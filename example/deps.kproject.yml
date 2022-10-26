@@ -1,0 +1,5 @@
+#name: deps
+dependencies:
+    - git::korge-fleks::korlibs/korge-fleks::/korge-fleks::94908e913118b229812b0d447ffc161f6f8f5f78
+    #- git::korge-fleks::korlibs/korge-fleks::/korge-fleks::v0.0.1
+    #- ../korge-fleks
