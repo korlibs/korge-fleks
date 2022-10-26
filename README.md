@@ -2,7 +2,10 @@
 
 Fleks ECS System for KorGE Game Engine
 
+<img width="546" alt="Screenshot 2022-10-26 at 13 54 12" src="https://user-images.githubusercontent.com/570848/198019508-dafdb3a5-02af-49f7-92ec-9f76533c2524.png">
+
 ## Usage
+
 
 By using kproject:
 
