@@ -4,7 +4,7 @@
 
 <https://github.com/Quillraven/Fleks>
 
-KorGE integration by @jobe-m
+KorGE integration by [@jobe-m](https://github.com/jobe-m)
 
 https://github.com/korlibs-archive/korge-next/pull/472
 
