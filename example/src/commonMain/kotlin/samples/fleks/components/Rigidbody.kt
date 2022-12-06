@@ -1,5 +1,8 @@
 package samples.fleks.components
 
+import com.github.quillraven.fleks.Component
+import com.github.quillraven.fleks.ComponentType
+
 /**
  * This is a very basic definition of a rigid body which does not take rotation into account.
  */
@@ -9,4 +12,8 @@ data class Rigidbody(
     var velocityY: Double = 0.0,
     var damping: Double = 0.0,  // e.g. air resistance of the object when falling
     var friction: Double = 0.0,  // e.g. friction of the object when it moves over surfaces
-)
+) : Component<Rigidbody> {
+    override fun type(): ComponentType<Rigidbody> = Rigidbody
+    companion object : ComponentType<Rigidbody>()
+}
+

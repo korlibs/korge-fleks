@@ -1,6 +1,7 @@
 package samples.fleks.systems
 
 import com.github.quillraven.fleks.*
+import com.github.quillraven.fleks.World.Companion.family
 import samples.fleks.components.*
 
 /**
@@ -8,20 +9,18 @@ import samples.fleks.components.*
  * it moves the entity linear without caring about gravity.
  */
 class MoveSystem : IteratingSystem(
-    allOfComponents = arrayOf(Position::class),  // Position component absolutely needed for movement of entity objects
-    anyOfComponents = arrayOf(Position::class, Rigidbody::class),  // Rigidbody not necessarily needed for movement
+    family {
+        all(Position)  // Position component absolutely needed for movement of entity objects
+        any(Position, Rigidbody)  // Rigidbody not necessarily needed for movement
+           },
     interval = EachFrame
 ) {
-
-    private val positions = Inject.componentMapper<Position>()
-    private val rigidbodies = Inject.componentMapper<Rigidbody>()
-
     override fun onTickEntity(entity: Entity) {
-        val pos = positions[entity]
+        val pos = entity[Position]
 
-        if (rigidbodies.contains(entity)) {
+        if (entity has Rigidbody) {
             // Entity has a rigidbody - that means the movement will be calculated depending on it
-            val rigidbody = rigidbodies[entity]
+            val rigidbody = entity[Rigidbody]
             // Currently we just add gravity to the entity
             pos.yAcceleration += rigidbody.mass * 9.81
             // TODO implement more sophisticated movement with rigidbody taking damping and friction into account
