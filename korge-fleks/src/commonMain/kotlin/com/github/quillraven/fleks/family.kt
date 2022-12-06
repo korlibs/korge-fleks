@@ -1,78 +1,127 @@
 package com.github.quillraven.fleks
 
-import com.github.quillraven.fleks.collection.BitArray
-import com.github.quillraven.fleks.collection.EntityComparator
-import com.github.quillraven.fleks.collection.IntBag
-import com.github.quillraven.fleks.collection.bag
-import kotlin.native.concurrent.ThreadLocal
-import kotlin.reflect.KClass
+import com.github.quillraven.fleks.collection.*
 
 /**
- * Abstract class of a [family][Family] listener that gets notified when an
- * [entity][Entity] gets added to, or removed from a family.
- *
- * @param allOfComponents is specifying the family to which this system belongs.
- * @param noneOfComponents is specifying the family to which this system belongs.
- * @param anyOfComponents is specifying the family to which this system belongs.
+ * Type alias for an optional hook function for a [Family].
+ * Such a function runs within a [World] and takes the [Entity] as an argument.
  */
-abstract class FamilyListener(
-    allOfComponents: Array<KClass<*>>? = null,
-    noneOfComponents: Array<KClass<*>>? = null,
-    anyOfComponents: Array<KClass<*>>? = null,
+typealias FamilyHook = World.(Entity) -> Unit
+
+/**
+ * A class to define the configuration of a [Family]. A [family][Family] contains of three parts:
+ *
+ * - **allOf**: an [entity][Entity] must have all specified [components][Component] to be part of the [family][Family].
+ * - **noneOf**: an [entity][Entity] must not have any of the specified [components][Component] to be part of the [family][Family].
+ * - **anyOf**: an [entity][Entity] must have at least one of the specified [components][Component] to be part of the [family][Family].
+ *
+ * It is not mandatory to specify all three parts but **at least one** part must be provided.
+ */
+data class FamilyDefinition(
+    internal var allOf: BitArray? = null,
+    internal var noneOf: BitArray? = null,
+    internal var anyOf: BitArray? = null,
 ) {
-    init {
-        CURRENT_FAMILY = World.CURRENT_WORLD.family(allOfComponents, noneOfComponents, anyOfComponents)
+
+    /**
+     * Any [entity][Entity] must have all given [types] to be part of the [family][Family].
+     */
+    fun all(vararg types: ComponentType<*>): FamilyDefinition {
+        allOf = BitArray(types.size).also { bits ->
+            types.forEach { bits.set(it.id) }
+        }
+        return this
     }
 
     /**
-     * Function that gets called when an [entity][Entity] gets added to a [family][Family].
+     * Any [entity][Entity] must not have any of the given [types] to be part of the [family][Family].
      */
-    open fun onEntityAdded(entity: Entity) = Unit
+    fun none(vararg types: ComponentType<*>): FamilyDefinition {
+        noneOf = BitArray(types.size).also { bits ->
+            types.forEach { bits.set(it.id) }
+        }
+        return this
+    }
 
     /**
-     * Function that gets called when an [entity][Entity] gets removed from a [family][Family].
+     * Any [entity][Entity] must have at least one of the given [types] to be part of the [family][Family].
      */
-    open fun onEntityRemoved(entity: Entity) = Unit
+    fun any(vararg types: ComponentType<*>): FamilyDefinition {
+        anyOf = BitArray(types.size).also { bits ->
+            types.forEach { bits.set(it.id) }
+        }
+        return this
+    }
 
-    @ThreadLocal
-    companion object {
-        internal lateinit var CURRENT_FAMILY: Family
+    /**
+     * Returns true if and only if [allOf], [noneOf] and [anyOf] are either null or empty.
+     */
+    internal fun isEmpty(): Boolean {
+        return allOf.isNullOrEmpty() && noneOf.isNullOrEmpty() && anyOf.isNullOrEmpty()
     }
 }
 
-
 /**
  * A family of [entities][Entity]. It stores [entities][Entity] that have a specific configuration of components.
- * A configuration is defined via the three [IteratingSystem] properties "allOf", "noneOf" and "anyOf".
- * Each component is assigned to a unique index. That index is set in the [allOf], [noneOf] or [anyOf][] [BitArray].
+ * A configuration is defined via the a [FamilyDefinition].
+ * Each [component][Component] is assigned to a unique index via its [ComponentType].
+ * That index is set in the [allOf], [noneOf] or [anyOf][] [BitArray].
  *
- * A family is an [EntityListener] and gets notified when an [entity][Entity] is added to the world or the
- * entity's component configuration changes.
+ * A family gets notified when an [entity][Entity] is added, updated or removed of the [world][World].
  *
- * Every [IteratingSystem] is linked to exactly one family. Families are created by the [SystemService] automatically
- * when a [world][World] gets created.
- *
- * @param allOf all the components that an [entity][Entity] must have. Default value is null.
- * @param noneOf all the components that an [entity][Entity] must not have. Default value is null.
- * @param anyOf the components that an [entity][Entity] must have at least one. Default value is null.
+ * Every [IteratingSystem] is linked to exactly one family but a family can also exist outside of systems.
+ * It gets created via the [World.family] function.
  */
 data class Family(
     internal val allOf: BitArray? = null,
     internal val noneOf: BitArray? = null,
     internal val anyOf: BitArray? = null,
+    private val world: World,
     @PublishedApi
-    internal val entityService: EntityService,
-) : EntityListener {
+    internal val entityService: EntityService = world.entityService,
+) : EntityComponentContext(world.componentService) {
     /**
-     * Return the [entities] in form of an [IntBag] for better iteration performance.
+     * An optional [FamilyHook] that gets called whenever an [entity][Entity] enters the family.
      */
-    @PublishedApi
-    internal val entitiesBag = IntBag()
+    internal var addHook: FamilyHook? = null
+
+    /**
+     * An optional [FamilyHook] that gets called whenever an [entity][Entity] leaves the family.
+     */
+    internal var removeHook: FamilyHook? = null
 
     /**
      * Returns the [entities][Entity] that belong to this family.
      */
-    private val entities = BitArray(1)
+    private val entityBits = BitArray(world.capacity)
+
+    /**
+     * Returns true if an iteration of this family is currently in process.
+     */
+    @PublishedApi
+    internal var isIterating = false
+
+    // This bag is added in addition to the BitArray for better iteration performance.
+    @PublishedApi
+    internal val mutableEntities = MutableEntityBag()
+        get() {
+            if (isDirty && !isIterating) {
+                // no iteration in process -> update entities if necessary
+                isDirty = false
+                entityBits.toEntityBag(field)
+            }
+            return field
+        }
+
+    /**
+     * Returns the [entities][Entity] that belong to this family.
+     * Be aware that the underlying [EntityBag] collection is not always up to date.
+     * The collection is not updated while a family iteration is in progress. It
+     * gets automatically updated whenever it is accessed and no iteration is currently
+     * in progress.
+     */
+    val entities: EntityBag
+        get() = mutableEntities
 
     /**
      * Returns the number of [entities][Entity] that belong to this family.
@@ -80,54 +129,41 @@ data class Family(
      * iterates through the entire underlying [BitArray].
      */
     val numEntities: Int
-        get() = entities.numBits()
+        get() = entityBits.numBits()
 
     /**
      * Returns true if and only if this [Family] does not contain any entity.
      */
     val isEmpty: Boolean
-        get() = entities.isEmpty
+        get() = entityBits.isEmpty
 
     /**
      * Returns true if and only if this [Family] contains at least one entity.
      */
     val isNotEmpty: Boolean
-        get() = entities.isNotEmpty
+        get() = entityBits.isNotEmpty
 
     /**
-     * Flag to indicate if there are changes in the [entities]. If it is true then the [entitiesBag] should get
-     * updated via a call to [updateActiveEntities].
-     *
-     * Refer to [IteratingSystem.onTick] for an example implementation.
+     * Flag to indicate if there are changes in the [entityBits].
+     * If it is true then the [mutableEntities] will get updated the next time it is accessed.
      */
-    @PublishedApi
-    internal var isDirty = false
-        private set
-
-    @PublishedApi
-    internal val listeners = bag<FamilyListener>()
+    private var isDirty = false
 
     /**
      * Returns true if the specified [compMask] matches the family's component configuration.
      *
      * @param compMask the component configuration of an [entity][Entity].
      */
-    operator fun contains(compMask: BitArray): Boolean {
+    internal operator fun contains(compMask: BitArray): Boolean {
         return (allOf == null || compMask.contains(allOf))
             && (noneOf == null || !compMask.intersects(noneOf))
             && (anyOf == null || compMask.intersects(anyOf))
     }
 
     /**
-     * Updates the [entitiesBag] and clears the [isDirty] flag if needed.
+     * Returns true if and only if the given [entity] is part of the family.
      */
-    @PublishedApi
-    internal fun updateActiveEntities() {
-        if (isDirty) {
-            isDirty = false
-            entities.toIntBag(entitiesBag)
-        }
-    }
+    operator fun contains(entity: Entity): Boolean = entityBits[entity.id]
 
     /**
      * Updates this family if needed and runs the given [action] for all [entities][Entity].
@@ -141,14 +177,21 @@ data class Family(
      * To avoid these kinds of issues, entity removals are delayed until the end of the iteration. This also means
      * that a removed entity of this family will still be part of the [action] for the current iteration.
      */
-    inline fun forEach(action: Family.(Entity) -> Unit) {
-        updateActiveEntities()
+    inline fun forEach(crossinline action: Family.(Entity) -> Unit) {
+        // Access entities before 'forEach' call to properly update them.
+        // Check mutableEntities getter for more details.
+        val entitiesForIteration = mutableEntities
+
         if (!entityService.delayRemoval) {
             entityService.delayRemoval = true
-            entitiesBag.forEach { this.action(Entity(it)) }
+            isIterating = true
+            entitiesForIteration.forEach { action(it) }
+            isIterating = false
             entityService.cleanupDelays()
         } else {
-            entitiesBag.forEach { this.action(Entity(it)) }
+            isIterating = true
+            entitiesForIteration.forEach { this.action(it) }
+            isIterating = false
         }
     }
 
@@ -156,61 +199,50 @@ data class Family(
      * Updates this family if needed and returns its first [Entity].
      * @throws [NoSuchElementException] if the family has no entities.
      */
-    fun first(): Entity {
-        if (!entityService.delayRemoval || entitiesBag.isEmpty) {
-            // no iteration in process -> update entities if necessary
-            updateActiveEntities()
-        }
-
-        return Entity(entitiesBag.first)
-    }
+    fun first(): Entity = mutableEntities.first()
 
     /**
      * Updates this family if needed and returns its first [Entity] or null if the family has no entities.
      */
-    fun firstOrNull(): Entity? {
-        if (!entityService.delayRemoval || entitiesBag.isEmpty) {
-            // no iteration in process -> update entities if necessary
-            updateActiveEntities()
-        }
-
-        val id = entitiesBag.firstOrNull ?: return null
-        return Entity(id)
-    }
-
-    /**
-     * Updates an [entity] using the given [configuration] to add and remove components.
-     */
-    inline fun configureEntity(entity: Entity, configuration: EntityUpdateCfg.(Entity) -> Unit) {
-        entityService.configureEntity(entity, configuration)
-    }
+    fun firstOrNull(): Entity? = mutableEntities.firstOrNull()
 
     /**
      * Sorts the [entities][Entity] of this family by the given [comparator].
      */
-    fun sort(comparator: EntityComparator) {
-        updateActiveEntities()
-        entitiesBag.sort(comparator)
+    fun sort(comparator: EntityComparator) = mutableEntities.sort(comparator)
+
+    /**
+     * Adds the [entity] to the family and sets the [isDirty] flag if and only
+     * if the entity's [compMask] is matching the family configuration.
+     */
+    @PublishedApi
+    internal fun onEntityAdded(entity: Entity, compMask: BitArray) {
+        if (compMask in this) {
+            isDirty = true
+            entityBits.set(entity.id)
+            addHook?.invoke(world, entity)
+        }
     }
 
     /**
      * Checks if the [entity] is part of the family by analyzing the entity's components.
      * The [compMask] is a [BitArray] that indicates which components the [entity] currently has.
      *
-     * The [entity] gets either added to the [entities] or removed and [isDirty] is set when needed.
+     * The [entity] gets either added to the [entityBits] or removed and [isDirty] is set when needed.
      */
-    override fun onEntityCfgChanged(entity: Entity, compMask: BitArray) {
+    @PublishedApi
+    internal fun onEntityCfgChanged(entity: Entity, compMask: BitArray) {
         val entityInFamily = compMask in this
-        if (entityInFamily && !entities[entity.id]) {
+        if (entityInFamily && !entityBits[entity.id]) {
             // new entity gets added
             isDirty = true
-            entities.set(entity.id)
-            listeners.forEach { it.onEntityAdded(entity) }
-        } else if (!entityInFamily && entities[entity.id]) {
+            entityBits.set(entity.id)
+            addHook?.invoke(world, entity)
+        } else if (!entityInFamily && entityBits[entity.id]) {
             // existing entity gets removed
             isDirty = true
-            entities.clear(entity.id)
-            listeners.forEach { it.onEntityRemoved(entity) }
+            entityBits.clear(entity.id)
+            removeHook?.invoke(world, entity)
         }
     }
 
@@ -218,27 +250,16 @@ data class Family(
      * Removes the [entity] of the family and sets the [isDirty] flag if and only
      * if the [entity] is already in the family.
      */
-    override fun onEntityRemoved(entity: Entity) {
-        if (entities[entity.id]) {
+    internal fun onEntityRemoved(entity: Entity) {
+        if (entityBits[entity.id]) {
             // existing entity gets removed
             isDirty = true
-            entities.clear(entity.id)
-            listeners.forEach { it.onEntityRemoved(entity) }
+            entityBits.clear(entity.id)
+            removeHook?.invoke(world, entity)
         }
     }
 
-    /**
-     * Adds the given [listener] to the list of [FamilyListener].
-     */
-    fun addFamilyListener(listener: FamilyListener) = listeners.add(listener)
-
-    /**
-     * Removes the given [listener] from the list of [FamilyListener].
-     */
-    fun removeFamilyListener(listener: FamilyListener) = listeners.removeValue(listener)
-
-    /**
-     * Returns true if and only if the given [listener] is part of the list of [FamilyListener].
-     */
-    operator fun contains(listener: FamilyListener) = listener in listeners
+    override fun toString(): String {
+        return "Family(allOf=$allOf, noneOf=$noneOf, anyOf=$anyOf, numEntities=$numEntities)"
+    }
 }

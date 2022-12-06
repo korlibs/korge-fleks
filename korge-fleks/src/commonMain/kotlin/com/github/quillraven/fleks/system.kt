@@ -1,8 +1,6 @@
 package com.github.quillraven.fleks
 
 import com.github.quillraven.fleks.collection.EntityComparator
-import kotlin.native.concurrent.ThreadLocal
-import kotlin.reflect.KClass
 
 /**
  * An interval for an [IntervalSystem]. There are two kind of intervals:
@@ -32,12 +30,12 @@ data class Fixed(val step: Float) : Interval
  */
 abstract class IntervalSystem(
     val interval: Interval = EachFrame,
-    var enabled: Boolean = true
-) {
+    var enabled: Boolean = true,
     /**
      * Returns the [world][World] to which this system belongs.
      */
-    val world: World = World.CURRENT_WORLD
+    val world: World = World.CURRENT_WORLD ?: throw FleksWrongConfigurationUsageException()
+) : EntityComponentContext(world.componentService) {
 
     private var accumulator: Float = 0.0f
 
@@ -115,14 +113,12 @@ object Manual : SortingType
 /**
  * An [IntervalSystem] of a [world][World] with a context to [entities][Entity].
  *
- * It must have at least one of allOfComponents, anyOfComponent or noneOfComponents objects defined.
- * These objects define a [Family] of entities for which the [IteratingSystem] will get active.
- * The [IteratingSystem] will use those components which are part of the family config for
- * any specific processing within this system.
+ * An IteratingSystem is always linked to exactly one [family][Family] which defines the [entities][Entity]
+ * over which it will iterate.
  *
- * @param allOfComponents is specifying the family to which this system belongs.
- * @param noneOfComponents is specifying the family to which this system belongs.
- * @param anyOfComponents is specifying the family to which this system belongs.
+ * Refer to [FamilyDefinition] for more details.
+ *
+ * @param family the [Family] that is used for iteration.
  * @param comparator an optional [EntityComparator] that is used to sort [entities][Entity].
  * Default value is an empty comparator which means no sorting.
  * @param sortingType the [type][SortingType] of sorting for entities when using a [comparator].
@@ -130,25 +126,12 @@ object Manual : SortingType
  * @param enabled defines if the system gets updated when the [world][World] gets updated. Default is true.
  */
 abstract class IteratingSystem(
-    allOfComponents: Array<KClass<*>>? = null,
-    noneOfComponents: Array<KClass<*>>? = null,
-    anyOfComponents: Array<KClass<*>>? = null,
+    val family: Family,
     private val comparator: EntityComparator = EMPTY_COMPARATOR,
     private val sortingType: SortingType = Automatic,
     interval: Interval = EachFrame,
     enabled: Boolean = true
 ) : IntervalSystem(interval, enabled) {
-    /**
-     * Returns the [family][Family] of this system.
-     */
-    val family: Family = world.family(allOfComponents, noneOfComponents, anyOfComponents)
-
-    /**
-     * Returns the [entityService][EntityService] of this system.
-     */
-    @PublishedApi
-    internal val entityService: EntityService = world.entityService
-
     /**
      * Flag that defines if sorting of [entities][Entity] will be performed the next time [onTick] is called.
      *
@@ -157,13 +140,6 @@ abstract class IteratingSystem(
      * Otherwise, it must be set programmatically to perform sorting. The flag gets cleared after sorting.
      */
     var doSort = sortingType == Automatic && comparator != EMPTY_COMPARATOR
-
-    /**
-     * Updates an [entity] using the given [configuration] to add and remove components.
-     */
-    inline fun configureEntity(entity: Entity, configuration: EntityUpdateCfg.(Entity) -> Unit) {
-        entityService.configureEntity(entity, configuration)
-    }
 
     /**
      * Updates the [family] if needed and calls [onTickEntity] for each [entity][Entity] of the [family].
@@ -204,111 +180,5 @@ abstract class IteratingSystem(
         private val EMPTY_COMPARATOR = object : EntityComparator {
             override fun compare(entityA: Entity, entityB: Entity): Int = 0
         }
-    }
-}
-
-/**
- * A service class for any [IntervalSystem] of a [world][World]. It is responsible to create systems using
- * constructor dependency injection. It also stores [systems] and updates [enabled][IntervalSystem.enabled] systems
- * each time [update] is called.
- *
- * @param systemFactory the factory methods to create the [systems][IntervalSystem].
- */
-class SystemService(
-    systemFactory: MutableMap<KClass<*>, () -> IntervalSystem>,
-) {
-    @PublishedApi
-    internal val systems: Array<IntervalSystem>
-
-    init {
-        // Create systems
-        val systemList = systemFactory.toList()
-        systems = Array(systemFactory.size) { sysIdx ->
-            val (sysType, factory) = systemList[sysIdx]
-            try {
-                factory.invoke()
-            } catch (e: Exception) {
-                if (e is FleksFamilyException) {
-                    throw FleksSystemCreationException(
-                        sysType,
-                        "IteratingSystem must define at least one of AllOf, NoneOf or AnyOf"
-                    )
-                }
-                throw e
-            }
-        }
-    }
-
-    /**
-     * Returns the specified [system][IntervalSystem].
-     *
-     * @throws [FleksNoSuchSystemException] if there is no such system.
-     */
-    inline fun <reified T : IntervalSystem> system(): T {
-        systems.forEach { system ->
-            if (system is T) {
-                return system
-            }
-        }
-        throw FleksNoSuchSystemException(T::class)
-    }
-
-    /**
-     * Updates all [enabled][IntervalSystem.enabled] [systems][IntervalSystem] by calling
-     * their [IntervalSystem.onUpdate] function.
-     */
-    fun update() {
-        systems.forEach { system ->
-            if (system.enabled) {
-                system.onUpdate()
-            }
-        }
-    }
-
-    /**
-     * Calls the [onDispose][IntervalSystem.onDispose] function of all [systems].
-     */
-    fun dispose() {
-        systems.forEach { it.onDispose() }
-    }
-}
-
-/**
- * An [injector][Inject] which is used to inject objects from outside the [IntervalSystem].
- *
- * @throws [FleksSystemDependencyInjectException] if the Injector does not contain an entry
- * for the given type in its internal map.
- * @throws [FleksSystemComponentInjectException] if the Injector does not contain a component mapper
- * for the given type in its internal map.
- * @throws [FleksInjectableTypeHasNoName] if the dependency type has no T::class.simpleName.
- */
-@ThreadLocal
-object Inject {
-    @PublishedApi
-    internal lateinit var injectObjects: Map<String, Injectable>
-
-    @PublishedApi
-    internal lateinit var mapperObjects: Map<KClass<*>, ComponentMapper<*>>
-
-    inline fun <reified T : Any> dependency(): T {
-        val injectType = T::class.simpleName ?: throw FleksInjectableTypeHasNoName(T::class)
-        return if (injectType in injectObjects) {
-            injectObjects[injectType]!!.used = true
-            injectObjects[injectType]!!.injObj as T
-        } else throw FleksSystemDependencyInjectException(injectType)
-    }
-
-    inline fun <reified T : Any> dependency(type: String): T {
-        return if (type in injectObjects) {
-            injectObjects[type]!!.used = true
-            injectObjects[type]!!.injObj as T
-        } else throw FleksSystemDependencyInjectException(type)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    inline fun <reified T : Any> componentMapper(): ComponentMapper<T> {
-        val type = T::class
-        val mapper = mapperObjects[type] ?: FleksSystemComponentInjectException(type)
-        return mapper as ComponentMapper<T>
     }
 }

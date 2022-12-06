@@ -1,61 +1,56 @@
 package com.github.quillraven.fleks.benchmark
 
 import com.github.quillraven.fleks.*
+import com.github.quillraven.fleks.World.Companion.family
 import org.openjdk.jmh.annotations.*
 import java.util.concurrent.TimeUnit
 
-data class FleksPosition(var x: Float = 0f, var y: Float = 0f)
+data class FleksPosition(var x: Float = 0f, var y: Float = 0f) : Component<FleksPosition> {
+    override fun type() = FleksPosition
 
-data class FleksLife(var life: Float = 0f)
+    companion object : ComponentType<FleksPosition>()
+}
 
-data class FleksSprite(var path: String = "", var animationTime: Float = 0f)
+data class FleksLife(var life: Float = 0f) : Component<FleksLife> {
+    override fun type() = FleksLife
 
-class FleksSystemSimple : IteratingSystem(
-    allOfComponents = arrayOf(FleksPosition::class)
-) {
+    companion object : ComponentType<FleksLife>()
+}
 
-    private val positions: ComponentMapper<FleksPosition> = Inject.componentMapper()
+data class FleksSprite(var path: String = "", var animationTime: Float = 0f) : Component<FleksSprite> {
+    override fun type() = FleksSprite
+
+    companion object : ComponentType<FleksSprite>()
+}
+
+class FleksSystemSimple : IteratingSystem(family { all(FleksPosition) }) {
 
     override fun onTickEntity(entity: Entity) {
-        positions[entity].x++
+        entity[FleksPosition].x++
     }
 }
 
-class FleksSystemComplex1 : IteratingSystem(
-    allOfComponents = arrayOf(FleksPosition::class),
-    noneOfComponents = arrayOf(FleksLife::class),
-    anyOfComponents = arrayOf(FleksSprite::class)
-) {
-
-    private val positions: ComponentMapper<FleksPosition> = Inject.componentMapper()
-    private val lifes: ComponentMapper<FleksLife> = Inject.componentMapper()
-    private val sprites: ComponentMapper<FleksSprite> = Inject.componentMapper()
-
+class FleksSystemComplex1 : IteratingSystem(family { all(FleksPosition).none(FleksLife).any(FleksSprite) }) {
     private var actionCalls = 0
 
     override fun onTickEntity(entity: Entity) {
         if (actionCalls % 2 == 0) {
-            positions[entity].x++
-            configureEntity(entity) { lifes.add(it) }
+            entity[FleksPosition].x++
+            entity.configure { it += FleksLife() }
         } else {
-            configureEntity(entity) { positions.remove(it) }
+            entity.configure { it -= FleksPosition }
         }
-        sprites[entity].animationTime++
+        entity[FleksSprite].animationTime++
         ++actionCalls
     }
 }
 
-class FleksSystemComplex2 : IteratingSystem(
-    anyOfComponents = arrayOf(FleksPosition::class, FleksLife::class, FleksSprite::class)
-) {
-
-    private val positions: ComponentMapper<FleksPosition> = Inject.componentMapper()
-    private val lifes: ComponentMapper<FleksLife> = Inject.componentMapper()
+class FleksSystemComplex2 : IteratingSystem(family { any(FleksPosition, FleksLife, FleksSprite) }) {
 
     override fun onTickEntity(entity: Entity) {
-        configureEntity(entity) {
-            lifes.remove(it)
-            positions.add(it)
+        entity.configure {
+            it -= FleksLife
+            it += FleksPosition()
         }
     }
 }
@@ -66,13 +61,7 @@ open class FleksStateAddRemove {
 
     @Setup(value = Level.Iteration)
     fun setup() {
-        world = world {
-            entityCapacity = NUM_ENTITIES
-
-            components {
-                add(::FleksPosition)
-            }
-        }
+        world = world(NUM_ENTITIES) { }
     }
 }
 
@@ -82,20 +71,16 @@ open class FleksStateSimple {
 
     @Setup(value = Level.Iteration)
     fun setup() {
-        world = world {
-            entityCapacity = NUM_ENTITIES
-
+        world = world(NUM_ENTITIES) {
             systems {
-                add(::FleksSystemSimple)
-            }
-
-            components {
-                add(::FleksPosition)
+                add(FleksSystemSimple())
             }
         }
 
         repeat(NUM_ENTITIES) {
-            world.entity { add<FleksPosition>() }
+            world.entity {
+                it += FleksPosition()
+            }
         }
     }
 }
@@ -106,25 +91,17 @@ open class FleksStateComplex {
 
     @Setup(value = Level.Iteration)
     fun setup() {
-        world = world {
-            entityCapacity = NUM_ENTITIES
-
+        world = world(NUM_ENTITIES) {
             systems {
-                add(::FleksSystemComplex1)
-                add(::FleksSystemComplex2)
-            }
-
-            components {
-                add(::FleksPosition)
-                add(::FleksLife)
-                add(::FleksSprite)
+                add(FleksSystemComplex1())
+                add(FleksSystemComplex2())
             }
         }
 
         repeat(NUM_ENTITIES) {
             world.entity {
-                add<FleksPosition>()
-                add<FleksSprite>()
+                it += FleksPosition()
+                it += FleksSprite()
             }
         }
     }
@@ -137,10 +114,12 @@ open class FleksBenchmark {
     @Benchmark
     fun addRemove(state: FleksStateAddRemove) {
         repeat(NUM_ENTITIES) {
-            state.world.entity { add<FleksPosition>() }
+            state.world.entity {
+                it += FleksPosition()
+            }
         }
         repeat(NUM_ENTITIES) {
-            state.world.remove(Entity(it))
+            state.world -= Entity(it)
         }
     }
 

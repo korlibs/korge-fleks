@@ -6,15 +6,24 @@ fun main() {
     compareArtemisFleksAddRemove()
     compareArtemisFleksSimple()
     compareArtemisFleksComplex()
+    // profileComplex()
 }
 
+/*
+ADD_REMOVE:
+Artemis: max(17)    min(6)  avg(11.666666666666666)
+Fleks:   max(18)    min(7)  avg(11.666666666666666)
+ */
 private fun compareArtemisFleksAddRemove() {
     val artemisTimes = mutableListOf<Long>()
     val artemisState = ArtemisStateAddRemove().apply { setup() }
     val artemisBm = ArtemisBenchmark()
     artemisBm.addRemove(artemisState)
     repeat(3) {
-        artemisTimes.add(measureTimeMillis { artemisBm.addRemove(artemisState) })
+        artemisTimes.add(measureTimeMillis {
+            artemisBm.addRemove(artemisState)
+            artemisState.world.process()
+        })
     }
 
     val fleksTimes = mutableListOf<Long>()
@@ -36,8 +45,8 @@ private fun compareArtemisFleksAddRemove() {
 
 /*
 SIMPLE:
-Artemis: max(38)    min(31)  avg(33.666666666666664)
-Fleks:   max(32)    min(31)  avg(31.333333333333332)
+Artemis: max(32)    min(30)  avg(31.0)
+Fleks:   max(21)    min(15)  avg(17.333333333333332)
  */
 private fun compareArtemisFleksSimple() {
     val artemisTimes = mutableListOf<Long>()
@@ -55,9 +64,8 @@ private fun compareArtemisFleksSimple() {
 
     // verify benchmark
     assert(fleksState.world.numEntities == NUM_ENTITIES)
-    val positions = fleksState.world.mapper<FleksPosition>()
     fleksState.world.forEach { entity ->
-        assert(positions[entity].x == WORLD_UPDATES.toFloat())
+        with(fleksState.world) { assert(entity[FleksPosition].x == WORLD_UPDATES.toFloat()) }
     }
 
     repeat(3) {
@@ -75,8 +83,8 @@ private fun compareArtemisFleksSimple() {
 
 /*
 COMPLEX:
-Artemis: max(787)    min(720)  avg(747.0)
-Fleks:   max(877)    min(800)  avg(846.0)
+Artemis: max(744)    min(731)  avg(737.0)
+Fleks:   max(924)    min(888)  avg(901.0)
  */
 private fun compareArtemisFleksComplex() {
     val artemisTimes = mutableListOf<Long>()
@@ -102,4 +110,10 @@ private fun compareArtemisFleksComplex() {
           Fleks:   max(${fleksTimes.maxOrNull()})    min(${fleksTimes.minOrNull()})  avg(${fleksTimes.average()})
       """.trimIndent()
     )
+}
+
+fun profileComplex() {
+    val fleksState = FleksStateComplex().apply { setup() }
+    val fleksBm = FleksBenchmark()
+    fleksBm.complex(fleksState)
 }

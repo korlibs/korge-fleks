@@ -1,217 +1,225 @@
 package com.github.quillraven.fleks
 
-import com.github.quillraven.fleks.collection.BitArray
+import com.github.quillraven.fleks.World.Companion.CURRENT_WORLD
+import com.github.quillraven.fleks.collection.EntityBag
+import com.github.quillraven.fleks.collection.MutableEntityBag
 import kotlin.native.concurrent.ThreadLocal
 import kotlin.reflect.KClass
 
 /**
- * Wrapper class for injectables of the [WorldConfiguration].
- * It is used in the [SystemService] to find out any unused injectables.
+ * DSL marker for the [WorldConfiguration].
  */
-data class Injectable(val injObj: Any, var used: Boolean = false)
-
-@DslMarker
-annotation class ComponentCfgMarker
-
-/**
- * A DSL class to configure components and [ComponentListener] of a [WorldConfiguration].
- */
-@ComponentCfgMarker
-class ComponentConfiguration {
-    @PublishedApi
-    internal val compListenerFactory = mutableMapOf<KClass<*>, () -> ComponentListener<*>>()
-
-    @PublishedApi
-    internal val componentFactory = mutableMapOf<KClass<*>, () -> Any>()
-
-    /**
-     * Adds the specified component and its [ComponentListener] to the [world][World]. If a component listener
-     * is not needed than it can be omitted.
-     *
-     * @param compFactory the constructor method for creating the component.
-     * @param listenerFactory the constructor method for creating the component listener.
-     * @throws [FleksComponentAlreadyAddedException] if the component was already added before.
-     */
-    inline fun <reified T : Any> add(
-        noinline compFactory: () -> T,
-        noinline listenerFactory: (() -> ComponentListener<T>)? = null
-    ) {
-        val compType = T::class
-
-        if (compType in componentFactory) {
-            throw FleksComponentAlreadyAddedException(compType)
-        }
-        componentFactory[compType] = compFactory
-        if (listenerFactory != null) {
-            // No need to check compType again in compListenerFactory - it is already guarded with check in componentFactory
-            compListenerFactory[compType] = listenerFactory
-        }
-    }
-}
-
-@DslMarker
-annotation class SystemCfgMarker
-
-/**
- * A DSL class to configure [IntervalSystem] of a [WorldConfiguration].
- */
-@SystemCfgMarker
-class SystemConfiguration {
-    @PublishedApi
-    internal val systemFactory = mutableMapOf<KClass<*>, () -> IntervalSystem>()
-
-    /**
-     * Adds the specified [IntervalSystem] to the [world][World].
-     * The order in which systems are added is the order in which they will be executed when calling [World.update].
-     *
-     * @param factory A function which creates an object of type [T].
-     * @throws [FleksSystemAlreadyAddedException] if the system was already added before.
-     */
-    inline fun <reified T : IntervalSystem> add(noinline factory: () -> T) {
-        val systemType = T::class
-        if (systemType in systemFactory) {
-            throw FleksSystemAlreadyAddedException(systemType)
-        }
-        systemFactory[systemType] = factory
-    }
-}
-
-@DslMarker
-annotation class InjectableCfgMarker
-
-/**
- * A DSL class to configure [Injectable] of a [WorldConfiguration].
- */
-@InjectableCfgMarker
-class InjectableConfiguration {
-    @PublishedApi
-    internal val injectables = mutableMapOf<String, Injectable>()
-
-    /**
-     * Adds the specified [dependency] under the given [name] which can then be injected to any [IntervalSystem], [ComponentListener] or [FamilyListener].
-     *
-     * @throws [FleksInjectableAlreadyAddedException] if the dependency was already added before.
-     */
-    fun <T : Any> add(name: String, dependency: T) {
-        if (name in injectables) {
-            throw FleksInjectableAlreadyAddedException(name)
-        }
-
-        injectables[name] = Injectable(dependency)
-    }
-
-    /**
-     * Adds the specified dependency which can then be injected to any [IntervalSystem], [ComponentListener] or [FamilyListener].
-     * Refer to [add]: the name is the simpleName of the class of the [dependency].
-     *
-     * @throws [FleksInjectableAlreadyAddedException] if the dependency was already added before.
-     * @throws [FleksInjectableTypeHasNoName] if the simpleName of the [dependency] is null.
-     */
-    inline fun <reified T : Any> add(dependency: T) {
-        val key = T::class.simpleName ?: throw FleksInjectableTypeHasNoName(T::class)
-        add(key, dependency)
-    }
-}
-
-@DslMarker
-annotation class FamilyCfgMarker
-
-/**
- * A DSL class to configure [FamilyListener] of a [WorldConfiguration].
- */
-@FamilyCfgMarker
-class FamilyConfiguration {
-    @PublishedApi
-    internal val famListenerFactory = mutableMapOf<KClass<out FamilyListener>, () -> FamilyListener>()
-
-    /**
-     * Adds the specified [FamilyListener] to the [world][World].
-     *
-     * @param listenerFactory the constructor method for creating the FamilyListener.
-     * @throws [FleksFamilyListenerAlreadyAddedException] if the listener was already added before.
-     */
-    inline fun <reified T : FamilyListener> add(
-        noinline listenerFactory: (() -> T)
-    ) {
-        val listenerType = T::class
-        if (listenerType in famListenerFactory) {
-            throw FleksFamilyListenerAlreadyAddedException(listenerType)
-        }
-        famListenerFactory[listenerType] = listenerFactory
-    }
-}
-
 @DslMarker
 annotation class WorldCfgMarker
 
 /**
- * A configuration for an entity [world][World] to define the initial maximum entity capacity,
- * the systems of the [world][World] and the systems' dependencies to be injected.
- * Additionally, you can define [ComponentListener] to define custom logic when a specific component is
- * added or removed from an [entity][Entity].
+ * Wrapper class for injectables of the [WorldConfiguration].
+ * It is used to identify unused injectables after [world][World] creation.
+ */
+data class Injectable(val injObj: Any, var used: Boolean = false)
+
+/**
+ * A DSL class to configure [Injectable] of a [WorldConfiguration].
  */
 @WorldCfgMarker
-class WorldConfiguration {
+class InjectableConfiguration(private val world: World) {
+
     /**
-     * Initial maximum entity capacity.
-     * Will be used internally when a [world][World] is created to set the initial
-     * size of some collections and to avoid slow resizing calls.
+     * Adds the specified [dependency] under the given [name] which
+     * can then be injected via [World.inject].
+     *
+     * @throws [FleksInjectableAlreadyAddedException] if the dependency was already added before.
      */
-    var entityCapacity = 512
+    fun <T : Any> add(name: String, dependency: T) {
+        if (name in world.injectables) {
+            throw FleksInjectableAlreadyAddedException(name)
+        }
 
-    internal val compCfg = ComponentConfiguration()
+        world.injectables[name] = Injectable(dependency)
+    }
 
-    internal val systemCfg = SystemConfiguration()
+    /**
+     * Adds the specified [dependency] via its [simpleName][KClass.simpleName],
+     * or via its [toString][KClass.toString] if it has no name.
+     * It can then be injected via [World.inject].
+     *
+     * @throws [FleksInjectableAlreadyAddedException] if the dependency was already added before.
+     */
+    inline fun <reified T : Any> add(dependency: T) = add(T::class.simpleName ?: T::class.toString(), dependency)
+}
 
-    internal val injectableCfg = InjectableConfiguration()
+/**
+ * A DSL class to configure [ComponentHook] for specific [components][Component].
+ */
+@WorldCfgMarker
+class ComponentConfiguration(
+    @PublishedApi
+    internal val world: World,
+    @PublishedApi
+    internal val systems: List<IntervalSystem>,
+) {
 
-    internal val familyCfg = FamilyConfiguration()
+    /**
+     * Sets the add [hook][ComponentsHolder.addHook] for the given [type].
+     * This hook gets called whenever a [component][Component] of the given [type] gets added to an [entity][Entity].
+     */
+    inline fun <reified T : Component<*>> onAdd(
+        type: ComponentType<T>,
+        noinline hook: ComponentHook<T>
+    ) {
+        if (systems.isNotEmpty()) {
+            throw FleksWrongConfigurationOrderException()
+        }
 
-    fun components(cfg: ComponentConfiguration.() -> Unit) = compCfg.run(cfg)
+        world.setComponentAddHook(type, hook)
+    }
 
-    fun systems(cfg: SystemConfiguration.() -> Unit) = systemCfg.run(cfg)
+    /**
+     * Sets the remove [hook][ComponentsHolder.addHook] for the given [type].
+     * This hook gets called whenever a [component][Component] of the given [type] gets removed from an [entity][Entity].
+     */
+    inline fun <reified T : Component<*>> onRemove(
+        type: ComponentType<T>,
+        noinline hook: ComponentHook<T>
+    ) {
+        if (systems.isNotEmpty()) {
+            throw FleksWrongConfigurationOrderException()
+        }
+
+        world.setComponentRemoveHook(type, hook)
+    }
+}
+
+/**
+ * A DSL class to configure [IntervalSystem] of a [WorldConfiguration].
+ */
+@WorldCfgMarker
+class SystemConfiguration(
+    private val systems: MutableList<IntervalSystem> = mutableListOf()
+) {
+    /**
+     * Adds the [system] to the [world][World].
+     * The order in which systems are added is the order in which they will be executed when calling [World.update].
+     *
+     * @throws [FleksSystemAlreadyAddedException] if the system was already added before.
+     */
+    fun add(system: IntervalSystem) {
+        if (systems.any { it::class == system::class }) {
+            throw FleksSystemAlreadyAddedException(system::class)
+        }
+        systems += system
+    }
+}
+
+/**
+ * A DSL class to configure [FamilyHook] for specific [families][Family].
+ */
+@WorldCfgMarker
+class FamilyConfiguration(
+    @PublishedApi
+    internal val world: World,
+    @PublishedApi
+    internal val systems: List<IntervalSystem>,
+) {
+
+    /**
+     * Sets the add [hook][Family.addHook] for the given [family].
+     * This hook gets called whenever an [entity][Entity] enters the [family].
+     */
+    fun onAdd(
+        family: Family,
+        hook: FamilyHook
+    ) {
+        if (systems.isNotEmpty()) {
+            throw FleksWrongConfigurationOrderException()
+        }
+
+        if (family.addHook != null) {
+            throw FleksHookAlreadyAddedException("addHook", "Family $family")
+        }
+        family.addHook = hook
+    }
+
+    /**
+     * Sets the remove [hook][Family.removeHook] for the given [family].
+     * This hook gets called whenever an [entity][Entity] leaves the [family].
+     */
+    fun onRemove(
+        family: Family,
+        hook: FamilyHook
+    ) {
+        if (systems.isNotEmpty()) {
+            throw FleksWrongConfigurationOrderException()
+        }
+
+        if (family.removeHook != null) {
+            throw FleksHookAlreadyAddedException("removeHook", "Family $family")
+        }
+        family.removeHook = hook
+    }
+}
+
+/**
+ * A configuration for an entity [world][World] to define the systems, dependencies to be injected,
+ * [component][Component]- and [family][Family] hooks.
+ *
+ * @param world the [World] to be configured.
+ */
+@WorldCfgMarker
+class WorldConfiguration(internal val world: World) {
+
+    internal val systems = mutableListOf<IntervalSystem>()
+    private val injectableCfg = InjectableConfiguration(world)
+    private val compCfg = ComponentConfiguration(world, systems)
+    private val familyCfg = FamilyConfiguration(world, systems)
+    private val systemCfg = SystemConfiguration(systems)
 
     fun injectables(cfg: InjectableConfiguration.() -> Unit) = injectableCfg.run(cfg)
 
+    fun components(cfg: ComponentConfiguration.() -> Unit) = compCfg.run(cfg)
+
     fun families(cfg: FamilyConfiguration.() -> Unit) = familyCfg.run(cfg)
+
+    fun systems(cfg: SystemConfiguration.() -> Unit) = systemCfg.run(cfg)
 }
 
 /**
  * Creates a new [world][World] with the given [cfg][WorldConfiguration].
  *
- * @param cfg the [configuration][WorldConfiguration] of the world containing the initial maximum entity capacity,
- * the [systems][IntervalSystem], injectables, components, [ComponentListener] and [FamilyListener].
+ * @param entityCapacity initial maximum entity capacity.
+ * Will be used internally when a [world][World] is created to set the initial
+ * size of some collections and to avoid slow resizing calls.
+ *
+ * @param cfg the [configuration][WorldConfiguration] of the world containing the [systems][IntervalSystem],
+ * [injectables][Injectable], [ComponentHook]s and [FamilyHook]s.
  */
-fun world(cfg: WorldConfiguration.() -> Unit): World {
-    val worldCfg = WorldConfiguration().apply(cfg)
-    return World(
-        worldCfg.entityCapacity,
-        worldCfg.injectableCfg.injectables,
-        worldCfg.compCfg.componentFactory,
-        worldCfg.compCfg.compListenerFactory,
-        worldCfg.familyCfg.famListenerFactory,
-        worldCfg.systemCfg.systemFactory
-    )
+fun world(entityCapacity: Int = 512, cfg: WorldConfiguration.() -> Unit): World {
+    val newWorld = World(entityCapacity)
+    CURRENT_WORLD = newWorld
+
+    try {
+        val worldCfg = WorldConfiguration(newWorld).apply(cfg)
+        // assign world systems afterwards to resize the systems array only once to the correct size
+        // instead of resizing every time a system gets added to the configuration
+        newWorld.systems = worldCfg.systems.toTypedArray()
+    } finally {
+        CURRENT_WORLD = null
+    }
+
+    return newWorld
 }
 
 /**
  * A world to handle [entities][Entity] and [systems][IntervalSystem].
  *
  * @param entityCapacity the initial maximum capacity of entities.
- * @param injectables the injectables for any [system][IntervalSystem], [ComponentListener] or [FamilyListener].
- * @param componentFactory the factories to create components.
- * @param compListenerFactory the factories to create [ComponentListener].
- * @param famListenerFactory the factories to create [FamilyListener].
- * @param systemFactory the factories to create [systems][IntervalSystem].
  */
 class World internal constructor(
     entityCapacity: Int,
-    injectables: MutableMap<String, Injectable>,
-    componentFactory: MutableMap<KClass<*>, () -> Any>,
-    compListenerFactory: MutableMap<KClass<*>, () -> ComponentListener<*>>,
-    famListenerFactory: MutableMap<KClass<out FamilyListener>, () -> FamilyListener>,
-    systemFactory: MutableMap<KClass<*>, () -> IntervalSystem>
-) {
+) : EntityComponentContext(ComponentService()) {
+    @PublishedApi
+    internal val injectables = mutableMapOf<String, Injectable>()
+
     /**
      * Returns the time that is passed to [update][World.update].
      * It represents the time in seconds between two frames.
@@ -220,20 +228,15 @@ class World internal constructor(
         private set
 
     @PublishedApi
-    internal val systemService: SystemService
-
-    @PublishedApi
-    internal val componentService: ComponentService
-
-    @PublishedApi
-    internal val entityService: EntityService
+    internal val entityService = EntityService(this, entityCapacity)
 
     /**
      * List of all [families][Family] of the world that are created either via
      * an [IteratingSystem] or via the world's [family] function to
      * avoid creating duplicates.
      */
-    internal val allFamilies = mutableListOf<Family>()
+    @PublishedApi
+    internal var allFamilies = emptyArray<Family>()
 
     /**
      * Returns the amount of active entities.
@@ -250,87 +253,80 @@ class World internal constructor(
     /**
      * Returns the world's systems.
      */
-    val systems: Array<IntervalSystem>
-        get() = systemService.systems
+    var systems = emptyArray<IntervalSystem>()
+        internal set
 
     init {
-        componentService = ComponentService(componentFactory)
-        entityService = EntityService(entityCapacity, componentService)
-        // add the world as a used dependency in case any system or ComponentListener needs it
-        injectables["World"] = Injectable(this, true)
-
-        // set a Fleks internal global reference to the current world that
-        // gets created. This is used to correctly initialize the world
-        // reference of any created system and to correctly register
-        // any created FamilyListener below.
-        CURRENT_WORLD = this
-
-        Inject.injectObjects = injectables
-        Inject.mapperObjects = componentService.mappers
-
-        // create and register ComponentListener
-        // it is important to do this BEFORE creating systems because if a system's init block
-        // is creating entities then ComponentListener already need to be registered to get notified
-        compListenerFactory.forEach {
-            val compType = it.key
-            val listener = it.value.invoke()
-            val mapper = componentService.mapper(compType)
-            mapper.addComponentListenerInternal(listener)
-        }
-
-        // create and register FamilyListener
-        // like ComponentListener this must happen before systems are created
-        famListenerFactory.forEach {
-            val (listenerType, factory) = it
-            try {
-                val listener = factory.invoke()
-                FamilyListener.CURRENT_FAMILY.addFamilyListener(listener)
-            } catch (e: Exception) {
-                if (e is FleksFamilyException) {
-                    throw FleksFamilyListenerCreationException(
-                        listenerType,
-                        "FamilyListener must define at least one of AllOf, NoneOf or AnyOf"
-                    )
-                }
-                throw e
-            }
-        }
-
-        // create systems
-        systemService = SystemService(systemFactory)
-
-        // verify that there are no unused injectables
-        val unusedInjectables = injectables.filterValues { !it.used }.map { it.value.injObj::class }
-        if (unusedInjectables.isNotEmpty()) {
-            throw FleksUnusedInjectablesException(unusedInjectables)
-        }
-
-        // clear dependencies at the end because they are no longer necessary,
-        // and we don't want to keep a reference to them
-        Inject.injectObjects = EMPTY_INJECTIONS
-        Inject.mapperObjects = EMPTY_MAPPERS
+        /**
+         * Maybe because of design flaws, the world reference of the ComponentService must be
+         * set in the world's constructor because the parent class (=BaseEntityExtensions) already
+         * requires a ComponentService and it is not possible to pass "this" reference directly.
+         *
+         * That's why it is happening here to set it as soon as possible.
+         */
+        componentService.world = this
     }
 
     /**
-     * Adds a new [entity][Entity] to the world using the given [configuration][EntityCreateCfg].
+     * Returns an already registered injectable of the given [name] and marks it as used.
+     *
+     * @throws FleksNoSuchInjectableException if there is no injectable registered for [name].
      */
-    inline fun entity(configuration: EntityCreateCfg.(Entity) -> Unit = {}): Entity {
+    inline fun <reified T> inject(name: String = T::class.simpleName ?: T::class.toString()): T {
+        val injectable = injectables[name] ?: throw FleksNoSuchInjectableException(name)
+        injectable.used = true
+        return injectable.injObj as T
+    }
+
+    /**
+     * Returns a new map of unused [injectables][Injectable]. An injectable gets set to 'used'
+     * when it gets injected at least once via a call to [inject].
+     */
+    fun unusedInjectables(): Map<String, Any> =
+        injectables.filterValues { !it.used }.mapValues { it.value.injObj }
+
+    /**
+     * Returns a new [EntityBag] instance containing all [entities][Entity] of the world.
+     *
+     * Do not call this operation each frame, as it can be expensive depending on the amount
+     * of entities in your world.
+     *
+     * For frequent entity operations on specific entities, use [families][Family].
+     */
+    fun asEntityBag(): EntityBag {
+        val result = MutableEntityBag(numEntities)
+        entityService.forEach {
+            result += it
+        }
+        return result
+    }
+
+    /**
+     * Adds a new [entity][Entity] to the world using the given [configuration][EntityCreateContext].
+     *
+     * **Attention** Make sure that you only modify the entity of the current scope.
+     * Otherwise, you will get wrong behavior for families. E.g. don't do this:
+     *
+     *     entity {
+     *         // don't do this
+     *         somOtherEntity += Position()
+     *     }
+     */
+    inline fun entity(configuration: EntityCreateContext.(Entity) -> Unit = {}): Entity {
         return entityService.create(configuration)
     }
 
     /**
-     * Updates an [entity] using the given [configuration] to add and remove components.
+     * Returns true if and only if the [entity] is not removed and is part of the [World].
      */
-    inline fun configureEntity(entity: Entity, configuration: EntityUpdateCfg.(Entity) -> Unit) {
-        entityService.configureEntity(entity, configuration)
-    }
+    operator fun contains(entity: Entity) = entityService.contains(entity)
 
     /**
      * Removes the given [entity] from the world. The [entity] will be recycled and reused for
      * future calls to [World.entity].
      */
-    fun remove(entity: Entity) {
-        entityService.remove(entity)
+    operator fun minusAssign(entity: Entity) {
+        entityService -= entity
     }
 
     /**
@@ -346,29 +342,60 @@ class World internal constructor(
     /**
      * Performs the given [action] on each active [entity][Entity].
      */
-    fun forEach(action: (Entity) -> Unit) {
+    inline fun forEach(action: World.(Entity) -> Unit) {
         entityService.forEach(action)
     }
 
     /**
-     * Returns the specified [system][IntervalSystem] of the world.
+     * Returns the specified [system][IntervalSystem].
      *
-     * @throws [FleksNoSuchSystemException] if there is no such [system][IntervalSystem].
+     * @throws [FleksNoSuchSystemException] if there is no such system.
      */
     inline fun <reified T : IntervalSystem> system(): T {
-        return systemService.system()
+        systems.forEach { system ->
+            if (system is T) {
+                return system
+            }
+        }
+        throw FleksNoSuchSystemException(T::class)
     }
 
     /**
-     * Returns a [ComponentMapper] for the given type. If the mapper does not exist then it will be created.
+     * Sets the [hook] as a [ComponentsHolder.addHook] for the given [type].
      *
-     * @throws [FleksNoSuchComponentException] if the component of the given type does not exist in the
-     * world configuration.
+     * @throws FleksHookAlreadyAddedException if the [ComponentsHolder] already has an add hook set.
      */
-    inline fun <reified T : Any> mapper() = componentService.mapper<T>()
+    @PublishedApi
+    internal inline fun <reified T : Component<*>> setComponentAddHook(
+        type: ComponentType<T>,
+        noinline hook: ComponentHook<T>
+    ) {
+        val holder = componentService.holder(type)
+        if (holder.addHook != null) {
+            throw FleksHookAlreadyAddedException("addHook", "Component ${type::class.simpleName}")
+        }
+        holder.addHook = hook
+    }
 
     /**
-     * Creates a new [Family] for the given [allOf], [noneOf] and [anyOf] component configuration.
+     * Sets the [hook] as a [ComponentsHolder.removeHook] for the given [type].
+     *
+     * @throws FleksHookAlreadyAddedException if the [ComponentsHolder] already has a remove hook set.
+     */
+    @PublishedApi
+    internal inline fun <reified T : Component<*>> setComponentRemoveHook(
+        type: ComponentType<T>,
+        noinline hook: ComponentHook<T>
+    ) {
+        val holder = componentService.holder(type)
+        if (holder.removeHook != null) {
+            throw FleksHookAlreadyAddedException("removeHook", "Component ${type::class.simpleName}")
+        }
+        holder.removeHook = hook
+    }
+
+    /**
+     * Creates a new [Family] for the given [cfg][FamilyDefinition].
      *
      * This function internally either creates or reuses an already existing [family][Family].
      * In case a new [family][Family] gets created it will be initialized with any already existing [entity][Entity]
@@ -378,65 +405,38 @@ class World internal constructor(
      * As a best practice families should be created as early as possible, ideally during world creation.
      * Also, store the result of this function instead of calling this function multiple times with the same arguments.
      *
-     * @throws [FleksFamilyException] if [allOf], [noneOf] and [anyOf] are null or empty.
+     * @throws [FleksFamilyException] if the [FamilyDefinition] is null or empty.
      */
-    fun family(
-        allOf: Array<KClass<*>>? = null,
-        noneOf: Array<KClass<*>>? = null,
-        anyOf: Array<KClass<*>>? = null,
-    ): Family {
-        val allOfCmps = if (!allOf.isNullOrEmpty()) {
-            allOf.map { componentService.mapper(it) }
-        } else {
-            null
-        }
-
-        val noneOfCmps = if (!noneOf.isNullOrEmpty()) {
-            noneOf.map { componentService.mapper(it) }
-        } else {
-            null
-        }
-
-        val anyOfCmps = if (!anyOf.isNullOrEmpty()) {
-            anyOf.map { componentService.mapper(it) }
-        } else {
-            null
-        }
-
-        return familyOfMappers(allOfCmps, noneOfCmps, anyOfCmps)
-    }
+    fun family(cfg: FamilyDefinition.() -> Unit): Family = family(FamilyDefinition().apply(cfg))
 
     /**
-     * Creates or returns an already created [family][Family] for the given
-     * [allOf], [noneOf] and [anyOf] component configuration.
+     * Creates a new [Family] for the given [definition][FamilyDefinition].
      *
-     * Also, adds a newly created [family][Family] as [EntityListener] and
-     * initializes it by notifying it with any already existing [entity][Entity]
+     * This function internally either creates or reuses an already existing [family][Family].
+     * In case a new [family][Family] gets created it will be initialized with any already existing [entity][Entity]
      * that matches its configuration.
+     * Therefore, this might have a performance impact on the first call if there are a lot of entities in the world.
      *
-     * @throws [FleksFamilyException] if [allOf], [noneOf] and [anyOf] are null or empty.
+     * As a best practice families should be created as early as possible, ideally during world creation.
+     * Also, store the result of this function instead of calling this function multiple times with the same arguments.
+     *
+     * @throws [FleksFamilyException] if the [FamilyDefinition] is null or empty.
      */
-    private fun familyOfMappers(
-        allOf: List<ComponentMapper<*>>?,
-        noneOf: List<ComponentMapper<*>>?,
-        anyOf: List<ComponentMapper<*>>?,
-    ): Family {
-        if (allOf.isNullOrEmpty() && noneOf.isNullOrEmpty() && anyOf.isNullOrEmpty()) {
-            throw FleksFamilyException(allOf, noneOf, anyOf)
+    @PublishedApi
+    internal fun family(definition: FamilyDefinition): Family {
+        if (definition.isEmpty()) {
+            throw FleksFamilyException(definition)
         }
 
-        val allBs = if (allOf == null) null else BitArray().apply { allOf.forEach { this.set(it.id) } }
-        val noneBs = if (noneOf == null) null else BitArray().apply { noneOf.forEach { this.set(it.id) } }
-        val anyBs = if (anyOf == null) null else BitArray().apply { anyOf.forEach { this.set(it.id) } }
+        val (defAll, defNone, defAny) = definition
 
-        var family = allFamilies.find { it.allOf == allBs && it.noneOf == noneBs && it.anyOf == anyBs }
+        var family = allFamilies.find { it.allOf == defAll && it.noneOf == defNone && it.anyOf == defAny }
         if (family == null) {
-            family = Family(allBs, noneBs, anyBs, entityService).apply {
-                entityService.addEntityListener(this)
-                allFamilies.add(this)
-                // initialize a newly created family by notifying it for any already existing entity
-                entityService.forEach { this.onEntityCfgChanged(it, entityService.compMasks[it.id]) }
-            }
+            family = Family(defAll, defNone, defAny, this)
+            allFamilies += family
+            // initialize a newly created family by notifying it for any already existing entity
+            // world.allFamilies.forEach { it.onEntityCfgChanged(entity, compMask) }
+            entityService.forEach { family.onEntityCfgChanged(it, entityService.compMasks[it.id]) }
         }
         return family
     }
@@ -447,14 +447,14 @@ class World internal constructor(
      * The values are a list of components that a specific entity has. If the entity
      * does not have any components then the value is an empty list.
      */
-    fun snapshot(): Map<Entity, List<Any>> {
-        val entityComps = mutableMapOf<Entity, List<Any>>()
+    fun snapshot(): Map<Entity, List<Component<*>>> {
+        val entityComps = mutableMapOf<Entity, List<Component<*>>>()
 
         entityService.forEach { entity ->
-            val components = mutableListOf<Any>()
+            val components = mutableListOf<Component<*>>()
             val compMask = entityService.compMasks[entity.id]
             compMask.forEachSetBit { cmpId ->
-                components += componentService.mapper(cmpId)[entity] as Any
+                components += componentService.holderByIndex(cmpId)[entity]
             }
             entityComps[entity] = components
         }
@@ -466,12 +466,12 @@ class World internal constructor(
      * Returns a list that contains all components of the given [entity] of this world.
      * If the entity does not have any components then an empty list is returned.
      */
-    fun snapshotOf(entity: Entity): List<Any> {
-        val comps = mutableListOf<Any>()
+    fun snapshotOf(entity: Entity): List<Component<*>> {
+        val comps = mutableListOf<Component<*>>()
 
         if (entity in entityService) {
             entityService.compMasks[entity.id].forEachSetBit { cmpId ->
-                comps += componentService.mapper(cmpId)[entity] as Any
+                comps += componentService.holderByIndex(cmpId)[entity]
             }
         }
 
@@ -481,14 +481,11 @@ class World internal constructor(
     /**
      * Loads the given [snapshot] of the world. This will first clear any existing
      * entity of the world. After that it will load all provided entities and components.
-     * This will also notify [ComponentListener] and [FamilyListener].
+     * This will also execute [ComponentHook] or [FamilyHook].
      *
      * @throws FleksSnapshotException if a family iteration is currently in process.
-     *
-     * @throws [FleksNoSuchComponentException] if any of the components does not exist in the
-     * world configuration.
      */
-    fun loadSnapshot(snapshot: Map<Entity, List<Any>>) {
+    fun loadSnapshot(snapshot: Map<Entity, List<Component<*>>>) {
         if (entityService.delayRemoval) {
             throw FleksSnapshotException("Snapshots cannot be loaded while a family iteration is in process")
         }
@@ -513,7 +510,7 @@ class World internal constructor(
                 if (components != null) {
                     // components for entity are provided -> create it
                     // note that the id for the entity will be the recycled id from above
-                    this.configureEntity(this.create { }, components)
+                    this.configure(this.create { }, components)
                 }
             }
         }
@@ -525,22 +522,52 @@ class World internal constructor(
      */
     fun update(deltaTime: Float) {
         this.deltaTime = deltaTime
-        systemService.update()
+        systems.forEach { system ->
+            if (system.enabled) {
+                system.onUpdate()
+            }
+        }
     }
 
     /**
-     * Removes all [entities][Entity] of the world and calls the [onDispose][IntervalSystem.onDispose] function of each system.
+     * Removes all [entities][Entity] of the world and calls the
+     * [onDispose][IntervalSystem.onDispose] function of each system.
      */
     fun dispose() {
         entityService.removeAll()
-        systemService.dispose()
+        systems.forEach { it.onDispose() }
     }
 
 
     @ThreadLocal
     companion object {
-        private val EMPTY_INJECTIONS: Map<String, Injectable> = emptyMap()
-        private val EMPTY_MAPPERS: Map<KClass<*>, ComponentMapper<*>> = emptyMap()
-        internal lateinit var CURRENT_WORLD: World
+        @PublishedApi
+        internal var CURRENT_WORLD: World? = null
+
+        /**
+         * Returns an already registered injectable of the given [name] and marks it as used.
+         *
+         * @throws FleksNoSuchInjectableException if there is no injectable registered for [name].
+         * @throws FleksWrongConfigurationUsageException if called outside a [WorldConfiguration] scope.
+         */
+        inline fun <reified T> inject(name: String = T::class.simpleName ?: T::class.toString()): T =
+            CURRENT_WORLD?.inject(name) ?: throw FleksWrongConfigurationUsageException()
+
+        /**
+         * Creates a new [Family] for the given [cfg][FamilyDefinition].
+         *
+         * This function internally either creates or reuses an already existing [family][Family].
+         * In case a new [family][Family] gets created it will be initialized with any already existing [entity][Entity]
+         * that matches its configuration.
+         * Therefore, this might have a performance impact on the first call if there are a lot of entities in the world.
+         *
+         * As a best practice families should be created as early as possible, ideally during world creation.
+         * Also, store the result of this function instead of calling this function multiple times with the same arguments.
+         *
+         * @throws [FleksFamilyException] if the [FamilyDefinition] is null or empty.
+         * @throws FleksWrongConfigurationUsageException if called outside a [WorldConfiguration] scope.
+         */
+        fun family(cfg: FamilyDefinition.() -> Unit): Family =
+            CURRENT_WORLD?.family(cfg) ?: throw FleksWrongConfigurationUsageException()
     }
 }

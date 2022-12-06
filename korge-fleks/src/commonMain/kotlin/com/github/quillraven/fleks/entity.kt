@@ -1,108 +1,146 @@
 package com.github.quillraven.fleks
 
-import com.github.quillraven.fleks.collection.BitArray
-import com.github.quillraven.fleks.collection.IntBag
-import com.github.quillraven.fleks.collection.bag
+import com.github.quillraven.fleks.collection.*
+import kotlin.jvm.JvmInline
 
 /**
  * An entity of a [world][World]. It represents a unique id.
  */
-data class Entity(val id: Int)
+@JvmInline
+value class Entity(val id: Int)
 
 /**
- * Interface of an [entity][Entity] listener that gets notified when the component configuration changes.
- * The [onEntityCfgChanged] function gets also called when an [entity][Entity] gets created and removed.
+ * A class for basic [Entity] extension functions within an add/remove hook of a [Component], [Family],
+ * [IntervalSystem], [World] or [compareEntity].
  */
-interface EntityListener {
-    /**
-     * Function that gets called when an [entity's][Entity] component configuration changes.
-     * This happens when a component gets added or removed or the [entity] gets added or removed from the [world][World].
-     *
-     * @param entity the [entity][Entity] with the updated component configuration.
-     *
-     * @param compMask the [BitArray] representing what type of components the entity has. Each component type has a
-     * unique id. Refer to [ComponentMapper] for more details.
-     */
-    fun onEntityCfgChanged(entity: Entity, compMask: BitArray) = Unit
-
-    /**
-     * Function that gets called when an [entity][Entity] gets removed.
-     *
-     * @param entity the [entity][Entity] that gets removed.
-     */
-    fun onEntityRemoved(entity: Entity) = Unit
-}
-
-@DslMarker
-annotation class EntityCfgMarker
-
-/**
- * A DSL class to add components to a newly created [entity][Entity].
- */
-@EntityCfgMarker
-class EntityCreateCfg(
+abstract class EntityComponentContext(
     @PublishedApi
-    internal val compService: ComponentService
+    internal val componentService: ComponentService
 ) {
-    @PublishedApi
-    internal var entity = Entity(0)
-
-    @PublishedApi
-    internal lateinit var compMask: BitArray
+    /**
+     * Returns a [component][Component] of the given [type] for the [entity][Entity].
+     *
+     * @throws [FleksNoSuchEntityComponentException] if the [entity][Entity] does not have such a component.
+     */
+    inline operator fun <reified T : Component<*>> Entity.get(type: ComponentType<T>): T =
+        componentService.holder(type)[this]
 
     /**
-     * Adds and returns a component of the given type to the [entity] and
-     * applies the [configuration] to the component.
-     * Notifies any registered [ComponentListener].
+     * Returns a [component][Component] of the given [type] for the [entity][Entity]
+     * or null if the [entity][Entity] does not have such a [component][Component].
      */
-    inline fun <reified T : Any> add(configuration: T.() -> Unit = {}): T {
-        val mapper = compService.mapper<T>()
-        compMask.set(mapper.id)
-        return mapper.addInternal(entity, configuration)
+    inline fun <reified T : Component<*>> Entity.getOrNull(type: ComponentType<T>): T? =
+        componentService.holder(type).getOrNull(this)
+
+    /**
+     * Returns true if and only if the [entity][Entity] has a [component][Component] of the given [type].
+     */
+    inline operator fun <reified T : Component<*>> Entity.contains(type: ComponentType<T>): Boolean =
+        this in componentService.holder(type)
+
+    /**
+     * Returns true if and only if the [entity][Entity] has a [component][Component] of the given [type].
+     */
+    inline infix fun <reified T : Component<*>> Entity.has(type: ComponentType<T>): Boolean =
+        this in componentService.holder(type)
+
+    /**
+     * Returns true if and only if the [entity][Entity] doesn't have a [component][Component] of the given [type].
+     */
+    inline infix fun <reified T : Component<*>> Entity.hasNo(type: ComponentType<T>): Boolean =
+        this !in componentService.holder(type)
+
+    /**
+     * Updates the [entity][Entity] using the given [configuration] to add and remove [components][Component].
+     *
+     * **Attention** Make sure that you only modify the entity of the current scope.
+     * Otherwise you will get wrong behavior for families. E.g. don't do this:
+     *
+     *     entity.configure {
+     *         // don't do this
+     *         somOtherEntity += Position()
+     *     }
+     */
+    inline fun Entity.configure(configuration: EntityUpdateContext.(Entity) -> Unit) =
+        componentService.world.entityService.configure(this, configuration)
+
+    /**
+     * Removes the [entity][Entity] from the world. The [entity][Entity] will be recycled and reused for
+     * future calls to [World.entity].
+     */
+    fun Entity.remove() = componentService.world.minusAssign(this)
+}
+
+/**
+ * A class that extends the extension functionality of an [EntityComponentContext] by also providing
+ * the possibility to create [components][Component].
+ */
+open class EntityCreateContext(
+    compService: ComponentService,
+    @PublishedApi
+    internal val compMasks: Bag<BitArray>,
+) : EntityComponentContext(compService) {
+
+    /**
+     * Adds the [component] to the [entity][Entity].
+     *
+     * If a component [addHook][ComponentsHolder.addHook] is defined then it
+     * gets called after the [component] is assigned to the [entity][Entity].
+     *
+     * If a component [removeHook][ComponentsHolder.removeHook] is defined and the [entity][Entity]
+     * already had such a [component] then it gets called with the previous assigned component before
+     * the [addHook][ComponentsHolder.addHook] is called.
+     */
+    inline operator fun <reified T : Component<T>> Entity.plusAssign(component: T) {
+        val compType: ComponentType<T> = component.type()
+        compMasks[this.id].set(compType.id)
+        val holder: ComponentsHolder<T> = componentService.holder(compType)
+        holder[this] = component
     }
 }
 
 /**
- * A DSL class to update components of an already existing [entity][Entity].
- * It contains extension functions for [ComponentMapper] which is how the component configuration of
- * existing entities is changed. This usually happens within [IteratingSystem] classes.
+ * A class that extends the extension functionality of an [EntityCreateContext] by also providing
+ * the possibility to update [components][Component].
  */
-@EntityCfgMarker
-class EntityUpdateCfg {
-    @PublishedApi
-    internal lateinit var compMask: BitArray
-
+class EntityUpdateContext(
+    compService: ComponentService,
+    compMasks: Bag<BitArray>,
+) : EntityCreateContext(compService, compMasks) {
     /**
-     * Adds and returns a component of the given type to the [entity] and applies the [configuration] to that component.
-     * If the [entity] already has a component of the given type then no new component is created and instead
-     * the existing one will be updated.
-     * Notifies any registered [ComponentListener].
-     */
-    inline fun <reified T : Any> ComponentMapper<T>.add(entity: Entity, configuration: T.() -> Unit = {}): T {
-        compMask.set(this.id)
-        return this.addInternal(entity, configuration)
-    }
-
-    /**
-     * Adds a new component of the given type to the [entity] if it does not have it yet.
-     * Otherwise, updates the already existing component.
-     * Applies the [configuration] in both cases and returns the component.
-     * Notifies any registered [ComponentListener] if a new component is created.
-     */
-    inline fun <reified T : Any> ComponentMapper<T>.addOrUpdate(entity: Entity, configuration: T.() -> Unit = {}): T {
-        compMask.set(this.id)
-        return this.addOrUpdateInternal(entity, configuration)
-    }
-
-    /**
-     * Removes a component of the given type from the [entity].
-     * Notifies any registered [ComponentListener].
+     * Removes a [component][Component] of the given [type] from the [entity][Entity].
      *
-     * @throws [IndexOutOfBoundsException] if the id of the [entity] exceeds the mapper's capacity.
+     * If a component [removeHook][ComponentsHolder.removeHook] is defined then it gets called
+     * if the [entity][Entity] has such a component.
+     *
+     * @throws [IndexOutOfBoundsException] if the id of the [entity][Entity] exceeds the internal components' capacity.
+     * This can only happen when the [entity][Entity] never had such a component.
      */
-    inline fun <reified T : Any> ComponentMapper<T>.remove(entity: Entity) {
-        compMask.clear(this.id)
-        this.removeInternal(entity)
+    inline operator fun <reified T : Component<*>> Entity.minusAssign(type: ComponentType<T>) {
+        compMasks[this.id].clear(type.id)
+        componentService.holder(type) -= this
+    }
+
+    /**
+     * Returns a [component][Component] of the given [type] for the [entity][Entity].
+     *
+     * If the [entity][Entity] does not have such a [component][Component] then [add] is called
+     * to assign it to the [entity][Entity] and return it.
+     */
+    inline fun <reified T : Component<T>> Entity.getOrAdd(
+        type: ComponentType<T>,
+        add: () -> T,
+    ): T {
+        val holder: ComponentsHolder<T> = componentService.holder(type)
+        val existingCmp = holder.getOrNull(this)
+        if (existingCmp != null) {
+            return existingCmp
+        }
+
+        compMasks[this.id].set(type.id)
+        val newCmp = add()
+        holder[this] = newCmp
+        return newCmp
     }
 }
 
@@ -112,8 +150,10 @@ class EntityUpdateCfg {
  * what kind of components an entity has or doesn't have.
  */
 class EntityService(
+    @PublishedApi
+    internal val world: World,
     initialEntityCapacity: Int,
-    private val compService: ComponentService
+    private val compService: ComponentService = world.componentService,
 ) {
     /**
      * The id that will be given to a newly created [entity][Entity] if there are no [recycledEntities].
@@ -153,13 +193,10 @@ class EntityService(
     internal val compMasks = bag<BitArray>(initialEntityCapacity)
 
     @PublishedApi
-    internal val createCfg = EntityCreateCfg(compService)
+    internal val createCtx = EntityCreateContext(compService, compMasks)
 
     @PublishedApi
-    internal val updateCfg = EntityUpdateCfg()
-
-    @PublishedApi
-    internal val listeners = bag<EntityListener>()
+    internal val updateCtx = EntityUpdateContext(compService, compMasks)
 
     /**
      * Flag that indicates if an iteration of an [IteratingSystem] is currently in progress.
@@ -172,14 +209,14 @@ class EntityService(
     /**
      * The entities that get removed at the end of an [IteratingSystem] iteration.
      */
-    private val delayedEntities = IntBag()
+    private val delayedEntities = MutableEntityBag()
 
     /**
      * Creates and returns a new [entity][Entity] and applies the given [configuration].
      * If there are [recycledEntities] then they will be preferred over creating new entities.
-     * Notifies any registered [EntityListener].
+     * Notifies all [families][World.allFamilies].
      */
-    inline fun create(configuration: EntityCreateCfg.(Entity) -> Unit): Entity {
+    inline fun create(configuration: EntityCreateContext.(Entity) -> Unit): Entity {
         val newEntity = if (recycledEntities.isEmpty()) {
             Entity(nextId++)
         } else {
@@ -192,42 +229,36 @@ class EntityService(
             compMasks[newEntity.id] = BitArray(64)
         }
         val compMask = compMasks[newEntity.id]
-        createCfg.run {
-            this.entity = newEntity
-            this.compMask = compMask
-            configuration(this.entity)
-        }
-        listeners.forEach { it.onEntityCfgChanged(newEntity, compMask) }
+        createCtx.configuration(newEntity)
+        world.allFamilies.forEach { it.onEntityAdded(newEntity, compMask) }
 
         return newEntity
     }
 
     /**
      * Updates an [entity] with the given [configuration].
-     * Notifies any registered [EntityListener].
+     * Notifies all [families][World.allFamilies].
      */
-    inline fun configureEntity(entity: Entity, configuration: EntityUpdateCfg.(Entity) -> Unit) {
+    inline fun configure(entity: Entity, configuration: EntityUpdateContext.(Entity) -> Unit) {
         val compMask = compMasks[entity.id]
-        updateCfg.run {
-            this.compMask = compMask
-            configuration(entity)
-        }
-        listeners.forEach { it.onEntityCfgChanged(entity, compMask) }
+        updateCtx.configuration(entity)
+        world.allFamilies.forEach { it.onEntityCfgChanged(entity, compMask) }
     }
 
     /**
      * Updates an [entity] with the given [components].
-     * Notifies any registered [EntityListener].
-     * This function is only used by [World.loadSnapshot].
+     * Notifies all [families][World.allFamilies].
+     * This function is only used by [World.loadSnapshot] and is therefore working
+     * with unsafe wildcards ('*').
      */
-    internal fun configureEntity(entity: Entity, components: List<Any>) {
+    internal fun configure(entity: Entity, components: List<Component<*>>) {
         val compMask = compMasks[entity.id]
         components.forEach { cmp ->
-            val mapper = compService.mapper(cmp::class)
-            mapper.addInternal(entity, cmp)
-            compMask.set(mapper.id)
+            val holder = compService.wildcardHolder(cmp.type())
+            holder.setWildcard(entity, cmp)
+            compMask.set(cmp.type().id)
         }
-        listeners.forEach { it.onEntityCfgChanged(entity, compMask) }
+        world.allFamilies.forEach { it.onEntityCfgChanged(entity, compMask) }
     }
 
     /**
@@ -247,25 +278,25 @@ class EntityService(
      * If [delayRemoval] is set then the [entity] is not removed immediately and instead will be cleaned up
      * within the [cleanupDelays] function.
      *
-     * Notifies any registered [EntityListener] when the [entity] gets removed.
+     * Notifies all [families][World.allFamilies] when the [entity] gets removed.
      */
-    fun remove(entity: Entity) {
+    operator fun minusAssign(entity: Entity) {
         if (removedEntities[entity.id]) {
             // entity is already removed
             return
         }
 
         if (delayRemoval) {
-            delayedEntities.add(entity.id)
+            delayedEntities += entity
         } else {
             removedEntities.set(entity.id)
             val compMask = compMasks[entity.id]
             recycledEntities.add(entity)
             compMask.forEachSetBit { compId ->
-                compService.mapper(compId).removeInternal(entity)
+                compService.holderByIndex(compId) -= entity
             }
             compMask.clearAll()
-            listeners.forEach { it.onEntityRemoved(entity) }
+            world.allFamilies.forEach { it.onEntityRemoved(entity) }
         }
     }
 
@@ -282,7 +313,7 @@ class EntityService(
             if (removedEntities[entity.id]) {
                 continue
             }
-            remove(entity)
+            this -= entity
         }
 
         if (clearRecycled) {
@@ -303,13 +334,13 @@ class EntityService(
     /**
      * Performs the given [action] on each active [entity][Entity].
      */
-    fun forEach(action: (Entity) -> Unit) {
+    inline fun forEach(action: World.(Entity) -> Unit) {
         for (id in 0 until nextId) {
             val entity = Entity(id)
             if (removedEntities[entity.id]) {
                 continue
             }
-            entity.run(action)
+            world.action(entity)
         }
     }
 
@@ -318,24 +349,9 @@ class EntityService(
      */
     fun cleanupDelays() {
         delayRemoval = false
-        if (delayedEntities.isNotEmpty) {
-            delayedEntities.forEach { remove(Entity(it)) }
+        if (delayedEntities.isNotEmpty()) {
+            delayedEntities.forEach { this -= it }
             delayedEntities.clear()
         }
     }
-
-    /**
-     * Adds the given [listener] to the list of [EntityListener].
-     */
-    fun addEntityListener(listener: EntityListener) = listeners.add(listener)
-
-    /**
-     * Removes the given [listener] from the list of [EntityListener].
-     */
-    fun removeEntityListener(listener: EntityListener) = listeners.removeValue(listener)
-
-    /**
-     * Returns true if and only if the given [listener] is part of the list of [EntityListener].
-     */
-    operator fun contains(listener: EntityListener) = listener in listeners
 }
