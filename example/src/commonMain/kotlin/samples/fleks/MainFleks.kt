@@ -1,17 +1,12 @@
 package samples.fleks
 
-import com.soywiz.korge.Korge
 import com.soywiz.korge.scene.Scene
-import com.soywiz.korge.scene.sceneContainer
-import com.soywiz.korge.view.Container
 import com.soywiz.korge.view.container
 import com.soywiz.korge.view.addUpdater
-import com.soywiz.korim.color.Colors
 import com.github.quillraven.fleks.*
 import com.soywiz.korge.view.SContainer
 import samples.fleks.assets.Assets
 import samples.fleks.systems.*
-import samples.fleks.systems.SpriteSystem.SpriteListener
 import samples.fleks.components.*
 import samples.fleks.entities.createMeteoriteSpawner
 
@@ -44,34 +39,33 @@ class MainFleksSample : Scene() {
 
             // This is the world object of the entity component system (ECS)
             // It contains all ECS related system and component configuration
-            val world = world {
-                entityCapacity = 512
-
-                // Register all needed systems of the entity component system
-                // The order of systems here also define the order in which the systems are called inside Fleks ECS
-                systems {
-                    add(::MoveSystem)
-                    add(::SpawnerSystem)
-                    add(::CollisionSystem)
-                    add(::DestructSystem)
-                    add(::SpriteSystem)   // Drawing images on screen should be last otherwise the position might be (0, 0) because it was not set before
-                }
-
-                // Register all needed components and its listeners (if needed)
-                components {
-                    add(::Position)
-                    add(::Sprite, ::SpriteListener)
-                    add(::Spawner)
-                    add(::Destruct)
-                    add(::Rigidbody)
-                    add(::Impulse)
-                }
-
+            val world = world(entityCapacity = 512) {
                 // Register external objects which are used by systems and component listeners
                 injectables {
                     add(assets)  // Assets are used by the SpriteSystem / SpriteListener to get the image data for drawing
                     add("layer0", layer0)  // Currently, we use only one layer to draw all objects to - this is also used in SpriteListener to add the image to the layer container
                     // inject("layer1", layer1)  // Add more layers when needed e.g. for explosion objects to be on top, etc.
+                }
+
+                // Register component hooks which trigger actions when specific components are created
+                components {
+                    onAdd(Sprite, Sprite.onComponentAdded)
+                    onRemove(Sprite, Sprite.onComponentRemoved)
+                }
+
+                // Register family hooks which trigger actions when specific entities (combination of components) are created
+                families {
+                    // not used here
+                }
+
+                // Register all needed systems of the entity component system
+                // The order of systems here also define the order in which the systems are called inside Fleks ECS
+                systems {
+                    add(MoveSystem())
+                    add(SpawnerSystem())
+                    add(CollisionSystem())
+                    add(DestructSystem())
+                    add(SpriteSystem())   // Drawing images on screen should be last otherwise the position might be (0, 0) because it was not set before
                 }
             }
 
@@ -85,17 +79,3 @@ class MainFleksSample : Scene() {
         }
     }
 }
-
-/*
-const val scaleFactor = 3
-
-suspend fun main() = Korge(width = 384 * scaleFactor, height = 216 * scaleFactor, bgcolor = Colors["#000000"]) {
-
-    injector.mapPrototype { ExampleScene() }
-
-    val rootSceneContainer = sceneContainer()
-    views.debugViews = true
-
-    rootSceneContainer.changeTo<ExampleScene>()
-}
-*/

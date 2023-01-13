@@ -1,5 +1,8 @@
 package samples.fleks.components
 
+import com.github.quillraven.fleks.Component
+import com.github.quillraven.fleks.ComponentType
+
 /**
  * This component makes an entity a spawner. That means the entity will spawn new entities as configured below.
  */
@@ -43,4 +46,8 @@ data class Spawner(
 
     // internal state
     var nextSpawnIn: Int = 0
-)
+) : Component<Spawner> {
+    override fun type(): ComponentType<Spawner> = Spawner
+    companion object : ComponentType<Spawner>()
+}
+

@@ -1,8 +1,9 @@
 package samples.fleks.systems
 
+import com.github.quillraven.fleks.EachFrame
 import com.github.quillraven.fleks.Entity
-import com.github.quillraven.fleks.Inject
 import com.github.quillraven.fleks.IteratingSystem
+import com.github.quillraven.fleks.World.Companion.family
 import samples.fleks.components.*
 import samples.fleks.entities.createExplosionArtefact
 
@@ -11,22 +12,19 @@ import samples.fleks.entities.createExplosionArtefact
  *
  */
 class DestructSystem : IteratingSystem(
-    allOfComponents = arrayOf(Destruct::class)
+    family { all(Position, Destruct) },
+    interval = EachFrame
 ) {
-
-    private val positions = Inject.componentMapper<Position>()
-    private val destructs = Inject.componentMapper<Destruct>()
-
     override fun onTickEntity(entity: Entity) {
-        val destruct = destructs[entity]
+        val destruct = entity[Destruct]
         if (destruct.triggerDestruction) {
-            val position = positions[entity]
+            val position = entity[Position]
             // The spawning of explosion objects is hardcoded here to 40 objects - TODO that should be put into some component config later
             for (i in 0 until 40) {
                 world.createExplosionArtefact(position, destruct)
             }
             // now destroy entity
-            world.remove(entity)
+            world -= entity
         }
     }
 }

@@ -1,4 +1,0 @@
-name: "korge-fleks"
-dependencies:
-    - "maven::common::com.soywiz.korlibs.korge2:korge:3.3.0"
-

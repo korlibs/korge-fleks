@@ -5,15 +5,11 @@ import samples.fleks.components.*
 import samples.fleks.entities.createMeteoriteObject
 
 class SpawnerSystem : IteratingSystem(
-    allOfComponents = arrayOf(Spawner::class),
+    World.family { all(Spawner) },
     interval = EachFrame
 ) {
-
-    private val positions = Inject.componentMapper<Position>()
-    private val spawners = Inject.componentMapper<Spawner>()
-
     override fun onTickEntity(entity: Entity) {
-        val spawner = spawners[entity]
+        val spawner = entity[Spawner]
         if (spawner.interval > 0) {
             if (spawner.nextSpawnIn <= 0) {
                 spawn(entity)
@@ -26,8 +22,8 @@ class SpawnerSystem : IteratingSystem(
     }
 
     private fun spawn(entity: Entity) {
-        val spawnerPosition = positions[entity]
-        val spawner = spawners[entity]
+        val spawnerPosition = entity[Position]
+        val spawner = entity[Spawner]
         for (i in 0 until spawner.numberOfObjects) {
             world.createMeteoriteObject(spawnerPosition, spawner)
         }

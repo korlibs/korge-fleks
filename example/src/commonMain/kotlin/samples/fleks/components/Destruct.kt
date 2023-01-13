@@ -1,5 +1,8 @@
 package samples.fleks.components
 
+import com.github.quillraven.fleks.Component
+import com.github.quillraven.fleks.ComponentType
+
 /**
  * This component contains details on destruction of the entity like if other entities should be spawned
  * or if other systems should be fed with data (score, player health or damage, enemy damage,
@@ -17,4 +20,8 @@ data class Destruct(
     var spawnExplosion: Boolean = false,
     var explosionParticleRange: Double = 0.0,
     var explosionParticleAcceleration: Double = 0.0,
-)
+) : Component<Destruct> {
+    override fun type(): ComponentType<Destruct> = Destruct
+    companion object : ComponentType<Destruct>()
+}
+

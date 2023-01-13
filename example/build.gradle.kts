@@ -1,12 +1,11 @@
 import com.soywiz.korge.gradle.*
 
 plugins {
-        //alias(libs.plugins.korge)
-    id("com.soywiz.korge") version "3.3.0"
+    id("com.soywiz.korge") version "3.4.0"
 }
 
 korge {
-    id = "com.sample.demodragonbones"
+    id = "com.sample.fleks"
 
 // To enable all targets at once
 
@@ -19,7 +18,7 @@ korge {
 
     targetJvm()
     targetJs()
-    //targetDesktop()
+    targetDesktop()
     //targetDesktopCross()
     //targetIos()
     //targetAndroidIndirect() // targetAndroidDirect()
@@ -29,6 +28,5 @@ korge {
 
 dependencies {
     add("commonMainApi", project(":deps"))
-    //add("commonMainApi", project(":korge-dragonbones"))
 }
 
