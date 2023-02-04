@@ -15,6 +15,7 @@ import com.soywiz.korma.geom.vector.line
 import com.soywiz.korma.geom.vector.rect
 import com.soywiz.korgeFleks.components.*
 import com.soywiz.korgeFleks.components.Sprite
+import com.soywiz.korgeFleks.components.Text
 import com.soywiz.korgeFleks.utils.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
 import com.soywiz.korgeFleks.utils.random
@@ -70,10 +71,6 @@ class KorgeViewSystem(
                     val positionShape = entity[PositionShape]
                     view.x = positionShape.x - offset.x
                     view.y = positionShape.y - offset.y
-                } else {
-                    // TODO this will not work - we need to save the position in positionShape.x .y !!!
-                    view.x += offset.x
-                    view.y += offset.y
                 }
 
 //                println("[${entity.id}] Y: ${view.y} (Position: ${positionShape.y} delta: ${lastY - positionShape.y})")

@@ -1,6 +1,11 @@
 # Korge-Fleks
 
 This is the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) integration for KorGE Game Engine.
+Korge-fleks consists of a growing set of component definitions and dedicated systems.
+
+with some supporting stuff like AssetStore, etc. which are reusable or will get better reusable over time.
+Eventually this will grow into a specialized game engine for 2D platform games or similar.
+It depends what the ECS systems will be able to do.
 
 Upstream project for Fleks ECS can be found here: <https://github.com/Quillraven/Fleks>
 
@@ -57,12 +62,11 @@ kproject("./deps")
 ```kotlin
 name: fleks
 type: library
-version: 2.2
 
-# loading git tag 2.2 from GitHub repo (https://github.com/Quillraven/Fleks)
+# loading git tag release from GitHub repo (https://github.com/Quillraven/Fleks)
 src: git::Quillraven/Fleks::/src::2.2
-# using Fleks sources locally in sub-folder "libs/fleks"
-#src: ./fleks
+# using Fleks sources locally in sub-folder "libs/fleks-src"
+#src: ./fleks-src
 
 ```
 
@@ -71,12 +75,11 @@ src: git::Quillraven/Fleks::/src::2.2
 ```kotlin
 name: korge-fleks
 type: library
-version: 0.1
 
 # loading git tag from GitHub repo (https://github.com/korlibs/korge-fleks)
 src: git::korlibs/korge-fleks::/korge-fleks/src::0.0.1
 # using Korge-Fleks sources locally in sub-folder "libs/korge-fleks"
-#src: ./korge-fleks
+#src: ./korge-fleks-src/korge-fleks
 
 dependencies:
   - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"

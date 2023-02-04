@@ -175,6 +175,6 @@ class AnimationScriptSystem : IteratingSystem(
     }
 
     private inline fun <reified T : Component<*>> Entity.getOrError(componentType: ComponentType<T>) : T {
-        return getOrNull(componentType) ?: error("AnimationScriptSystem: Entity '${this.id}' does not contain component type '${componentType}'!")
+        return getOrNull(componentType) ?: error("AnimationScriptSystem: Entity '${this.id}' does not contain component type '${componentType}'!\nEntity snapshot: \n${world.snapshotOf(this)}".replace("), ", "),\n"))
     }
 }

@@ -4,12 +4,11 @@ import com.github.quillraven.fleks.Family
 import com.github.quillraven.fleks.FamilyHook
 import com.github.quillraven.fleks.World
 import com.soywiz.korge.tiled.TiledMapView
-import com.soywiz.korge.view.Container
-import com.soywiz.korge.view.View
-import com.soywiz.korge.view.centerXOnStage
-import com.soywiz.korge.view.centerYOnStage
+import com.soywiz.korge.view.*
 import com.soywiz.korgeFleks.assets.AssetStore
 import com.soywiz.korgeFleks.components.*
+import com.soywiz.korgeFleks.components.Sprite
+import com.soywiz.korgeFleks.components.Text
 import com.soywiz.korgeFleks.systems.KorgeViewSystem
 import com.soywiz.korgeFleks.utils.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
@@ -115,7 +114,7 @@ object DrawableFamily {
         }
 
         entity.getOrNull(Layout)?.let {
-            if (it.centerX) view.centerXOnStage()
+            if (it.centerX) view.centerXBetween(0.0, view.root.width)  // <-- workaround for buggy centerXOnStage() of Text view
             if (it.centerY) view.centerYOnStage()
             positionShape.x = view.x + it.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
             positionShape.y = view.y + it.offsetY
