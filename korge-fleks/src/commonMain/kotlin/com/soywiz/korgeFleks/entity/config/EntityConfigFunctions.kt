@@ -9,15 +9,15 @@ import com.github.quillraven.fleks.World
  * The parameters are:
  * - world: reference to the world
  * - entity: reference to a valid to-be-used entity for the new object
- * - x: x position where the new object is spawned
- * - y: y position
- * - config: a data class containing the specific configuration for the to-be-spawned entity,
- *           this config values CANNOT be altered for a specific created entity
+ * - config: a data class containing the specific configuration for the to-be-spawned entity
  */
 interface EntityConfigFunctions {
-    operator fun get(name: String) : (World, Entity, Double, Double, Config) -> Unit
+    operator fun get(name: String) : (World, Entity, Config) -> Unit
 }
 
+/**
+ *  Specify config properties which can be accessed by the [SpawnerSystem][com.soywiz.korgeFleks.systems.SpawnerSystem]
+ */
 interface Config
 private class NoConfig: Config
 

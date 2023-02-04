@@ -15,7 +15,6 @@ import com.soywiz.korma.geom.vector.line
 import com.soywiz.korma.geom.vector.rect
 import com.soywiz.korgeFleks.components.*
 import com.soywiz.korgeFleks.components.Sprite
-import com.soywiz.korgeFleks.components.Text
 import com.soywiz.korgeFleks.utils.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
 import com.soywiz.korgeFleks.utils.random

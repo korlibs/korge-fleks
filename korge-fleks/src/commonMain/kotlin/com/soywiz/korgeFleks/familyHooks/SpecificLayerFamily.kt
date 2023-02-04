@@ -26,13 +26,14 @@ import com.soywiz.korim.color.RGBA
  * One of the two optional components must be added to the specific-layer entity.
  */
 object SpecificLayerFamily {
-    val define: Family = World.family { all(SpecificLayer).any(SpecificLayer, Appearance, PositionShape, Offset) }
+    val define: Family = World.family { all(SpecificLayer, PositionShape).any(SpecificLayer, PositionShape, Appearance) }
 
     val onEntityAdded: FamilyHook = { entity ->
         val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
 
         // Need to get parent entity to search for view object which contains the sprite layer
         val specificLayer = entity[SpecificLayer]
+        val positionShape = entity[PositionShape]
         val view = (korgeViewCache[specificLayer.parentEntity] as ImageAnimView).getLayer(specificLayer.spriteLayer)
                 ?: error("SpecificLayerFamily.onEntityAdded: Could not find layer with name '${specificLayer.spriteLayer}'!")
 
@@ -41,11 +42,9 @@ object SpecificLayerFamily {
             view.alpha = it.alpha
             it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
         }
-        entity.getOrNull(PositionShape)?.also {
-            // Save current position of layer into PositionShape component
-            it.x = view.x
-            it.y = view.y
-        }
+        // Save current position of layer into PositionShape component
+        positionShape.x = view.x
+        positionShape.y = view.y
 
         korgeViewCache.addOrUpdate(entity, view)
     }
