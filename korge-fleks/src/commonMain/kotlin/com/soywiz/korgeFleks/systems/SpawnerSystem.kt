@@ -28,13 +28,16 @@ class SpawnerSystem(
             if (spawner.nextSpawnIn <= 0) {
                 var x = 0.0
                 var y = 0.0
+                var setPosition = false
                 entity.getOrNull(PositionShape)?.let {
                     x = it.x
                     y = it.y
+                    setPosition = true
                 }
                 entity.getOrNull(Offset)?.let {
                     x += it.x
                     y += it.y
+                    setPosition = true
                 }
                 entity.getOrNull(OffsetByFrameIndex)?.let {
                     // Get offset depending on current animation and frame index
@@ -43,21 +46,26 @@ class SpawnerSystem(
                     val offset = it.list[animationName]?.get(currentFrameIndex) ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
                     x += offset.x
                     y += offset.y
+                    setPosition = true
                 }
 
                 for (i in 0 until spawner.numberOfObjects) {
-                    val newEntity = if (isNullEntity(spawner.newEntity)) world.entity()  // create new entity
-                    else spawner.newEntity  // use given entity
-                    // Call the configured spawner function for configuring new objects
+                    var xx = x
+                    var yy = y
+                    val newEntity =
+                        if (isNullEntity(spawner.newEntity)) world.entity()  // create new entity
+                        else spawner.newEntity  // use given entity
                     if (spawner.positionVariation != 0.0) {
-                        entityConfigFunctions[spawner.configureFunction].invoke(world, newEntity,
-                            // TODO cleanup code below
-                            x + (-spawner.positionVariation..spawner.positionVariation).random(),
-                            y + (-spawner.positionVariation..spawner.positionVariation).random(),
-                            spawner.config)
-                    } else {
-                        entityConfigFunctions[spawner.configureFunction].invoke(world, newEntity, x, y, spawner.config)
+                        xx = x + (-spawner.positionVariation..spawner.positionVariation).random()
+                        yy = y + (-spawner.positionVariation..spawner.positionVariation).random()
                     }
+                    // Directly set position if
+                    if (setPosition) newEntity.configure {
+                        it += PositionShape(xx, yy)
+                    }
+
+                    // Call the configured spawner function for configuring new objects
+                    entityConfigFunctions[spawner.configureFunction].invoke(world, newEntity, spawner.config)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects
