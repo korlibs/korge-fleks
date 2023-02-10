@@ -2,6 +2,7 @@ package com.soywiz.korgeFleks.korlibsAdaptation
 
 import com.soywiz.kds.*
 import com.soywiz.kds.iterators.fastForEach
+import com.soywiz.klock.TimeSpan
 import com.soywiz.klock.milliseconds
 import com.soywiz.kmem.umod
 import com.soywiz.korge.view.Container
@@ -171,21 +172,21 @@ open class ImageAnimationView<T: SmoothedBmpSlice>(
     fun stop() { running = false }
     fun rewind() { setFirstFrame() }
 
-    init {
-        didSetAnimation()
-        addUpdater {
-            //println("running=$running, nextFrameIn=$nextFrameIn, nextFrameIndex=$nextFrameIndex")
-            if (running) {
-                nextFrameIn -= it
-                if (nextFrameIn <= 0.0.milliseconds) {
-                    setFrame(nextFrameIndex)
-                    // Check if animation should be played only once
-                    if (dir == 0) {
-                        running = false
-                        onPlayFinished?.invoke()
-                    }
+    fun update(time: TimeSpan) {
+        if (running) {
+            nextFrameIn -= time
+            if (nextFrameIn <= 0.0.milliseconds) {
+                setFrame(nextFrameIndex)
+                // Check if animation should be played only once
+                if (dir == 0) {
+                    running = false
+                    onPlayFinished?.invoke()
                 }
             }
         }
+    }
+
+    init {
+        didSetAnimation()
     }
 }

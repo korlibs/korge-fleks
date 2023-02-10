@@ -4,7 +4,6 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.World.Companion.inject
 import com.soywiz.korgeFleks.components.*
-import com.soywiz.korgeFleks.entity.config.EntityConfigFunctions
 import com.soywiz.korgeFleks.entity.config.isNullEntity
 import com.soywiz.korgeFleks.korlibsAdaptation.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
@@ -61,11 +60,11 @@ class SpawnerSystem(
                     }
                     // Directly set position
                     if (setPosition) newEntity.configure {
-                        it += PositionShape(xx, yy)
+                        it += PositionShape(x = xx, y = yy)
                     }
 
                     // Call the configured spawner function for configuring new objects
-                    spawner.configureFunction.invoke(world, newEntity, spawner.config)
+                    spawner.configureFunction.invoke(world, newEntity)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects

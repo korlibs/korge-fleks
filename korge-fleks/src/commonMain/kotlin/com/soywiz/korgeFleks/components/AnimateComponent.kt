@@ -59,6 +59,11 @@ data class AnimateComponent (
         val AnimateOffsetX = object : ComponentType<AnimateComponent>() {}
         val AnimateOffsetY = object : ComponentType<AnimateComponent>() {}
 
+        val AnimateLayoutCenterX = object : ComponentType<AnimateComponent>() {}
+        val AnimateLayoutCenterY = object : ComponentType<AnimateComponent>() {}
+        val AnimateLayoutOffsetX = object : ComponentType<AnimateComponent>() {}
+        val AnimateLayoutOffsetY = object : ComponentType<AnimateComponent>() {}
+
         val AnimateSwitchLayerVisibilityOnVariance = object : ComponentType<AnimateComponent>() {}
         val AnimateSwitchLayerVisibilityOffVariance = object : ComponentType<AnimateComponent>() {}
 
@@ -85,13 +90,19 @@ enum class AnimateComponentType(val type: ComponentType<AnimateComponent>) {
     SpawnerTimeVariation(AnimateComponent.AnimateSpawnerTimeVariation),
     SpawnerPositionVariation(AnimateComponent.AnimateSpawnerPositionVariation),
 
-    LifeCycleHealthCounter(AnimateComponent.AnimateLifeCycleHealthCounter),  // TODO not used yet in animation system
+    // TODO not used yet in animation system
+    LifeCycleHealthCounter(AnimateComponent.AnimateLifeCycleHealthCounter),
 
     PositionShapeX(AnimateComponent.AnimatePositionShapeX),
     PositionShapeY(AnimateComponent.AnimatePositionShapeY),
 
     OffsetX(AnimateComponent.AnimateOffsetX),
     OffsetY(AnimateComponent.AnimateOffsetY),
+
+    LayoutCenterX(AnimateComponent.AnimateLayoutCenterX),
+    LayoutCenterY(AnimateComponent.AnimateLayoutCenterY),
+    LayoutOffsetX(AnimateComponent.AnimateLayoutOffsetX),
+    LayoutOffsetY(AnimateComponent.AnimateLayoutOffsetY),
 
     SwitchLayerVisibilityOnVariance(AnimateComponent.AnimateSwitchLayerVisibilityOnVariance),
     SwitchLayerVisibilityOffVariance(AnimateComponent.AnimateSwitchLayerVisibilityOffVariance),

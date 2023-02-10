@@ -2,34 +2,27 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import com.soywiz.korgeFleks.entity.config.Config
 import com.soywiz.korgeFleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.plus
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlin.test.assertFalse
 
 @Serializable
 @SerialName("TestConfig")
-internal data class TestConfig(
+internal data class ConfigForTesting(
     var id: Int = 0
-) : Config
+)
 
-fun World.testInvokable(entity: Entity, config: Config) : Entity {
-    println("Invoke test - configureTestEntity: world: $this, entity: ${entity.id}, config: $config")
+fun World.testInvokable(entity: Entity) : Entity {
+    println("Invoke test - configureTestEntity: world: $this, entity: ${entity.id}")
     return entity
 }
 
 // This test configure function creates a new entity and sets its id
-fun World.testFunction(entity: Entity, config: Config) : Entity {
-    config as TestConfig
-    return Entity(id = config.id)
+fun World.testFunction(entity: Entity) : Entity {
+    return Entity(id = 8080)
 }
 
 object CommonTestEnv {

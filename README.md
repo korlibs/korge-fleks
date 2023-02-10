@@ -12,7 +12,7 @@ Korge-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
 ## Supported Version-triple
 
-- Korge-Fleks Addon: v0.0.2
+- Korge-Fleks Addon: v0.0.3
 - Korge: 3.4.0
 - Fleks: c24925091ced418bf045ba0672734addaab573d8 (on branch 2.3-korge-serialization)
 
@@ -20,7 +20,7 @@ Korge-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
 The Korge-Fleks implementation follows the idea to separate the configuration of Game Objects from its behaviour.
 A Game Object in an ECS world is an Entity and by that just an index number (in Fleks e.g.`Entity(id = 1)`).
-The aspects of an Entity are stored in Components. Aspects can be read as configuration for a Game Object.
+The aspects of an Entity are stored in Components. Aspects can be read as runtime-configuration for a Game Object.
 Component objects have a relationship to at least one Entity.
 ECS Systems iterate over all (active) Entities of an ECS world and execute the "behaviour" for each Entity.
 To do so they use the config (aspects) from all associated Components of that Entity.
@@ -32,8 +32,8 @@ within a Korge game.
 
 ... to be continued
 
-- Components contain only basic (nullable) types like Int, String, Boolean, Entity, invokable (?) and 
-  set of them in Lists and Maps
+- Components contain only basic (nullable) types like Int, String, Boolean, Entity, invokable function prototypes
+  (lambdas) and set of them in Lists and Maps
 - Components do not contain any Korge-related complex objects like Views, Components, etc.
 - Components are easily serializable because of its basic nature
 - Save game can be done by simply serializing and saving the whole ECS world snapshot (all active entities
@@ -112,7 +112,7 @@ name: korge-fleks
 type: library
 
 # loading git tag from GitHub repo (https://github.com/korlibs/korge-fleks)
-src: git::korlibs/korge-fleks::/korge-fleks/src::v0.0.2
+src: git::korlibs/korge-fleks::/korge-fleks/src::v0.0.3
 # using Korge-Fleks sources locally in sub-folder "libs/korge-fleks"
 #src: ./korge-fleks-src/korge-fleks
 
@@ -159,7 +159,7 @@ Korge and Korge-Fleks verions:
 
 ```kotlin
 [...]
-src: git::korlibs/korge-fleks::/korge-fleks/src::v0.0.2
+src: git::korlibs/korge-fleks::/korge-fleks/src::v0.0.3
 [...]
 dependencies:
     - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"

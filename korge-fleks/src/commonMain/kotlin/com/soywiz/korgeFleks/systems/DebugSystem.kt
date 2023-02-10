@@ -3,7 +3,8 @@ package com.soywiz.korgeFleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.soywiz.korgeFleks.components.*
-import com.soywiz.korgeFleks.familyHooks.SpecificLayerFamily
+import com.soywiz.korgeFleks.familyHooks.onSpecificLayerFamilyAdded
+import com.soywiz.korgeFleks.familyHooks.onSpecificLayerFamilyRemoved
 
 /**
  *
@@ -20,8 +21,8 @@ class DebugSystem(
     override fun onTickEntity(entity: Entity) {
         val assetReload = entity[AssetReload]
         if (assetReload.trigger) {
-            SpecificLayerFamily.onEntityRemoved(world, entity)
-            SpecificLayerFamily.onEntityAdded(world, entity)
+            onSpecificLayerFamilyRemoved(world, entity)
+            onSpecificLayerFamilyAdded(world, entity)
 
             // TODO check DrawableLayerFamily !!!
 

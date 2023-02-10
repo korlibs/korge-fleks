@@ -5,7 +5,6 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import com.soywiz.kds.iterators.fastForEach
 import com.soywiz.korgeFleks.components.*
-import com.soywiz.korgeFleks.entity.config.Config
 import com.soywiz.korma.interpolation.Easing
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -17,21 +16,31 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.plus
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
+import kotlinx.serialization.modules.*
 
 /**
  * All Fleks components which should be serializable needs to derive from this interface.
  */
 interface SerializeBase
 
-typealias SerializableSnapshot = Map<Entity, List<SerializeBase>>
-typealias SerializableSnapshotOf = List<SerializeBase>
-typealias FleksSnapshot = Map<Entity, List<Component<*>>>
-typealias FleksSnapshotOf = List<Component<*>>
+// Some convenience aliases for Fleks snapshots of world and entities
+typealias SerializableSnapshot = Map<Entity, List<SerializeBase>>  // snapshot of Fleks world
+typealias SerializableSnapshotOf = List<SerializeBase>  // snapshot of one entity
+typealias FleksSnapshot = Map<Entity, List<Component<*>>>  // snapshot data of Fleks world
+typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
 
+/**
+ *  All entity config data classes should be serializable by deriving from this interface.
+ *  They are accessed e.g. by the [SpawnerSystem][com.soywiz.korgeFleks.systems.SpawnerSystem].
+ *
+ * Hint: Do not forget to register all Config data classes in their entity type classes (init).
+ * */
+interface SerializableConfig
+
+// An empty config object for initialization of config properties of components.
+// This config does not have any data per definition.
+private class NoConfig: SerializableConfig
+val noConfig: SerializableConfig = NoConfig()
 
 /**
  * This polymorphic module config for kotlinx serialization lists all Korge-fleks
@@ -44,46 +53,76 @@ internal val internalModule = SerializersModule {
         subclass(AnimationScript::class)
         subclass(DebugInfo::class)
         subclass(AssetReload::class)
+        subclass(Drawable::class)
+        subclass(Appearance::class)
+        subclass(Rgb::class)
+        subclass(SpecificLayer::class)
+        subclass(SwitchLayerVisibility::class)
+        subclass(LayerVisibility::class)
+        subclass(InputTouchButton::class)
+        subclass(Layout::class)
+        subclass(LifeCycle::class)
+        subclass(Parallax::class)
+        subclass(ParallaxMotion::class)
         subclass(PositionShape::class)
         subclass(Offset::class)
+        subclass(OffsetByFrameIndex::class)
+        subclass(Point::class)
+        subclass(Motion::class)
+        subclass(Rigidbody::class)
+        subclass(Sound::class)
+        subclass(Spawner::class)
+        subclass(Sprite::class)
+        subclass(SubEntities::class)
+        subclass(Text::class)
+        subclass(MultiLineText::class)
+        subclass(TiledMap::class)
     }
     // Data class hierarchy used for AnimationScript component
     polymorphic(TweenBase::class) {
         subclass(TweenSequence::class)
         subclass(ParallelTweens::class)
         subclass(Wait::class)
-    }
-    // Data class hierarchy used for AnimationScript component
-    polymorphic(TweenBaseHasEntity::class) {
         subclass(SpawnEntity::class)
         subclass(DeleteEntity::class)
         subclass(TweenAppearance::class)
         subclass(TweenPositionShape::class)
         subclass(TweenOffset::class)
+        subclass(TweenLayout::class)
         subclass(TweenSprite::class)
         subclass(TweenSwitchLayerVisibility::class)
         subclass(TweenSpawner::class)
         subclass(TweenSound::class)
     }
 }
+
 /**
- * TODO
+ * TODO document class here
  */
 class SnapshotSerializer {
 
-    private var modules: SerializersModule = internalModule
+    private val modulesMap = mutableMapOf<String, SerializersModule>()
     private lateinit var json: Json
     private var dirty = true
 
-    fun register(module: SerializersModule) {
-        modules = modules.plus(module)
+    fun register(name: String, module: SerializersModule) {
+        modulesMap[name] = module
         dirty = true
     }
 
-    fun json() : Json {
+    fun unregister(name: String) {
+        modulesMap.remove(name)
+    }
+
+    fun json(pretty: Boolean = false) : Json {
         if (dirty) {
+            var modules = internalModule
+            modulesMap.values.forEach { module ->
+                modules = modules.plus(module)
+            }
+
             json = Json {
-                prettyPrint = true // false
+                prettyPrint = pretty
                 serializersModule = modules
             }
             dirty = false
@@ -95,20 +134,24 @@ class SnapshotSerializer {
 /**
  * This is the type for component properties which should contain invokable functions. Those functions
  * are used to specifically configure new created entities.
+ *
+ * Hint: Do not forget to mark all Invokable properties in components with `@Serializable(InvokableSerializer::class)`
  */
-typealias Invokable = (@Contextual World).(Entity, Config) -> Entity
+typealias Invokable = (@Contextual World).(Entity) -> Entity
 
 /**
  * Use this function to initialize Invokable properties of components.
  */
-fun World.noFunction(entity: Entity, config: Config) = entity
+fun World.noFunction(entity: Entity) = entity
 
 /**
  * A serializer strategy for Invokable (i.e. Lambdas) in components.
+ * It is necessary that all lambda functions are added to the internal map which
+ * shall be serializable. For that the [register] function can be used.
  */
 object InvokableSerializer : KSerializer<Invokable> {
     private val map = mutableMapOf<String, Invokable>(
-        "emptyFunction" to World::noFunction
+        "noFunction" to World::noFunction
     )
 
     fun register(vararg invokable: Invokable) {
@@ -118,7 +161,14 @@ object InvokableSerializer : KSerializer<Invokable> {
         }
     }
 
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LambdaAsString", PrimitiveKind.STRING)
+    fun unregister(vararg invokable: Invokable) {
+        invokable.fastForEach {
+            val name = it.toString().substringAfter("World.").substringBefore('(')
+            map.remove(name)
+        }
+    }
+
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("InvokableAsString", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Invokable) {
         val name = value.toString().substringAfter("World.").substringBefore('(')

@@ -3,13 +3,8 @@ package com.soywiz.korgeFleks.components
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import com.github.quillraven.fleks.world
-import com.soywiz.korgeFleks.entity.config.Config
 import com.soywiz.korgeFleks.utils.InvokableSerializer
 import com.soywiz.korma.interpolation.Easing
-import kotlinx.serialization.PolymorphicSerializer
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -23,14 +18,6 @@ internal class AnimationScriptTest {
     fun testAnimationScriptSerialization() {
 
         InvokableSerializer.register(World::testFunction)
-        CommonTestEnv.snapshotSerializer.register(
-            SerializersModule {
-                polymorphic(Config::class) {
-                    // List here all test specific config classes
-                    subclass(TestConfig::class)
-                }
-            }
-        )
 
         val compUnderTest = AnimationScript(
             tweens = listOf(
@@ -40,12 +27,8 @@ internal class AnimationScriptTest {
                             tweens = listOf(
                                 SpawnEntity(
                                     configureFunction = World::testFunction,
-                                    createNewEntity = true,
                                     x = 10.2,
                                     y = 20.3,
-                                    config = TestConfig(
-                                        id = 4243
-                                    ),
                                     entity = Entity(43)
                                 ),
                                 DeleteEntity(entity = Entity(44)),
@@ -101,14 +84,10 @@ internal class AnimationScriptTest {
         val spawnEntity = parallelTweens.tweens.first() as SpawnEntity
         val newSpawnEntity = newParallelTweens.tweens.first() as SpawnEntity
         assertEquals(spawnEntity.configureFunction, newSpawnEntity.configureFunction, "Check 'spawnEntity.spawnFunction' property to be equal")
-        assertEquals(spawnEntity.createNewEntity, newSpawnEntity.createNewEntity, "Check 'spawnEntity.createNewEntity' property to be equal")
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")
         assertEquals(spawnEntity.entity, newSpawnEntity.entity, "Check 'spawnEntity.entity' property to be equal")
-        val spawnedEntity = spawnEntity.configureFunction.invoke(recreatedWorld, Entity(4242), TestConfig(id = 8080))
+        val spawnedEntity = spawnEntity.configureFunction.invoke(recreatedWorld, Entity(4242))
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
-        val config = spawnEntity.config as TestConfig
-        val newConfig = newSpawnEntity.config as TestConfig
-        assertEquals(config.id, newConfig.id, "Check 'spawnEntity.config.id' property to be equal")
     }
 }

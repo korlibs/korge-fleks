@@ -1,6 +1,7 @@
 package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.*
+import com.soywiz.korgeFleks.utils.SerializeBase
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -19,7 +20,7 @@ import kotlinx.serialization.Serializable
 @SerialName("TiledMap")
 data class TiledMap(
     var assetName: String = "",
-) : Component<TiledMap> {
+) : Component<TiledMap>, SerializeBase {
     override fun type(): ComponentType<TiledMap> = TiledMap
     companion object : ComponentType<TiledMap>() {
         /**

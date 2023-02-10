@@ -1,6 +1,7 @@
 package com.soywiz.korgeFleks.assets
 
-import com.soywiz.korgeFleks.korlibsAdaptation.ParallaxConfig
+import com.soywiz.korgeFleks.entity.config.ParallaxConfig
+
 
 /**
  * Asset model contains run time configuration for loading assets for the game.
