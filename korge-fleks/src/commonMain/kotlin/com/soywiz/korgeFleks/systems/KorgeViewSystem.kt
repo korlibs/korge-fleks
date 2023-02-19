@@ -15,7 +15,7 @@ import com.soywiz.korma.geom.vector.line
 import com.soywiz.korma.geom.vector.rect
 import com.soywiz.korgeFleks.components.*
 import com.soywiz.korgeFleks.components.Sprite
-import com.soywiz.korgeFleks.utils.ImageAnimView
+import com.soywiz.korgeFleks.korlibsAdaptation.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
 import com.soywiz.korgeFleks.utils.random
 
@@ -42,10 +42,10 @@ class KorgeViewSystem(
             visibility.spriteLayers.forEach { layer ->
                 layer.visible = if (layer.visible) {
                     // try to switch off
-                    (0.0..1.0).random() > visibility.onVariance  // variance in switching value off - 1: every frame switching possible - 0: no switching at all
+                    (0.0..1.0).random() > visibility.offVariance  // variance in switching value off - 1: every frame switching possible - 0: no switching at all
                 } else {
                     // try to switch on again
-                    (0.0..1.0).random() <= visibility.offVariance  // variance in switching value on again - 1: changed value switches back immediately - 0: changed value stays forever
+                    (0.0..1.0).random() <= visibility.onVariance  // variance in switching value on again - 1: changed value switches back immediately - 0: changed value stays forever
                 }
                 (korgeViewCache[entity] as ImageAnimView).getLayer(layer.name)?.visible = layer.visible
             }

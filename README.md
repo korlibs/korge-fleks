@@ -1,25 +1,52 @@
 # Korge-Fleks
 
-This is the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) integration for KorGE Game Engine.
-Korge-fleks consists of a growing set of component definitions and dedicated systems.
-
-with some supporting stuff like AssetStore, etc. which are reusable or will get better reusable over time.
-Eventually this will grow into a specialized game engine for 2D platform games or similar.
-It depends what the ECS systems will be able to do.
+This is the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) (ECS) integration for KorGE Game Engine.
+Korge-fleks consists of a growing set of Entity Component definitions, dedicated Entity Systems and utilities around
+them like AssetStore, Entity-Component serialization, etc. which are reusable or will get better reusable over time.
+Eventually this will grow into a specialized Korge-based game engine for 2D platform games or similar.
+It depends on what the ECS systems will be able to do.
 
 Upstream project for Fleks ECS can be found here: <https://github.com/Quillraven/Fleks>
 
-Maintained by [@jobe-m](https://github.com/jobe-m)
+Korge-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
-## Suported Version-tripple
+## Supported Version-triple
 
 - Korge-Fleks Addon: 0.0.1
 - Korge: 3.4.0
 - Fleks: 2.2
 
+## Idea
+
+The Korge-Fleks implementation follows the idea to separate the configuration of Game Objects from its behaviour.
+A Game Object in an ECS world is an Entity and by that just an index number (in Fleks e.g.`Entity(id = 1)`).
+The aspects of an Entity are stored in Components. Aspects can be read as configuration for a Game Object.
+Component objects have a relationship to at least one Entity.
+ECS Systems iterate over all (active) Entities of an ECS world and execute the "behaviour" for each Entity.
+To do so they use the config (aspects) from all associated Components of that Entity.
+
+If I lost you already please step back and read elsewhere a little more about ECS basics. It is important to
+understand the basic principles of an ECS system. Moreover, there are various interpretations out there what an
+ECS is and how it works. But when you read further down you should get the idea of how the Fleks ECS can work
+within a Korge game.
+
+... to be continued
+
+- Components contain only basic (nullable) types like Int, String, Boolean, Entity, invokable (?) and 
+  set of them in Lists and Maps
+- Components do not contain any Korge-related complex objects like Views, Components, etc.
+- Components are easily serializable because of its basic nature
+- Save game can be done by simply serializing and saving the whole ECS world snapshot (all active entities
+  and components)
+- Loading a save game is done by deserializing a saved world snapshot
+- ECS Systems keep track of complex Korge objects and map them to the Entities
+- For simplicity all properties of a Component shall be independent of any Korge-specific type
+
+
 ## Setup
 
-As a clean start the [Korge-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world) repo can be used. It contains the kproject and gradle setup to use Fleks, Korge-Fleks and Korge together in a project.
+As a clean start the [Korge-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world) repo can be used.
+It contains the kproject and gradle setup to use Fleks, Korge-Fleks and Korge together in a project.
 
 In detail the project setup looks like that:
 
@@ -30,7 +57,7 @@ This tells gradle that the overall project depends on a project _deps_ in the ro
 ```kotlin
 [...]
 dependencies {
-	add("commonMainApi", project(":deps"))
+    add("commonMainApi", project(":deps"))
 }
 ```
 
@@ -39,13 +66,15 @@ dependencies {
 This is the configuration for kproject to setup a project _deps_ in the root directory.
 It just contains two dependencies to further projects in the `libs` sub-folder.
 
-```kotlin
+```yaml
 dependencies:
-  - ./libs/fleks
-  - ./libs/korge-fleks
+    - ./libs/fleks
+    - ./libs/korge-fleks
 ```
 
 ### `settings.gradle.kts`
+
+Needed settings for gradle to make kproject usable in the project.
 
 ```kotlin
 pluginManagement { repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() } }
@@ -59,7 +88,9 @@ kproject("./deps")
 
 ### `libs/fleks.kproject.yml`
 
-```kotlin
+This is the kproject config for including Fleks sources into the Korge project.
+
+```yaml
 name: fleks
 type: library
 
@@ -67,12 +98,13 @@ type: library
 src: git::Quillraven/Fleks::/src::2.2
 # using Fleks sources locally in sub-folder "libs/fleks-src"
 #src: ./fleks-src
-
 ```
 
 ### `libs/korge-fleks.kproject.yml`
 
-```kotlin
+This is the kproject config for including Korge-Fleks sources  into the Korge project.
+
+```yaml
 name: korge-fleks
 type: library
 
@@ -84,17 +116,27 @@ src: git::korlibs/korge-fleks::/korge-fleks/src::0.0.1
 dependencies:
   - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"
   - "./fleks"
+
+# This is only needed if kotlinx.serialization should be used
+#plugins:
+#    - serialization
+
 ```
 
 ### Updating to newer versions of KorGE-Fleks
 
-It is important to understand that the Korge-Fleks Addon depends on specific versions of Korge and Fleks ECS. Thus, updating the version of Korge-Fleks also involves updating of Korge and Fleks versions. Do not try to update only one version until you know what you are doing.
+It is important to understand that the Korge-Fleks Addon depends on specific versions of Korge and Fleks ECS.
+Thus, updating the version of Korge-Fleks also involves updating of Korge and Fleks versions. Do not try to
+update only one version until you know what you are doing.
 
-The current tripple of versions which are working together can be seen at the top of this readme in section "Supported Version-tripple".
+The current triple of versions which are working together can be seen at the top of this readme in section
+"Supported Version-triple".
 
 The Korge, Fleks ECS and Korge-Fleks versions need to be updated in three places:
 
 #### `gradle/libs.versions.toml`
+
+Korge version:
 
 ```kotlin
 [plugins]
@@ -103,29 +145,35 @@ korge = { id = "com.soywiz.korge", version = "3.4.0" }
 
 #### `libs/fleks.kproject.yml`
 
-```kotlin
+Fleks version:
+
+```
 [...]
 src: git::Quillraven/Fleks::/src::2.2
 ```
 
 #### `libs/korge-fleks.kproject.yml`
 
+Korge and Korge-Fleks verions:
+
 ```kotlin
 [...]
 src: git::korlibs/korge-fleks::/korge-fleks/src::0.0.1
 [...]
 dependencies:
-  - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"
+    - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"
 ```
-... to be continued
-
 
 ## Usage
 
-This repo contains under `src` folder the `korgeFleks` addon. It simplifies usage of Fleks in a KorGE environment.
-For that a set of Components and Systems are implemented.
+This repo contains under `korge-fleks/src` folder the `korgeFleks` addon. It simplifies usage of Fleks in a KorGE
+environment. For that a set of Components and Systems are implemented.
 
 ### Components
+
+... to be continued
+
+### Serialization of Components
 
 ... to be continued
 

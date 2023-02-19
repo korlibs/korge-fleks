@@ -27,7 +27,7 @@ import com.soywiz.korgeFleks.components.AnimateComponent.Companion.AnimateSoundP
 import com.soywiz.korgeFleks.components.AnimateComponent.Companion.AnimateSoundStartTrigger
 import com.soywiz.korgeFleks.components.AnimateComponent.Companion.AnimateSoundStopTrigger
 import com.soywiz.korgeFleks.components.AnimateComponent.Companion.AnimateSoundVolume
-import com.soywiz.korgeFleks.utils.ImageAnimView
+import com.soywiz.korgeFleks.korlibsAdaptation.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
 import kotlin.jvm.JvmName
 import kotlin.reflect.KMutableProperty0
@@ -58,8 +58,8 @@ class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
 ) {
     override fun onTickEntity(entity: Entity) {
         val visibility = entity[SwitchLayerVisibility]
-        updateProperty(entity, AnimateSwitchLayerVisibilityOnVariance, visibility::onVariance)
-        updateProperty(entity, AnimateSwitchLayerVisibilityOffVariance, visibility::offVariance)
+        updateProperty(entity, AnimateSwitchLayerVisibilityOnVariance, visibility::offVariance)
+        updateProperty(entity, AnimateSwitchLayerVisibilityOffVariance, visibility::onVariance)
     }
 }
 

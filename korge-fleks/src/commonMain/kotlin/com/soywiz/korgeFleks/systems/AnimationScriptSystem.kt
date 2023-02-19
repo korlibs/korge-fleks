@@ -130,8 +130,8 @@ class AnimationScriptSystem : IteratingSystem(
                 tween.destroyOnPlayingFinished?.let { value -> createAnimateComponent(SpriteDestroyOnPlayingFinished, value) }
             }
             is TweenSwitchLayerVisibility -> tween.entity.getOrError(SwitchLayerVisibility).let { start ->
-                tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.onVariance, change = end - start.onVariance) }
-                tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.offVariance, end - start.offVariance) }
+                tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
+                tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
             }
             is TweenSpawner -> tween.entity.getOrError(Spawner).let { start ->
                 tween.numberOfObjects?.let { end -> createAnimateComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }

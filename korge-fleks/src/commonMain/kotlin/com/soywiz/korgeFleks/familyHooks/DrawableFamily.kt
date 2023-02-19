@@ -3,6 +3,7 @@ package com.soywiz.korgeFleks.familyHooks
 import com.github.quillraven.fleks.Family
 import com.github.quillraven.fleks.FamilyHook
 import com.github.quillraven.fleks.World
+import com.soywiz.korge.input.mouse
 import com.soywiz.korge.tiled.TiledMapView
 import com.soywiz.korge.view.*
 import com.soywiz.korgeFleks.assets.AssetStore
@@ -10,9 +11,9 @@ import com.soywiz.korgeFleks.components.*
 import com.soywiz.korgeFleks.components.Sprite
 import com.soywiz.korgeFleks.components.Text
 import com.soywiz.korgeFleks.systems.KorgeViewSystem
-import com.soywiz.korgeFleks.utils.ImageAnimView
+import com.soywiz.korgeFleks.korlibsAdaptation.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
-import com.soywiz.korgeFleks.utils.ParallaxDataView
+import com.soywiz.korgeFleks.korlibsAdaptation.ParallaxDataView
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
 import com.soywiz.korim.text.DefaultStringTextRenderer
@@ -118,6 +119,20 @@ object DrawableFamily {
             if (it.centerY) view.centerYOnStage()
             positionShape.x = view.x + it.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
             positionShape.y = view.y + it.offsetY
+        }
+
+        entity.getOrNull(TouchInput)?.let {
+            view.mouse {
+                onDown {
+                    println("onDown")
+                }
+                onUp {
+                    println("onUp: Save world entities")
+                }
+                onUpOutside {
+                    println("onUpOutside")
+                }
+            }
         }
 
         positionShape.width = width
