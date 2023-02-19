@@ -1,4 +1,4 @@
-package com.soywiz.korgeFleks.utils
+package com.soywiz.korgeFleks.korlibsAdaptation
 
 import com.soywiz.korge.view.Container
 import com.soywiz.korge.view.View

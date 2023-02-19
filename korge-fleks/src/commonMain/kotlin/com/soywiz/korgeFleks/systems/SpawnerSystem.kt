@@ -6,7 +6,7 @@ import com.github.quillraven.fleks.World.Companion.inject
 import com.soywiz.korgeFleks.components.*
 import com.soywiz.korgeFleks.entity.config.EntityConfigFunctions
 import com.soywiz.korgeFleks.entity.config.isNullEntity
-import com.soywiz.korgeFleks.utils.ImageAnimView
+import com.soywiz.korgeFleks.korlibsAdaptation.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
 import com.soywiz.korgeFleks.utils.random
 

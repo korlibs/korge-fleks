@@ -18,6 +18,8 @@ import com.soywiz.korio.file.fullName
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korio.lang.Closeable
 import com.soywiz.korgeFleks.components.AssetReload
+import com.soywiz.korgeFleks.korlibsAdaptation.ParallaxDataContainer
+import com.soywiz.korgeFleks.korlibsAdaptation.readParallaxDataContainer
 
 import com.soywiz.korgeFleks.utils.*
 import kotlin.coroutines.CoroutineContext

@@ -3,8 +3,9 @@ package com.soywiz.korgeFleks.familyHooks
 import com.github.quillraven.fleks.Family
 import com.github.quillraven.fleks.FamilyHook
 import com.github.quillraven.fleks.World
+import com.soywiz.korge.input.mouse
 import com.soywiz.korgeFleks.components.*
-import com.soywiz.korgeFleks.utils.ImageAnimView
+import com.soywiz.korgeFleks.korlibsAdaptation.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
 import com.soywiz.korim.color.RGBA
 
@@ -26,7 +27,7 @@ import com.soywiz.korim.color.RGBA
  * One of the two optional components must be added to the specific-layer entity.
  */
 object SpecificLayerFamily {
-    val define: Family = World.family { all(SpecificLayer, PositionShape).any(SpecificLayer, PositionShape, Appearance) }
+    val define: Family = World.family { all(SpecificLayer, PositionShape).any(SpecificLayer, PositionShape, Appearance, TouchInput) }
 
     val onEntityAdded: FamilyHook = { entity ->
         val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
@@ -42,6 +43,21 @@ object SpecificLayerFamily {
             view.alpha = it.alpha
             it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
         }
+
+        entity.getOrNull(TouchInput)?.let {
+            view.mouse {
+                onDown {
+                    println("onDown")
+                }
+                onUp {
+                    println("onUp")
+                }
+                onUpOutside {
+                    println("onUpOutside")
+                }
+            }
+        }
+
         // Save current position of layer into PositionShape component
         positionShape.x = view.x
         positionShape.y = view.y

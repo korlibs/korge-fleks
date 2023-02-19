@@ -133,8 +133,8 @@ data class TweenSprite(
 ) : TweenBaseHasEntity
 
 data class TweenSwitchLayerVisibility(
-    var onVariance: Double? = null,
     var offVariance: Double? = null,
+    var onVariance: Double? = null,
     var spriteLayers: List<String>? = null,
 
     override var entity: Entity,
