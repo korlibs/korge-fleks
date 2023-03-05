@@ -3,7 +3,8 @@ type: library
 version: 2.2
 
 # loading git tag 2.2 from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::2.2
+#src: git::Quillraven/Fleks::/src::2.2
+src: git::jobe-m/Fleks::/src::cf518ca66755e11be3561ab7a70a62e3af3d74ee
 # using Fleks sources locally in sub-folder "libs/fleks-src" (not included by default)
 #src: ./fleks-src
 
