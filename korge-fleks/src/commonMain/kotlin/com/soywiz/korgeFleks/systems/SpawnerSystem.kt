@@ -65,7 +65,8 @@ class SpawnerSystem(
                     }
 
                     // Call the configured spawner function for configuring new objects
-                    entityConfigFunctions[spawner.configureFunction].invoke(world, newEntity, spawner.config)
+                    TODO("Take new invokable property type into use")
+//                    entityConfigFunctions[spawner.configureFunction].invoke(world, newEntity, spawner.config)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects

@@ -9,7 +9,7 @@ import com.soywiz.korge.render.useLineBatcher
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
-import com.soywiz.korma.geom.Point
+//import com.soywiz.korma.geom.Point
 import com.soywiz.korma.geom.Rectangle
 import com.soywiz.korma.geom.vector.line
 import com.soywiz.korma.geom.vector.rect
@@ -18,6 +18,7 @@ import com.soywiz.korgeFleks.components.Sprite
 import com.soywiz.korgeFleks.korlibsAdaptation.ImageAnimView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
 import com.soywiz.korgeFleks.utils.random
+import com.soywiz.korma.geom.IPoint
 
 /**
  * This system is updating the view objects for all [Drawable] entities.
@@ -57,7 +58,9 @@ class KorgeViewSystem(
             // Get offset depending on current animation and frame index
             val currentFrameIndex = (korgeViewCache[it.entity] as ImageAnimView).currentFrameIndex
             val animationName = it.entity.getOrNull(Sprite)?.animationName ?: ""
-            offset += it.list[animationName]?.get(currentFrameIndex) ?: error("KorgeViewSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
+            val frameOffset = it.list[animationName]?.get(currentFrameIndex) ?: error("KorgeViewSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
+            offset.x += frameOffset.x
+            offset.y += frameOffset.y
         }
 
         korgeViewCache[entity].let { view ->

@@ -2,7 +2,12 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import com.soywiz.korgeFleks.utils.AnyAsTypedContainer
+import com.soywiz.korgeFleks.utils.EasingAsString
+import com.soywiz.korgeFleks.utils.SerializeBase
 import com.soywiz.korma.interpolation.Easing
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * Generalized Animate Component Property data class. It is used for animating properties of other components
@@ -13,16 +18,21 @@ import com.soywiz.korma.interpolation.Easing
  *
  * In case of single switch: This value is set when easing > 0.5
  */
+@Serializable
+@SerialName("AnimateComponent")
 data class AnimateComponent (
     var componentProperty: AnimateComponentType,
 
+    @Serializable(with = AnyAsTypedContainer::class)
     var change: Any = Unit,
+    @Serializable(with = AnyAsTypedContainer::class)
     var value: Any = Unit,
 
-    var duration: Float = 0f,           // in seconds
-    var timeProgress: Float = 0f,       // in seconds
-    var easing: Easing = Easing.LINEAR  // Changing function
-) : Component<AnimateComponent> {
+    var duration: Float = 0f,                    // in seconds
+    var timeProgress: Float = 0f,                // in seconds
+    @Serializable(with = EasingAsString::class)
+    var easing: Easing = Easing.LINEAR           // Changing function
+) : Component<AnimateComponent>, SerializeBase {
     override fun type(): ComponentType<AnimateComponent> = componentProperty.type
 
     companion object {

@@ -6,3 +6,6 @@ version: 2.2
 src: git::Quillraven/Fleks::/src::2.2
 # using Fleks sources locally in sub-folder "libs/fleks-src" (not included by default)
 #src: ./fleks-src
+
+plugins:
+  - serialization

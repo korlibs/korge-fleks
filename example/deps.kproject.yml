@@ -1,2 +1,3 @@
 dependencies:
     - ./libs/fleks
+    - ./libs/korge-fleks
