@@ -31,7 +31,7 @@ internal class DebugInfoTest {
         val newDebugInfo = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][DebugInfo] }
         val newAssetReload = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][AssetReload] }
 
-        assertEquals(debugInfo.name, newDebugInfo.name + "Bla", "Check 'name' property to be equal")
+        assertEquals(debugInfo.name, newDebugInfo.name, "Check 'name' property to be equal")
         assertEquals(debugInfo.showPivotPoint, newDebugInfo.showPivotPoint, "Check 'showPivotPoint' property to be equal")
         assertEquals(assetReload.trigger, newAssetReload.trigger, "Check 'trigger' property to be equal")
     }
