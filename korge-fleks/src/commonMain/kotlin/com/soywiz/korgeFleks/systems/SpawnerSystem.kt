@@ -16,7 +16,6 @@ import com.soywiz.korgeFleks.utils.random
  * it can also spawn an unlimited number of entities (run forever until it dies).
  */
 class SpawnerSystem(
-    private val entityConfigFunctions: EntityConfigFunctions = inject(),
     private val korgeViewCache: KorgeViewCache = inject("normalViewCache")
 ) : IteratingSystem(
     family { all(Spawner) },
@@ -43,7 +42,8 @@ class SpawnerSystem(
                     // Get offset depending on current animation and frame index
                     val currentFrameIndex = (korgeViewCache[it.entity] as ImageAnimView).currentFrameIndex
                     val animationName = it.entity.getOrNull(Sprite)?.animationName ?: ""
-                    val offset = it.list[animationName]?.get(currentFrameIndex) ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
+                    val offset = it.list[animationName]?.get(currentFrameIndex)
+                        ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
                     x += offset.x
                     y += offset.y
                     setPosition = true
@@ -59,14 +59,13 @@ class SpawnerSystem(
                         xx = x + (-spawner.positionVariation..spawner.positionVariation).random()
                         yy = y + (-spawner.positionVariation..spawner.positionVariation).random()
                     }
-                    // Directly set position if
+                    // Directly set position
                     if (setPosition) newEntity.configure {
                         it += PositionShape(xx, yy)
                     }
 
                     // Call the configured spawner function for configuring new objects
-                    TODO("Take new invokable property type into use")
-//                    entityConfigFunctions[spawner.configureFunction].invoke(world, newEntity, spawner.config)
+                    spawner.configureFunction.invoke(world, newEntity, spawner.config)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects

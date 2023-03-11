@@ -3,9 +3,7 @@ package com.soywiz.korgeFleks.components
 import com.github.quillraven.fleks.*
 import com.soywiz.korma.interpolation.Easing
 import com.soywiz.korgeFleks.entity.config.*
-import com.soywiz.korgeFleks.utils.EasingAsString
-import com.soywiz.korgeFleks.utils.EntityAsInt
-import com.soywiz.korgeFleks.utils.SerializeBase
+import com.soywiz.korgeFleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -59,7 +57,7 @@ data class TweenSequence(
 
     override var delay: Float? = null,       // following 3 properties not used here
     override var duration: Float? = null,
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null
 ) : TweenBase
 
@@ -70,7 +68,7 @@ data class ParallelTweens(
 
     override var delay: Float? = 0f,                  // in seconds
     override var duration: Float? = 0f,               // in seconds
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = Easing.LINEAR      // function to change the properties
 ) : TweenBase
 
@@ -79,7 +77,7 @@ data class ParallelTweens(
 data class Wait(
     override var delay: Float? = null,   // Not used
     override var duration: Float? = 0f,
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null  // not used
 ) : TweenBase
 
@@ -92,28 +90,27 @@ data class Wait(
 data class DeleteEntity(
     val healthCounter: Int = 0,            // set healthCounter to zero to delete the entity immediately
 
-    @Serializable(with = EntityAsInt::class)
     override var entity: Entity,
     override var delay: Float? = null,   // not used
     override var duration: Float? = 0f,  // not used
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null  // not used
 ) : TweenBaseHasEntity
 
 @Serializable
 @SerialName("AnimationScript.SpawnEntity")
 data class SpawnEntity(
-    var spawnFunction: String = "",        // name of function which spawns the new object
+    @Serializable(InvokableSerializer::class)
+    var configureFunction: Invokable = World::noFunction, // name of function which configures the spawned entity
     var createNewEntity: Boolean = false,  // do not create a new entity, use entity which was specified with entity property below
     var x: Double = 0.0,                   // position where entity will be spawned
     var y: Double = 0.0,
     var config: Config = noConfig,
 
-    @Serializable(with = EntityAsInt::class)
     override var entity: Entity,
     override var delay: Float? = null,   // not used
     override var duration: Float? = 0f,  // not used
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null  // not used
 ) : TweenBaseHasEntity
 
@@ -125,11 +122,10 @@ data class TweenAppearance(
     val tint: Rgb? = null,
     val visible: Boolean? = null,
 
-    @Serializable(with = EntityAsInt::class)
     override var entity: Entity,
     override var delay: Float? = null,
     override var duration: Float? = null,
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null
 ) : TweenBaseHasEntity
 
@@ -139,11 +135,10 @@ data class TweenPositionShape(
     val x: Double? = null,
     val y: Double? = null,
 
-    @Serializable(with = EntityAsInt::class)
     override var entity: Entity,
     override var delay: Float? = null,
     override var duration: Float? = null,
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null
 ) : TweenBaseHasEntity
 
@@ -153,11 +148,10 @@ data class TweenOffset(
     val x: Double? = null,
     val y: Double? = null,
 
-    @Serializable(with = EntityAsInt::class)
     override var entity: Entity,
     override var delay: Float? = null,
     override var duration: Float? = null,
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null
 ) : TweenBaseHasEntity
 
@@ -170,11 +164,10 @@ data class TweenSprite(
     var loop: Boolean? = null,
     var destroyOnPlayingFinished: Boolean? = null,
 
-    @Serializable(with = EntityAsInt::class)
     override var entity: Entity,
     override var delay: Float? = null,
     override var duration: Float? = null,
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null
 ) : TweenBaseHasEntity
 
@@ -185,11 +178,10 @@ data class TweenSwitchLayerVisibility(
     var onVariance: Double? = null,
     var spriteLayers: List<String>? = null,
 
-    @Serializable(with = EntityAsInt::class)
     override var entity: Entity,
     override var delay: Float? = null,
     override var duration: Float? = null,
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null
 ) : TweenBaseHasEntity
 
@@ -201,11 +193,10 @@ data class TweenSpawner(
     var timeVariation: Int? = null,
     var positionVariation: Double? = null,
 
-    @Serializable(with = EntityAsInt::class)
     override var entity: Entity,
     override var delay: Float? = null,
     override var duration: Float? = null,
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null
 ) : TweenBaseHasEntity
 
@@ -217,10 +208,9 @@ data class TweenSound(
     var position: Double? = null,
     var volume: Double? = null,
 
-    @Serializable(with = EntityAsInt::class)
     override var entity: Entity,
     override var delay: Float? = null,
     override var duration: Float? = null,
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null
 ) : TweenBaseHasEntity

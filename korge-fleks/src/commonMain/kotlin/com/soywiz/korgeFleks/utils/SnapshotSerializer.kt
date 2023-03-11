@@ -3,6 +3,7 @@ package com.soywiz.korgeFleks.utils
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
+import com.soywiz.kds.iterators.fastForEach
 import com.soywiz.korgeFleks.components.*
 import com.soywiz.korgeFleks.entity.config.Config
 import com.soywiz.korma.interpolation.Easing
@@ -15,7 +16,9 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.plus
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
@@ -29,11 +32,12 @@ typealias SerializableSnapshotOf = List<SerializeBase>
 typealias FleksSnapshot = Map<Entity, List<Component<*>>>
 typealias FleksSnapshotOf = List<Component<*>>
 
+
 /**
  * This polymorphic module config for kotlinx serialization lists all Korge-fleks
  * internal components as subclasses.
  */
-val componentModule = SerializersModule {
+internal val internalModule = SerializersModule {
     // Top level component classes
     polymorphic(SerializeBase::class) {
         subclass(AnimateComponent::class)
@@ -61,36 +65,76 @@ val componentModule = SerializersModule {
         subclass(TweenSpawner::class)
         subclass(TweenSound::class)
     }
-    polymorphic(Invokable::class) {
-        subclass(EmptyInvokable::class)
+}
+/**
+ * TODO
+ */
+class SnapshotSerializer {
+
+    private var modules: SerializersModule = internalModule
+    private lateinit var json: Json
+    private var dirty = true
+
+    fun register(module: SerializersModule) {
+        modules = modules.plus(module)
+        dirty = true
+    }
+
+    fun json() : Json {
+        if (dirty) {
+            json = Json {
+                prettyPrint = true // false
+                serializersModule = modules
+            }
+            dirty = false
+        }
+        return json
     }
 }
 
 /**
  * This is the type for component properties which should contain invokable functions. Those functions
- * are used e.g. to specifically configure new created generic entities.
+ * are used to specifically configure new created entities.
  */
-interface Invokable {
-    fun invoke(world: World, entity: Entity, config: Config)
-}
-
-// This object can be used to initialize [Invokable] properties of components.
-@Serializable
-object EmptyInvokable : Invokable { override fun invoke(world: World, entity: Entity, config: Config) {} }
+typealias Invokable = (@Contextual World).(Entity, Config) -> Entity
 
 /**
- * A simple serializer strategy for Entity type. It serializes the Entity value class name as string.
+ * Use this function to initialize Invokable properties of components.
  */
-object EntityAsInt : KSerializer<Entity> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("EntityAsInt", PrimitiveKind.INT)
-    override fun serialize(encoder: Encoder, value: Entity) = encoder.encodeInt(value.id)
-    override fun deserialize(decoder: Decoder): Entity = Entity(decoder.decodeInt())
+fun World.noFunction(entity: Entity, config: Config) = entity
+
+/**
+ * A serializer strategy for Invokable (i.e. Lambdas) in components.
+ */
+object InvokableSerializer : KSerializer<Invokable> {
+    private val map = mutableMapOf<String, Invokable>(
+        "emptyFunction" to World::noFunction
+    )
+
+    fun register(vararg invokable: Invokable) {
+        invokable.fastForEach {
+            val name = it.toString().substringAfter("World.").substringBefore('(')
+            map[name] = it
+        }
+    }
+
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LambdaAsString", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Invokable) {
+        val name = value.toString().substringAfter("World.").substringBefore('(')
+        if (map.containsKey(name)) encoder.encodeString(name)
+        else throw SerializationException("Invokable function '$name' not registered in InvokableAsString serializer!")
+    }
+
+    override fun deserialize(decoder: Decoder): Invokable =
+        map[decoder.decodeString()]
+            ?: throw SerializationException("No lambda function found for '${decoder.decodeString()}' in InvokableAsString!")
 }
 
 /**
  * A simple serializer strategy for Easing types. It serializes the easing class name as string.
  */
-object EasingAsString : KSerializer<Easing> {
+object EasingSerializer : KSerializer<Easing> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("EasingAsString", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Easing) =
@@ -135,7 +179,7 @@ object AnyAsString : KSerializer<Any> {
  * An even simpler "Any" object serializer which encodes a given Any value as specific typed property
  * within a data class container.
  */
-object AnyAsTypedContainer : KSerializer<Any> {
+object AnySerializer : KSerializer<Any> {
     override val descriptor: SerialDescriptor = ContainerForAny.serializer().descriptor
 
     // The trick here is that only one property shall be non-null. Thus, it contains the type information

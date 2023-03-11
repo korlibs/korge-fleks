@@ -83,7 +83,7 @@ internal class AnimateComponentTest {
         component.change = change as Any
         component.value = value as Any
 
-        serializeDeserialize(expectedWorld, recreatedWorld)
+        CommonTestEnv.serializeDeserialize(expectedWorld, recreatedWorld)
 
         // get the component from entity with the same id from the new created world
         val recreatedTestComponent = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][Companion.AnimateAppearanceAlpha] }
@@ -91,36 +91,4 @@ internal class AnimateComponentTest {
         assertEquals(component.change, recreatedTestComponent.change, "Check 'change' property to be equal")
         assertEquals(component.value, recreatedTestComponent.value, "Check 'value' property to be equal")
     }
-
-    /* for reference
-            val testEntity = expectedWorld.entity {
-                it += PositionShape(
-                    x = 5.2,
-                    y = 42.1,
-                    entity = Entity(42),
-                    string = "hello world!",
-                    notNullString = "hehe",
-                    entities = mutableMapOf("one" to Entity(3), "two" to Entity(1001)),
-                    configureFunction = CustomInvokable,
-                    componentProperty = AnimateComponentType.LifeCycleHealthCounter,
-                    changeDouble = 42.42,
-                    changeString = "changeString",
-                    changeRgb = Rgb(0x12, 0x34,0x56),
-                    easing = Easing.EASE_OUT, // Easing(Easing.EASE_OUT),
-                    config = TestConfig(
-                        centerX = true,
-                        offsetX = 1.23,
-                        offsetY = 4.56,
-                        logoName = "coolLogo",
-                        alpha = 1.0,
-                        drawOnLayer = "layer5"
-                    )
-                )
-
-            }
-
-            with (expectedWorld) {
-                testEntity[PositionShape].configureFunction.invoke(expectedWorld, testEntity, testEntity[PositionShape].config)
-            }
-    */
 }

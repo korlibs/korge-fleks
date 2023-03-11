@@ -44,6 +44,7 @@ object SpecificLayerFamily {
             it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
         }
 
+// TODO remove testing code again later
         entity.getOrNull(TouchInput)?.let {
             view.mouse {
                 onDown {

@@ -25,7 +25,7 @@ internal class DebugInfoTest {
             it += assetReload
         }
 
-        serializeDeserialize(expectedWorld, recreatedWorld)
+        CommonTestEnv.serializeDeserialize(expectedWorld, recreatedWorld)
 
         // get the component from entity with the same id from the new created world
         val newDebugInfo = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][DebugInfo] }

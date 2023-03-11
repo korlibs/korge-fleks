@@ -7,6 +7,7 @@ import com.soywiz.korgeFleks.entity.config.nullEntity
 import com.soywiz.korio.lang.format
 import com.soywiz.korio.lang.substr
 import com.soywiz.krypto.encoding.fromHex
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt
 
@@ -17,6 +18,8 @@ import kotlin.math.roundToInt
  * @param [drawOnLayer] The number of the layer in the KorGe view scene where the entity is placed.
  *
  */
+@Serializable
+@SerialName("Drawable")
 data class Drawable(
     var drawOnLayer: String = ""
 ) : Component<Drawable> {
@@ -24,6 +27,8 @@ data class Drawable(
     companion object : ComponentType<Drawable>()
 }
 
+@Serializable
+@SerialName("Appearance")
 data class Appearance(
     var alpha: Double = 1.0,
     var visible: Boolean = true,
@@ -44,6 +49,8 @@ data class Appearance(
  * @param [spriteLayer] has to be set to the same layer name as in Aseprite to select that layer.
  * @param [parentEntity] is the entity (ID) which defines [Sprite] data.
  */
+@Serializable
+@SerialName("SpecificLayer")
 data class SpecificLayer(
     var spriteLayer: String = "",
     var parentEntity: Entity = nullEntity  // The entity which contains the sprite data with layers (ImageAnimView)
@@ -53,6 +60,7 @@ data class SpecificLayer(
 }
 
 @Serializable
+@SerialName("Appearance.Rgb")
 data class Rgb(
     var r: Int = 0xff,
     var g: Int = 0xff,
@@ -81,6 +89,8 @@ data class Rgb(
 /**
  * This component is used to switch [visible][Appearance.visible] property of [Appearance] component.
  */
+@Serializable
+@SerialName("SwitchLayerVisibility")
 data class SwitchLayerVisibility(
     var offVariance: Double = 0.0,  // variance in switching value off: (1.0) - every frame switching possible, (0.0) - no switching at all
     var onVariance: Double = 0.0,   // variance in switching value on again: (1.0) - changed value switches back immediately, (0.0) - changed value stays forever
@@ -90,6 +100,8 @@ data class SwitchLayerVisibility(
     companion object : ComponentType<SwitchLayerVisibility>()
 }
 
+@Serializable
+@SerialName("SwitchLayerVisibility.LayerVisibility")
 data class LayerVisibility(
     var name: String = "",
     var visible: Boolean = true

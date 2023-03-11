@@ -11,6 +11,7 @@ import com.github.quillraven.fleks.World
  * - entity: reference to a valid to-be-used entity for the new object
  * - config: a data class containing the specific configuration for the to-be-spawned entity
  */
+// TODO adapt this to Invokable
 interface EntityConfigFunctions {
     operator fun get(name: String) : (World, Entity, Config) -> Unit
 }

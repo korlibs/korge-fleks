@@ -14,6 +14,7 @@ import com.soywiz.korma.geom.vector.lineTo
 import com.soywiz.korma.geom.vector.moveTo
 
 /**
+ * TODO clean this up - remove if obsolete and not usable
  */
 inline fun Container.showMotionPath(
     actualPosition: Point,

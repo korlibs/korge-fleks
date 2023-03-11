@@ -2,8 +2,8 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
-import com.soywiz.korgeFleks.utils.AnyAsTypedContainer
-import com.soywiz.korgeFleks.utils.EasingAsString
+import com.soywiz.korgeFleks.utils.AnySerializer
+import com.soywiz.korgeFleks.utils.EasingSerializer
 import com.soywiz.korgeFleks.utils.SerializeBase
 import com.soywiz.korma.interpolation.Easing
 import kotlinx.serialization.SerialName
@@ -23,14 +23,14 @@ import kotlinx.serialization.Serializable
 data class AnimateComponent (
     var componentProperty: AnimateComponentType,
 
-    @Serializable(with = AnyAsTypedContainer::class)
+    @Serializable(with = AnySerializer::class)
     var change: Any = Unit,
-    @Serializable(with = AnyAsTypedContainer::class)
+    @Serializable(with = AnySerializer::class)
     var value: Any = Unit,
 
     var duration: Float = 0f,                    // in seconds
     var timeProgress: Float = 0f,                // in seconds
-    @Serializable(with = EasingAsString::class)
+    @Serializable(with = EasingSerializer::class)
     var easing: Easing = Easing.LINEAR           // Changing function
 ) : Component<AnimateComponent>, SerializeBase {
     override fun type(): ComponentType<AnimateComponent> = componentProperty.type
