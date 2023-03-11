@@ -12,9 +12,9 @@ Korge-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
 ## Supported Version-triple
 
-- Korge-Fleks Addon: 0.0.1
+- Korge-Fleks Addon: 0.0.2
 - Korge: 3.4.0
-- Fleks: 2.2
+- Fleks: c24925091ced418bf045ba0672734addaab573d8 (on branch 2.3-korge-serialization)
 
 ## Idea
 
@@ -149,7 +149,7 @@ Fleks version:
 
 ```
 [...]
-src: git::Quillraven/Fleks::/src::2.2
+src: git::Quillraven/Fleks::/src::2.3
 ```
 
 #### `libs/korge-fleks.kproject.yml`
@@ -158,7 +158,7 @@ Korge and Korge-Fleks verions:
 
 ```kotlin
 [...]
-src: git::korlibs/korge-fleks::/korge-fleks/src::0.0.1
+src: git::korlibs/korge-fleks::/korge-fleks/src::0.0.2
 [...]
 dependencies:
     - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"

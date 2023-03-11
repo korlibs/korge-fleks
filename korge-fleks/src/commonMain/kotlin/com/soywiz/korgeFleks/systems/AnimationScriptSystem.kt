@@ -150,7 +150,7 @@ class AnimationScriptSystem : IteratingSystem(
                 animatedEntity.getOrAdd(Spawner) { Spawner() }.also {
                     it.totalNumberOfObjects = 1
                     it.newEntity = animatedEntity
-                    it.configureFunction = tween.spawnFunction
+                    it.configureFunction = tween.configureFunction
                     it.config = tween.config
                 }
             }

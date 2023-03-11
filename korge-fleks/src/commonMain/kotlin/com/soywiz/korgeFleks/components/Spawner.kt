@@ -3,10 +3,17 @@ package com.soywiz.korgeFleks.components
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
+import com.github.quillraven.fleks.World
 import com.soywiz.korgeFleks.entity.config.Config
 import com.soywiz.korgeFleks.entity.config.noConfig
 import com.soywiz.korgeFleks.entity.config.nullEntity
+import com.soywiz.korgeFleks.utils.Invokable
+import com.soywiz.korgeFleks.utils.noFunction
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
+@SerialName("Spawner")
 data class Spawner(
     // Config for spawner
     var numberOfObjects: Int = 1,                  // The spawner will generate this number of object when triggered after interval time
@@ -15,7 +22,7 @@ data class Spawner(
     var positionVariation: Double = 0.0,           // variation radius where objects will be spawned - 0.0 = no variation
     var config: Config = noConfig,                 // contains additional config values which will be given to the configure function of the created entity
     var newEntity: Entity = nullEntity,            // If spawner shall take a specific entity for spawning it can be set here
-    var configureFunction: String = "",            // Name of function which spawns the new object
+    var configureFunction: Invokable = World::noFunction, // Name of function which configures the new entity
     var totalNumberOfObjects: Int = -1,            // -1 - unlimited number of objects spawned, x = x-number of objects spawned in total
     // internal state
     var nextSpawnIn: Int = 0,

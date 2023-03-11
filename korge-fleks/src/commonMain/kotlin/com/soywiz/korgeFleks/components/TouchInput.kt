@@ -2,7 +2,11 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
+@SerialName("TouchInput")
 data class TouchInput(
     var drawOnLayer: String = ""
 ) : Component<TouchInput> {

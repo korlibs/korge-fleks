@@ -1,6 +1,8 @@
 package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * Hint: How you should read "Component"
@@ -13,6 +15,8 @@ import com.github.quillraven.fleks.*
  * Korge-specific objects shall not be added to any component. They will be stored
  * in the Korge specific systems.
  */
+@Serializable
+@SerialName("TiledMap")
 data class TiledMap(
     var assetName: String = "",
 ) : Component<TiledMap> {

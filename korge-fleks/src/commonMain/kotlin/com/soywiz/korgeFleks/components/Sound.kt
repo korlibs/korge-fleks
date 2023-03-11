@@ -2,6 +2,8 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * This is the sound config component for a sound entity.
@@ -11,6 +13,8 @@ import com.github.quillraven.fleks.ComponentType
  * Thus, if multiple other entities are triggering the sound effect than playing of the sound effect
  * will be stopped and started again. This creates the typical retro sound effects playback.
  */
+@Serializable
+@SerialName("Sound")
 data class Sound(
     var name: String = "",
     var startTrigger: Boolean = false,  // to play this sound effect set this to "true"
