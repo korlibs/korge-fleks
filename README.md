@@ -80,7 +80,7 @@ Needed settings for gradle to make kproject usable in the project.
 pluginManagement { repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() } }
 
 plugins {
-    id("com.soywiz.kproject.settings") version "0.0.6"
+    id("com.soywiz.kproject.settings") version "0.0.6"  // Newer versions are not yet working due to a bug in kproject
 }
 
 kproject("./deps")
@@ -94,10 +94,13 @@ This is the kproject config for including Fleks sources into the Korge project.
 name: fleks
 type: library
 
-# loading git tag release from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::2.2
+# loading git tag release (or commit) from GitHub repo (https://github.com/Quillraven/Fleks)
+src: git::Quillraven/Fleks::/src::c24925091ced418bf045ba0672734addaab573d8  # on branch 2.3-korge-serialization
 # using Fleks sources locally in sub-folder "libs/fleks-src"
 #src: ./fleks-src
+
+plugins:
+  - serialization
 ```
 
 ### `libs/korge-fleks.kproject.yml`
@@ -109,18 +112,16 @@ name: korge-fleks
 type: library
 
 # loading git tag from GitHub repo (https://github.com/korlibs/korge-fleks)
-src: git::korlibs/korge-fleks::/korge-fleks/src::0.0.1
+src: git::korlibs/korge-fleks::/korge-fleks/src::v0.0.2
 # using Korge-Fleks sources locally in sub-folder "libs/korge-fleks"
 #src: ./korge-fleks-src/korge-fleks
+
+plugins:
+  - serialization
 
 dependencies:
   - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"
   - "./fleks"
-
-# This is only needed if kotlinx.serialization should be used
-#plugins:
-#    - serialization
-
 ```
 
 ### Updating to newer versions of KorGE-Fleks
@@ -158,7 +159,7 @@ Korge and Korge-Fleks verions:
 
 ```kotlin
 [...]
-src: git::korlibs/korge-fleks::/korge-fleks/src::0.0.2
+src: git::korlibs/korge-fleks::/korge-fleks/src::v0.0.2
 [...]
 dependencies:
     - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"
