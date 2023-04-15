@@ -2,6 +2,7 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import com.soywiz.korgeFleks.utils.SerializeBase
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -19,7 +20,7 @@ data class Sprite(
     var forwardDirection: Boolean = true,
     var loop: Boolean = false,
     var destroyOnPlayingFinished: Boolean = true,
-) : Component<Sprite> {
+) : Component<Sprite>, SerializeBase {
     override fun type(): ComponentType<Sprite> = Sprite
     companion object : ComponentType<Sprite>()
 }

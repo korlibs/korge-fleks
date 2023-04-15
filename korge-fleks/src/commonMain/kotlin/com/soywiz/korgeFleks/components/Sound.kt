@@ -2,6 +2,7 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import com.soywiz.korgeFleks.utils.SerializeBase
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -12,6 +13,8 @@ import kotlinx.serialization.Serializable
  * The system is set up in a way that every specific sound effect can only be played once a time.
  * Thus, if multiple other entities are triggering the sound effect than playing of the sound effect
  * will be stopped and started again. This creates the typical retro sound effects playback.
+ *
+ * TODO: Remove Sound component from entity when it has finished playing
  */
 @Serializable
 @SerialName("Sound")
@@ -22,7 +25,7 @@ data class Sound(
     var position: Double = 0.0,  // playing position in milliseconds
     var volume: Double = 1.0,
     var loop: Boolean = false  // TODO not yet implemented
-) : Component<Sound> {
+) : Component<Sound>, SerializeBase {
     override fun type(): ComponentType<Sound> = Sound
     companion object : ComponentType<Sound>()
 /*

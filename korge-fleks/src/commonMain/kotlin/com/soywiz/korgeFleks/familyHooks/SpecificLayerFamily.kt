@@ -3,9 +3,11 @@ package com.soywiz.korgeFleks.familyHooks
 import com.github.quillraven.fleks.Family
 import com.github.quillraven.fleks.FamilyHook
 import com.github.quillraven.fleks.World
+import com.soywiz.kds.iterators.fastForEach
 import com.soywiz.korge.input.mouse
+import com.soywiz.korge.view.View
 import com.soywiz.korgeFleks.components.*
-import com.soywiz.korgeFleks.korlibsAdaptation.ImageAnimView
+import com.soywiz.korgeFleks.korlibsAdaptation.ParallaxDataView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
 import com.soywiz.korim.color.RGBA
 
@@ -14,7 +16,8 @@ import com.soywiz.korim.color.RGBA
  * The graphics of a sprites, when created and loaded from Aseprite, can contain layers.
  * Those layers can be controlled independently. E.g. the relative position of the layer
  * graphics inside the sprite or the visibility (alpha value) can be manipulated
- * independently per sprite layer.
+ * independently per sprite layer. Also touch input can be caught and specific Invokable
+ * functions can be started.
  *
  * The related components contain following details:
  * - [SpecificLayer] : Contains the [Layer name][SpecificLayer.spriteLayer] and the parent entity
@@ -23,52 +26,71 @@ import com.soywiz.korim.color.RGBA
  * [color tint][Appearance.tint].
  * - [PositionShape] (optional) : Contains the [x][PositionShape.x] and [y][PositionShape.y] position of the
  * layer relative to the [Sprite].
+ * - [InputTouchButton] (optional) : Contains the [Invokable] functions when the player touches that layer on the display.
  *
- * One of the two optional components must be added to the specific-layer entity.
+ * One of the optional components must be added to the specific-layer entity. Otherwise, the [SpecificLayer] component
+ * will be useless.
  */
-object SpecificLayerFamily {
-    val define: Family = World.family { all(SpecificLayer, PositionShape).any(SpecificLayer, PositionShape, Appearance, TouchInput) }
+fun specificLayerFamily(): Family = World.family { all(SpecificLayer).any(SpecificLayer, PositionShape, Appearance, InputTouchButton, Offset) }
 
-    val onEntityAdded: FamilyHook = { entity ->
-        val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
+val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
+    val world = this
+    val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
 
-        // Need to get parent entity to search for view object which contains the sprite layer
-        val specificLayer = entity[SpecificLayer]
-        val positionShape = entity[PositionShape]
-        val view = (korgeViewCache[specificLayer.parentEntity] as ImageAnimView).getLayer(specificLayer.spriteLayer)
-                ?: error("SpecificLayerFamily.onEntityAdded: Could not find layer with name '${specificLayer.spriteLayer}'!")
+    // Need to get parent entity to search for view object which contains the sprite layer
+    val specificLayer = entity[SpecificLayer]
 
-        entity.getOrNull(Appearance)?.also {
-            view.visible = it.visible
-            view.alpha = it.alpha
-            it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
-        }
+    val view: View = if (specificLayer.parallaxPlaneLine != null) {
+        val pView = korgeViewCache[specificLayer.parentEntity]
+        pView as ParallaxDataView
+        pView.parallaxLines[specificLayer.parallaxPlaneLine!!] ?: error("OnSpecificLayerFamily: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
+    } else if (specificLayer.spriteLayer != null) {
+        korgeViewCache.getLayer(specificLayer.parentEntity, specificLayer.spriteLayer!!)
+    } else {
+        error("OnSpecificLayerFamily: No sprite layer name or parallax plane line number set for entity '${entity.id}'!")
+    }
 
-// TODO remove testing code again later
-        entity.getOrNull(TouchInput)?.let {
-            view.mouse {
-                onDown {
-                    println("onDown")
+    entity.getOrNull(Appearance)?.also {
+        view.visible = it.visible
+        view.alpha = it.alpha
+        it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
+    }
+
+    // Set properties in TouchInput when touch input was recognized
+    // TouchInputSystem checks for those properties and executes specific Invokable function
+    entity.getOrNull(InputTouchButton)?.let { touchInput ->
+        view.mouse {
+            onDown {
+                if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity)
+                touchInput.pressed = true
+            }
+            onUp {
+                if (touchInput.pressed) {
+                    touchInput.pressed = false
+                    touchInput.action.invoke(world, entity)
                 }
-                onUp {
-                    println("onUp")
-                }
-                onUpOutside {
-                    println("onUpOutside")
+            }
+            onUpOutside {
+                if (touchInput.pressed) {
+                    touchInput.pressed = false
+                    if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity)
                 }
             }
         }
-
-        // Save current position of layer into PositionShape component
-        positionShape.x = view.x
-        positionShape.y = view.y
-
-        korgeViewCache.addOrUpdate(entity, view)
     }
 
-    val onEntityRemoved: FamilyHook = { entity ->
-        (inject<KorgeViewCache>("normalViewCache").getOrNull(entity)
-            ?: error("SpecificLayerFamily.onEntityRemoved: Cannot remove view from entity '${entity.id}' with layer name '${entity[SpecificLayer].spriteLayer}'!"))
-            .removeFromParent()
+    // Save current position of layer into PositionShape component
+    entity.getOrNull(PositionShape)?.let {
+        if (!it.initialized) {
+            it.x = view.x
+            it.y = view.y
+            it.initialized = true
+        }
     }
+
+    korgeViewCache.addOrUpdate(entity, view)
+}
+
+val onSpecificLayerFamilyRemoved: FamilyHook = { entity ->
+    inject<KorgeViewCache>("normalViewCache").remove(entity)
 }

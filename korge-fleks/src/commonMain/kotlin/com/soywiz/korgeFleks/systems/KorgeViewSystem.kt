@@ -3,22 +3,22 @@ package com.soywiz.korgeFleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.World.Companion.inject
+import com.soywiz.klock.TimeSpan
 import com.soywiz.korge.annotations.KorgeExperimental
 import com.soywiz.korge.bitmapfont.drawText
 import com.soywiz.korge.render.useLineBatcher
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.color.RGBA
-//import com.soywiz.korma.geom.Point
 import com.soywiz.korma.geom.Rectangle
 import com.soywiz.korma.geom.vector.line
 import com.soywiz.korma.geom.vector.rect
 import com.soywiz.korgeFleks.components.*
 import com.soywiz.korgeFleks.components.Sprite
 import com.soywiz.korgeFleks.korlibsAdaptation.ImageAnimView
+import com.soywiz.korgeFleks.korlibsAdaptation.ParallaxDataView
 import com.soywiz.korgeFleks.utils.KorgeViewCache
 import com.soywiz.korgeFleks.utils.random
-import com.soywiz.korma.geom.IPoint
 
 /**
  * This system is updating the view objects for all [Drawable] entities.
@@ -30,25 +30,28 @@ class KorgeViewSystem(
     private val korgeViewCache: KorgeViewCache = inject("normalViewCache"),
     private val korgeDebugViewCache: KorgeViewCache = inject("debugViewCache")
 ) : IteratingSystem(
-    family { all(Appearance).any(Appearance, SwitchLayerVisibility, SpecificLayer, PositionShape, Offset).none(ParallaxIntro) },
+    family { all(Appearance).any(Appearance, SwitchLayerVisibility, SpecificLayer, PositionShape, Offset) },
     interval = EachFrame
 ) {
+    var updateViewsEnabled: Boolean = true
     private var lastY: Double = 0.0
 
     override fun onTickEntity(entity: Entity) {
         val appearance = entity[Appearance]
 
-        // TODO this can be re-written with help of SpecificLayer ???
-        entity.getOrNull(SwitchLayerVisibility)?.let { visibility ->
-            visibility.spriteLayers.forEach { layer ->
-                layer.visible = if (layer.visible) {
-                    // try to switch off
-                    (0.0..1.0).random() > visibility.offVariance  // variance in switching value off - 1: every frame switching possible - 0: no switching at all
-                } else {
-                    // try to switch on again
-                    (0.0..1.0).random() <= visibility.onVariance  // variance in switching value on again - 1: changed value switches back immediately - 0: changed value stays forever
+        if (updateViewsEnabled) {
+            // TODO this can be re-written with help of SpecificLayer ???
+            entity.getOrNull(SwitchLayerVisibility)?.let { visibility ->
+                visibility.spriteLayers.forEach { layer ->
+                    layer.visible = if (layer.visible) {
+                        // try to switch off
+                        (0.0..1.0).random() > visibility.offVariance  // variance in switching value off - 1: every frame switching possible - 0: no switching at all
+                    } else {
+                        // try to switch on again
+                        (0.0..1.0).random() <= visibility.onVariance  // variance in switching value on again - 1: changed value switches back immediately - 0: changed value stays forever
+                    }
+                    (korgeViewCache[entity] as ImageAnimView).getLayer(layer.name)?.visible = layer.visible
                 }
-                (korgeViewCache[entity] as ImageAnimView).getLayer(layer.name)?.visible = layer.visible
             }
         }
 
@@ -58,7 +61,8 @@ class KorgeViewSystem(
             // Get offset depending on current animation and frame index
             val currentFrameIndex = (korgeViewCache[it.entity] as ImageAnimView).currentFrameIndex
             val animationName = it.entity.getOrNull(Sprite)?.animationName ?: ""
-            val frameOffset = it.list[animationName]?.get(currentFrameIndex) ?: error("KorgeViewSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
+            val frameOffset = it.list[animationName]?.get(currentFrameIndex)
+                ?: error("KorgeViewSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
             offset.x += frameOffset.x
             offset.y += frameOffset.y
         }
@@ -81,6 +85,12 @@ class KorgeViewSystem(
             } else {
                 view.visible = false
             }
+
+            if (updateViewsEnabled) {
+                if (view is ImageAnimView) view.update(TimeSpan(deltaTime.toDouble() * 1000.0))
+                else if (view is ParallaxDataView) view.update(TimeSpan(deltaTime.toDouble() * 1000.0))
+            }
+
         }
 
         // Do debug drawing if component is configured for this entity

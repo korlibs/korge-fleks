@@ -14,7 +14,7 @@ class AnimationScriptSystem : IteratingSystem(
     interval = EachFrame
 ) {
     // Internally used variables in createAnimateComponent function
-    private lateinit var currentTween: TweenBaseHasEntity
+    private lateinit var currentTween: TweenBase
     private lateinit var currentParentTween: ParallelTweens
 
     /**
@@ -83,7 +83,7 @@ class AnimationScriptSystem : IteratingSystem(
                         }
                         // currentTween cannot be TweenSequence and ParallelTweens - so this cast is safe
                         else if (currentTween !is Wait)
-                            checkTween(currentTween as TweenBaseHasEntity, ParallelTweens())  // ParallelTweens() as 2nd parameter gives default values for delay, duration and easing
+                            checkTween(currentTween, ParallelTweens())  // ParallelTweens() as 2nd parameter gives default values for delay, duration and easing
                     }
                 }
             }
@@ -104,7 +104,7 @@ class AnimationScriptSystem : IteratingSystem(
         }
     }
 
-    private fun checkTween(tween: TweenBaseHasEntity, parentTween: ParallelTweens) {
+    private fun checkTween(tween: TweenBase, parentTween: ParallelTweens) {
         currentTween = tween
         currentParentTween = parentTween
         when (tween) {
@@ -121,6 +121,12 @@ class AnimationScriptSystem : IteratingSystem(
             is TweenOffset -> tween.entity.getOrError(Offset).let { start ->
                 tween.x?.let { end -> createAnimateComponent(OffsetX, start.x, end - start.x) }
                 tween.y?.let { end -> createAnimateComponent(OffsetY, start.y, end - start.y) }
+            }
+            is TweenLayout -> tween.entity.getOrError(Layout).let { start ->
+                tween.centerX?.let { value -> createAnimateComponent(LayoutCenterX, value) }
+                tween.centerY?.let { value -> createAnimateComponent(LayoutCenterY, value) }
+                tween.offsetX?.let { end -> createAnimateComponent(LayoutOffsetX, start.offsetX, end - start.offsetX) }
+                tween.offsetY?.let { end -> createAnimateComponent(LayoutOffsetY, start.offsetY, end - start.offsetY) }
             }
             is TweenSprite -> tween.entity.getOrError(Sprite).let { _ ->  // make sure to-be-animated-entity is of type sprite
                 tween.animationName?.let { value -> createAnimateComponent(SpriteAnimName, value) }
@@ -141,21 +147,21 @@ class AnimationScriptSystem : IteratingSystem(
             }
             is TweenSound -> tween.entity.getOrError(Sound).let{ start ->
                 tween.startTrigger?.let { value -> createAnimateComponent(SoundStartTrigger, value) }
-                tween.stopTrigger?.let { value -> createAnimateComponent(SoundStartTrigger, value) }
+                tween.stopTrigger?.let { value -> createAnimateComponent(SoundStopTrigger, value) }
                 tween.position?.let { end -> createAnimateComponent(SoundPosition, start.position, end - start.position) }
                 tween.volume?.let { end -> createAnimateComponent(SoundVolume, start.volume, end - start.volume) }
             }
             // A special type of TweenSpawner which directly changes the Spawner component
-            is SpawnEntity -> tween.entity.configure { animatedEntity ->
-                animatedEntity.getOrAdd(Spawner) { Spawner() }.also {
+            is SpawnEntity -> tween.entity.configure { spawnerEntity ->
+                // TODO create a new fresh entity and make sure it will be deleted or reused after spawning is done
+                spawnerEntity.getOrAdd(Spawner) { Spawner() }.also {
                     it.totalNumberOfObjects = 1
-                    it.newEntity = animatedEntity
+                    it.newEntity = spawnerEntity
                     it.configureFunction = tween.configureFunction
-                    it.config = tween.config
                 }
             }
             // A special type of TweenLifeCycle (to be created if needed) which directly changes the LifeCycle component
-            is DeleteEntity -> tween.entity.configure { animatedEntity ->  // Make sure the entity is deleted by adding LifeCycle component in any case
+            is DeleteEntity -> tween.entity.configure { animatedEntity ->
                 animatedEntity.getOrAdd(LifeCycle) { LifeCycle() }.also { it.healthCounter = 0 }
             }
             else -> error("AnimationScriptSystem: Animate function for tween $tween not implemented!")
