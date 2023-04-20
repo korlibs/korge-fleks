@@ -2,18 +2,11 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import com.soywiz.korgeFleks.utils.*
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlin.test.assertFalse
 
-@Serializable
-@SerialName("TestConfig")
-internal data class ConfigForTesting(
-    var id: Int = 0
-)
 
 fun World.testInvokable(entity: Entity) : Entity {
     println("Invoke test - configureTestEntity: world: $this, entity: ${entity.id}")
