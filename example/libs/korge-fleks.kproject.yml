@@ -11,5 +11,7 @@ plugins:
   - serialization
 
 dependencies:
-  - maven::common::com.soywiz.korlibs.korge2:korge:3.4.0
+  - maven::common::com.soywiz.korlibs.korge2:korge
   - ./fleks
+  - ./korge-parallax
+  - ./korge-tiled

@@ -1,0 +1,11 @@
+name: korge-parallax
+type: library
+
+# loading git tag from GitHub repo (https://github.com/korlibs/korge-parallax)
+# Currently commit from integration branch "adaptation-of-parallax-view-to-korge-fleks"
+src: git::korlibs/korge-parallax::/korge-parallax/src::6cbac0f917f208ac1fe58dd3f0618af75f00427d
+# using Korge-parallax sources locally in sub-folder "libs/korge-parallax" (not included by default)
+#src: ../../../korge-parallax/korge-parallax
+
+dependencies:
+  - maven::common::com.soywiz.korlibs.korge2:korge

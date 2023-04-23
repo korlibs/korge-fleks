@@ -2,7 +2,8 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.World
 import com.github.quillraven.fleks.world
-import com.soywiz.korgeFleks.utils.InvokableSerializer
+import korlibs.korge.fleks.utils.InvokableSerializer
+import korlibs.korge.fleks.components.PositionShape
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -18,8 +19,8 @@ internal class PositionShapeTest {
         InvokableSerializer.register(World::testFunction)
 
         val compUnderTest = PositionShape(
-            x = 5.2,
-            y = 42.1,
+            x = 5.2f,
+            y = 42.1f,
         )
 
         val entity = expectedWorld.entity {

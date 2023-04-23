@@ -1,9 +1,12 @@
 package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.*
-import com.soywiz.korgeFleks.components.AnimateComponentType.*
-import com.soywiz.korgeFleks.components.AnimateComponent.*
-import com.soywiz.korma.interpolation.Easing
+import korlibs.korge.fleks.components.AnimateComponentType.*
+import korlibs.korge.fleks.components.AnimateComponent.*
+import korlibs.math.interpolation.Easing
+import korlibs.korge.fleks.components.AnimateComponent
+import korlibs.korge.fleks.components.AnimateComponentType
+import korlibs.korge.fleks.components.Rgb
 import kotlin.test.*
 
 internal class AnimateComponentTest {

@@ -1,6 +1,8 @@
 package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.world
+import korlibs.korge.fleks.components.AssetReload
+import korlibs.korge.fleks.components.DebugInfo
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

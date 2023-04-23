@@ -10,16 +10,18 @@ Upstream project for Fleks ECS can be found here: <https://github.com/Quillraven
 
 Korge-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
-## Supported Version-triple
+## Supported Versions
 
-- Korge-Fleks Addon: v0.0.3
-- Korge: 3.4.0
+- Korge: 4.0.0-rc
+- Korge-fleks addon: v0.0.4
+- Korge-parallax addon: (no commit yet)
+- Korge-tiled addon: 13e674655b94d422839fd3b689f8ba40e92fa84c
 - Fleks: c24925091ced418bf045ba0672734addaab573d8 (on branch 2.3-korge-serialization)
 
 ## Idea
 
 The Korge-Fleks implementation follows the idea to separate the configuration of Game Objects from its behaviour.
-A Game Object in an ECS world is an Entity and by that just an index number (in Fleks e.g.`Entity(id = 1)`).
+A Game Object in an ECS world is an Entity and by that just an index number (in Fleks e.g. `Entity(id = 1)`).
 The aspects of an Entity are stored in Components. Aspects can be read as runtime-configuration for a Game Object.
 Component objects have a relationship to at least one Entity.
 ECS Systems iterate over all (active) Entities of an ECS world and execute the "behaviour" for each Entity.
@@ -126,43 +128,43 @@ dependencies:
 
 ### Updating to newer versions of KorGE-Fleks
 
-It is important to understand that the Korge-Fleks Addon depends on specific versions of Korge and Fleks ECS.
-Thus, updating the version of Korge-Fleks also involves updating of Korge and Fleks versions. Do not try to
-update only one version until you know what you are doing.
+It is important to understand that Korge-Fleks depends on specific versions of Korge, Korge-parallax
+addon, Korge-tiled addon and Fleks ECS.
+Thus, updating the version of Korge-Fleks also involves updating all versions of those modules/addons.
+Do not try to update only one version until you know what you are doing.
 
-The current triple of versions which are working together can be seen at the top of this readme in section
-"Supported Version-triple".
+The current versions which are working together can be seen at the top of this readme in section
+"Supported Versions".
 
-The Korge, Fleks ECS and Korge-Fleks versions need to be updated in three places:
+The Korge, Fleks ECS and all Korge Addon versions need to be updated in following places:
 
-#### `gradle/libs.versions.toml`
+#### Korge version
 
-Korge version:
+Korge version needs to be updated in `gradle/libs.versions.toml`:
 
 ```kotlin
 [plugins]
-korge = { id = "com.soywiz.korge", version = "3.4.0" }
+korge = { id = "com.soywiz.korge", version = "4.0.0" }
 ```
 
-#### `libs/fleks.kproject.yml`
+#### Fleks version
 
-Fleks version:
+Fleks ECS version needs to be updated in the kproject file `libs/fleks.kproject.yml`:
 
 ```
 [...]
 src: git::Quillraven/Fleks::/src::2.3
 ```
 
-#### `libs/korge-fleks.kproject.yml`
+#### Korge Addon versions
 
-Korge and Korge-Fleks verions:
+All version of used Korge sddons (Korge-fleks, Korge-parallax, Korge-tiled) needs to be updated
+in their corresponding kproject files `libs/korge-fleks.kproject.yml`, `libs/korge-parallax.kproject.yml` and
+`libs/korge-tiled.kproject.yml`:
 
 ```kotlin
 [...]
-src: git::korlibs/korge-fleks::/korge-fleks/src::v0.0.3
-[...]
-dependencies:
-    - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"
+src: git::korlibs/korge-xxx::/korge-xxx/src::v0.0.x
 ```
 
 ## Usage

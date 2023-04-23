@@ -1,3 +1,5 @@
 dependencies:
-    - ./libs/fleks
-    - ./libs/korge-fleks
+  - ./libs/fleks
+  - ./libs/korge-tiled
+  - ./libs/korge-parallax
+  - ./libs/korge-fleks

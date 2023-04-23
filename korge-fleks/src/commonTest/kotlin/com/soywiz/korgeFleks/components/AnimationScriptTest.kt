@@ -3,8 +3,9 @@ package com.soywiz.korgeFleks.components
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import com.github.quillraven.fleks.world
-import com.soywiz.korgeFleks.utils.InvokableSerializer
-import com.soywiz.korma.interpolation.Easing
+import korlibs.korge.fleks.utils.InvokableSerializer
+import korlibs.math.interpolation.Easing
+import korlibs.korge.fleks.components.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -27,8 +28,8 @@ internal class AnimationScriptTest {
                             tweens = listOf(
                                 SpawnEntity(
                                     configureFunction = World::testFunction,
-                                    x = 10.2,
-                                    y = 20.3,
+                                    x = 10.2f,
+                                    y = 20.3f,
                                     entity = Entity(43)
                                 ),
                                 DeleteEntity(entity = Entity(44)),

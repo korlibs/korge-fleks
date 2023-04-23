@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd example
-./gradlew jvmTest
+./gradlew :korge-fleks:jvmTest
