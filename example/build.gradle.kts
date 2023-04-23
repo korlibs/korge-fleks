@@ -1,7 +1,7 @@
-import com.soywiz.korge.gradle.*
+import korlibs.korge.gradle.*
 
 plugins {
-    id("com.soywiz.korge") version "3.4.0"
+    alias(libs.plugins.korge)
 }
 
 korge {

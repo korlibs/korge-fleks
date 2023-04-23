@@ -1,0 +1,10 @@
+name: korge-tiled
+type: library
+
+# loading git tag from GitHub repo (https://github.com/korlibs/korge-tiled)
+src: git::korlibs/korge-tiled::/korge-tiled/src::13e674655b94d422839fd3b689f8ba40e92fa84c
+# using Korge-tiled sources locally in sub-folder "libs/korge-tiled" (not included by default)
+#src: ../../../korge-tiled/korge-tiled
+
+dependencies:
+  - maven::common::com.soywiz.korlibs.korge2:korge
