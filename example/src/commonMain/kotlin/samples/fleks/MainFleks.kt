@@ -1,10 +1,10 @@
 package samples.fleks
 
-import com.soywiz.korge.scene.Scene
-import com.soywiz.korge.view.container
-import com.soywiz.korge.view.addUpdater
+import korlibs.korge.scene.Scene
+import korlibs.korge.view.container
+import korlibs.korge.view.addUpdater
 import com.github.quillraven.fleks.*
-import com.soywiz.korge.view.SContainer
+import korlibs.korge.view.SContainer
 import samples.fleks.assets.Assets
 import samples.fleks.systems.*
 import samples.fleks.components.*
@@ -29,7 +29,7 @@ class MainFleksSample : Scene() {
 
     override suspend fun SContainer.sceneMain() {
         container {
-            scale = scaleFactor.toDouble()
+            scaleAvg = scaleFactor.toFloat()
 
             // Here are the container views which contain the generated entity objects with visible component "Sprite" attached to it
             //

@@ -1,12 +1,12 @@
 package samples.fleks.components
 
 import com.github.quillraven.fleks.*
-import com.soywiz.korge.view.Container
-import com.soywiz.korge.view.Image
-import com.soywiz.korge.view.addTo
-import com.soywiz.korge.view.animation.ImageAnimationView
-import com.soywiz.korim.bitmap.Bitmaps
-import com.soywiz.korim.format.ImageAnimation
+import korlibs.korge.view.Container
+import korlibs.korge.view.Image
+import korlibs.korge.view.addTo
+import korlibs.korge.view.animation.ImageAnimationView
+import korlibs.image.bitmap.Bitmaps
+import korlibs.image.format.ImageAnimation
 import samples.fleks.assets.Assets
 
 /**

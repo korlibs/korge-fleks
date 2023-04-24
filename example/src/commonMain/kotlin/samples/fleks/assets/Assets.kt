@@ -1,9 +1,9 @@
 package samples.fleks.assets
 
-import com.soywiz.klock.Stopwatch
-import com.soywiz.korim.atlas.MutableAtlasUnit
-import com.soywiz.korim.format.*
-import com.soywiz.korio.file.std.resourcesVfs
+import korlibs.time.Stopwatch
+import korlibs.image.atlas.MutableAtlasUnit
+import korlibs.image.format.*
+import korlibs.io.file.std.resourcesVfs
 
 class Assets {
 

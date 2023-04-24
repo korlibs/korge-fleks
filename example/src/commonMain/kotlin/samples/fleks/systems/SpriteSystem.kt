@@ -18,7 +18,7 @@ class SpriteSystem : IteratingSystem(
         val sprite = entity[Sprite]
         val pos = entity[Position]
         // sync view position
-        sprite.imageAnimView.x = pos.x
-        sprite.imageAnimView.y = pos.y
+        sprite.imageAnimView.x = pos.x.toFloat()
+        sprite.imageAnimView.y = pos.y.toFloat()
     }
 }
