@@ -25,6 +25,7 @@ data class Sound(
     var stopTrigger: Boolean = false,  // to stop playing this sound effect set this to "true"
     var position: Double = 0.0,  // playing position in milliseconds
     var volume: Float = 1.0f,
+    var isPlaying: Boolean = false,
     var loop: Boolean = false  // TODO not yet implemented
 ) : Component<Sound>, SerializeBase {
     override fun type(): ComponentType<Sound> = Sound

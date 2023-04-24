@@ -3,6 +3,7 @@ package korlibs.korge.fleks.assets
 import com.github.quillraven.fleks.World
 import korlibs.audio.sound.SoundChannel
 import korlibs.audio.sound.readMusic
+import korlibs.audio.sound.readSound
 import korlibs.datastructure.setExtra
 import korlibs.image.atlas.MutableAtlasUnit
 import korlibs.image.font.Font
@@ -149,7 +150,9 @@ class AssetStore {
             tiledMaps[tiledMap.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + tiledMap.value].readTiledMap(atlas = atlas))
         }
         assetConfig.sounds.forEach { sound ->
-            val soundChannel = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readMusic().play()
+            val soundFile = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readMusic()
+            val soundChannel = soundFile.play()
+//            val soundChannel = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readSound().play()
             soundChannel.pause()
             sounds[sound.key] = Pair(type, soundChannel)
         }
