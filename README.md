@@ -10,7 +10,7 @@ Upstream project for Fleks ECS can be found here: <https://github.com/Quillraven
 
 Korge-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
-## Supported Versions
+# Supported Versions
 
 - Korge: 4.0.0-rc
 - Korge-fleks addon: v0.0.4
@@ -18,7 +18,7 @@ Korge-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 - Korge-tiled addon: 13e674655b94d422839fd3b689f8ba40e92fa84c
 - Fleks: c24925091ced418bf045ba0672734addaab573d8 (on branch 2.3-korge-serialization)
 
-## Idea
+# Idea
 
 The Korge-Fleks implementation follows the idea to separate the configuration of Game Objects from its behaviour.
 A Game Object in an ECS world is an Entity and by that just an index number (in Fleks e.g. `Entity(id = 1)`).
@@ -45,14 +45,14 @@ within a Korge game.
 - For simplicity all properties of a Component shall be independent of any Korge-specific type
 
 
-## Setup
+# Setup
 
 As a clean start the [Korge-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world) repo can be used.
 It contains the kproject and gradle setup to use Fleks, Korge-Fleks and Korge together in a project.
 
 In detail the project setup looks like that:
 
-### `build.gradle.kts`
+## `build.gradle.kts`
 
 This tells gradle that the overall project depends on a project _deps_ in the root directory.
 
@@ -63,7 +63,7 @@ dependencies {
 }
 ```
 
-### `deps.kproject.yml`
+## `deps.kproject.yml`
 
 This is the configuration for kproject to setup a project _deps_ in the root directory.
 It just contains two dependencies to further projects in the `libs` sub-folder.
@@ -74,7 +74,7 @@ dependencies:
     - ./libs/korge-fleks
 ```
 
-### `settings.gradle.kts`
+## `settings.gradle.kts`
 
 Needed settings for gradle to make kproject usable in the project.
 
@@ -88,7 +88,7 @@ plugins {
 kproject("./deps")
 ```
 
-### `libs/fleks.kproject.yml`
+## `libs/fleks.kproject.yml`
 
 This is the kproject config for including Fleks sources into the Korge project.
 
@@ -105,9 +105,9 @@ plugins:
   - serialization
 ```
 
-### `libs/korge-fleks.kproject.yml`
+## `libs/korge-fleks.kproject.yml`
 
-This is the kproject config for including Korge-Fleks sources  into the Korge project.
+This is the kproject config for including Korge-fleks sources into the Korge project.
 
 ```yaml
 name: korge-fleks
@@ -122,11 +122,35 @@ plugins:
   - serialization
 
 dependencies:
-  - "maven::common::com.soywiz.korlibs.korge2:korge:3.4.0"
-  - "./fleks"
+  - maven::common::com.soywiz.korlibs.korge2:korge
+  - ./fleks
 ```
 
-### Updating to newer versions of KorGE-Fleks
+## `libs/korge-parallax.kproject.yml`
+
+This is the kproject config for including Korge-parallax sources into the Korge project.
+
+```yaml
+name: korge-parallax
+type: library
+
+# loading git tag from GitHub repo (https://github.com/korlibs/korge-parallax)
+src: git::korlibs/korge-parallax::/korge-parallax/src::6cbac0f917f208ac1fe58dd3f0618af75f00427d  # commit on branch adaptation-of-parallax-view-to-korge-fleks
+# using Korge-parallax sources locally in sub-folder "libs/korge-parallax" (not included by default)
+#src: ./korge-parallax/korge-parallax
+
+dependencies:
+  - maven::common::com.soywiz.korlibs.korge2:korge
+```
+
+There is also a kproject file for korge-tiled. It looks basically the same as that one for
+korge-parallax and is therefore omitted here.
+
+When changes are neede in one of the kproject libs above than it it possible to use a local copy of the
+corresponding git repo in the `libs` folder. E.g. for Korge-parallax the `src:` line for git can be commented
+out and the `src:` line for the folder under `libs/korge-parallax` can be uncommented. 
+
+# Updating to newer versions of KorGE-Fleks
 
 It is important to understand that Korge-Fleks depends on specific versions of Korge, Korge-parallax
 addon, Korge-tiled addon and Fleks ECS.
@@ -138,7 +162,7 @@ The current versions which are working together can be seen at the top of this r
 
 The Korge, Fleks ECS and all Korge Addon versions need to be updated in following places:
 
-#### Korge version
+## Korge version
 
 Korge version needs to be updated in `gradle/libs.versions.toml`:
 
@@ -147,7 +171,7 @@ Korge version needs to be updated in `gradle/libs.versions.toml`:
 korge = { id = "com.soywiz.korge", version = "4.0.0" }
 ```
 
-#### Fleks version
+## Fleks version
 
 Fleks ECS version needs to be updated in the kproject file `libs/fleks.kproject.yml`:
 
@@ -156,39 +180,39 @@ Fleks ECS version needs to be updated in the kproject file `libs/fleks.kproject.
 src: git::Quillraven/Fleks::/src::2.3
 ```
 
-#### Korge Addon versions
+## Korge Addon versions
 
-All version of used Korge sddons (Korge-fleks, Korge-parallax, Korge-tiled) needs to be updated
+All versions of used Korge addons (Korge-fleks, Korge-parallax, Korge-tiled) needs to be updated
 in their corresponding kproject files `libs/korge-fleks.kproject.yml`, `libs/korge-parallax.kproject.yml` and
-`libs/korge-tiled.kproject.yml`:
+`libs/korge-tiled.kproject.yml`. It will look like below example:
 
 ```kotlin
 [...]
 src: git::korlibs/korge-xxx::/korge-xxx/src::v0.0.x
 ```
 
-## Usage
+# Usage
 
 This repo contains under `korge-fleks/src` folder the `korgeFleks` addon. It simplifies usage of Fleks in a KorGE
 environment. For that a set of Components and Systems are implemented.
 
-### Components
+## Components
 
 ... to be continued
 
-### Serialization of Components
+## Serialization of Components
 
 ... to be continued
 
-### Systems
+## Systems
 
 ... to be continued
 
-### Fleks World Integration into a KorGE Scene
+## Fleks World Integration into a KorGE Scene
 
 ... to be continued
 
-## Examples
+# Examples
 
 * [Example in this repo](https://github.com/korlibs/korge-fleks/tree/main/example)
 
@@ -196,7 +220,7 @@ environment. For that a set of Components and Systems are implemented.
 
 * [Korge-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world)
 
-## History
+# History
 
 * <https://github.com/korlibs-archive/korge-next/pull/472>
 * <https://github.com/korlibs/korge/pull/988>
