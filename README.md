@@ -12,10 +12,10 @@ Korge-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
 # Supported Versions
 
-- Korge: 4.0.0-rc
-- Korge-fleks addon: v0.0.4
-- Korge-parallax addon: 6cbac0f917f208ac1fe58dd3f0618af75f00427d (on branch adaptation-of-parallax-view-to-korge-fleks)
-- Korge-tiled addon: 13e674655b94d422839fd3b689f8ba40e92fa84c
+- Korge: 4.0.0-rc4
+- Korge-fleks addon: 0.0.5
+- Korge-parallax addon: 994e0356761e6f19cb518e39332ac9383bd8149f (on branch adaptation-of-parallax-view-to-korge-fleks)
+- Korge-tiled addon: 0.0.1
 - Fleks: c24925091ced418bf045ba0672734addaab573d8 (on branch 2.3-korge-serialization)
 
 # Idea
@@ -59,7 +59,7 @@ This tells gradle that the overall project depends on a project _deps_ in the ro
 ```kotlin
 [...]
 dependencies {
-    add("commonMainApi", project(":deps"))
+  add("commonMainApi", project(":deps"))
 }
 ```
 
@@ -70,19 +70,22 @@ It just contains two dependencies to further projects in the `libs` sub-folder.
 
 ```yaml
 dependencies:
-    - ./libs/fleks
-    - ./libs/korge-fleks
+  - ./libs/fleks
+  - ./libs/korge-tiled
+  - ./libs/korge-parallax
+  - ./libs/korge-fleks
 ```
 
 ## `settings.gradle.kts`
 
-Needed settings for gradle to make kproject usable in the project.
+Needed settings for gradle to make kproject usable in the project. Version 0.1.4 or later is needed to
+support Android target platform.
 
 ```kotlin
 pluginManagement { repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() } }
 
 plugins {
-    id("com.soywiz.kproject.settings") version "0.0.6"  // Newer versions are not yet working due to a bug in kproject
+  id("com.soywiz.kproject.settings") version "0.1.4"
 }
 
 kproject("./deps")
@@ -90,16 +93,17 @@ kproject("./deps")
 
 ## `libs/fleks.kproject.yml`
 
-This is the kproject config for including Fleks sources into the Korge project.
+This is the kproject config for including Fleks sources into the Korge project. Since `Entity` value objects
+from Fleks need to be serializable for saving the game state the `serialization` plugin needs to be added.
 
 ```yaml
 name: fleks
 type: library
 
 # loading git tag release (or commit) from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::c24925091ced418bf045ba0672734addaab573d8  # on branch 2.3-korge-serialization
-# using Fleks sources locally in sub-folder "libs/fleks-src"
-#src: ./fleks-src
+src: git::fleks::Quillraven/Fleks::/src::c24925091ced418bf045ba0672734addaab573d8  # on branch 2.3-korge-serialization
+# using Fleks sources locally in sub-folder "libs/fleks"
+#src: ./fleks
 
 plugins:
   - serialization
@@ -107,16 +111,17 @@ plugins:
 
 ## `libs/korge-fleks.kproject.yml`
 
-This is the kproject config for including Korge-fleks sources into the Korge project.
+This is the kproject config for including Korge-fleks sources into the Korge project. Also for Korge-fleks
+the `serialization` plugin is needed to save the game state.
 
 ```yaml
 name: korge-fleks
 type: library
 
 # loading git tag from GitHub repo (https://github.com/korlibs/korge-fleks)
-src: git::korlibs/korge-fleks::/korge-fleks/src::v0.0.3
+src: git::korge-fleks::korlibs/korge-fleks::/korge-fleks/src::0.0.5
 # using Korge-Fleks sources locally in sub-folder "libs/korge-fleks"
-#src: ./korge-fleks-src/korge-fleks
+#src: ./korge-fleks
 
 plugins:
   - serialization
@@ -124,6 +129,8 @@ plugins:
 dependencies:
   - maven::common::com.soywiz.korlibs.korge2:korge
   - ./fleks
+  - ./korge-parallax
+  - ./korge-tiled
 ```
 
 ## `libs/korge-parallax.kproject.yml`
@@ -135,9 +142,9 @@ name: korge-parallax
 type: library
 
 # loading git tag from GitHub repo (https://github.com/korlibs/korge-parallax)
-src: git::korlibs/korge-parallax::/korge-parallax/src::6cbac0f917f208ac1fe58dd3f0618af75f00427d  # commit on branch adaptation-of-parallax-view-to-korge-fleks
+src: git::korge-parallax::korlibs/korge-parallax::/korge-parallax/src::994e0356761e6f19cb518e39332ac9383bd8149f  # commit on branch adaptation-of-parallax-view-to-korge-fleks
 # using Korge-parallax sources locally in sub-folder "libs/korge-parallax" (not included by default)
-#src: ./korge-parallax/korge-parallax
+#src: ./korge-parallax
 
 dependencies:
   - maven::common::com.soywiz.korlibs.korge2:korge
@@ -188,7 +195,7 @@ in their corresponding kproject files `libs/korge-fleks.kproject.yml`, `libs/kor
 
 ```kotlin
 [...]
-src: git::korlibs/korge-xxx::/korge-xxx/src::v0.0.x
+src: git::korge-xxx::korlibs/korge-xxx::/korge-xxx/src::0.0.x
 ```
 
 # Usage
