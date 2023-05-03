@@ -15,7 +15,7 @@ import korlibs.korge.parallax.ImageDataViewEx
  * it can also spawn an unlimited number of entities (run forever until it dies).
  */
 class SpawnerSystem(
-    private val korgeViewCache: KorgeViewCache = inject("normalViewCache")
+    private val korgeViewCache: KorgeViewCache = inject("KorgeViewCache")
 ) : IteratingSystem(
     family { all(Spawner) },
     interval = EachFrame

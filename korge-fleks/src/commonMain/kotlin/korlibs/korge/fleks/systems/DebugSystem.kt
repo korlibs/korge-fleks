@@ -13,7 +13,7 @@ import korlibs.korge.fleks.components.PositionShape
  *
  */
 class DebugSystem(
-//    private val korgeViewCache: KorgeViewCache = World.inject("normalViewCache"),
+//    private val korgeViewCache: KorgeViewCache = World.inject("KorgeViewCache"),
 //    private val layers: HashMap<String, Container> = World.inject(),
 //    private val assets: GameAssets = World.inject()
 ) : IteratingSystem(
@@ -38,7 +38,7 @@ class DebugSystem(
                 val view = ParallaxDataView(assets.getBackground(parallax.assetName), disableScrollingX = parallax.disableScrollingX, disableScrollingY = parallax.disableScrollingY)
 
                 if (layers[drawable.layerName] != null) {
-                val layers = inject<HashMap<String, Container>>()
+                val layers = inject<HashMap<String, Container>>("Layers")
                 layers[drawable.layerName]!!.addChild(view)
                 korgeViewCache.addOrUpdate(entity, view)
 

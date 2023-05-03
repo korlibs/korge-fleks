@@ -12,7 +12,7 @@ import korlibs.korge.fleks.components.Sound
  * it moves the entity linear without caring about gravity.
  */
 class SoundSystem(
-    private val assets: AssetStore = World.inject()
+    private val assets: AssetStore = World.inject<AssetStore>("AssetStore")
 ) : IteratingSystem(
     family {
         all(Sound)

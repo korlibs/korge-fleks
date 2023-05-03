@@ -25,8 +25,8 @@ import korlibs.time.TimeSpan
  * [Sprite] component to setup and control the sprite animations.
  */
 class KorgeViewSystem(
-    private val korgeViewCache: KorgeViewCache = inject("normalViewCache"),
-    private val korgeDebugViewCache: KorgeViewCache = inject("debugViewCache")
+    private val korgeViewCache: KorgeViewCache = inject("KorgeViewCache"),
+    private val korgeViewCacheDebug: KorgeViewCache = inject("KorgeViewCacheDebug")
 ) : IteratingSystem(
     family { all(Appearance).any(Appearance, SwitchLayerVisibility, SpecificLayer, PositionShape, Offset) },
     interval = EachFrame
@@ -97,7 +97,7 @@ class KorgeViewSystem(
 
             val positionShape = entity[PositionShape]
 
-            korgeDebugViewCache[entity].let { debugView ->
+            korgeViewCacheDebug[entity].let { debugView ->
                 debugView.xy(positionShape.x, positionShape.y)
 
                 @OptIn(KorgeExperimental::class)

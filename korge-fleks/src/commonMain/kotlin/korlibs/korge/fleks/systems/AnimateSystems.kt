@@ -80,7 +80,7 @@ class AnimatePositionShapeSystem : IteratingSystem(
 }
 
 class AnimateSpriteSystem(
-    private val korgeViewCache: KorgeViewCache = inject("normalViewCache")
+    private val korgeViewCache: KorgeViewCache = inject("KorgeViewCache")
 ) : IteratingSystem(
     family { all(Sprite).any(AnimateSpriteAnimName, AnimateSpriteIsPlaying, AnimateSpriteForwardDirection, AnimateSpriteLoop, AnimateSpriteDestroyOnPlayingFinished) },
     interval = EachFrame
@@ -220,7 +220,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Anim
     }
 }
 
-@JvmName("updatePropertyString?")
+@JvmName("updatePropertyStringNullable")
 fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<AnimateComponent>, value: KMutableProperty0<String?>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->

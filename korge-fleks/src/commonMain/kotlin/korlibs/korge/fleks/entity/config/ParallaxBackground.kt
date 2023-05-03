@@ -22,7 +22,7 @@ class ParallaxBackground(private val world: World, assetName: String, drawOnLaye
 
     init {
         with(world) {
-            val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
+            val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
             entity = entity {
                 it += Parallax(assetName = assetName)
@@ -34,7 +34,7 @@ class ParallaxBackground(private val world: World, assetName: String, drawOnLaye
             // Once the base ParallaxDataView is created with above base entity we can access it from the cache
             val view = korgeViewCache[entity] as ParallaxDataView
 
-            val config = inject<AssetStore>().getBackground(assetName).config
+            val config = inject<AssetStore>("AssetStore").getBackground(assetName).config
             val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
 
             config.backgroundLayers?.fastForEach { conf ->

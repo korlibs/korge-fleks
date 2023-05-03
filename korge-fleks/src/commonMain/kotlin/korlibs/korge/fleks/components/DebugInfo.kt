@@ -20,16 +20,16 @@ data class DebugInfo(
 
     companion object : ComponentType<DebugInfo>() {
         val onComponentAdded: ComponentHook<DebugInfo> = { entity, _ ->
-            val korgeDebugViewCache: KorgeViewCache = inject("debugViewCache")
-            val debugLayer = inject<HashMap<String, Container>>()["debug_layer"] ?: error("DebugInfo: Cannot find 'debug_layer' in layers map!")
+            val korgeViewCacheDebug: KorgeViewCache = inject("KorgeViewCacheDebug")
+            val debugLayer = inject<HashMap<String, Container>>("Layers")["debug_layer"] ?: error("DebugInfo: Cannot find 'debug_layer' in layers map!")
             val view = Container()
 
-            korgeDebugViewCache.addOrUpdate(entity, view)
+            korgeViewCacheDebug.addOrUpdate(entity, view)
             debugLayer.addChild(view)
         }
 
         val onComponentRemoved: ComponentHook<DebugInfo> = { entity, _ ->
-            inject<KorgeViewCache>("debugViewCache").getOrNull(entity)?.removeFromParent()
+            inject<KorgeViewCache>("KorgeViewCacheDebug").getOrNull(entity)?.removeFromParent()
         }
     }
 }

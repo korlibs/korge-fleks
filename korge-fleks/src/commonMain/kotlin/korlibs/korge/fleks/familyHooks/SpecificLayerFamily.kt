@@ -34,7 +34,7 @@ fun specificLayerFamily(): Family = World.family { all(SpecificLayer).any(Specif
 
 val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     val world = this
-    val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
+    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
     // Need to get parent entity to search for view object which contains the sprite layer
     val specificLayer = entity[SpecificLayer]
@@ -91,5 +91,5 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
 }
 
 val onSpecificLayerFamilyRemoved: FamilyHook = { entity ->
-    inject<KorgeViewCache>("normalViewCache").remove(entity)
+    inject<KorgeViewCache>("KorgeViewCache").remove(entity)
 }

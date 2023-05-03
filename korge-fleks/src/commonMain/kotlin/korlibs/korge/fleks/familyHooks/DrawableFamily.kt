@@ -34,9 +34,9 @@ import korlibs.korge.view.align.centerYOnStage
 fun drawableFamily(): Family = World.family { all(Drawable, PositionShape).any(Drawable, Appearance) }
 
 val onDrawableFamilyAdded: FamilyHook = { entity ->
-    val assets = inject<AssetStore>()
-    val layers = inject<HashMap<String, Container>>()
-    val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
+    val assets = inject<AssetStore>("AssetStore")
+    val layers = inject<HashMap<String, Container>>("Layers")
+    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
     val drawable = entity[Drawable]
     val positionShape = entity[PositionShape]
@@ -145,7 +145,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 }
 
 val onDrawableFamilyRemoved: FamilyHook = { entity ->
-    val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
+    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
     (korgeViewCache.getOrNull(entity)
         ?: error("DrawableFamily.onEntityRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[Drawable].drawOnLayer}'!"))
         .removeFromParent()
