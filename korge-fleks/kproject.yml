@@ -1,0 +1,8 @@
+plugins:
+- serialization
+dependencies:
+- ../fleks
+- maven::common::com.soywiz.korlibs.korge2:korge
+- https://github.com/korlibs/korge-parallax/tree/994e0356761e6f19cb518e39332ac9383bd8149f/korge-parallax
+- https://github.com/korlibs/korge-tiled/tree/734d96ccc18733064ef9fbda8ac359585011112d/korge-tiled
+
