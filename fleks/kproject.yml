@@ -1,0 +1,3 @@
+src: git::Quillraven/Fleks::/src::c24925091ced418bf045ba0672734addaab573d8
+plugins:
+- serialization
