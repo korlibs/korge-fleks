@@ -22,9 +22,8 @@ korge {
     targetDesktop()
     //targetDesktopCross()
     //targetIos()
-    //targetAndroidIndirect() // targetAndroidDirect()
+    //targetAndroid()
     serializationJson()
-    //targetAndroidDirect()
 }
 
 dependencies {
