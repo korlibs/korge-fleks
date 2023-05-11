@@ -62,7 +62,7 @@ class AssetStore {
         return TextAndLogos.LogoConfig(centerX = true, centerY = true,
             offsetY = 0f,
             text = "Continue Game",
-            fontName = "font_realityHyperRegular17", alpha = 0.0f, drawOnLayer = "hud_layer") as T
+            fontName = "font_realityHyperRegular17", alpha = 1.0f, drawOnLayer = "hud_layer") as T
     }
 
     fun getSound(name: String) : SoundChannel {

@@ -156,7 +156,7 @@ class AnimationScriptSystem : IteratingSystem(
             is SpawnEntity -> {
                 tween.configureFunction.invoke(
                     world,
-                    world.entity { it += Info(name = tween.entityName) }
+                    world.entity { it += Info(name = tween.entityName.name()) }
                 )
 //                tween.entity.configure { spawnerEntity ->
 //                // TODO create a new fresh entity and make sure it will be deleted or reused after spawning is done

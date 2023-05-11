@@ -100,10 +100,14 @@ data class DeleteEntity(
     override var easing: Easing? = null  // not used
 ) : TweenBase
 
+interface EntityName {
+    fun name(): String
+}
+
 @Serializable
 @SerialName("AnimationScript.SpawnEntity")
 data class SpawnEntity(
-    var entityName: String,
+    var entityName: EntityName,
     @Serializable(InvokableSerializer::class)
     var configureFunction: Invokable = World::noFunction, // name of function which configures the spawned entity
     var x: Float = 0.0f,                   // position where entity will be spawned
