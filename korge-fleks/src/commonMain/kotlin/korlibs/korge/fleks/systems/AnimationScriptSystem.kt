@@ -153,13 +153,19 @@ class AnimationScriptSystem : IteratingSystem(
                 tween.volume?.let { end -> createAnimateComponent(SoundVolume, start.volume, end - start.volume) }
             }
             // A special type of TweenSpawner which directly changes the Spawner component
-            is SpawnEntity -> tween.entity.configure { spawnerEntity ->
-                // TODO create a new fresh entity and make sure it will be deleted or reused after spawning is done
-                spawnerEntity.getOrAdd(Spawner) { Spawner() }.also {
-                    it.totalNumberOfObjects = 1
-                    it.newEntity = spawnerEntity
-                    it.configureFunction = tween.configureFunction
-                }
+            is SpawnEntity -> {
+                tween.configureFunction.invoke(
+                    world,
+                    world.entity { it += Info(name = tween.entityName) }
+                )
+//                tween.entity.configure { spawnerEntity ->
+//                // TODO create a new fresh entity and make sure it will be deleted or reused after spawning is done
+//                spawnerEntity.getOrAdd(Spawner) { Spawner() }.also {
+//                    it.entityName = tween.entityName
+//                    it.totalNumberOfObjects = 1
+//                    it.newEntity = spawnerEntity
+//                    it.configureFunction = tween.configureFunction
+//                }
             }
             // A special type of TweenLifeCycle (to be created if needed) which directly changes the LifeCycle component
             is DeleteEntity -> tween.entity.configure { animatedEntity ->

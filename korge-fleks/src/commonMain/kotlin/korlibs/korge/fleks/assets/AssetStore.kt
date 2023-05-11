@@ -18,7 +18,9 @@ import korlibs.io.file.fullName
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.lang.Closeable
 import korlibs.korge.fleks.components.AssetReload
+import korlibs.korge.fleks.entity.config.TextAndLogos
 import korlibs.korge.fleks.utils.AssetReloadCache
+import korlibs.korge.fleks.utils.SerializableConfig
 import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
 import korlibs.time.Stopwatch
@@ -54,6 +56,14 @@ class AssetStore {
     private lateinit var currentLevelResourcesWatcher: Closeable
 
     enum class AssetType{ None, Common, World, Level }
+
+    fun <T : SerializableConfig> getConfig(entityName: String) : T {
+        // TODO make this generic usable - currently it is hardcoded for testing in hud.kt
+        return TextAndLogos.LogoConfig(centerX = true, centerY = true,
+            offsetY = 0f,
+            text = "Continue Game",
+            fontName = "font_realityHyperRegular17", alpha = 0.0f, drawOnLayer = "hud_layer") as T
+    }
 
     fun getSound(name: String) : SoundChannel {
         return if (sounds.contains(name)) sounds[name]!!.second

@@ -95,7 +95,7 @@ data class DeleteEntity(
 
     override var entity: Entity,
     override var delay: Float? = null,   // not used
-    override var duration: Float? = 0f,  // not used
+    override var duration: Float? = 0f,  // not used - 0f for immediately
     @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null  // not used
 ) : TweenBase
@@ -103,14 +103,15 @@ data class DeleteEntity(
 @Serializable
 @SerialName("AnimationScript.SpawnEntity")
 data class SpawnEntity(
+    var entityName: String,
     @Serializable(InvokableSerializer::class)
     var configureFunction: Invokable = World::noFunction, // name of function which configures the spawned entity
     var x: Float = 0.0f,                   // position where entity will be spawned
     var y: Float = 0.0f,
 
-    override var entity: Entity,
+    override var entity: Entity = nullEntity,
     override var delay: Float? = null,
-    override var duration: Float? = 0f,  // not used
+    override var duration: Float? = 0f,  // not used - 0f for immediately
     @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null  // not used
 ) : TweenBase

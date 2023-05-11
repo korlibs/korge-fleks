@@ -15,7 +15,6 @@ import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxDataView
 import korlibs.korge.render.useLineBatcher
 import korlibs.korge.view.*
-import korlibs.math.geom.Rectangle
 import korlibs.time.TimeSpan
 
 /**
@@ -92,8 +91,9 @@ class KorgeViewSystem(
         }
 
         // Do debug drawing if component is configured for this entity
-        entity.getOrNull(DebugInfo)?.let { debugInfo ->
+        entity.getOrNull(Info)?.let { debugInfo ->
             // TODO check for Keys to enable certain debug options
+            if (!debugInfo.showName) return
 
             val positionShape = entity[PositionShape]
 

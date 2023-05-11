@@ -52,7 +52,7 @@ internal val internalModule = SerializersModule {
     polymorphic(SerializeBase::class) {
         subclass(AnimateComponent::class)
         subclass(AnimationScript::class)
-        subclass(DebugInfo::class)
+        subclass(Info::class)
         subclass(AssetReload::class)
         subclass(Drawable::class)
         subclass(Appearance::class)

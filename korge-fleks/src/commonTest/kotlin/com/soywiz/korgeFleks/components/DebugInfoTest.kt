@@ -2,7 +2,7 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.world
 import korlibs.korge.fleks.components.AssetReload
-import korlibs.korge.fleks.components.DebugInfo
+import korlibs.korge.fleks.components.Info
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -14,7 +14,7 @@ internal class DebugInfoTest {
     @Test
     fun testDebugInfoSerialization() {
 
-        val debugInfo = DebugInfo(
+        val info = Info(
             name = "DebugTest",
             showPivotPoint = true
         )
@@ -23,18 +23,18 @@ internal class DebugInfoTest {
         )
 
         val entity = expectedWorld.entity {
-            it += debugInfo
+            it += info
             it += assetReload
         }
 
         CommonTestEnv.serializeDeserialize(expectedWorld, recreatedWorld)
 
         // get the component from entity with the same id from the new created world
-        val newDebugInfo = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][DebugInfo] }
+        val newInfo = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][Info] }
         val newAssetReload = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][AssetReload] }
 
-        assertEquals(debugInfo.name, newDebugInfo.name, "Check 'name' property to be equal")
-        assertEquals(debugInfo.showPivotPoint, newDebugInfo.showPivotPoint, "Check 'showPivotPoint' property to be equal")
+        assertEquals(info.name, newInfo.name, "Check 'name' property to be equal")
+        assertEquals(info.showPivotPoint, newInfo.showPivotPoint, "Check 'showPivotPoint' property to be equal")
         assertEquals(assetReload.trigger, newAssetReload.trigger, "Check 'trigger' property to be equal")
     }
 }

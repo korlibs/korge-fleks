@@ -2,7 +2,9 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.utils.SerializableConfig
 
 
 object TextAndLogos {
@@ -19,7 +21,7 @@ object TextAndLogos {
 
         val alpha: Float = 0.0f,
         val drawOnLayer: String? = null
-    )
+    ) : SerializableConfig
 
     data class LogoLayerConfig(
         var layerName: String = "",
@@ -31,6 +33,8 @@ object TextAndLogos {
 
     fun configureLogo(world: World, entity: Entity, config: LogoConfig) : Entity = with(world) {
         entity.configure { entity ->
+            // Make sure we have position component
+            entity.getOrAdd(PositionShape) { PositionShape() }
 
             config.logoName?.let {
                 entity.getOrAdd(Sprite) { Sprite() }.also {
@@ -78,3 +82,11 @@ object TextAndLogos {
         }
     }
 }
+
+fun World.createLogo(entity: Entity) : Entity {
+    // Assuming entity has Info component
+    val entityName = if (entity has Info) entity[Info].name else error("TextAndLogos - createLogo: Entity '${entity.id}' has no Info component!")
+    val config = inject<AssetStore>("AssetStore").getConfig<TextAndLogos.LogoConfig>(entityName)
+    return TextAndLogos.configureLogo(this, entity, config)
+}
+
