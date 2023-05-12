@@ -52,7 +52,7 @@ class SpawnerSystem(
                     var xx = x
                     var yy = y
                     val newEntity =
-                        if (isNullEntity(spawner.newEntity)) world.entity()  // create new entity
+                        if (isNullEntity(spawner.newEntity)) world.entity {}  // create new entity
                         else spawner.newEntity  // use given entity
                     if (spawner.positionVariation != 0.0f) {
                         xx = x + (-spawner.positionVariation..spawner.positionVariation).random()
@@ -60,7 +60,7 @@ class SpawnerSystem(
                     }
                     // Directly set position and entity name
                     newEntity.configure {
-                        it += Info(spawner.entityName)
+                        it += Info(spawner.entityType)
                         if (setPosition) it += PositionShape(x = xx, y = yy)
                     }
 

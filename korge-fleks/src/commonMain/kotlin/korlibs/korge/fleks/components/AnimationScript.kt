@@ -11,8 +11,7 @@ import kotlinx.serialization.Serializable
 /**
  * This component holds all needed details to animate an entity's component.
  */
-@Serializable
-@SerialName("AnimationScript")
+@Serializable @SerialName("AnimationScript")
 data class AnimationScript(
     var tweens: List<TweenBase> = listOf(),
 
@@ -39,6 +38,11 @@ data class AnimationScript(
     }
 }
 
+fun interface ConfigName {
+    fun name(): String
+}
+
+val noConfig = ConfigName { "NoConfig" }
 
 interface TweenBase {
     var entity: Entity
@@ -50,8 +54,7 @@ interface TweenBase {
 /**
  * Animation Component data classes based on TweenBase
  */
-@Serializable
-@SerialName("AnimationScript.TweenSequence")
+@Serializable @SerialName("AnimationScript.TweenSequence")
 data class TweenSequence(
     val tweens: List<TweenBase> = listOf(),   // tween objects which contain entity and its properties to be animated in sequence
 
@@ -62,8 +65,7 @@ data class TweenSequence(
     override var easing: Easing? = null
 ) : TweenBase
 
-@Serializable
-@SerialName("AnimationScript.ParallelTweens")
+@Serializable @SerialName("AnimationScript.ParallelTweens")
 data class ParallelTweens(
     val tweens: List<TweenBase> = listOf(),           // tween objects which contain entity and its properties to be animated in parallel
 
@@ -74,8 +76,7 @@ data class ParallelTweens(
     override var easing: Easing? = Easing.LINEAR      // function to change the properties
 ) : TweenBase
 
-@Serializable
-@SerialName("AnimationScript.Wait")
+@Serializable @SerialName("AnimationScript.Wait")
 data class Wait(
     override var entity: Entity = nullEntity, // not used
     override var delay: Float? = null,   // Not used
@@ -88,8 +89,7 @@ data class Wait(
 /**
  * Animation Component data classes based on TweenBaseHasEntity
  */
-@Serializable
-@SerialName("AnimationScript.DeleteEntity")
+@Serializable @SerialName("AnimationScript.DeleteEntity")
 data class DeleteEntity(
     val healthCounter: Int = 0,            // set healthCounter to zero to delete the entity immediately
 
@@ -100,20 +100,16 @@ data class DeleteEntity(
     override var easing: Easing? = null  // not used
 ) : TweenBase
 
-interface EntityName {
-    fun name(): String
-}
-
-@Serializable
-@SerialName("AnimationScript.SpawnEntity")
+@Serializable @SerialName("AnimationScript.SpawnEntity")
 data class SpawnEntity(
-    var entityName: EntityName,
+    @Serializable(ConfigNameSerializer::class)
+    var configName: ConfigName,          // name of config for configuring spawned entity
     @Serializable(InvokableSerializer::class)
-    var configureFunction: Invokable = World::noFunction, // name of function which configures the spawned entity
-    var x: Float = 0.0f,                   // position where entity will be spawned
+    var configureFunction: Invokable,    // name of function which configures the spawned entity
+    var x: Float = 0.0f,                 // position where entity will be spawned
     var y: Float = 0.0f,
 
-    override var entity: Entity = nullEntity,
+    override var entity: Entity,         // entity needs to be provided in any case
     override var delay: Float? = null,
     override var duration: Float? = 0f,  // not used - 0f for immediately
     @Serializable(with = EasingSerializer::class)
@@ -121,8 +117,7 @@ data class SpawnEntity(
 ) : TweenBase
 
 // Following component classes are for animating specific components
-@Serializable
-@SerialName("AnimationScript.TweenAppearance")
+@Serializable @SerialName("AnimationScript.TweenAppearance")
 data class TweenAppearance(
     val alpha: Float? = null,
     val tint: Rgb? = null,
@@ -135,8 +130,7 @@ data class TweenAppearance(
     override var easing: Easing? = null
 ) : TweenBase
 
-@Serializable
-@SerialName("AnimationScript.TweenPositionShape")
+@Serializable @SerialName("AnimationScript.TweenPositionShape")
 data class TweenPositionShape(
     val x: Float? = null,
     val y: Float? = null,
@@ -148,8 +142,7 @@ data class TweenPositionShape(
     override var easing: Easing? = null
 ) : TweenBase
 
-@Serializable
-@SerialName("AnimationScript.TweenOffset")
+@Serializable @SerialName("AnimationScript.TweenOffset")
 data class TweenOffset(
     val x: Float? = null,
     val y: Float? = null,
@@ -161,8 +154,7 @@ data class TweenOffset(
     override var easing: Easing? = null
 ) : TweenBase
 
-@Serializable
-@SerialName("AnimationScript.TweenLayout")
+@Serializable @SerialName("AnimationScript.TweenLayout")
 data class TweenLayout(
     val centerX: Boolean? = null,
     val centerY: Boolean? = null,
@@ -176,8 +168,7 @@ data class TweenLayout(
     override var easing: Easing? = null
 ) : TweenBase
 
-@Serializable
-@SerialName("AnimationScript.TweenSprite")
+@Serializable @SerialName("AnimationScript.TweenSprite")
 data class TweenSprite(
     var animationName: String? = null,
     var isPlaying: Boolean? = null,
@@ -192,8 +183,7 @@ data class TweenSprite(
     override var easing: Easing? = null
 ) : TweenBase
 
-@Serializable
-@SerialName("AnimationScript.TweenSwitchLayerVisibility")
+@Serializable @SerialName("AnimationScript.TweenSwitchLayerVisibility")
 data class TweenSwitchLayerVisibility(
     var offVariance: Float? = null,
     var onVariance: Float? = null,
@@ -206,8 +196,7 @@ data class TweenSwitchLayerVisibility(
     override var easing: Easing? = null
 ) : TweenBase
 
-@Serializable
-@SerialName("AnimationScript.TweenSpawner")
+@Serializable @SerialName("AnimationScript.TweenSpawner")
 data class TweenSpawner(
     var numberOfObjects: Int? = null,
     var interval: Int? = null,
@@ -221,8 +210,7 @@ data class TweenSpawner(
     override var easing: Easing? = null
 ) : TweenBase
 
-@Serializable
-@SerialName("AnimationScript.TweenSound")
+@Serializable @SerialName("AnimationScript.TweenSound")
 data class TweenSound(
     var startTrigger: Boolean? = null,
     var stopTrigger: Boolean? = null,

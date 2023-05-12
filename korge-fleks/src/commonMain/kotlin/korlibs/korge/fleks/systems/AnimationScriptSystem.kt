@@ -154,9 +154,10 @@ class AnimationScriptSystem : IteratingSystem(
             }
             // A special type of TweenSpawner which directly changes the Spawner component
             is SpawnEntity -> {
+                tween.entity.configure { it.getOrAdd(Info) { Info() }.configName = tween.configName.name() }
                 tween.configureFunction.invoke(
                     world,
-                    world.entity { it += Info(name = tween.entityName.name()) }
+                    tween.entity
                 )
 //                tween.entity.configure { spawnerEntity ->
 //                // TODO create a new fresh entity and make sure it will be deleted or reused after spawning is done

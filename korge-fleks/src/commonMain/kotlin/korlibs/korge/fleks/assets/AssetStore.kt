@@ -3,7 +3,6 @@ package korlibs.korge.fleks.assets
 import com.github.quillraven.fleks.World
 import korlibs.audio.sound.SoundChannel
 import korlibs.audio.sound.readMusic
-import korlibs.audio.sound.readSound
 import korlibs.datastructure.setExtra
 import korlibs.image.atlas.MutableAtlasUnit
 import korlibs.image.font.Font
@@ -57,12 +56,12 @@ class AssetStore {
 
     enum class AssetType{ None, Common, World, Level }
 
-    fun <T : SerializableConfig> getConfig(entityName: String) : T {
+    fun <T : SerializableConfig> getConfig(name: String) : T {
         // TODO make this generic usable - currently it is hardcoded for testing in hud.kt
         return TextAndLogos.LogoConfig(centerX = true, centerY = true,
             offsetY = 0f,
             text = "Continue Game",
-            fontName = "font_realityHyperRegular17", alpha = 1.0f, drawOnLayer = "hud_layer") as T
+            fontName = "font_realityHyperRegular17", alpha = 0.0f, drawOnLayer = "hud_layer") as T
     }
 
     fun getSound(name: String) : SoundChannel {

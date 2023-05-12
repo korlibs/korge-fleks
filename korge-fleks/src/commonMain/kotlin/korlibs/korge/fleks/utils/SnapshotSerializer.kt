@@ -182,6 +182,26 @@ object InvokableSerializer : KSerializer<Invokable> {
             ?: throw SerializationException("No lambda function found for '${decoder.decodeString()}' in InvokableAsString!")
 }
 
+object ConfigNameSerializer : KSerializer<ConfigName> {
+    private val map = mutableMapOf<String, ConfigName>(
+        "noFunction" to korlibs.korge.fleks.components.noConfig
+    )
+
+    fun register(vararg invokable: ConfigName) = invokable.fastForEach { map[it.name()] = it }
+    fun unregister(vararg invokable: ConfigName) = invokable.fastForEach { map.remove(it.name()) }
+
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ConfigNameAsString", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: ConfigName) {
+        if (map.containsKey(value.name())) encoder.encodeString(value.name())
+        else throw SerializationException("Invokable function '${value.name()}' not registered in InvokableAsString serializer!")
+    }
+
+    override fun deserialize(decoder: Decoder): ConfigName =
+        map[decoder.decodeString()]
+            ?: throw SerializationException("No lambda function found for '${decoder.decodeString()}' in InvokableAsString!")
+}
+
 /**
  * A simple serializer strategy for Easing types. It serializes the easing class name as string.
  */

@@ -15,7 +15,7 @@ internal class DebugInfoTest {
     fun testDebugInfoSerialization() {
 
         val info = Info(
-            name = "DebugTest",
+            configName = "DebugTest",
             showPivotPoint = true
         )
         val assetReload = AssetReload(
@@ -33,7 +33,7 @@ internal class DebugInfoTest {
         val newInfo = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][Info] }
         val newAssetReload = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][AssetReload] }
 
-        assertEquals(info.name, newInfo.name, "Check 'name' property to be equal")
+        assertEquals(info.configName, newInfo.configName, "Check 'name' property to be equal")
         assertEquals(info.showPivotPoint, newInfo.showPivotPoint, "Check 'showPivotPoint' property to be equal")
         assertEquals(assetReload.trigger, newAssetReload.trigger, "Check 'trigger' property to be equal")
     }

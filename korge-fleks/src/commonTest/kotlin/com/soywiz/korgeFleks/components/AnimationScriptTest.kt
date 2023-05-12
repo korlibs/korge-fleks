@@ -27,7 +27,7 @@ internal class AnimationScriptTest {
                         ParallelTweens(
                             tweens = listOf(
                                 SpawnEntity(
-                                    entityName = "testEntity",
+                                    configName = "testEntity",
                                     configureFunction = World::testFunction,
                                     x = 10.2f,
                                     y = 20.3f,
@@ -85,7 +85,7 @@ internal class AnimationScriptTest {
         assertEquals(parallelTweens.easing, newParallelTweens.easing, "Check 'parallelTweens.easing' property to be equal")
         val spawnEntity = parallelTweens.tweens.first() as SpawnEntity
         val newSpawnEntity = newParallelTweens.tweens.first() as SpawnEntity
-        assertEquals(spawnEntity.entityName, newSpawnEntity.entityName, "spawnEntity.entityName' property to be equal")
+        assertEquals(spawnEntity.configName, newSpawnEntity.configName, "spawnEntity.entityName' property to be equal")
         assertEquals(spawnEntity.configureFunction, newSpawnEntity.configureFunction, "Check 'spawnEntity.spawnFunction' property to be equal")
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")

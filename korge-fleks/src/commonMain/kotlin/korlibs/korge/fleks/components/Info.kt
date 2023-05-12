@@ -2,8 +2,6 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.EntityByName
-import korlibs.korge.view.*
-import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.utils.SerializeBase
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -13,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("Info")
 data class Info(
-    var name: String = "",
+    var configName: String = "",
     var showName: Boolean = false,
     var showPivotPoint: Boolean = true,
     var showSizeBox: Boolean = false,
@@ -29,14 +27,14 @@ data class Info(
 //            korgeViewCacheDebug.addOrUpdate(entity, view)
 //            debugLayer.addChild(view)
             val entityByName = inject<EntityByName>("EntityByName")
-            entityByName.add(component.name, entity)
+            entityByName.add(component.configName, entity)
         }
 
         val onComponentRemoved: ComponentHook<Info> = { _, component ->
             // TODO
 //            inject<KorgeViewCache>("KorgeViewCacheDebug").getOrNull(entity)?.removeFromParent()
             val entityByName = inject<EntityByName>("EntityByName")
-            entityByName.remove(component.name)
+            entityByName.remove(component.configName)
         }
     }
 }

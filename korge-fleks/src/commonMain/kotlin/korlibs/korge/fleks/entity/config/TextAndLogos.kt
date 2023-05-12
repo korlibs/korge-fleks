@@ -85,8 +85,8 @@ object TextAndLogos {
 
 fun World.createLogo(entity: Entity) : Entity {
     // Assuming entity has Info component
-    val entityName = if (entity has Info) entity[Info].name else error("TextAndLogos - createLogo: Entity '${entity.id}' has no Info component!")
-    val config = inject<AssetStore>("AssetStore").getConfig<TextAndLogos.LogoConfig>(entityName)
+    val configName = if (entity has Info) entity[Info].configName else error("TextAndLogos - createLogo: Entity '${entity.id}' has no Info component!")
+    val config = inject<AssetStore>("AssetStore").getConfig<TextAndLogos.LogoConfig>(configName)
     return TextAndLogos.configureLogo(this, entity, config)
 }
 
