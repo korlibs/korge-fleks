@@ -187,14 +187,14 @@ object ConfigNameSerializer : KSerializer<ConfigName> {
         "noFunction" to korlibs.korge.fleks.components.noConfig
     )
 
-    fun register(vararg invokable: ConfigName) = invokable.fastForEach { map[it.name()] = it }
-    fun unregister(vararg invokable: ConfigName) = invokable.fastForEach { map.remove(it.name()) }
+    fun register(vararg invokable: ConfigName) = invokable.fastForEach { map[it.value()] = it }
+    fun unregister(vararg invokable: ConfigName) = invokable.fastForEach { map.remove(it.value()) }
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ConfigNameAsString", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: ConfigName) {
-        if (map.containsKey(value.name())) encoder.encodeString(value.name())
-        else throw SerializationException("Invokable function '${value.name()}' not registered in InvokableAsString serializer!")
+        if (map.containsKey(value.value())) encoder.encodeString(value.value())
+        else throw SerializationException("Invokable function '${value.value()}' not registered in InvokableAsString serializer!")
     }
 
     override fun deserialize(decoder: Decoder): ConfigName =

@@ -17,6 +17,7 @@ import korlibs.io.file.fullName
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.lang.Closeable
 import korlibs.korge.fleks.components.AssetReload
+import korlibs.korge.fleks.components.ConfigName
 import korlibs.korge.fleks.entity.config.TextAndLogos
 import korlibs.korge.fleks.utils.AssetReloadCache
 import korlibs.korge.fleks.utils.SerializableConfig
@@ -43,6 +44,7 @@ class AssetStore {
     private var currentWorldAssetConfig: AssetModel = AssetModel()
     private var currentLevelAssetConfig: AssetModel = AssetModel()
 
+    private var entityConfigs: MutableMap<String, SerializableConfig> = mutableMapOf()
     private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
     private var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     private var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
@@ -56,12 +58,13 @@ class AssetStore {
 
     enum class AssetType{ None, Common, World, Level }
 
-    fun <T : SerializableConfig> getConfig(name: String) : T {
-        // TODO make this generic usable - currently it is hardcoded for testing in hud.kt
-        return TextAndLogos.LogoConfig(centerX = true, centerY = true,
-            offsetY = 0f,
-            text = "Continue Game",
-            fontName = "font_realityHyperRegular17", alpha = 0.0f, drawOnLayer = "hud_layer") as T
+    fun <T : SerializableConfig> addEntityConfig(name: ConfigName, config: T) {
+        entityConfigs[name.value()] = config
+    }
+
+    fun <T : SerializableConfig> getConfig(name: ConfigName) : T {
+        if (!entityConfigs.containsKey(name.value())) error("AssetStore - getConfig: No config found for name '${name.value()}'!")
+        return entityConfigs[name.value()]!! as T
     }
 
     fun getSound(name: String) : SoundChannel {

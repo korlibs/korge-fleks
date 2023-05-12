@@ -154,7 +154,7 @@ class AnimationScriptSystem : IteratingSystem(
             }
             // A special type of TweenSpawner which directly changes the Spawner component
             is SpawnEntity -> {
-                tween.entity.configure { it.getOrAdd(Info) { Info() }.configName = tween.configName.name() }
+                tween.entity.configure { it.getOrAdd(Info) { Info() }.configName = tween.configName }
                 tween.configureFunction.invoke(
                     world,
                     tween.entity

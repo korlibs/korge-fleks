@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.utils.Invokable
 import korlibs.korge.fleks.utils.SerializableConfig
 
 
@@ -20,7 +21,9 @@ object TextAndLogos {
         val fontName: String = "",
 
         val alpha: Float = 0.0f,
-        val drawOnLayer: String? = null
+        val drawOnLayer: String? = null,
+
+        val invokable: Invokable? = null
     ) : SerializableConfig
 
     data class LogoLayerConfig(
@@ -64,6 +67,11 @@ object TextAndLogos {
                 it.alpha = config.alpha
             }
             entity += LifeCycle()
+            config.invokable?.let {
+                entity.getOrAdd(InputTouchButton) { InputTouchButton() }.also {
+                    it.action = config.invokable
+                }
+            }
         }
         return entity
     }
@@ -89,4 +97,3 @@ fun World.createLogo(entity: Entity) : Entity {
     val config = inject<AssetStore>("AssetStore").getConfig<TextAndLogos.LogoConfig>(configName)
     return TextAndLogos.configureLogo(this, entity, config)
 }
-

@@ -16,6 +16,7 @@ import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.Text
 import korlibs.korge.fleks.systems.KorgeViewSystem
 import korlibs.korge.fleks.utils.KorgeViewCache
+import korlibs.korge.input.mouse
 import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxConfig
 import korlibs.korge.parallax.ParallaxDataView
@@ -31,9 +32,10 @@ import korlibs.korge.view.align.centerYOnStage
  * component hook because we are sure that all needed components are set up before in the [World].
  */
 
-fun drawableFamily(): Family = World.family { all(Drawable, PositionShape).any(Drawable, Appearance) }
+fun drawableFamily(): Family = World.family { all(Drawable, PositionShape).any(Drawable, Appearance, InputTouchButton) }
 
 val onDrawableFamilyAdded: FamilyHook = { entity ->
+    val world = this
     val assets = inject<AssetStore>("AssetStore")
     val layers = inject<HashMap<String, Container>>("Layers")
     val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
@@ -138,6 +140,29 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         if (layout.centerY) view.centerYOnStage()
         positionShape.x = view.x + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
         positionShape.y = view.y + layout.offsetY
+    }
+
+    // Set properties in TouchInput when touch input was recognized
+    // TouchInputSystem checks for those properties and executes specific Invokable function
+    entity.getOrNull(InputTouchButton)?.let { touchInput ->
+        view.mouse {
+            onDown {
+                if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity)
+                touchInput.pressed = true
+            }
+            onUp {
+                if (touchInput.pressed) {
+                    touchInput.pressed = false
+                    touchInput.action.invoke(world, entity)
+                }
+            }
+            onUpOutside {
+                if (touchInput.pressed) {
+                    touchInput.pressed = false
+                    if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity)
+                }
+            }
+        }
     }
 
     positionShape.width = width

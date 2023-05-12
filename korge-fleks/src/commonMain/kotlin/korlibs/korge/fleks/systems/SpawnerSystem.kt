@@ -60,7 +60,7 @@ class SpawnerSystem(
                     }
                     // Directly set position and entity name
                     newEntity.configure {
-                        it += Info(spawner.entityType)
+                        it += Info(spawner.configName)
                         if (setPosition) it += PositionShape(x = xx, y = yy)
                     }
 

@@ -39,7 +39,7 @@ data class AnimationScript(
 }
 
 fun interface ConfigName {
-    fun name(): String
+    fun value(): String
 }
 
 val noConfig = ConfigName { "NoConfig" }

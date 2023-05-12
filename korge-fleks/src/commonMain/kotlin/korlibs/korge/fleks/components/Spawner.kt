@@ -19,7 +19,7 @@ data class Spawner(
     var timeVariation: Int = 0,                    // 0 - no variation, 1 - one frame variation, 2 - two frames variation, ...
     var positionVariation: Float = 0.0f,           // variation radius where objects will be spawned - 0.0 = no variation
     var newEntity: Entity = nullEntity,            // If spawner shall take a specific entity for spawning it can be set here
-    var entityType: String = "NullEntity",
+    var configName: ConfigName = noConfig,
     @Serializable(InvokableSerializer::class)
     var configureFunction: Invokable = World::noFunction, // Name of function which configures the new entity
     var totalNumberOfObjects: Int = -1,            // -1 - unlimited number of objects spawned, x = x-number of objects spawned in total

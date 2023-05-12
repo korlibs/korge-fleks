@@ -106,7 +106,7 @@ class KorgeViewSystem(
                     if (debugInfo.showName) {
                         ctx.drawText(
                             ctx.views?.debugBmpFont ?: error("KorgeViewSystem: Could not load debugBmpFont!"),
-                            fontSize, debugInfo.configName,
+                            fontSize, debugInfo.configName.value(),
                             positionShape.x.toInt(),
                             positionShape.y.toInt() + 1,
                             colMul = Colors.RED,
