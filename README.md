@@ -44,9 +44,10 @@ a multiplayer game.
 All components of the Fleks ECS shall contain only basic property types like:
 
 - String
-- Number (Int, Float, Double, enum class)
+- Numbers (Int, Float, Double, enum class)
 - Entity (value class)
-- Invokable (lambda functions with fix parameter set)
+- ConfigId (Identifier for static entity configuration which is loaded from assets)
+- Invokable (lambda function with world, entity, config parameters)
 
 and sets of those in Lists and Maps. For simplicity all those properties shall be independent of any Korge-specific complex classes. Components shall not contain any Korge-related complex objects like `Views`, `Image`, `Camera`, etc. Where it makes sense a type can be taken over from Korge as it is done with the `Easing` enum class for the _Animation system_.
 

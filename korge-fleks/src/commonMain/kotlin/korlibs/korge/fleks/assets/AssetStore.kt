@@ -17,15 +17,15 @@ import korlibs.io.file.fullName
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.lang.Closeable
 import korlibs.korge.fleks.components.AssetReload
-import korlibs.korge.fleks.components.ConfigName
-import korlibs.korge.fleks.entity.config.TextAndLogos
 import korlibs.korge.fleks.utils.AssetReloadCache
-import korlibs.korge.fleks.utils.SerializableConfig
 import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
+
+
+interface EntityConfig
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -44,7 +44,7 @@ class AssetStore {
     private var currentWorldAssetConfig: AssetModel = AssetModel()
     private var currentLevelAssetConfig: AssetModel = AssetModel()
 
-    private var entityConfigs: MutableMap<String, SerializableConfig> = mutableMapOf()
+    private var entityConfigs: MutableMap<String, EntityConfig> = mutableMapOf()
     private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
     private var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     private var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
@@ -58,13 +58,13 @@ class AssetStore {
 
     enum class AssetType{ None, Common, World, Level }
 
-    fun <T : SerializableConfig> addEntityConfig(name: ConfigName, config: T) {
-        entityConfigs[name.value()] = config
+    fun <T : EntityConfig> addEntityConfig(name: String, entityConfig: T) {
+        entityConfigs[name] = entityConfig
     }
 
-    fun <T : SerializableConfig> getConfig(name: ConfigName) : T {
-        if (!entityConfigs.containsKey(name.value())) error("AssetStore - getConfig: No config found for name '${name.value()}'!")
-        return entityConfigs[name.value()]!! as T
+    fun <T : EntityConfig> getEntityConfig(name: String) : T {
+        if (!entityConfigs.containsKey(name)) error("AssetStore - getConfig: No config found for configId name '$name'!")
+        return entityConfigs[name]!! as T
     }
 
     fun getSound(name: String) : SoundChannel {

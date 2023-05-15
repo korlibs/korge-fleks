@@ -58,14 +58,13 @@ class SpawnerSystem(
                         xx = x + (-spawner.positionVariation..spawner.positionVariation).random()
                         yy = y + (-spawner.positionVariation..spawner.positionVariation).random()
                     }
-                    // Directly set position and entity name
-                    newEntity.configure {
-                        it += Info(spawner.configName)
-                        if (setPosition) it += PositionShape(x = xx, y = yy)
+                    // Directly set position
+                    if (setPosition) newEntity.configure {
+                        it += PositionShape(x = xx, y = yy)
                     }
 
                     // Call the configured spawner function for configuring new objects
-                    spawner.configureFunction.invoke(world, newEntity)
+                    spawner.configureFunction.invoke(world, newEntity, spawner.configId)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects

@@ -2,6 +2,8 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import com.github.quillraven.fleks.World.Companion.inject
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.AnimateComponentType.*
 import korlibs.math.interpolation.Easing
@@ -13,6 +15,8 @@ class AnimationScriptSystem : IteratingSystem(
     family { all(AnimationScript) },
     interval = EachFrame
 ) {
+    private val assetStore = inject<AssetStore>("AssetStore")
+
     // Internally used variables in createAnimateComponent function
     private lateinit var currentTween: TweenBase
     private lateinit var currentParentTween: ParallelTweens
@@ -154,10 +158,11 @@ class AnimationScriptSystem : IteratingSystem(
             }
             // A special type of TweenSpawner which directly changes the Spawner component
             is SpawnEntity -> {
-                tween.entity.configure { it.getOrAdd(Info) { Info() }.configName = tween.configName }
+//                tween.entity.configure { it.getOrAdd(Info) { Info() }.configName = tween.configName }
                 tween.configureFunction.invoke(
                     world,
-                    tween.entity
+                    tween.entity,
+                    tween.configId
                 )
 //                tween.entity.configure { spawnerEntity ->
 //                // TODO create a new fresh entity and make sure it will be deleted or reused after spawning is done

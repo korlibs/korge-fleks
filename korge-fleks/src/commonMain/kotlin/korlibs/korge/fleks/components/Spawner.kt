@@ -3,7 +3,6 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
-import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.entity.config.nullEntity
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
@@ -19,10 +18,10 @@ data class Spawner(
     var timeVariation: Int = 0,                    // 0 - no variation, 1 - one frame variation, 2 - two frames variation, ...
     var positionVariation: Float = 0.0f,           // variation radius where objects will be spawned - 0.0 = no variation
     var newEntity: Entity = nullEntity,            // If spawner shall take a specific entity for spawning it can be set here
-    var configName: ConfigName = noConfig,
+    var configId: EntityConfigId = noConfig,
     @Serializable(InvokableSerializer::class)
-    var configureFunction: Invokable = World::noFunction, // Name of function which configures the new entity
-    var totalNumberOfObjects: Int = -1,            // -1 - unlimited number of objects spawned, x = x-number of objects spawned in total
+    var configureFunction: Invokable = noInvokable, // Name of function which configures the new entity
+    var totalNumberOfObjects: Int = -1,             // -1 - unlimited number of objects spawned, x = x-number of objects spawned in total
     // internal state
     var nextSpawnIn: Int = 0,
     var numberOfObjectsSpawned: Int = 0

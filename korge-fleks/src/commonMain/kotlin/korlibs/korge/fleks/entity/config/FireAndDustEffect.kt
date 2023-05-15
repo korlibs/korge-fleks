@@ -2,13 +2,16 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.EntityConfig
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.utils.EntityConfigId
 import korlibs.korge.fleks.utils.random
 
 
 object FireAndDustEffect {
 
-    data class EffectObjectConfig(
+    data class Config(
         val assetName: String,
         val animationName: String,
         val offsetX: Float = 0.0f,
@@ -19,41 +22,42 @@ object FireAndDustEffect {
         val velocityVariationY: Float = 0.0f,
         val drawOnLayer: String,
         val fadeOutDuration: Float = 0f
-    )
+    ) : EntityConfig
 
-    fun configureEffectObject(world: World, entity: Entity, config: EffectObjectConfig) : Entity = with(world) {
+    fun configureEffectObject(world: World, entity: Entity, config: EntityConfigId) : Entity = with(world) {
+        val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config.name())
         entity.configure { entity ->
             entity.getOrAdd(Offset) { Offset() }.also {
-                it.x = config.offsetX
-                it.y = config.offsetY
+                it.x = effectConfig.offsetX
+                it.y = effectConfig.offsetY
             }
             entity.getOrAdd(Motion) { Motion() }.also {
-                var velocityXX = config.velocityX
-                var velocityYY = config.velocityY
-                if (config.velocityVariationX != 0.0f) {
-                    velocityXX += (-config.velocityVariationX..config.velocityVariationX).random()
+                var velocityXX = effectConfig.velocityX
+                var velocityYY = effectConfig.velocityY
+                if (effectConfig.velocityVariationX != 0.0f) {
+                    velocityXX += (-effectConfig.velocityVariationX..effectConfig.velocityVariationX).random()
                 }
-                if (config.velocityVariationY != 0.0f) {
-                    velocityYY += (-config.velocityVariationY..config.velocityVariationY).random()
+                if (effectConfig.velocityVariationY != 0.0f) {
+                    velocityYY += (-effectConfig.velocityVariationY..effectConfig.velocityVariationY).random()
                 }
                 it.velocityX = velocityXX
                 it.velocityY = velocityYY
             }
             entity.getOrAdd(Sprite) { Sprite() }.also {
-                it.assetName = config.assetName
-                it.animationName = config.animationName
+                it.assetName = effectConfig.assetName
+                it.animationName = effectConfig.animationName
                 it.isPlaying = true
             }
             entity.getOrAdd(Drawable) { Drawable() }.also {
-                it.drawOnLayer = config.drawOnLayer
+                it.drawOnLayer = effectConfig.drawOnLayer
             }
             entity.getOrAdd(Appearance) { Appearance() }
             entity.getOrAdd(LifeCycle) { LifeCycle() }
-            if (config.fadeOutDuration > 0f) {
+            if (effectConfig.fadeOutDuration > 0f) {
                 entity.getOrAdd(AnimationScript) { AnimationScript() }.also {
                     it.tweens = listOf(
                         // Fade out effect objects
-                        TweenAppearance(entity = entity, alpha = 0.0f, duration = config.fadeOutDuration)
+                        TweenAppearance(entity = entity, alpha = 0.0f, duration = effectConfig.fadeOutDuration)
                     )
                 }
             }

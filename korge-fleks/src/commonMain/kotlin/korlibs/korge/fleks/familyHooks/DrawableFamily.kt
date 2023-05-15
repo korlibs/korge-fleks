@@ -21,7 +21,6 @@ import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxConfig
 import korlibs.korge.parallax.ParallaxDataView
 import korlibs.korge.view.*
-import korlibs.korge.view.align.centerXBetween
 import korlibs.korge.view.align.centerXOnStage
 import korlibs.korge.view.align.centerYOnStage
 
@@ -147,19 +146,19 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
     entity.getOrNull(InputTouchButton)?.let { touchInput ->
         view.mouse {
             onDown {
-                if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity)
+                if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity, touchInput.buttonId)
                 touchInput.pressed = true
             }
             onUp {
                 if (touchInput.pressed) {
                     touchInput.pressed = false
-                    touchInput.action.invoke(world, entity)
+                    touchInput.action.invoke(world, entity, touchInput.buttonId)
                 }
             }
             onUpOutside {
                 if (touchInput.pressed) {
                     touchInput.pressed = false
-                    if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity)
+                    if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity, touchInput.buttonId)
                 }
             }
         }

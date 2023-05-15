@@ -3,9 +3,11 @@ package korlibs.korge.fleks.entity.config
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.EntityConfig
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.Invokable
-import korlibs.korge.fleks.utils.SerializableConfig
+import korlibs.korge.fleks.utils.EntityConfigId
+import korlibs.korge.fleks.utils.noConfig
 
 
 object TextAndLogos {
@@ -23,8 +25,9 @@ object TextAndLogos {
         val alpha: Float = 0.0f,
         val drawOnLayer: String? = null,
 
-        val invokable: Invokable? = null
-    ) : SerializableConfig
+        val invokable: Invokable? = null,
+        val configId: EntityConfigId = noConfig
+    ) : EntityConfig
 
     data class LogoLayerConfig(
         var layerName: String = "",
@@ -34,53 +37,51 @@ object TextAndLogos {
         var parentEntity: Entity = nullEntity
     )
 
-    fun configureLogo(world: World, entity: Entity, config: LogoConfig) : Entity = with(world) {
+    fun configureLogo(world: World, entity: Entity, config: EntityConfigId) : Entity = with(world) {
+        val logoConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoConfig>(config.name())
         entity.configure { entity ->
             // Make sure we have position component
             entity.getOrAdd(PositionShape) { PositionShape() }
 
-            config.logoName?.let {
+            logoConfig.logoName?.let {
                 entity.getOrAdd(Sprite) { Sprite() }.also {
-                    it.assetName = config.logoName
+                    it.assetName = logoConfig.logoName
                 }
             }
-            config.text?.let {
+            logoConfig.text?.let {
                 entity.getOrAdd(Text) { Text() }.also {
-                    it.text = config.text
-                    it.fontName = config.fontName
+                    it.text = logoConfig.text
+                    it.fontName = logoConfig.fontName
                 }
             }
 
             entity += PositionShape()
             entity.getOrAdd(Layout) { Layout() }.also {
-                it.centerX = config.centerX
-                it.centerY = config.centerY
-                it.offsetX = config.offsetX
-                it.offsetY = config.offsetY
+                it.centerX = logoConfig.centerX
+                it.centerY = logoConfig.centerY
+                it.offsetX = logoConfig.offsetX
+                it.offsetY = logoConfig.offsetY
             }
-            config.drawOnLayer?.let {
+            logoConfig.drawOnLayer?.let {
                 entity.getOrAdd(Drawable) { Drawable() }.also {
-                    it.drawOnLayer = config.drawOnLayer
+                    it.drawOnLayer = logoConfig.drawOnLayer
                 }
             }
             entity.getOrAdd(Appearance) { Appearance() }.also {
-                it.alpha = config.alpha
+                it.alpha = logoConfig.alpha
             }
             entity += LifeCycle()
-            config.invokable?.let {
+            logoConfig.invokable?.let { invokable ->
                 entity.getOrAdd(InputTouchButton) { InputTouchButton() }.also {
-                    it.action = config.invokable
+                    it.action = invokable
+                    it.buttonId = logoConfig.configId
                 }
             }
         }
         return entity
     }
 
-    fun createLogo(world: World, config: LogoConfig) : Entity {
-        val entity = world.entity {}
-        return configureLogo(world, entity, config)
-    }
-
+    // TODO change to configure logo layer
     fun createLogoLayer(world: World, config: LogoLayerConfig) : Entity  {
         return world.entity {
             it += SpecificLayer(spriteLayer = config.layerName, parentEntity = config.parentEntity)
@@ -91,9 +92,12 @@ object TextAndLogos {
     }
 }
 
-fun World.createLogo(entity: Entity) : Entity {
+// TODO clean up
+/*
+fun createLogo(world: World, entity: Entity, config: EntityConfig) : Entity = with (world) {
     // Assuming entity has Info component
     val configName = if (entity has Info) entity[Info].configName else error("TextAndLogos - createLogo: Entity '${entity.id}' has no Info component!")
     val config = inject<AssetStore>("AssetStore").getConfig<TextAndLogos.LogoConfig>(configName)
     return TextAndLogos.configureLogo(this, entity, config)
 }
+*/
