@@ -1,11 +1,10 @@
 package korlibs.korge.fleks.entity.config
 
-import com.github.quillraven.fleks.Entity
-import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.EntityConfig
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.utils.EntityConfigId
+import korlibs.korge.fleks.utils.Invokable
+import korlibs.korge.fleks.utils.InvokableSerializer
 import korlibs.korge.fleks.utils.random
 
 
@@ -24,49 +23,55 @@ object FireAndDustEffect {
         val fadeOutDuration: Float = 0f
     ) : EntityConfig
 
-    fun configureEffectObject(world: World, entity: Entity, config: EntityConfigId) : Entity = with(world) {
-        val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config.name())
-        entity.configure { entity ->
-            entity.getOrAdd(Offset) { Offset() }.also {
-                it.x = effectConfig.offsetX
-                it.y = effectConfig.offsetY
-            }
-            entity.getOrAdd(Motion) { Motion() }.also {
-                var velocityXX = effectConfig.velocityX
-                var velocityYY = effectConfig.velocityY
-                if (effectConfig.velocityVariationX != 0.0f) {
-                    velocityXX += (-effectConfig.velocityVariationX..effectConfig.velocityVariationX).random()
+    val configureEffectObject = Invokable { world, entity, config ->
+        with(world) {
+            val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config.name())
+            entity.configure { entity ->
+                entity.getOrAdd(Offset) { Offset() }.also {
+                    it.x = effectConfig.offsetX
+                    it.y = effectConfig.offsetY
                 }
-                if (effectConfig.velocityVariationY != 0.0f) {
-                    velocityYY += (-effectConfig.velocityVariationY..effectConfig.velocityVariationY).random()
+                entity.getOrAdd(Motion) { Motion() }.also {
+                    var velocityXX = effectConfig.velocityX
+                    var velocityYY = effectConfig.velocityY
+                    if (effectConfig.velocityVariationX != 0.0f) {
+                        velocityXX += (-effectConfig.velocityVariationX..effectConfig.velocityVariationX).random()
+                    }
+                    if (effectConfig.velocityVariationY != 0.0f) {
+                        velocityYY += (-effectConfig.velocityVariationY..effectConfig.velocityVariationY).random()
+                    }
+                    it.velocityX = velocityXX
+                    it.velocityY = velocityYY
                 }
-                it.velocityX = velocityXX
-                it.velocityY = velocityYY
-            }
-            entity.getOrAdd(Sprite) { Sprite() }.also {
-                it.assetName = effectConfig.assetName
-                it.animationName = effectConfig.animationName
-                it.isPlaying = true
-            }
-            entity.getOrAdd(Drawable) { Drawable() }.also {
-                it.drawOnLayer = effectConfig.drawOnLayer
-            }
-            entity.getOrAdd(Appearance) { Appearance() }
-            entity.getOrAdd(LifeCycle) { LifeCycle() }
-            if (effectConfig.fadeOutDuration > 0f) {
-                entity.getOrAdd(AnimationScript) { AnimationScript() }.also {
-                    it.tweens = listOf(
-                        // Fade out effect objects
-                        TweenAppearance(entity = entity, alpha = 0.0f, duration = effectConfig.fadeOutDuration)
-                    )
+                entity.getOrAdd(Sprite) { Sprite() }.also {
+                    it.assetName = effectConfig.assetName
+                    it.animationName = effectConfig.animationName
+                    it.isPlaying = true
                 }
-            }
-/* for visual debugging
+                entity.getOrAdd(Drawable) { Drawable() }.also {
+                    it.drawOnLayer = effectConfig.drawOnLayer
+                }
+                entity.getOrAdd(Appearance) { Appearance() }
+                entity.getOrAdd(LifeCycle) { LifeCycle() }
+                if (effectConfig.fadeOutDuration > 0f) {
+                    entity.getOrAdd(AnimationScript) { AnimationScript() }.also {
+                        it.tweens = listOf(
+                            // Fade out effect objects
+                            TweenAppearance(entity = entity, alpha = 0.0f, duration = effectConfig.fadeOutDuration)
+                        )
+                    }
+                }
+                /* for visual debugging
             entity.getOrAdd(DebugInfo) { DebugInfo() }.also {
                 it.name = "Dust"
             }
 // */
+            }
         }
-        return entity
+        entity
+    }
+
+    init {
+        InvokableSerializer.register(configureEffectObject)
     }
 }

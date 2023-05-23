@@ -2,6 +2,7 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.assets.EntityConfig
 import korlibs.korge.fleks.components.Appearance
 import korlibs.korge.fleks.components.Drawable
 import korlibs.korge.fleks.components.PositionShape
@@ -16,12 +17,12 @@ object TiledMapBackground {
         val x: Float = 0.0f,
         val y: Float = 0.0f,
         val alpha: Float = 1.0f
-    )
+    ) : EntityConfig
 
     /**
      * This function creates a tiled map background entity which is used for various backgrounds in the game and intro.
      */
-    fun createTiledMap(world: World, config: TiledMapConfig) : Entity {
+    fun createTiledMap(world: World, entity: Entity, config: TiledMapConfig) : Entity {
         return world.entity {
             it += TiledMap(
                 assetName = config.assetName

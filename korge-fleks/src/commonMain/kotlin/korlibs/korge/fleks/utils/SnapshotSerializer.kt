@@ -161,6 +161,7 @@ object InvokableSerializer : KSerializer<Invokable> {
 
     fun register(vararg invokable: Invokable) {
         invokable.fastForEach {
+            // TODO check how we get the name out of it for serialization
             println("register Invokable: ${it.toString()}")
             val name = it.toString().substringAfter("World.").substringBefore('(')
             map[name] = it
@@ -189,26 +190,11 @@ object InvokableSerializer : KSerializer<Invokable> {
 
 /**
  * A serializer strategy for ConfigName functional interface objects in components.
- * It is necessary that all created ConfigName objects are added to the internal map which
- * shall be serializable. For that the [register] function can be used.
- */object EntityConfigIdSerializer : KSerializer<EntityConfigId> {
-    private val map = mutableMapOf<String, EntityConfigId>(
-        noConfig.name() to noConfig
-    )
-
-    fun register(vararg config: EntityConfigId) = config.fastForEach { map[it.name()] = it }
-    fun unregister(vararg config: EntityConfigId) = config.fastForEach { map.remove(it.name()) }
-
+ */
+object EntityConfigIdSerializer : KSerializer<EntityConfigId> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("EntityConfigIdAsString", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: EntityConfigId) {
-        if (map.containsKey(value.name())) encoder.encodeString(value.name())
-        else throw SerializationException("Invokable function '${value.name()}' not registered in InvokableAsString serializer!")
-    }
-
-    override fun deserialize(decoder: Decoder): EntityConfigId =
-        map[decoder.decodeString()]
-            ?: throw SerializationException("No lambda function found for '${decoder.decodeString()}' in InvokableAsString!")
+    override fun serialize(encoder: Encoder, value: EntityConfigId) = encoder.encodeString(value.name())
+    override fun deserialize(decoder: Decoder): EntityConfigId = EntityConfigId { decoder.decodeString() }
 }
 
 /**
