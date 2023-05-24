@@ -61,10 +61,10 @@ object FireAndDustEffect {
                         )
                     }
                 }
-                /* for visual debugging
-            entity.getOrAdd(DebugInfo) { DebugInfo() }.also {
-                it.name = "Dust"
-            }
+/* for visual debugging
+                entity.getOrAdd(DebugInfo) { DebugInfo() }.also {
+                    it.name = "Dust"
+                }
 // */
             }
         }
