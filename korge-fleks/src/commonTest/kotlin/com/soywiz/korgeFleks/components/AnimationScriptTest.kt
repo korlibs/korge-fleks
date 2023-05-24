@@ -2,23 +2,24 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import com.github.quillraven.fleks.world
+import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.utils.InvokableSerializer
 import korlibs.math.interpolation.Easing
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.utils.EntityConfigId
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
 internal class AnimationScriptTest {
 
-    private val expectedWorld = world {}
-    private val recreatedWorld = world {}
+    private val expectedWorld = configureWorld {}
+    private val recreatedWorld = configureWorld {}
 
     @Test
     fun testAnimationScriptSerialization() {
 
-        InvokableSerializer.register(World::testFunction)
+        InvokableSerializer.register(testFunction)
 
         val compUnderTest = AnimationScript(
             tweens = listOf(
@@ -27,8 +28,8 @@ internal class AnimationScriptTest {
                         ParallelTweens(
                             tweens = listOf(
                                 SpawnEntity(
-                                    configId = "testEntity",
-                                    configureFunction = World::testFunction,
+                                    configId = EntityConfigId { "testEntity" },
+                                    configureFunction = testFunction,
                                     x = 10.2f,
                                     y = 20.3f,
                                     entity = Entity(43)

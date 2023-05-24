@@ -161,16 +161,14 @@ object InvokableSerializer : KSerializer<Invokable> {
 
     fun register(vararg invokable: Invokable) {
         invokable.fastForEach {
-            // TODO check how we get the name out of it for serialization
-            println("register Invokable: ${it.toString()}")
-            val name = it.toString().substringAfter("World.").substringBefore('(')
+            val name = it.toString().substringAfter('$').substringBefore('$')
             map[name] = it
         }
     }
 
     fun unregister(vararg invokable: Invokable) {
         invokable.fastForEach {
-            val name = it.toString().substringAfter("World.").substringBefore('(')
+            val name = it.toString().substringAfter('$').substringBefore('$')
             map.remove(name)
         }
     }
@@ -178,7 +176,7 @@ object InvokableSerializer : KSerializer<Invokable> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("InvokableAsString", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Invokable) {
-        val name = value.toString().substringAfter("World.").substringBefore('(')
+        val name = value.toString().substringAfter('$').substringBefore('$')
         if (map.containsKey(name)) encoder.encodeString(name)
         else throw SerializationException("Invokable function '$name' not registered in InvokableAsString serializer!")
     }

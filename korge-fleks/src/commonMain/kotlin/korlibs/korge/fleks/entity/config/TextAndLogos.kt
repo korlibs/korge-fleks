@@ -38,9 +38,9 @@ object TextAndLogos {
         var parentEntity: Entity = nullEntity
     ) : EntityConfig
 
-    val configureLogo = Invokable { world, entity, config ->
+    val configureLogo = Invokable { world, entity, configId ->
         with(world) {
-            val logoConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoConfig>(config.name())
+            val logoConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoConfig>(configId.name())
             entity.configure { entity ->
                 // Make sure we have position component
                 entity.getOrAdd(PositionShape) { PositionShape() }
