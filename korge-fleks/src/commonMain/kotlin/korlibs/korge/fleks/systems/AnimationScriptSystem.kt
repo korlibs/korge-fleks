@@ -175,7 +175,8 @@ class AnimationScriptSystem : IteratingSystem(
             }
             // A special type of TweenLifeCycle (to be created if needed) which directly changes the LifeCycle component
             is DeleteEntity -> tween.entity.configure { animatedEntity ->
-                animatedEntity.getOrAdd(LifeCycle) { LifeCycle() }.also { it.healthCounter = 0 }
+                world -= animatedEntity
+//                animatedEntity.getOrAdd(LifeCycle) { LifeCycle() }.also { it.healthCounter = 0 }
             }
             else -> error("AnimationScriptSystem: Animate function for tween $tween not implemented!")
         }
