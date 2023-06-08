@@ -135,11 +135,11 @@ class AssetStore {
                 currentWorldAssetConfig = assetConfig
                 worldAtlas
             }
-            assetConfig.assetFolderName.contains(Regex("^world[0-9]+\\/(intro|extro/level[0-9]+)\$")) -> {
+            assetConfig.assetFolderName.contains(Regex("^world[0-9]+\\/(intro[0-9]+|extro/level[0-9]+)\$")) -> {
                 when (currentLevelAssetConfig.assetFolderName) {
                     "none" -> { /* Just load assets */ }
                     assetConfig.assetFolderName -> {
-                        println("INFO: World assets already loaded! No reload is happening!")
+                        println("INFO: Level assets already loaded! No reload is happening!")
                         return
                     }
                     else -> {
@@ -205,7 +205,8 @@ class AssetStore {
         }
     }
 
-    private suspend fun checkAssetFolders(world: World, file: VfsFile, type: AssetType, assetConfig: AssetModel, assetReloadContext: CoroutineContext, assetReloadCache: AssetReloadCache) = with (world) {
+    private suspend fun checkAssetFolders(world: World, file: VfsFile, type: AssetType, assetConfig: AssetModel,
+                                          assetReloadContext: CoroutineContext, assetReloadCache: AssetReloadCache) = with (world) {
         assetConfig.backgrounds.forEach { config ->
             if (file.fullName.contains(config.value.aseName) && !reloading) {
                 reloading = true  // save that reloading is in progress

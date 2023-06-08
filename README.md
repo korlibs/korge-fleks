@@ -14,7 +14,7 @@ Korge-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
 This is a list of versions for all needed modules/addons which are known to work together:
 
-- Korge: 4.0.0
+- Korge: 4.0.3
 - Korge-fleks addon: 0.0.5
 - Korge-parallax addon: b8e7356c3c5ba5fac273a83d3f6ef127a16de739 (on branch adaptation-of-parallax-view-to-korge-fleks)
 - Korge-tiled addon: 0.0.2
@@ -47,9 +47,12 @@ All components of the Fleks ECS shall contain only basic property types like:
 - Numbers (Int, Float, Double, enum class)
 - Entity (value class)
 - ConfigId (Identifier for static entity configuration which is loaded from assets)
-- Invokable (lambda function with world, entity, config parameters)
+- Invokable (lambda function with world, entity, configId parameters)
 
-and sets of those in Lists and Maps. For simplicity all those properties shall be independent of any Korge-specific complex classes. Components shall not contain any Korge-related complex objects like `Views`, `Image`, `Camera`, etc. Where it makes sense a type can be taken over from Korge as it is done with the `Easing` enum class for the _Animation system_.
+and sets of those in Lists and Maps. For simplicity all those properties shall be independent of any Korge-specific
+complex classes. Components shall not contain any Korge-related complex objects like `Views`, `Image`, `Camera`, etc.
+Where it makes sense a type can be taken over from Korge as it is done with the `Easing` enum class for the
+_Animation system_.
 
 ... to be continued
 
@@ -101,7 +104,7 @@ Needed settings for gradle to make kproject usable in the project.
 pluginManagement { repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() } }
 
 plugins {
-  id("com.soywiz.kproject.settings") version "0.2.3"
+  id("com.soywiz.kproject.settings") version "0.3.1"
 }
 
 kproject("./deps")
