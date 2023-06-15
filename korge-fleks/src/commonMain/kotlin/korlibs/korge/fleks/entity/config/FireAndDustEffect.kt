@@ -25,7 +25,7 @@ object FireAndDustEffect {
 
     val configureEffectObject = Invokable { world, entity, config ->
         with(world) {
-            val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config.name())
+            val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config)
             entity.configure { entity ->
                 entity.getOrAdd(Offset) { Offset() }.also {
                     it.x = effectConfig.offsetX

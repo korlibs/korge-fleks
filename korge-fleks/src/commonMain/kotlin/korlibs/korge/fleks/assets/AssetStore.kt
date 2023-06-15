@@ -18,9 +18,13 @@ import korlibs.io.file.std.resourcesVfs
 import korlibs.io.lang.Closeable
 import korlibs.korge.fleks.components.AssetReload
 import korlibs.korge.fleks.utils.AssetReloadCache
+import korlibs.korge.fleks.utils.EntityConfigId
+import korlibs.korge.fleks.utils.PolymorphicEnumSerializer
+import korlibs.korge.fleks.utils.SnapshotSerializer
 import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
 import korlibs.time.Stopwatch
+import kotlinx.serialization.modules.polymorphic
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 
@@ -58,13 +62,13 @@ class AssetStore {
 
     enum class AssetType{ None, Common, World, Level }
 
-    fun <T : EntityConfig> addEntityConfig(name: String, entityConfig: T) {
-        entityConfigs[name] = entityConfig
+    fun <T : EntityConfig> addEntityConfig(entityConfigId: EntityConfigId, entityConfig: T) {
+        entityConfigs[entityConfigId.name] = entityConfig
     }
 
-    fun <T : EntityConfig> getEntityConfig(name: String) : T {
-        if (!entityConfigs.containsKey(name)) error("AssetStore - getConfig: No config found for configId name '$name'!")
-        return entityConfigs[name]!! as T
+    fun <T : EntityConfig> getEntityConfig(entityConfigId: EntityConfigId) : T {
+        if (!entityConfigs.containsKey(entityConfigId.name)) error("AssetStore - getConfig: No config found for configId name '${entityConfigId.name}'!")
+        return entityConfigs[entityConfigId.name]!! as T
     }
 
     fun getSound(name: String) : SoundChannel {

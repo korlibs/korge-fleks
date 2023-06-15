@@ -32,13 +32,12 @@ typealias FleksSnapshot = Map<Entity, List<Component<*>>>  // snapshot data of F
 typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
 
 /**
- * Functional interface for serializing config name
+ * Class for serializing entity config ID objects
  */
-fun interface EntityConfigId {
-    fun name(): String
-}
+@Serializable
+class EntityConfigId(val name: String)
 
-val noConfig = EntityConfigId { "noConfig" }
+val noConfig = EntityConfigId("noConfig")
 
 fun interface Invokable {
     fun invoke(world: World, entity: Entity, config: EntityConfigId): Entity
@@ -187,12 +186,12 @@ object InvokableSerializer : KSerializer<Invokable> {
 }
 
 /**
- * A serializer strategy for ConfigName functional interface objects in components.
+ * A serializer strategy for EntityConfigId name objects in components.
  */
 object EntityConfigIdSerializer : KSerializer<EntityConfigId> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("EntityConfigIdAsString", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: EntityConfigId) = encoder.encodeString(value.name())
-    override fun deserialize(decoder: Decoder): EntityConfigId = EntityConfigId { decoder.decodeString() }
+    override fun serialize(encoder: Encoder, value: EntityConfigId) = encoder.encodeString(value.name)
+    override fun deserialize(decoder: Decoder): EntityConfigId = EntityConfigId(decoder.decodeString())
 }
 
 /**

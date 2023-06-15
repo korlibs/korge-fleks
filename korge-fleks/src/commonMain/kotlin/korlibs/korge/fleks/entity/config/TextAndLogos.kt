@@ -40,7 +40,7 @@ object TextAndLogos {
 
     val configureLogo = Invokable { world, entity, configId ->
         with(world) {
-            val logoConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoConfig>(configId.name())
+            val logoConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoConfig>(configId)
             entity.configure { entity ->
                 // Make sure we have position component
                 entity.getOrAdd(PositionShape) { PositionShape() }
@@ -86,7 +86,7 @@ object TextAndLogos {
 
     val configureLogoLayer = Invokable { world, entity, config ->
         with(world) {
-            val layerConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoLayerConfig>(config.name())
+            val layerConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoLayerConfig>(config)
             entity.configure { entity ->
                 entity.getOrAdd(SpecificLayer) { SpecificLayer() }.also {
                     it.spriteLayer = layerConfig.layerName

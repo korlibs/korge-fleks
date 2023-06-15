@@ -25,7 +25,7 @@ object TiledMapBackground {
      */
     val configureTiledMap = Invokable { world, entity, config ->
         with(world) {
-            val tiledMapConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config.name())
+            val tiledMapConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config)
             entity.configure {
                 it += TiledMap(
                     assetName = tiledMapConfig.assetName
