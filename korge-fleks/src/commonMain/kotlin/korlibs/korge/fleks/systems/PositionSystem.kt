@@ -49,7 +49,7 @@ class PositionSystem : IteratingSystem(
             }
         }
 
-        if (entity has SubEntities) {
+        if (entity has SubEntities && entity[SubEntities].moveWithParent) {
             entity[SubEntities].entities.forEach {
                 val subEntity = it.value
                 subEntity.getOrNull(PositionShape)?.let { subEntityPosition ->

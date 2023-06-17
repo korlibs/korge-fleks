@@ -15,38 +15,33 @@ import korlibs.korge.parallax.ParallaxDataView
 
 
 class ParallaxBackground(private val world: World, private val assetConfig: EntityConfig, drawOnLayer: String) {
-
     val entity: Entity
 
     companion object {
-        // Used in component properties to specify entity config
-//        val parallaxLayerConfig = EntityConfig(name = "parallaxLayerConfig")
-
         // Used in component properties to specify invokable function
         val configureParallaxLayers = Invokable(name = "configureParallaxLayers")
 
         private val configureParallaxLayersFct = fun(world: World, entity: Entity, assetConfig: EntityConfig) = with(world) {
-            println("TODO: re-configure parallax Layers")
+            println("Re-configure attached parallax Layers")
 
             val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
             val config = inject<AssetStore>("AssetStore").getBackground(assetConfig).config
             val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
             val view = korgeViewCache[entity] as ParallaxDataView
+            val layerMap = entity[SubEntities]
 
             config.parallaxPlane?.let { planeConf ->
                 val offset = planeConf.offset
                 val selfSpeedX = if (isHorizontal) planeConf.selfSpeed else 0.0f
                 val selfSpeedY = if (!isHorizontal) planeConf.selfSpeed else 0.0f
 
-                // TODO: we need to get the entity for each attached layer
-
-/*
+                // Update only attached layers because they might change their speed depending on their position on the ground plane
                 planeConf.attachedLayersFront?.fastForEach { conf ->
                     val layer = korgeViewCache.getLayer(entity, conf.name)
                     configureSubEntityForLayer(
                         world = world,
-                        entity = layerEntityMap[conf.name] ?: error("ParallaxBackground - updateLayersConfig: No layer '${conf.name}' found in layerEntityMap!"),
+                        entity = layerMap[conf.name],
                         layerName = conf.name,
                         speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                         selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
@@ -56,14 +51,14 @@ class ParallaxBackground(private val world: World, private val assetConfig: Enti
                 planeConf.attachedLayersRear?.fastForEach { conf ->
                     val layer = korgeViewCache.getLayer(entity, conf.name)
                     configureSubEntityForLayer(
-                        entity = layerEntityMap[conf.name] ?: error("ParallaxBackground - updateLayersConfig: No layer '${conf.name}' found in layerEntityMap!"),
+                        world = world,
+                        entity = layerMap[conf.name],
                         layerName = conf.name,
                         speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                         selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                         isHorizontal = isHorizontal
                     )
                 }
-*/
             }
             entity
         }
@@ -90,16 +85,16 @@ class ParallaxBackground(private val world: World, private val assetConfig: Enti
             entity
         }
 
+        init {
+            Invokables.register(configureParallaxLayers, configureParallaxLayersFct)
+        }
     }
 
-    // All sub-entity IDs are here for quick lookup by its layer name and for recycling of the overall background entity object
-    private val layerEntityMap = mutableMapOf<String, Entity>()
-
-    fun getEntityByLayerName(name: String) : Entity = layerEntityMap[name] ?: error("ParallaxBackground: Layer '$name' not found!")
+    fun getEntityByLayerName(name: String) : Entity = with(world) {
+        entity[SubEntities].entities[name] ?: error("ParallaxBackground: Layer '$name' not found!")
+    }
 
     init {
-        Invokables.register(configureParallaxLayers, configureParallaxLayersFct)
-
         with(world) {
             val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
@@ -108,21 +103,24 @@ class ParallaxBackground(private val world: World, private val assetConfig: Enti
                 it += PositionShape()
                 it += Drawable(drawOnLayer = drawOnLayer)
                 it += Appearance(alpha = 1.0f)
+                // All sub-entity IDs are here for quick lookup by its layer name and for recycling of the overall background entity object
+                it += SubEntities(moveWithParent = false)
             }
 
             // Once the base ParallaxDataView is created with above base entity we can access it from the cache
             val view = korgeViewCache[entity] as ParallaxDataView
+            val layerMap = entity[SubEntities]
 
             val config = inject<AssetStore>("AssetStore").getBackground(assetConfig).config
             val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
 
             config.backgroundLayers?.fastForEach { conf ->
-                layerEntityMap[conf.name] = createSubEntityForLayer(entity, conf.name,
+                layerMap.entities[conf.name] = createSubEntityForLayer(entity, conf.name,
                     speedFactor = conf.speedFactor, selfSpeedX = conf.selfSpeedX, selfSpeedY = conf.selfSpeedY,
                     isHorizontal = isHorizontal)
             }
             config.foregroundLayers?.fastForEach { conf ->
-                layerEntityMap[conf.name] = createSubEntityForLayer(entity, conf.name,
+                layerMap.entities[conf.name] = createSubEntityForLayer(entity, conf.name,
                     speedFactor = conf.speedFactor, selfSpeedX = conf.selfSpeedX, selfSpeedY = conf.selfSpeedY,
                     isHorizontal = isHorizontal)
             }
@@ -132,14 +130,14 @@ class ParallaxBackground(private val world: World, private val assetConfig: Enti
                 val selfSpeedY = if (!isHorizontal) planeConf.selfSpeed else 0.0f
                 planeConf.attachedLayersFront?.fastForEach { conf ->
                     val layer = korgeViewCache.getLayer(entity, conf.name)
-                    layerEntityMap[conf.name] = createSubEntityForLayer(entity, conf.name,
+                    layerMap.entities[conf.name] = createSubEntityForLayer(entity, conf.name,
                         speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                         selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                         isHorizontal = isHorizontal)
                 }
                 planeConf.attachedLayersRear?.fastForEach { conf ->
                     val layer = korgeViewCache.getLayer(entity, conf.name)
-                    layerEntityMap[conf.name] = createSubEntityForLayer(entity, conf.name,
+                    layerMap.entities[conf.name] = createSubEntityForLayer(entity, conf.name,
                         speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                         selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                         isHorizontal = isHorizontal)
@@ -147,7 +145,7 @@ class ParallaxBackground(private val world: World, private val assetConfig: Enti
 
                 view.parallaxLines.fastForEachWithIndex { index, it -> it?.let { line ->
                     // Here we need to take speedFactor per line into account
-                    layerEntityMap[planeConf.name + index] =  createSubEntityForLayer(entity, layerLine = index,
+                    layerMap.entities[planeConf.name + index] = createSubEntityForLayer(entity, layerLine = index,
                         speedFactor = view.parallaxPlaneSpeedFactor[line.y.toInt() - offset],
                         selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                         isHorizontal = isHorizontal)
@@ -156,45 +154,8 @@ class ParallaxBackground(private val world: World, private val assetConfig: Enti
         }
     }
 
-    fun updateLayersConfig() = with(world) {
-        val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
-
-        val config = inject<AssetStore>("AssetStore").getBackground(assetConfig).config
-        val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
-        val view = korgeViewCache[entity] as ParallaxDataView
-
-        config.parallaxPlane?.let { planeConf ->
-            val offset = planeConf.offset
-            val selfSpeedX = if (isHorizontal) planeConf.selfSpeed else 0.0f
-            val selfSpeedY = if (!isHorizontal) planeConf.selfSpeed else 0.0f
-            planeConf.attachedLayersFront?.fastForEach { conf ->
-                val layer = korgeViewCache.getLayer(entity, conf.name)
-                configureSubEntityForLayer(
-                    world = world,
-                    entity = layerEntityMap[conf.name] ?: error("ParallaxBackground - updateLayersConfig: No layer '${conf.name}' found in layerEntityMap!"),
-                    parentEntity = entity,
-                    layerName = conf.name,
-                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
-                    selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
-                    isHorizontal = isHorizontal
-                )
-            }
-            planeConf.attachedLayersRear?.fastForEach { conf ->
-                val layer = korgeViewCache.getLayer(entity, conf.name)
-                configureSubEntityForLayer(
-                    world = world,
-                    entity = layerEntityMap[conf.name] ?: error("ParallaxBackground - updateLayersConfig: No layer '${conf.name}' found in layerEntityMap!"),
-                    parentEntity = entity,
-                    layerName = conf.name,
-                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
-                    selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
-                    isHorizontal = isHorizontal
-                )
-            }
-        }
-    }
-
     private fun createSubEntityForLayer(parentEntity: Entity, layerName: String? = null, layerLine: Int? = null, speedFactor: Float? = null,
-                                        selfSpeedX: Float = 0.0f, selfSpeedY: Float = 0.0f, isHorizontal: Boolean = true) : Entity =
-        configureSubEntityForLayer(world, world.entity(), parentEntity, layerName, layerLine, speedFactor, selfSpeedX, selfSpeedY, isHorizontal)
+                                        selfSpeedX: Float = 0.0f, selfSpeedY: Float = 0.0f, isHorizontal: Boolean = true) : Entity {
+        return configureSubEntityForLayer(world, world.entity(), parentEntity, layerName, layerLine, speedFactor, selfSpeedX, selfSpeedY, isHorizontal)
+    }
 }
