@@ -17,7 +17,11 @@ import korlibs.korge.parallax.ParallaxDataView
 class ParallaxBackground(private val world: World, private val assetConfig: EntityConfig, drawOnLayer: String) {
     val entity: Entity
 
+    // TODO: Refactor to object instead of class above
     companion object {
+
+        // TODO: Put parallax config data class here for storing it in assetStore
+
         // Used in component properties to specify invokable function
         val configureParallaxLayers = Invokable(name = "configureParallaxLayers")
 
@@ -90,10 +94,12 @@ class ParallaxBackground(private val world: World, private val assetConfig: Enti
         }
     }
 
+    // TODO: do be removed
     fun getEntityByLayerName(name: String) : Entity = with(world) {
         entity[SubEntities].entities[name] ?: error("ParallaxBackground: Layer '$name' not found!")
     }
 
+    // TODO: Put next into a configureParallaxBackgroundFct
     init {
         with(world) {
             val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
