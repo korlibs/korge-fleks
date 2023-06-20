@@ -42,11 +42,11 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     val view: View = if (specificLayer.parallaxPlaneLine != null) {
         val pView = korgeViewCache[specificLayer.parentEntity]
         pView as ParallaxDataView
-        pView.parallaxLines[specificLayer.parallaxPlaneLine!!] ?: error("OnSpecificLayerFamily: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
+        pView.parallaxLines[specificLayer.parallaxPlaneLine!!] ?: error("onSpecificLayerFamilyAdded: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
     } else if (specificLayer.spriteLayer != null) {
         korgeViewCache.getLayer(specificLayer.parentEntity, specificLayer.spriteLayer!!)
     } else {
-        error("OnSpecificLayerFamily: No sprite layer name or parallax plane line number set for entity '${entity.id}'!")
+        error("onSpecificLayerFamilyAdded: No sprite layer name or parallax plane line number set for entity '${entity.id}'!")
     }
 
     entity.getOrNull(Appearance)?.also {

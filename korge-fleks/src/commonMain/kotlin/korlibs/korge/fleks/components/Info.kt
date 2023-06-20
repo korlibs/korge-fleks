@@ -36,11 +36,3 @@ data class Info(
         }
     }
 }
-
-@Serializable @SerialName("AssetReload")
-class AssetReload(
-    var trigger: Boolean = false
-) : Component<AssetReload>, SerializeBase {
-    override fun type(): ComponentType<AssetReload> = AssetReload
-    companion object : ComponentType<AssetReload>()
-}

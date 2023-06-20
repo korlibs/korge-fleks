@@ -16,7 +16,8 @@ import korlibs.io.file.VfsFile
 import korlibs.io.file.fullName
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.lang.Closeable
-import korlibs.korge.fleks.components.AssetReload
+import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.familyHooks.*
 import korlibs.korge.fleks.utils.AssetReloadCache
 import korlibs.korge.fleks.utils.EntityConfigId
 import korlibs.korge.fleks.utils.PolymorphicEnumSerializer
@@ -24,6 +25,8 @@ import korlibs.korge.fleks.utils.SnapshotSerializer
 import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
 import korlibs.time.Stopwatch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.newCoroutineContext
 import kotlinx.serialization.modules.polymorphic
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
@@ -44,21 +47,16 @@ class AssetStore {
     val worldAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
     val levelAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
 
-    private var commonAssetConfig: AssetModel = AssetModel()
-    private var currentWorldAssetConfig: AssetModel = AssetModel()
-    private var currentLevelAssetConfig: AssetModel = AssetModel()
+    internal var commonAssetConfig: AssetModel = AssetModel()
+    internal var currentWorldAssetConfig: AssetModel = AssetModel()
+    internal var currentLevelAssetConfig: AssetModel = AssetModel()
 
     private var entityConfigs: MutableMap<String, EntityConfig> = mutableMapOf()
     private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
-    private var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
-    private var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
+    internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
+    internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     private var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     private var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
-
-    private var reloading: Boolean = false  // Used for debouncing reload of config (in case the modification message comes twice from the system)
-    private lateinit var commonResourcesWatcher: Closeable
-    private lateinit var currentWorldResourcesWatcher: Closeable
-    private lateinit var currentLevelResourcesWatcher: Closeable
 
     enum class AssetType{ None, Common, World, Level }
 
@@ -191,70 +189,5 @@ class AssetStore {
         }
 
         println("Assets: Loaded resources in ${sw.elapsed}")
-    }
-
-    suspend fun watchAssetsForChanges(world: World, assetReloadContext: CoroutineContext, assetReloadCache: AssetReloadCache) {
-        // This resource watcher will check if one asset file was changed. If yes then it will reload the asset.
-        commonResourcesWatcher = resourcesVfs[commonAssetConfig.assetFolderName].watch {
-            if (it.kind == Vfs.FileEvent.Kind.MODIFIED) { checkAssetFolders(world, it.file,
-                AssetType.Common, commonAssetConfig, assetReloadContext, assetReloadCache) }
-        }
-        currentWorldResourcesWatcher = resourcesVfs[currentWorldAssetConfig.assetFolderName].watch {
-            if (it.kind == Vfs.FileEvent.Kind.MODIFIED) { checkAssetFolders(world, it.file,
-                AssetType.World, currentWorldAssetConfig, assetReloadContext, assetReloadCache) }
-        }
-        currentLevelResourcesWatcher = resourcesVfs[currentLevelAssetConfig.assetFolderName].watch {
-            if (it.kind == Vfs.FileEvent.Kind.MODIFIED) { checkAssetFolders(world, it.file,
-                AssetType.Level, currentLevelAssetConfig, assetReloadContext, assetReloadCache) }
-        }
-    }
-
-    private suspend fun checkAssetFolders(world: World, file: VfsFile, type: AssetType, assetConfig: AssetModel,
-                                          assetReloadContext: CoroutineContext, assetReloadCache: AssetReloadCache) = with (world) {
-        assetConfig.backgrounds.forEach { config ->
-            if (file.fullName.contains(config.value.aseName) && !reloading) {
-                reloading = true  // save that reloading is in progress
-                print("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    // Give aseprite more time to finish writing the files
-                    kotlinx.coroutines.delay(100)
-                    backgrounds[config.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
-                    assetReloadCache.backgroundEntities.forEach { entity ->
-                        entity[AssetReload].trigger = true
-                    }
-                    // Guard period until reloading is activated again - this is used for debouncing watch messages
-                    kotlinx.coroutines.delay(100)
-                    reloading = false
-                    println("Finished")
-                }
-            }
-        }
-        assetConfig.images.forEach { config ->
-            if (file.fullName.contains(config.value.fileName) && !reloading) {
-                reloading = true
-                print("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    kotlinx.coroutines.delay(100)
-                    images[config.key] = Pair(type,
-                        if (config.value.layers == null) {
-                            resourcesVfs[assetConfig.assetFolderName + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
-                        } else {
-                            val props = ASE.toProps()
-                            props.setExtra("layers", config.value.layers)
-                            resourcesVfs[assetConfig.assetFolderName + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
-                        }
-                    )
-                    assetReloadCache.spriteEntities.forEach { entity ->
-                        entity[AssetReload].trigger = true
-                    }
-                    kotlinx.coroutines.delay(100)
-                    reloading = false
-                    println("Finished")
-
-                }
-            }
-        }
     }
 }

@@ -26,11 +26,10 @@ import korlibs.korge.view.align.centerYOnStage
 
 
 /**
- * Whenever a View based object is created (combination of "all", "any" and "none") then the View objects can be
+ * Whenever a View based object is created (combination of "all", "any" and "none" in the family lambda) then the View objects can be
  * created and added to the [KorgeViewSystem]. This is done in [onDrawableFamilyAdded] family hook here rather than in
  * component hook because we are sure that all needed components are set up before in the [World].
  */
-
 fun drawableFamily(): Family = World.family { all(Drawable, PositionShape).any(Drawable, Appearance, InputTouchButton) }
 
 val onDrawableFamilyAdded: FamilyHook = { entity ->
@@ -58,9 +57,9 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             if (sprite.isPlaying) view.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
 
             width =
-                view.data?.width?.toFloat() ?: error("KorgeViewHook: Cannot get width of sprite ImageAnimView!")
+                view.data?.width?.toFloat() ?: error("onDrawableFamilyAdded: Cannot get width of sprite ImageAnimView!")
             height =
-                view.data?.height?.toFloat() ?: error("KorgeViewHook: Cannot get height of sprite ImageAnimView!")
+                view.data?.height?.toFloat() ?: error("onDrawableFamilyAdded: Cannot get height of sprite ImageAnimView!")
 
             view
         }
@@ -116,7 +115,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             view
         }
 
-        else -> error("DrawableFamily.onEntityAdded: No Parallax, ParallaxLayer, TiledMap, Sprite or Text component found!")
+        else -> error("onDrawableFamilyAdded: No Parallax, ParallaxLayer, TiledMap, Sprite or Text component found!")
     }
 
     entity.getOrNull(Appearance)?.also {
@@ -126,7 +125,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
     }
 
     when (val layer = layers[drawable.drawOnLayer]) {
-        null -> error("DrawableFamily.onEntityAdded: Cannot add view for entity '${entity.id}' to layer '${drawable.drawOnLayer}'!")
+        null -> error("onDrawableFamilyAdded: Cannot add view for entity '${entity.id}' to layer '${drawable.drawOnLayer}'!")
         else -> {
             layer.addChild(view)
             korgeViewCache.addOrUpdate(entity, view)
@@ -170,8 +169,6 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
 val onDrawableFamilyRemoved: FamilyHook = { entity ->
     val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
-    (korgeViewCache.getOrNull(entity)
-        ?: error("DrawableFamily.onEntityRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[Drawable].drawOnLayer}'!"))
-        .removeFromParent()
+    (korgeViewCache.getOrNull(entity) ?: error("onDrawableFamilyRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[Drawable].drawOnLayer}'!")).removeFromParent()
     korgeViewCache.remove(entity)
 }

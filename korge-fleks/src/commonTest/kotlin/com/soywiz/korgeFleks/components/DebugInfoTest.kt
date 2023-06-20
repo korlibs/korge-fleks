@@ -1,7 +1,5 @@
 package com.soywiz.korgeFleks.components
 
-import com.github.quillraven.fleks.world
-import korlibs.korge.fleks.components.AssetReload
 import korlibs.korge.fleks.components.Info
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -18,13 +16,9 @@ internal class DebugInfoTest {
             configName = "DebugTest",
             showPivotPoint = true
         )
-        val assetReload = AssetReload(
-            trigger = true
-        )
 
         val entity = expectedWorld.entity {
             it += info
-            it += assetReload
         }
 
         CommonTestEnv.serializeDeserialize(expectedWorld, recreatedWorld)

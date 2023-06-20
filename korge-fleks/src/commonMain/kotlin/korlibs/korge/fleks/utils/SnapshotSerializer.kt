@@ -55,7 +55,6 @@ internal val internalModule = SerializersModule {
         subclass(AnimateComponent::class)
         subclass(AnimationScript::class)
         subclass(Info::class)
-        subclass(AssetReload::class)
         subclass(Drawable::class)
         subclass(Appearance::class)
         subclass(Rgb::class)
