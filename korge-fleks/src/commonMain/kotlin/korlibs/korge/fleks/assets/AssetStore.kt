@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.assets
 
-import com.github.quillraven.fleks.World
 import korlibs.audio.sound.SoundChannel
 import korlibs.audio.sound.readMusic
 import korlibs.datastructure.setExtra
@@ -10,29 +9,15 @@ import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
 import korlibs.image.tiles.tiled.TiledMap
 import korlibs.image.tiles.tiled.readTiledMap
-import korlibs.io.async.launchImmediately
-import korlibs.io.file.Vfs
-import korlibs.io.file.VfsFile
-import korlibs.io.file.fullName
 import korlibs.io.file.std.resourcesVfs
-import korlibs.io.lang.Closeable
-import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.familyHooks.*
-import korlibs.korge.fleks.utils.AssetReloadCache
-import korlibs.korge.fleks.utils.EntityConfigId
-import korlibs.korge.fleks.utils.PolymorphicEnumSerializer
-import korlibs.korge.fleks.utils.SnapshotSerializer
+import korlibs.korge.fleks.utils.EntityConfig
 import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
 import korlibs.time.Stopwatch
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.newCoroutineContext
-import kotlinx.serialization.modules.polymorphic
 import kotlin.collections.set
-import kotlin.coroutines.CoroutineContext
 
 
-interface EntityConfig
+interface ConfigBase
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -51,7 +36,7 @@ class AssetStore {
     internal var currentWorldAssetConfig: AssetModel = AssetModel()
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
 
-    private var entityConfigs: MutableMap<String, EntityConfig> = mutableMapOf()
+    var entityConfigs: MutableMap<String, ConfigBase> = mutableMapOf()
     private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
@@ -60,13 +45,14 @@ class AssetStore {
 
     enum class AssetType{ None, Common, World, Level }
 
-    fun <T : EntityConfig> addEntityConfig(entityConfigId: EntityConfigId, entityConfig: T) {
-        entityConfigs[entityConfigId.name] = entityConfig
+    fun <T : ConfigBase> addEntityConfig(entityConfigName: EntityConfig, entityConfig: T) {
+        entityConfigs[entityConfigName.name] = entityConfig
     }
 
-    fun <T : EntityConfig> getEntityConfig(entityConfigId: EntityConfigId) : T {
-        if (!entityConfigs.containsKey(entityConfigId.name)) error("AssetStore - getConfig: No config found for configId name '${entityConfigId.name}'!")
-        return entityConfigs[entityConfigId.name]!! as T
+    inline fun <reified T : ConfigBase> getEntityConfig(entityConfig: EntityConfig) : T {
+        val config: ConfigBase = entityConfigs[entityConfig.name] ?: error("AssetStore - getConfig: No config found for configId name '${entityConfig.name}'!")
+        if (config !is T) error("AssetStore - getConfig: Config for '${entityConfig.name}' is not of type ${T::class}!")
+        return config
     }
 
     fun getSound(name: String) : SoundChannel {

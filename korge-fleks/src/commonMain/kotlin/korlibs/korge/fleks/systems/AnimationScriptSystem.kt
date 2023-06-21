@@ -6,6 +6,7 @@ import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.AnimateComponentType.*
+import korlibs.korge.fleks.utils.Invokables
 import korlibs.math.interpolation.Easing
 
 /**
@@ -157,27 +158,9 @@ class AnimationScriptSystem : IteratingSystem(
                 tween.volume?.let { end -> createAnimateComponent(SoundVolume, start.volume, end - start.volume) }
             }
             // A special type of TweenSpawner which directly changes the Spawner component
-            is SpawnEntity -> {
-//                tween.entity.configure { it.getOrAdd(Info) { Info() }.configName = tween.configName }
-                tween.configureFunction.invoke(
-                    world,
-                    tween.entity,
-                    tween.configId
-                )
-//                tween.entity.configure { spawnerEntity ->
-//                // TODO create a new fresh entity and make sure it will be deleted or reused after spawning is done
-//                spawnerEntity.getOrAdd(Spawner) { Spawner() }.also {
-//                    it.entityName = tween.entityName
-//                    it.totalNumberOfObjects = 1
-//                    it.newEntity = spawnerEntity
-//                    it.configureFunction = tween.configureFunction
-//                }
-            }
+            is SpawnEntity -> Invokables.invoke(tween.configureFunction, world, tween.entity, tween.configId)
             // A special type of TweenLifeCycle (to be created if needed) which directly changes the LifeCycle component
-            is DeleteEntity -> tween.entity.configure { animatedEntity ->
-                world -= animatedEntity
-//                animatedEntity.getOrAdd(LifeCycle) { LifeCycle() }.also { it.healthCounter = 0 }
-            }
+            is DeleteEntity -> tween.entity.configure { entityToDelete -> world -= entityToDelete }
             else -> error("AnimationScriptSystem: Animate function for tween $tween not implemented!")
         }
     }

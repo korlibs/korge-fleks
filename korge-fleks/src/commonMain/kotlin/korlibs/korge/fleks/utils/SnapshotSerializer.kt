@@ -3,10 +3,7 @@ package korlibs.korge.fleks.utils
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.datastructure.iterators.fastForEach
-import korlibs.korge.fleks.assets.EntityConfig
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.utils.InvokableSerializer.register
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -34,20 +31,31 @@ typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
 
 /**
  * Class for serializing entity config ID objects in components.
+ * It wraps a string value which makes it easier to use EntityConfigId objects everywhere instead of plain strings.
+ * This class can be checked on compile time for correctness which is not done for the correctness of a single string.
  */
 @JvmInline
 @Serializable
-value class EntityConfigId(val name: String)
+value class EntityConfig(val name: String)
 
-val noConfig = EntityConfigId(name = "noConfig")
+/**
+ * NoConfig object which is used to initialize component properties.
+ */
+val noConfig = EntityConfig(name = "noConfig")
 
 /**
  * Class for serializing Invocable objects in components.
  */
+@JvmInline
 @Serializable
-class Invokable(val name: String, val invoke: (@Contextual World, Entity, EntityConfigId) -> Entity)
+value class Invokable(val name: String)
 
-val noInvokable = Invokable(name = "noInvokable", invoke = { _, entity, _ -> entity })
+/**
+ * NoInvokable object which is used to initialize component properties.
+ */
+val noInvokable = Invokable(name = "noInvokable")
+
+typealias InvokableFunction = (World, Entity, EntityConfig) -> Entity
 
 /**
  * This polymorphic module config for kotlinx serialization lists all Korge-fleks
@@ -137,42 +145,19 @@ class SnapshotSerializer {
     }
 }
 
-/**
- * This is the type for component properties which should contain invokable functions. Those functions
- * are used to specifically configure new created entities.
- *
- * Hint: Do not forget to mark all Invokable properties in components with `@Serializable(InvokableSerializer::class)`
- */
-// TODO clean this up
-//typealias Invokable = (@Contextual World).(Entity) -> Entity
-
-/**
- * Use this function to initialize Invokable properties of components.
- */
-//fun World.noFunction(entity: Entity) = entity
-
-/**
- * A serializer strategy for Invokable (i.e. Lambdas) in components.
- * It is necessary that all lambda functions are added to the internal map which
- * shall be serializable. For that the [register] function can be used.
- */
-object InvokableSerializer : KSerializer<Invokable> {
-    private val map = mutableMapOf<String, Invokable>(
-        "noInvokable" to noInvokable
+object Invokables {
+    val map = mutableMapOf<Invokable, InvokableFunction>(
+        noInvokable to fun(_: World, entity: Entity, _: EntityConfig) = entity
     )
 
-    fun register(vararg invokable: Invokable) = invokable.fastForEach { map[it.name] = it }
-    fun unregister(vararg invokable: Invokable) = invokable.fastForEach { map.remove(it.name) }
-
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("InvokableAsString", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: Invokable) {
-        if (map.containsKey(value.name)) encoder.encodeString(value.name)
-        else throw SerializationException("Invokable function '${value.name}' not registered in InvokableAsString serializer!")
+    fun register(name: Invokable, invokableFct: InvokableFunction) {
+        map[name] = invokableFct
     }
 
-    override fun deserialize(decoder: Decoder): Invokable =
-        map[decoder.decodeString()] ?: throw SerializationException("No lambda function found for '${decoder.decodeString()}' in InvokableAsString!")
+    fun unregister(name: Invokable) : InvokableFunction = map.remove(name) ?: throw Exception("Cannot unregister! Function with name '${name.name}' not registered in Invokables!")
+
+    fun invoke(name: Invokable, world: World, entity: Entity, config: EntityConfig) : Entity =
+        map[name]?.invoke(world, entity, config) ?: throw Exception("Cannot invoke! Function with name '${name.name}' not registered in Invokables!")
 }
 
 /**

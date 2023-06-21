@@ -7,6 +7,7 @@ import korlibs.korge.fleks.entity.config.isNullEntity
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.utils.random
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.utils.Invokables
 import korlibs.korge.parallax.ImageDataViewEx
 
 /**
@@ -64,7 +65,7 @@ class SpawnerSystem(
                     }
 
                     // Call the configured spawner function for configuring new objects
-                    spawner.configureFunction.invoke(world, newEntity, spawner.configId)
+                    Invokables.invoke(spawner.configureFunction, world, newEntity, spawner.configId)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects
