@@ -7,4 +7,4 @@ import com.github.quillraven.fleks.Entity
 // This entity does not have any components per definition.
 val nullEntity: Entity = Entity(id = 0)
 
-inline fun isNullEntity(entity: Entity) : Boolean = entity.id == 0
+inline fun Entity.isNullEntity() : Boolean = this.id == 0

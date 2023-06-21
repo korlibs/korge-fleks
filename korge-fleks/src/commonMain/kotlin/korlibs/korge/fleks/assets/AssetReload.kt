@@ -11,10 +11,8 @@ import korlibs.io.file.VfsFile
 import korlibs.io.file.fullName
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.lang.Closeable
-import korlibs.korge.fleks.components.Drawable
-import korlibs.korge.fleks.components.PositionShape
-import korlibs.korge.fleks.components.SpecificLayer
-import korlibs.korge.fleks.components.Sprite
+import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.entity.config.ParallaxBackground.Companion.configureParallaxLayers
 import korlibs.korge.fleks.familyHooks.onDrawableFamilyAdded
 import korlibs.korge.fleks.familyHooks.onDrawableFamilyRemoved
 import korlibs.korge.fleks.familyHooks.onSpecificLayerFamilyAdded
@@ -31,18 +29,17 @@ class AssetReload(private val assetStore: AssetStore) {
     private lateinit var currentLevelResourcesWatcher: Closeable
 
     suspend fun watchForChanges(world: World, assetReloadContext: CoroutineContext) {
-        // This resource watcher will check if one asset file was changed. If yes then it will reload the asset.
-        if (assetStore.commonAssetConfig.assetFolderName != "none") commonResourcesWatcher = resourcesVfs[assetStore.commonAssetConfig.assetFolderName].watch {
-            if (it.kind == Vfs.FileEvent.Kind.MODIFIED) { checkAssetFolders(world, it.file,
-                AssetStore.AssetType.Common, assetStore.commonAssetConfig, assetReloadContext) }
-        }
-        if (assetStore.currentWorldAssetConfig.assetFolderName != "none") currentWorldResourcesWatcher = resourcesVfs[assetStore.currentWorldAssetConfig.assetFolderName].watch {
-            if (it.kind == Vfs.FileEvent.Kind.MODIFIED) { checkAssetFolders(world, it.file,
-                AssetStore.AssetType.World, assetStore.currentWorldAssetConfig, assetReloadContext) }
-        }
-        if (assetStore.currentLevelAssetConfig.assetFolderName != "none") currentLevelResourcesWatcher = resourcesVfs[assetStore.currentLevelAssetConfig.assetFolderName].watch {
-            if (it.kind == Vfs.FileEvent.Kind.MODIFIED) { checkAssetFolders(world, it.file,
-                AssetStore.AssetType.Level, assetStore.currentLevelAssetConfig, assetReloadContext) }
+        resourcesVfs["."].listRecursiveSimple().forEach { file ->
+            if (file.stat().isDirectory) {
+                println("Add watcher for '${file.path}'")
+                file.watch {
+                    if (it.kind == Vfs.FileEvent.Kind.MODIFIED) {
+                        checkAssetFolders(world, it.file, AssetStore.AssetType.Common, assetStore.commonAssetConfig, assetReloadContext)
+                        checkAssetFolders(world, it.file, AssetStore.AssetType.World, assetStore.currentWorldAssetConfig, assetReloadContext)
+                        checkAssetFolders(world, it.file, AssetStore.AssetType.Level, assetStore.currentLevelAssetConfig, assetReloadContext)
+                    }
+                }
+            }
         }
     }
 
@@ -54,15 +51,37 @@ class AssetReload(private val assetStore: AssetStore) {
         assetConfig.backgrounds.forEach { config ->
             if (file.fullName.contains(config.value.aseName) && !reloading) {
                 reloading = true  // save that reloading is in progress
-                print("Reloading ${file.fullName}... ")
+                println("Reloading ${file.fullName}... ")
 
                 launchImmediately(context = assetReloadContext) {
                     // Give aseprite more time to finish writing the files
                     delay(100)
-                    assetStore.backgrounds[config.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
+                    val assetName = config.key
+                    assetStore.backgrounds[assetName] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
 
-                    // TODO
+                    println("\nTriggering asset change for: $assetName")
+                    world.family { all(Drawable) }.forEach { entity ->
+                        if (entity has Parallax && entity[Parallax].assetConfig.name == assetName) {
+                            println("Updating sprite data in entity: ${entity.id}")
+                            onDrawableFamilyRemoved(world, entity)
+                            onDrawableFamilyAdded(world, entity)
 
+                            // We need to update the layer config for the parallax entity - create AnimationScript entity and execute a config function for the parallax entity
+                            world.entity {
+                                it += AnimationScript(
+                                    tweens = listOf(ExecuteConfigFunction(entity = entity, config = entity[Parallax].assetConfig, function = configureParallaxLayers))
+                                )
+                            }
+                        }
+                    }
+                    world.family { all(SpecificLayer) }.forEach { entity ->
+                        if (entity[SpecificLayer].parentEntity has Parallax && entity[SpecificLayer].parentEntity[Parallax].assetConfig.name == assetName) {
+                            println("Updating layer in entity: ${entity.id} - layer: ${entity[SpecificLayer].spriteLayer}")
+                            onSpecificLayerFamilyRemoved(world, entity)
+                            entity.getOrNull(PositionShape)?.let { it.initialized = false }  // reset position otherwise position data will not be initialized with updated view data (x, y)
+                            onSpecificLayerFamilyAdded(world, entity)
+                        }
+                    }
                     // Guard period until reloading is activated again - this is used for debouncing watch messages
                     delay(100)
                     reloading = false
@@ -88,9 +107,7 @@ class AssetReload(private val assetStore: AssetStore) {
                         }
                     )
 
-
                     println("\nTriggering asset change for: $assetName")
-
                     world.family { all(Drawable) }.forEach { entity ->
                         if (entity has Sprite && entity[Sprite].assetName == assetName) {
                             println("Updating sprite data in entity: ${entity.id}")

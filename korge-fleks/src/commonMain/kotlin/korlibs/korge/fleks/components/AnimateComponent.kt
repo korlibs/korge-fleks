@@ -72,6 +72,8 @@ data class AnimateComponent (
         val AnimateSoundStopTrigger = object : ComponentType<AnimateComponent>() {}
         val AnimateSoundPosition = object : ComponentType<AnimateComponent>() {}
         val AnimateSoundVolume = object : ComponentType<AnimateComponent>() {}
+
+        val ExecuteConfigureFunction = object : ComponentType<AnimateComponent>() {}
     }
 }
 
@@ -111,5 +113,7 @@ enum class AnimateComponentType(val type: ComponentType<AnimateComponent>) {
     SoundStartTrigger(AnimateComponent.AnimateSoundStartTrigger),
     SoundStopTrigger(AnimateComponent.AnimateSoundStopTrigger),
     SoundPosition(AnimateComponent.AnimateSoundPosition),
-    SoundVolume(AnimateComponent.AnimateSoundVolume)
+    SoundVolume(AnimateComponent.AnimateSoundVolume),
+
+    ConfigureFunction(AnimateComponent.ExecuteConfigureFunction)
 }

@@ -71,8 +71,8 @@ data class Motion(
 data class ParallaxMotion(
     var isScrollingHorizontally: Boolean = true,
     var speedFactor: Float = 1.0f,  // TODO put this into assets because it is static and does not change  ????
-    val selfSpeedX: Float = 0.0f,
-    val selfSpeedY: Float = 0.0f
+    var selfSpeedX: Float = 0.0f,
+    var selfSpeedY: Float = 0.0f
 ) : Component<ParallaxMotion>, SerializeBase {
     override fun type(): ComponentType<ParallaxMotion> = ParallaxMotion
     companion object : ComponentType<ParallaxMotion>()

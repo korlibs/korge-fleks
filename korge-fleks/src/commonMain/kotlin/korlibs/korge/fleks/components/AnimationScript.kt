@@ -101,11 +101,23 @@ data class SpawnEntity(
     var x: Float = 0.0f,                 // position where entity will be spawned
     var y: Float = 0.0f,
 
-    override var entity: Entity,         // entity needs to be provided in any case
+    override var entity: Entity = nullEntity, // when entity is not given (=nullEntity) than it will be created
     override var delay: Float? = null,
     override var duration: Float? = 0f,  // not used - 0f for immediately
     @Serializable(with = EasingSerializer::class)
     override var easing: Easing? = null  // not used
+) : TweenBase
+
+@Serializable @SerialName("AnimationScript.ExecuteConfigFunction")
+data class ExecuteConfigFunction(
+    var config: EntityConfig,             // name of config for configuring spawned entity
+    var function: Invokable,              // name of function which configures the spawned entity
+
+    override var entity: Entity,          // entity needs to be provided in any case
+    override var delay: Float? = null,    // not used
+    override var duration: Float? = null, // not used
+    @Serializable(with = EasingSerializer::class)
+    override var easing: Easing? = null   // not used
 ) : TweenBase
 
 // Following component classes are for animating specific components

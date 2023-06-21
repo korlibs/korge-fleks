@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets
 
+import com.github.quillraven.fleks.World
 import korlibs.audio.sound.SoundChannel
 import korlibs.audio.sound.readMusic
 import korlibs.datastructure.setExtra
@@ -15,6 +16,7 @@ import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
 import korlibs.time.Stopwatch
 import kotlin.collections.set
+import kotlin.coroutines.CoroutineContext
 
 
 interface ConfigBase
@@ -42,6 +44,12 @@ class AssetStore {
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     private var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     private var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
+
+    private val assetReload = AssetReload(assetStore = this)
+
+    suspend fun watchForChanges(world: World, assetReloadContext: CoroutineContext) = assetReload.watchForChanges(world, assetReloadContext)
+//    assetReload.watchForChanges(gameWorld, newCoroutineContext(coroutineContext))
+//    assetReload.watchForChanges(hudWorld, newCoroutineContext(coroutineContext))
 
     enum class AssetType{ None, Common, World, Level }
 
@@ -72,9 +80,9 @@ class AssetStore {
         } else error("GameAssets: Image '$name' not found!")
     }
 
-    fun getBackground(name: String) : ParallaxDataContainer {
-        return if (backgrounds.contains(name)) backgrounds[name]!!.second
-        else error("GameAssets: Parallax background '$name' not found!")
+    fun getBackground(assetConfig: EntityConfig) : ParallaxDataContainer {
+        return if (backgrounds.contains(assetConfig.name)) backgrounds[assetConfig.name]!!.second
+        else error("GameAssets: Parallax background '${assetConfig.name}' not found!")
     }
 
     fun getTiledMap(name: String) : TiledMap {

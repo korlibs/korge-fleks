@@ -98,6 +98,7 @@ internal val internalModule = SerializersModule {
         subclass(ParallelTweens::class)
         subclass(Wait::class)
         subclass(SpawnEntity::class)
+        subclass(ExecuteConfigFunction::class)
         subclass(DeleteEntity::class)
         subclass(TweenAppearance::class)
         subclass(TweenPositionShape::class)

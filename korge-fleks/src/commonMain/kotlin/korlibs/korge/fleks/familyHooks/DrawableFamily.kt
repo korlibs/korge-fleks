@@ -75,7 +75,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
         entity has Parallax -> {
             val parallax = entity[Parallax]
-            val parallaxConfig = assets.getBackground(parallax.assetName)
+            val parallaxConfig = assets.getBackground(parallax.assetConfig)
             val view = ParallaxDataView(parallaxConfig)
 
             when (parallaxConfig.config.mode) {
