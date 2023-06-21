@@ -19,6 +19,7 @@ import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.*
+import kotlin.jvm.JvmInline
 
 /**
  * All Fleks components which should be serializable needs to derive from this interface.
@@ -32,18 +33,21 @@ typealias FleksSnapshot = Map<Entity, List<Component<*>>>  // snapshot data of F
 typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
 
 /**
- * Class for serializing entity config ID objects
+ * Class for serializing entity config ID objects in components.
+ */
+@JvmInline
+@Serializable
+value class EntityConfigId(val name: String)
+
+val noConfig = EntityConfigId(name = "noConfig")
+
+/**
+ * Class for serializing Invocable objects in components.
  */
 @Serializable
-class EntityConfigId(val name: String)
+class Invokable(val name: String, val invoke: (@Contextual World, Entity, EntityConfigId) -> Entity)
 
-val noConfig = EntityConfigId("noConfig")
-
-fun interface Invokable {
-    fun invoke(world: World, entity: Entity, config: EntityConfigId): Entity
-}
-
-val noInvokable = Invokable { _, entity, _ -> entity }
+val noInvokable = Invokable(name = "noInvokable", invoke = { _, entity, _ -> entity })
 
 /**
  * This polymorphic module config for kotlinx serialization lists all Korge-fleks
@@ -157,40 +161,18 @@ object InvokableSerializer : KSerializer<Invokable> {
         "noInvokable" to noInvokable
     )
 
-    fun register(vararg invokable: Invokable) {
-        invokable.fastForEach {
-            val name = it.toString().substringAfter('$').substringBefore('$')
-            map[name] = it
-        }
-    }
-
-    fun unregister(vararg invokable: Invokable) {
-        invokable.fastForEach {
-            val name = it.toString().substringAfter('$').substringBefore('$')
-            map.remove(name)
-        }
-    }
+    fun register(vararg invokable: Invokable) = invokable.fastForEach { map[it.name] = it }
+    fun unregister(vararg invokable: Invokable) = invokable.fastForEach { map.remove(it.name) }
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("InvokableAsString", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Invokable) {
-        val name = value.toString().substringAfter('$').substringBefore('$')
-        if (map.containsKey(name)) encoder.encodeString(name)
-        else throw SerializationException("Invokable function '$name' not registered in InvokableAsString serializer!")
+        if (map.containsKey(value.name)) encoder.encodeString(value.name)
+        else throw SerializationException("Invokable function '${value.name}' not registered in InvokableAsString serializer!")
     }
 
     override fun deserialize(decoder: Decoder): Invokable =
-        map[decoder.decodeString()]
-            ?: throw SerializationException("No lambda function found for '${decoder.decodeString()}' in InvokableAsString!")
-}
-
-/**
- * A serializer strategy for EntityConfigId name objects in components.
- */
-object EntityConfigIdSerializer : KSerializer<EntityConfigId> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("EntityConfigIdAsString", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: EntityConfigId) = encoder.encodeString(value.name)
-    override fun deserialize(decoder: Decoder): EntityConfigId = EntityConfigId(decoder.decodeString())
+        map[decoder.decodeString()] ?: throw SerializationException("No lambda function found for '${decoder.decodeString()}' in InvokableAsString!")
 }
 
 /**

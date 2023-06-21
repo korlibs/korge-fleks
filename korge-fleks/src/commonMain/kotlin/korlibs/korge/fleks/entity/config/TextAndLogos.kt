@@ -38,7 +38,7 @@ object TextAndLogos {
         var parentEntity: Entity = nullEntity
     ) : EntityConfig
 
-    val configureLogo = Invokable { world, entity, configId ->
+    val configureLogo = Invokable("configureLogo") { world, entity, configId ->
         with(world) {
             val logoConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoConfig>(configId)
             entity.configure { entity ->
@@ -84,7 +84,7 @@ object TextAndLogos {
         entity
     }
 
-    val configureLogoLayer = Invokable { world, entity, config ->
+    val configureLogoLayer = Invokable("configureLogoLayer") { world, entity, config ->
         with(world) {
             val layerConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoLayerConfig>(config)
             entity.configure { entity ->

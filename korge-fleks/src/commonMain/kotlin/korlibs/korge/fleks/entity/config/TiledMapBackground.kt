@@ -23,7 +23,7 @@ object TiledMapBackground {
     /**
      * This function creates a tiled map background entity which is used for various backgrounds in the game and intro.
      */
-    val configureTiledMap = Invokable { world, entity, config ->
+    val configureTiledMap = Invokable("configureTiledMap") { world, entity, config ->
         with(world) {
             val tiledMapConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config)
             entity.configure {

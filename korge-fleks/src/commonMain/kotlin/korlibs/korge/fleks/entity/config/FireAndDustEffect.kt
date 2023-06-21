@@ -23,7 +23,7 @@ object FireAndDustEffect {
         val fadeOutDuration: Float = 0f
     ) : EntityConfig
 
-    val configureEffectObject = Invokable { world, entity, config ->
+    val configureEffectObject = Invokable(name = "configureEffectObject") { world, entity, config ->
         with(world) {
             val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config)
             entity.configure { entity ->

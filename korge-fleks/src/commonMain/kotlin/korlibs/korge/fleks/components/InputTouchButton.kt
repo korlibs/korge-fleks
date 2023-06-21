@@ -14,7 +14,6 @@ data class InputTouchButton(
     var triggerImmediately: Boolean = false,
     @Serializable(InvokableSerializer::class)
     var action: Invokable = noInvokable,
-    @Serializable(EntityConfigIdSerializer::class)
     var buttonId: EntityConfigId = noConfig
 ) : Component<InputTouchButton>, SerializeBase {
     override fun type(): ComponentType<InputTouchButton> = InputTouchButton

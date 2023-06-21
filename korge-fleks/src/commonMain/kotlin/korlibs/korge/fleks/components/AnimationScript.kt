@@ -96,7 +96,6 @@ data class DeleteEntity(
 
 @Serializable @SerialName("AnimationScript.SpawnEntity")
 data class SpawnEntity(
-    @Serializable(EntityConfigIdSerializer::class)
     var configId: EntityConfigId,        // name of config for configuring spawned entity
     @Serializable(InvokableSerializer::class)
     var configureFunction: Invokable,    // name of function which configures the spawned entity
