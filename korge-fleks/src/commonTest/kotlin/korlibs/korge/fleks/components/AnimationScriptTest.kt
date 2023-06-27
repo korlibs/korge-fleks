@@ -1,4 +1,4 @@
-package com.soywiz.korgeFleks.components
+package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.configureWorld

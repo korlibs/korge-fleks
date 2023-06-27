@@ -1,9 +1,6 @@
-package com.soywiz.korgeFleks.components
+package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.World
 import com.github.quillraven.fleks.configureWorld
-import korlibs.korge.fleks.components.PositionShape
-import korlibs.korge.fleks.utils.Invokables
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
