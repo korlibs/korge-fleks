@@ -5,14 +5,15 @@ import korlibs.korge.fleks.components.AnimateComponentType.*
 import korlibs.korge.fleks.components.AnimateComponent.*
 import korlibs.math.interpolation.Easing
 import korlibs.korge.fleks.components.AnimateComponent
+import korlibs.korge.fleks.components.AnimateComponent.Companion.ExecuteConfigureFunction
 import korlibs.korge.fleks.components.AnimateComponentType
 import korlibs.korge.fleks.components.Rgb
 import kotlin.test.*
 
 internal class AnimateComponentTest {
 
-    private val expectedWorld = world {}
-    private val recreatedWorld = world {}
+    private val expectedWorld = configureWorld {}
+    private val recreatedWorld = configureWorld {}
 
     @Test
     fun testAnimateComponentTypeIntegrity() {
@@ -43,7 +44,8 @@ internal class AnimateComponentTest {
             Pair(SoundStartTrigger, Companion.AnimateSoundStartTrigger),
             Pair(SoundStopTrigger, Companion.AnimateSoundStopTrigger),
             Pair(SoundPosition, Companion.AnimateSoundPosition),
-            Pair(SoundVolume, Companion.AnimateSoundVolume)
+            Pair(SoundVolume, Companion.AnimateSoundVolume),
+            Pair(ConfigureFunction, Companion.ExecuteConfigureFunction)
         )
 
         testVector.forEach { animateType ->

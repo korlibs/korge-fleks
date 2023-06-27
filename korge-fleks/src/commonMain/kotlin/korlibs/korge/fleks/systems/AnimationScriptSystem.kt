@@ -161,7 +161,7 @@ class AnimationScriptSystem : IteratingSystem(
             // A special type of TweenSpawner which directly changes the Spawner component
             is SpawnEntity -> {
                 val spawnedEntity = if (tween.entity.isNullEntity()) world.entity() else tween.entity
-                Invokables.invoke(tween.configureFunction, world, spawnedEntity, tween.configId)
+                Invokables.invoke(tween.configureFunction, world, spawnedEntity, tween.config)
             }
             // A special type of TweenLifeCycle (to be created if needed) which directly changes the LifeCycle component
             is DeleteEntity -> tween.entity.configure { entityToDelete -> world -= entityToDelete }

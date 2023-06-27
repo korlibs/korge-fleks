@@ -8,13 +8,10 @@ import kotlinx.serialization.encodeToString
 import kotlin.test.assertFalse
 
 
-fun World.testInvokable(entity: Entity) : Entity {
-    println("Invoke test - configureTestEntity: world: $this, entity: ${entity.id}")
-    return entity
-}
+val testConfigure = Invokable("testEntityConfig")
 
-// This test configure function creates a new entity and sets its id
-fun World.testFunction(entity: Entity) : Entity {
+val testConfigureFct = fun(world: World, entity: Entity, config: EntityConfig) : Entity {
+    println("Invoke test - configureTestEntity: world: $world, entity: ${entity.id}, config: $config")
     return Entity(id = 8080)
 }
 

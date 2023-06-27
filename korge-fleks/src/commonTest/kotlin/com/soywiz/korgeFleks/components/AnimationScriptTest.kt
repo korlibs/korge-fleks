@@ -2,10 +2,10 @@ package com.soywiz.korgeFleks.components
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.configureWorld
-import korlibs.korge.fleks.utils.InvokableSerializer
 import korlibs.math.interpolation.Easing
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.EntityConfig
+import korlibs.korge.fleks.utils.Invokables
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -18,7 +18,9 @@ internal class AnimationScriptTest {
     @Test
     fun testAnimationScriptSerialization() {
 
-        InvokableSerializer.register(testFunction)
+        Invokables.register(testConfigure, testConfigureFct)
+
+        val testEntityConfig = EntityConfig("testEntityConfig")
 
         val compUnderTest = AnimationScript(
             tweens = listOf(
@@ -27,8 +29,8 @@ internal class AnimationScriptTest {
                         ParallelTweens(
                             tweens = listOf(
                                 SpawnEntity(
-                                    configId = EntityConfig { "testEntity" },
-                                    configureFunction = testFunction,
+                                    config = testEntityConfig,
+                                    configureFunction = testConfigure,
                                     x = 10.2f,
                                     y = 20.3f,
                                     entity = Entity(43)
@@ -85,12 +87,12 @@ internal class AnimationScriptTest {
         assertEquals(parallelTweens.easing, newParallelTweens.easing, "Check 'parallelTweens.easing' property to be equal")
         val spawnEntity = parallelTweens.tweens.first() as SpawnEntity
         val newSpawnEntity = newParallelTweens.tweens.first() as SpawnEntity
-        assertEquals(spawnEntity.configId, newSpawnEntity.configId, "spawnEntity.entityName' property to be equal")
+        assertEquals(spawnEntity.config, newSpawnEntity.config, "spawnEntity.config' property to be equal")
         assertEquals(spawnEntity.configureFunction, newSpawnEntity.configureFunction, "Check 'spawnEntity.spawnFunction' property to be equal")
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")
         assertEquals(spawnEntity.entity, newSpawnEntity.entity, "Check 'spawnEntity.entity' property to be equal")
-        val spawnedEntity = spawnEntity.configureFunction.invoke(recreatedWorld, Entity(4242))
+        val spawnedEntity = Invokables.invoke(spawnEntity.configureFunction, recreatedWorld, Entity(4242), spawnEntity.config)
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
     }
 }
