@@ -3,7 +3,7 @@ plugins:
 dependencies:
 - ../fleks
 - maven::common::com.soywiz.korlibs.korge2:korge
-#- https://github.com/korlibs/korge-parallax/tree/b8e7356c3c5ba5fac273a83d3f6ef127a16de739/korge-parallax
-- ../../korge-parallax/korge-parallax
+- https://github.com/korlibs/korge-parallax/tree/b8e7356c3c5ba5fac273a83d3f6ef127a16de739/korge-parallax
+#- ../../korge-parallax/korge-parallax
 - https://github.com/korlibs/korge-tiled/tree/0.0.2/korge-tiled
 targets: [jvm, native, android]
