@@ -8,9 +8,7 @@ import korlibs.korge.fleks.components.Appearance
 import korlibs.korge.fleks.components.Drawable
 import korlibs.korge.fleks.components.PositionShape
 import korlibs.korge.fleks.components.TiledMap
-import korlibs.korge.fleks.utils.EntityConfig
-import korlibs.korge.fleks.utils.Invokable
-import korlibs.korge.fleks.utils.Invokables
+import korlibs.korge.fleks.utils.Identifier
 
 
 object TiledMapBackground {
@@ -24,12 +22,12 @@ object TiledMapBackground {
     ) : ConfigBase
 
     // Used in component properties to specify invokable function
-    val configureTiledMap = Invokable(name = "configureTiledMap")
+    val configureTiledMap = Identifier(name = "configureTiledMap")
 
     /**
      * This function creates a tiled map background entity which is used for various backgrounds in the game and intro.
      */
-    private val configureTiledMapFct = fun(world: World, entity: Entity, config: EntityConfig) = with(world) {
+    private val configureTiledMapFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
         val tiledMapConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config)
         entity.configure {
             it += TiledMap(

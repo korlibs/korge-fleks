@@ -5,9 +5,7 @@ import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.ConfigBase
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.utils.EntityConfig
-import korlibs.korge.fleks.utils.Invokable
-import korlibs.korge.fleks.utils.Invokables
+import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.fleks.utils.random
 
 
@@ -27,9 +25,9 @@ object FireAndDustEffect {
     ) : ConfigBase
 
     // Used in component properties to specify invokable function
-    val configureEffectObject = Invokable(name = "configureEffectObject")
+    val configureEffectObject = Identifier(name = "configureEffectObject")
 
-    private val configureEffectObjectFct = fun(world: World, entity: Entity, config: EntityConfig) = with(world) {
+    private val configureEffectObjectFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
         val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config)
         entity.configure { entity ->
             entity.getOrAdd(Offset) { Offset() }.also {

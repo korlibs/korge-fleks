@@ -61,7 +61,7 @@ class AssetReload(private val assetStore: AssetStore) {
 
                     println("\nTriggering asset change for: $assetName")
                     world.family { all(Drawable) }.forEach { entity ->
-                        if (entity has Parallax && entity[Parallax].assetConfig.name == assetName) {
+                        if (entity has Parallax && entity[Parallax].config.name == assetName) {
                             println("Updating sprite data in entity: ${entity.id}")
                             onDrawableFamilyRemoved(world, entity)
                             onDrawableFamilyAdded(world, entity)
@@ -69,13 +69,13 @@ class AssetReload(private val assetStore: AssetStore) {
                             // We need to update the layer config for the parallax entity - create AnimationScript entity and execute a config function for the parallax entity
                             world.entity {
                                 it += AnimationScript(
-                                    tweens = listOf(ExecuteConfigFunction(entity = entity, config = entity[Parallax].assetConfig, function = configureParallaxLayers))
+                                    tweens = listOf(ExecuteConfigFunction(entity = entity, config = entity[Parallax].config, function = configureParallaxLayers))
                                 )
                             }
                         }
                     }
                     world.family { all(SpecificLayer) }.forEach { entity ->
-                        if (entity[SpecificLayer].parentEntity has Parallax && entity[SpecificLayer].parentEntity[Parallax].assetConfig.name == assetName) {
+                        if (entity[SpecificLayer].parentEntity has Parallax && entity[SpecificLayer].parentEntity[Parallax].config.name == assetName) {
                             println("Updating layer in entity: ${entity.id} - layer: ${entity[SpecificLayer].spriteLayer}")
                             onSpecificLayerFamilyRemoved(world, entity)
                             entity.getOrNull(PositionShape)?.let { it.initialized = false }  // reset position otherwise position data will not be initialized with updated view data (x, y)

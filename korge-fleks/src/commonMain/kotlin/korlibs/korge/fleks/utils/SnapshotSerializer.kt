@@ -2,8 +2,9 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.Entity
-import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.entity.config.Invokables
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -18,6 +19,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.*
 import kotlin.jvm.JvmInline
 
+
 /**
  * All Fleks components which should be serializable needs to derive from this interface.
  */
@@ -30,32 +32,15 @@ typealias FleksSnapshot = Map<Entity, List<Component<*>>>  // snapshot data of F
 typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
 
 /**
- * Class for serializing entity config ID objects in components.
- * It wraps a string value which makes it easier to use EntityConfigId objects everywhere instead of plain strings.
- * This class can be checked on compile time for correctness which is not done for the correctness of a single string.
+ * Class for serializing identifier objects for entity configs and functions in components.
+ *
+ * These identifiers are used to access a specific entity configuration from the [AssetStore].
+ * They are also used to access a specific lambda function through the [Invokables] object.
+ * It wraps a string value. Using this [Identifier] object everywhere in the code is more error-prone than using a plain string.
+ * Since strings can have typos which are not realized at compile time.
  */
-@JvmInline
-@Serializable
-value class EntityConfig(val name: String)
-
-/**
- * NoConfig object which is used to initialize component properties.
- */
-val noConfig = EntityConfig(name = "noConfig")
-
-/**
- * Class for serializing Invocable objects in components.
- */
-@JvmInline
-@Serializable
-value class Invokable(val name: String)
-
-/**
- * NoInvokable object which is used to initialize component properties.
- */
-val noInvokable = Invokable(name = "noInvokable")
-
-typealias InvokableFunction = (World, Entity, EntityConfig) -> Entity
+@JvmInline @Serializable
+value class Identifier(val name: String)
 
 /**
  * This polymorphic module config for kotlinx serialization lists all Korge-fleks
@@ -144,21 +129,6 @@ class SnapshotSerializer {
         }
         return json
     }
-}
-
-object Invokables {
-    val map = mutableMapOf<Invokable, InvokableFunction>(
-        noInvokable to fun(_: World, entity: Entity, _: EntityConfig) = entity
-    )
-
-    fun register(name: Invokable, invokableFct: InvokableFunction) {
-        map[name] = invokableFct
-    }
-
-    fun unregister(name: Invokable) : InvokableFunction = map.remove(name) ?: throw Exception("Cannot unregister! Function with name '${name.name}' not registered in Invokables!")
-
-    fun invoke(name: Invokable, world: World, entity: Entity, config: EntityConfig) : Entity =
-        map[name]?.invoke(world, entity, config) ?: throw Exception("Cannot invoke! Function with name '${name.name}' not registered in Invokables!")
 }
 
 /**

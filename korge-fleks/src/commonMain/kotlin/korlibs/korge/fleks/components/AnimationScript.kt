@@ -52,7 +52,7 @@ interface TweenBase {
 data class TweenSequence(
     val tweens: List<TweenBase> = listOf(),   // tween objects which contain entity and its properties to be animated in sequence
 
-    override var entity: Entity = nullEntity, // not used
+    override var entity: Entity = invalidEntity, // not used
     override var delay: Float? = null,        // following 3 properties not used here
     override var duration: Float? = null,
     @Serializable(with = EasingSerializer::class)
@@ -63,7 +63,7 @@ data class TweenSequence(
 data class ParallelTweens(
     val tweens: List<TweenBase> = listOf(),           // tween objects which contain entity and its properties to be animated in parallel
 
-    override var entity: Entity = nullEntity,         // not used here
+    override var entity: Entity = invalidEntity,         // not used here
     override var delay: Float? = 0f,                  // in seconds
     override var duration: Float? = 0f,               // in seconds
     @Serializable(with = EasingSerializer::class)
@@ -72,7 +72,7 @@ data class ParallelTweens(
 
 @Serializable @SerialName("AnimationScript.Wait")
 data class Wait(
-    override var entity: Entity = nullEntity, // not used
+    override var entity: Entity = invalidEntity, // not used
     override var delay: Float? = null,   // Not used
     override var duration: Float? = 0f,
     @Serializable(with = EasingSerializer::class)
@@ -96,12 +96,12 @@ data class DeleteEntity(
 
 @Serializable @SerialName("AnimationScript.SpawnEntity")
 data class SpawnEntity(
-    var config: EntityConfig,            // name of config for configuring spawned entity
-    var configureFunction: Invokable,    // name of function which configures the spawned entity
+    var config: Identifier,             // name of config for configuring spawned entity
+    var function: Identifier,           // name of function which configures the spawned entity
     var x: Float = 0.0f,                 // position where entity will be spawned
     var y: Float = 0.0f,
 
-    override var entity: Entity = nullEntity, // when entity is not given (=nullEntity) than it will be created
+    override var entity: Entity = invalidEntity, // when entity is not given (=nullEntity) than it will be created
     override var delay: Float? = null,
     override var duration: Float? = 0f,  // not used - 0f for immediately
     @Serializable(with = EasingSerializer::class)
@@ -110,8 +110,8 @@ data class SpawnEntity(
 
 @Serializable @SerialName("AnimationScript.ExecuteConfigFunction")
 data class ExecuteConfigFunction(
-    var config: EntityConfig,             // name of config for configuring spawned entity
-    var function: Invokable,              // name of function which configures the spawned entity
+    var config: Identifier,              // name of config for configuring spawned entity
+    var function: Identifier,            // name of function which configures the spawned entity
 
     override var entity: Entity,          // entity needs to be provided in any case
     override var delay: Float? = null,    // not used

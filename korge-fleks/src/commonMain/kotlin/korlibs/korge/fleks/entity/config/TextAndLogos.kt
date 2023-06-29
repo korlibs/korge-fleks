@@ -23,8 +23,8 @@ object TextAndLogos {
         val alpha: Float = 0.0f,
         val drawOnLayer: String? = null,
 
-        val invokable: Invokable? = null,
-        val configId: EntityConfig = noConfig
+        val function: Identifier? = null,
+        val config: Identifier = nothing
     ) : ConfigBase
 
     data class LogoLayerConfig(
@@ -32,14 +32,14 @@ object TextAndLogos {
         var offsetX: Float = 0.0f,
         var offsetY: Float = 0.0f,
         val alpha: Float = 0.0f,
-        var parentEntity: Entity = nullEntity
+        var parentEntity: Entity = invalidEntity
     ) : ConfigBase
 
     // Used in component properties to specify invokable function
-    val configureLogo = Invokable(name = "configureLogo")
-    val configureLogoLayer = Invokable(name = "configureLogoLayer")
+    val configureLogo = Identifier(name = "configureLogo")
+    val configureLogoLayer = Identifier(name = "configureLogoLayer")
 
-    private val configureLogoFct = fun(world: World, entity: Entity, config: EntityConfig) = with(world) {
+    private val configureLogoFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
         val logoConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoConfig>(config)
         entity.configure { entity ->
             // Make sure we have position component
@@ -73,17 +73,17 @@ object TextAndLogos {
                 it.alpha = logoConfig.alpha
             }
             entity += LifeCycle()
-            logoConfig.invokable?.let { invokable ->
+            logoConfig.function?.let { invokable ->
                 entity.getOrAdd(InputTouchButton) { InputTouchButton() }.also {
-                    it.action = invokable
-                    it.buttonId = logoConfig.configId
+                    it.function = invokable
+                    it.config = logoConfig.config
                 }
             }
         }
         entity
     }
 
-    private val configureLogoLayerFct = fun(world: World, entity: Entity, config: EntityConfig) = with(world) {
+    private val configureLogoLayerFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
         val layerConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoLayerConfig>(config)
         entity.configure { entity ->
             entity.getOrAdd(SpecificLayer) { SpecificLayer() }.also {

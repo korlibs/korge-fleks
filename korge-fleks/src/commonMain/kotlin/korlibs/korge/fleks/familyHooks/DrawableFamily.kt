@@ -14,8 +14,8 @@ import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.Text
+import korlibs.korge.fleks.entity.config.Invokables
 import korlibs.korge.fleks.systems.KorgeViewSystem
-import korlibs.korge.fleks.utils.Invokables
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.input.mouse
 import korlibs.korge.parallax.ImageDataViewEx
@@ -75,7 +75,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
         entity has Parallax -> {
             val parallax = entity[Parallax]
-            val parallaxConfig = assets.getBackground(parallax.assetConfig)
+            val parallaxConfig = assets.getBackground(parallax.config)
             val view = ParallaxDataView(parallaxConfig)
 
             when (parallaxConfig.config.mode) {
@@ -146,19 +146,19 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
     entity.getOrNull(InputTouchButton)?.let { touchInput ->
         view.mouse {
             onDown {
-                if (touchInput.triggerImmediately) Invokables.invoke(touchInput.action, world, entity, touchInput.buttonId)
+                if (touchInput.triggerImmediately) Invokables.invoke(touchInput.function, world, entity, touchInput.config)
                 touchInput.pressed = true
             }
             onUp {
                 if (touchInput.pressed) {
                     touchInput.pressed = false
-                    Invokables.invoke(touchInput.action, world, entity, touchInput.buttonId)
+                    Invokables.invoke(touchInput.function, world, entity, touchInput.config)
                 }
             }
             onUpOutside {
                 if (touchInput.pressed) {
                     touchInput.pressed = false
-                    if (touchInput.triggerImmediately) Invokables.invoke(touchInput.action, world, entity, touchInput.buttonId)
+                    if (touchInput.triggerImmediately) Invokables.invoke(touchInput.function, world, entity, touchInput.config)
                 }
             }
         }

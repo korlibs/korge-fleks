@@ -6,15 +6,13 @@ import korlibs.datastructure.iterators.fastForEach
 import korlibs.datastructure.iterators.fastForEachWithIndex
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.utils.EntityConfig
-import korlibs.korge.fleks.utils.Invokable
-import korlibs.korge.fleks.utils.Invokables
+import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.parallax.ParallaxConfig
 import korlibs.korge.parallax.ParallaxDataView
 
 
-class ParallaxBackground(private val world: World, private val assetConfig: EntityConfig, drawOnLayer: String) {
+class ParallaxBackground(private val world: World, private val assetConfig: Identifier, drawOnLayer: String) {
     val entity: Entity
 
     // TODO: Refactor to object instead of class above
@@ -23,9 +21,9 @@ class ParallaxBackground(private val world: World, private val assetConfig: Enti
         // TODO: Put parallax config data class here for storing it in assetStore
 
         // Used in component properties to specify invokable function
-        val configureParallaxLayers = Invokable(name = "configureParallaxLayers")
+        val configureParallaxLayers = Identifier(name = "configureParallaxLayers")
 
-        private val configureParallaxLayersFct = fun(world: World, entity: Entity, assetConfig: EntityConfig) = with(world) {
+        private val configureParallaxLayersFct = fun(world: World, entity: Entity, assetConfig: Identifier) = with(world) {
             println("Re-configure attached parallax Layers")
 
             val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
@@ -105,7 +103,7 @@ class ParallaxBackground(private val world: World, private val assetConfig: Enti
             val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
             entity = entity {
-                it += Parallax(assetConfig = assetConfig)
+                it += Parallax(config = assetConfig)
                 it += PositionShape()
                 it += Drawable(drawOnLayer = drawOnLayer)
                 it += Appearance(alpha = 1.0f)

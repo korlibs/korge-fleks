@@ -11,7 +11,7 @@ import korlibs.image.format.*
 import korlibs.image.tiles.tiled.TiledMap
 import korlibs.image.tiles.tiled.readTiledMap
 import korlibs.io.file.std.resourcesVfs
-import korlibs.korge.fleks.utils.EntityConfig
+import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
 import korlibs.time.Stopwatch
@@ -53,13 +53,13 @@ class AssetStore {
 
     enum class AssetType{ None, Common, World, Level }
 
-    fun <T : ConfigBase> addEntityConfig(entityConfigName: EntityConfig, entityConfig: T) {
-        entityConfigs[entityConfigName.name] = entityConfig
+    fun <T : ConfigBase> addEntityConfig(identifier: Identifier, entityConfig: T) {
+        entityConfigs[identifier.name] = entityConfig
     }
 
-    inline fun <reified T : ConfigBase> getEntityConfig(entityConfig: EntityConfig) : T {
-        val config: ConfigBase = entityConfigs[entityConfig.name] ?: error("AssetStore - getConfig: No config found for configId name '${entityConfig.name}'!")
-        if (config !is T) error("AssetStore - getConfig: Config for '${entityConfig.name}' is not of type ${T::class}!")
+    inline fun <reified T : ConfigBase> getEntityConfig(identifier: Identifier) : T {
+        val config: ConfigBase = entityConfigs[identifier.name] ?: error("AssetStore - getConfig: No config found for configId name '${identifier.name}'!")
+        if (config !is T) error("AssetStore - getConfig: Config for '${identifier.name}' is not of type ${T::class}!")
         return config
     }
 
@@ -80,7 +80,7 @@ class AssetStore {
         } else error("GameAssets: Image '$name' not found!")
     }
 
-    fun getBackground(assetConfig: EntityConfig) : ParallaxDataContainer {
+    fun getBackground(assetConfig: Identifier) : ParallaxDataContainer {
         return if (backgrounds.contains(assetConfig.name)) backgrounds[assetConfig.name]!!.second
         else error("GameAssets: Parallax background '${assetConfig.name}' not found!")
     }
