@@ -1,4 +1,4 @@
-package com.soywiz.korgeFleks.components
+package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
@@ -8,13 +8,10 @@ import kotlinx.serialization.encodeToString
 import kotlin.test.assertFalse
 
 
-fun World.testInvokable(entity: Entity) : Entity {
-    println("Invoke test - configureTestEntity: world: $this, entity: ${entity.id}")
-    return entity
-}
+val testConfigure = Identifier("testEntityConfig")
 
-// This test configure function creates a new entity and sets its id
-fun World.testFunction(entity: Entity) : Entity {
+val testConfigureFct = fun(world: World, entity: Entity, config: Identifier) : Entity {
+    println("Invoke test - configureTestEntity: world: $world, entity: ${entity.id}, config: $config")
     return Entity(id = 8080)
 }
 
@@ -30,7 +27,7 @@ object CommonTestEnv {
 
         // Check if there is any component not having short SerialName set
         assertFalse(
-            compactJson.contains("soywiz"), "serializeDeserialize: json string should not contain full class" +
+            compactJson.contains("korlibs"), "serializeDeserialize: json string should not contain full class" +
                     "names like 'com.soywiz.korgeFleks.components...'. Please add @SerialName(...) to the Component class! json: \n\n$compactJson\n"
         )
 

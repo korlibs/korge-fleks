@@ -25,6 +25,7 @@ data class Sound(
     var stopTrigger: Boolean = false,  // to stop playing this sound effect set this to "true"
     var position: Double = 0.0,  // playing position in milliseconds
     var volume: Float = 1.0f,
+    var isPlaying: Boolean = false,
     var loop: Boolean = false  // TODO not yet implemented
 ) : Component<Sound>, SerializeBase {
     override fun type(): ComponentType<Sound> = Sound
@@ -32,9 +33,9 @@ data class Sound(
 /*
     {
         val onComponentAdded: ComponentHook<Sound> = { entity, component ->
-//            val korgeDebugViewCache: KorgeViewCache = inject("debugViewCache")
-//            val debugLayer = inject<HashMap<String, Container>>()["debug_layer"] ?: error("KorgeViewSystem: Cannot find 'debug_layer' in drawingLayers map!")
-//            korgeDebugViewCache.addOrUpdate(entity, view)
+//            val korgeViewCacheDebug: KorgeViewCache = inject("KorgeViewCacheDebug")
+//            val debugLayer = inject<HashMap<String, Container>>("Layers")["debug_layer"] ?: error("KorgeViewSystem: Cannot find 'debug_layer' in drawingLayers map!")
+//            korgeViewCacheDebug.addOrUpdate(entity, view)
 //            debugLayer.addChild(view)
 
             val asset: GameAssets = inject()

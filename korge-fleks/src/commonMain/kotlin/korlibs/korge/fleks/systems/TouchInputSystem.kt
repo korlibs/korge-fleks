@@ -10,7 +10,7 @@ import korlibs.korge.fleks.components.InputTouchButton
  *
  */
 class TouchInputSystem(
-    private val assets: AssetStore = World.inject()
+    private val assets: AssetStore = World.inject<AssetStore>("AssetStore")
 ) : IteratingSystem(
     family {
         all(InputTouchButton)

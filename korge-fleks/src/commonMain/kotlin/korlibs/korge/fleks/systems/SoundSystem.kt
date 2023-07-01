@@ -2,6 +2,7 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import korlibs.audio.sound.paused
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Sound
 
@@ -11,13 +12,16 @@ import korlibs.korge.fleks.components.Sound
  * it moves the entity linear without caring about gravity.
  */
 class SoundSystem(
-    private val assets: AssetStore = World.inject()
+    private val assets: AssetStore = World.inject<AssetStore>("AssetStore")
 ) : IteratingSystem(
     family {
         all(Sound)
     },
     interval = EachFrame
 ) {
+
+    var soundEnabled: Boolean = true
+    private var soundEnabledSave: Boolean = false
 /*
     private val arraySize: Int = 64
 
@@ -45,17 +49,32 @@ class SoundSystem(
 
     override fun onTickEntity(entity: Entity) {
         val sound = entity[Sound]
+
+
         val soundChannel = assets.getSound(sound.name)
 
-        if (sound.stopTrigger) {
-            soundChannel.pause()
-            sound.stopTrigger = false
-        }
-        if (sound.startTrigger) {
-            soundChannel.pause()
-            soundChannel.reset()
-            soundChannel.resume()
-            sound.startTrigger = false
+        // Sound enabling/disabling triggered from outside
+        if (soundEnabled == soundEnabledSave) {
+            soundEnabledSave = soundEnabled
+            if (soundEnabled) {
+                if (sound.isPlaying && soundChannel.paused) soundChannel.resume()
+            } else {
+                if(!soundChannel.paused) soundChannel.pause()
+            }
+        } else {
+
+            if (sound.stopTrigger) {
+                if (!soundChannel.paused) soundChannel.pause()
+                sound.stopTrigger = false
+                sound.isPlaying = false
+            }
+            if (sound.startTrigger) {
+                if (soundChannel.paused) soundChannel.pause()
+                soundChannel.reset()
+                soundChannel.resume()
+                sound.startTrigger = false
+                sound.isPlaying = true
+            }
         }
 
         // continously save the play position

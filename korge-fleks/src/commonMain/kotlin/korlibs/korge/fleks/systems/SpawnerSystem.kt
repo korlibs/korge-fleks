@@ -3,10 +3,11 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.World.Companion.inject
-import korlibs.korge.fleks.entity.config.isNullEntity
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.utils.random
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.entity.config.Invokables
+import korlibs.korge.fleks.entity.config.isInvalidEntity
 import korlibs.korge.parallax.ImageDataViewEx
 
 /**
@@ -15,7 +16,7 @@ import korlibs.korge.parallax.ImageDataViewEx
  * it can also spawn an unlimited number of entities (run forever until it dies).
  */
 class SpawnerSystem(
-    private val korgeViewCache: KorgeViewCache = inject("normalViewCache")
+    private val korgeViewCache: KorgeViewCache = inject("KorgeViewCache")
 ) : IteratingSystem(
     family { all(Spawner) },
     interval = EachFrame
@@ -52,7 +53,7 @@ class SpawnerSystem(
                     var xx = x
                     var yy = y
                     val newEntity =
-                        if (isNullEntity(spawner.newEntity)) world.entity()  // create new entity
+                        if (spawner.newEntity.isInvalidEntity()) world.entity {}  // create new entity
                         else spawner.newEntity  // use given entity
                     if (spawner.positionVariation != 0.0f) {
                         xx = x + (-spawner.positionVariation..spawner.positionVariation).random()
@@ -64,7 +65,7 @@ class SpawnerSystem(
                     }
 
                     // Call the configured spawner function for configuring new objects
-                    spawner.configureFunction.invoke(world, newEntity)
+                    Invokables.invoke(spawner.function, world, newEntity, spawner.config)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects

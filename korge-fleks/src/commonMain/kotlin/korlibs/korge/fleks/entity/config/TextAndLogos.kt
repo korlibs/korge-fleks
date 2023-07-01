@@ -2,7 +2,10 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.ConfigBase
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.utils.*
 
 
 object TextAndLogos {
@@ -18,63 +21,89 @@ object TextAndLogos {
         val fontName: String = "",
 
         val alpha: Float = 0.0f,
-        val drawOnLayer: String? = null
-    )
+        val drawOnLayer: String? = null,
+
+        val function: Identifier? = null,
+        val config: Identifier = nothing
+    ) : ConfigBase
 
     data class LogoLayerConfig(
         var layerName: String = "",
         var offsetX: Float = 0.0f,
         var offsetY: Float = 0.0f,
         val alpha: Float = 0.0f,
-        var parentEntity: Entity = nullEntity
-    )
+        var parentEntity: Entity = invalidEntity
+    ) : ConfigBase
 
-    fun configureLogo(world: World, entity: Entity, config: LogoConfig) : Entity = with(world) {
+    // Used in component properties to specify invokable function
+    val configureLogo = Identifier(name = "configureLogo")
+    val configureLogoLayer = Identifier(name = "configureLogoLayer")
+
+    private val configureLogoFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
+        val logoConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoConfig>(config)
         entity.configure { entity ->
+            // Make sure we have position component
+            entity.getOrAdd(PositionShape) { PositionShape() }
 
-            config.logoName?.let {
+            logoConfig.logoName?.let {
                 entity.getOrAdd(Sprite) { Sprite() }.also {
-                    it.assetName = config.logoName
+                    it.assetName = logoConfig.logoName
                 }
             }
-            config.text?.let {
+            logoConfig.text?.let {
                 entity.getOrAdd(Text) { Text() }.also {
-                    it.text = config.text
-                    it.fontName = config.fontName
+                    it.text = logoConfig.text
+                    it.fontName = logoConfig.fontName
                 }
             }
 
             entity += PositionShape()
             entity.getOrAdd(Layout) { Layout() }.also {
-                it.centerX = config.centerX
-                it.centerY = config.centerY
-                it.offsetX = config.offsetX
-                it.offsetY = config.offsetY
+                it.centerX = logoConfig.centerX
+                it.centerY = logoConfig.centerY
+                it.offsetX = logoConfig.offsetX
+                it.offsetY = logoConfig.offsetY
             }
-            config.drawOnLayer?.let {
+            logoConfig.drawOnLayer?.let {
                 entity.getOrAdd(Drawable) { Drawable() }.also {
-                    it.drawOnLayer = config.drawOnLayer
+                    it.drawOnLayer = logoConfig.drawOnLayer
                 }
             }
             entity.getOrAdd(Appearance) { Appearance() }.also {
-                it.alpha = config.alpha
+                it.alpha = logoConfig.alpha
             }
             entity += LifeCycle()
+            logoConfig.function?.let { invokable ->
+                entity.getOrAdd(InputTouchButton) { InputTouchButton() }.also {
+                    it.function = invokable
+                    it.config = logoConfig.config
+                }
+            }
         }
-        return entity
+        entity
     }
 
-    fun createLogo(world: World, config: LogoConfig) : Entity {
-        val entity = world.entity {}
-        return configureLogo(world, entity, config)
+    private val configureLogoLayerFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
+        val layerConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoLayerConfig>(config)
+        entity.configure { entity ->
+            entity.getOrAdd(SpecificLayer) { SpecificLayer() }.also {
+                it.spriteLayer = layerConfig.layerName
+                it.parentEntity = layerConfig.parentEntity
+            }
+            entity.getOrAdd(PositionShape) { PositionShape() }  // x, y will be set to view in SpecificLayer hook function
+            entity.getOrAdd(Offset) { Offset() }.also {
+                it.x = layerConfig.offsetX
+                it.y = layerConfig.offsetY
+            }
+            entity.getOrAdd(Appearance) { Appearance() }.also {
+                it.alpha = layerConfig.alpha
+            }
+        }
+        entity
     }
 
-    fun createLogoLayer(world: World, config: LogoLayerConfig) : Entity  {
-        return world.entity {
-            it += SpecificLayer(spriteLayer = config.layerName, parentEntity = config.parentEntity)
-            it += PositionShape()
-            it += Offset(x = config.offsetX, y = config.offsetY)
-            it += Appearance(alpha = config.alpha)
-        }
+    init {
+        Invokables.register(configureLogo, configureLogoFct)
+        Invokables.register(configureLogoLayer, configureLogoLayerFct)
     }
 }

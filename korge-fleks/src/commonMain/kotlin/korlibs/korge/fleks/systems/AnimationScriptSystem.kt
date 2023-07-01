@@ -2,8 +2,12 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import com.github.quillraven.fleks.World.Companion.inject
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.AnimateComponentType.*
+import korlibs.korge.fleks.entity.config.Invokables
+import korlibs.korge.fleks.entity.config.isInvalidEntity
 import korlibs.math.interpolation.Easing
 
 /**
@@ -13,6 +17,8 @@ class AnimationScriptSystem : IteratingSystem(
     family { all(AnimationScript) },
     interval = EachFrame
 ) {
+    private val assetStore = inject<AssetStore>("AssetStore")
+
     // Internally used variables in createAnimateComponent function
     private lateinit var currentTween: TweenBase
     private lateinit var currentParentTween: ParallelTweens
@@ -153,18 +159,13 @@ class AnimationScriptSystem : IteratingSystem(
                 tween.volume?.let { end -> createAnimateComponent(SoundVolume, start.volume, end - start.volume) }
             }
             // A special type of TweenSpawner which directly changes the Spawner component
-            is SpawnEntity -> tween.entity.configure { spawnerEntity ->
-                // TODO create a new fresh entity and make sure it will be deleted or reused after spawning is done
-                spawnerEntity.getOrAdd(Spawner) { Spawner() }.also {
-                    it.totalNumberOfObjects = 1
-                    it.newEntity = spawnerEntity
-                    it.configureFunction = tween.configureFunction
-                }
+            is SpawnEntity -> {
+                val spawnedEntity = if (tween.entity.isInvalidEntity()) world.entity() else tween.entity
+                Invokables.invoke(tween.function, world, spawnedEntity, tween.config)
             }
             // A special type of TweenLifeCycle (to be created if needed) which directly changes the LifeCycle component
-            is DeleteEntity -> tween.entity.configure { animatedEntity ->
-                animatedEntity.getOrAdd(LifeCycle) { LifeCycle() }.also { it.healthCounter = 0 }
-            }
+            is DeleteEntity -> tween.entity.configure { entityToDelete -> world -= entityToDelete }
+            is ExecuteConfigFunction -> Invokables.invoke(tween.function, world, tween.entity, tween.config)
             else -> error("AnimationScriptSystem: Animate function for tween $tween not implemented!")
         }
     }

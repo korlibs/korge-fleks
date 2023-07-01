@@ -2,10 +2,9 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.Entity
-import com.github.quillraven.fleks.World
-import korlibs.datastructure.iterators.fastForEach
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.utils.InvokableSerializer.register
+import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.entity.config.Invokables
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -18,6 +17,8 @@ import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.*
+import kotlin.jvm.JvmInline
+
 
 /**
  * All Fleks components which should be serializable needs to derive from this interface.
@@ -31,17 +32,15 @@ typealias FleksSnapshot = Map<Entity, List<Component<*>>>  // snapshot data of F
 typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
 
 /**
- *  All entity config data classes should be serializable by deriving from this interface.
- *  They are accessed e.g. by the [SpawnerSystem][com.soywiz.korgeFleks.systems.SpawnerSystem].
+ * Class for serializing identifier objects for entity configs and functions in components.
  *
- * Hint: Do not forget to register all Config data classes in their entity type classes (init).
- * */
-interface SerializableConfig
-
-// An empty config object for initialization of config properties of components.
-// This config does not have any data per definition.
-private class NoConfig: SerializableConfig
-val noConfig: SerializableConfig = NoConfig()
+ * These identifiers are used to access a specific entity configuration from the [AssetStore].
+ * They are also used to access a specific lambda function through the [Invokables] object.
+ * It wraps a string value. Using this [Identifier] object everywhere in the code is more error-prone than using a plain string.
+ * Since strings can have typos which are not realized at compile time.
+ */
+@JvmInline @Serializable
+value class Identifier(val name: String)
 
 /**
  * This polymorphic module config for kotlinx serialization lists all Korge-fleks
@@ -52,8 +51,7 @@ internal val internalModule = SerializersModule {
     polymorphic(SerializeBase::class) {
         subclass(AnimateComponent::class)
         subclass(AnimationScript::class)
-        subclass(DebugInfo::class)
-        subclass(AssetReload::class)
+        subclass(Info::class)
         subclass(Drawable::class)
         subclass(Appearance::class)
         subclass(Rgb::class)
@@ -85,6 +83,7 @@ internal val internalModule = SerializersModule {
         subclass(ParallelTweens::class)
         subclass(Wait::class)
         subclass(SpawnEntity::class)
+        subclass(ExecuteConfigFunction::class)
         subclass(DeleteEntity::class)
         subclass(TweenAppearance::class)
         subclass(TweenPositionShape::class)
@@ -130,56 +129,6 @@ class SnapshotSerializer {
         }
         return json
     }
-}
-
-/**
- * This is the type for component properties which should contain invokable functions. Those functions
- * are used to specifically configure new created entities.
- *
- * Hint: Do not forget to mark all Invokable properties in components with `@Serializable(InvokableSerializer::class)`
- */
-typealias Invokable = (@Contextual World).(Entity) -> Entity
-
-/**
- * Use this function to initialize Invokable properties of components.
- */
-fun World.noFunction(entity: Entity) = entity
-
-/**
- * A serializer strategy for Invokable (i.e. Lambdas) in components.
- * It is necessary that all lambda functions are added to the internal map which
- * shall be serializable. For that the [register] function can be used.
- */
-object InvokableSerializer : KSerializer<Invokable> {
-    private val map = mutableMapOf<String, Invokable>(
-        "noFunction" to World::noFunction
-    )
-
-    fun register(vararg invokable: Invokable) {
-        invokable.fastForEach {
-            val name = it.toString().substringAfter("World.").substringBefore('(')
-            map[name] = it
-        }
-    }
-
-    fun unregister(vararg invokable: Invokable) {
-        invokable.fastForEach {
-            val name = it.toString().substringAfter("World.").substringBefore('(')
-            map.remove(name)
-        }
-    }
-
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("InvokableAsString", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: Invokable) {
-        val name = value.toString().substringAfter("World.").substringBefore('(')
-        if (map.containsKey(name)) encoder.encodeString(name)
-        else throw SerializationException("Invokable function '$name' not registered in InvokableAsString serializer!")
-    }
-
-    override fun deserialize(decoder: Decoder): Invokable =
-        map[decoder.decodeString()]
-            ?: throw SerializationException("No lambda function found for '${decoder.decodeString()}' in InvokableAsString!")
 }
 
 /**

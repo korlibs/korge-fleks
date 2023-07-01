@@ -10,19 +10,16 @@ import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
 import korlibs.image.tiles.tiled.TiledMap
 import korlibs.image.tiles.tiled.readTiledMap
-import korlibs.io.async.launchImmediately
-import korlibs.io.file.Vfs
-import korlibs.io.file.VfsFile
-import korlibs.io.file.fullName
 import korlibs.io.file.std.resourcesVfs
-import korlibs.io.lang.Closeable
-import korlibs.korge.fleks.components.AssetReload
-import korlibs.korge.fleks.utils.AssetReloadCache
+import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
+
+
+interface ConfigBase
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -37,22 +34,34 @@ class AssetStore {
     val worldAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
     val levelAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
 
-    private var commonAssetConfig: AssetModel = AssetModel()
-    private var currentWorldAssetConfig: AssetModel = AssetModel()
-    private var currentLevelAssetConfig: AssetModel = AssetModel()
+    internal var commonAssetConfig: AssetModel = AssetModel()
+    internal var currentWorldAssetConfig: AssetModel = AssetModel()
+    internal var currentLevelAssetConfig: AssetModel = AssetModel()
 
+    var entityConfigs: MutableMap<String, ConfigBase> = mutableMapOf()
     private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
-    private var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
-    private var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
+    internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
+    internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     private var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     private var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
 
-    private var reloading: Boolean = false  // Used for debouncing reload of config (in case the modification message comes twice from the system)
-    private lateinit var commonResourcesWatcher: Closeable
-    private lateinit var currentWorldResourcesWatcher: Closeable
-    private lateinit var currentLevelResourcesWatcher: Closeable
+    private val assetReload = AssetReload(assetStore = this)
+
+    suspend fun watchForChanges(world: World, assetReloadContext: CoroutineContext) = assetReload.watchForChanges(world, assetReloadContext)
+//    assetReload.watchForChanges(gameWorld, newCoroutineContext(coroutineContext))
+//    assetReload.watchForChanges(hudWorld, newCoroutineContext(coroutineContext))
 
     enum class AssetType{ None, Common, World, Level }
+
+    fun <T : ConfigBase> addEntityConfig(identifier: Identifier, entityConfig: T) {
+        entityConfigs[identifier.name] = entityConfig
+    }
+
+    inline fun <reified T : ConfigBase> getEntityConfig(identifier: Identifier) : T {
+        val config: ConfigBase = entityConfigs[identifier.name] ?: error("AssetStore - getConfig: No config found for configId name '${identifier.name}'!")
+        if (config !is T) error("AssetStore - getConfig: Config for '${identifier.name}' is not of type ${T::class}!")
+        return config
+    }
 
     fun getSound(name: String) : SoundChannel {
         return if (sounds.contains(name)) sounds[name]!!.second
@@ -71,9 +80,9 @@ class AssetStore {
         } else error("GameAssets: Image '$name' not found!")
     }
 
-    fun getBackground(name: String) : ParallaxDataContainer {
-        return if (backgrounds.contains(name)) backgrounds[name]!!.second
-        else error("GameAssets: Parallax background '$name' not found!")
+    fun getBackground(assetConfig: Identifier) : ParallaxDataContainer {
+        return if (backgrounds.contains(assetConfig.name)) backgrounds[assetConfig.name]!!.second
+        else error("GameAssets: Parallax background '${assetConfig.name}' not found!")
     }
 
     fun getTiledMap(name: String) : TiledMap {
@@ -122,11 +131,11 @@ class AssetStore {
                 currentWorldAssetConfig = assetConfig
                 worldAtlas
             }
-            assetConfig.assetFolderName.contains(Regex("^world[0-9]+\\/(intro|extro/level[0-9]+)\$")) -> {
+            assetConfig.assetFolderName.contains(Regex("^world[0-9]+\\/(intro[0-9]+|extro/level[0-9]+)\$")) -> {
                 when (currentLevelAssetConfig.assetFolderName) {
                     "none" -> { /* Just load assets */ }
                     assetConfig.assetFolderName -> {
-                        println("INFO: World assets already loaded! No reload is happening!")
+                        println("INFO: Level assets already loaded! No reload is happening!")
                         return
                     }
                     else -> {
@@ -149,7 +158,9 @@ class AssetStore {
             tiledMaps[tiledMap.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + tiledMap.value].readTiledMap(atlas = atlas))
         }
         assetConfig.sounds.forEach { sound ->
-            val soundChannel = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readMusic().play()
+            val soundFile = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readMusic()
+            val soundChannel = soundFile.play()
+//            val soundChannel = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readSound().play()
             soundChannel.pause()
             sounds[sound.key] = Pair(type, soundChannel)
         }
@@ -172,69 +183,5 @@ class AssetStore {
         }
 
         println("Assets: Loaded resources in ${sw.elapsed}")
-    }
-
-    suspend fun watchAssetsForChanges(world: World, assetReloadContext: CoroutineContext, assetReloadCache: AssetReloadCache) {
-        // This resource watcher will check if one asset file was changed. If yes then it will reload the asset.
-        commonResourcesWatcher = resourcesVfs[commonAssetConfig.assetFolderName].watch {
-            if (it.kind == Vfs.FileEvent.Kind.MODIFIED) { checkAssetFolders(world, it.file,
-                AssetType.Common, commonAssetConfig, assetReloadContext, assetReloadCache) }
-        }
-        currentWorldResourcesWatcher = resourcesVfs[currentWorldAssetConfig.assetFolderName].watch {
-            if (it.kind == Vfs.FileEvent.Kind.MODIFIED) { checkAssetFolders(world, it.file,
-                AssetType.World, currentWorldAssetConfig, assetReloadContext, assetReloadCache) }
-        }
-        currentLevelResourcesWatcher = resourcesVfs[currentLevelAssetConfig.assetFolderName].watch {
-            if (it.kind == Vfs.FileEvent.Kind.MODIFIED) { checkAssetFolders(world, it.file,
-                AssetType.Level, currentLevelAssetConfig, assetReloadContext, assetReloadCache) }
-        }
-    }
-
-    private suspend fun checkAssetFolders(world: World, file: VfsFile, type: AssetType, assetConfig: AssetModel, assetReloadContext: CoroutineContext, assetReloadCache: AssetReloadCache) = with (world) {
-        assetConfig.backgrounds.forEach { config ->
-            if (file.fullName.contains(config.value.aseName) && !reloading) {
-                reloading = true  // save that reloading is in progress
-                print("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    // Give aseprite more time to finish writing the files
-                    kotlinx.coroutines.delay(100)
-                    backgrounds[config.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
-                    assetReloadCache.backgroundEntities.forEach { entity ->
-                        entity[AssetReload].trigger = true
-                    }
-                    // Guard period until reloading is activated again - this is used for debouncing watch messages
-                    kotlinx.coroutines.delay(100)
-                    reloading = false
-                    println("Finished")
-                }
-            }
-        }
-        assetConfig.images.forEach { config ->
-            if (file.fullName.contains(config.value.fileName) && !reloading) {
-                reloading = true
-                print("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    kotlinx.coroutines.delay(100)
-                    images[config.key] = Pair(type,
-                        if (config.value.layers == null) {
-                            resourcesVfs[assetConfig.assetFolderName + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
-                        } else {
-                            val props = ASE.toProps()
-                            props.setExtra("layers", config.value.layers)
-                            resourcesVfs[assetConfig.assetFolderName + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
-                        }
-                    )
-                    assetReloadCache.spriteEntities.forEach { entity ->
-                        entity[AssetReload].trigger = true
-                    }
-                    kotlinx.coroutines.delay(100)
-                    reloading = false
-                    println("Finished")
-
-                }
-            }
-        }
     }
 }

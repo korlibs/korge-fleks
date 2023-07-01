@@ -11,7 +11,6 @@ import korlibs.korge.parallax.ParallaxConfig
  */
 data class AssetModel(
     val assetFolderName: String = "none",
-    var reloading: Boolean = false,
     val sounds: Map<String, String> = mapOf(),
     val backgrounds: Map<String, ParallaxConfig> = mapOf(),
     val images: Map<String, ImageDataConfig> = mapOf(),

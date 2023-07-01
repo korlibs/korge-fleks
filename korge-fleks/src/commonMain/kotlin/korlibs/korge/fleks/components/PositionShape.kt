@@ -3,8 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
-import korlibs.korge.fleks.entity.config.nullEntity
-import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.entity.config.invalidEntity
 import korlibs.korge.fleks.utils.SerializeBase
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -40,7 +39,7 @@ data class Offset(
 @Serializable
 @SerialName("OffsetByFrameIndex")
 data class OffsetByFrameIndex(
-    var entity: Entity = nullEntity,
+    var entity: Entity = invalidEntity,
     var list: Map<String, List<Point>> = emptyMap()
 ) : Component<OffsetByFrameIndex>, SerializeBase {
     override fun type(): ComponentType<OffsetByFrameIndex> = OffsetByFrameIndex
@@ -71,8 +70,8 @@ data class Motion(
 data class ParallaxMotion(
     var isScrollingHorizontally: Boolean = true,
     var speedFactor: Float = 1.0f,  // TODO put this into assets because it is static and does not change  ????
-    val selfSpeedX: Float = 0.0f,
-    val selfSpeedY: Float = 0.0f
+    var selfSpeedX: Float = 0.0f,
+    var selfSpeedY: Float = 0.0f
 ) : Component<ParallaxMotion>, SerializeBase {
     override fun type(): ComponentType<ParallaxMotion> = ParallaxMotion
     companion object : ComponentType<ParallaxMotion>()

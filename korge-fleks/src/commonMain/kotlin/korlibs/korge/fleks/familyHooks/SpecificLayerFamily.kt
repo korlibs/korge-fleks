@@ -5,6 +5,7 @@ import com.github.quillraven.fleks.FamilyHook
 import com.github.quillraven.fleks.World
 import korlibs.image.color.RGBA
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.entity.config.Invokables
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.input.mouse
 import korlibs.korge.parallax.ParallaxDataView
@@ -34,7 +35,7 @@ fun specificLayerFamily(): Family = World.family { all(SpecificLayer).any(Specif
 
 val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     val world = this
-    val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
+    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
     // Need to get parent entity to search for view object which contains the sprite layer
     val specificLayer = entity[SpecificLayer]
@@ -42,11 +43,11 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     val view: View = if (specificLayer.parallaxPlaneLine != null) {
         val pView = korgeViewCache[specificLayer.parentEntity]
         pView as ParallaxDataView
-        pView.parallaxLines[specificLayer.parallaxPlaneLine!!] ?: error("OnSpecificLayerFamily: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
+        pView.parallaxLines[specificLayer.parallaxPlaneLine!!] ?: error("onSpecificLayerFamilyAdded: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
     } else if (specificLayer.spriteLayer != null) {
         korgeViewCache.getLayer(specificLayer.parentEntity, specificLayer.spriteLayer!!)
     } else {
-        error("OnSpecificLayerFamily: No sprite layer name or parallax plane line number set for entity '${entity.id}'!")
+        error("onSpecificLayerFamilyAdded: No sprite layer name or parallax plane line number set for entity '${entity.id}'!")
     }
 
     entity.getOrNull(Appearance)?.also {
@@ -60,19 +61,19 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     entity.getOrNull(InputTouchButton)?.let { touchInput ->
         view.mouse {
             onDown {
-                if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity)
+                if (touchInput.triggerImmediately) Invokables.invoke(touchInput.function, world, entity, touchInput.config)
                 touchInput.pressed = true
             }
             onUp {
                 if (touchInput.pressed) {
                     touchInput.pressed = false
-                    touchInput.action.invoke(world, entity)
+                    Invokables.invoke(touchInput.function, world, entity, touchInput.config)
                 }
             }
             onUpOutside {
                 if (touchInput.pressed) {
                     touchInput.pressed = false
-                    if (touchInput.triggerImmediately) touchInput.action.invoke(world, entity)
+                    if (touchInput.triggerImmediately) Invokables.invoke(touchInput.function, world, entity, touchInput.config)
                 }
             }
         }
@@ -91,5 +92,5 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
 }
 
 val onSpecificLayerFamilyRemoved: FamilyHook = { entity ->
-    inject<KorgeViewCache>("normalViewCache").remove(entity)
+    inject<KorgeViewCache>("KorgeViewCache").remove(entity)
 }

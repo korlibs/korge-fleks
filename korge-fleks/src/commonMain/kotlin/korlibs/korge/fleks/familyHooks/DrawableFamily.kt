@@ -14,29 +14,30 @@ import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.Text
+import korlibs.korge.fleks.entity.config.Invokables
 import korlibs.korge.fleks.systems.KorgeViewSystem
 import korlibs.korge.fleks.utils.KorgeViewCache
+import korlibs.korge.input.mouse
 import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxConfig
 import korlibs.korge.parallax.ParallaxDataView
 import korlibs.korge.view.*
-import korlibs.korge.view.align.centerXBetween
 import korlibs.korge.view.align.centerXOnStage
 import korlibs.korge.view.align.centerYOnStage
 
 
 /**
- * Whenever a View based object is created (combination of "all", "any" and "none") then the View objects can be
+ * Whenever a View based object is created (combination of "all", "any" and "none" in the family lambda) then the View objects can be
  * created and added to the [KorgeViewSystem]. This is done in [onDrawableFamilyAdded] family hook here rather than in
  * component hook because we are sure that all needed components are set up before in the [World].
  */
-
-fun drawableFamily(): Family = World.family { all(Drawable, PositionShape).any(Drawable, Appearance) }
+fun drawableFamily(): Family = World.family { all(Drawable, PositionShape).any(Drawable, Appearance, InputTouchButton) }
 
 val onDrawableFamilyAdded: FamilyHook = { entity ->
-    val assets = inject<AssetStore>()
-    val layers = inject<HashMap<String, Container>>()
-    val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
+    val world = this
+    val assets = inject<AssetStore>("AssetStore")
+    val layers = inject<HashMap<String, Container>>("Layers")
+    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
     val drawable = entity[Drawable]
     val positionShape = entity[PositionShape]
@@ -57,9 +58,9 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             if (sprite.isPlaying) view.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
 
             width =
-                view.data?.width?.toFloat() ?: error("KorgeViewHook: Cannot get width of sprite ImageAnimView!")
+                view.data?.width?.toFloat() ?: error("onDrawableFamilyAdded: Cannot get width of sprite ImageAnimView!")
             height =
-                view.data?.height?.toFloat() ?: error("KorgeViewHook: Cannot get height of sprite ImageAnimView!")
+                view.data?.height?.toFloat() ?: error("onDrawableFamilyAdded: Cannot get height of sprite ImageAnimView!")
 
             view
         }
@@ -74,7 +75,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
         entity has Parallax -> {
             val parallax = entity[Parallax]
-            val parallaxConfig = assets.getBackground(parallax.assetName)
+            val parallaxConfig = assets.getBackground(parallax.config)
             val view = ParallaxDataView(parallaxConfig)
 
             when (parallaxConfig.config.mode) {
@@ -115,7 +116,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             view
         }
 
-        else -> error("DrawableFamily.onEntityAdded: No Parallax, ParallaxLayer, TiledMap, Sprite or Text component found!")
+        else -> error("onDrawableFamilyAdded: No Parallax, ParallaxLayer, TiledMap, Sprite or Text component found!")
     }
 
     entity.getOrNull(Appearance)?.also {
@@ -125,7 +126,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
     }
 
     when (val layer = layers[drawable.drawOnLayer]) {
-        null -> error("DrawableFamily.onEntityAdded: Cannot add view for entity '${entity.id}' to layer '${drawable.drawOnLayer}'!")
+        null -> error("onDrawableFamilyAdded: Cannot add view for entity '${entity.id}' to layer '${drawable.drawOnLayer}'!")
         else -> {
             layer.addChild(view)
             korgeViewCache.addOrUpdate(entity, view)
@@ -140,14 +141,35 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         positionShape.y = view.y + layout.offsetY
     }
 
+    // Set properties in TouchInput when touch input was recognized
+    // TouchInputSystem checks for those properties and executes specific Invokable function
+    entity.getOrNull(InputTouchButton)?.let { touchInput ->
+        view.mouse {
+            onDown {
+                if (touchInput.triggerImmediately) Invokables.invoke(touchInput.function, world, entity, touchInput.config)
+                touchInput.pressed = true
+            }
+            onUp {
+                if (touchInput.pressed) {
+                    touchInput.pressed = false
+                    Invokables.invoke(touchInput.function, world, entity, touchInput.config)
+                }
+            }
+            onUpOutside {
+                if (touchInput.pressed) {
+                    touchInput.pressed = false
+                    if (touchInput.triggerImmediately) Invokables.invoke(touchInput.function, world, entity, touchInput.config)
+                }
+            }
+        }
+    }
+
     positionShape.width = width
     positionShape.height = height
 }
 
 val onDrawableFamilyRemoved: FamilyHook = { entity ->
-    val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
-    (korgeViewCache.getOrNull(entity)
-        ?: error("DrawableFamily.onEntityRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[Drawable].drawOnLayer}'!"))
-        .removeFromParent()
+    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
+    (korgeViewCache.getOrNull(entity) ?: error("onDrawableFamilyRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[Drawable].drawOnLayer}'!")).removeFromParent()
     korgeViewCache.remove(entity)
 }

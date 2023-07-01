@@ -11,7 +11,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("SubEntities")
 data class SubEntities(
-    var entities: MutableMap<String, Entity> = mutableMapOf()
+    var entities: MutableMap<String, Entity> = mutableMapOf(),
+    var moveWithParent: Boolean = true
 ) : Component<SubEntities>, SerializeBase {
     override fun type(): ComponentType<SubEntities> = SubEntities
     companion object : ComponentType<SubEntities>()

@@ -11,7 +11,7 @@ fun parallaxFamily(): Family = World.family { all(Parallax).any(Parallax, Motion
 
 val onParallaxFamilyAdded: FamilyHook = { entity ->
     val world = this
-    val korgeViewCache = inject<KorgeViewCache>("normalViewCache")
+    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
 }
 

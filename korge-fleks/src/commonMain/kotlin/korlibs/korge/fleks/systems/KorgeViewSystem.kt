@@ -15,7 +15,6 @@ import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxDataView
 import korlibs.korge.render.useLineBatcher
 import korlibs.korge.view.*
-import korlibs.math.geom.Rectangle
 import korlibs.time.TimeSpan
 
 /**
@@ -25,8 +24,8 @@ import korlibs.time.TimeSpan
  * [Sprite] component to setup and control the sprite animations.
  */
 class KorgeViewSystem(
-    private val korgeViewCache: KorgeViewCache = inject("normalViewCache"),
-    private val korgeDebugViewCache: KorgeViewCache = inject("debugViewCache")
+    private val korgeViewCache: KorgeViewCache = inject("KorgeViewCache"),
+    private val korgeViewCacheDebug: KorgeViewCache = inject("KorgeViewCacheDebug")
 ) : IteratingSystem(
     family { all(Appearance).any(Appearance, SwitchLayerVisibility, SpecificLayer, PositionShape, Offset) },
     interval = EachFrame
@@ -92,12 +91,13 @@ class KorgeViewSystem(
         }
 
         // Do debug drawing if component is configured for this entity
-        entity.getOrNull(DebugInfo)?.let { debugInfo ->
+        entity.getOrNull(Info)?.let { debugInfo ->
             // TODO check for Keys to enable certain debug options
+            if (!debugInfo.showName) return
 
             val positionShape = entity[PositionShape]
 
-            korgeDebugViewCache[entity].let { debugView ->
+            korgeViewCacheDebug[entity].let { debugView ->
                 debugView.xy(positionShape.x, positionShape.y)
 
                 @OptIn(KorgeExperimental::class)

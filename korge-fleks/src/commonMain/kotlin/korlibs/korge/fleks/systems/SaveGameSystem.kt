@@ -6,7 +6,7 @@ import korlibs.korge.fleks.components.Sound
 import korlibs.korge.fleks.utils.SnapshotSerializer
 
 class SaveGameSystem(
-    private val serializer: SnapshotSerializer = World.inject()
+    private val serializer: SnapshotSerializer = World.inject<SnapshotSerializer>("SnapshotSerializer")
 ) : IteratingSystem(
     family { all(Sound) },
     interval = Fixed(step = 0.5f)

@@ -1,22 +1,17 @@
-package com.soywiz.korgeFleks.components
+package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.World
-import com.github.quillraven.fleks.world
-import korlibs.korge.fleks.utils.InvokableSerializer
-import korlibs.korge.fleks.components.PositionShape
+import com.github.quillraven.fleks.configureWorld
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
 internal class PositionShapeTest {
 
-    private val expectedWorld = world {}
-    private val recreatedWorld = world {}
+    private val expectedWorld = configureWorld {}
+    private val recreatedWorld = configureWorld {}
 
     @Test
     fun testPositionShapeSerialization() {
-
-        InvokableSerializer.register(World::testFunction)
 
         val compUnderTest = PositionShape(
             x = 5.2f,
