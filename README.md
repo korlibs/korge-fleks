@@ -33,27 +33,92 @@ understand -at least- the basic principles of an ECS system. Moreover, there are
 an ECS is and how it works. But when you read further down you should get the idea of how the Fleks ECS can work
 within a KorGE game.
 
-Per definition in KorGE-Fleks components shall only contain data which is necessary to fully describe the state of a game
-object at every point in time. This enables the game system to save the state of a game object and to restore its state
-when needed. This makes it possible to easily implement a save-game system or to handle transmission of game object
-states over network for a multiplayer game. Details about implemented properties for components can be found in section
-Components.
+Per definition KorGE-Fleks components contain only data which is necessary to fully describe the state of a game
+object at every point in time. All components are easily serializable with _kotlinx.serialization_ because of its
+basic nature. This enables the game system to save the state of a game object and to restore its state
+when needed. This also makes it possible to easily implement a save-game system or to handle transmission of game object
+states over network for a multiplayer game. Details about implemented property types for components can be found below in
+section Components.
 
+KorGE-Fleks can save the state of the game by simply serializing and saving the whole ECS world snapshot as a JSON string
+to a file (all active entities and components). Loading a saved state of the game is done by deserializing the
+saved JSON string of a world
+snapshot.
+
+KorGE-Fleks implements a couple of useful Systems. Those systems keep track of complex KorGE objects and map them
+to the Entities which needs those objects to implement various behavior like e.g. displaying sprites, playing sounds or
+reacting to touch input.
+
+Execution time of systems in Fleks is very static and thus predictable. The core of KorGE makes a lot of use of
+coroutines and asyncronous execution of object's behavior in update functions. KorGE-Fleks tries to hide this
+complexity in the implemented systems.
+ 
+AssetStore implements loading of typical game asses like graphics images, sounds, level maps, game object configs, etc.
+It uses up to 4 independently loadable sets of asset which can have different lifetime in the game:
+- Common assets
+- World assets
+- Level assets
+- Special assets
+
+KorGe-Fleks provides basic entity configuration objects and functions to easily setup Game Objects 
+
+- Parallax background
+- Text and image logos
+- Level maps (Tiledmap)
+- Effect objects (like explosions)
+- ... to be continued
+
+In the end the actual game code outside KorGE-Fleks is just specialized configuration and individual assets for the
+final Game Objects.
+
+# Implementation of KorGE-Fleks
+
+This repository contains under `korge-fleks/src` folder the _KorGE-Fleks_ addon. The next subsection gives an overview
+over all provided Components and Systems. Also, Serialization of Entities and its associated components and how to
+use the AssetStore and entity configuration to build up Game Objects is described.
+
+## Components
+
+All provided components in KorGe-Fleks contain only basic property types like:
+
+- String
+- Number (Int, Float, Double)
+- Enum class (like Easing from KorGE)
+- Entity (Int value class)
+- Identifier (String value class for accessing static entity configuration which is loaded from assets and
+  invoking functions with `World`, `Entity` and `Identifier` parameters)
+
+Collections of above types in Lists and Maps are also supported.
+
+For simplicity all properties are independent of any KorGE-specific complex classes. Components do not contain
+any KorGE-related complex objects like `Views`, `Image`, `Camera`, etc.
+
+Hint: Where it makes sense a basic type can be taken over from KorGE as it is done with the `Easing` enum class for the
+_Animation system_.
+
+## Serialization of Components
 
 ... to be continued
 
-- Components are easily serializable because of its basic nature
-- Save game can be done by simply serializing and saving the whole ECS world snapshot (all active entities
-  and components)
-- Loading a save game is done by deserializing a saved world snapshot
-- ECS Systems keep track of complex KorGE objects and map them to the Entities
-- Timely execution of systems in Fleks is very static and predictable while the core of KorGE makes a lot of use of
-  coroutines and asyncronous execution of update functions
+## Systems
 
+...
 
-# Setup
+## AssetStore
 
-As a clean start the [KorGE-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world) repo can be used.
+...
+
+### Hot-reloading of Assets
+
+...
+
+## Fleks World Integration into a KorGE Scene
+
+...
+
+# Set up a new Game with KorGE-Fleks
+
+As a clean start the [KorGE-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world) repository can be used.
 It contains the kproject and gradle setup to use Fleks, KorGE and all needed KorGE addons _KorGE-Fleks, KorGE-Tiled,
 KorGE-Parallax_ together in a project.
 
@@ -149,7 +214,7 @@ corresponding git repo in the `libs` folder. E.g. for KorGE-Parallax the `src:` 
 commented out and the `src:` line with local folder under `../../korge-parallax/korge-parallax` can be
 uncommented.
 
-# Updating KorGE-Fleks to newer versions of KorGE and other KorGE Addons
+# Updating KorGE-Fleks to newer versions
 
 KorGE-Fleks depends on specific versions of KorGE, KorGE-Parallax addon, KorGE-Tiled addon and Fleks ECS.
 
@@ -188,52 +253,6 @@ dependencies:
 - https://github.com/korlibs/korge-parallax/tree/0.0.3/korge-parallax
 - https://github.com/korlibs/korge-tiled/tree/0.0.2/korge-tiled
 ```
-
-# Usage
-
-This repo contains under `korge-fleks/src` folder the _KorGE-Fleks_ addon. It simplifies usage of Fleks in a KorGE
-environment. For that a set of Components and Systems and are implemented. Also, Serialization of Entities and its
-associated components is available.
-
-## Components
-
-All components of the Fleks ECS contain only basic property types like:
-
-- String
-- Number (Int, Float, Double)
-- Enum class (like Easing from KorGE)
-- Entity (value class)
-- Identifier (A String value class for accessing static entity configuration which is loaded from assets and
-  invoking functions with `World`, `Entity` and `Identifier` parameters)
-
-Sets of above types in Lists and Maps is also supported.
-
-For simplicity all properties are independent of any KorGE-specific complex classes. Components do not contain
-any KorGE-related complex objects like `Views`, `Image`, `Camera`, etc.
-
-Where it makes sense a type can be taken over from KorGE as it is done with the `Easing` enum class for the
-_Animation system_.
-
-## Serialization of Components
-
-...
-
-## Systems
-
-...
-
-## AssetStore
-
-...
-
-### Hot-reloading of Assets
-
-...
-
-## Fleks World Integration into a KorGE Scene
-
-...
-
 # Examples
 
 * [Example in this repo](https://github.com/korlibs/korge-fleks/tree/main/example)
