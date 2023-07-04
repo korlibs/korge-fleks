@@ -12,7 +12,7 @@ import korlibs.io.file.fullName
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.lang.Closeable
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.entity.config.ParallaxBackground.Companion.configureParallaxLayers
+import korlibs.korge.fleks.entity.config.ParallaxBackground.configureParallaxLayers
 import korlibs.korge.fleks.familyHooks.onDrawableFamilyAdded
 import korlibs.korge.fleks.familyHooks.onDrawableFamilyRemoved
 import korlibs.korge.fleks.familyHooks.onSpecificLayerFamilyAdded

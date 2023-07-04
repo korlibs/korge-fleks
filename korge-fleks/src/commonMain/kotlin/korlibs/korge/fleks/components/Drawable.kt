@@ -25,7 +25,7 @@ import kotlin.math.roundToInt
 data class Drawable(
     var drawOnLayer: String = ""
 ) : Component<Drawable>, SerializeBase {
-    override fun type(): ComponentType<Drawable> = Drawable
+    override fun type() = Drawable
     companion object : ComponentType<Drawable>()
 }
 
@@ -45,7 +45,7 @@ data class Appearance(
     var visible: Boolean = true,
     var tint: Rgb? = null
 ) : Component<Appearance>, SerializeBase {
-    override fun type(): ComponentType<Appearance> = Appearance
+    override fun type() = Appearance
     companion object : ComponentType<Appearance>()
 }
 
@@ -67,7 +67,7 @@ data class SpecificLayer(
     var spriteLayer: String? = null,
     var parallaxPlaneLine: Int? = null
 ) : Component<SpecificLayer>, SerializeBase {
-    override fun type(): ComponentType<SpecificLayer> = SpecificLayer
+    override fun type() = SpecificLayer
     companion object : ComponentType<SpecificLayer>()
 }
 
@@ -108,7 +108,7 @@ data class SwitchLayerVisibility(
     var onVariance: Float = 0.0f,   // variance in switching value on again: (1.0) - changed value switches back immediately, (0.0) - changed value stays forever
     var spriteLayers: List<LayerVisibility> = listOf()
 ) : Component<SwitchLayerVisibility>, SerializeBase {
-    override fun type(): ComponentType<SwitchLayerVisibility> = SwitchLayerVisibility
+    override fun type() = SwitchLayerVisibility
     companion object : ComponentType<SwitchLayerVisibility>()
 }
 
