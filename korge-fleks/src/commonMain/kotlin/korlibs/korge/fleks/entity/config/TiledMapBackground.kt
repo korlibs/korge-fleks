@@ -48,6 +48,6 @@ object TiledMapBackground {
     }
 
     init {
-        Invokables.register(configureTiledMap, configureTiledMapFct)
+        Invokable.register(configureTiledMap, configureTiledMapFct)
     }
 }

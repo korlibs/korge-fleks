@@ -133,8 +133,8 @@ object ParallaxBackground {
     }
 
     init {
-        Invokables.register(configureParallaxLayers, configureParallaxLayersFct)
-        Invokables.register(configureParallaxBackground, configureParallaxBackgroundFct)
+        Invokable.register(configureParallaxLayers, configureParallaxLayersFct)
+        Invokable.register(configureParallaxBackground, configureParallaxBackgroundFct)
     }
 
     private fun createSubEntityForLayer(world: World, parentEntity: Entity, layerName: String? = null, layerLine: Int? = null, speedFactor: Float? = null,

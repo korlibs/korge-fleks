@@ -6,7 +6,7 @@ import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.utils.random
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.entity.config.Invokables
+import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.korge.fleks.entity.config.isInvalidEntity
 import korlibs.korge.parallax.ImageDataViewEx
 
@@ -65,7 +65,7 @@ class SpawnerSystem(
                     }
 
                     // Call the configured spawner function for configuring new objects
-                    Invokables.invoke(spawner.function, world, newEntity, spawner.config)
+                    Invokable.invoke(spawner.function, world, newEntity, spawner.config)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects
