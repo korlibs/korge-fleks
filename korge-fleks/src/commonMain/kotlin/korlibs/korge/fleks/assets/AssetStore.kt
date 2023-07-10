@@ -181,6 +181,9 @@ class AssetStore {
         assetConfig.fonts.forEach { font ->
             fonts[font.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + font.value].readBitmapFont(atlas = atlas))
         }
+        assetConfig.entityConfigs.forEach { config ->
+            entityConfigs[config.key] = config.value
+        }
 
         println("Assets: Loaded resources in ${sw.elapsed}")
     }
