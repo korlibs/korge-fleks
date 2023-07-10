@@ -4,7 +4,7 @@ import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.Entity
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.entity.config.Invokables
+import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -35,7 +35,7 @@ typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
  * Class for serializing identifier objects for entity configs and functions in components.
  *
  * These identifiers are used to access a specific entity configuration from the [AssetStore].
- * They are also used to access a specific lambda function through the [Invokables] object.
+ * They are also used to access a specific lambda function through the [Invokable] object.
  * It wraps a string value. Using this [Identifier] object everywhere in the code is more error-prone than using a plain string.
  * Since strings can have typos which are not realized at compile time.
  */

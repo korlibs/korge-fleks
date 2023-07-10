@@ -27,6 +27,7 @@ object FireAndDustEffect {
     // Used in component properties to specify invokable function
     val configureEffectObject = Identifier(name = "configureEffectObject")
 
+    // Configure function which applies the config to the entity's components
     private val configureEffectObjectFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
         val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config)
         entity.configure { entity ->
@@ -74,6 +75,6 @@ object FireAndDustEffect {
     }
 
     init {
-        Invokables.register(configureEffectObject, configureEffectObjectFct)
+        Invokable.register(configureEffectObject, configureEffectObjectFct)
     }
 }

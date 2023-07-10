@@ -3,6 +3,7 @@ package korlibs.korge.fleks.entity.config
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.utils.Identifier
+import korlibs.korge.fleks.systems.SpawnerSystem
 
 
 /**
@@ -20,9 +21,11 @@ val nothing = Identifier(name = "nothing")
 typealias InvokableFunction = (World, Entity, Identifier) -> Entity
 
 /**
- *
+ * This object contains all usable functions which can be invoked from components.
+ * For that the components contain the [Identifier] for the function. Systems like [SpawnerSystem]
+ * will then invoke the actual function by looking up the [Identifier] and executing [invoke].
  */
-object Invokables {
+object Invokable {
     val map = mutableMapOf<Identifier, InvokableFunction>(
         nothing to fun(_: World, entity: Entity, _: Identifier) = entity
     )

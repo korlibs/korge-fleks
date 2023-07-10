@@ -85,7 +85,7 @@ All provided components in KorGe-Fleks contain only basic property types like:
 - Number (Int, Float, Double)
 - Enum class (like Easing from KorGE)
 - Entity (Int value class)
-- Identifier (String value class for accessing static entity configuration which is loaded from assets and
+- Identifier (String value class for accessing static entity configuration which is loaded from AssetStore and
   invoking functions with `World`, `Entity` and `Identifier` parameters)
 
 Collections of above types in Lists and Maps are also supported.
@@ -103,6 +103,23 @@ _Animation system_.
 ## Systems
 
 ...
+
+## Entity Configuration
+
+KorGE-Fleks contains some generic configuration assets which can be used to build up more complex game objects.
+The existing config objects can be found in `korlibs.korge.fleks.entity.config`.
+These object classes contain 4 sections:
+
+- Config data classes
+- Identifiers for invokable functions
+- The actual (anonymous) configure function as a value object
+- Init block which registers the configure function and its Identifier to the Invokable object store
+
+A configuration for an entity is applied to the entity's components by executing
+the configure function. The Invokable object stores the relationship between the Identifier and the function.
+Systems like the SpawnerSystem will invoke the function by looking up the Identifier and executing invoke from
+the Invokable object class. This is how KorGE-Fleks can set up new game objects/entities in a very generic and
+configurable way. 
 
 ## AssetStore
 

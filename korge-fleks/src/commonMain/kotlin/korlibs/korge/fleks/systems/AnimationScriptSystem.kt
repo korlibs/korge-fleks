@@ -6,7 +6,7 @@ import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.AnimateComponentType.*
-import korlibs.korge.fleks.entity.config.Invokables
+import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.korge.fleks.entity.config.isInvalidEntity
 import korlibs.math.interpolation.Easing
 
@@ -161,11 +161,11 @@ class AnimationScriptSystem : IteratingSystem(
             // A special type of TweenSpawner which directly changes the Spawner component
             is SpawnEntity -> {
                 val spawnedEntity = if (tween.entity.isInvalidEntity()) world.entity() else tween.entity
-                Invokables.invoke(tween.function, world, spawnedEntity, tween.config)
+                Invokable.invoke(tween.function, world, spawnedEntity, tween.config)
             }
             // A special type of TweenLifeCycle (to be created if needed) which directly changes the LifeCycle component
             is DeleteEntity -> tween.entity.configure { entityToDelete -> world -= entityToDelete }
-            is ExecuteConfigFunction -> Invokables.invoke(tween.function, world, tween.entity, tween.config)
+            is ExecuteConfigFunction -> Invokable.invoke(tween.function, world, tween.entity, tween.config)
             else -> error("AnimationScriptSystem: Animate function for tween $tween not implemented!")
         }
     }

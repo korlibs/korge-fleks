@@ -3,8 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.configureWorld
 import korlibs.math.interpolation.Easing
-import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.entity.config.Invokables
+import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.korge.fleks.utils.Identifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -18,7 +17,7 @@ internal class AnimationScriptTest {
     @Test
     fun testAnimationScriptSerialization() {
 
-        Invokables.register(testConfigure, testConfigureFct)
+        Invokable.register(testConfigure, testConfigureFct)
 
         val testIdentifier = Identifier("testEntityConfig")
 
@@ -92,7 +91,7 @@ internal class AnimationScriptTest {
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")
         assertEquals(spawnEntity.entity, newSpawnEntity.entity, "Check 'spawnEntity.entity' property to be equal")
-        val spawnedEntity = Invokables.invoke(spawnEntity.function, recreatedWorld, Entity(4242), spawnEntity.config)
+        val spawnedEntity = Invokable.invoke(spawnEntity.function, recreatedWorld, Entity(4242), spawnEntity.config)
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
     }
 }
