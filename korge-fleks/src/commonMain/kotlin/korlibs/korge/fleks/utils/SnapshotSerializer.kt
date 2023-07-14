@@ -66,6 +66,7 @@ internal val internalModule = SerializersModule {
         subclass(PositionShape::class)
         subclass(Offset::class)
         subclass(OffsetByFrameIndex::class)
+        subclass(ChangeOffsetRandomly::class)
         subclass(Point::class)
         subclass(Motion::class)
         subclass(Rigidbody::class)
@@ -91,6 +92,7 @@ internal val internalModule = SerializersModule {
         subclass(TweenLayout::class)
         subclass(TweenSprite::class)
         subclass(TweenSwitchLayerVisibility::class)
+        subclass(TweenChangeOffsetRandomly::class)
         subclass(TweenSpawner::class)
         subclass(TweenSound::class)
     }

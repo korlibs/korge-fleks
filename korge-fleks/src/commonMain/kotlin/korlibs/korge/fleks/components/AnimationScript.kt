@@ -200,6 +200,22 @@ data class TweenSwitchLayerVisibility(
     override var easing: Easing? = null
 ) : TweenBase
 
+@Serializable @SerialName("AnimationScript.ChangeOffsetRandomly")
+data class TweenChangeOffsetRandomly(
+    var triggerChangeVariance: Float? = null,
+    var triggerBackVariance: Float? = null,
+    var offsetXRange: Float? = null,
+    var offsetYRange: Float? = null,
+    var x: Float? = null,
+    var y: Float? = null,
+
+    override var entity: Entity,
+    override var delay: Float? = null,
+    override var duration: Float? = null,
+    @Serializable(with = EasingSerializer::class)
+    override var easing: Easing? = null
+) : TweenBase
+
 @Serializable @SerialName("AnimationScript.TweenSpawner")
 data class TweenSpawner(
     var numberOfObjects: Int? = null,

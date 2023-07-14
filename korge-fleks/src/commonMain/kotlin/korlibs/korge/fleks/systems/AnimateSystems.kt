@@ -28,17 +28,24 @@ import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSoundSto
 import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSoundVolume
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyOffsetXRange
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyOffsetYRange
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyTriggerBackVariance
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyTriggerChangeVariance
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyX
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyY
 import korlibs.korge.parallax.ImageDataViewEx
 import kotlin.jvm.JvmName
 import kotlin.reflect.KMutableProperty0
 
+
 /**
  * This system is configured to work on a combination of one target and one or multiple "Animate" components (e.g. Drawable and AnimateDrawableAlpha or AnimateDrawableTint).
- * The "Animate" component will animate fields of the target component.
+ * The "Animate" component will animate properties of the target component.
  *
  * Thus, for starting an animation for an entity it is sufficient to add the desired "Animate" component to the entity.
  * When the animation is over than the Animate component is removed again from the entity.
- * Adding Animate components can be done e.g. by the AnimationSequence Entity Component configuration.
+ * Adding "Animate" components can be done e.g. by the [AnimationScript] Component configuration.
  */
 class AnimateAppearanceSystem : IteratingSystem(
     family { all(Appearance).any(AnimateAppearanceAlpha, AnimateAppearanceTint, AnimateAppearanceVisible) },
@@ -60,6 +67,23 @@ class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
         val visibility = entity[SwitchLayerVisibility]
         updateProperty(entity, AnimateSwitchLayerVisibilityOnVariance, visibility::offVariance)
         updateProperty(entity, AnimateSwitchLayerVisibilityOffVariance, visibility::onVariance)
+    }
+}
+
+class AnimateChangeOffsetRandomlySystem : IteratingSystem(
+    family { all(ChangeOffsetRandomly).any(AnimateChangeOffsetRandomlyTriggerChangeVariance, AnimateChangeOffsetRandomlyTriggerBackVariance,
+        AnimateChangeOffsetRandomlyOffsetXRange, AnimateChangeOffsetRandomlyOffsetYRange,
+        AnimateChangeOffsetRandomlyX, AnimateChangeOffsetRandomlyY) },
+    interval = EachFrame
+) {
+    override fun onTickEntity(entity: Entity) {
+        val changeOffsetRandomly = entity[ChangeOffsetRandomly]
+        updateProperty(entity, AnimateChangeOffsetRandomlyTriggerChangeVariance, changeOffsetRandomly::triggerChangeVariance)
+        updateProperty(entity, AnimateChangeOffsetRandomlyTriggerBackVariance, changeOffsetRandomly::triggerBackVariance)
+        updateProperty(entity, AnimateChangeOffsetRandomlyOffsetXRange, changeOffsetRandomly::offsetXRange)
+        updateProperty(entity, AnimateChangeOffsetRandomlyOffsetYRange, changeOffsetRandomly::offsetYRange)
+        updateProperty(entity, AnimateChangeOffsetRandomlyX, changeOffsetRandomly::x)
+        updateProperty(entity, AnimateChangeOffsetRandomlyY, changeOffsetRandomly::y)
     }
 }
 

@@ -68,6 +68,13 @@ data class AnimateComponent (
         val AnimateSwitchLayerVisibilityOnVariance = object : ComponentType<AnimateComponent>() {}
         val AnimateSwitchLayerVisibilityOffVariance = object : ComponentType<AnimateComponent>() {}
 
+        val AnimateChangeOffsetRandomlyTriggerChangeVariance = object : ComponentType<AnimateComponent>() {}
+        val AnimateChangeOffsetRandomlyTriggerBackVariance = object : ComponentType<AnimateComponent>() {}
+        val AnimateChangeOffsetRandomlyOffsetXRange = object : ComponentType<AnimateComponent>() {}
+        val AnimateChangeOffsetRandomlyOffsetYRange = object : ComponentType<AnimateComponent>() {}
+        val AnimateChangeOffsetRandomlyX = object : ComponentType<AnimateComponent>() {}
+        val AnimateChangeOffsetRandomlyY = object : ComponentType<AnimateComponent>() {}
+
         val AnimateSoundStartTrigger = object : ComponentType<AnimateComponent>() {}
         val AnimateSoundStopTrigger = object : ComponentType<AnimateComponent>() {}
         val AnimateSoundPosition = object : ComponentType<AnimateComponent>() {}
@@ -109,6 +116,13 @@ enum class AnimateComponentType(val type: ComponentType<AnimateComponent>) {
 
     SwitchLayerVisibilityOnVariance(AnimateComponent.AnimateSwitchLayerVisibilityOnVariance),
     SwitchLayerVisibilityOffVariance(AnimateComponent.AnimateSwitchLayerVisibilityOffVariance),
+
+    ChangeOffsetRandomlyTriggerChangeVariance(AnimateComponent.AnimateChangeOffsetRandomlyTriggerChangeVariance),
+    ChangeOffsetRandomlyTriggerBackVariance(AnimateComponent.AnimateChangeOffsetRandomlyTriggerBackVariance),
+    ChangeOffsetRandomlyOffsetXRange(AnimateComponent.AnimateChangeOffsetRandomlyOffsetXRange),
+    ChangeOffsetRandomlyOffsetYRange(AnimateComponent.AnimateChangeOffsetRandomlyOffsetYRange),
+    ChangeOffsetRandomlyX(AnimateComponent.AnimateChangeOffsetRandomlyX),
+    ChangeOffsetRandomlyY(AnimateComponent.AnimateChangeOffsetRandomlyY),
 
     SoundStartTrigger(AnimateComponent.AnimateSoundStartTrigger),
     SoundStopTrigger(AnimateComponent.AnimateSoundStopTrigger),

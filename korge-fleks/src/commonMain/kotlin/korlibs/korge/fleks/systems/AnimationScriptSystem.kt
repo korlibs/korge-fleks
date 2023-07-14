@@ -146,6 +146,14 @@ class AnimationScriptSystem : IteratingSystem(
                 tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
                 tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
             }
+            is TweenChangeOffsetRandomly -> tween.entity.getOrError(ChangeOffsetRandomly).let { start ->
+                tween.triggerChangeVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerChangeVariance, value = start.triggerChangeVariance, change = end - start.triggerChangeVariance) }
+                tween.triggerBackVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerBackVariance, value = start.triggerBackVariance, change = end - start.triggerBackVariance) }
+                tween.offsetXRange?.let { end -> createAnimateComponent(ChangeOffsetRandomlyOffsetXRange, value = start.offsetXRange, change = end - start.offsetXRange) }
+                tween.offsetYRange?.let { end -> createAnimateComponent(ChangeOffsetRandomlyOffsetYRange, value = start.offsetYRange, change = end - start.offsetYRange) }
+                tween.x?.let { end -> createAnimateComponent(ChangeOffsetRandomlyX, value = start.x, change = end - start.x) }
+                tween.y?.let { end -> createAnimateComponent(ChangeOffsetRandomlyY, value = start.y, change = end - start.y) }
+            }
             is TweenSpawner -> tween.entity.getOrError(Spawner).let { start ->
                 tween.numberOfObjects?.let { end -> createAnimateComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }
                 tween.interval?.let { end -> createAnimateComponent(SpawnerInterval, start.interval, end - start.interval) }

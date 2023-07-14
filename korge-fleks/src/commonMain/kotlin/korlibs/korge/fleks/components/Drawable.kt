@@ -14,16 +14,15 @@ import kotlin.math.roundToInt
 
 /**
  * The [Drawable] component is used to specify that an entity is visible on the display.
- * I.e. it is drawn by KorGe to the Scene.
+ * I.e. it is drawn by KorGE to the Scene.
  * This component is used only in family hook DrawableFamily to set up the view data.
  *
  * @param [drawOnLayer] The number of the layer in the KorGe view scene where the entity is placed.
  *
  */
-@Serializable
-@SerialName("Drawable")
+@Serializable @SerialName("Drawable")
 data class Drawable(
-    var drawOnLayer: String = ""
+    var drawOnLayer: String = ""  // TODO could be moved to EntityConfig in AssetModel
 ) : Component<Drawable>, SerializeBase {
     override fun type() = Drawable
     companion object : ComponentType<Drawable>()
@@ -38,8 +37,7 @@ data class Drawable(
  * @param [tint] can be used optionally to tint the sprite with a specific RGB color.
  *
  */
-@Serializable
-@SerialName("Appearance")
+@Serializable @SerialName("Appearance")
 data class Appearance(
     var alpha: Float = 1.0f,
     var visible: Boolean = true,
@@ -60,8 +58,7 @@ data class Appearance(
  * @param [spriteLayer] has to be set to the same layer name as in Aseprite to select that layer.
  * @param [parentEntity] is the entity (ID) which defines [Sprite] data.
  */
-@Serializable
-@SerialName("SpecificLayer")
+@Serializable @SerialName("SpecificLayer")
 data class SpecificLayer(
     var parentEntity: Entity = invalidEntity,  // The entity which contains the sprite data with layers (ImageAnimView)
     var spriteLayer: String? = null,
@@ -71,8 +68,7 @@ data class SpecificLayer(
     companion object : ComponentType<SpecificLayer>()
 }
 
-@Serializable
-@SerialName("Appearance.Rgb")
+@Serializable @SerialName("Appearance.Rgb")
 data class Rgb(
     var r: Int = 0xff,
     var g: Int = 0xff,
@@ -101,8 +97,7 @@ data class Rgb(
 /**
  * This component is used to switch [visible][Appearance.visible] property of [Appearance] component.
  */
-@Serializable
-@SerialName("SwitchLayerVisibility")
+@Serializable @SerialName("SwitchLayerVisibility")
 data class SwitchLayerVisibility(
     var offVariance: Float = 0.0f,  // variance in switching value off: (1.0) - every frame switching possible, (0.0) - no switching at all
     var onVariance: Float = 0.0f,   // variance in switching value on again: (1.0) - changed value switches back immediately, (0.0) - changed value stays forever
@@ -112,8 +107,7 @@ data class SwitchLayerVisibility(
     companion object : ComponentType<SwitchLayerVisibility>()
 }
 
-@Serializable
-@SerialName("SwitchLayerVisibility.LayerVisibility")
+@Serializable @SerialName("SwitchLayerVisibility.LayerVisibility")
 data class LayerVisibility(
     var name: String = "",
     var visible: Boolean = true

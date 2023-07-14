@@ -15,6 +15,7 @@ import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxDataView
 import korlibs.korge.render.useLineBatcher
 import korlibs.korge.view.*
+import korlibs.math.interpolation.Easing
 import korlibs.time.TimeSpan
 
 /**
@@ -33,6 +34,17 @@ class KorgeViewSystem(
     var updateViewsEnabled: Boolean = true
     private var lastY: Double = 0.0
 
+    private fun updateAnimateComponent(entity: Entity, componentProperty: AnimateComponentType, value: Any, change: Any = Unit, duration: Float? = null, easing: Easing? = null) {
+        entity.configure { animatedEntity ->
+            animatedEntity.getOrAdd(componentProperty.type) { AnimateComponent(componentProperty) }.also {
+                it.change = change
+                it.value = value
+                it.duration = duration ?: 0f
+                it.timeProgress = 0f
+                it.easing = easing ?: Easing.LINEAR
+            }
+        }
+    }
     override fun onTickEntity(entity: Entity) {
         val appearance = entity[Appearance]
 
@@ -42,18 +54,17 @@ class KorgeViewSystem(
                 visibility.spriteLayers.forEach { layer ->
                     layer.visible = if (layer.visible) {
                         // try to switch off
-                        (0.0..1.0).random() > visibility.offVariance  // variance in switching value off - 1: every frame switching possible - 0: no switching at all
+                        (0f..1f).random() > visibility.offVariance  // variance in switching value off - 1: every frame switching possible - 0: no switching at all
                     } else {
                         // try to switch on again
-                        (0.0..1.0).random() <= visibility.onVariance  // variance in switching value on again - 1: changed value switches back immediately - 0: changed value stays forever
+                        (0f..1f).random() <= visibility.onVariance  // variance in switching value on again - 1: changed value switches back immediately - 0: changed value stays forever
                     }
                     (korgeViewCache[entity] as ImageDataViewEx).getLayer(layer.name)?.visible = layer.visible
                 }
             }
         }
 
-        val offset: Point = if (entity hasNo Offset) Point()
-        else Point(entity[Offset].x, entity[Offset].y)
+        val offset: Point = if (entity hasNo Offset) Point() else Point(entity[Offset].x, entity[Offset].y)
         entity.getOrNull(OffsetByFrameIndex)?.let {
             // Get offset depending on current animation and frame index
             val currentFrameIndex = (korgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
@@ -62,6 +73,28 @@ class KorgeViewSystem(
                 ?: error("KorgeViewSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
             offset.x += frameOffset.x
             offset.y += frameOffset.y
+        }
+
+        // TODO put into own system ???
+        entity.getOrNull(ChangeOffsetRandomly)?.let { changeOffsetRandomly ->
+
+            val random: Float = (0f .. 1f).random()
+            if (!changeOffsetRandomly.triggered && random > changeOffsetRandomly.triggerChangeVariance) {
+                // Create new random variance value for adding to offset
+                val startX = changeOffsetRandomly.x
+                val startY = changeOffsetRandomly.y
+                val endX = changeOffsetRandomly.offsetXRange * (-1f .. 1f).random()
+                val endY = changeOffsetRandomly.offsetYRange * (-1f .. 1f).random()
+                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyX, value = startX, change = endX - startX, 3f, null)
+                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyY, value = startY, change = endY - startY, 3f, null)
+                changeOffsetRandomly.triggered = true
+            } else if (changeOffsetRandomly.triggered && random <= changeOffsetRandomly.triggerBackVariance) {
+                // Reset and enable switching to new random value again
+                changeOffsetRandomly.triggered = false
+            }
+
+            offset.x += changeOffsetRandomly.x
+            offset.y += changeOffsetRandomly.y
         }
 
         korgeViewCache[entity].let { view ->
