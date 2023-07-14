@@ -15,7 +15,8 @@ data class AssetModel(
     val backgrounds: Map<String, ParallaxConfig> = mapOf(),
     val images: Map<String, ImageDataConfig> = mapOf(),
     val fonts: Map<String, String> = mapOf(),
-    val tiledMaps: Map<String, String> = mapOf()
+    val tiledMaps: Map<String, String> = mapOf(),
+    val entityConfigs: Map<String, ConfigBase> = mapOf()
 ) {
     data class ImageDataConfig(
         val fileName: String = "",
