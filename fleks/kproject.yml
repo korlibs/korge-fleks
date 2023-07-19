@@ -1,6 +1,7 @@
 # loading git tag release (or commit) from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::ad6380dae7cfcd84a5406b2f9d1c1ca1ba2c4fb3
-# or using Fleks sources locally in sub-folder "fleks/src"
-#src: .
+#src: git::Quillraven/Fleks::/src::ad6380dae7cfcd84a5406b2f9d1c1ca1ba2c4fb3
+# on 2.4 branch
+#src: git::Quillraven/Fleks::/src::6c6d118cc628b0788dbc4d115857d230878b7945
+# or using Fleks sources locally in sub-folder "fleks/src" comment "src: ..." line
 plugins:
   - serialization

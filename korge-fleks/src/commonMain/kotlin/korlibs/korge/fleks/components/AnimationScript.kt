@@ -24,18 +24,19 @@ data class AnimationScript(
 ) : Component<AnimationScript>, SerializeBase {
     override fun type(): ComponentType<AnimationScript> = AnimationScript
 
-    companion object : ComponentType<AnimationScript>() {
-        /**
-         * Initialize internal waitTime property with delay value of first tweens if available.
-         */
-        val onComponentAdded: ComponentHook<AnimationScript> = { _, component ->
-            if (!component.initialized) {
-                if (component.tweens.isNotEmpty()) component.waitTime = component.tweens[component.index].delay ?: 0f
-                component.initialized = true
-            }
+    /**
+     * Initialize internal waitTime property with delay value of first tweens if available.
+     */
+    override fun World.onAdd(entity: Entity) {
+        if (!initialized) {
+            if (tweens.isNotEmpty()) waitTime = tweens[index].delay ?: 0f
+            initialized = true
         }
-        val onComponentRemoved: ComponentHook<AnimationScript> = { _, _ -> /* not used here */ }
     }
+
+    override fun World.onRemove(entity: Entity) { /* not used here */ }
+
+    companion object : ComponentType<AnimationScript>()
 }
 
 interface TweenBase {
