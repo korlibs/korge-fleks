@@ -45,11 +45,11 @@ data class OffsetByFrameIndex(
 }
 
 /**
- * Add this component to an entity together with Offset component to randomly change the offset withing
+ * Add this component to an entity together with PositionShape component to randomly change the position withing
  * the specified [offsetXRange] and [offsetYRange].
  */
 @Serializable @SerialName("ChangeOffsetRandomly")
-data class ChangeOffsetRandomly(
+data class BlurPosition(
     // variance in triggering offset change: (1.0) - every frame triggering possible, (0.0) - no triggering at all
     var triggerChangeVariance: Float = 0.0f,
     // variance in triggering back to original offset: (1.0) - triggered offset change switches back immediately, (0.0) - triggered offset change stays forever
@@ -61,9 +61,9 @@ data class ChangeOffsetRandomly(
     var triggered: Boolean = false,
     var x: Float = 0f,
     var y: Float = 0f
-) : Component<ChangeOffsetRandomly>, SerializeBase {
-    override fun type() = ChangeOffsetRandomly
-    companion object : ComponentType<ChangeOffsetRandomly>()
+) : Component<BlurPosition>, SerializeBase {
+    override fun type() = BlurPosition
+    companion object : ComponentType<BlurPosition>()
 }
 
 @Serializable @SerialName("PositionShape.Point")

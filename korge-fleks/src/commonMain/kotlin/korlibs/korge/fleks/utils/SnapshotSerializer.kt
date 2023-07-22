@@ -66,7 +66,7 @@ internal val internalModule = SerializersModule {
         subclass(PositionShape::class)
         subclass(Offset::class)
         subclass(OffsetByFrameIndex::class)
-        subclass(ChangeOffsetRandomly::class)
+        subclass(BlurPosition::class)
         subclass(Point::class)
         subclass(Motion::class)
         subclass(Rigidbody::class)

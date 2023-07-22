@@ -3,6 +3,8 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.utils.random
+import korlibs.math.interpolation.Easing
 
 /**
  * A system which moves entities. It either takes the rigidbody of an entity into account or if not
@@ -11,7 +13,7 @@ import korlibs.korge.fleks.components.*
 class PositionSystem : IteratingSystem(
     family {
         all(PositionShape)  // Position component absolutely needed for movement of entity objects
-        any(PositionShape, Motion, ParallaxMotion, Rigidbody, SubEntities)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
+        any(PositionShape, Motion, ParallaxMotion, Rigidbody, SubEntities, BlurPosition)
     },
     interval = EachFrame
 ) {
@@ -49,13 +51,49 @@ class PositionSystem : IteratingSystem(
             }
         }
 
+        if (entity has BlurPosition) {
+            val blurPosition = entity[BlurPosition]
+            val random: Float = (0f .. 1f).random()
+            if (!blurPosition.triggered && random < blurPosition.triggerChangeVariance) {
+                // Create new random variance value for adding to offset
+                val startX = blurPosition.x
+                val startY = blurPosition.y
+                val endX = blurPosition.offsetXRange * (-1f .. 1f).random()
+                val endY = blurPosition.offsetYRange * (-1f .. 1f).random()
+                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyX, value = startX, change = endX - startX, 3f, null)
+                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyY, value = startY, change = endY - startY, 3f, null)
+                blurPosition.triggered = true
+            } else if (blurPosition.triggered && random < blurPosition.triggerBackVariance) {
+                // Reset and enable switching to new random value again
+                blurPosition.triggered = false
+            }
+        }
+
         if (entity has SubEntities && entity[SubEntities].moveWithParent) {
             entity[SubEntities].entities.forEach {
                 val subEntity = it.value
                 subEntity.getOrNull(PositionShape)?.let { subEntityPosition ->
-                    subEntityPosition.x = positionShape.x
-                    subEntityPosition.y = positionShape.y
+                    if (entity has BlurPosition) {
+                        val blurPosition = entity[BlurPosition]
+                        subEntityPosition.x = positionShape.x - blurPosition.x
+                        subEntityPosition.y = positionShape.y - blurPosition.y
+                    } else {
+                        subEntityPosition.x = positionShape.x
+                        subEntityPosition.y = positionShape.y
+                    }
                 }
+            }
+        }
+    }
+
+    private fun updateAnimateComponent(entity: Entity, componentProperty: AnimateComponentType, value: Any, change: Any = Unit, duration: Float? = null, easing: Easing? = null) {
+        entity.configure { animatedEntity ->
+            animatedEntity.getOrAdd(componentProperty.type) { AnimateComponent(componentProperty) }.also {
+                it.change = change
+                it.value = value
+                it.duration = duration ?: 0f
+                it.timeProgress = 0f
+                it.easing = easing ?: Easing.LINEAR
             }
         }
     }

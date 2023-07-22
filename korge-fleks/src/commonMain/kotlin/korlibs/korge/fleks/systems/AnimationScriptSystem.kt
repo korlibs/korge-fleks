@@ -146,7 +146,7 @@ class AnimationScriptSystem : IteratingSystem(
                 tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
                 tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
             }
-            is TweenChangeOffsetRandomly -> tween.entity.getOrError(ChangeOffsetRandomly).let { start ->
+            is TweenChangeOffsetRandomly -> tween.entity.getOrError(BlurPosition).let { start ->
                 tween.triggerChangeVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerChangeVariance, value = start.triggerChangeVariance, change = end - start.triggerChangeVariance) }
                 tween.triggerBackVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerBackVariance, value = start.triggerBackVariance, change = end - start.triggerBackVariance) }
                 tween.offsetXRange?.let { end -> createAnimateComponent(ChangeOffsetRandomlyOffsetXRange, value = start.offsetXRange, change = end - start.offsetXRange) }

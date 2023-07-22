@@ -71,13 +71,13 @@ class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
 }
 
 class AnimateChangeOffsetRandomlySystem : IteratingSystem(
-    family { all(ChangeOffsetRandomly).any(AnimateChangeOffsetRandomlyTriggerChangeVariance, AnimateChangeOffsetRandomlyTriggerBackVariance,
+    family { all(BlurPosition).any(AnimateChangeOffsetRandomlyTriggerChangeVariance, AnimateChangeOffsetRandomlyTriggerBackVariance,
         AnimateChangeOffsetRandomlyOffsetXRange, AnimateChangeOffsetRandomlyOffsetYRange,
         AnimateChangeOffsetRandomlyX, AnimateChangeOffsetRandomlyY) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
-        val changeOffsetRandomly = entity[ChangeOffsetRandomly]
+        val changeOffsetRandomly = entity[BlurPosition]
         updateProperty(entity, AnimateChangeOffsetRandomlyTriggerChangeVariance, changeOffsetRandomly::triggerChangeVariance)
         updateProperty(entity, AnimateChangeOffsetRandomlyTriggerBackVariance, changeOffsetRandomly::triggerBackVariance)
         updateProperty(entity, AnimateChangeOffsetRandomlyOffsetXRange, changeOffsetRandomly::offsetXRange)
