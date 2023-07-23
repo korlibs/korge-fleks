@@ -15,7 +15,6 @@ import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxDataView
 import korlibs.korge.render.useLineBatcher
 import korlibs.korge.view.*
-import korlibs.math.interpolation.Easing
 import korlibs.time.TimeSpan
 
 /**
@@ -63,7 +62,7 @@ class KorgeViewSystem(
             offset.x += frameOffset.x
             offset.y += frameOffset.y
         }
-        entity.getOrNull(BlurPosition)?.let {
+        entity.getOrNull(AutomaticMoving)?.let {
             offset.x += it.x
             offset.y += it.y
         }

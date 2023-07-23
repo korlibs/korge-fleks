@@ -13,7 +13,7 @@ import korlibs.math.interpolation.Easing
 class PositionSystem : IteratingSystem(
     family {
         all(PositionShape)  // Position component absolutely needed for movement of entity objects
-        any(PositionShape, Motion, ParallaxMotion, Rigidbody, SubEntities, BlurPosition)
+        any(PositionShape, Motion, ParallaxMotion, Rigidbody, SubEntities, AutomaticMoving)
     },
     interval = EachFrame
 ) {
@@ -51,32 +51,52 @@ class PositionSystem : IteratingSystem(
             }
         }
 
-        if (entity has BlurPosition) {
-            val blurPosition = entity[BlurPosition]
-            val random: Float = (0f .. 1f).random()
-            if (!blurPosition.triggered && random < blurPosition.triggerChangeVariance) {
-                // Create new random variance value for adding to offset
-                val startX = blurPosition.x
-                val startY = blurPosition.y
-                val endX = blurPosition.offsetXRange * (-1f .. 1f).random()
-                val endY = blurPosition.offsetYRange * (-1f .. 1f).random()
-                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyX, value = startX, change = endX - startX, 3f, null)
-                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyY, value = startY, change = endY - startY, 3f, null)
-                blurPosition.triggered = true
-            } else if (blurPosition.triggered && random < blurPosition.triggerBackVariance) {
-                // Reset and enable switching to new random value again
-                blurPosition.triggered = false
+        if (entity has AutomaticMoving) {
+            val automaticMoving = entity[AutomaticMoving]
+
+
+            with(automaticMoving) {
+                if (timeProgress >= waitTime) {
+                    timeProgress = 0f
+                    waitTime = interval + if (intervalVariance != 0f) (-intervalVariance .. intervalVariance).random() else 0f
+
+                    val startX = x
+                    val startY = y
+                    val endX = targetX + if (xVariance != 0f) (-xVariance .. xVariance).random() else 0f
+                    val endY = targetY + if (yVariance != 0f) (-yVariance .. yVariance).random() else 0f
+                    updateAnimateComponent(world, entity, AnimateComponentType.ChangeOffsetRandomlyX, value = startX, change = endX - startX, waitTime, Easing.EASE_IN_OLD)
+                    updateAnimateComponent(world, entity, AnimateComponentType.ChangeOffsetRandomlyY, value = startY, change = endY - startY, waitTime, Easing.EASE_IN_OUT)
+
+                } else timeProgress += deltaTime
             }
+
+
+/*
+            val random: Float = (0f .. 1f).random()
+            if (!automaticMoving.triggered && random < automaticMoving.triggerVariance) {
+                // Create new random variance value for adding to offset
+                val startX = automaticMoving.x
+                val startY = automaticMoving.y
+                val endX = automaticMoving.xVariance * (-1f .. 1f).random()
+                val endY = automaticMoving.yVariance * (-1f .. 1f).random()
+                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyX, value = startX, change = endX - startX, 3f, Easing.EASE_IN_OLD)
+                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyY, value = startY, change = endY - startY, 3f, Easing.EASE_IN_OUT)
+                automaticMoving.triggered = true
+            } else if (automaticMoving.triggered && random < automaticMoving.terminateVariance) {
+                // Reset and enable switching to new random value again
+                automaticMoving.triggered = false
+            }
+*/
         }
 
         if (entity has SubEntities && entity[SubEntities].moveWithParent) {
             entity[SubEntities].entities.forEach {
                 val subEntity = it.value
                 subEntity.getOrNull(PositionShape)?.let { subEntityPosition ->
-                    if (entity has BlurPosition) {
-                        val blurPosition = entity[BlurPosition]
-                        subEntityPosition.x = positionShape.x - blurPosition.x
-                        subEntityPosition.y = positionShape.y - blurPosition.y
+                    if (entity has AutomaticMoving) {
+                        val automaticMoving = entity[AutomaticMoving]
+                        subEntityPosition.x = positionShape.x - automaticMoving.x
+                        subEntityPosition.y = positionShape.y - automaticMoving.y
                     } else {
                         subEntityPosition.x = positionShape.x
                         subEntityPosition.y = positionShape.y
@@ -86,7 +106,7 @@ class PositionSystem : IteratingSystem(
         }
     }
 
-    private fun updateAnimateComponent(entity: Entity, componentProperty: AnimateComponentType, value: Any, change: Any = Unit, duration: Float? = null, easing: Easing? = null) {
+    private fun updateAnimateComponent2(entity: Entity, componentProperty: AnimateComponentType, value: Any, change: Any = Unit, duration: Float? = null, easing: Easing? = null) {
         entity.configure { animatedEntity ->
             animatedEntity.getOrAdd(componentProperty.type) { AnimateComponent(componentProperty) }.also {
                 it.change = change

@@ -17,8 +17,6 @@ class AnimationScriptSystem : IteratingSystem(
     family { all(AnimationScript) },
     interval = EachFrame
 ) {
-    private val assetStore = inject<AssetStore>("AssetStore")
-
     // Internally used variables in createAnimateComponent function
     private lateinit var currentTween: TweenBase
     private lateinit var currentParentTween: ParallelTweens
@@ -83,18 +81,14 @@ class AnimationScriptSystem : IteratingSystem(
                                             )
                                         )
                                     }
-                                }
-                                else checkTween(tween, currentTween)
+                                } else checkTween(tween, currentTween)
                             }
-                        }
-                        // currentTween cannot be TweenSequence and ParallelTweens - so this cast is safe
-                        else if (currentTween !is Wait)
+                        } else if (currentTween !is Wait) // currentTween cannot be TweenSequence and ParallelTweens - so this cast is safe
                             checkTween(currentTween, ParallelTweens())  // ParallelTweens() as 2nd parameter gives default values for delay, duration and easing
                     }
                 }
             }
-        }
-        else animScript.timeProgress += deltaTime
+        } else animScript.timeProgress += deltaTime
     }
 
     private fun checkNextTween(animScript: AnimationScript, entity: Entity) : TweenBase? {
@@ -146,11 +140,11 @@ class AnimationScriptSystem : IteratingSystem(
                 tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
                 tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
             }
-            is TweenChangeOffsetRandomly -> tween.entity.getOrError(BlurPosition).let { start ->
-                tween.triggerChangeVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerChangeVariance, value = start.triggerChangeVariance, change = end - start.triggerChangeVariance) }
-                tween.triggerBackVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerBackVariance, value = start.triggerBackVariance, change = end - start.triggerBackVariance) }
-                tween.offsetXRange?.let { end -> createAnimateComponent(ChangeOffsetRandomlyOffsetXRange, value = start.offsetXRange, change = end - start.offsetXRange) }
-                tween.offsetYRange?.let { end -> createAnimateComponent(ChangeOffsetRandomlyOffsetYRange, value = start.offsetYRange, change = end - start.offsetYRange) }
+            is TweenChangeOffsetRandomly -> tween.entity.getOrError(AutomaticMoving).let { start ->
+                tween.triggerChangeVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerChangeVariance, value = start.triggerVariance, change = end - start.triggerVariance) }
+                tween.triggerBackVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerBackVariance, value = start.terminateVariance, change = end - start.terminateVariance) }
+                tween.offsetXRange?.let { end -> createAnimateComponent(ChangeOffsetRandomlyOffsetXRange, value = start.xVariance, change = end - start.xVariance) }
+                tween.offsetYRange?.let { end -> createAnimateComponent(ChangeOffsetRandomlyOffsetYRange, value = start.yVariance, change = end - start.yVariance) }
                 tween.x?.let { end -> createAnimateComponent(ChangeOffsetRandomlyX, value = start.x, change = end - start.x) }
                 tween.y?.let { end -> createAnimateComponent(ChangeOffsetRandomlyY, value = start.y, change = end - start.y) }
             }
@@ -190,7 +184,6 @@ class AnimationScriptSystem : IteratingSystem(
         }
     }
 
-    private inline fun <reified T : Component<*>> Entity.getOrError(componentType: ComponentType<T>) : T {
-        return getOrNull(componentType) ?: error("AnimationScriptSystem: Entity '${this.id}' does not contain component type '${componentType}'!\nEntity snapshot: \n${world.snapshotOf(this)}".replace("), ", "),\n"))
-    }
+    private inline fun <reified T : Component<*>> Entity.getOrError(componentType: ComponentType<T>) : T =
+        getOrNull(componentType) ?: error("AnimationScriptSystem: Entity '${this.id}' does not contain component type '${componentType}'!\nEntity snapshot: \n${world.snapshotOf(this)}".replace("), ", "),\n"))
 }
