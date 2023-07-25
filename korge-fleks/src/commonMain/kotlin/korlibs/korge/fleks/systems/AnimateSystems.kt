@@ -28,12 +28,16 @@ import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSoundSto
 import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSoundVolume
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyOffsetXRange
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyOffsetYRange
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyTriggerBackVariance
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyTriggerChangeVariance
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyX
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateChangeOffsetRandomlyY
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveInterval
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveIntervalVariance
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveTriggerBackVariance
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveTriggerChangeVariance
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveXTarget
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveYTarget
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveXVariance
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveYVariance
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveX
+import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateNoisyMoveY
 import korlibs.korge.parallax.ImageDataViewEx
 import kotlin.jvm.JvmName
 import kotlin.reflect.KMutableProperty0
@@ -70,20 +74,25 @@ class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
     }
 }
 
-class AnimateChangeOffsetRandomlySystem : IteratingSystem(
-    family { all(AutomaticMoving).any(AnimateChangeOffsetRandomlyTriggerChangeVariance, AnimateChangeOffsetRandomlyTriggerBackVariance,
-        AnimateChangeOffsetRandomlyOffsetXRange, AnimateChangeOffsetRandomlyOffsetYRange,
-        AnimateChangeOffsetRandomlyX, AnimateChangeOffsetRandomlyY) },
+class AnimateNoisyMoveSystem : IteratingSystem(
+    family { all(NoisyMove).any(AnimateNoisyMoveTriggerChangeVariance, AnimateNoisyMoveTriggerBackVariance,
+        AnimateNoisyMoveInterval, AnimateNoisyMoveIntervalVariance,
+        AnimateNoisyMoveXTarget, AnimateNoisyMoveYTarget, AnimateNoisyMoveXVariance, AnimateNoisyMoveYVariance,
+        AnimateNoisyMoveX, AnimateNoisyMoveY) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
-        val changeOffsetRandomly = entity[AutomaticMoving]
-        updateProperty(entity, AnimateChangeOffsetRandomlyTriggerChangeVariance, changeOffsetRandomly::triggerVariance)
-        updateProperty(entity, AnimateChangeOffsetRandomlyTriggerBackVariance, changeOffsetRandomly::terminateVariance)
-        updateProperty(entity, AnimateChangeOffsetRandomlyOffsetXRange, changeOffsetRandomly::xVariance)
-        updateProperty(entity, AnimateChangeOffsetRandomlyOffsetYRange, changeOffsetRandomly::yVariance)
-        updateProperty(entity, AnimateChangeOffsetRandomlyX, changeOffsetRandomly::x)
-        updateProperty(entity, AnimateChangeOffsetRandomlyY, changeOffsetRandomly::y)
+        val noisyMove = entity[NoisyMove]
+        updateProperty(entity, AnimateNoisyMoveTriggerChangeVariance, noisyMove::triggerVariance)
+        updateProperty(entity, AnimateNoisyMoveTriggerBackVariance, noisyMove::terminateVariance)
+        updateProperty(entity, AnimateNoisyMoveInterval, noisyMove::interval)
+        updateProperty(entity, AnimateNoisyMoveIntervalVariance, noisyMove::intervalVariance)
+        updateProperty(entity, AnimateNoisyMoveXTarget, noisyMove::xTarget)
+        updateProperty(entity, AnimateNoisyMoveYTarget, noisyMove::yTarget)
+        updateProperty(entity, AnimateNoisyMoveXVariance, noisyMove::xVariance)
+        updateProperty(entity, AnimateNoisyMoveYVariance, noisyMove::yVariance)
+        updateProperty(entity, AnimateNoisyMoveX, noisyMove::x)
+        updateProperty(entity, AnimateNoisyMoveY, noisyMove::y)
     }
 }
 

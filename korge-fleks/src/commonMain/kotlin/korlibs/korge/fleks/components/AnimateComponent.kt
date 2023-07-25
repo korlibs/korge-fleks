@@ -68,12 +68,16 @@ data class AnimateComponent (
         val AnimateSwitchLayerVisibilityOnVariance = object : ComponentType<AnimateComponent>() {}
         val AnimateSwitchLayerVisibilityOffVariance = object : ComponentType<AnimateComponent>() {}
 
-        val AnimateChangeOffsetRandomlyTriggerChangeVariance = object : ComponentType<AnimateComponent>() {}
-        val AnimateChangeOffsetRandomlyTriggerBackVariance = object : ComponentType<AnimateComponent>() {}
-        val AnimateChangeOffsetRandomlyOffsetXRange = object : ComponentType<AnimateComponent>() {}
-        val AnimateChangeOffsetRandomlyOffsetYRange = object : ComponentType<AnimateComponent>() {}
-        val AnimateChangeOffsetRandomlyX = object : ComponentType<AnimateComponent>() {}
-        val AnimateChangeOffsetRandomlyY = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveTriggerChangeVariance = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveTriggerBackVariance = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveInterval = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveIntervalVariance = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveXTarget = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveYTarget = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveXVariance = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveYVariance = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveX = object : ComponentType<AnimateComponent>() {}
+        val AnimateNoisyMoveY = object : ComponentType<AnimateComponent>() {}
 
         val AnimateSoundStartTrigger = object : ComponentType<AnimateComponent>() {}
         val AnimateSoundStopTrigger = object : ComponentType<AnimateComponent>() {}
@@ -117,12 +121,16 @@ enum class AnimateComponentType(val type: ComponentType<AnimateComponent>) {
     SwitchLayerVisibilityOnVariance(AnimateComponent.AnimateSwitchLayerVisibilityOnVariance),
     SwitchLayerVisibilityOffVariance(AnimateComponent.AnimateSwitchLayerVisibilityOffVariance),
 
-    ChangeOffsetRandomlyTriggerChangeVariance(AnimateComponent.AnimateChangeOffsetRandomlyTriggerChangeVariance),
-    ChangeOffsetRandomlyTriggerBackVariance(AnimateComponent.AnimateChangeOffsetRandomlyTriggerBackVariance),
-    ChangeOffsetRandomlyOffsetXRange(AnimateComponent.AnimateChangeOffsetRandomlyOffsetXRange),
-    ChangeOffsetRandomlyOffsetYRange(AnimateComponent.AnimateChangeOffsetRandomlyOffsetYRange),
-    ChangeOffsetRandomlyX(AnimateComponent.AnimateChangeOffsetRandomlyX),
-    ChangeOffsetRandomlyY(AnimateComponent.AnimateChangeOffsetRandomlyY),
+    NoisyMoveTriggerChangeVariance(AnimateComponent.AnimateNoisyMoveTriggerChangeVariance),
+    NoisyMoveTriggerBackVariance(AnimateComponent.AnimateNoisyMoveTriggerBackVariance),
+    NoisyMoveInterval(AnimateComponent.AnimateNoisyMoveInterval),
+    NoisyMoveIntervalVariance(AnimateComponent.AnimateNoisyMoveIntervalVariance),
+    NoisyMoveOffsetXTarget(AnimateComponent.AnimateNoisyMoveXTarget),
+    NoisyMoveOffsetYTarget(AnimateComponent.AnimateNoisyMoveYTarget),
+    NoisyMoveOffsetXVariance(AnimateComponent.AnimateNoisyMoveXVariance),
+    NoisyMoveOffsetYVariance(AnimateComponent.AnimateNoisyMoveYVariance),
+    NoisyMoveX(AnimateComponent.AnimateNoisyMoveX),
+    NoisyMoveY(AnimateComponent.AnimateNoisyMoveY),
 
     SoundStartTrigger(AnimateComponent.AnimateSoundStartTrigger),
     SoundStopTrigger(AnimateComponent.AnimateSoundStopTrigger),

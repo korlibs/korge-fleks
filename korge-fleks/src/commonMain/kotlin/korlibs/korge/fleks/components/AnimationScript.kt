@@ -201,12 +201,17 @@ data class TweenSwitchLayerVisibility(
     override var easing: Easing? = null
 ) : TweenBase
 
-@Serializable @SerialName("AnimationScript.ChangeOffsetRandomly")
-data class TweenChangeOffsetRandomly(
+@Serializable @SerialName("AnimationScript.NoisyMove")
+data class TweenNoisyMove(
     var triggerChangeVariance: Float? = null,
     var triggerBackVariance: Float? = null,
-    var offsetXRange: Float? = null,
-    var offsetYRange: Float? = null,
+    var interval: Float? = null,
+    var intervalVariance: Float? = null,
+    var xVariance: Float? = null,
+    var yVariance: Float? = null,
+    var xTarget: Float? = null,
+    var yTarget: Float? = null,
+    // Final move values which are animated by NoisyMove in PositionSystem
     var x: Float? = null,
     var y: Float? = null,
 

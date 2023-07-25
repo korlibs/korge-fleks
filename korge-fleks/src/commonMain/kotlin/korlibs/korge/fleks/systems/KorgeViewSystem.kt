@@ -62,7 +62,7 @@ class KorgeViewSystem(
             offset.x += frameOffset.x
             offset.y += frameOffset.y
         }
-        entity.getOrNull(AutomaticMoving)?.let {
+        entity.getOrNull(NoisyMove)?.let {
             offset.x += it.x
             offset.y += it.y
         }

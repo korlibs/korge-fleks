@@ -13,7 +13,7 @@ import korlibs.math.interpolation.Easing
 class PositionSystem : IteratingSystem(
     family {
         all(PositionShape)  // Position component absolutely needed for movement of entity objects
-        any(PositionShape, Motion, ParallaxMotion, Rigidbody, SubEntities, AutomaticMoving)
+        any(PositionShape, Motion, ParallaxMotion, Rigidbody, SubEntities, NoisyMove)
     },
     interval = EachFrame
 ) {
@@ -51,23 +51,26 @@ class PositionSystem : IteratingSystem(
             }
         }
 
-        if (entity has AutomaticMoving) {
-            val automaticMoving = entity[AutomaticMoving]
+        if (entity has NoisyMove) {
+            val noisyMove = entity[NoisyMove]
 
 
-            with(automaticMoving) {
-                if (timeProgress >= waitTime) {
-                    timeProgress = 0f
-                    waitTime = interval + if (intervalVariance != 0f) (-intervalVariance .. intervalVariance).random() else 0f
+            with(noisyMove) {
+                if (interval != 0f) {
+                    if (timeProgress >= waitTime) {
+                        timeProgress = 0f
+                        waitTime = interval + if (intervalVariance != 0f) (-intervalVariance .. intervalVariance).random() else 0f
+                        if (waitTime < 0f) waitTime = 0f
 
-                    val startX = x
-                    val startY = y
-                    val endX = targetX + if (xVariance != 0f) (-xVariance .. xVariance).random() else 0f
-                    val endY = targetY + if (yVariance != 0f) (-yVariance .. yVariance).random() else 0f
-                    updateAnimateComponent(world, entity, AnimateComponentType.ChangeOffsetRandomlyX, value = startX, change = endX - startX, waitTime, Easing.EASE_IN_OLD)
-                    updateAnimateComponent(world, entity, AnimateComponentType.ChangeOffsetRandomlyY, value = startY, change = endY - startY, waitTime, Easing.EASE_IN_OUT)
+                        val startX = x
+                        val startY = y
+                        val endX = xTarget + if (xVariance != 0f) (-xVariance .. xVariance).random() else 0f
+                        val endY = yTarget + if (yVariance != 0f) (-yVariance .. yVariance).random() else 0f
+                        updateAnimateComponent(world, entity, AnimateComponentType.NoisyMoveX, value = startX, change = endX - startX, waitTime, Easing.EASE_IN_OLD)
+                        updateAnimateComponent(world, entity, AnimateComponentType.NoisyMoveY, value = startY, change = endY - startY, waitTime, Easing.EASE_IN_OUT)
 
-                } else timeProgress += deltaTime
+                    } else timeProgress += deltaTime
+                }
             }
 
 
@@ -79,8 +82,8 @@ class PositionSystem : IteratingSystem(
                 val startY = automaticMoving.y
                 val endX = automaticMoving.xVariance * (-1f .. 1f).random()
                 val endY = automaticMoving.yVariance * (-1f .. 1f).random()
-                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyX, value = startX, change = endX - startX, 3f, Easing.EASE_IN_OLD)
-                updateAnimateComponent(entity, AnimateComponentType.ChangeOffsetRandomlyY, value = startY, change = endY - startY, 3f, Easing.EASE_IN_OUT)
+                updateAnimateComponent(entity, AnimateComponentType.NoisyMoveX, value = startX, change = endX - startX, 3f, Easing.EASE_IN_OLD)
+                updateAnimateComponent(entity, AnimateComponentType.NoisyMoveY, value = startY, change = endY - startY, 3f, Easing.EASE_IN_OUT)
                 automaticMoving.triggered = true
             } else if (automaticMoving.triggered && random < automaticMoving.terminateVariance) {
                 // Reset and enable switching to new random value again
@@ -93,10 +96,10 @@ class PositionSystem : IteratingSystem(
             entity[SubEntities].entities.forEach {
                 val subEntity = it.value
                 subEntity.getOrNull(PositionShape)?.let { subEntityPosition ->
-                    if (entity has AutomaticMoving) {
-                        val automaticMoving = entity[AutomaticMoving]
-                        subEntityPosition.x = positionShape.x - automaticMoving.x
-                        subEntityPosition.y = positionShape.y - automaticMoving.y
+                    if (entity has NoisyMove) {
+                        val noisyMove = entity[NoisyMove]
+                        subEntityPosition.x = positionShape.x - noisyMove.x
+                        subEntityPosition.y = positionShape.y - noisyMove.y
                     } else {
                         subEntityPosition.x = positionShape.x
                         subEntityPosition.y = positionShape.y

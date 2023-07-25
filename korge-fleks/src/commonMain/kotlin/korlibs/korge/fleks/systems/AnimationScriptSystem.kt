@@ -2,8 +2,6 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.World.Companion.inject
-import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.AnimateComponentType.*
 import korlibs.korge.fleks.entity.config.Invokable
@@ -140,13 +138,17 @@ class AnimationScriptSystem : IteratingSystem(
                 tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
                 tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
             }
-            is TweenChangeOffsetRandomly -> tween.entity.getOrError(AutomaticMoving).let { start ->
-                tween.triggerChangeVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerChangeVariance, value = start.triggerVariance, change = end - start.triggerVariance) }
-                tween.triggerBackVariance?.let { end -> createAnimateComponent(ChangeOffsetRandomlyTriggerBackVariance, value = start.terminateVariance, change = end - start.terminateVariance) }
-                tween.offsetXRange?.let { end -> createAnimateComponent(ChangeOffsetRandomlyOffsetXRange, value = start.xVariance, change = end - start.xVariance) }
-                tween.offsetYRange?.let { end -> createAnimateComponent(ChangeOffsetRandomlyOffsetYRange, value = start.yVariance, change = end - start.yVariance) }
-                tween.x?.let { end -> createAnimateComponent(ChangeOffsetRandomlyX, value = start.x, change = end - start.x) }
-                tween.y?.let { end -> createAnimateComponent(ChangeOffsetRandomlyY, value = start.y, change = end - start.y) }
+            is TweenNoisyMove -> tween.entity.getOrError(NoisyMove).let { start ->
+                tween.triggerChangeVariance?.let { end -> createAnimateComponent(NoisyMoveTriggerChangeVariance, value = start.triggerVariance, change = end - start.triggerVariance) }
+                tween.triggerBackVariance?.let { end -> createAnimateComponent(NoisyMoveTriggerBackVariance, value = start.terminateVariance, change = end - start.terminateVariance) }
+                tween.interval?.let { end -> createAnimateComponent(NoisyMoveInterval, value = start.interval, change = end - start.interval) }
+                tween.intervalVariance?.let { end -> createAnimateComponent(NoisyMoveIntervalVariance, value = start.intervalVariance, change = end - start.intervalVariance) }
+                tween.xTarget?.let { end -> createAnimateComponent(NoisyMoveOffsetXTarget, value = start.xTarget, change = end - start.xTarget) }
+                tween.yTarget?.let { end -> createAnimateComponent(NoisyMoveOffsetYTarget, value = start.yTarget, change = end - start.yTarget) }
+                tween.xVariance?.let { end -> createAnimateComponent(NoisyMoveOffsetXVariance, value = start.xVariance, change = end - start.xVariance) }
+                tween.yVariance?.let { end -> createAnimateComponent(NoisyMoveOffsetYVariance, value = start.yVariance, change = end - start.yVariance) }
+                tween.x?.let { end -> createAnimateComponent(NoisyMoveX, value = start.x, change = end - start.x) }
+                tween.y?.let { end -> createAnimateComponent(NoisyMoveY, value = start.y, change = end - start.y) }
             }
             is TweenSpawner -> tween.entity.getOrError(Spawner).let { start ->
                 tween.numberOfObjects?.let { end -> createAnimateComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }

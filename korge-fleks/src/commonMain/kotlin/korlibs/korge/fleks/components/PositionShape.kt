@@ -52,15 +52,15 @@ data class OffsetByFrameIndex(
  * the specified [xVariance] and [yVariance].
  */
 @Serializable @SerialName("AutomaticMoving")
-data class AutomaticMoving(
+data class NoisyMove(
     // trigger variance for start moving: (1.0) - trigger immediately when possible, (0.0) - no trigger for start moving at all
     var triggerVariance: Float = 0f,
     // terminate variance for stop moving: (1.0) - always terminate previous trigger, (0.0) - triggered moving stays forever
     var terminateVariance: Float = 0f,
     var interval: Float = 0f,          // in seconds
     var intervalVariance: Float = 0f,  // in seconds
-    var targetX: Float = 0f,
-    var targetY: Float = 0f,
+    var xTarget: Float = 0f,
+    var yTarget: Float = 0f,
     var xVariance: Float = 0f,
     var yVariance: Float = 0f,
 
@@ -72,8 +72,8 @@ data class AutomaticMoving(
     // Internal runtime data
     var timeProgress: Float = 0f,
     var waitTime: Float = 0f
-) : Component<AutomaticMoving>, SerializeBase {
-    override fun type() = AutomaticMoving
+) : Component<NoisyMove>, SerializeBase {
+    override fun type() = NoisyMove
 
     override fun World.onAdd(entity: Entity) {
 
@@ -82,10 +82,10 @@ data class AutomaticMoving(
 
         val startX = x
         val startY = y
-        val endX = targetX + if (xVariance != 0f) (-xVariance..xVariance).random() else 0f
-        val endY = targetY + if (yVariance != 0f) (-yVariance..yVariance).random() else 0f
-        updateAnimateComponent(this, entity, AnimateComponentType.ChangeOffsetRandomlyX, value = startX, change = endX - startX, waitTime, Easing.EASE_IN_OLD)
-        updateAnimateComponent(this, entity, AnimateComponentType.ChangeOffsetRandomlyY, value = startY, change = endY - startY, waitTime, Easing.EASE_IN_OUT)
+        val endX = xTarget + if (xVariance != 0f) (-xVariance..xVariance).random() else 0f
+        val endY = yTarget + if (yVariance != 0f) (-yVariance..yVariance).random() else 0f
+        updateAnimateComponent(this, entity, AnimateComponentType.NoisyMoveX, value = startX, change = endX - startX, waitTime, Easing.EASE_IN_OLD)
+        updateAnimateComponent(this, entity, AnimateComponentType.NoisyMoveY, value = startY, change = endY - startY, waitTime, Easing.EASE_IN_OUT)
 
     }
 
@@ -101,7 +101,7 @@ data class AutomaticMoving(
         }
     }
 
-    companion object : ComponentType<AutomaticMoving>()
+    companion object : ComponentType<NoisyMove>()
 }
 
 @Serializable @SerialName("PositionShape.Point")
