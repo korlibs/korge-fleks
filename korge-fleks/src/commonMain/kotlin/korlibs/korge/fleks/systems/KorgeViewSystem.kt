@@ -67,13 +67,13 @@ class KorgeViewSystem(
         korgeViewCache[entity].let { view ->
             if (appearance.visible) {
                 view.visible = true
-                view.alpha = appearance.alpha
+                view.alphaF = appearance.alpha
                 appearance.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
 
                 if (entity has PositionShape) {
                     val positionShape = entity[PositionShape]
-                    view.x = positionShape.x - offset.x
-                    view.y = positionShape.y - offset.y
+                    view.x = positionShape.x.toDouble() - offset.x
+                    view.y = positionShape.y.toDouble() - offset.y
                 }
 
 //                println("[${entity.id}] Y: ${view.y} (Position: ${positionShape.y} delta: ${lastY - positionShape.y})")

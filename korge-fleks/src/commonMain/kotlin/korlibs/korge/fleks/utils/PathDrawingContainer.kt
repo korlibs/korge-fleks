@@ -104,11 +104,11 @@ fun Container.createPointController(point: Point, color: Paint, onMove: () -> Un
     circle.mouse {
         onOver {
             circle.colorMul(RGBA(+256, 0, 0, 0))
-            text.textSize = textSizeOnMouseOver
+            text.textSize = textSizeOnMouseOver.toDouble()
         }
         onOut {
             circle.colorMul(RGBA(0, 0, 0, 0))
-            text.textSize = textSize
+            text.textSize = textSize.toDouble()
         }
     }
     updateText()

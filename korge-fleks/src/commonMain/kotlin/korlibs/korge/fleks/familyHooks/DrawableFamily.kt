@@ -110,8 +110,8 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
                 verticalAlign = VerticalAlign.MIDDLE
                 horizontalAlign = HorizontalAlign.CENTER
             }
-            width = view.width
-            height = view.height
+            width = view.width.toFloat()
+            height = view.height.toFloat()
 
             view
         }
@@ -121,7 +121,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
     entity.getOrNull(Appearance)?.also {
         view.visible = it.visible
-        view.alpha = it.alpha
+        view.alpha = it.alpha.toDouble()
         it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
     }
 
@@ -137,8 +137,8 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         val layout = entity[Layout]
         if (layout.centerX) view.centerXOnStage()
         if (layout.centerY) view.centerYOnStage()
-        positionShape.x = view.x + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
-        positionShape.y = view.y + layout.offsetY
+        positionShape.x = view.x.toFloat() + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
+        positionShape.y = view.y.toFloat() + layout.offsetY
     }
 
     // Set properties in TouchInput when touch input was recognized
