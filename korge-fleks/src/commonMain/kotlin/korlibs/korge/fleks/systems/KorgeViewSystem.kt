@@ -67,13 +67,13 @@ class KorgeViewSystem(
         korgeViewCache[entity].let { view ->
             if (appearance.visible) {
                 view.visible = true
-                view.alpha = appearance.alpha
+                view.alpha = appearance.alpha.toDouble()
                 appearance.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
 
                 if (entity has PositionShape) {
                     val positionShape = entity[PositionShape]
-                    view.x = positionShape.x - offset.x
-                    view.y = positionShape.y - offset.y
+                    view.x = (positionShape.x - offset.x).toDouble()
+                    view.y = (positionShape.y - offset.y).toDouble()
                 }
 
 //                println("[${entity.id}] Y: ${view.y} (Position: ${positionShape.y} delta: ${lastY - positionShape.y})")
@@ -93,7 +93,7 @@ class KorgeViewSystem(
         // Do debug drawing if component is configured for this entity
         entity.getOrNull(Info)?.let { debugInfo ->
             // TODO check for Keys to enable certain debug options
-            if (!debugInfo.showName) return
+//            if (!debugInfo.showName) return
 
             val positionShape = entity[PositionShape]
 
@@ -103,30 +103,30 @@ class KorgeViewSystem(
                 @OptIn(KorgeExperimental::class)
                 (debugView as Container).renderableView {
                     val fontSize = 8.0
-                    if (debugInfo.showName) {
-                        ctx.drawText(
-                            ctx.views?.debugBmpFont ?: error("KorgeViewSystem: Could not load debugBmpFont!"),
-                            fontSize, debugInfo.name,
-                            positionShape.x.toInt(),
-                            positionShape.y.toInt() + 1,
-                            colMul = Colors.RED,
-                            filtering = false
-                        )
-                    }
+//                    if (debugInfo.showName) {
+//                        ctx.drawText(
+//                            ctx.views?.debugBmpFont ?: error("KorgeViewSystem: Could not load debugBmpFont!"),
+//                            fontSize, debugInfo.name,
+//                            positionShape.x.toInt(),
+//                            positionShape.y.toInt() + 1,
+//                            colMul = Colors.RED,
+//                            filtering = false
+//                        )
+//                    }
 
                     ctx.useLineBatcher { lines ->
                         lines.drawVector(Colors.RED) {
-                            // Draw pivot point
-                            if (debugInfo.showPivotPoint) {
+//                            // Draw pivot point
+//                            if (debugInfo.showPivotPoint) {
 // TODO                                val centerX = globalX
 //                                val centerY = globalY
 //                                line(centerX, centerY - 5, centerX, centerY + 5)
 //                                line(centerX - 5, centerY, centerX + 5, centerY)
-                            }
-                            // Draw overall entity object size
-                            if (debugInfo.showSizeBox) {
+//                            }
+//                            // Draw overall entity object size
+//                            if (debugInfo.showSizeBox) {
 // TODO                                rect(Rectangle(globalX - offset.x, globalY - offset.y, positionShape.width, positionShape.height))
-                            }
+//                            }
                         }
 
 /* here as reference for future use ;-)

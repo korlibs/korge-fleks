@@ -13,11 +13,11 @@ KorGE-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
 This is a list of versions for all needed modules/addons which are known to work together:
 
-- KorGE: v4.0.7
-- KorGE-Fleks addon: v0.0.5
-- KorGE-Parallax addon: b8e7356c3c5ba5fac273a83d3f6ef127a16de739 (on branch adaptation-of-parallax-view-to-korge-fleks)
+- KorGE: v5.1.0
+- KorGE-Fleks addon: <latest-commit>
+- KorGE-Parallax addon: 2f5fa9be09b52c343d9160fe29dc683aa86e22e8 (on branch adaptation-of-parallax-view-to-korge-fleks)
 - KorGE-Tiled addon: v0.0.2
-- Fleks: ad6380dae7cfcd84a5406b2f9d1c1ca1ba2c4fb3 (on master - pre 2.4 release)
+- Fleks: 2.5
 
 # Idea and Motivation
 

@@ -10,8 +10,8 @@ import korlibs.korge.fleks.systems.SpawnerSystem
  * The invalidEntity is used to initialize entity properties of components.
  * This entity is not existing and thus should never be created in a Fleks world.
  */
-val invalidEntity: Entity = Entity(id = -1)
-inline fun Entity.isInvalidEntity() : Boolean = this.id == -1
+val invalidEntity: Entity = Entity.NONE
+fun Entity.isInvalidEntity() : Boolean = this.id == -1
 
 /**
  * Object which is used to initialize [Identifier] component properties.

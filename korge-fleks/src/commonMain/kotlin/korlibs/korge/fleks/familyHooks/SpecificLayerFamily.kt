@@ -52,7 +52,7 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
 
     entity.getOrNull(Appearance)?.also {
         view.visible = it.visible
-        view.alpha = it.alpha
+        view.alpha = it.alpha.toDouble()
         it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
     }
 
@@ -82,8 +82,8 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     // Save current position of layer into PositionShape component
     entity.getOrNull(PositionShape)?.let {
         if (!it.initialized) {
-            it.x = view.x
-            it.y = view.y
+            it.x = view.x.toFloat()
+            it.y = view.y.toFloat()
             it.initialized = true
         }
     }

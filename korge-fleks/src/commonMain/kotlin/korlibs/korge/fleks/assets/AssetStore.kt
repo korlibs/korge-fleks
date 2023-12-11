@@ -8,8 +8,6 @@ import korlibs.image.atlas.MutableAtlasUnit
 import korlibs.image.font.Font
 import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
-import korlibs.image.tiles.tiled.TiledMap
-import korlibs.image.tiles.tiled.readTiledMap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.parallax.ParallaxDataContainer
@@ -39,7 +37,7 @@ class AssetStore {
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
 
     var entityConfigs: MutableMap<String, ConfigBase> = mutableMapOf()
-    private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
+// TODO    private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     private var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
@@ -85,10 +83,12 @@ class AssetStore {
         else error("GameAssets: Parallax background '${assetConfig.name}' not found!")
     }
 
-    fun getTiledMap(name: String) : TiledMap {
-        return if (tiledMaps.contains(name)) tiledMaps[name]!!.second
-        else error("GameAssets: TiledMap '$name' not found!")
-    }
+
+// TODO
+//    fun getTiledMap(name: String) : TiledMap {
+//        return if (tiledMaps.contains(name)) tiledMaps[name]!!.second
+//        else error("GameAssets: TiledMap '$name' not found!")
+//    }
 
     fun getFont(name: String) : Font {
         return if (fonts.contains(name)) fonts[name]!!.second
@@ -96,7 +96,7 @@ class AssetStore {
     }
 
     private fun removeAssets(type: AssetType) {
-        tiledMaps.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
+// TODO        tiledMaps.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
         backgrounds.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
         images.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
         fonts.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
@@ -154,9 +154,10 @@ class AssetStore {
         println("GameAssets: Start loading [${type.name}] resources from '${assetConfig.assetFolderName}'...")
 
         // Update maps of music, images, ...
-        assetConfig.tiledMaps.forEach { tiledMap ->
-            tiledMaps[tiledMap.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + tiledMap.value].readTiledMap(atlas = atlas))
-        }
+// TODO
+//        assetConfig.tiledMaps.forEach { tiledMap ->
+//            tiledMaps[tiledMap.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + tiledMap.value].readTiledMap(atlas = atlas))
+//        }
         assetConfig.sounds.forEach { sound ->
             val soundFile = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readMusic()
             val soundChannel = soundFile.play()
