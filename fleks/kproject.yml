@@ -4,3 +4,5 @@ src: git::Quillraven/Fleks::/src::2.5
 #src: .
 plugins:
   - serialization
+dependencies:
+  - maven::common::org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2

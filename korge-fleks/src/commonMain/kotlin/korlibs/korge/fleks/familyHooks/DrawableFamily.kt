@@ -46,7 +46,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
     val view: View = when {
         entity has Sprite -> {
             val sprite = entity[Sprite]
-            val view = ImageDataViewEx(assets.getImage(sprite.assetName), sprite.animationName, smoothing = false)
+            val view = ImageDataViewEx(AssetStore.getImage(sprite.assetName), sprite.animationName, smoothing = false)
 
             // when animation finished playing trigger destruction of entity
             if (sprite.destroyOnPlayingFinished) view.onPlayFinished = {
@@ -101,7 +101,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
                 text = entity[Text].text,
                 textSize = korlibs.korge.view.Text.DEFAULT_TEXT_SIZE,
                 color = Colors.WHITE,
-                font = assets.getFont(entity[Text].fontName),
+                font = AssetStore.getFont(entity[Text].fontName),
                 alignment = TextAlignment.CENTER,
                 renderer = DefaultStringTextRenderer,
                 autoScaling = false
