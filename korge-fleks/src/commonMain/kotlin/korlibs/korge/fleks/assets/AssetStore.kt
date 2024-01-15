@@ -13,6 +13,8 @@ import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
+import korlibs.korge.view.*
+import korlibs.math.geom.*
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 import kotlin.concurrent.*
@@ -43,7 +45,6 @@ object AssetStore {
 // TODO    private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
-    private val ninePatches: MutableMap<String, Pair<AssetType, NinePatchBmpSlice>> = mutableMapOf()
     private var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     private var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
 
@@ -79,8 +80,13 @@ object AssetStore {
         } else error("AssetStore: Image '$name' not found!")
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
-        if (ninePatches.contains(name)) ninePatches[name]!!.second
-        else error("AssetStore: Ninepatch image '$name' not found!")
+        if (images.contains(name)) {
+            val layerData = images[name]!!.second.imageDatas.first().frames.first().first
+            if (layerData != null) {
+                val ninePatch = layerData.ninePatchSlice
+                ninePatch ?: error("AssetStore: Image '$name' does not contain nine-patch data!")
+            } else error("AssetStore: Image layer of '$name' not found!")
+        } else error("AssetStore: Image '$name' not found!")
 
     fun getBackground(assetConfig: Identifier) : ParallaxDataContainer =
         if (backgrounds.contains(assetConfig.name)) backgrounds[assetConfig.name]!!.second
@@ -180,9 +186,6 @@ object AssetStore {
                     resourcesVfs[assetConfig.assetFolderName + "/" + image.value.fileName].readImageDataContainer(props, atlas)
                 }
             )
-        }
-        assetConfig.ninePatches.forEach { ninePatch ->
-            ninePatches[ninePatch.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + ninePatch.value].readNinePatch())
         }
         assetConfig.fonts.forEach { font ->
             fonts[font.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + font.value].readBitmapFont(atlas = atlas))

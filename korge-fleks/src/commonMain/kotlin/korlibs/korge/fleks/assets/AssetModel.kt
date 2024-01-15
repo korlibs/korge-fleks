@@ -15,7 +15,6 @@ data class AssetModel(
     val sounds: Map<String, String> = mapOf(),
     val backgrounds: Map<String, ParallaxConfig> = mapOf(),
     val images: Map<String, ImageDataConfig> = mapOf(),
-    val ninePatches: Map<String, String> = mapOf(),
     val fonts: Map<String, String> = mapOf(),
     val tiledMaps: Map<String, String> = mapOf(),
     val entityConfigs: Map<String, ConfigBase> = mapOf()
