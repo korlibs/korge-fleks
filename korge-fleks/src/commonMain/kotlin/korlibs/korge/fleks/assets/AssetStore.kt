@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.assets
 
-import com.github.quillraven.fleks.World
 import korlibs.audio.sound.SoundChannel
 import korlibs.audio.sound.readMusic
 import korlibs.datastructure.setExtra
@@ -13,15 +12,9 @@ import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.parallax.ParallaxDataContainer
 import korlibs.korge.parallax.readParallaxDataContainer
-import korlibs.korge.view.*
-import korlibs.math.geom.*
 import korlibs.time.Stopwatch
 import kotlin.collections.set
-import kotlin.concurrent.*
-import kotlin.coroutines.CoroutineContext
 
-
-interface ConfigBase
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -48,11 +41,7 @@ object AssetStore {
     private var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     private var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
 
-    private val assetReload = AssetReload(assetStore = this)
-
-    suspend fun watchForChanges(world: World, assetReloadContext: CoroutineContext) = assetReload.watchForChanges(world, assetReloadContext)
-
-    enum class AssetType{ None, Common, World, Level }
+    enum class AssetType{ Common, World, Level, Special }
 
     fun <T : ConfigBase> addEntityConfig(identifier: Identifier, entityConfig: T) {
         entityConfigs[identifier.name] = entityConfig

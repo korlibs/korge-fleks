@@ -21,14 +21,17 @@ import korlibs.korge.parallax.readParallaxDataContainer
 import kotlinx.coroutines.delay
 import kotlin.coroutines.CoroutineContext
 
-class AssetReload(private val assetStore: AssetStore) {
+class AssetReload(private val assetStore: AssetStore = AssetStore) {
 
     private var reloading: Boolean = false  // Used for debouncing reload of config (in case the modification message comes twice from the system)
     private lateinit var commonResourcesWatcher: Closeable
     private lateinit var currentWorldResourcesWatcher: Closeable
     private lateinit var currentLevelResourcesWatcher: Closeable
 
-    suspend fun watchForChanges(world: World, assetReloadContext: CoroutineContext) {
+    private var callback: () -> Unit = {}
+
+    suspend fun watchForChanges(world: World, assetReloadContext: CoroutineContext, block: () -> Unit = {}) {
+        callback = block
         resourcesVfs["."].listRecursiveSimple().forEach { file ->
             if (file.stat().isDirectory) {
                 println("Add watcher for '${file.path}'")
@@ -86,6 +89,8 @@ class AssetReload(private val assetStore: AssetStore) {
                     delay(100)
                     reloading = false
                     println("Finished")
+
+                    callback.invoke()
                 }
             }
         }
@@ -128,6 +133,7 @@ class AssetReload(private val assetStore: AssetStore) {
                     reloading = false
                     println("Finished")
 
+                    callback.invoke()
                 }
             }
         }

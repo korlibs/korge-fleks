@@ -24,3 +24,5 @@ data class AssetModel(
         val layers: String? = null
     )
 }
+
+interface ConfigBase
