@@ -19,20 +19,25 @@ import kotlin.collections.set
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
  *
- * Assets are separated into 'common', 'world' and 'level' types. The common type means that the asset is used throughout
- * the game. So it makes sense to not reload those assets on every level or world. The same applies also for world type.
- * It means a world-asset is used in all levels of a world. An asset of type 'level' means that it is really only used in
- * one level (e.g. a level-end boss or other level specific graphics).
+ * Assets are separated into [Common][AssetType.Common], [World][AssetType.World], [Level][AssetType.Level] and
+ * [Special][AssetType.Special] types. The 'Common' type means that the asset is used throughout
+ * the game. So it makes sense to not reload those assets on every level or world. The same applies also for 'World' type.
+ * It means a world-asset is used in all levels of a world. An asset of type 'Level' means that it is really only used in
+ * one level (e.g. level specific graphics or music). The 'Special' type of assets is meant to be used for loading assets
+ * during a level which should be unloaded also within the level. This can be used for extensive graphics for a mid-level
+ * boss. After the boss has be beaten the graphics can be unloaded since they are not needed anymore.
  */
 object AssetStore {
     val commonAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
     val worldAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
     val levelAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
+    val specialAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
 
 //    @Volatile
     internal var commonAssetConfig: AssetModel = AssetModel()
     internal var currentWorldAssetConfig: AssetModel = AssetModel()
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
+    internal var specialAssetConfig: AssetModel = AssetModel()
 
     var entityConfigs: MutableMap<String, ConfigBase> = mutableMapOf()
 // TODO    private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
@@ -40,8 +45,6 @@ object AssetStore {
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     private var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     private var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
-
-    enum class AssetType{ Common, World, Level, Special }
 
     fun <T : ConfigBase> addEntityConfig(identifier: Identifier, entityConfig: T) {
         entityConfigs[identifier.name] = entityConfig
@@ -92,63 +95,30 @@ object AssetStore {
         else error("AssetStore: Cannot find font '$name'!")
     }
 
-    private fun removeAssets(type: AssetType) {
-// TODO        tiledMaps.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
-        backgrounds.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
-        images.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
-        fonts.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
-        sounds.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
-    }
-
     suspend fun loadAssets(assetConfig: AssetModel) {
-        val type: AssetType
-        val atlas = when {
-            assetConfig.assetFolderName.contains(Regex("^common$")) -> {
-                if (commonAssetConfig.assetFolderName == "common") {
-                    println("INFO: Common assets already loaded! No reload is happening!")
-                    return
-                }
-                type = AssetType.Common
-                commonAssetConfig = assetConfig
+        val type: AssetType = assetConfig.type
+        val atlas = when (type) {
+            AssetType.Common -> {
+                commonAssetConfig = prepareCurrentAssets(assetConfig, commonAssetConfig) ?: return  // Just return if those assets are already loaded
                 commonAtlas
             }
-            assetConfig.assetFolderName.contains(Regex("^world[0-9]+$")) -> {
-                when (currentWorldAssetConfig.assetFolderName) {
-                    "none" -> { /* Just load assets */ }
-                    assetConfig.assetFolderName -> {
-                        println("INFO: World assets already loaded! No reload is happening!")
-                        return
-                    }
-                    else -> {
-                        println("INFO: Remove old world assets and load new ones!")
-                        removeAssets(AssetType.World)
-                    }
-                }
-                type = AssetType.World
-                currentWorldAssetConfig = assetConfig
+            AssetType.World -> {
+                currentWorldAssetConfig = prepareCurrentAssets(assetConfig, currentWorldAssetConfig) ?: return
                 worldAtlas
             }
-            assetConfig.assetFolderName.contains(Regex("^world[0-9]+\\/(intro[0-9]+|extro/level[0-9]+)\$")) -> {
-                when (currentLevelAssetConfig.assetFolderName) {
-                    "none" -> { /* Just load assets */ }
-                    assetConfig.assetFolderName -> {
-                        println("INFO: Level assets already loaded! No reload is happening!")
-                        return
-                    }
-                    else -> {
-                        println("INFO: Remove old world assets and load new ones!")
-                        removeAssets(AssetType.Level)
-                    }
-                }
-                type = AssetType.Level
-                currentLevelAssetConfig = assetConfig
+            AssetType.Level -> {
+                currentLevelAssetConfig = prepareCurrentAssets(assetConfig, currentLevelAssetConfig) ?: return
                 levelAtlas
             }
-            else -> error("LoadAssets: Given asset directory name '${assetConfig.assetFolderName}' is not inline with GameAsset specification!")
+            AssetType.Special -> {
+                specialAssetConfig = prepareCurrentAssets(assetConfig, specialAssetConfig) ?: return
+                specialAtlas
+            }
+            else -> error("LoadAssets: Asset type for '${assetConfig.folderName}' is 'None', but it must be set to one of 'Common, World, Level, Special'")
         }
 
         val sw = Stopwatch().start()
-        println("AssetStore: Start loading [${type.name}] resources from '${assetConfig.assetFolderName}'...")
+        println("AssetStore: Start loading [${type.name}] resources from '${assetConfig.folderName}'...")
 
         // Update maps of music, images, ...
 // TODO
@@ -156,33 +126,58 @@ object AssetStore {
 //            tiledMaps[tiledMap.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + tiledMap.value].readTiledMap(atlas = atlas))
 //        }
         assetConfig.sounds.forEach { sound ->
-            val soundFile = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readMusic()
+            val soundFile = resourcesVfs[assetConfig.folderName + "/" + sound.value].readMusic()
             val soundChannel = soundFile.play()
 //            val soundChannel = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readSound().play()
             soundChannel.pause()
             sounds[sound.key] = Pair(type, soundChannel)
         }
         assetConfig.backgrounds.forEach { background ->
-            backgrounds[background.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + background.value.aseName].readParallaxDataContainer(background.value, ASE, atlas = atlas))
+            backgrounds[background.key] = Pair(type, resourcesVfs[assetConfig.folderName + "/" + background.value.aseName].readParallaxDataContainer(background.value, ASE, atlas = atlas))
         }
         assetConfig.images.forEach { image ->
             images[image.key] = Pair(type,
                 if (image.value.layers == null) {
-                    resourcesVfs[assetConfig.assetFolderName + "/" + image.value.fileName].readImageDataContainer(ASE.toProps(), atlas = atlas)
+                    resourcesVfs[assetConfig.folderName + "/" + image.value.fileName].readImageDataContainer(ASE.toProps(), atlas = atlas)
                 } else {
                     val props = ASE.toProps() // TODO check -- ImageDecodingProps(it.value.fileName, extra = ExtraTypeCreate())
                     props.setExtra("layers", image.value.layers)
-                    resourcesVfs[assetConfig.assetFolderName + "/" + image.value.fileName].readImageDataContainer(props, atlas)
+                    resourcesVfs[assetConfig.folderName + "/" + image.value.fileName].readImageDataContainer(props, atlas)
                 }
             )
         }
         assetConfig.fonts.forEach { font ->
-            fonts[font.key] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + font.value].readBitmapFont(atlas = atlas))
+            fonts[font.key] = Pair(type, resourcesVfs[assetConfig.folderName + "/" + font.value].readBitmapFont(atlas = atlas))
         }
         assetConfig.entityConfigs.forEach { config ->
             entityConfigs[config.key] = config.value
         }
 
         println("Assets: Loaded resources in ${sw.elapsed}")
+    }
+
+    private fun prepareCurrentAssets(newAssetConfig: AssetModel, currentAssetConfig: AssetModel): AssetModel? =
+        when (currentAssetConfig.folderName) {
+            "none" -> {
+                // Just load new assets
+                newAssetConfig
+            }
+            newAssetConfig.folderName -> {
+                println("INFO: ${newAssetConfig.type} assets '${newAssetConfig.folderName}' already loaded! No reload is happening!")
+                null
+            }
+            else -> {
+                println("INFO: Remove old ${newAssetConfig.type} assets and load new ones!")
+                removeAssets(newAssetConfig.type)
+                newAssetConfig
+            }
+        }
+
+    private fun removeAssets(type: AssetType) {
+// TODO        tiledMaps.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
+        backgrounds.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
+        images.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
+        fonts.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
+        sounds.entries.iterator().let { while (it.hasNext()) if (it.next().value.first == type) it.remove() }
     }
 }

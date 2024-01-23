@@ -37,16 +37,16 @@ class AssetReload(private val assetStore: AssetStore = AssetStore) {
                 println("Add watcher for '${file.path}'")
                 file.watch {
                     if (it.kind == Vfs.FileEvent.Kind.MODIFIED) {
-                        checkAssetFolders(world, it.file, AssetStore.AssetType.Common, assetStore.commonAssetConfig, assetReloadContext)
-                        checkAssetFolders(world, it.file, AssetStore.AssetType.World, assetStore.currentWorldAssetConfig, assetReloadContext)
-                        checkAssetFolders(world, it.file, AssetStore.AssetType.Level, assetStore.currentLevelAssetConfig, assetReloadContext)
+                        checkAssetFolders(world, it.file, AssetType.Common, assetStore.commonAssetConfig, assetReloadContext)
+                        checkAssetFolders(world, it.file, AssetType.World, assetStore.currentWorldAssetConfig, assetReloadContext)
+                        checkAssetFolders(world, it.file, AssetType.Level, assetStore.currentLevelAssetConfig, assetReloadContext)
                     }
                 }
             }
         }
     }
 
-    private suspend fun checkAssetFolders(world: World, file: VfsFile, type: AssetStore.AssetType, assetConfig: AssetModel, assetReloadContext: CoroutineContext) = with (world) {
+    private suspend fun checkAssetFolders(world: World, file: VfsFile, type: AssetType, assetConfig: AssetModel, assetReloadContext: CoroutineContext) = with (world) {
 
         // TODO: Currently only sprite images and parallax images are reloaded
         //       -> Implement reloading also for other asset types
@@ -60,7 +60,7 @@ class AssetReload(private val assetStore: AssetStore = AssetStore) {
                     // Give aseprite more time to finish writing the files
                     delay(100)
                     val assetName = config.key
-                    assetStore.backgrounds[assetName] = Pair(type, resourcesVfs[assetConfig.assetFolderName + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
+                    assetStore.backgrounds[assetName] = Pair(type, resourcesVfs[assetConfig.folderName + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
 
                     println("\nTriggering asset change for: $assetName")
                     world.family { all(Drawable) }.forEach { entity ->
@@ -104,11 +104,11 @@ class AssetReload(private val assetStore: AssetStore = AssetStore) {
                     val assetName = config.key
                     assetStore.images[assetName] = Pair(type,
                         if (config.value.layers == null) {
-                            resourcesVfs[assetConfig.assetFolderName + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
+                            resourcesVfs[assetConfig.folderName + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
                         } else {
                             val props = ASE.toProps()
                             props.setExtra("layers", config.value.layers)
-                            resourcesVfs[assetConfig.assetFolderName + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
+                            resourcesVfs[assetConfig.folderName + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
                         }
                     )
 

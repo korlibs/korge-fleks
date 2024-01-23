@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.assets
 
-import korlibs.image.bitmap.*
 import korlibs.korge.parallax.ParallaxConfig
 
 
@@ -11,7 +10,8 @@ import korlibs.korge.parallax.ParallaxConfig
  * Hint: Make sure to use only basic types (Integer, String, Boolean).
  */
 data class AssetModel(
-    val assetFolderName: String = "none",
+    val type: AssetType = AssetType.None,
+    val folderName: String = "none",
     val sounds: Map<String, String> = mapOf(),
     val backgrounds: Map<String, ParallaxConfig> = mapOf(),
     val images: Map<String, ImageDataConfig> = mapOf(),
@@ -24,5 +24,7 @@ data class AssetModel(
         val layers: String? = null
     )
 }
+
+enum class AssetType{ None, Common, World, Level, Special }
 
 interface ConfigBase
