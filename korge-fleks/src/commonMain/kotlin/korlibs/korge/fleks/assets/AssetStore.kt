@@ -43,8 +43,8 @@ object AssetStore {
 // TODO    private var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
-    private var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
-    private var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
+    internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
+    internal var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
 
     fun <T : ConfigBase> addEntityConfig(identifier: Identifier, entityConfig: T) {
         entityConfigs[identifier.name] = entityConfig

@@ -2,6 +2,7 @@ package korlibs.korge.fleks.assets
 
 import com.github.quillraven.fleks.World
 import korlibs.datastructure.setExtra
+import korlibs.image.font.*
 import korlibs.image.format.ASE
 import korlibs.image.format.readImageDataContainer
 import korlibs.image.format.toProps
@@ -48,8 +49,28 @@ class AssetReload(private val assetStore: AssetStore = AssetStore) {
 
     private suspend fun checkAssetFolders(world: World, file: VfsFile, type: AssetType, assetConfig: AssetModel, assetReloadContext: CoroutineContext) = with (world) {
 
-        // TODO: Currently only sprite images and parallax images are reloaded
+        // TODO: Currently only fonts, sprite images and parallax images are reloaded
         //       -> Implement reloading also for other asset types
+
+        assetConfig.fonts.forEach { config ->
+            // Check filename
+            if (file.fullName.contains(config.value.removeSuffix(".fnt")) && !reloading) {
+                reloading = true  // save that reloading is in progress
+                println("Reloading ${assetConfig.folderName}/${config.value} for changes in ${file.fullName} ... ")
+
+                launchImmediately(context = assetReloadContext) {
+                    delay(500)
+                    val assetName = config.key
+                    assetStore.fonts[assetName] = Pair(type, resourcesVfs[assetConfig.folderName + "/" + config.value].readBitmapFont(atlas = null))
+                }
+
+                delay(100)
+                reloading = false
+                println("Finished")
+
+                callback.invoke()
+            }
+        }
 
         assetConfig.backgrounds.forEach { config ->
             if (file.fullName.contains(config.value.aseName) && !reloading) {
