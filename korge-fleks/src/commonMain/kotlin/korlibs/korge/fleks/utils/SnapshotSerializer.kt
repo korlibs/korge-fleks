@@ -3,7 +3,7 @@ package korlibs.korge.fleks.utils
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.Entity
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*

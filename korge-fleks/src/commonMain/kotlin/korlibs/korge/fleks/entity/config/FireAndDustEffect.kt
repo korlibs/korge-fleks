@@ -2,8 +2,7 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.assets.ConfigBase
+import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.fleks.utils.random
@@ -29,7 +28,7 @@ object FireAndDustEffect {
 
     // Configure function which applies the config to the entity's components
     private val configureEffectObjectFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
-        val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config)
+        val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config.name)
         entity.configure { entity ->
             entity.getOrAdd(Offset) { Offset() }.also {
                 it.x = effectConfig.offsetX

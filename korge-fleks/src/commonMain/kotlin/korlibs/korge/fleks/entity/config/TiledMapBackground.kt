@@ -2,8 +2,8 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.assets.ConfigBase
+import korlibs.korge.assetmanager.AssetStore
+import korlibs.korge.assetmanager.ConfigBase
 import korlibs.korge.fleks.components.Appearance
 import korlibs.korge.fleks.components.Drawable
 import korlibs.korge.fleks.components.PositionShape
@@ -28,7 +28,7 @@ object TiledMapBackground {
      * This function creates a tiled map background entity which is used for various backgrounds in the game and intro.
      */
     private val configureTiledMapFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
-        val tiledMapConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config)
+        val tiledMapConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config.name)
         entity.configure {
             it += TiledMap(
                 assetName = tiledMapConfig.assetName

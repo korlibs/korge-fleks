@@ -6,4 +6,5 @@ dependencies:
 - maven::common::com.soywiz.korlibs.korge2:korge
 - https://github.com/korlibs/korge-parallax/tree/2f5fa9be09b52c343d9160fe29dc683aa86e22e8/korge-parallax
 #- ../../korge-parallax/korge-parallax
+- ../../korge-asset-manager/korge-asset-manager
 targets: [jvm, android]

@@ -9,7 +9,7 @@ import korlibs.image.text.DefaultStringTextRenderer
 import korlibs.image.text.HorizontalAlign
 import korlibs.image.text.TextAlignment
 import korlibs.image.text.VerticalAlign
-import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.Text
@@ -75,7 +75,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
         entity has Parallax -> {
             val parallax = entity[Parallax]
-            val parallaxConfig = assets.getBackground(parallax.config)
+            val parallaxConfig = assets.getBackground(parallax.config.name)
             val view = ParallaxDataView(parallaxConfig)
 
             when (parallaxConfig.config.mode) {

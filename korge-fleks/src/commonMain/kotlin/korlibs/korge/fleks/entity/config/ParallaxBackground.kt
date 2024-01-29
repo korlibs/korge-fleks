@@ -4,8 +4,8 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import korlibs.datastructure.iterators.fastForEach
 import korlibs.datastructure.iterators.fastForEachWithIndex
-import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.assets.ConfigBase
+import korlibs.korge.assetmanager.AssetStore
+import korlibs.korge.assetmanager.ConfigBase
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.fleks.utils.KorgeViewCache
@@ -35,7 +35,7 @@ object ParallaxBackground {
 
         val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
-        val config = inject<AssetStore>("AssetStore").getBackground(assetConfig).config
+        val config = inject<AssetStore>("AssetStore").getBackground(assetConfig.name).config
         val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
         val view = korgeViewCache[entity] as ParallaxDataView
         val layerMap = entity[SubEntities]
@@ -74,7 +74,7 @@ object ParallaxBackground {
 
     private val configureParallaxBackgroundFct = fun(world: World, entity: Entity, config: Identifier): Entity = with(world) {
         val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
-        val parallaxConfig = inject<AssetStore>( "AssetStore").getEntityConfig<Config>(config)
+        val parallaxConfig = inject<AssetStore>( "AssetStore").getEntityConfig<Config>(config.name)
 
         entity.configure {
             it += Parallax(config = parallaxConfig.assetName)
@@ -89,7 +89,7 @@ object ParallaxBackground {
         val view = korgeViewCache[entity] as ParallaxDataView
         val layerMap = entity[SubEntities]
 
-        val config = inject<AssetStore>("AssetStore").getBackground(parallaxConfig.assetName).config
+        val config = inject<AssetStore>("AssetStore").getBackground(parallaxConfig.assetName.name).config
         val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
 
         config.backgroundLayers?.fastForEach { conf ->
