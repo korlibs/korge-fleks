@@ -35,7 +35,7 @@ object ParallaxBackground {
 
         val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
-        val config = inject<AssetStore>("AssetStore").getBackground(assetConfig.name).config
+        val config = AssetStore.getBackground(assetConfig.name).config
         val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
         val view = korgeViewCache[entity] as ParallaxDataView
         val layerMap = entity[SubEntities]
@@ -74,7 +74,7 @@ object ParallaxBackground {
 
     private val configureParallaxBackgroundFct = fun(world: World, entity: Entity, config: Identifier): Entity = with(world) {
         val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
-        val parallaxConfig = inject<AssetStore>( "AssetStore").getEntityConfig<Config>(config.name)
+        val parallaxConfig = AssetStore.getEntityConfig<Config>(config.name)
 
         entity.configure {
             it += Parallax(config = parallaxConfig.assetName)
@@ -89,7 +89,7 @@ object ParallaxBackground {
         val view = korgeViewCache[entity] as ParallaxDataView
         val layerMap = entity[SubEntities]
 
-        val config = inject<AssetStore>("AssetStore").getBackground(parallaxConfig.assetName.name).config
+        val config = AssetStore.getBackground(parallaxConfig.assetName.name).config
         val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
 
         config.backgroundLayers?.fastForEach { conf ->

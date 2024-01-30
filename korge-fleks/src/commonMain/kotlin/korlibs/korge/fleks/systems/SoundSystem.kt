@@ -12,9 +12,7 @@ import korlibs.time.*
  * A system which moves entities. It either takes the rigidbody of an entity into account or if not
  * it moves the entity linear without caring about gravity.
  */
-class SoundSystem(
-    private val assets: AssetStore = World.inject<AssetStore>("AssetStore")
-) : IteratingSystem(
+class SoundSystem : IteratingSystem(
     family {
         all(Sound)
     },
@@ -52,7 +50,7 @@ class SoundSystem(
         val sound = entity[Sound]
 
 
-        val soundChannel = assets.getSound(sound.name)
+        val soundChannel = AssetStore.getSound(sound.name)
 
         // Sound enabling/disabling triggered from outside
         if (soundEnabled == soundEnabledSave) {

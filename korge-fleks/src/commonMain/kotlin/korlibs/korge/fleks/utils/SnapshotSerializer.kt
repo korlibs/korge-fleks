@@ -75,7 +75,7 @@ internal val internalModule = SerializersModule {
         subclass(SubEntities::class)
         subclass(Text::class)
         subclass(MultiLineText::class)
-        subclass(TiledMap::class)
+        subclass(TileMap::class)
     }
     // Data class hierarchy used for AnimationScript component
     polymorphic(TweenBase::class) {

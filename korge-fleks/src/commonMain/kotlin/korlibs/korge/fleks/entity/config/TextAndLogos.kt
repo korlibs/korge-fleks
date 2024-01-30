@@ -40,7 +40,7 @@ object TextAndLogos {
     val configureLogoLayer = Identifier(name = "configureLogoLayer")
 
     private val configureLogoFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
-        val logoConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoConfig>(config.name)
+        val logoConfig = AssetStore.getEntityConfig<LogoConfig>(config.name)
         entity.configure { entity ->
             // Make sure we have position component
             entity.getOrAdd(PositionShape) { PositionShape() }
@@ -84,7 +84,7 @@ object TextAndLogos {
     }
 
     private val configureLogoLayerFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
-        val layerConfig = inject<AssetStore>("AssetStore").getEntityConfig<LogoLayerConfig>(config.name)
+        val layerConfig = AssetStore.getEntityConfig<LogoLayerConfig>(config.name)
         entity.configure { entity ->
             entity.getOrAdd(SpecificLayer) { SpecificLayer() }.also {
                 it.spriteLayer = layerConfig.layerName

@@ -34,7 +34,6 @@ fun drawableFamily(): Family = World.family { all(Drawable, PositionShape).any(D
 
 val onDrawableFamilyAdded: FamilyHook = { entity ->
     val world = this
-    val assets = inject<AssetStore>("AssetStore")
     val layers = inject<HashMap<String, Container>>("Layers")
     val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
@@ -75,7 +74,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
         entity has Parallax -> {
             val parallax = entity[Parallax]
-            val parallaxConfig = assets.getBackground(parallax.config.name)
+            val parallaxConfig = AssetStore.getBackground(parallax.config.name)
             val view = ParallaxDataView(parallaxConfig)
 
             when (parallaxConfig.config.mode) {

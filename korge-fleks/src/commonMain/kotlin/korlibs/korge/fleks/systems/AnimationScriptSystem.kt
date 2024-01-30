@@ -17,8 +17,6 @@ class AnimationScriptSystem : IteratingSystem(
     family { all(AnimationScript) },
     interval = EachFrame
 ) {
-    private val assetStore = inject<AssetStore>("AssetStore")
-
     // Internally used variables in createAnimateComponent function
     private lateinit var currentTween: TweenBase
     private lateinit var currentParentTween: ParallelTweens

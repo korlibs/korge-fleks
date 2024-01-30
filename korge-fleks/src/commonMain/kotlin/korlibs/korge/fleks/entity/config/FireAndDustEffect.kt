@@ -28,7 +28,7 @@ object FireAndDustEffect {
 
     // Configure function which applies the config to the entity's components
     private val configureEffectObjectFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
-        val effectConfig = inject<AssetStore>("AssetStore").getEntityConfig<Config>(config.name)
+        val effectConfig = AssetStore.getEntityConfig<Config>(config.name)
         entity.configure { entity ->
             entity.getOrAdd(Offset) { Offset() }.also {
                 it.x = effectConfig.offsetX
