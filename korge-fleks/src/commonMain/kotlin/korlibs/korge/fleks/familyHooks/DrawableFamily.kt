@@ -71,7 +71,12 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 //
 //            TiledMapView(assets.getTiledMap(entity[TiledMap].assetName), smoothing = false, showShapes = false)
 //        }
+/*
+        entity has LdtkTileMap -> {
+            tileMap
 
+        }
+*/
         entity has Parallax -> {
             val parallax = entity[Parallax]
             val parallaxConfig = AssetStore.getBackground(parallax.config.name)

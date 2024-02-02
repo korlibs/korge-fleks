@@ -18,12 +18,12 @@ import kotlinx.serialization.Serializable
  * in the Korge specific systems.
  */
 @Serializable
-@SerialName("TileMap")
-data class TileMap(
+@SerialName("TiledMap")
+data class TiledMap(
     var assetName: String = "",
-) : Component<TileMap>, SerializeBase {
-    override fun type(): ComponentType<TileMap> = TileMap
-    companion object : ComponentType<TileMap>() {
+) : Component<TiledMap>, SerializeBase {
+    override fun type(): ComponentType<TiledMap> = TiledMap
+    companion object : ComponentType<TiledMap>() {
         /**
          * Hint: How you should read "Component Hook"
          *
@@ -31,8 +31,18 @@ data class TileMap(
          * This initialization can only use data from one component. Thus, it must be self-containable regarding the
          * save-state of an object. But this is often not the case -> check FamilyHooks.
          */
-        fun onComponentAdded(entity: Entity, component: TileMap) {}
+        fun onComponentAdded(entity: Entity, component: TiledMap) {}
 
-        fun onComponentRemoved(entity: Entity, component: TileMap) {}
+        fun onComponentRemoved(entity: Entity, component: TiledMap) {}
     }
+}
+
+@Serializable
+@SerialName("LdtkTileMap")
+data class LdtkTileMap(
+    var assetName: String = "",
+
+) : Component<LdtkTileMap>, SerializeBase {
+    override fun type(): ComponentType<LdtkTileMap> = LdtkTileMap
+    companion object : ComponentType<LdtkTileMap>()
 }

@@ -7,7 +7,7 @@ import korlibs.korge.assetmanager.ConfigBase
 import korlibs.korge.fleks.components.Appearance
 import korlibs.korge.fleks.components.Drawable
 import korlibs.korge.fleks.components.PositionShape
-import korlibs.korge.fleks.components.TileMap
+import korlibs.korge.fleks.components.TiledMap
 import korlibs.korge.fleks.utils.Identifier
 
 
@@ -27,10 +27,10 @@ object TiledMapBackground {
     /**
      * This function creates a tiled map background entity which is used for various backgrounds in the game and intro.
      */
-    private val configureTileMapFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
+    private val configureTiledMapFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
         val tileMapConfig = AssetStore.getEntityConfig<Config>(config.name)
         entity.configure {
-            it += TileMap(
+            it += TiledMap(
                 assetName = tileMapConfig.assetName
             )
             it += PositionShape(
@@ -48,6 +48,6 @@ object TiledMapBackground {
     }
 
     init {
-        Invokable.register(configureTileMap, configureTileMapFct)
+        Invokable.register(configureTileMap, configureTiledMapFct)
     }
 }

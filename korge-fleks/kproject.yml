@@ -7,4 +7,7 @@ dependencies:
 - https://github.com/korlibs/korge-parallax/tree/2f5fa9be09b52c343d9160fe29dc683aa86e22e8/korge-parallax
 #- ../../korge-parallax/korge-parallax
 - ../../korge-asset-manager/korge-asset-manager
+#- https://github.com/korlibs/korge-ldtk/tree/3cc31bddd707037084f8e0d764a9706cc99f0bfb/korge-ldtk
+- ../../korge-ldtk/korge-ldtk
+- https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
 targets: [jvm, android]
