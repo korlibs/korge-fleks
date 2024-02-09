@@ -17,6 +17,7 @@ import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.korge.fleks.systems.KorgeViewSystem
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.input.mouse
+import korlibs.korge.ldtk.view.*
 import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxConfig
 import korlibs.korge.parallax.ParallaxDataView
@@ -71,12 +72,20 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 //
 //            TiledMapView(assets.getTiledMap(entity[TiledMap].assetName), smoothing = false, showShapes = false)
 //        }
-/*
-        entity has LdtkTileMap -> {
-            tileMap
 
+        entity has LdtkLevelMap -> {
+            val ldtkLevelMapComponent = entity[LdtkLevelMap]
+            val ldtkWorld = AssetStore.getLdtkWorld(ldtkLevelMapComponent.worldName)
+            val ldtkLevel = AssetStore.getLdtkLevel(ldtkWorld, ldtkLevelMapComponent.levelName)
+            val view = LDTKLevelView(level = LDTKLevel(
+                world = ldtkWorld,
+                level = ldtkLevel
+            ))
+            width = ldtkLevel.pxWid.toFloat()
+            height = ldtkLevel.pxHei.toFloat()
+            view
         }
-*/
+
         entity has Parallax -> {
             val parallax = entity[Parallax]
             val parallaxConfig = AssetStore.getBackground(parallax.config.name)

@@ -7,6 +7,7 @@ import korlibs.korge.fleks.entity.config.invalidEntity
 import korlibs.korge.fleks.utils.SerializeBase
 import korlibs.io.lang.format
 import korlibs.io.lang.substr
+import korlibs.util.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt

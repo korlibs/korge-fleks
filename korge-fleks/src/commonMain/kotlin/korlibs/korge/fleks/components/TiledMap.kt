@@ -38,11 +38,18 @@ data class TiledMap(
 }
 
 @Serializable
-@SerialName("LdtkTileMap")
-data class LdtkTileMap(
-    var assetName: String = "",
+@SerialName("LdtkLevelMap")
+data class LdtkLevelMap(
+    /**
+     * The name of the LDtk world in the Asset manager
+     */
+    var worldName: String = "",
+    /**
+     * The unique identifier (level name) of the level from the LDtk world
+     */
+    var levelName: String = ""
 
-) : Component<LdtkTileMap>, SerializeBase {
-    override fun type(): ComponentType<LdtkTileMap> = LdtkTileMap
-    companion object : ComponentType<LdtkTileMap>()
+) : Component<LdtkLevelMap>, SerializeBase {
+    override fun type(): ComponentType<LdtkLevelMap> = LdtkLevelMap
+    companion object : ComponentType<LdtkLevelMap>()
 }
