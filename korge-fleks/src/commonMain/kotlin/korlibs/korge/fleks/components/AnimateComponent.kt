@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.Component
-import com.github.quillraven.fleks.ComponentType
+import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.AnySerializer
 import korlibs.korge.fleks.utils.EasingSerializer
 import korlibs.korge.fleks.utils.SerializeBase
@@ -37,83 +36,89 @@ data class AnimateComponent (
     override fun type(): ComponentType<AnimateComponent> = componentProperty.type
 
     companion object {
-        val AnimateSpriteIsPlaying = object : ComponentType<AnimateComponent>() {}
-        val AnimateSpriteForwardDirection = object : ComponentType<AnimateComponent>() {}
-        val AnimateSpriteLoop = object : ComponentType<AnimateComponent>() {}
-        val AnimateSpriteDestroyOnPlayingFinished = object : ComponentType<AnimateComponent>() {}
-        val AnimateSpriteAnimName = object : ComponentType<AnimateComponent>() {}
+        // TODO update unit test for this mapping from enum to here
 
-        val AnimateAppearanceAlpha = object : ComponentType<AnimateComponent>() {}
-        val AnimateAppearanceTint = object : ComponentType<AnimateComponent>() {}
-        val AnimateAppearanceVisible = object : ComponentType<AnimateComponent>() {}
+        val AnimateSpriteIsPlaying = AnimateComponentType.SpriteIsPlaying.type
+        val AnimateSpriteForwardDirection = AnimateComponentType.SpriteForwardDirection.type
+        val AnimateSpriteLoop = AnimateComponentType.SpriteLoop.type
+        val AnimateSpriteDestroyOnPlayingFinished = AnimateComponentType.SpriteDestroyOnPlayingFinished.type
+        val AnimateSpriteAnimName = AnimateComponentType.SpriteAnimName.type
 
-        val AnimateSpawnerNumberOfObjects = object : ComponentType<AnimateComponent>() {}
-        val AnimateSpawnerInterval = object : ComponentType<AnimateComponent>() {}
-        val AnimateSpawnerTimeVariation = object : ComponentType<AnimateComponent>() {}
-        val AnimateSpawnerPositionVariation = object : ComponentType<AnimateComponent>() {}
+        val AnimateAppearanceAlpha = AnimateComponentType.AppearanceAlpha.type
+        val AnimateAppearanceTint = AnimateComponentType.AppearanceTint.type
+        val AnimateAppearanceVisible = AnimateComponentType.AppearanceVisible.type
 
-        val AnimateLifeCycleHealthCounter = object : ComponentType<AnimateComponent>() {}
+        val AnimateSpawnerNumberOfObjects = AnimateComponentType.SpawnerNumberOfObjects.type
+        val AnimateSpawnerInterval = AnimateComponentType.SpawnerInterval.type
+        val AnimateSpawnerTimeVariation = AnimateComponentType.SpawnerTimeVariation.type
+        val AnimateSpawnerPositionVariation = AnimateComponentType.SpawnerPositionVariation.type
 
-        val AnimatePositionShapeX = object : ComponentType<AnimateComponent>() {}
-        val AnimatePositionShapeY = object : ComponentType<AnimateComponent>() {}
+        val AnimateLifeCycleHealthCounter = AnimateComponentType.LifeCycleHealthCounter.type
 
-        val AnimateOffsetX = object : ComponentType<AnimateComponent>() {}
-        val AnimateOffsetY = object : ComponentType<AnimateComponent>() {}
+        val AnimatePositionShapeX = AnimateComponentType.PositionShapeX.type
+        val AnimatePositionShapeY = AnimateComponentType.PositionShapeY.type
 
-        val AnimateLayoutCenterX = object : ComponentType<AnimateComponent>() {}
-        val AnimateLayoutCenterY = object : ComponentType<AnimateComponent>() {}
-        val AnimateLayoutOffsetX = object : ComponentType<AnimateComponent>() {}
-        val AnimateLayoutOffsetY = object : ComponentType<AnimateComponent>() {}
+        val AnimateOffsetX = AnimateComponentType.OffsetX.type
+        val AnimateOffsetY = AnimateComponentType.OffsetY.type
 
-        val AnimateSwitchLayerVisibilityOnVariance = object : ComponentType<AnimateComponent>() {}
-        val AnimateSwitchLayerVisibilityOffVariance = object : ComponentType<AnimateComponent>() {}
+        val AnimateLayoutCenterX = AnimateComponentType.LayoutCenterX.type
+        val AnimateLayoutCenterY = AnimateComponentType.LayoutCenterY.type
+        val AnimateLayoutOffsetX = AnimateComponentType.LayoutOffsetX.type
+        val AnimateLayoutOffsetY = AnimateComponentType.LayoutOffsetY.type
 
-        val AnimateSoundStartTrigger = object : ComponentType<AnimateComponent>() {}
-        val AnimateSoundStopTrigger = object : ComponentType<AnimateComponent>() {}
-        val AnimateSoundPosition = object : ComponentType<AnimateComponent>() {}
-        val AnimateSoundVolume = object : ComponentType<AnimateComponent>() {}
+        val AnimateSwitchLayerVisibilityOnVariance = AnimateComponentType.SwitchLayerVisibilityOnVariance.type
+        val AnimateSwitchLayerVisibilityOffVariance = AnimateComponentType.SwitchLayerVisibilityOffVariance.type
 
-        val ExecuteConfigureFunction = object : ComponentType<AnimateComponent>() {}
+        val AnimateSoundStartTrigger = AnimateComponentType.SoundStartTrigger.type
+        val AnimateSoundStopTrigger = AnimateComponentType.SoundStopTrigger.type
+        val AnimateSoundPosition = AnimateComponentType.SoundPosition.type
+        val AnimateSoundVolume = AnimateComponentType.SoundVolume.type
+
+        val ExecuteConfigureFunction = AnimateComponentType.ConfigureFunction.type
     }
 }
 
+/**
+ * All final [AnimateComponentType] names are organized in this enum. This is done to easily serialize the
+ * animateProperty of the base AnimateComponent data class.
+ */
 enum class AnimateComponentType(val type: ComponentType<AnimateComponent>) {
-    SpriteIsPlaying(AnimateComponent.AnimateSpriteIsPlaying),
-    SpriteForwardDirection(AnimateComponent.AnimateSpriteForwardDirection),
-    SpriteLoop(AnimateComponent.AnimateSpriteLoop),
-    SpriteDestroyOnPlayingFinished(AnimateComponent.AnimateSpriteDestroyOnPlayingFinished),
-    SpriteAnimName(AnimateComponent.AnimateSpriteAnimName),
+    SpriteIsPlaying(componentTypeOf<AnimateComponent>()),
+    SpriteForwardDirection(componentTypeOf<AnimateComponent>()),
+    SpriteLoop(componentTypeOf<AnimateComponent>()),
+    SpriteDestroyOnPlayingFinished(componentTypeOf<AnimateComponent>()),
+    SpriteAnimName(componentTypeOf<AnimateComponent>()),
 
-    AppearanceAlpha(AnimateComponent.AnimateAppearanceAlpha),
-    AppearanceTint(AnimateComponent.AnimateAppearanceTint),
-    AppearanceVisible(AnimateComponent.AnimateAppearanceVisible),
+    AppearanceAlpha(componentTypeOf<AnimateComponent>()),
+    AppearanceTint(componentTypeOf<AnimateComponent>()),
+    AppearanceVisible(componentTypeOf<AnimateComponent>()),
 
-    SpawnerNumberOfObjects(AnimateComponent.AnimateSpawnerNumberOfObjects),
-    SpawnerInterval(AnimateComponent.AnimateSpawnerInterval),
-    SpawnerTimeVariation(AnimateComponent.AnimateSpawnerTimeVariation),
-    SpawnerPositionVariation(AnimateComponent.AnimateSpawnerPositionVariation),
+    SpawnerNumberOfObjects(componentTypeOf<AnimateComponent>()),
+    SpawnerInterval(componentTypeOf<AnimateComponent>()),
+    SpawnerTimeVariation(componentTypeOf<AnimateComponent>()),
+    SpawnerPositionVariation(componentTypeOf<AnimateComponent>()),
 
     // TODO not used yet in animation system
-    LifeCycleHealthCounter(AnimateComponent.AnimateLifeCycleHealthCounter),
+    LifeCycleHealthCounter(componentTypeOf<AnimateComponent>()),
 
-    PositionShapeX(AnimateComponent.AnimatePositionShapeX),
-    PositionShapeY(AnimateComponent.AnimatePositionShapeY),
+    PositionShapeX(componentTypeOf<AnimateComponent>()),
+    PositionShapeY(componentTypeOf<AnimateComponent>()),
 
-    OffsetX(AnimateComponent.AnimateOffsetX),
-    OffsetY(AnimateComponent.AnimateOffsetY),
+    OffsetX(componentTypeOf<AnimateComponent>()),
+    OffsetY(componentTypeOf<AnimateComponent>()),
 
-    LayoutCenterX(AnimateComponent.AnimateLayoutCenterX),
-    LayoutCenterY(AnimateComponent.AnimateLayoutCenterY),
-    LayoutOffsetX(AnimateComponent.AnimateLayoutOffsetX),
-    LayoutOffsetY(AnimateComponent.AnimateLayoutOffsetY),
+    LayoutCenterX(componentTypeOf<AnimateComponent>()),
+    LayoutCenterY(componentTypeOf<AnimateComponent>()),
+    LayoutOffsetX(componentTypeOf<AnimateComponent>()),
+    LayoutOffsetY(componentTypeOf<AnimateComponent>()),
 
-    SwitchLayerVisibilityOnVariance(AnimateComponent.AnimateSwitchLayerVisibilityOnVariance),
-    SwitchLayerVisibilityOffVariance(AnimateComponent.AnimateSwitchLayerVisibilityOffVariance),
+    SwitchLayerVisibilityOnVariance(componentTypeOf<AnimateComponent>()),
+    SwitchLayerVisibilityOffVariance(componentTypeOf<AnimateComponent>()),
 
-    SoundStartTrigger(AnimateComponent.AnimateSoundStartTrigger),
-    SoundStopTrigger(AnimateComponent.AnimateSoundStopTrigger),
-    SoundPosition(AnimateComponent.AnimateSoundPosition),
-    SoundVolume(AnimateComponent.AnimateSoundVolume),
+    SoundStartTrigger(componentTypeOf<AnimateComponent>()),
+    SoundStopTrigger(componentTypeOf<AnimateComponent>()),
+    SoundPosition(componentTypeOf<AnimateComponent>()),
+    SoundVolume(componentTypeOf<AnimateComponent>()),
 
-    ConfigureFunction(AnimateComponent.ExecuteConfigureFunction)
+    ConfigureFunction(componentTypeOf<AnimateComponent>())
 }
