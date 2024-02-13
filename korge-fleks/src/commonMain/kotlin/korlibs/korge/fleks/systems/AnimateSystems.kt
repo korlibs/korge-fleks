@@ -3,29 +3,29 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.World.Companion.inject
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateAppearanceAlpha
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateAppearanceTint
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateAppearanceVisible
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSwitchLayerVisibilityOnVariance
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSwitchLayerVisibilityOffVariance
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimatePositionShapeX
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimatePositionShapeY
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSpriteAnimName
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSpriteIsPlaying
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSpriteForwardDirection
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSpriteLoop
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSpriteDestroyOnPlayingFinished
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSpawnerNumberOfObjects
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSpawnerInterval
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSpawnerTimeVariation
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSpawnerPositionVariation
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateLifeCycleHealthCounter
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateOffsetX
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateOffsetY
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSoundPosition
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSoundStartTrigger
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSoundStopTrigger
-import korlibs.korge.fleks.components.AnimateComponent.Companion.AnimateSoundVolume
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateAppearanceAlpha
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateAppearanceTint
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateAppearanceVisible
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSwitchLayerVisibilityOnVariance
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSwitchLayerVisibilityOffVariance
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimatePositionShapeX
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimatePositionShapeY
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteAnimName
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteIsPlaying
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteForwardDirection
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteLoop
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteDestroyOnPlayingFinished
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpawnerNumberOfObjects
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpawnerInterval
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpawnerTimeVariation
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpawnerPositionVariation
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateLifeCycleHealthCounter
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateOffsetX
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateOffsetY
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSoundPosition
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSoundStartTrigger
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSoundStopTrigger
+import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSoundVolume
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.components.*
 import korlibs.korge.parallax.ImageDataViewEx
@@ -146,7 +146,7 @@ class AnimateSoundSystem : IteratingSystem(
  *
  */
 @JvmName("updatePropertyDouble")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<AnimateComponent>, value: KMutableProperty0<Double>) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Double>) {
     entity.getOrNull(component)?.let {
         // Check if time of animation sequence is over - then we can remove the animation component again
         if (it.timeProgress >= it.duration) entity.configure { entity ->
@@ -163,7 +163,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Anim
 }
 
 @JvmName("updatePropertyFloat")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<AnimateComponent>, value: KMutableProperty0<Float>) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Float>) {
     entity.getOrNull(component)?.let {
         // Check if time of animation sequence is over - then we can remove the animation component again
         if (it.timeProgress >= it.duration) entity.configure { entity ->
@@ -180,7 +180,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Anim
 }
 
 @JvmName("updatePropertyInt")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<AnimateComponent>, value: KMutableProperty0<Int>, block: EntityUpdateContext.() -> Unit = {}) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Int>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration) entity.configure { entity ->
             value.set(it.change as Int + it.value as Int)
@@ -195,7 +195,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Anim
 }
 
 @JvmName("updatePropertyRgb")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<AnimateComponent>, value: KMutableProperty0<Rgb?>) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Rgb?>) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration) entity.configure { entity ->
             value.set(it.change as Rgb + it.value as Rgb)
@@ -210,7 +210,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Anim
 }
 
 @JvmName("updatePropertyBoolean")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<AnimateComponent>, value: KMutableProperty0<Boolean>, block: EntityUpdateContext.() -> Unit = {}) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Boolean>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
             value.set(it.value as Boolean)
@@ -221,7 +221,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Anim
 }
 
 @JvmName("updatePropertyStringNullable")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<AnimateComponent>, value: KMutableProperty0<String?>, block: EntityUpdateContext.() -> Unit = {}) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<String?>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
             value.set(it.value as String)

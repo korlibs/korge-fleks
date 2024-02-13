@@ -1,13 +1,9 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.AnimateComponentType.*
-import korlibs.korge.fleks.components.AnimateComponent.*
+import korlibs.korge.fleks.components.TweenProperty.*
+import korlibs.korge.fleks.components.TweenComponent.*
 import korlibs.math.interpolation.Easing
-import korlibs.korge.fleks.components.AnimateComponent
-import korlibs.korge.fleks.components.AnimateComponent.Companion.ExecuteConfigureFunction
-import korlibs.korge.fleks.components.AnimateComponentType
-import korlibs.korge.fleks.components.Rgb
 import kotlin.test.*
 
 internal class AnimateComponentTest {
@@ -17,7 +13,7 @@ internal class AnimateComponentTest {
 
     @Test
     fun testAnimateComponentTypeIntegrity() {
-        val testVector: List<Pair<AnimateComponentType, ComponentType<*>>> = listOf(
+        val testVector: List<Pair<TweenProperty, ComponentType<*>>> = listOf(
             Pair(SpriteIsPlaying, Companion.AnimateSpriteIsPlaying),
             Pair(SpriteForwardDirection, Companion.AnimateSpriteForwardDirection),
             Pair(SpriteLoop, Companion.AnimateSpriteLoop),
@@ -56,7 +52,7 @@ internal class AnimateComponentTest {
         }
 
         assertEquals(
-            AnimateComponentType.values().size,
+            TweenProperty.values().size,
             testVector.size,
             "Check if all AnimateComponentType enum values have been tested"
         )
@@ -65,8 +61,8 @@ internal class AnimateComponentTest {
     @Test
     fun testAnimateComponentSerialization() {
 
-        val componentUnderTest = AnimateComponent(
-            componentProperty = AppearanceAlpha,
+        val componentUnderTest = TweenComponent(
+            property = AppearanceAlpha,
             change = Unit,
             value = Unit,
             duration = 1.2f,
@@ -86,7 +82,7 @@ internal class AnimateComponentTest {
     }
 
     private fun <T> runAnimateComponentSerializationTest(
-        entity: Entity, component: AnimateComponent,
+        entity: Entity, component: TweenComponent,
         change: T, value: T
     ) {
         component.change = change as Any

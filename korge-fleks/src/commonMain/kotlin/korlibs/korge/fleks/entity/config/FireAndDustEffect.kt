@@ -57,8 +57,8 @@ object FireAndDustEffect {
             entity.getOrAdd(Appearance) { Appearance() }
             entity.getOrAdd(LifeCycle) { LifeCycle() }
             if (effectConfig.fadeOutDuration > 0f) {
-                entity.getOrAdd(AnimationScript) { AnimationScript() }.also {
-                    it.tweens = listOf(
+                entity.getOrAdd(TweenScript) { TweenScript() }.also {
+                    it.tweenSequence = listOf(
                         // Fade out effect objects
                         TweenAppearance(entity = entity, alpha = 0.0f, duration = effectConfig.fadeOutDuration)
                     )

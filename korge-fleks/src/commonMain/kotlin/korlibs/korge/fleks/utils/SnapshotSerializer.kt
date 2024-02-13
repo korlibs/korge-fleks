@@ -49,8 +49,8 @@ value class Identifier(val name: String)
 internal val internalModule = SerializersModule {
     // Top level component classes
     polymorphic(SerializeBase::class) {
-        subclass(AnimateComponent::class)
-        subclass(AnimationScript::class)
+        subclass(TweenComponent::class)
+        subclass(TweenScript::class)
         subclass(Info::class)
         subclass(Drawable::class)
         subclass(Appearance::class)
@@ -79,8 +79,8 @@ internal val internalModule = SerializersModule {
     }
     // Data class hierarchy used for AnimationScript component
     polymorphic(TweenBase::class) {
-        subclass(TweenSequence::class)
-        subclass(ParallelTweens::class)
+        subclass(Sequence::class)
+        subclass(Parallel::class)
         subclass(Wait::class)
         subclass(SpawnEntity::class)
         subclass(ExecuteConfigFunction::class)
