@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Generalized Animate Component Property data class. It is used for animating properties of other components
- * via the [TweenScript] components and one of the systems in AnimateSystems.kt file.
+ * via the [TweenSequence] components and one of the systems in AnimateSystems.kt file.
  *
  * value:  This is set to the previous or initial value
  * change: Value with which last value needs to be changed to reach the target value of the animation step

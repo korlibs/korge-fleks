@@ -21,11 +21,11 @@ internal class AnimationScriptTest {
 
         val testIdentifier = Identifier("testEntityConfig")
 
-        val compUnderTest = TweenScript(
-            tweenSequence = listOf(
-                Sequence(
+        val compUnderTest = TweenSequence(
+            tweens = listOf(
+                SpawnNewTweenSequence(
                     tweens = listOf(
-                        Parallel(
+                        ParallelTweens(
                             tweens = listOf(
                                 SpawnEntity(
                                     config = testIdentifier,
@@ -57,7 +57,7 @@ internal class AnimationScriptTest {
             index = 42,
             timeProgress = 3.4f,
             waitTime = 5.6f,
-            active = true
+            executed = true
         )
 
         val entity = expectedWorld.entity {
@@ -68,19 +68,19 @@ internal class AnimationScriptTest {
 
         // get the component from entity with the same id from the new created world
         val newEntity = recreatedWorld.asEntityBag()[entity.id]
-        val newCompUnderTest = with (recreatedWorld) { newEntity[TweenScript] }
+        val newCompUnderTest = with (recreatedWorld) { newEntity[TweenSequence] }
 
         assertEquals(compUnderTest.index, newCompUnderTest.index, "Check 'index' property to be equal")
         assertEquals(compUnderTest.timeProgress, newCompUnderTest.timeProgress, "Check 'timeProgress' property to be equal")
         assertEquals(compUnderTest.waitTime, newCompUnderTest.waitTime, "Check 'waitTime' property to be equal")
-        assertEquals(compUnderTest.active, newCompUnderTest.active, "Check 'active' property to be equal")
-        val sequenceOfTweens = compUnderTest.tweenSequence.first() as Sequence
-        val newSequenceOfTweens = compUnderTest.tweenSequence.first() as Sequence
+        assertEquals(compUnderTest.executed, newCompUnderTest.executed, "Check 'active' property to be equal")
+        val sequenceOfTweens = compUnderTest.tweens.first() as SpawnNewTweenSequence
+        val newSequenceOfTweens = compUnderTest.tweens.first() as SpawnNewTweenSequence
         assertEquals(sequenceOfTweens.delay, newSequenceOfTweens.delay, "Check 'tweenSequence.delay' property to be equal")
         assertEquals(sequenceOfTweens.duration, newSequenceOfTweens.duration, "Check 'tweenSequence.duration' property to be equal")
         assertEquals(sequenceOfTweens.easing, newSequenceOfTweens.easing, "Check 'tweenSequence.easing' property to be equal")
-        val parallelTweens = sequenceOfTweens.tweens.first() as Parallel
-        val newParallelTweens = newSequenceOfTweens.tweens.first() as Parallel
+        val parallelTweens = sequenceOfTweens.tweens.first() as ParallelTweens
+        val newParallelTweens = newSequenceOfTweens.tweens.first() as ParallelTweens
         assertEquals(parallelTweens.delay, newParallelTweens.delay, "Check 'parallelTweens.delay' property to be equal")
         assertEquals(parallelTweens.duration, newParallelTweens.duration, "Check 'parallelTweens.duration' property to be equal")
         assertEquals(parallelTweens.easing, newParallelTweens.easing, "Check 'parallelTweens.easing' property to be equal")

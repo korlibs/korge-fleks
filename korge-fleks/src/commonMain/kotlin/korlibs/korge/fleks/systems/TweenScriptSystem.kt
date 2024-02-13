@@ -12,26 +12,26 @@ import korlibs.math.interpolation.Easing
  * This system creates Animate... components on entities which should be animated according to the game config.
  */
 class TweenScriptSystem : IteratingSystem(
-    family { all(TweenScript) },
+    family { all(TweenSequence) },
     interval = EachFrame
 ) {
     // Internally used variables in createAnimateComponent function
     private lateinit var currentTween: TweenBase
-    private lateinit var currentParentTween: Parallel
+    private lateinit var currentParentTween: ParallelTweens
 
     /**
-     * When the system is called it checks for the [TweenScript] component if the waitTime is over.
+     * When the system is called it checks for the [TweenSequence] component if the waitTime is over.
      * If yes, then it checks the tween at index in the tweens array which type it has.
      *
-     * - On [Sequence] type the system creates a new [TweenScript] Entity and configures it to operate on the sub-script.
+     * - On [SpawnNewTweenSequence] type the system creates a new [TweenSequence] Entity and configures it to operate on the sub-script.
      *   Then it checks all next steps and if they are an AnimationScript it spawns new AnimationScript Entities for each sub-script.
      *   The first next step which is an AnimationStep stops checking and configures the current script with the next waitTime from the next
      *   to be executed animation step. If the array of steps comes to the end before a new AnimationStep is found than the current
      *   AnimationScript Entity is destroyed. The animation of that script is finished.
      *
-     * - On [Parallel] type it is first checked if the animation is already active. If not then the waitTime is set to the
-     *   duration of the [Parallel] component and all specified animation component (e.g. [AppearanceAlpha] and [PositionShapeX]) are created for
-     *   each specified sub-entity. If the animation is already active than that means that the duration of the [Parallel] is over. In
+     * - On [ParallelTweens] type it is first checked if the animation is already active. If not then the waitTime is set to the
+     *   duration of the [ParallelTweens] component and all specified animation component (e.g. [AppearanceAlpha] and [PositionShapeX]) are created for
+     *   each specified sub-entity. If the animation is already active than that means that the duration of the [ParallelTweens] is over. In
      *   that case it is checked if a next step is available in the steps array. In case the next step is an AnimationStep than the waitTime
      *   is set to the delay of the next animation step.
      *
@@ -42,72 +42,70 @@ class TweenScriptSystem : IteratingSystem(
      * Finally, it checks if the animation script has reached the end. If so it removes the AnimationScript component again from the entity.
      */
     override fun onTickEntity(entity: Entity) {
-        val animScript = entity[TweenScript]
+        val animScript = entity[TweenSequence]
 
         if (animScript.timeProgress >= animScript.waitTime) {
             animScript.timeProgress = 0f
 
-            if (animScript.index >= animScript.tweenSequence.size) {
-                world -= entity
-            } else when (val currentTween = animScript.tweenSequence[animScript.index]) {
-                // currentTween == Sequence
-                is Sequence -> {
-                    var nextTween: TweenBase? = currentTween
-                    while (nextTween is Sequence) {
-                        world.entity { it += TweenScript(tweenSequence = (nextTween as Sequence).tweens) }
-                        nextTween = checkNextTween(animScript, entity)
-                        if (nextTween == null) break
+            val currentTween: TweenBase =
+                if (animScript.index >= animScript.tweens.size) {
+                    // No further tweens -> destroy TweenSequence entity
+                    world -= entity
+                    return
+                } else if (animScript.executed) {
+                    // Tween was executed lately -> read next tween from the script
+                    animScript.executed = false
+                    animScript.index++
+                    // Check if script of tweens has finished
+                    if (animScript.index >= animScript.tweens.size) {
+                        world -= entity
+                        return
+                    }
+                    // check for initial delay of new tween
+                    val currentTween = animScript.tweens[animScript.index]
+                    animScript.waitTime = currentTween.delay ?: 0f
+                    if (animScript.waitTime != 0f)
+                        return
+                    currentTween
+                } else animScript.tweens[animScript.index]
+
+            animScript.executed = true
+            animScript.waitTime = currentTween.duration ?: 0f
+
+            when (currentTween) {
+                is SpawnNewTweenSequence -> {
+                    world.entity { it += TweenSequence(tweens = currentTween.tweens) }
+                }
+                is ParallelTweens -> {
+                    currentTween.tweens.forEach { tween ->
+                        if (tween.delay != null && tween.delay!! > 0f) {
+                            // Tween has an own delay -> spawn a new TweenSequence for it
+                            world.entity {
+                                it += TweenSequence(
+                                    tweens = listOf(
+                                        tween.also { tween ->
+                                            if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
+                                            if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
+                                        }
+                                    )
+                                )
+                            }
+                        } else {
+                            // No delay -> run it directly
+                            checkTween(tween, currentTween)
+                        }
                     }
                 }
                 else -> {
-                    if (animScript.active) checkNextTween(animScript, entity)
-                    else {
-                        animScript.active = true
-                        animScript.waitTime = currentTween.duration ?: 0f
-
-                        if (currentTween is Parallel) {
-
-                            currentTween.tweens.forEach { tween ->
-                                // Check if tween has an own delay and spawn a new AnimationSequence for it
-                                if (tween.delay != null && tween.delay!! > 0f) {
-                                    world.entity {
-                                        it += TweenScript(
-                                            tweenSequence = listOf(
-                                                tween.also { tween ->
-                                                    if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
-                                                    if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
-                                                }
-                                            )
-                                        )
-                                    }
-                                }
-                                else checkTween(tween, currentTween)
-                            }
-                        }
-                        // currentTween cannot be TweenSequence and ParallelTweens - so this cast is safe
-                        else if (currentTween !is Wait)
-                            checkTween(currentTween, Parallel())  // ParallelTweens() as 2nd parameter gives default values for delay, duration and easing
-                    }
+                    if (currentTween !is Wait)
+                        checkTween(currentTween, ParallelTweens())  // ParallelTweens() as 2nd parameter gives default values for delay, duration and easing
                 }
             }
         }
         else animScript.timeProgress += deltaTime
     }
 
-    private fun checkNextTween(animScript: TweenScript, entity: Entity) : TweenBase? {
-        animScript.index++
-        animScript.active = false
-        return if (animScript.index >= animScript.tweenSequence.size) {
-            world -= entity
-            null
-        } else {
-            val nextTween = animScript.tweenSequence[animScript.index]
-            animScript.waitTime = nextTween.delay ?: 0f
-            nextTween
-        }
-    }
-
-    private fun checkTween(tween: TweenBase, parentTween: Parallel) {
+    private fun checkTween(tween: TweenBase, parentTween: ParallelTweens) {
         currentTween = tween
         currentParentTween = parentTween
         when (tween) {
