@@ -49,8 +49,8 @@ value class Identifier(val name: String)
 internal val internalModule = SerializersModule {
     // Top level component classes
     polymorphic(SerializeBase::class) {
-        subclass(TweenComponent::class)
-        subclass(TweenSequence::class)
+        subclass(TweenPropertyComponent::class)
+        subclass(TweenSequenceComponent::class)
         subclass(Info::class)
         subclass(Drawable::class)
         subclass(Appearance::class)

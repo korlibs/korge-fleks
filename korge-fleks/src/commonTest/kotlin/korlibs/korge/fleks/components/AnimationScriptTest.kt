@@ -21,7 +21,7 @@ internal class AnimationScriptTest {
 
         val testIdentifier = Identifier("testEntityConfig")
 
-        val compUnderTest = TweenSequence(
+        val compUnderTest = TweenSequenceComponent(
             tweens = listOf(
                 SpawnNewTweenSequence(
                     tweens = listOf(
@@ -68,7 +68,7 @@ internal class AnimationScriptTest {
 
         // get the component from entity with the same id from the new created world
         val newEntity = recreatedWorld.asEntityBag()[entity.id]
-        val newCompUnderTest = with (recreatedWorld) { newEntity[TweenSequence] }
+        val newCompUnderTest = with (recreatedWorld) { newEntity[TweenSequenceComponent] }
 
         assertEquals(compUnderTest.index, newCompUnderTest.index, "Check 'index' property to be equal")
         assertEquals(compUnderTest.timeProgress, newCompUnderTest.timeProgress, "Check 'timeProgress' property to be equal")

@@ -2,7 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.TweenProperty.*
-import korlibs.korge.fleks.components.TweenComponent.*
+import korlibs.korge.fleks.components.TweenPropertyComponent.*
 import korlibs.math.interpolation.Easing
 import kotlin.test.*
 
@@ -19,7 +19,7 @@ internal class AnimateComponentTest {
             Pair(SpriteLoop, Companion.AnimateSpriteLoop),
             Pair(SpriteDestroyOnPlayingFinished, Companion.AnimateSpriteDestroyOnPlayingFinished),
             Pair(SpriteAnimName, Companion.AnimateSpriteAnimName),
-            Pair(AppearanceAlpha, Companion.AnimateAppearanceAlpha),
+            Pair(AppearanceAlpha, Companion.TweenAppearanceAlphaComponent),
             Pair(AppearanceTint, Companion.AnimateAppearanceTint),
             Pair(AppearanceVisible, Companion.AnimateAppearanceVisible),
             Pair(SpawnerNumberOfObjects, Companion.AnimateSpawnerNumberOfObjects),
@@ -27,8 +27,8 @@ internal class AnimateComponentTest {
             Pair(SpawnerTimeVariation, Companion.AnimateSpawnerTimeVariation),
             Pair(SpawnerPositionVariation, Companion.AnimateSpawnerPositionVariation),
             Pair(LifeCycleHealthCounter, Companion.AnimateLifeCycleHealthCounter),
-            Pair(PositionShapeX, Companion.AnimatePositionShapeX),
-            Pair(PositionShapeY, Companion.AnimatePositionShapeY),
+            Pair(PositionShapeX, Companion.TweenPositionShapeXComponent),
+            Pair(PositionShapeY, Companion.TweenPositionShapeYComponent),
             Pair(OffsetX, Companion.AnimateOffsetX),
             Pair(OffsetY, Companion.AnimateOffsetY),
             Pair(LayoutCenterX, Companion.AnimateLayoutCenterX),
@@ -61,7 +61,7 @@ internal class AnimateComponentTest {
     @Test
     fun testAnimateComponentSerialization() {
 
-        val componentUnderTest = TweenComponent(
+        val componentUnderTest = TweenPropertyComponent(
             property = AppearanceAlpha,
             change = Unit,
             value = Unit,
@@ -82,7 +82,7 @@ internal class AnimateComponentTest {
     }
 
     private fun <T> runAnimateComponentSerializationTest(
-        entity: Entity, component: TweenComponent,
+        entity: Entity, component: TweenPropertyComponent,
         change: T, value: T
     ) {
         component.change = change as Any
@@ -91,7 +91,7 @@ internal class AnimateComponentTest {
         CommonTestEnv.serializeDeserialize(expectedWorld, recreatedWorld)
 
         // get the component from entity with the same id from the new created world
-        val recreatedTestComponent = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][Companion.AnimateAppearanceAlpha] }
+        val recreatedTestComponent = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][Companion.TweenAppearanceAlphaComponent] }
 
         assertEquals(component.change, recreatedTestComponent.change, "Check 'change' property to be equal")
         assertEquals(component.value, recreatedTestComponent.value, "Check 'value' property to be equal")

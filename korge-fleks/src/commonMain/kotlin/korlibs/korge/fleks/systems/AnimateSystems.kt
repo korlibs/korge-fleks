@@ -3,29 +3,29 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.World.Companion.inject
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateAppearanceAlpha
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateAppearanceTint
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateAppearanceVisible
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSwitchLayerVisibilityOnVariance
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSwitchLayerVisibilityOffVariance
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimatePositionShapeX
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimatePositionShapeY
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteAnimName
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteIsPlaying
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteForwardDirection
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteLoop
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpriteDestroyOnPlayingFinished
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpawnerNumberOfObjects
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpawnerInterval
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpawnerTimeVariation
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSpawnerPositionVariation
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateLifeCycleHealthCounter
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateOffsetX
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateOffsetY
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSoundPosition
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSoundStartTrigger
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSoundStopTrigger
-import korlibs.korge.fleks.components.TweenComponent.Companion.AnimateSoundVolume
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenAppearanceAlphaComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateAppearanceTint
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateAppearanceVisible
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSwitchLayerVisibilityOnVariance
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSwitchLayerVisibilityOffVariance
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionShapeXComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionShapeYComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSpriteAnimName
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSpriteIsPlaying
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSpriteForwardDirection
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSpriteLoop
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSpriteDestroyOnPlayingFinished
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSpawnerNumberOfObjects
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSpawnerInterval
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSpawnerTimeVariation
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSpawnerPositionVariation
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateLifeCycleHealthCounter
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateOffsetX
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateOffsetY
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSoundPosition
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSoundStartTrigger
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSoundStopTrigger
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.AnimateSoundVolume
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.components.*
 import korlibs.korge.parallax.ImageDataViewEx
@@ -41,12 +41,12 @@ import kotlin.reflect.KMutableProperty0
  * Adding Animate components can be done e.g. by the AnimationSequence Entity Component configuration.
  */
 class AnimateAppearanceSystem : IteratingSystem(
-    family { all(Appearance).any(AnimateAppearanceAlpha, AnimateAppearanceTint, AnimateAppearanceVisible) },
+    family { all(Appearance).any(TweenAppearanceAlphaComponent, AnimateAppearanceTint, AnimateAppearanceVisible) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
         val appearance = entity[Appearance]
-        updateProperty(entity, AnimateAppearanceAlpha, appearance::alpha)
+        updateProperty(entity, TweenAppearanceAlphaComponent, appearance::alpha)
         updateProperty(entity, AnimateAppearanceTint, appearance::tint)
         updateProperty(entity, AnimateAppearanceVisible, appearance::visible)
     }
@@ -64,13 +64,13 @@ class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
 }
 
 class AnimatePositionShapeSystem : IteratingSystem(
-    family { any(AnimatePositionShapeX, AnimatePositionShapeY, AnimateOffsetX, AnimateOffsetY) },
+    family { any(TweenPositionShapeXComponent, TweenPositionShapeYComponent, AnimateOffsetX, AnimateOffsetY) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
         entity.getOrNull(PositionShape)?.let {
-            updateProperty(entity, AnimatePositionShapeX, it::x)
-            updateProperty(entity, AnimatePositionShapeY, it::y)
+            updateProperty(entity, TweenPositionShapeXComponent, it::x)
+            updateProperty(entity, TweenPositionShapeYComponent, it::y)
         }
         entity.getOrNull(Offset)?.let {
             updateProperty(entity, AnimateOffsetX, it::x)
@@ -146,7 +146,7 @@ class AnimateSoundSystem : IteratingSystem(
  *
  */
 @JvmName("updatePropertyDouble")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Double>) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Double>) {
     entity.getOrNull(component)?.let {
         // Check if time of animation sequence is over - then we can remove the animation component again
         if (it.timeProgress >= it.duration) entity.configure { entity ->
@@ -163,7 +163,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
 }
 
 @JvmName("updatePropertyFloat")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Float>) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Float>) {
     entity.getOrNull(component)?.let {
         // Check if time of animation sequence is over - then we can remove the animation component again
         if (it.timeProgress >= it.duration) entity.configure { entity ->
@@ -180,7 +180,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
 }
 
 @JvmName("updatePropertyInt")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Int>, block: EntityUpdateContext.() -> Unit = {}) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Int>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration) entity.configure { entity ->
             value.set(it.change as Int + it.value as Int)
@@ -195,7 +195,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
 }
 
 @JvmName("updatePropertyRgb")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Rgb?>) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Rgb?>) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration) entity.configure { entity ->
             value.set(it.change as Rgb + it.value as Rgb)
@@ -210,7 +210,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
 }
 
 @JvmName("updatePropertyBoolean")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<Boolean>, block: EntityUpdateContext.() -> Unit = {}) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Boolean>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
             value.set(it.value as Boolean)
@@ -221,7 +221,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
 }
 
 @JvmName("updatePropertyStringNullable")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenComponent>, value: KMutableProperty0<String?>, block: EntityUpdateContext.() -> Unit = {}) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<String?>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
             value.set(it.value as String)

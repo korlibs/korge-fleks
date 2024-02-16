@@ -12,7 +12,7 @@ import korlibs.math.interpolation.Easing
  * This system creates Animate... components on entities which should be animated according to the game config.
  */
 class TweenScriptSystem : IteratingSystem(
-    family { all(TweenSequence) },
+    family { all(TweenSequenceComponent) },
     interval = EachFrame
 ) {
     // Internally used variables in createAnimateComponent function
@@ -20,10 +20,10 @@ class TweenScriptSystem : IteratingSystem(
     private lateinit var currentParentTween: ParallelTweens
 
     /**
-     * When the system is called it checks for the [TweenSequence] component if the waitTime is over.
+     * When the system is called it checks for the [TweenSequenceComponent] component if the waitTime is over.
      * If yes, then it checks the tween at index in the tweens array which type it has.
      *
-     * - On [SpawnNewTweenSequence] type the system creates a new [TweenSequence] Entity and configures it to operate on the sub-script.
+     * - On [SpawnNewTweenSequence] type the system creates a new [TweenSequenceComponent] Entity and configures it to operate on the sub-script.
      *   Then it checks all next steps and if they are an AnimationScript it spawns new AnimationScript Entities for each sub-script.
      *   The first next step which is an AnimationStep stops checking and configures the current script with the next waitTime from the next
      *   to be executed animation step. If the array of steps comes to the end before a new AnimationStep is found than the current
@@ -42,7 +42,7 @@ class TweenScriptSystem : IteratingSystem(
      * Finally, it checks if the animation script has reached the end. If so it removes the AnimationScript component again from the entity.
      */
     override fun onTickEntity(entity: Entity) {
-        val animScript = entity[TweenSequence]
+        val animScript = entity[TweenSequenceComponent]
 
         if (animScript.timeProgress >= animScript.waitTime) {
             animScript.timeProgress = 0f
@@ -74,14 +74,14 @@ class TweenScriptSystem : IteratingSystem(
 
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
-                    world.entity { it += TweenSequence(tweens = currentTween.tweens) }
+                    world.entity { it += TweenSequenceComponent(tweens = currentTween.tweens) }
                 }
                 is ParallelTweens -> {
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
                             // Tween has an own delay -> spawn a new TweenSequence for it
                             world.entity {
-                                it += TweenSequence(
+                                it += TweenSequenceComponent(
                                     tweens = listOf(
                                         tween.also { tween ->
                                             if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
@@ -167,7 +167,7 @@ class TweenScriptSystem : IteratingSystem(
 
     private fun createAnimateComponent(componentProperty: TweenProperty, value: Any, change: Any = Unit) {
         currentTween.entity.configure { animatedEntity ->
-            animatedEntity.getOrAdd(componentProperty.type) { TweenComponent(componentProperty) }.also {
+            animatedEntity.getOrAdd(componentProperty.type) { TweenPropertyComponent(componentProperty) }.also {
                 it.change = change
                 it.value = value
                 it.duration = currentTween.duration ?: currentParentTween.duration ?: 0f
