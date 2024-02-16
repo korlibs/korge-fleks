@@ -5,7 +5,6 @@ import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
 import korlibs.korge.fleks.entity.config.invalidEntity
 import korlibs.korge.fleks.utils.SerializeBase
-import korlibs.io.lang.format
 import korlibs.io.lang.substr
 import korlibs.util.*
 import kotlinx.serialization.SerialName
@@ -52,10 +51,10 @@ data class Appearance(
 
 /**
  * This component adds the control-specific-layer aspect to the entity.
- * I.e. when this component is added to an entity than that entity will control e.g. [Appearance], [PositionShape] or
+ * I.e. when this component is added to an entity than that entity will control e.g. [Appearance], [PositionShapeComponent] or
  * [InputTouchButton] aspects of a specific layer of a sprite.
  *
- * Hint: Usually [PositionShape] and [Offset] components are also added to that entity in order to change the layer
+ * Hint: Usually [PositionShapeComponent] and [Offset] components are also added to that entity in order to change the layer
  * position relatively to the [Sprite] position or pivot point.
  *
  * @param [spriteLayer] has to be set to the same layer name as in Aseprite to select that layer.

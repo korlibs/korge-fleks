@@ -18,17 +18,17 @@ import korlibs.korge.parallax.ImageDataViewEx
 class SpawnerSystem(
     private val korgeViewCache: KorgeViewCache = inject("KorgeViewCache")
 ) : IteratingSystem(
-    family { all(Spawner) },
+    family { all(SpawnerComponent) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
-        val spawner = entity[Spawner]
+        val spawner = entity[SpawnerComponent]
         if (spawner.interval > 0) {
             if (spawner.nextSpawnIn <= 0) {
                 var x: Float = 0.0f
                 var y: Float = 0.0f
                 var setPosition = false
-                entity.getOrNull(PositionShape)?.let {
+                entity.getOrNull(PositionShapeComponent)?.let {
                     x = it.x
                     y = it.y
                     setPosition = true
@@ -61,7 +61,7 @@ class SpawnerSystem(
                     }
                     // Directly set position
                     if (setPosition) newEntity.configure {
-                        it += PositionShape(x = xx, y = yy)
+                        it += PositionShapeComponent(x = xx, y = yy)
                     }
 
                     // Call the configured spawner function for configuring new objects
@@ -76,7 +76,7 @@ class SpawnerSystem(
             }
         }
         if (spawner.totalNumberOfObjects > 0 && spawner.numberOfObjectsSpawned >= spawner.totalNumberOfObjects) entity.configure {
-            entity -= Spawner
+            entity -= SpawnerComponent
         }
     }
 }

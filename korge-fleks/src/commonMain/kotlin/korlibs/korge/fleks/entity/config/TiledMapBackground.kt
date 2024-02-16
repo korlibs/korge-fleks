@@ -6,7 +6,7 @@ import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.assetmanager.ConfigBase
 import korlibs.korge.fleks.components.Appearance
 import korlibs.korge.fleks.components.Drawable
-import korlibs.korge.fleks.components.PositionShape
+import korlibs.korge.fleks.components.PositionShapeComponent
 import korlibs.korge.fleks.components.TiledMap
 import korlibs.korge.fleks.utils.Identifier
 
@@ -33,7 +33,7 @@ object TiledMapBackground {
             it += TiledMap(
                 assetName = tileMapConfig.assetName
             )
-            it += PositionShape(
+            it += PositionShapeComponent(
                 x = tileMapConfig.x,
                 y = tileMapConfig.y
             )

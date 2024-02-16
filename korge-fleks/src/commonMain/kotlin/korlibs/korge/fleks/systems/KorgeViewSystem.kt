@@ -6,7 +6,6 @@ import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.annotations.KorgeExperimental
-import korlibs.korge.bitmapfont.drawText
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.utils.KorgeViewCache
@@ -27,7 +26,7 @@ class KorgeViewSystem(
     private val korgeViewCache: KorgeViewCache = inject("KorgeViewCache"),
     private val korgeViewCacheDebug: KorgeViewCache = inject("KorgeViewCacheDebug")
 ) : IteratingSystem(
-    family { all(Appearance).any(Appearance, SwitchLayerVisibility, SpecificLayer, PositionShape, Offset) },
+    family { all(Appearance).any(Appearance, SwitchLayerVisibility, SpecificLayer, PositionShapeComponent, Offset) },
     interval = EachFrame
 ) {
     var updateViewsEnabled: Boolean = true
@@ -70,10 +69,10 @@ class KorgeViewSystem(
                 view.alpha = appearance.alpha.toDouble()
                 appearance.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
 
-                if (entity has PositionShape) {
-                    val positionShape = entity[PositionShape]
-                    view.x = (positionShape.x - offset.x).toDouble()
-                    view.y = (positionShape.y - offset.y).toDouble()
+                if (entity has PositionShapeComponent) {
+                    val positionShapeComponent = entity[PositionShapeComponent]
+                    view.x = (positionShapeComponent.x - offset.x).toDouble()
+                    view.y = (positionShapeComponent.y - offset.y).toDouble()
                 }
 
 //                println("[${entity.id}] Y: ${view.y} (Position: ${positionShape.y} delta: ${lastY - positionShape.y})")
@@ -95,10 +94,10 @@ class KorgeViewSystem(
             // TODO check for Keys to enable certain debug options
 //            if (!debugInfo.showName) return
 
-            val positionShape = entity[PositionShape]
+            val positionShapeComponent = entity[PositionShapeComponent]
 
             korgeViewCacheDebug[entity].let { debugView ->
-                debugView.xy(positionShape.x, positionShape.y)
+                debugView.xy(positionShapeComponent.x, positionShapeComponent.y)
 
                 @OptIn(KorgeExperimental::class)
                 (debugView as Container).renderableView {

@@ -38,7 +38,6 @@ data class TweenSequenceComponent(
 
     companion object : ComponentType<TweenSequenceComponent>()
 }
-
 interface TweenBase {
     var entity: Entity
     var delay: Float?
@@ -51,33 +50,33 @@ interface TweenBase {
  */
 @Serializable @SerialName("SpawnNewTweenSequence")
 data class SpawnNewTweenSequence(
-    val tweens: List<TweenBase> = listOf(),      // tween objects which contain entity and its properties to be animated in sequence
+    val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in sequence
 
-    override var entity: Entity = invalidEntity, // not used
+    override var entity: Entity = invalidEntity,  // not used
     override var delay: Float? = null,
     override var duration: Float? = null,
     @Serializable(with = EasingSerializer::class)
-    override var easing: Easing? = null          // not used
+    override var easing: Easing? = null           // not used
 ) : TweenBase
 
 @Serializable @SerialName("ParallelTweens")
 data class ParallelTweens(
-    val tweens: List<TweenBase> = listOf(),           // tween objects which contain entity and its properties to be animated in parallel
+    val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in parallel
 
-    override var entity: Entity = invalidEntity,      // not used here
-    override var delay: Float? = 0f,                  // in seconds
-    override var duration: Float? = 0f,               // in seconds
+    override var entity: Entity = invalidEntity,  // not used here
+    override var delay: Float? = 0f,              // in seconds
+    override var duration: Float? = 0f,           // in seconds
     @Serializable(with = EasingSerializer::class)
-    override var easing: Easing? = Easing.LINEAR      // function to change the properties
+    override var easing: Easing? = Easing.LINEAR  // function to change the properties
 ) : TweenBase
 
 @Serializable @SerialName("TweenSequence.Wait")
 data class Wait(
-    override var entity: Entity = invalidEntity, // not used
-    override var delay: Float? = null,           // Not used
+    override var entity: Entity = invalidEntity,  // not used
+    override var delay: Float? = null,            // Not used
     override var duration: Float? = 0f,
     @Serializable(with = EasingSerializer::class)
-    override var easing: Easing? = null          // not used
+    override var easing: Easing? = null           // not used
 ) : TweenBase
 
 
@@ -89,17 +88,17 @@ data class DeleteEntity(
     val healthCounter: Int = 0,            // set healthCounter to zero to delete the entity immediately
 
     override var entity: Entity,
-    override var delay: Float? = null,
-    override var duration: Float? = 0f,  // not used - 0f for immediately
+    override var delay: Float? = null,     // not used
+    override var duration: Float? = null,  // not used
     @Serializable(with = EasingSerializer::class)
-    override var easing: Easing? = null  // not used
+    override var easing: Easing? = null    // not used
 ) : TweenBase
 
 @Serializable @SerialName("TweenSequence.SpawnEntity")
 data class SpawnEntity(
     var config: Identifier,             // name of config for configuring spawned entity
     var function: Identifier,           // name of function which configures the spawned entity
-    var x: Float = 0.0f,                 // position where entity will be spawned
+    var x: Float = 0.0f,                // position where entity will be spawned
     var y: Float = 0.0f,
 
     override var entity: Entity = invalidEntity, // when entity is not given (=invalidEntity) than it will be created

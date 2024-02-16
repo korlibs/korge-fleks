@@ -15,15 +15,15 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("PositionShape")
-data class PositionShape(
+data class PositionShapeComponent(
     var initialized: Boolean = false,
     var x: Float = 0.0f,
     var y: Float = 0.0f,
     var width: Float = 0.0f,
     var height: Float = 0.0f,
-    ) : Component<PositionShape>, SerializeBase {
-    override fun type(): ComponentType<PositionShape> = PositionShape
-    companion object : ComponentType<PositionShape>()
+    ) : Component<PositionShapeComponent>, SerializeBase {
+    override fun type(): ComponentType<PositionShapeComponent> = PositionShapeComponent
+    companion object : ComponentType<PositionShapeComponent>()
 }
 
 @Serializable

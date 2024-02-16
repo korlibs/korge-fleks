@@ -43,7 +43,7 @@ object TextAndLogos {
         val logoConfig = AssetStore.getEntityConfig<LogoConfig>(config.name)
         entity.configure { entity ->
             // Make sure we have position component
-            entity.getOrAdd(PositionShape) { PositionShape() }
+            entity.getOrAdd(PositionShapeComponent) { PositionShapeComponent() }
 
             logoConfig.logoName?.let {
                 entity.getOrAdd(Sprite) { Sprite() }.also {
@@ -57,7 +57,7 @@ object TextAndLogos {
                 }
             }
 
-            entity += PositionShape()
+            entity += PositionShapeComponent()
             entity.getOrAdd(Layout) { Layout() }.also {
                 it.centerX = logoConfig.centerX
                 it.centerY = logoConfig.centerY
@@ -90,7 +90,7 @@ object TextAndLogos {
                 it.spriteLayer = layerConfig.layerName
                 it.parentEntity = layerConfig.parentEntity
             }
-            entity.getOrAdd(PositionShape) { PositionShape() }  // x, y will be set to view in SpecificLayer hook function
+            entity.getOrAdd(PositionShapeComponent) { PositionShapeComponent() }  // x, y will be set to view in SpecificLayer hook function
             entity.getOrAdd(Offset) { Offset() }.also {
                 it.x = layerConfig.offsetX
                 it.y = layerConfig.offsetY

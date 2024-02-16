@@ -10,8 +10,8 @@ import korlibs.korge.fleks.components.*
  */
 class PositionSystem : IteratingSystem(
     family {
-        all(PositionShape)  // Position component absolutely needed for movement of entity objects
-        any(PositionShape, Motion, ParallaxMotion, Rigidbody, SubEntities)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
+        all(PositionShapeComponent)  // Position component absolutely needed for movement of entity objects
+        any(PositionShapeComponent, Motion, ParallaxMotion, Rigidbody, SubEntities)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
     },
     interval = EachFrame
 ) {
@@ -20,7 +20,7 @@ class PositionSystem : IteratingSystem(
     val deltaY: Float = 0.0f
 
     override fun onTickEntity(entity: Entity) {
-        val positionShape = entity[PositionShape]
+        val positionShapeComponent = entity[PositionShapeComponent]
 
         if (entity has Rigidbody && entity has Motion) {
             // Entity has a rigidbody - that means the movement will be calculated depending on it
@@ -33,18 +33,18 @@ class PositionSystem : IteratingSystem(
         if (entity has Motion) {
             val motion = entity[Motion]
             // s(t) = a/2 * t^2 + v * t + s(t-1)
-            positionShape.x = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityX * deltaTime + positionShape.x
-            positionShape.y = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityY * deltaTime + positionShape.y
+            positionShapeComponent.x = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityX * deltaTime + positionShapeComponent.x
+            positionShapeComponent.y = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityY * deltaTime + positionShapeComponent.y
         }
 
         if (entity has ParallaxMotion) {
             val motion = entity[ParallaxMotion]
             // s(t) = v * t + s(t-1)
             if (motion.isScrollingHorizontally) {
-                positionShape.x = ((deltaX * motion.speedFactor) + (motion.selfSpeedX * motion.speedFactor)) * deltaTime + positionShape.x
+                positionShapeComponent.x = ((deltaX * motion.speedFactor) + (motion.selfSpeedX * motion.speedFactor)) * deltaTime + positionShapeComponent.x
                 // TODO get height of parallax background and scroll Y per deltaY [0..1] inside of height
             } else {
-                positionShape.y = ((deltaY * motion.speedFactor) + (motion.selfSpeedY * motion.speedFactor)) * deltaTime + positionShape.y
+                positionShapeComponent.y = ((deltaY * motion.speedFactor) + (motion.selfSpeedY * motion.speedFactor)) * deltaTime + positionShapeComponent.y
                 // TODO same as above for X
             }
         }
@@ -52,9 +52,9 @@ class PositionSystem : IteratingSystem(
         if (entity has SubEntities && entity[SubEntities].moveWithParent) {
             entity[SubEntities].entities.forEach {
                 val subEntity = it.value
-                subEntity.getOrNull(PositionShape)?.let { subEntityPosition ->
-                    subEntityPosition.x = positionShape.x
-                    subEntityPosition.y = positionShape.y
+                subEntity.getOrNull(PositionShapeComponent)?.let { subEntityPosition ->
+                    subEntityPosition.x = positionShapeComponent.x
+                    subEntityPosition.y = positionShapeComponent.y
                 }
             }
         }

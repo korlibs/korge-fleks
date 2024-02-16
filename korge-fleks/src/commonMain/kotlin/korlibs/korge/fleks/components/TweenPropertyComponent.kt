@@ -38,41 +38,41 @@ data class TweenPropertyComponent (
     companion object {
         // TODO update unit test for this mapping from enum to here
 
-        val AnimateSpriteIsPlaying = TweenProperty.SpriteIsPlaying.type
-        val AnimateSpriteForwardDirection = TweenProperty.SpriteForwardDirection.type
-        val AnimateSpriteLoop = TweenProperty.SpriteLoop.type
-        val AnimateSpriteDestroyOnPlayingFinished = TweenProperty.SpriteDestroyOnPlayingFinished.type
-        val AnimateSpriteAnimName = TweenProperty.SpriteAnimName.type
+        val TweenSpriteIsPlaying = TweenProperty.SpriteIsPlaying.type
+        val TweenSpriteForwardDirection = TweenProperty.SpriteForwardDirection.type
+        val TweenSpriteLoop = TweenProperty.SpriteLoop.type
+        val TweenSpriteDestroyOnPlayingFinished = TweenProperty.SpriteDestroyOnPlayingFinished.type
+        val TweenSpriteAnimName = TweenProperty.SpriteAnimName.type
 
         val TweenAppearanceAlphaComponent = TweenProperty.AppearanceAlpha.type
-        val AnimateAppearanceTint = TweenProperty.AppearanceTint.type
-        val AnimateAppearanceVisible = TweenProperty.AppearanceVisible.type
+        val TweenAppearanceTint = TweenProperty.AppearanceTint.type
+        val TweenAppearanceVisible = TweenProperty.AppearanceVisible.type
 
-        val AnimateSpawnerNumberOfObjects = TweenProperty.SpawnerNumberOfObjects.type
-        val AnimateSpawnerInterval = TweenProperty.SpawnerInterval.type
-        val AnimateSpawnerTimeVariation = TweenProperty.SpawnerTimeVariation.type
-        val AnimateSpawnerPositionVariation = TweenProperty.SpawnerPositionVariation.type
+        val TweenSpawnerNumberOfObjects = TweenProperty.SpawnerNumberOfObjects.type
+        val TweenSpawnerInterval = TweenProperty.SpawnerInterval.type
+        val TweenSpawnerTimeVariation = TweenProperty.SpawnerTimeVariation.type
+        val TweenSpawnerPositionVariation = TweenProperty.SpawnerPositionVariation.type
 
-        val AnimateLifeCycleHealthCounter = TweenProperty.LifeCycleHealthCounter.type
+        val TweenLifeCycleHealthCounter = TweenProperty.LifeCycleHealthCounter.type
 
         val TweenPositionShapeXComponent = TweenProperty.PositionShapeX.type
         val TweenPositionShapeYComponent = TweenProperty.PositionShapeY.type
 
-        val AnimateOffsetX = TweenProperty.OffsetX.type
-        val AnimateOffsetY = TweenProperty.OffsetY.type
+        val TweenOffsetX = TweenProperty.OffsetX.type
+        val TweenOffsetY = TweenProperty.OffsetY.type
 
-        val AnimateLayoutCenterX = TweenProperty.LayoutCenterX.type
-        val AnimateLayoutCenterY = TweenProperty.LayoutCenterY.type
-        val AnimateLayoutOffsetX = TweenProperty.LayoutOffsetX.type
-        val AnimateLayoutOffsetY = TweenProperty.LayoutOffsetY.type
+        val TweenLayoutCenterX = TweenProperty.LayoutCenterX.type
+        val TweenLayoutCenterY = TweenProperty.LayoutCenterY.type
+        val TweenLayoutOffsetX = TweenProperty.LayoutOffsetX.type
+        val TweenLayoutOffsetY = TweenProperty.LayoutOffsetY.type
 
-        val AnimateSwitchLayerVisibilityOnVariance = TweenProperty.SwitchLayerVisibilityOnVariance.type
-        val AnimateSwitchLayerVisibilityOffVariance = TweenProperty.SwitchLayerVisibilityOffVariance.type
+        val TweenSwitchLayerVisibilityOnVariance = TweenProperty.SwitchLayerVisibilityOnVariance.type
+        val TweenSwitchLayerVisibilityOffVariance = TweenProperty.SwitchLayerVisibilityOffVariance.type
 
-        val AnimateSoundStartTrigger = TweenProperty.SoundStartTrigger.type
-        val AnimateSoundStopTrigger = TweenProperty.SoundStopTrigger.type
-        val AnimateSoundPosition = TweenProperty.SoundPosition.type
-        val AnimateSoundVolume = TweenProperty.SoundVolume.type
+        val TweenSoundStartTrigger = TweenProperty.SoundStartTrigger.type
+        val TweenSoundStopTrigger = TweenProperty.SoundStopTrigger.type
+        val TweenSoundPosition = TweenProperty.SoundPosition.type
+        val TweenSoundVolume = TweenProperty.SoundVolume.type
 
         val ExecuteConfigureFunction = TweenProperty.ConfigureFunction.type
     }

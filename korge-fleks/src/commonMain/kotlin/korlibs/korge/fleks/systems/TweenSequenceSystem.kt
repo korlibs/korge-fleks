@@ -11,13 +11,14 @@ import korlibs.math.interpolation.Easing
 /**
  * This system creates Animate... components on entities which should be animated according to the game config.
  */
-class TweenScriptSystem : IteratingSystem(
+class TweenSequenceSystem : IteratingSystem(
     family { all(TweenSequenceComponent) },
     interval = EachFrame
 ) {
     // Internally used variables in createAnimateComponent function
     private lateinit var currentTween: TweenBase
     private lateinit var currentParentTween: ParallelTweens
+    private val defaultTweenValues = ParallelTweens() // <-- gives default values for delay, duration and easing
 
     /**
      * When the system is called it checks for the [TweenSequenceComponent] component if the waitTime is over.
@@ -42,35 +43,35 @@ class TweenScriptSystem : IteratingSystem(
      * Finally, it checks if the animation script has reached the end. If so it removes the AnimationScript component again from the entity.
      */
     override fun onTickEntity(entity: Entity) {
-        val animScript = entity[TweenSequenceComponent]
+        val tweenSequence = entity[TweenSequenceComponent]
 
-        if (animScript.timeProgress >= animScript.waitTime) {
-            animScript.timeProgress = 0f
+        if (tweenSequence.timeProgress >= tweenSequence.waitTime) {
+            tweenSequence.timeProgress = 0f
 
             val currentTween: TweenBase =
-                if (animScript.index >= animScript.tweens.size) {
-                    // No further tweens -> destroy TweenSequence entity
-                    world -= entity
+                if (tweenSequence.index >= tweenSequence.tweens.size) {
+                    // No further tweens -> remove TweenSequence component
+                    entity.configure { it -= TweenSequenceComponent }
                     return
-                } else if (animScript.executed) {
+                } else if (tweenSequence.executed) {
                     // Tween was executed lately -> read next tween from the script
-                    animScript.executed = false
-                    animScript.index++
+                    tweenSequence.executed = false
+                    tweenSequence.index++
                     // Check if script of tweens has finished
-                    if (animScript.index >= animScript.tweens.size) {
-                        world -= entity
+                    if (tweenSequence.index >= tweenSequence.tweens.size) {
+                        entity.configure { it -= TweenSequenceComponent }
                         return
                     }
                     // check for initial delay of new tween
-                    val currentTween = animScript.tweens[animScript.index]
-                    animScript.waitTime = currentTween.delay ?: 0f
-                    if (animScript.waitTime != 0f)
+                    val currentTween = tweenSequence.tweens[tweenSequence.index]
+                    tweenSequence.waitTime = currentTween.delay ?: 0f
+                    if (tweenSequence.waitTime != 0f)
                         return
                     currentTween
-                } else animScript.tweens[animScript.index]
+                } else tweenSequence.tweens[tweenSequence.index]
 
-            animScript.executed = true
-            animScript.waitTime = currentTween.duration ?: 0f
+            tweenSequence.executed = true
+            tweenSequence.waitTime = currentTween.duration ?: 0f
 
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
@@ -79,14 +80,17 @@ class TweenScriptSystem : IteratingSystem(
                 is ParallelTweens -> {
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
-                            // Tween has an own delay -> spawn a new TweenSequence for it
+                            // Tween has its own delay -> spawn a new TweenSequence for it
                             world.entity {
                                 it += TweenSequenceComponent(
                                     tweens = listOf(
+                                        // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
                                         tween.also { tween ->
                                             if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
                                             if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
-                                        }
+                                        },
+                                        // After finish the tween delete the entity again - it is not needed anymore
+                                        DeleteEntity(entity = it)
                                     )
                                 )
                             }
@@ -96,13 +100,13 @@ class TweenScriptSystem : IteratingSystem(
                         }
                     }
                 }
+                // In case of "Wait" the duration was already set above
                 else -> {
-                    if (currentTween !is Wait)
-                        checkTween(currentTween, ParallelTweens())  // ParallelTweens() as 2nd parameter gives default values for delay, duration and easing
+                    if (currentTween !is Wait) checkTween(currentTween, defaultTweenValues)
                 }
             }
         }
-        else animScript.timeProgress += deltaTime
+        else tweenSequence.timeProgress += deltaTime
     }
 
     private fun checkTween(tween: TweenBase, parentTween: ParallelTweens) {
@@ -116,7 +120,7 @@ class TweenScriptSystem : IteratingSystem(
                 ) }
                 tween.visible?.let { value -> createAnimateComponent(AppearanceVisible, value) }
             }
-            is TweenPositionShape -> tween.entity.getOrError(PositionShape).let { start ->
+            is TweenPositionShape -> tween.entity.getOrError(PositionShapeComponent).let { start ->
                 tween.x?.let { end -> createAnimateComponent(PositionShapeX, start.x, end - start.x) }
                 tween.y?.let { end -> createAnimateComponent(PositionShapeY, start.y, end - start.y) }
             }
@@ -141,7 +145,7 @@ class TweenScriptSystem : IteratingSystem(
                 tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
                 tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
             }
-            is TweenSpawner -> tween.entity.getOrError(Spawner).let { start ->
+            is TweenSpawner -> tween.entity.getOrError(SpawnerComponent).let { start ->
                 tween.numberOfObjects?.let { end -> createAnimateComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }
                 tween.interval?.let { end -> createAnimateComponent(SpawnerInterval, start.interval, end - start.interval) }
                 tween.timeVariation?.let { end -> createAnimateComponent(SpawnerTimeVariation, start.timeVariation, end - start.timeVariation) }
@@ -153,13 +157,14 @@ class TweenScriptSystem : IteratingSystem(
                 tween.position?.let { end -> createAnimateComponent(SoundPosition, start.position, end - start.position) }
                 tween.volume?.let { end -> createAnimateComponent(SoundVolume, start.volume, end - start.volume) }
             }
-            // A special type of TweenSpawner which directly changes the Spawner component
+            // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
             is SpawnEntity -> {
                 val spawnedEntity = if (tween.entity.isInvalidEntity()) world.entity() else tween.entity
                 Invokable.invoke(tween.function, world, spawnedEntity, tween.config)
             }
-            // A special type of TweenLifeCycle (to be created if needed) which directly changes the LifeCycle component
+            // Directly deletes the given entity from the tween
             is DeleteEntity -> tween.entity.configure { entityToDelete -> world -= entityToDelete }
+            // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> Invokable.invoke(tween.function, world, tween.entity, tween.config)
             else -> error("AnimationScriptSystem: Animate function for tween $tween not implemented!")
         }

@@ -24,14 +24,14 @@ import korlibs.korge.view.View
  * with the [Sprite] data (graphics).
  * - [Appearance] (optional) : Contains values for [visibility][Appearance.visible], [alpha][Appearance.alpha] and
  * [color tint][Appearance.tint].
- * - [PositionShape] (optional) : Contains the [x][PositionShape.x] and [y][PositionShape.y] position of the
+ * - [PositionShapeComponent] (optional) : Contains the [x][PositionShapeComponent.x] and [y][PositionShapeComponent.y] position of the
  * layer relative to the [Sprite].
  * - [InputTouchButton] (optional) : Contains the [Invokable] functions when the player touches that layer on the display.
  *
  * One of the optional components must be added to the specific-layer entity. Otherwise, the [SpecificLayer] component
  * will be useless.
  */
-fun specificLayerFamily(): Family = World.family { all(SpecificLayer).any(SpecificLayer, PositionShape, Appearance, InputTouchButton, Offset) }
+fun specificLayerFamily(): Family = World.family { all(SpecificLayer).any(SpecificLayer, PositionShapeComponent, Appearance, InputTouchButton, Offset) }
 
 val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     val world = this
@@ -80,7 +80,7 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     }
 
     // Save current position of layer into PositionShape component
-    entity.getOrNull(PositionShape)?.let {
+    entity.getOrNull(PositionShapeComponent)?.let {
         if (!it.initialized) {
             it.x = view.x.toFloat()
             it.y = view.y.toFloat()

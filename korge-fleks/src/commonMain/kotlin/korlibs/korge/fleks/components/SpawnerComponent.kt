@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("Spawner")
-data class Spawner(
+data class SpawnerComponent(
     // Config for spawner
     var numberOfObjects: Int = 1,                  // The spawner will generate this number of object when triggered after interval time
     var interval: Int = 1,                         // 0 - disabled, 1 - every frame, 2 - every second frame, 3 - every third frame,...
@@ -25,7 +25,7 @@ data class Spawner(
     // internal state
     var nextSpawnIn: Int = 0,
     var numberOfObjectsSpawned: Int = 0
-) : Component<Spawner>, SerializeBase {
-    override fun type(): ComponentType<Spawner> = Spawner
-    companion object : ComponentType<Spawner>()
+) : Component<SpawnerComponent>, SerializeBase {
+    override fun type(): ComponentType<SpawnerComponent> = SpawnerComponent
+    companion object : ComponentType<SpawnerComponent>()
 }

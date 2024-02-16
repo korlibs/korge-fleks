@@ -78,7 +78,7 @@ object ParallaxBackground {
 
         entity.configure {
             it += Parallax(config = parallaxConfig.assetName)
-            it += PositionShape()
+            it += PositionShapeComponent()
             it += Drawable(drawOnLayer = parallaxConfig.drawOnLayer)
             it += Appearance(alpha = 1.0f)
             // All sub-entity IDs are here for quick lookup by its layer name and for recycling of the overall background entity object
@@ -150,7 +150,7 @@ object ParallaxBackground {
                 it.spriteLayer = layerName
                 it.parallaxPlaneLine = layerLine
             }
-            entity.getOrAdd(PositionShape) { PositionShape() }
+            entity.getOrAdd(PositionShapeComponent) { PositionShapeComponent() }
             entity.getOrAdd(Appearance) { Appearance() }
             speedFactor?.let { speedFactor ->
                 entity.getOrAdd(ParallaxMotion) { ParallaxMotion() }.also {

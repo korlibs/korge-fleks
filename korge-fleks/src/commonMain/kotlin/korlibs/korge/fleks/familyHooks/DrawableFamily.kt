@@ -31,7 +31,7 @@ import korlibs.korge.view.align.centerYOnStage
  * created and added to the [KorgeViewSystem]. This is done in [onDrawableFamilyAdded] family hook here rather than in
  * component hook because we are sure that all needed components are set up before in the [World].
  */
-fun drawableFamily(): Family = World.family { all(Drawable, PositionShape).any(Drawable, Appearance, InputTouchButton) }
+fun drawableFamily(): Family = World.family { all(Drawable, PositionShapeComponent).any(Drawable, Appearance, InputTouchButton) }
 
 val onDrawableFamilyAdded: FamilyHook = { entity ->
     val world = this
@@ -39,7 +39,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
     val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
     val drawable = entity[Drawable]
-    val positionShape = entity[PositionShape]
+    val positionShapeComponent = entity[PositionShapeComponent]
     val width: Float
     val height: Float
 
@@ -146,12 +146,16 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         }
     }
 
+    // Update position of view with initial position
+    view.x = positionShapeComponent.x.toDouble()
+    view.y = positionShapeComponent.y.toDouble()
+
     if (entity has Layout) {
         val layout = entity[Layout]
         if (layout.centerX) view.centerXOnStage()
         if (layout.centerY) view.centerYOnStage()
-        positionShape.x = (view.x + layout.offsetX).toFloat()  // view is needed otherwise the Sprite System will not take possible center values from above
-        positionShape.y = (view.y + layout.offsetY).toFloat()
+        positionShapeComponent.x = (view.x + layout.offsetX).toFloat()  // view is needed otherwise the Sprite System will not take possible center values from above
+        positionShapeComponent.y = (view.y + layout.offsetY).toFloat()
     }
 
     // Set properties in TouchInput when touch input was recognized
@@ -177,8 +181,8 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         }
     }
 
-    positionShape.width = width
-    positionShape.height = height
+    positionShapeComponent.width = width
+    positionShapeComponent.height = height
 }
 
 val onDrawableFamilyRemoved: FamilyHook = { entity ->
