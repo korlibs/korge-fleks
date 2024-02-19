@@ -79,15 +79,13 @@ class AnimatePositionShapeSystem : IteratingSystem(
     }
 }
 
-class AnimateSpriteSystem(
-    private val korgeViewCache: KorgeViewCache = inject("KorgeViewCache")
-) : IteratingSystem(
+class AnimateSpriteSystem : IteratingSystem(
     family { all(Sprite).any(TweenSpriteAnimName, TweenSpriteIsPlaying, TweenSpriteForwardDirection, TweenSpriteLoop, TweenSpriteDestroyOnPlayingFinished) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
         val sprite = entity[Sprite]
-        val imageView = korgeViewCache[entity] as ImageDataViewEx
+        val imageView = KorgeViewCache[entity] as ImageDataViewEx
         updateProperty(entity, TweenSpriteAnimName, sprite::animationName) { imageView.animation = sprite.animationName }
         updateProperty(entity, TweenSpriteIsPlaying, sprite::isPlaying)
         updateProperty(entity, TweenSpriteForwardDirection, sprite::forwardDirection)

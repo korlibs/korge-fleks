@@ -35,17 +35,16 @@ fun specificLayerFamily(): Family = World.family { all(SpecificLayer).any(Specif
 
 val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     val world = this
-    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
     // Need to get parent entity to search for view object which contains the sprite layer
     val specificLayer = entity[SpecificLayer]
 
     val view: View = if (specificLayer.parallaxPlaneLine != null) {
-        val pView = korgeViewCache[specificLayer.parentEntity]
+        val pView = KorgeViewCache[specificLayer.parentEntity]
         pView as ParallaxDataView
         pView.parallaxLines[specificLayer.parallaxPlaneLine!!] ?: error("onSpecificLayerFamilyAdded: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
     } else if (specificLayer.spriteLayer != null) {
-        korgeViewCache.getLayer(specificLayer.parentEntity, specificLayer.spriteLayer!!)
+        KorgeViewCache.getLayer(specificLayer.parentEntity, specificLayer.spriteLayer!!)
     } else {
         error("onSpecificLayerFamilyAdded: No sprite layer name or parallax plane line number set for entity '${entity.id}'!")
     }
@@ -88,9 +87,9 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
         }
     }
 
-    korgeViewCache.addOrUpdate(entity, view)
+    KorgeViewCache.addOrUpdate(entity, view)
 }
 
 val onSpecificLayerFamilyRemoved: FamilyHook = { entity ->
-    inject<KorgeViewCache>("KorgeViewCache").remove(entity)
+    KorgeViewCache.remove(entity)
 }

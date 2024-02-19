@@ -33,11 +33,9 @@ object ParallaxBackground {
     private val configureParallaxLayersFct = fun(world: World, entity: Entity, assetConfig: Identifier): Entity = with(world) {
         println("Re-configure attached parallax Layers")
 
-        val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
-
         val config = AssetStore.getBackground(assetConfig.name).config
         val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
-        val view = korgeViewCache[entity] as ParallaxDataView
+        val view = KorgeViewCache[entity] as ParallaxDataView
         val layerMap = entity[SubEntities]
 
         config.parallaxPlane?.let { planeConf ->
@@ -47,7 +45,7 @@ object ParallaxBackground {
 
             // Update only attached layers because they might change their speed depending on their position on the ground plane
             planeConf.attachedLayersFront?.fastForEach { conf ->
-                val layer = korgeViewCache.getLayer(entity, conf.name)
+                val layer = KorgeViewCache.getLayer(entity, conf.name)
                 configureSubEntityForLayer(
                     world = world,
                     entity = layerMap[conf.name],
@@ -58,7 +56,7 @@ object ParallaxBackground {
                 )
             }
             planeConf.attachedLayersRear?.fastForEach { conf ->
-                val layer = korgeViewCache.getLayer(entity, conf.name)
+                val layer = KorgeViewCache.getLayer(entity, conf.name)
                 configureSubEntityForLayer(
                     world = world,
                     entity = layerMap[conf.name],
@@ -73,7 +71,6 @@ object ParallaxBackground {
     }
 
     private val configureParallaxBackgroundFct = fun(world: World, entity: Entity, config: Identifier): Entity = with(world) {
-        val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
         val parallaxConfig = AssetStore.getEntityConfig<Config>(config.name)
 
         entity.configure {
@@ -86,7 +83,7 @@ object ParallaxBackground {
         }
 
         // Once the base ParallaxDataView is created with above base entity we can access it from the cache
-        val view = korgeViewCache[entity] as ParallaxDataView
+        val view = KorgeViewCache[entity] as ParallaxDataView
         val layerMap = entity[SubEntities]
 
         val config = AssetStore.getBackground(parallaxConfig.assetName.name).config
@@ -107,14 +104,14 @@ object ParallaxBackground {
             val selfSpeedX = if (isHorizontal) planeConf.selfSpeed else 0.0f
             val selfSpeedY = if (!isHorizontal) planeConf.selfSpeed else 0.0f
             planeConf.attachedLayersFront?.fastForEach { conf ->
-                val layer = korgeViewCache.getLayer(entity, conf.name)
+                val layer = KorgeViewCache.getLayer(entity, conf.name)
                 layerMap.entities[conf.name] = createSubEntityForLayer(world, entity, conf.name,
                     speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                     selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                     isHorizontal = isHorizontal)
             }
             planeConf.attachedLayersRear?.fastForEach { conf ->
-                val layer = korgeViewCache.getLayer(entity, conf.name)
+                val layer = KorgeViewCache.getLayer(entity, conf.name)
                 layerMap.entities[conf.name] = createSubEntityForLayer(world, entity, conf.name,
                     speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                     selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,

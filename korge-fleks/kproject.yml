@@ -10,4 +10,4 @@ dependencies:
 #- https://github.com/korlibs/korge-ldtk/tree/3cc31bddd707037084f8e0d764a9706cc99f0bfb/korge-ldtk
 - ../../korge-ldtk/korge-ldtk
 - https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
-targets: [jvm, android]
+targets: [jvm, js, android]

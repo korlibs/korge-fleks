@@ -36,7 +36,6 @@ fun drawableFamily(): Family = World.family { all(Drawable, PositionShapeCompone
 val onDrawableFamilyAdded: FamilyHook = { entity ->
     val world = this
     val layers = inject<HashMap<String, Container>>("Layers")
-    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
 
     val drawable = entity[Drawable]
     val positionShapeComponent = entity[PositionShapeComponent]
@@ -142,7 +141,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         null -> error("onDrawableFamilyAdded: Cannot add view for entity '${entity.id}' to layer '${drawable.drawOnLayer}'!")
         else -> {
             layer.addChild(view)
-            korgeViewCache.addOrUpdate(entity, view)
+            KorgeViewCache.addOrUpdate(entity, view)
         }
     }
 
@@ -186,7 +185,6 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 }
 
 val onDrawableFamilyRemoved: FamilyHook = { entity ->
-    val korgeViewCache = inject<KorgeViewCache>("KorgeViewCache")
-    (korgeViewCache.getOrNull(entity) ?: error("onDrawableFamilyRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[Drawable].drawOnLayer}'!")).removeFromParent()
-    korgeViewCache.remove(entity)
+    (KorgeViewCache.getOrNull(entity) ?: error("onDrawableFamilyRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[Drawable].drawOnLayer}'!")).removeFromParent()
+    KorgeViewCache.remove(entity)
 }

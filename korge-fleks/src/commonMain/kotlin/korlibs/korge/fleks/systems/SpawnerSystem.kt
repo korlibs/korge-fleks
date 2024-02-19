@@ -15,9 +15,7 @@ import korlibs.korge.parallax.ImageDataViewEx
  * It can be configured to periodically spawn entities until a total number of spawned objects is reached, or
  * it can also spawn an unlimited number of entities (run forever until it dies).
  */
-class SpawnerSystem(
-    private val korgeViewCache: KorgeViewCache = inject("KorgeViewCache")
-) : IteratingSystem(
+class SpawnerSystem : IteratingSystem(
     family { all(SpawnerComponent) },
     interval = EachFrame
 ) {
@@ -40,7 +38,7 @@ class SpawnerSystem(
                 }
                 entity.getOrNull(OffsetByFrameIndex)?.let {
                     // Get offset depending on current animation and frame index
-                    val currentFrameIndex = (korgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
+                    val currentFrameIndex = (KorgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
                     val animationName = it.entity.getOrNull(Sprite)?.animationName ?: ""
                     val offset = it.list[animationName]?.get(currentFrameIndex)
                         ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
