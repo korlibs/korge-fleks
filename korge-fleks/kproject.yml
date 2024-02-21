@@ -4,8 +4,8 @@ dependencies:
 - ../fleks
 - maven::common::org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2
 - maven::common::com.soywiz.korlibs.korge2:korge
-- https://github.com/korlibs/korge-parallax/tree/2f5fa9be09b52c343d9160fe29dc683aa86e22e8/korge-parallax
-#- ../../korge-parallax/korge-parallax
+#- https://github.com/korlibs/korge-parallax/tree/2f5fa9be09b52c343d9160fe29dc683aa86e22e8/korge-parallax
+- ../../korge-parallax/korge-parallax
 - ../../korge-asset-manager/korge-asset-manager
 #- https://github.com/korlibs/korge-ldtk/tree/3cc31bddd707037084f8e0d764a9706cc99f0bfb/korge-ldtk
 - ../../korge-ldtk/korge-ldtk

@@ -39,8 +39,8 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
     val drawable = entity[Drawable]
     val positionShapeComponent = entity[PositionShapeComponent]
-    val width: Float
-    val height: Float
+    val width: Double
+    val height: Double
 
     val view: View = when {
         entity has Sprite -> {
@@ -56,9 +56,9 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             if (sprite.isPlaying) view.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
 
             width =
-                view.data?.width?.toFloat() ?: error("onDrawableFamilyAdded: Cannot get width of sprite ImageAnimView!")
+                view.data?.width?.toDouble() ?: error("onDrawableFamilyAdded: Cannot get width of sprite ImageAnimView!")
             height =
-                view.data?.height?.toFloat() ?: error("onDrawableFamilyAdded: Cannot get height of sprite ImageAnimView!")
+                view.data?.height?.toDouble() ?: error("onDrawableFamilyAdded: Cannot get height of sprite ImageAnimView!")
 
             view
         }
@@ -80,8 +80,8 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
                 world = ldtkWorld,
                 level = ldtkLevel
             ))
-            width = ldtkLevel.pxWid.toFloat()
-            height = ldtkLevel.pxHei.toFloat()
+            width = ldtkLevel.pxWid.toDouble()
+            height = ldtkLevel.pxHei.toDouble()
             view
         }
 
@@ -92,16 +92,16 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
             when (parallaxConfig.config.mode) {
                 ParallaxConfig.Mode.HORIZONTAL_PLANE -> {
-                    width = parallaxConfig.config.parallaxPlane?.size?.width?.toFloat() ?: 0.0f
-                    height = view.parallaxLayerSize.toFloat()
+                    width = parallaxConfig.config.parallaxPlane?.size?.width?.toDouble() ?: 0.0
+                    height = view.parallaxLayerSize.toDouble()
                 }
                 ParallaxConfig.Mode.VERTICAL_PLANE -> {
-                    width = view.parallaxLayerSize.toFloat()
-                    height = parallaxConfig.config.parallaxPlane?.size?.height?.toFloat() ?: 0.0f
+                    width = view.parallaxLayerSize.toDouble()
+                    height = parallaxConfig.config.parallaxPlane?.size?.height?.toDouble() ?: 0.0
                 }
                 else -> {
-                    width = parallaxConfig.config.parallaxPlane?.size?.width?.toFloat() ?: 0.0f
-                    height = parallaxConfig.config.parallaxPlane?.size?.height?.toFloat() ?: 0.0f
+                    width = parallaxConfig.config.parallaxPlane?.size?.width?.toDouble() ?: 0.0
+                    height = parallaxConfig.config.parallaxPlane?.size?.height?.toDouble() ?: 0.0
                 }
             }
 
@@ -122,8 +122,8 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
                 verticalAlign = VerticalAlign.MIDDLE
                 horizontalAlign = HorizontalAlign.CENTER
             }
-            width = view.width.toFloat()
-            height = view.height.toFloat()
+            width = view.width
+            height = view.height
 
             view
         }
@@ -146,15 +146,15 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
     }
 
     // Update position of view with initial position
-    view.x = positionShapeComponent.x.toDouble()
+    view.x = positionShapeComponent.x
     view.y = positionShapeComponent.y.toDouble()
 
     if (entity has Layout) {
         val layout = entity[Layout]
         if (layout.centerX) view.centerXOnStage()
         if (layout.centerY) view.centerYOnStage()
-        positionShapeComponent.x = (view.x + layout.offsetX).toFloat()  // view is needed otherwise the Sprite System will not take possible center values from above
-        positionShapeComponent.y = (view.y + layout.offsetY).toFloat()
+        positionShapeComponent.x = view.x + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
+        positionShapeComponent.y = view.y + layout.offsetY
     }
 
     // Set properties in TouchInput when touch input was recognized

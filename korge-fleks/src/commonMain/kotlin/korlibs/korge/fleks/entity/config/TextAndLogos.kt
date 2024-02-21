@@ -29,9 +29,9 @@ object TextAndLogos {
 
     data class LogoLayerConfig(
         var layerName: String = "",
-        var offsetX: Float = 0.0f,
-        var offsetY: Float = 0.0f,
-        val alpha: Float = 0.0f,
+        var offsetX: Double = 0.0,
+        var offsetY: Double = 0.0,
+        val alpha: Float = 0f,
         var parentEntity: Entity = invalidEntity
     ) : ConfigBase
 

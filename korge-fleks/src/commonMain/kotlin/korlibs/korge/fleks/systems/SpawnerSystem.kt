@@ -23,8 +23,8 @@ class SpawnerSystem : IteratingSystem(
         val spawner = entity[SpawnerComponent]
         if (spawner.interval > 0) {
             if (spawner.nextSpawnIn <= 0) {
-                var x: Float = 0.0f
-                var y: Float = 0.0f
+                var x = 0.0
+                var y = 0.0
                 var setPosition = false
                 entity.getOrNull(PositionShapeComponent)?.let {
                     x = it.x

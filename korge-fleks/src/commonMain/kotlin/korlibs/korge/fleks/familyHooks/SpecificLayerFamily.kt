@@ -81,8 +81,8 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     // Save current position of layer into PositionShape component
     entity.getOrNull(PositionShapeComponent)?.let {
         if (!it.initialized) {
-            it.x = view.x.toFloat()
-            it.y = view.y.toFloat()
+            it.x = view.x
+            it.y = view.y
             it.initialized = true
         }
     }

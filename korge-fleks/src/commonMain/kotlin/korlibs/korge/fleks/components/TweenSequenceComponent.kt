@@ -136,8 +136,8 @@ data class TweenAppearance(
 
 @Serializable @SerialName("TweenPositionShape")
 data class TweenPositionShape(
-    val x: Float? = null,
-    val y: Float? = null,
+    val x: Double? = null,
+    val y: Double? = null,
 
     override var entity: Entity,
     override var delay: Float? = null,
@@ -148,8 +148,8 @@ data class TweenPositionShape(
 
 @Serializable @SerialName("TweenOffset")
 data class TweenOffset(
-    val x: Float? = null,
-    val y: Float? = null,
+    val x: Double? = null,
+    val y: Double? = null,
 
     override var entity: Entity,
     override var delay: Float? = null,
@@ -162,8 +162,8 @@ data class TweenOffset(
 data class TweenLayout(
     val centerX: Boolean? = null,
     val centerY: Boolean? = null,
-    val offsetX: Float? = null,
-    val offsetY: Float? = null,
+    val offsetX: Double? = null,
+    val offsetY: Double? = null,
 
     override var entity: Entity,
     override var delay: Float? = null,

@@ -13,12 +13,12 @@ object FireAndDustEffect {
     data class Config(
         val assetName: String,
         val animationName: String,
-        val offsetX: Float = 0.0f,
-        val offsetY: Float = 0.0f,
-        val velocityX: Float = 0.0f,
-        val velocityY: Float = 0.0f,
-        val velocityVariationX: Float = 0.0f,
-        val velocityVariationY: Float = 0.0f,
+        val offsetX: Double = 0.0,
+        val offsetY: Double = 0.0,
+        val velocityX: Double = 0.0,
+        val velocityY: Double = 0.0,
+        val velocityVariationX: Double = 0.0,
+        val velocityVariationY: Double = 0.0,
         val drawOnLayer: String,
         val fadeOutDuration: Float = 0f
     ) : ConfigBase
@@ -37,10 +37,10 @@ object FireAndDustEffect {
             entity.getOrAdd(Motion) { Motion() }.also {
                 var velocityXX = effectConfig.velocityX
                 var velocityYY = effectConfig.velocityY
-                if (effectConfig.velocityVariationX != 0.0f) {
+                if (effectConfig.velocityVariationX != 0.0) {
                     velocityXX += (-effectConfig.velocityVariationX..effectConfig.velocityVariationX).random()
                 }
-                if (effectConfig.velocityVariationY != 0.0f) {
+                if (effectConfig.velocityVariationY != 0.0) {
                     velocityYY += (-effectConfig.velocityVariationY..effectConfig.velocityVariationY).random()
                 }
                 it.velocityX = velocityXX

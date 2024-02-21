@@ -17,10 +17,10 @@ import kotlinx.serialization.Serializable
 @SerialName("PositionShape")
 data class PositionShapeComponent(
     var initialized: Boolean = false,
-    var x: Float = 0.0f,
-    var y: Float = 0.0f,
-    var width: Float = 0.0f,
-    var height: Float = 0.0f,
+    var x: Double = 0.0,
+    var y: Double = 0.0,
+    var width: Double = 0.0,
+    var height: Double = 0.0,
     ) : Component<PositionShapeComponent>, SerializeBase {
     override fun type(): ComponentType<PositionShapeComponent> = PositionShapeComponent
     companion object : ComponentType<PositionShapeComponent>()
@@ -29,8 +29,8 @@ data class PositionShapeComponent(
 @Serializable
 @SerialName("Offset")
 data class Offset(
-    var x: Float = 0.0f,
-    var y: Float = 0.0f
+    var x: Double = 0.0,
+    var y: Double = 0.0
 ) : Component<Offset>, SerializeBase {
     override fun type(): ComponentType<Offset> = Offset
     companion object : ComponentType<Offset>()
@@ -49,17 +49,17 @@ data class OffsetByFrameIndex(
 @Serializable
 @SerialName("PositionShape.Point")
 data class Point(
-    var x: Float = 0.0f,
-    var y: Float = 0.0f
+    var x: Double = 0.0,
+    var y: Double = 0.0
 ) : SerializeBase
 
 @Serializable
 @SerialName("Motion")
 data class Motion(
-    var accelX: Float = 0.0f,
-    var accelY: Float = 0.0f,
-    var velocityX: Float = 0.0f,
-    var velocityY: Float = 0.0f
+    var accelX: Double = 0.0,
+    var accelY: Double = 0.0,
+    var velocityX: Double = 0.0,
+    var velocityY: Double = 0.0
 ) : Component<Motion>, SerializeBase {
     override fun type(): ComponentType<Motion> = Motion
     companion object : ComponentType<Motion>()
@@ -69,9 +69,9 @@ data class Motion(
 @SerialName("ParallaxMotion")
 data class ParallaxMotion(
     var isScrollingHorizontally: Boolean = true,
-    var speedFactor: Float = 1.0f,  // TODO put this into assets because it is static and does not change  ????
-    var selfSpeedX: Float = 0.0f,
-    var selfSpeedY: Float = 0.0f
+    var speedFactor: Double = 1.0,  // TODO put this into assets because it is static and does not change  ????
+    var selfSpeedX: Double = 0.0,
+    var selfSpeedY: Double = 0.0
 ) : Component<ParallaxMotion>, SerializeBase {
     override fun type(): ComponentType<ParallaxMotion> = ParallaxMotion
     companion object : ComponentType<ParallaxMotion>()

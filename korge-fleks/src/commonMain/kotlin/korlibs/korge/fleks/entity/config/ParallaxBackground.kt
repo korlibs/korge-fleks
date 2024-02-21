@@ -40,8 +40,8 @@ object ParallaxBackground {
 
         config.parallaxPlane?.let { planeConf ->
             val offset = planeConf.offset
-            val selfSpeedX = if (isHorizontal) planeConf.selfSpeed else 0.0f
-            val selfSpeedY = if (!isHorizontal) planeConf.selfSpeed else 0.0f
+            val selfSpeedX = if (isHorizontal) planeConf.selfSpeed else 0.0
+            val selfSpeedY = if (!isHorizontal) planeConf.selfSpeed else 0.0
 
             // Update only attached layers because they might change their speed depending on their position on the ground plane
             planeConf.attachedLayersFront?.fastForEach { conf ->
@@ -101,8 +101,8 @@ object ParallaxBackground {
         }
         config.parallaxPlane?.let { planeConf ->
             val offset = planeConf.offset
-            val selfSpeedX = if (isHorizontal) planeConf.selfSpeed else 0.0f
-            val selfSpeedY = if (!isHorizontal) planeConf.selfSpeed else 0.0f
+            val selfSpeedX = if (isHorizontal) planeConf.selfSpeed else 0.0
+            val selfSpeedY = if (!isHorizontal) planeConf.selfSpeed else 0.0
             planeConf.attachedLayersFront?.fastForEach { conf ->
                 val layer = KorgeViewCache.getLayer(entity, conf.name)
                 layerMap.entities[conf.name] = createSubEntityForLayer(world, entity, conf.name,
@@ -134,13 +134,13 @@ object ParallaxBackground {
         Invokable.register(configureParallaxBackground, configureParallaxBackgroundFct)
     }
 
-    private fun createSubEntityForLayer(world: World, parentEntity: Entity, layerName: String? = null, layerLine: Int? = null, speedFactor: Float? = null,
-                                        selfSpeedX: Float = 0.0f, selfSpeedY: Float = 0.0f, isHorizontal: Boolean = true) : Entity {
+    private fun createSubEntityForLayer(world: World, parentEntity: Entity, layerName: String? = null, layerLine: Int? = null, speedFactor: Double? = null,
+                                        selfSpeedX: Double = 0.0, selfSpeedY: Double = 0.0, isHorizontal: Boolean = true) : Entity {
         return configureSubEntityForLayer(world, world.entity(), parentEntity, layerName, layerLine, speedFactor, selfSpeedX, selfSpeedY, isHorizontal)
     }
 
-    private fun configureSubEntityForLayer(world: World, entity: Entity, parentEntity: Entity? = null, layerName: String?, layerLine: Int? = null, speedFactor: Float? = null,
-                                           selfSpeedX: Float = 0.0f, selfSpeedY: Float = 0.0f, isHorizontal: Boolean = true) : Entity  = with(world) {
+    private fun configureSubEntityForLayer(world: World, entity: Entity, parentEntity: Entity? = null, layerName: String?, layerLine: Int? = null, speedFactor: Double? = null,
+                                           selfSpeedX: Double = 0.0, selfSpeedY: Double = 0.0, isHorizontal: Boolean = true) : Entity  = with(world) {
         entity.configure { entity ->
             entity.getOrAdd(SpecificLayer) { SpecificLayer() }.also {
                 parentEntity?.let { parentEntity -> it.parentEntity = parentEntity }

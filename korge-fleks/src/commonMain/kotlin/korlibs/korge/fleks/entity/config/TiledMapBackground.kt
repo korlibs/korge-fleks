@@ -16,8 +16,8 @@ object TiledMapBackground {
     data class Config(
         val assetName: String,
         val layerName: String,
-        val x: Float = 0.0f,
-        val y: Float = 0.0f,
+        val x: Double = 0.0,
+        val y: Double = 0.0,
         val alpha: Float = 1.0f
     ) : ConfigBase
 
