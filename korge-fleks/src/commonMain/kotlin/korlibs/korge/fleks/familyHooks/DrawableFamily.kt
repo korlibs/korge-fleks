@@ -9,7 +9,7 @@ import korlibs.image.text.DefaultStringTextRenderer
 import korlibs.image.text.HorizontalAlign
 import korlibs.image.text.TextAlignment
 import korlibs.image.text.VerticalAlign
-import korlibs.korge.assetmanager.AssetStore
+import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.SpriteComponent
 import korlibs.korge.fleks.components.TextComponent
@@ -142,6 +142,26 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         else -> {
             layer.addChild(view)
             KorgeViewCache.addOrUpdate(entity, view)
+
+            if (entity has ParallaxComponent) {
+                // TODO remove hardcoded asset type
+                configureAssetUpdater(AssetType.World) {
+                    onBackgroundChanged {
+                        val parallax = entity[ParallaxComponent]
+                        val parallaxConfig = AssetStore.getBackground(parallax.config.name)
+                        val newView = ParallaxDataView(parallaxConfig)
+
+                        // Remove view object with old image
+                        (KorgeViewCache.getOrNull(entity) ?: error("onBackgroundChanged: Cannot remove view of entity '${entity.id}' from layer '${entity[DrawableComponent].drawOnLayer}'!")).removeFromParent()
+                        KorgeViewCache.remove(entity)
+
+                        // Add new view object to the view cache and make it visible
+                        layer.addChild(newView)
+                        KorgeViewCache.addOrUpdate(entity, newView)
+                    }
+                }
+            }
+
         }
     }
 

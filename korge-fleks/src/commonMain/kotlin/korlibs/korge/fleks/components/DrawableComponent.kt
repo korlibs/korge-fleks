@@ -59,6 +59,9 @@ data class AppearanceComponent(
  *
  * @param [spriteLayer] has to be set to the same layer name as in Aseprite to select that layer.
  * @param [parentEntity] is the entity (ID) which defines [SpriteComponent] data.
+ * @param [parallaxPlaneLine] is the index in the array of lines for the parallaxPlane (the pseudo 3D parallax effect)
+ *
+ * Hint: Either [spriteLayer] or [parallaxPlaneLine] needs to be specified.
  */
 @Serializable
 @SerialName("SpecificLayer")

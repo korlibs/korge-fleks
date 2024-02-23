@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.Family
 import com.github.quillraven.fleks.FamilyHook
 import com.github.quillraven.fleks.World
 import korlibs.image.color.RGBA
+import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.korge.fleks.utils.KorgeViewCache
@@ -40,10 +41,42 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     val specificLayer = entity[SpecificLayerComponent]
 
     val view: View = if (specificLayer.parallaxPlaneLine != null) {
+
+        // TODO remove hardcoded asset type
+        configureAssetUpdater(AssetType.World) {
+            onBackgroundChanged {
+                val pView = KorgeViewCache[specificLayer.parentEntity]
+                pView as ParallaxDataView
+
+                KorgeViewCache.remove(entity)
+                KorgeViewCache.addOrUpdate(entity,
+                    pView.parallaxLines[specificLayer.parallaxPlaneLine!!]
+                        ?: error("onSpecificLayerFamilyAdded: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
+                )
+            }
+        }
+
         val pView = KorgeViewCache[specificLayer.parentEntity]
         pView as ParallaxDataView
         pView.parallaxLines[specificLayer.parallaxPlaneLine!!] ?: error("onSpecificLayerFamilyAdded: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
     } else if (specificLayer.spriteLayer != null) {
+
+        // TODO remove hardcoded asset type
+        configureAssetUpdater(AssetType.World) {
+            onBackgroundChanged {
+                val view = KorgeViewCache.getLayer(specificLayer.parentEntity, specificLayer.spriteLayer!!)
+                KorgeViewCache.remove(entity)
+                KorgeViewCache.addOrUpdate(entity, view)
+
+                // Save current position of layer into PositionShape component
+                entity.getOrNull(PositionShapeComponent)?.let {
+                    it.x = view.x
+                    it.y = view.y
+                }
+
+            }
+        }
+
         KorgeViewCache.getLayer(specificLayer.parentEntity, specificLayer.spriteLayer!!)
     } else {
         error("onSpecificLayerFamilyAdded: No sprite layer name or parallax plane line number set for entity '${entity.id}'!")

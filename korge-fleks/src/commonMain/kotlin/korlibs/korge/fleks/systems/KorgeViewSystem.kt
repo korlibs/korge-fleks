@@ -63,8 +63,8 @@ class KorgeViewSystem : IteratingSystem(
 
                 if (entity has PositionShapeComponent) {
                     val positionShapeComponent = entity[PositionShapeComponent]
-                    view.x = (positionShapeComponent.x - offset.x).toDouble()
-                    view.y = (positionShapeComponent.y - offset.y).toDouble()
+                    view.x = (positionShapeComponent.x - offset.x)
+                    view.y = (positionShapeComponent.y - offset.y)
                 }
 
 //                println("[${entity.id}] Y: ${view.y} (Position: ${positionShape.y} delta: ${lastY - positionShape.y})")
