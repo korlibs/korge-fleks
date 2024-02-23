@@ -10,12 +10,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("SubEntities")
-data class SubEntities(
+data class SubEntitiesComponent(
     var entities: MutableMap<String, Entity> = mutableMapOf(),
     var moveWithParent: Boolean = true
-) : Component<SubEntities>, SerializeBase {
-    override fun type(): ComponentType<SubEntities> = SubEntities
-    companion object : ComponentType<SubEntities>()
+) : Component<SubEntitiesComponent>, SerializeBase {
+    override fun type(): ComponentType<SubEntitiesComponent> = SubEntitiesComponent
+    companion object : ComponentType<SubEntitiesComponent>()
 
     operator fun get(name: String) : Entity = entities[name] ?: error("SubEntities: Entity with name '$name' not found!")
 }

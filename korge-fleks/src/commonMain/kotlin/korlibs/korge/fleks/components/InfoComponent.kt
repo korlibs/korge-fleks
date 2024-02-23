@@ -8,11 +8,11 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable @SerialName("Info")
-data class Info(
+data class InfoComponent(
     var name: String = "noName",
     var entityId: Int = -1
-) : Component<Info>, SerializeBase {
-    override fun type(): ComponentType<Info> = Info
+) : Component<InfoComponent> {
+    override fun type(): ComponentType<InfoComponent> = InfoComponent
 
     override fun World.onAdd(entity: Entity) {
         entityId = entity.id
@@ -23,5 +23,5 @@ data class Info(
         EntityByName.remove(name)
     }
 
-    companion object : ComponentType<Info>()
+    companion object : ComponentType<InfoComponent>()
 }

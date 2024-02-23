@@ -2,7 +2,6 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.utils.random
 import korlibs.korge.fleks.components.*
@@ -31,15 +30,15 @@ class SpawnerSystem : IteratingSystem(
                     y = it.y
                     setPosition = true
                 }
-                entity.getOrNull(Offset)?.let {
+                entity.getOrNull(OffsetComponent)?.let {
                     x += it.x
                     y += it.y
                     setPosition = true
                 }
-                entity.getOrNull(OffsetByFrameIndex)?.let {
+                entity.getOrNull(OffsetByFrameIndexComponent)?.let {
                     // Get offset depending on current animation and frame index
                     val currentFrameIndex = (KorgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
-                    val animationName = it.entity.getOrNull(Sprite)?.animationName ?: ""
+                    val animationName = it.entity.getOrNull(SpriteComponent)?.animationName ?: ""
                     val offset = it.list[animationName]?.get(currentFrameIndex)
                         ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
                     x += offset.x

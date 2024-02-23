@@ -2,8 +2,7 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.assetmanager.AssetStore
-import korlibs.korge.fleks.components.InputTouchButton
+import korlibs.korge.fleks.components.InputTouchButtonComponent
 
 /**
  *
@@ -11,14 +10,14 @@ import korlibs.korge.fleks.components.InputTouchButton
  */
 class TouchInputSystem : IteratingSystem(
     family {
-        all(InputTouchButton)
+        all(InputTouchButtonComponent)
     },
     interval = EachFrame
 ) {
 
 
     override fun onTickEntity(entity: Entity) {
-        val inputTouchButton = entity[InputTouchButton]
+        val inputTouchButton = entity[InputTouchButtonComponent]
 //        if (inputTouchButton.onDown) {
 //            inputTouchButton.onDown = false
 //            println("down")

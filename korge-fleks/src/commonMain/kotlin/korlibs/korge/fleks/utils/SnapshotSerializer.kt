@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.utils
 
-import com.github.quillraven.fleks.Component
-import com.github.quillraven.fleks.Entity
+import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.entity.config.Invokable
@@ -26,8 +25,8 @@ import kotlin.jvm.JvmInline
 interface SerializeBase
 
 // Some convenience aliases for Fleks snapshots of world and entities
-typealias SerializableSnapshot = Map<Entity, List<SerializeBase>>  // snapshot of Fleks world
-typealias SerializableSnapshotOf = List<SerializeBase>  // snapshot of one entity
+//typealias SerializableSnapshot = Map<Int, List<SerializeBase>>  // snapshot of Fleks world
+//typealias SerializableSnapshotOf = List<SerializeBase>  // snapshot of one entity
 typealias FleksSnapshot = Map<Entity, List<Component<*>>>  // snapshot data of Fleks world
 typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
 
@@ -47,36 +46,46 @@ value class Identifier(val name: String)
  * internal components as subclasses.
  */
 internal val internalModule = SerializersModule {
-    // Top level component classes
+    // Register data classes
     polymorphic(SerializeBase::class) {
+        subclass(Rgb::class)
+        subclass(LayerVisibility::class)
+        subclass(Point::class)
+    }
+
+    // Register component classes
+    polymorphic(Component::class) {
         subclass(TweenPropertyComponent::class)
         subclass(TweenSequenceComponent::class)
-        subclass(Info::class)
-        subclass(Drawable::class)
-        subclass(Appearance::class)
-        subclass(Rgb::class)
-        subclass(SpecificLayer::class)
-        subclass(SwitchLayerVisibility::class)
-        subclass(LayerVisibility::class)
-        subclass(InputTouchButton::class)
-        subclass(Layout::class)
-        subclass(LifeCycle::class)
-        subclass(Parallax::class)
-        subclass(ParallaxMotion::class)
+        subclass(InfoComponent::class)
+        subclass(DrawableComponent::class)
+        subclass(AppearanceComponent::class)
+        subclass(SpecificLayerComponent::class)
+        subclass(SwitchLayerVisibilityComponent::class)
+        subclass(InputTouchButtonComponent::class)
+        subclass(LayoutComponent::class)
+        subclass(LifeCycleComponent::class)
+        subclass(ParallaxComponent::class)
+        subclass(ParallaxMotionComponent::class)
         subclass(PositionShapeComponent::class)
-        subclass(Offset::class)
-        subclass(OffsetByFrameIndex::class)
-        subclass(Point::class)
-        subclass(Motion::class)
-        subclass(Rigidbody::class)
-        subclass(Sound::class)
+        subclass(OffsetComponent::class)
+        subclass(OffsetByFrameIndexComponent::class)
+        subclass(MotionComponent::class)
+        subclass(RigidbodyComponent::class)
+        subclass(SoundComponent::class)
         subclass(SpawnerComponent::class)
-        subclass(Sprite::class)
-        subclass(SubEntities::class)
-        subclass(Text::class)
-        subclass(MultiLineText::class)
-        subclass(TiledMap::class)
+        subclass(SpriteComponent::class)
+        subclass(SubEntitiesComponent::class)
+        subclass(TextComponent::class)
+        subclass(MultiLineTextComponent::class)
+        subclass(TiledMapComponent::class)
+        subclass(LdtkLevelMapComponent::class)
     }
+    // Register tags (components without properties)
+    polymorphic(UniqueId::class) {
+//        subclass(VisibleTag::class, VisibleTag.serializer())
+    }
+
     // Data class hierarchy used for AnimationScript component
     polymorphic(TweenBase::class) {
         subclass(SpawnNewTweenSequence::class)
@@ -124,11 +133,21 @@ class SnapshotSerializer {
             json = Json {
                 prettyPrint = pretty
                 serializersModule = modules
+                allowStructuredMapKeys = true // to support entity id + version as a key in a map data structure
             }
             dirty = false
         }
         return json
     }
+}
+
+object EntitySerializer : KSerializer<Entity> {
+    override val descriptor: SerialDescriptor  = PrimitiveSerialDescriptor("EntityAsInt", PrimitiveKind.INT)
+
+    override fun deserialize(decoder: Decoder): Entity = Entity(id = decoder.decodeInt(), 0u)
+
+    override fun serialize(encoder: Encoder, value: Entity) =
+        encoder.encodeInt(value.id)
 }
 
 /**

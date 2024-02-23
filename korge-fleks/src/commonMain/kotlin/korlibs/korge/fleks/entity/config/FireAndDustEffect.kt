@@ -30,11 +30,11 @@ object FireAndDustEffect {
     private val configureEffectObjectFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
         val effectConfig = AssetStore.getEntityConfig<Config>(config.name)
         entity.configure { entity ->
-            entity.getOrAdd(Offset) { Offset() }.also {
+            entity.getOrAdd(OffsetComponent) { OffsetComponent() }.also {
                 it.x = effectConfig.offsetX
                 it.y = effectConfig.offsetY
             }
-            entity.getOrAdd(Motion) { Motion() }.also {
+            entity.getOrAdd(MotionComponent) { MotionComponent() }.also {
                 var velocityXX = effectConfig.velocityX
                 var velocityYY = effectConfig.velocityY
                 if (effectConfig.velocityVariationX != 0.0) {
@@ -46,16 +46,16 @@ object FireAndDustEffect {
                 it.velocityX = velocityXX
                 it.velocityY = velocityYY
             }
-            entity.getOrAdd(Sprite) { Sprite() }.also {
+            entity.getOrAdd(SpriteComponent) { SpriteComponent() }.also {
                 it.assetName = effectConfig.assetName
                 it.animationName = effectConfig.animationName
                 it.isPlaying = true
             }
-            entity.getOrAdd(Drawable) { Drawable() }.also {
+            entity.getOrAdd(DrawableComponent) { DrawableComponent() }.also {
                 it.drawOnLayer = effectConfig.drawOnLayer
             }
-            entity.getOrAdd(Appearance) { Appearance() }
-            entity.getOrAdd(LifeCycle) { LifeCycle() }
+            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }
+            entity.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }
             if (effectConfig.fadeOutDuration > 0f) {
                 entity.getOrAdd(TweenSequenceComponent) { TweenSequenceComponent() }.also {
                     it.tweens = listOf(

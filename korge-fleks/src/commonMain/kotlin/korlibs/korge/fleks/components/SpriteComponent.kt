@@ -2,18 +2,17 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
-import korlibs.korge.fleks.utils.SerializeBase
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 /**
- * The [Sprite] component adds visible details to an [Drawable] entity. By adding [Sprite] to an entity the entity will be
+ * The [SpriteComponent] component adds visible details to an [DrawableComponent] entity. By adding [SpriteComponent] to an entity the entity will be
  * able to handle animations.
  */
 @Serializable
 @SerialName("Sprite")
-data class Sprite(
+data class SpriteComponent(
     var assetName: String = "",
     var animationName: String? = null,
 
@@ -21,7 +20,7 @@ data class Sprite(
     var forwardDirection: Boolean = true,
     var loop: Boolean = false,
     var destroyOnPlayingFinished: Boolean = true,
-) : Component<Sprite>, SerializeBase {
-    override fun type(): ComponentType<Sprite> = Sprite
-    companion object : ComponentType<Sprite>()
+) : Component<SpriteComponent> {
+    override fun type(): ComponentType<SpriteComponent> = SpriteComponent
+    companion object : ComponentType<SpriteComponent>()
 }

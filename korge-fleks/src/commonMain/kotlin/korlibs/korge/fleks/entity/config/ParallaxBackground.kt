@@ -27,7 +27,7 @@ object ParallaxBackground {
     // Game object related functions
     fun create(world: World, config: Identifier) = configureParallaxBackgroundFct(world, world.entity(), config)
     fun getEntityByLayerName(world: World, entity: Entity, name: String): Entity = with (world) {
-        return entity[SubEntities][name]
+        return entity[SubEntitiesComponent][name]
     }
 
     private val configureParallaxLayersFct = fun(world: World, entity: Entity, assetConfig: Identifier): Entity = with(world) {
@@ -36,7 +36,7 @@ object ParallaxBackground {
         val config = AssetStore.getBackground(assetConfig.name).config
         val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
         val view = KorgeViewCache[entity] as ParallaxDataView
-        val layerMap = entity[SubEntities]
+        val layerMap = entity[SubEntitiesComponent]
 
         config.parallaxPlane?.let { planeConf ->
             val offset = planeConf.offset
@@ -74,17 +74,17 @@ object ParallaxBackground {
         val parallaxConfig = AssetStore.getEntityConfig<Config>(config.name)
 
         entity.configure {
-            it += Parallax(config = parallaxConfig.assetName)
+            it += ParallaxComponent(config = parallaxConfig.assetName)
             it += PositionShapeComponent()
-            it += Drawable(drawOnLayer = parallaxConfig.drawOnLayer)
-            it += Appearance(alpha = 1.0f)
+            it += DrawableComponent(drawOnLayer = parallaxConfig.drawOnLayer)
+            it += AppearanceComponent(alpha = 1.0f)
             // All sub-entity IDs are here for quick lookup by its layer name and for recycling of the overall background entity object
-            it += SubEntities(moveWithParent = false)
+            it += SubEntitiesComponent(moveWithParent = false)
         }
 
         // Once the base ParallaxDataView is created with above base entity we can access it from the cache
         val view = KorgeViewCache[entity] as ParallaxDataView
-        val layerMap = entity[SubEntities]
+        val layerMap = entity[SubEntitiesComponent]
 
         val config = AssetStore.getBackground(parallaxConfig.assetName.name).config
         val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
@@ -142,15 +142,15 @@ object ParallaxBackground {
     private fun configureSubEntityForLayer(world: World, entity: Entity, parentEntity: Entity? = null, layerName: String?, layerLine: Int? = null, speedFactor: Double? = null,
                                            selfSpeedX: Double = 0.0, selfSpeedY: Double = 0.0, isHorizontal: Boolean = true) : Entity  = with(world) {
         entity.configure { entity ->
-            entity.getOrAdd(SpecificLayer) { SpecificLayer() }.also {
+            entity.getOrAdd(SpecificLayerComponent) { SpecificLayerComponent() }.also {
                 parentEntity?.let { parentEntity -> it.parentEntity = parentEntity }
                 it.spriteLayer = layerName
                 it.parallaxPlaneLine = layerLine
             }
             entity.getOrAdd(PositionShapeComponent) { PositionShapeComponent() }
-            entity.getOrAdd(Appearance) { Appearance() }
+            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }
             speedFactor?.let { speedFactor ->
-                entity.getOrAdd(ParallaxMotion) { ParallaxMotion() }.also {
+                entity.getOrAdd(ParallaxMotionComponent) { ParallaxMotionComponent() }.also {
                     it.isScrollingHorizontally = isHorizontal
                     it.speedFactor = speedFactor
                     it.selfSpeedX = selfSpeedX

@@ -21,29 +21,29 @@ data class PositionShapeComponent(
     var y: Double = 0.0,
     var width: Double = 0.0,
     var height: Double = 0.0,
-    ) : Component<PositionShapeComponent>, SerializeBase {
+    ) : Component<PositionShapeComponent> {
     override fun type(): ComponentType<PositionShapeComponent> = PositionShapeComponent
     companion object : ComponentType<PositionShapeComponent>()
 }
 
 @Serializable
 @SerialName("Offset")
-data class Offset(
+data class OffsetComponent(
     var x: Double = 0.0,
     var y: Double = 0.0
-) : Component<Offset>, SerializeBase {
-    override fun type(): ComponentType<Offset> = Offset
-    companion object : ComponentType<Offset>()
+) : Component<OffsetComponent> {
+    override fun type(): ComponentType<OffsetComponent> = OffsetComponent
+    companion object : ComponentType<OffsetComponent>()
 }
 
 @Serializable
 @SerialName("OffsetByFrameIndex")
-data class OffsetByFrameIndex(
+data class OffsetByFrameIndexComponent(
     var entity: Entity = invalidEntity,
     var list: Map<String, List<Point>> = emptyMap()
-) : Component<OffsetByFrameIndex>, SerializeBase {
-    override fun type(): ComponentType<OffsetByFrameIndex> = OffsetByFrameIndex
-    companion object : ComponentType<OffsetByFrameIndex>()
+) : Component<OffsetByFrameIndexComponent> {
+    override fun type(): ComponentType<OffsetByFrameIndexComponent> = OffsetByFrameIndexComponent
+    companion object : ComponentType<OffsetByFrameIndexComponent>()
 }
 
 @Serializable
@@ -55,24 +55,24 @@ data class Point(
 
 @Serializable
 @SerialName("Motion")
-data class Motion(
+data class MotionComponent(
     var accelX: Double = 0.0,
     var accelY: Double = 0.0,
     var velocityX: Double = 0.0,
     var velocityY: Double = 0.0
-) : Component<Motion>, SerializeBase {
-    override fun type(): ComponentType<Motion> = Motion
-    companion object : ComponentType<Motion>()
+) : Component<MotionComponent> {
+    override fun type(): ComponentType<MotionComponent> = MotionComponent
+    companion object : ComponentType<MotionComponent>()
 }
 
 @Serializable
 @SerialName("ParallaxMotion")
-data class ParallaxMotion(
+data class ParallaxMotionComponent(
     var isScrollingHorizontally: Boolean = true,
     var speedFactor: Double = 1.0,  // TODO put this into assets because it is static and does not change  ????
     var selfSpeedX: Double = 0.0,
     var selfSpeedY: Double = 0.0
-) : Component<ParallaxMotion>, SerializeBase {
-    override fun type(): ComponentType<ParallaxMotion> = ParallaxMotion
-    companion object : ComponentType<ParallaxMotion>()
+) : Component<ParallaxMotionComponent> {
+    override fun type(): ComponentType<ParallaxMotionComponent> = ParallaxMotionComponent
+    companion object : ComponentType<ParallaxMotionComponent>()
 }

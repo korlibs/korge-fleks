@@ -4,7 +4,7 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.audio.sound.paused
 import korlibs.korge.assetmanager.AssetStore
-import korlibs.korge.fleks.components.Sound
+import korlibs.korge.fleks.components.SoundComponent
 import korlibs.time.*
 
 /**
@@ -14,7 +14,7 @@ import korlibs.time.*
  */
 class SoundSystem : IteratingSystem(
     family {
-        all(Sound)
+        all(SoundComponent)
     },
     interval = EachFrame
 ) {
@@ -47,7 +47,7 @@ class SoundSystem : IteratingSystem(
 */
 
     override fun onTickEntity(entity: Entity) {
-        val sound = entity[Sound]
+        val sound = entity[SoundComponent]
 
 
         val soundChannel = AssetStore.getSound(sound.name)

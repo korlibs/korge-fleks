@@ -20,24 +20,24 @@ import korlibs.korge.view.View
  * functions can be started.
  *
  * The related components contain following details:
- * - [SpecificLayer] : Contains the [Layer name][SpecificLayer.spriteLayer] and the parent entity
- * with the [Sprite] data (graphics).
- * - [Appearance] (optional) : Contains values for [visibility][Appearance.visible], [alpha][Appearance.alpha] and
- * [color tint][Appearance.tint].
+ * - [SpecificLayerComponent] : Contains the [Layer name][SpecificLayerComponent.spriteLayer] and the parent entity
+ * with the [SpriteComponent] data (graphics).
+ * - [AppearanceComponent] (optional) : Contains values for [visibility][AppearanceComponent.visible], [alpha][AppearanceComponent.alpha] and
+ * [color tint][AppearanceComponent.tint].
  * - [PositionShapeComponent] (optional) : Contains the [x][PositionShapeComponent.x] and [y][PositionShapeComponent.y] position of the
- * layer relative to the [Sprite].
- * - [InputTouchButton] (optional) : Contains the [Invokable] functions when the player touches that layer on the display.
+ * layer relative to the [SpriteComponent].
+ * - [InputTouchButtonComponent] (optional) : Contains the [Invokable] functions when the player touches that layer on the display.
  *
- * One of the optional components must be added to the specific-layer entity. Otherwise, the [SpecificLayer] component
+ * One of the optional components must be added to the specific-layer entity. Otherwise, the [SpecificLayerComponent] component
  * will be useless.
  */
-fun specificLayerFamily(): Family = World.family { all(SpecificLayer).any(SpecificLayer, PositionShapeComponent, Appearance, InputTouchButton, Offset) }
+fun specificLayerFamily(): Family = World.family { all(SpecificLayerComponent).any(SpecificLayerComponent, PositionShapeComponent, AppearanceComponent, InputTouchButtonComponent, OffsetComponent) }
 
 val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     val world = this
 
     // Need to get parent entity to search for view object which contains the sprite layer
-    val specificLayer = entity[SpecificLayer]
+    val specificLayer = entity[SpecificLayerComponent]
 
     val view: View = if (specificLayer.parallaxPlaneLine != null) {
         val pView = KorgeViewCache[specificLayer.parentEntity]
@@ -49,7 +49,7 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
         error("onSpecificLayerFamilyAdded: No sprite layer name or parallax plane line number set for entity '${entity.id}'!")
     }
 
-    entity.getOrNull(Appearance)?.also {
+    entity.getOrNull(AppearanceComponent)?.also {
         view.visible = it.visible
         view.alpha = it.alpha.toDouble()
         it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
@@ -57,7 +57,7 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
 
     // Set properties in TouchInput when touch input was recognized
     // TouchInputSystem checks for those properties and executes specific Invokable function
-    entity.getOrNull(InputTouchButton)?.let { touchInput ->
+    entity.getOrNull(InputTouchButtonComponent)?.let { touchInput ->
         view.mouse {
             onDown {
                 if (touchInput.triggerImmediately) Invokable.invoke(touchInput.function, world, entity, touchInput.config)

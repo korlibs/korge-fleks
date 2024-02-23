@@ -25,7 +25,7 @@ data class SpawnerComponent(
     // internal state
     var nextSpawnIn: Int = 0,
     var numberOfObjectsSpawned: Int = 0
-) : Component<SpawnerComponent>, SerializeBase {
+) : Component<SpawnerComponent> {
     override fun type(): ComponentType<SpawnerComponent> = SpawnerComponent
     companion object : ComponentType<SpawnerComponent>()
 }

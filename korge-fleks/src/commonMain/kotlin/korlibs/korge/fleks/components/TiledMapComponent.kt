@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.SerializeBase
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -19,11 +18,11 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TiledMap")
-data class TiledMap(
+data class TiledMapComponent(
     var assetName: String = "",
-) : Component<TiledMap>, SerializeBase {
-    override fun type(): ComponentType<TiledMap> = TiledMap
-    companion object : ComponentType<TiledMap>() {
+) : Component<TiledMapComponent> {
+    override fun type(): ComponentType<TiledMapComponent> = TiledMapComponent
+    companion object : ComponentType<TiledMapComponent>() {
         /**
          * Hint: How you should read "Component Hook"
          *
@@ -31,15 +30,15 @@ data class TiledMap(
          * This initialization can only use data from one component. Thus, it must be self-containable regarding the
          * save-state of an object. But this is often not the case -> check FamilyHooks.
          */
-        fun onComponentAdded(entity: Entity, component: TiledMap) {}
+        fun onComponentAdded(entity: Entity, component: TiledMapComponent) {}
 
-        fun onComponentRemoved(entity: Entity, component: TiledMap) {}
+        fun onComponentRemoved(entity: Entity, component: TiledMapComponent) {}
     }
 }
 
 @Serializable
 @SerialName("LdtkLevelMap")
-data class LdtkLevelMap(
+data class LdtkLevelMapComponent(
     /**
      * The name of the LDtk world in the Asset manager
      */
@@ -49,7 +48,7 @@ data class LdtkLevelMap(
      */
     var levelName: String = ""
 
-) : Component<LdtkLevelMap>, SerializeBase {
-    override fun type(): ComponentType<LdtkLevelMap> = LdtkLevelMap
-    companion object : ComponentType<LdtkLevelMap>()
+) : Component<LdtkLevelMapComponent> {
+    override fun type(): ComponentType<LdtkLevelMapComponent> = LdtkLevelMapComponent
+    companion object : ComponentType<LdtkLevelMapComponent>()
 }

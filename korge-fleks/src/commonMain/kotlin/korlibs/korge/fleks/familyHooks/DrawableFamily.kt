@@ -11,8 +11,8 @@ import korlibs.image.text.TextAlignment
 import korlibs.image.text.VerticalAlign
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.Sprite
-import korlibs.korge.fleks.components.Text
+import korlibs.korge.fleks.components.SpriteComponent
+import korlibs.korge.fleks.components.TextComponent
 import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.korge.fleks.systems.KorgeViewSystem
 import korlibs.korge.fleks.utils.KorgeViewCache
@@ -31,26 +31,26 @@ import korlibs.korge.view.align.centerYOnStage
  * created and added to the [KorgeViewSystem]. This is done in [onDrawableFamilyAdded] family hook here rather than in
  * component hook because we are sure that all needed components are set up before in the [World].
  */
-fun drawableFamily(): Family = World.family { all(Drawable, PositionShapeComponent).any(Drawable, Appearance, InputTouchButton) }
+fun drawableFamily(): Family = World.family { all(DrawableComponent, PositionShapeComponent).any(DrawableComponent, AppearanceComponent, InputTouchButtonComponent) }
 
 val onDrawableFamilyAdded: FamilyHook = { entity ->
     val world = this
     val layers = inject<HashMap<String, Container>>("Layers")
 
-    val drawable = entity[Drawable]
+    val drawable = entity[DrawableComponent]
     val positionShapeComponent = entity[PositionShapeComponent]
     val width: Double
     val height: Double
 
     val view: View = when {
-        entity has Sprite -> {
-            val sprite = entity[Sprite]
+        entity has SpriteComponent -> {
+            val sprite = entity[SpriteComponent]
             val view = ImageDataViewEx(AssetStore.getImage(sprite.assetName), sprite.animationName, smoothing = false)
 
             // when animation finished playing trigger destruction of entity
             if (sprite.destroyOnPlayingFinished) view.onPlayFinished = {
                 entity.configure { entity ->
-                    entity.getOrAdd(LifeCycle) { LifeCycle() }.also { it.healthCounter = 0 }
+                    entity.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }.also { it.healthCounter = 0 }
                 }
             }
             if (sprite.isPlaying) view.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
@@ -72,8 +72,8 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 //            TiledMapView(assets.getTiledMap(entity[TiledMap].assetName), smoothing = false, showShapes = false)
 //        }
 
-        entity has LdtkLevelMap -> {
-            val ldtkLevelMapComponent = entity[LdtkLevelMap]
+        entity has LdtkLevelMapComponent -> {
+            val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]
             val ldtkWorld = AssetStore.getLdtkWorld(ldtkLevelMapComponent.worldName)
             val ldtkLevel = AssetStore.getLdtkLevel(ldtkWorld, ldtkLevelMapComponent.levelName)
             val view = LDTKLevelView(level = LDTKLevel(
@@ -85,8 +85,8 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             view
         }
 
-        entity has Parallax -> {
-            val parallax = entity[Parallax]
+        entity has ParallaxComponent -> {
+            val parallax = entity[ParallaxComponent]
             val parallaxConfig = AssetStore.getBackground(parallax.config.name)
             val view = ParallaxDataView(parallaxConfig)
 
@@ -108,12 +108,12 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             view
         }
 
-        entity has Text -> {
+        entity has TextComponent -> {
             val view = korlibs.korge.view.Text(
-                text = entity[Text].text,
+                text = entity[TextComponent].text,
                 textSize = korlibs.korge.view.Text.DEFAULT_TEXT_SIZE,
                 color = Colors.WHITE,
-                font = AssetStore.getFont(entity[Text].fontName),
+                font = AssetStore.getFont(entity[TextComponent].fontName),
                 alignment = TextAlignment.CENTER,
                 renderer = DefaultStringTextRenderer,
                 autoScaling = false
@@ -131,7 +131,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         else -> error("onDrawableFamilyAdded: No Parallax, ParallaxLayer, TiledMap, Sprite or Text component found!")
     }
 
-    entity.getOrNull(Appearance)?.also {
+    entity.getOrNull(AppearanceComponent)?.also {
         view.visible = it.visible
         view.alpha = it.alpha.toDouble()
         it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
@@ -149,8 +149,8 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
     view.x = positionShapeComponent.x
     view.y = positionShapeComponent.y.toDouble()
 
-    if (entity has Layout) {
-        val layout = entity[Layout]
+    if (entity has LayoutComponent) {
+        val layout = entity[LayoutComponent]
         if (layout.centerX) view.centerXOnStage()
         if (layout.centerY) view.centerYOnStage()
         positionShapeComponent.x = view.x + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
@@ -159,7 +159,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
     // Set properties in TouchInput when touch input was recognized
     // TouchInputSystem checks for those properties and executes specific Invokable function
-    entity.getOrNull(InputTouchButton)?.let { touchInput ->
+    entity.getOrNull(InputTouchButtonComponent)?.let { touchInput ->
         view.mouse {
             onDown {
                 if (touchInput.triggerImmediately) Invokable.invoke(touchInput.function, world, entity, touchInput.config)
@@ -185,6 +185,6 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 }
 
 val onDrawableFamilyRemoved: FamilyHook = { entity ->
-    (KorgeViewCache.getOrNull(entity) ?: error("onDrawableFamilyRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[Drawable].drawOnLayer}'!")).removeFromParent()
+    (KorgeViewCache.getOrNull(entity) ?: error("onDrawableFamilyRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[DrawableComponent].drawOnLayer}'!")).removeFromParent()
     KorgeViewCache.remove(entity)
 }

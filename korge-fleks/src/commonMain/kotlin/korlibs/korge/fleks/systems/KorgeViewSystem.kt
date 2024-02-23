@@ -2,39 +2,34 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.World.Companion.inject
-import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
-import korlibs.korge.annotations.KorgeExperimental
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.Sprite
+import korlibs.korge.fleks.components.SpriteComponent
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.utils.random
 import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxDataView
-import korlibs.korge.render.useLineBatcher
-import korlibs.korge.view.*
 import korlibs.time.TimeSpan
 
 /**
- * This system is updating the view objects for all [Drawable] entities.
+ * This system is updating the view objects for all [DrawableComponent] entities.
  *
- * In case the [Drawable] entity is of type [Sprite] it takes the image configuration from
- * [Sprite] component to setup and control the sprite animations.
+ * In case the [DrawableComponent] entity is of type [SpriteComponent] it takes the image configuration from
+ * [SpriteComponent] component to setup and control the sprite animations.
  */
 class KorgeViewSystem : IteratingSystem(
-    family { all(Appearance).any(Appearance, SwitchLayerVisibility, SpecificLayer, PositionShapeComponent, Offset) },
+    family { all(AppearanceComponent).any(AppearanceComponent, SwitchLayerVisibilityComponent, SpecificLayerComponent, PositionShapeComponent, OffsetComponent) },
     interval = EachFrame
 ) {
     var updateViewsEnabled: Boolean = true
     private var lastY: Double = 0.0
 
     override fun onTickEntity(entity: Entity) {
-        val appearance = entity[Appearance]
+        val appearance = entity[AppearanceComponent]
 
         if (updateViewsEnabled) {
             // TODO this can be re-written with help of SpecificLayer ???
-            entity.getOrNull(SwitchLayerVisibility)?.let { visibility ->
+            entity.getOrNull(SwitchLayerVisibilityComponent)?.let { visibility ->
                 visibility.spriteLayers.forEach { layer ->
                     layer.visible = if (layer.visible) {
                         // try to switch off
@@ -48,12 +43,12 @@ class KorgeViewSystem : IteratingSystem(
             }
         }
 
-        val offset: Point = if (entity hasNo Offset) Point()
-        else Point(entity[Offset].x, entity[Offset].y)
-        entity.getOrNull(OffsetByFrameIndex)?.let {
+        val offset: Point = if (entity hasNo OffsetComponent) Point()
+        else Point(entity[OffsetComponent].x, entity[OffsetComponent].y)
+        entity.getOrNull(OffsetByFrameIndexComponent)?.let {
             // Get offset depending on current animation and frame index
             val currentFrameIndex = (KorgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
-            val animationName = it.entity.getOrNull(Sprite)?.animationName ?: ""
+            val animationName = it.entity.getOrNull(SpriteComponent)?.animationName ?: ""
             val frameOffset = it.list[animationName]?.get(currentFrameIndex)
                 ?: error("KorgeViewSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
             offset.x += frameOffset.x

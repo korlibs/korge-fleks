@@ -113,7 +113,7 @@ class TweenSequenceSystem : IteratingSystem(
         currentTween = tween
         currentParentTween = parentTween
         when (tween) {
-            is TweenAppearance -> tween.entity.getOrError(Appearance).let { start ->
+            is TweenAppearance -> tween.entity.getOrError(AppearanceComponent).let { start ->
                 tween.alpha?.let { end -> createAnimateComponent(AppearanceAlpha, value = start.alpha, change = end - start.alpha) }
                 tween.tint?.let { end ->  createAnimateComponent(AppearanceTint, start.tint ?: Rgb.WHITE,
                     Rgb(r = end.r - (start.tint?.r ?: 0xff), g = end.g - (start.tint?.g ?: 0xff), b = end.b - (start.tint?.b ?: 0xff))
@@ -124,24 +124,24 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.x?.let { end -> createAnimateComponent(PositionShapeX, start.x, end - start.x) }
                 tween.y?.let { end -> createAnimateComponent(PositionShapeY, start.y, end - start.y) }
             }
-            is TweenOffset -> tween.entity.getOrError(Offset).let { start ->
+            is TweenOffset -> tween.entity.getOrError(OffsetComponent).let { start ->
                 tween.x?.let { end -> createAnimateComponent(OffsetX, start.x, end - start.x) }
                 tween.y?.let { end -> createAnimateComponent(OffsetY, start.y, end - start.y) }
             }
-            is TweenLayout -> tween.entity.getOrError(Layout).let { start ->
+            is TweenLayout -> tween.entity.getOrError(LayoutComponent).let { start ->
                 tween.centerX?.let { value -> createAnimateComponent(LayoutCenterX, value) }
                 tween.centerY?.let { value -> createAnimateComponent(LayoutCenterY, value) }
                 tween.offsetX?.let { end -> createAnimateComponent(LayoutOffsetX, start.offsetX, end - start.offsetX) }
                 tween.offsetY?.let { end -> createAnimateComponent(LayoutOffsetY, start.offsetY, end - start.offsetY) }
             }
-            is TweenSprite -> tween.entity.getOrError(Sprite).let { _ ->  // make sure to-be-animated-entity is of type sprite
+            is TweenSprite -> tween.entity.getOrError(SpriteComponent).let { _ ->  // make sure to-be-animated-entity is of type sprite
                 tween.animationName?.let { value -> createAnimateComponent(SpriteAnimName, value) }
                 tween.isPlaying?.let { value -> createAnimateComponent(SpriteIsPlaying, value) }
                 tween.forwardDirection?.let { value -> createAnimateComponent(SpriteForwardDirection, value) }
                 tween.loop?.let { value -> createAnimateComponent(SpriteLoop, value) }
                 tween.destroyOnPlayingFinished?.let { value -> createAnimateComponent(SpriteDestroyOnPlayingFinished, value) }
             }
-            is TweenSwitchLayerVisibility -> tween.entity.getOrError(SwitchLayerVisibility).let { start ->
+            is TweenSwitchLayerVisibility -> tween.entity.getOrError(SwitchLayerVisibilityComponent).let { start ->
                 tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
                 tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
             }
@@ -151,7 +151,7 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.timeVariation?.let { end -> createAnimateComponent(SpawnerTimeVariation, start.timeVariation, end - start.timeVariation) }
                 tween.positionVariation?.let { end -> createAnimateComponent(SpawnerPositionVariation, start.positionVariation, end - start.positionVariation) }
             }
-            is TweenSound -> tween.entity.getOrError(Sound).let{ start ->
+            is TweenSound -> tween.entity.getOrError(SoundComponent).let{ start ->
                 tween.startTrigger?.let { value -> createAnimateComponent(SoundStartTrigger, value) }
                 tween.stopTrigger?.let { value -> createAnimateComponent(SoundStopTrigger, value) }
                 tween.position?.let { end -> createAnimateComponent(SoundPosition, start.position, end - start.position) }

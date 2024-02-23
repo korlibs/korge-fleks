@@ -2,7 +2,7 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.Drawable
+import korlibs.korge.fleks.components.DrawableComponent
 import korlibs.korge.fleks.components.PositionShapeComponent
 
 /**
@@ -14,7 +14,7 @@ class DebugSystem(
 //    private val layers: HashMap<String, Container> = World.inject(),
 //    private val assets: GameAssets = World.inject()
 ) : IteratingSystem(
-    family { all(Drawable, PositionShapeComponent) },
+    family { all(DrawableComponent, PositionShapeComponent) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {

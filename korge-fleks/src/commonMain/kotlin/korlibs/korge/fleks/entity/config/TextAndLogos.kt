@@ -46,35 +46,35 @@ object TextAndLogos {
             entity.getOrAdd(PositionShapeComponent) { PositionShapeComponent() }
 
             logoConfig.logoName?.let {
-                entity.getOrAdd(Sprite) { Sprite() }.also {
+                entity.getOrAdd(SpriteComponent) { SpriteComponent() }.also {
                     it.assetName = logoConfig.logoName
                 }
             }
             logoConfig.text?.let {
-                entity.getOrAdd(Text) { Text() }.also {
+                entity.getOrAdd(TextComponent) { TextComponent() }.also {
                     it.text = logoConfig.text
                     it.fontName = logoConfig.fontName
                 }
             }
 
             entity += PositionShapeComponent()
-            entity.getOrAdd(Layout) { Layout() }.also {
+            entity.getOrAdd(LayoutComponent) { LayoutComponent() }.also {
                 it.centerX = logoConfig.centerX
                 it.centerY = logoConfig.centerY
                 it.offsetX = logoConfig.offsetX
                 it.offsetY = logoConfig.offsetY
             }
             logoConfig.drawOnLayer?.let {
-                entity.getOrAdd(Drawable) { Drawable() }.also {
+                entity.getOrAdd(DrawableComponent) { DrawableComponent() }.also {
                     it.drawOnLayer = logoConfig.drawOnLayer
                 }
             }
-            entity.getOrAdd(Appearance) { Appearance() }.also {
+            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }.also {
                 it.alpha = logoConfig.alpha
             }
-            entity += LifeCycle()
+            entity += LifeCycleComponent()
             logoConfig.function?.let { invokable ->
-                entity.getOrAdd(InputTouchButton) { InputTouchButton() }.also {
+                entity.getOrAdd(InputTouchButtonComponent) { InputTouchButtonComponent() }.also {
                     it.function = invokable
                     it.config = logoConfig.config
                 }
@@ -86,16 +86,16 @@ object TextAndLogos {
     private val configureLogoLayerFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
         val layerConfig = AssetStore.getEntityConfig<LogoLayerConfig>(config.name)
         entity.configure { entity ->
-            entity.getOrAdd(SpecificLayer) { SpecificLayer() }.also {
+            entity.getOrAdd(SpecificLayerComponent) { SpecificLayerComponent() }.also {
                 it.spriteLayer = layerConfig.layerName
                 it.parentEntity = layerConfig.parentEntity
             }
             entity.getOrAdd(PositionShapeComponent) { PositionShapeComponent() }  // x, y will be set to view in SpecificLayer hook function
-            entity.getOrAdd(Offset) { Offset() }.also {
+            entity.getOrAdd(OffsetComponent) { OffsetComponent() }.also {
                 it.x = layerConfig.offsetX
                 it.y = layerConfig.offsetY
             }
-            entity.getOrAdd(Appearance) { Appearance() }.also {
+            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }.also {
                 it.alpha = layerConfig.alpha
             }
         }

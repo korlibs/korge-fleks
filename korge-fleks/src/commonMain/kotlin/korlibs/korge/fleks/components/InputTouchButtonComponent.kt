@@ -10,12 +10,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("InputTouchButton")
-data class InputTouchButton(
+data class InputTouchButtonComponent(
     var pressed: Boolean = false,
     var triggerImmediately: Boolean = false,
     var config: Identifier = nothing,
     var function: Identifier = nothing
-) : Component<InputTouchButton>, SerializeBase {
-    override fun type(): ComponentType<InputTouchButton> = InputTouchButton
-    companion object : ComponentType<InputTouchButton>()
+) : Component<InputTouchButtonComponent> {
+    override fun type(): ComponentType<InputTouchButtonComponent> = InputTouchButtonComponent
+    companion object : ComponentType<InputTouchButtonComponent>()
 }
