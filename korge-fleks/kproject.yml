@@ -1,13 +1,23 @@
 plugins:
-- serialization
+  - serialization
+
 dependencies:
-- ../fleks
-- maven::common::org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2
-- maven::common::com.soywiz.korlibs.korge2:korge
-#- https://github.com/korlibs/korge-parallax/tree/2f5fa9be09b52c343d9160fe29dc683aa86e22e8/korge-parallax
-- ../../korge-parallax/korge-parallax
-- ../../korge-asset-manager/korge-asset-manager
-#- https://github.com/korlibs/korge-ldtk/tree/3cc31bddd707037084f8e0d764a9706cc99f0bfb/korge-ldtk
-- ../../korge-ldtk/korge-ldtk
-- https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
+  - ../fleks
+# Or use fleks locally
+# kproject.yml file with following 3 lines of content needs to be added to checked out fleks repo:
+#     name: "fleks"
+#     plugins:
+#        - serialization
+#  - ../../fleks
+  - maven::common::com.soywiz.korlibs.korge2:korge
+  - https://github.com/korlibs/korge-parallax/tree/94bb0b1b86dc0d593e1baa520a0f2ce8d03e5238/korge-parallax
+  - https://github.com/korlibs/korge-ldtk/tree/c590319a9b9b3811b564a22c20e12cd1e877b528/korge-ldtk
+  - https://github.com/korlibs/korge-asset-manager/tree/b430445ff77dc4e7b0af8ff8468002bf5bc3ba75/korge-asset-manager
+  - https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
+  # Use local copy of KorGE addons (this needs to be updated also in kproject.yml config of korge-asset-manager)
+#  - ../../korge-parallax/korge-parallax
+#  - ../../korge-ldtk/korge-ldtk
+#  - ../../korge-asset-manager/korge-asset-manager
+#  - ../../korge-tiled/korge-tiled
+
 targets: [jvm, js, android]

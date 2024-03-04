@@ -63,8 +63,7 @@ class KorgeViewSystem : IteratingSystem(
 
                 if (entity has PositionShapeComponent) {
                     val positionShapeComponent = entity[PositionShapeComponent]
-                    view.x = (positionShapeComponent.x - offset.x)
-                    view.y = (positionShapeComponent.y - offset.y)
+                    view.pos = korlibs.math.geom.Point(positionShapeComponent.x - offset.x, positionShapeComponent.y - offset.y)
                 }
 
 //                println("[${entity.id}] Y: ${view.y} (Position: ${positionShape.y} delta: ${lastY - positionShape.y})")

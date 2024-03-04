@@ -16,7 +16,8 @@ import korlibs.korge.parallax.ImageDataViewEx
  */
 class SpawnerSystem : IteratingSystem(
     family { all(SpawnerComponent) },
-    interval = EachFrame
+    // Make this fixed to not generate too much objects
+    interval = Fixed(1f / 60f)
 ) {
     override fun onTickEntity(entity: Entity) {
         val spawner = entity[SpawnerComponent]

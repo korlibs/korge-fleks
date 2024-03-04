@@ -1,8 +1,5 @@
 # loading git tag release (or commit) from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::2.5
-# or using Fleks sources locally in sub-folder "fleks/src"
-#src: .
+src: git::Quillraven/Fleks::/src::2.6
+
 plugins:
   - serialization
-#dependencies:
-#  - maven::common::org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2

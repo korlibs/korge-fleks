@@ -13,7 +13,8 @@ import korlibs.math.interpolation.Easing
  */
 class TweenSequenceSystem : IteratingSystem(
     family { all(TweenSequenceComponent) },
-    interval = EachFrame
+    // Make this fixed to not waste time if more frames are drawn per second than objects generated (from SpawnerSystem)
+    interval = Fixed(1f / 60f)
 ) {
     // Internally used variables in createAnimateComponent function
     private lateinit var currentTween: TweenBase

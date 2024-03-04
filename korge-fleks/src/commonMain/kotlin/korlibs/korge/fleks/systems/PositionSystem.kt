@@ -11,7 +11,7 @@ import korlibs.korge.fleks.components.*
 class PositionSystem : IteratingSystem(
     family {
         all(PositionShapeComponent)  // Position component absolutely needed for movement of entity objects
-        any(PositionShapeComponent, MotionComponent, ParallaxMotionComponent, RigidbodyComponent, SubEntitiesComponent)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
+            .any(PositionShapeComponent, MotionComponent, ParallaxMotionComponent, RigidbodyComponent, SubEntitiesComponent)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
     },
     interval = EachFrame
 ) {
