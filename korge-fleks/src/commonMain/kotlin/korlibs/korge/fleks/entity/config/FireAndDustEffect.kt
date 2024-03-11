@@ -8,6 +8,10 @@ import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.fleks.utils.random
 
 
+/**
+ * Function to generate effect objects like explosions, shoots, dust, etc.
+ *
+ */
 object FireAndDustEffect {
 
     data class Config(

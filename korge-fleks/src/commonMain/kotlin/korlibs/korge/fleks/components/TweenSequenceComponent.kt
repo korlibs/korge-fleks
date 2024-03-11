@@ -110,14 +110,14 @@ data class SpawnEntity(
 
 @Serializable @SerialName("TweenSequence.ExecuteConfigFunction")
 data class ExecuteConfigFunction(
-    var config: Identifier,              // name of config for configuring spawned entity
-    var function: Identifier,            // name of function which configures the spawned entity
+    var function: Identifier,                     // name of function which configures the spawned entity
+    var config: Identifier = nothing,             // [optional] name of config for configuring spawned entity
 
-    override var entity: Entity,          // entity needs to be provided in any case
-    override var delay: Float? = null,    // not used
-    override var duration: Float? = null, // not used
+    override var entity: Entity = invalidEntity,  // [optional] entity can be provided if needed in the configure-function
+    override var delay: Float? = null,            // not used
+    override var duration: Float? = null,         // not used
     @Serializable(with = EasingSerializer::class)
-    override var easing: Easing? = null   // not used
+    override var easing: Easing? = null           // not used
 ) : TweenBase
 
 // Following component classes are for triggering tweens on specific properties of components
