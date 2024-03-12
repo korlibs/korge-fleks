@@ -11,13 +11,15 @@ KorGE-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 
 # Supported Versions
 
-This is a list of versions for all needed modules/addons which are known to work together:
+This is a list of versions for all needed modules/addons which are known to work together with
+KorGE-Fleks:
 
-- KorGE: v5.1.0
-- KorGE-Fleks addon: v0.0.7-snapshot
-- KorGE-Parallax addon: 2f5fa9be09b52c343d9160fe29dc683aa86e22e8 (on branch adaptation-of-parallax-view-to-korge-fleks)
-- KorGE-Tiled addon: v0.0.2
-- Fleks: 2.5
+- KorGE: v5.4.0
+- KorGE-Parallax addon: 00b2659614a39d0daab9023678d016d2b65c80fd (on branch adaptation-of-parallax-view-to-korge-fleks)
+- KorGE-Asset-Manager: 51d4aa031202c8f53280c2b951ddec2ab0aa8ab6 (on branch main)
+- KorGE-LDtk: c590319a9b9b3811b564a22c20e12cd1e877b528 (on branch main)
+- KorGE-Tiled addon: v0.0.5
+- Fleks: 2.6
 
 # Idea and Motivation
 
@@ -136,8 +138,8 @@ configurable way.
 # Set up a new Game with KorGE-Fleks
 
 As a clean start the [KorGE-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world) repository can be used.
-It contains the kproject and gradle setup to use Fleks, KorGE and all needed KorGE addons _KorGE-Fleks, KorGE-Tiled,
-KorGE-Parallax_ together in a project.
+It contains the kproject and gradle setup to use Fleks, KorGE and all needed KorGE addons _KorGE-Fleks, KorGE-Parallax,
+KorGE-Asset-Manager, KorGE-LDtk, KorGE-Tiled_ together in a project.
 
 In detail the project setup looks like that:
 
@@ -148,7 +150,7 @@ This tells gradle that the overall project depends on a project _deps_ in the ro
 ```kotlin
 [...]
 dependencies {
-  add("commonMainApi", project(":deps"))
+    add("commonMainApi", project(":deps"))
 }
 ```
 
@@ -159,9 +161,9 @@ It just contains one dependency to the KorGE-Fleks addon.
 
 ```yaml
 dependencies:
-  - https://github.com/korlibs/korge-fleks/tree/02fed30e752cc14c71cecafbdee2882c95d99e64/korge-fleks
-# or a local folder where korge-fleks is located
-#  - ../korge-fleks
+    - https://github.com/korlibs/korge-fleks/tree/0acbfcb5d89eca161c3537a9160143c9a72d2725/korge-fleks
+#    or use local copy
+#    - ./submodules/korge-fleks/korge-fleks
 ```
 
 ## `settings.gradle.kts`
@@ -169,13 +171,29 @@ dependencies:
 Needed settings for gradle to make kproject usable in the project.
 
 ```kotlin
-pluginManagement { repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() } }
-
-plugins {
-  id("com.soywiz.kproject.settings") version "0.3.1"
+pluginManagement {
+    repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() }
 }
 
-kproject("./deps")
+buildscript {
+    val libsTomlFile = File(this.sourceFile?.parentFile, "gradle/libs.versions.toml").readText()
+    var plugins = false
+    var version = ""
+    for (line in libsTomlFile.lines().map { it.trim() }) {
+        if (line.startsWith("#")) continue
+        if (line.startsWith("[plugins]")) plugins = true
+        if (plugins && line.startsWith("korge") && Regex("^korge\\s*=.*").containsMatchIn(line)) version = Regex("version\\s*=\\s*\"(.*?)\"").find(line)?.groupValues?.get(1) ?: error("Can't find korge version")
+    }
+    if (version.isEmpty()) error("Can't find korge version in $libsTomlFile")
+
+    repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() }
+
+    dependencies {
+        classpath("com.soywiz.korge.settings:com.soywiz.korge.settings.gradle.plugin:$version")
+    }
+}
+
+apply(plugin = "com.soywiz.korge.settings")
 ```
 
 ## `fleks/kproject.yml`
@@ -184,12 +202,12 @@ This is the kproject config for including Fleks sources into the KorGE project. 
 from Fleks need to be serializable for saving the game state the `serialization` plugin needs to be added.
 
 ```yaml
+# Get an external source project from GitHub which does not contain a kproject.yml file
 # loading git tag release (or commit) from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::c24925091ced418bf045ba0672734addaab573d8
-# or using Fleks sources locally in sub-folder "src"
-#src: .
+src: git::Quillraven/Fleks::/src::2.6
+
 plugins:
-  - serialization
+    - serialization
 ```
 
 ## `korge-fleks/kproject.yml`
@@ -199,18 +217,23 @@ the `serialization` plugin is needed to save the game state.
 
 ```yaml
 plugins:
-  - serialization
+    - serialization
+
 dependencies:
-  - ../fleks
-  - maven::common::com.soywiz.korlibs.korge2:korge
-  # loading git tag release (or commit) from GitHub repo for KorGE-Parallax
-  - https://github.com/korlibs/korge-parallax/tree/b8e7356c3c5ba5fac273a83d3f6ef127a16de739/korge-parallax
-# or a local folder where korge-parallax is located
-#  - ../../korge-parallax/korge-parallax
-  # loading git tag release (or commit) from GitHub repo for KorGE-Tiled
-  - https://github.com/korlibs/korge-tiled/tree/0.0.2/korge-tiled
-# or a local folder where korge-tiled is located
-#  - ../../korge-tiled/korge-tiled
+    - ../fleks
+# Or use fleks locally
+#  - ../../fleks
+#
+    - maven::common::com.soywiz.korlibs.korge2:korge
+    - https://github.com/korlibs/korge-parallax/tree/00b2659614a39d0daab9023678d016d2b65c80fd/korge-parallax
+    - https://github.com/korlibs/korge-ldtk/tree/c590319a9b9b3811b564a22c20e12cd1e877b528/korge-ldtk
+    - https://github.com/korlibs/korge-asset-manager/tree/51d4aa031202c8f53280c2b951ddec2ab0aa8ab6/korge-asset-manager
+    - https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
+# Use local copy of KorGE addons (this needs to be updated also in kproject.yml config of korge-asset-manager)
+#    - ../../korge-parallax/korge-parallax
+#    - ../../korge-ldtk/korge-ldtk
+#    - ../../korge-asset-manager/korge-asset-manager
+#    - ../../korge-tiled/korge-tiled
 ```
 
 ## `korge-parallax/kproject.yml`
@@ -219,15 +242,16 @@ This is the kproject config for KorGE-Parallax sources. It basically contains on
 of KorGE-Parallax to KorGE.
 
 ```yaml
+name: "korge-parallax"
 dependencies:
-  - maven::common::com.soywiz.korlibs.korge2:korge
+    - "maven::common::com.soywiz.korlibs.korge2:korge"
 ```
 
-There is also a kproject file for korge-tiled. It looks basically the same as that one for
+There is also a kproject files for the other KorGE-addons. They look basically the same as that one for
 korge-parallax and therefore is omitted here.
 
 When changes are needed in one of the kproject libs above than it is possible to use a local copy of the
-corresponding git repo in the `libs` folder. E.g. for KorGE-Parallax the `src:` line with git details can be
+corresponding git repo in the `modules` folder. E.g. for KorGE-Parallax the `src:` line with git details can be
 commented out and the `src:` line with local folder under `../../korge-parallax/korge-parallax` can be
 uncommented.
 
@@ -246,7 +270,7 @@ KorGE version needs to be updated in `gradle/libs.versions.toml`:
 
 ```kotlin
 [plugins]
-korge = { id = "com.soywiz.korge", version = "4.0.0" }
+korge = { id = "com.soywiz.korge", version = "5.4.0" }
 ```
 
 ## Fleks version
@@ -255,12 +279,12 @@ Fleks ECS version needs to be updated in the kproject file under `fleks/kproject
 
 ```
 [...]
-src: git::Quillraven/Fleks::/src::2.3
+src: git::Quillraven/Fleks::/src::2.6
 ```
 
 ## KorGE Addon versions
 
-All versions of additionally used KorGE addons (KorGE-Parallax, KorGE-Tiled) needs to be updated
+All versions of additionally used KorGE addons (KorGE-Parallax, KorGE-Tiled, etc.) needs to be updated
 in KorGE-Fleks kproject file under `korge-fleks/kproject.yml`:
 
 ```kotlin
@@ -270,6 +294,12 @@ dependencies:
 - https://github.com/korlibs/korge-parallax/tree/0.0.3/korge-parallax
 - https://github.com/korlibs/korge-tiled/tree/0.0.2/korge-tiled
 ```
+
+Hint: If one of the KorGE-Addons has dependencies to the same Addon which KorGE-Fleks is using make sure that those
+versions are updated in all places. This needs to be taken into account for KorGE-Asset-Manager. It depends on
+KorGE-Parallax  like KorGE-Fleks. Thus make sure to update the dependencies section of `kproject.yml` in
+KorGE-Asset-Manager, too.
+
 # Examples
 
 * [Example in this repo](https://github.com/korlibs/korge-fleks/tree/main/example)
