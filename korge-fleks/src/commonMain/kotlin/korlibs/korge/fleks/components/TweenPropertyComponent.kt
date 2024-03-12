@@ -28,8 +28,8 @@ data class TweenPropertyComponent (
     @Serializable(with = AnySerializer::class)
     var value: Any = Unit,
 
-    var duration: Float = 0f,                    // in seconds
-    var timeProgress: Float = 0f,                // in seconds
+    var duration: Double = 0.0,                  // in seconds
+    var timeProgress: Double = 0.0,              // in seconds
     @Serializable(with = EasingSerializer::class)
     var easing: Easing = Easing.LINEAR           // Changing function
 ) : Component<TweenPropertyComponent>, SerializeBase {

@@ -23,7 +23,7 @@ data class SoundComponent(
     var startTrigger: Boolean = false,  // to play this sound effect set this to "true"
     var stopTrigger: Boolean = false,  // to stop playing this sound effect set this to "true"
     var position: Double = 0.0,  // playing position in milliseconds
-    var volume: Float = 1.0f,
+    var volume: Double = 1.0,
     var isPlaying: Boolean = false,
     var loop: Boolean = false  // TODO not yet implemented
 ) : Component<SoundComponent> {

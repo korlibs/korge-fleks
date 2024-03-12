@@ -77,7 +77,7 @@ object ParallaxBackground {
             it += ParallaxComponent(config = parallaxConfig.assetName)
             it += PositionShapeComponent()
             it += DrawableComponent(drawOnLayer = parallaxConfig.drawOnLayer)
-            it += AppearanceComponent(alpha = 1.0f)
+            it += AppearanceComponent(alpha = 1.0)
             // All sub-entity IDs are here for quick lookup by its layer name and for recycling of the overall background entity object
             it += SubEntitiesComponent(moveWithParent = false)
         }

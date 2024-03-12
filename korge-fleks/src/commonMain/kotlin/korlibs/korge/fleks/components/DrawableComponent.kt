@@ -41,7 +41,7 @@ data class DrawableComponent(
 @Serializable
 @SerialName("Appearance")
 data class AppearanceComponent(
-    var alpha: Float = 1.0f,
+    var alpha: Double = 1.0,
     var visible: Boolean = true,
     var tint: Rgb? = null
 ) : Component<AppearanceComponent> {
@@ -82,10 +82,10 @@ data class Rgb(
     var b: Int = 0xff
 ) : SerializeBase {
     operator fun plus(other: Rgb) = Rgb(r + other.r, g + other.g, b + other.b)
-    operator fun times(f: Float) = Rgb(
-        (r.toFloat() * f).roundToInt(),
-        (g.toFloat() * f).roundToInt(),
-        (b.toFloat() * f).roundToInt()
+    operator fun times(f: Double) = Rgb(
+        (r.toDouble() * f).roundToInt(),
+        (g.toDouble() * f).roundToInt(),
+        (b.toDouble() * f).roundToInt()
     )
 
     override fun toString(): String = "#%02x%02x%02x".format(r, g, b)
@@ -107,8 +107,8 @@ data class Rgb(
 @Serializable
 @SerialName("SwitchLayerVisibility")
 data class SwitchLayerVisibilityComponent(
-    var offVariance: Float = 0.0f,  // variance in switching value off: (1.0) - every frame switching possible, (0.0) - no switching at all
-    var onVariance: Float = 0.0f,   // variance in switching value on again: (1.0) - changed value switches back immediately, (0.0) - changed value stays forever
+    var offVariance: Double = 0.0,  // variance in switching value off: (1.0) - every frame switching possible, (0.0) - no switching at all
+    var onVariance: Double = 0.0,   // variance in switching value on again: (1.0) - changed value switches back immediately, (0.0) - changed value stays forever
     var spriteLayers: List<LayerVisibility> = listOf()
 ) : Component<SwitchLayerVisibilityComponent> {
     override fun type() = SwitchLayerVisibilityComponent

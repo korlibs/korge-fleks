@@ -18,7 +18,7 @@ object TiledMapBackground {
         val layerName: String,
         val x: Double = 0.0,
         val y: Double = 0.0,
-        val alpha: Float = 1.0f
+        val alpha: Double = 1.0
     ) : ConfigBase
 
     // Used in component properties to specify invokable function

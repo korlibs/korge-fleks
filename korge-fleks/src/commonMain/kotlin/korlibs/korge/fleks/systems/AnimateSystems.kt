@@ -151,7 +151,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
             entity -= component  // remove component from entity
         } else {
             // Calculate new value for the animated property
-            val time: Float = it.timeProgress / it.duration
+            val time: Double = it.timeProgress / it.duration
             value.set(it.change as Double * it.easing.invoke(time) + it.value as Double)
             // Check if time of animation sequence is over - then we can remove the animation component again
             it.timeProgress += deltaTime
@@ -168,7 +168,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
             entity -= component  // remove component from entity
         } else {
             // Calculate new value for the animated property
-            val time: Float = it.timeProgress / it.duration
+            val time: Float = (it.timeProgress / it.duration).toFloat()
             value.set(it.change as Float * it.easing.invoke(time) + it.value as Float)
             // Check if time of animation sequence is over - then we can remove the animation component again
             it.timeProgress += deltaTime
@@ -184,7 +184,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
             block.invoke(this)
             entity -= component
         } else {
-            val time = it.timeProgress / it.duration
+            val time: Double = it.timeProgress / it.duration
             value.set(((it.change as Int).toFloat() * it.easing.invoke(time)).toInt() + it.value as Int)
             it.timeProgress += deltaTime
         }
@@ -198,7 +198,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
             value.set(it.change as Rgb + it.value as Rgb)
             entity -= component
         } else {
-            val time = it.timeProgress / it.duration
+            val time: Double = it.timeProgress / it.duration
             value.set(it.change as Rgb * it.easing.invoke(time) + it.value as Rgb)
             it.timeProgress += deltaTime
         }

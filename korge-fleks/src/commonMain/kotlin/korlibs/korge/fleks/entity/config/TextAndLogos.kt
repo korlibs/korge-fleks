@@ -13,14 +13,14 @@ object TextAndLogos {
     data class LogoConfig(
         val centerX: Boolean = false,
         val centerY: Boolean = false,
-        val offsetX: Float = 0.0f,
-        val offsetY: Float = 0.0f,
+        val offsetX: Double = 0.0,
+        val offsetY: Double = 0.0,
 
         val logoName: String? = null,
         val text: String? = null,
         val fontName: String = "",
 
-        val alpha: Float = 0.0f,
+        val alpha: Double = 0.0,
         val drawOnLayer: String? = null,
 
         val function: Identifier? = null,
@@ -31,7 +31,7 @@ object TextAndLogos {
         var layerName: String = "",
         var offsetX: Double = 0.0,
         var offsetY: Double = 0.0,
-        val alpha: Float = 0f,
+        val alpha: Double = 0.0,
         var parentEntity: Entity = invalidEntity
     ) : ConfigBase
 

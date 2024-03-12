@@ -24,7 +24,7 @@ object FireAndDustEffect {
         val velocityVariationX: Double = 0.0,
         val velocityVariationY: Double = 0.0,
         val drawOnLayer: String,
-        val fadeOutDuration: Float = 0f
+        val fadeOutDuration: Double = 0.0
     ) : ConfigBase
 
     // Used in component properties to specify invokable function
@@ -64,7 +64,7 @@ object FireAndDustEffect {
                 entity.getOrAdd(TweenSequenceComponent) { TweenSequenceComponent() }.also {
                     it.tweens = listOf(
                         // Fade out effect objects
-                        TweenAppearance(entity = entity, alpha = 0.0f, duration = effectConfig.fadeOutDuration),
+                        TweenAppearance(entity = entity, alpha = 0.0, duration = effectConfig.fadeOutDuration),
                         DeleteEntity(entity = entity)
                     )
                 }

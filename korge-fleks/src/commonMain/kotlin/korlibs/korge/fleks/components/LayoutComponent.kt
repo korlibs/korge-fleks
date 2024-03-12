@@ -15,8 +15,8 @@ import kotlinx.serialization.Serializable
 data class LayoutComponent(
     var centerX: Boolean = false,
     var centerY: Boolean = false,
-    var offsetX: Float = 0.0f,
-    var offsetY: Float = 0.0f
+    var offsetX: Double = 0.0,
+    var offsetY: Double = 0.0
 ) : Component<LayoutComponent> {
     override fun type(): ComponentType<LayoutComponent> = LayoutComponent
     companion object : ComponentType<LayoutComponent>()

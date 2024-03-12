@@ -53,7 +53,7 @@ class SpawnerSystem : IteratingSystem(
                     val newEntity =
                         if (spawner.newEntity.isInvalidEntity()) world.entity {}  // create new entity
                         else spawner.newEntity  // use given entity
-                    if (spawner.positionVariation != 0.0f) {
+                    if (spawner.positionVariation != 0.0) {
                         xx = x + (-spawner.positionVariation..spawner.positionVariation).random()
                         yy = y + (-spawner.positionVariation..spawner.positionVariation).random()
                     }
