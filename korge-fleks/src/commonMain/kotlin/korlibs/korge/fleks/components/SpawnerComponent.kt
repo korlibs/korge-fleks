@@ -19,8 +19,8 @@ data class SpawnerComponent(
     var timeVariation: Int = 0,                    // 0 - no variation, 1 - one frame variation, 2 - two frames variation, ...
     var positionVariation: Double = 0.0,           // variation radius where objects will be spawned - 0.0 = no variation
     var newEntity: Entity = invalidEntity,         // If spawner shall take a specific entity for spawning it can be set here
-    var config: Identifier = nothing,             // Name of configuration which is used in below function to configure the new entity
-    var function: Identifier = nothing,           // Name of function which configures the new entity
+    var config: Identifier = nothing,              // Name of configuration which is used in below function to configure the new entity
+    var function: Identifier = nothing,            // Name of function which configures the new entity
     var totalNumberOfObjects: Int = -1,            // -1 - unlimited number of objects spawned, x = x-number of objects spawned in total
     // internal state
     var nextSpawnIn: Int = 0,
