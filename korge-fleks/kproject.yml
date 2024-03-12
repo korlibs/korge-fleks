@@ -8,7 +8,9 @@ dependencies:
 #     name: "fleks"
 #     plugins:
 #        - serialization
+#
 #  - ../../fleks
+#
   - maven::common::com.soywiz.korlibs.korge2:korge
   - https://github.com/korlibs/korge-parallax/tree/00b2659614a39d0daab9023678d016d2b65c80fd/korge-parallax
   - https://github.com/korlibs/korge-ldtk/tree/c590319a9b9b3811b564a22c20e12cd1e877b528/korge-ldtk
@@ -19,5 +21,17 @@ dependencies:
 #  - ../../korge-ldtk/korge-ldtk
 #  - ../../korge-asset-manager/korge-asset-manager
 #  - ../../korge-tiled/korge-tiled
+#
+# Using local copy of Korge-addon repos
+#
+# For creating submodules for all involved repositories follow below commands and create
+# needed folders. Example below is for Korge-asset-manager:
+#
+#     $ git submodule add https://github.com/korlibs/korge-asset-manager.git submodules/korge-asset-manager
+#
+# Don't forget to check out commit SHA for korge-asset-manager repo from
+# "./submodules/korge-fleks/korge-fleks/kproject.yml" in that submodule:
+#
+#     $ cd submodules/korge-asset-manager && git checkout 51d4aa031202c8f53280c2b951ddec2ab0aa8ab6
 
 targets: [jvm, js, android]
