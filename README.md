@@ -14,12 +14,14 @@ KorGE-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
 This is a list of versions for all needed modules/addons which are known to work together with
 KorGE-Fleks:
 
-- KorGE: v5.4.0
+```
+- KorGE:                v5.4.0
 - KorGE-Parallax addon: 00b2659614a39d0daab9023678d016d2b65c80fd (on branch adaptation-of-parallax-view-to-korge-fleks)
-- KorGE-Asset-Manager: 51d4aa031202c8f53280c2b951ddec2ab0aa8ab6 (on branch main)
-- KorGE-LDtk: c590319a9b9b3811b564a22c20e12cd1e877b528 (on branch main)
-- KorGE-Tiled addon: v0.0.5
-- Fleks: 2.6
+- KorGE-Asset-Manager:  51d4aa031202c8f53280c2b951ddec2ab0aa8ab6 (on branch main)
+- KorGE-LDtk:           c590319a9b9b3811b564a22c20e12cd1e877b528 (on branch main)
+- KorGE-Tiled addon:    v0.0.5
+- Fleks:                2.6
+```
 
 # Idea and Motivation
 
@@ -268,7 +270,7 @@ KorGE, Fleks ECS and all KorGE Addon versions need to be updated in following pl
 
 KorGE version needs to be updated in `gradle/libs.versions.toml`:
 
-```kotlin
+```toml
 [plugins]
 korge = { id = "com.soywiz.korge", version = "5.4.0" }
 ```
@@ -277,7 +279,7 @@ korge = { id = "com.soywiz.korge", version = "5.4.0" }
 
 Fleks ECS version needs to be updated in the kproject file under `fleks/kproject.yml`:
 
-```
+```yaml
 [...]
 src: git::Quillraven/Fleks::/src::2.6
 ```
@@ -287,7 +289,7 @@ src: git::Quillraven/Fleks::/src::2.6
 All versions of additionally used KorGE addons (KorGE-Parallax, KorGE-Tiled, etc.) needs to be updated
 in KorGE-Fleks kproject file under `korge-fleks/kproject.yml`:
 
-```kotlin
+```yaml
 [...]
 dependencies:
 [...]

@@ -5,10 +5,7 @@ import com.github.quillraven.fleks.FamilyHook
 import com.github.quillraven.fleks.World
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
-import korlibs.image.text.DefaultStringTextRenderer
-import korlibs.image.text.HorizontalAlign
-import korlibs.image.text.TextAlignment
-import korlibs.image.text.VerticalAlign
+import korlibs.image.text.*
 import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.SpriteComponent
@@ -24,6 +21,7 @@ import korlibs.korge.parallax.ParallaxDataView
 import korlibs.korge.view.*
 import korlibs.korge.view.align.centerXOnStage
 import korlibs.korge.view.align.centerYOnStage
+import korlibs.math.geom.*
 
 
 /**
@@ -109,18 +107,17 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         }
 
         entity has TextComponent -> {
-            val view = korlibs.korge.view.Text(
-                text = entity[TextComponent].text,
-                textSize = korlibs.korge.view.Text.DEFAULT_TEXT_SIZE,
-                color = Colors.WHITE,
-                font = AssetStore.getFont(entity[TextComponent].fontName),
-                alignment = TextAlignment.CENTER,
-                renderer = DefaultStringTextRenderer,
-                autoScaling = false
+            val component = entity[TextComponent]
+            val richTextData = RichTextData(
+                text = component.text,
+                font = AssetStore.getFont(component.fontName)
+            )
+            val view = TextBlock(
+                text = richTextData,
+                align = TextAlignment.CENTER,
+                size = Size2D(richTextData.width + 1, richTextData.height + 1)
             ).apply {
                 smoothing = false
-                verticalAlign = VerticalAlign.MIDDLE
-                horizontalAlign = HorizontalAlign.CENTER
             }
             width = view.width
             height = view.height

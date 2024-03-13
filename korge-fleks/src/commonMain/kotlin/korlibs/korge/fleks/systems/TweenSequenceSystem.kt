@@ -167,7 +167,13 @@ class TweenSequenceSystem : IteratingSystem(
             is DeleteEntity -> tween.entity.configure { entityToDelete -> world -= entityToDelete }
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> Invokable.invoke(tween.function, world, tween.entity, tween.config)
-            else -> error("AnimationScriptSystem: Animate function for tween $tween not implemented!")
+            else -> {
+                when (tween) {
+                    is SpawnNewTweenSequence -> error("AnimationScriptSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens")
+                    is Wait -> error("AnimationScriptSystem: \"Wait\" not allowed in ParallelTweens")
+                    else -> error("AnimationScriptSystem: Animate function for tween $tween not implemented!")
+                }
+            }
         }
     }
 

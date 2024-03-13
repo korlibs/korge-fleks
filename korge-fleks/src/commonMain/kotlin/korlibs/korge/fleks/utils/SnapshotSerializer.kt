@@ -77,7 +77,6 @@ internal val internalModule = SerializersModule {
         subclass(SpriteComponent::class)
         subclass(SubEntitiesComponent::class)
         subclass(TextComponent::class)
-        subclass(MultiLineTextComponent::class)
         subclass(TiledMapComponent::class)
         subclass(LdtkLevelMapComponent::class)
     }
