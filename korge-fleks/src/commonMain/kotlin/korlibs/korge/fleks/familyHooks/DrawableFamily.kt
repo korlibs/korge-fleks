@@ -74,10 +74,12 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]
             val ldtkWorld = AssetStore.getLdtkWorld(ldtkLevelMapComponent.worldName)
             val ldtkLevel = AssetStore.getLdtkLevel(ldtkWorld, ldtkLevelMapComponent.levelName)
-            val view = LDTKLevelView(level = LDTKLevel(
-                world = ldtkWorld,
-                level = ldtkLevel
-            ))
+            val view = LDTKLevelView(
+                level = LDTKLevel(
+                    world = ldtkWorld,
+                    level = ldtkLevel
+                )
+            )
             width = ldtkLevel.pxWid.toDouble()
             height = ldtkLevel.pxHei.toDouble()
             view
