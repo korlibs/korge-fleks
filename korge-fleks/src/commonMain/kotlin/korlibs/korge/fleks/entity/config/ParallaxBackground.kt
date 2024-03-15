@@ -86,20 +86,20 @@ object ParallaxBackground {
         val view = KorgeViewCache[entity] as ParallaxDataView
         val layerMap = entity[SubEntitiesComponent]
 
-        val config = AssetStore.getBackground(parallaxConfig.assetName.name).config
-        val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
+        val parallaxDataContainer = AssetStore.getBackground(parallaxConfig.assetName.name).config
+        val isHorizontal = parallaxDataContainer.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
 
-        config.backgroundLayers?.fastForEach { conf ->
+        parallaxDataContainer.backgroundLayers?.fastForEach { conf ->
             layerMap.entities[conf.name] = createSubEntityForLayer(world, entity, conf.name,
                 speedFactor = conf.speedFactor, selfSpeedX = conf.selfSpeedX, selfSpeedY = conf.selfSpeedY,
                 isHorizontal = isHorizontal)
         }
-        config.foregroundLayers?.fastForEach { conf ->
+        parallaxDataContainer.foregroundLayers?.fastForEach { conf ->
             layerMap.entities[conf.name] = createSubEntityForLayer(world, entity, conf.name,
                 speedFactor = conf.speedFactor, selfSpeedX = conf.selfSpeedX, selfSpeedY = conf.selfSpeedY,
                 isHorizontal = isHorizontal)
         }
-        config.parallaxPlane?.let { planeConf ->
+        parallaxDataContainer.parallaxPlane?.let { planeConf ->
             val offset = planeConf.offset
             val selfSpeedX = if (isHorizontal) planeConf.selfSpeed else 0.0
             val selfSpeedY = if (!isHorizontal) planeConf.selfSpeed else 0.0

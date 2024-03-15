@@ -35,7 +35,7 @@ object LevelMap {
         entity.configure {
             when (levelMapConfig.mapType) {
                 MapType.LDTK -> it += LdtkLevelMapComponent(levelMapConfig.worldName, levelMapConfig.levelName)
-                MapType.TILED -> it += TiledMapComponent(levelMapConfig.assetName)
+                MapType.TILED -> it += TiledLevelMapComponent(levelMapConfig.assetName)
             }
             it += PositionShapeComponent(
                 x = levelMapConfig.x,

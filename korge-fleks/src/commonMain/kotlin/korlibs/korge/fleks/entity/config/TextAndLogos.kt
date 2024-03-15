@@ -21,7 +21,7 @@ object TextAndLogos {
         val fontName: String = "",
 
         val alpha: Double = 0.0,
-        val drawOnLayer: String? = null,
+        val drawOnLayer: String,
 
         val function: Identifier? = null,
         val config: Identifier = nothing
@@ -58,16 +58,14 @@ object TextAndLogos {
             }
 
             entity += PositionShapeComponent()
+            entity += DrawableComponent(drawOnLayer = logoConfig.drawOnLayer)
+
+            // Add Layout after adding PositionShapeComponent and DrawableComponent
             entity.getOrAdd(LayoutComponent) { LayoutComponent() }.also {
                 it.centerX = logoConfig.centerX
                 it.centerY = logoConfig.centerY
                 it.offsetX = logoConfig.offsetX
                 it.offsetY = logoConfig.offsetY
-            }
-            logoConfig.drawOnLayer?.let {
-                entity.getOrAdd(DrawableComponent) { DrawableComponent() }.also {
-                    it.drawOnLayer = logoConfig.drawOnLayer
-                }
             }
             entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }.also {
                 it.alpha = logoConfig.alpha

@@ -77,7 +77,7 @@ internal val internalModule = SerializersModule {
         subclass(SpriteComponent::class)
         subclass(SubEntitiesComponent::class)
         subclass(TextComponent::class)
-        subclass(TiledMapComponent::class)
+        subclass(TiledLevelMapComponent::class)
         subclass(LdtkLevelMapComponent::class)
     }
     // Register tags (components without properties)

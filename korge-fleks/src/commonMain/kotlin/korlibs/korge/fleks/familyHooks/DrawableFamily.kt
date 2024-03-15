@@ -18,6 +18,7 @@ import korlibs.korge.ldtk.view.*
 import korlibs.korge.parallax.ImageDataViewEx
 import korlibs.korge.parallax.ParallaxConfig
 import korlibs.korge.parallax.ParallaxDataView
+import korlibs.korge.tiled.*
 import korlibs.korge.view.*
 import korlibs.korge.view.align.centerXOnStage
 import korlibs.korge.view.align.centerYOnStage
@@ -29,7 +30,7 @@ import korlibs.math.geom.*
  * created and added to the [KorgeViewSystem]. This is done in [onDrawableFamilyAdded] family hook here rather than in
  * component hook because we are sure that all needed components are set up before in the [World].
  */
-fun drawableFamily(): Family = World.family { all(DrawableComponent, PositionShapeComponent).any(DrawableComponent, AppearanceComponent, InputTouchButtonComponent) }
+fun drawableFamily(): Family = World.family { all(DrawableComponent, PositionShapeComponent).any(DrawableComponent, LayoutComponent, AppearanceComponent, InputTouchButtonComponent) }
 
 val onDrawableFamilyAdded: FamilyHook = { entity ->
     val world = this
@@ -61,14 +62,13 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             view
         }
 
-// TODO
-//        entity has TiledMap -> {
-//            // TODO get width and height of overall tiled map
-//            width = 0.0f
-//            height = 0.0f
-//
-//            TiledMapView(assets.getTiledMap(entity[TiledMap].assetName), smoothing = false, showShapes = false)
-//        }
+        entity has TiledLevelMapComponent -> {
+            // TODO get width and height of overall tiled map
+            width = 0.0
+            height = 0.0
+
+            TiledMapView(AssetStore.getTiledMap(entity[TiledLevelMapComponent].assetName), smoothing = false, showShapes = false)
+        }
 
         entity has LdtkLevelMapComponent -> {
             val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]
@@ -166,7 +166,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
     // Update position of view with initial position
     view.x = positionShapeComponent.x
-    view.y = positionShapeComponent.y.toDouble()
+    view.y = positionShapeComponent.y
 
     if (entity has LayoutComponent) {
         val layout = entity[LayoutComponent]

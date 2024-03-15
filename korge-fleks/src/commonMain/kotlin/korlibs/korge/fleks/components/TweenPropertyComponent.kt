@@ -74,6 +74,9 @@ data class TweenPropertyComponent (
         val TweenSoundPosition = TweenProperty.SoundPosition.type
         val TweenSoundVolume = TweenProperty.SoundVolume.type
 
+        val TweenNoisyMoveX = TweenProperty.NoisyMoveX.type
+        val TweenNoisyMoveY = TweenProperty.NoisyMoveY.type
+
         val ExecuteConfigureFunction = TweenProperty.ConfigureFunction.type
     }
 }
@@ -119,6 +122,9 @@ enum class TweenProperty(val type: ComponentType<TweenPropertyComponent>) {
     SoundStopTrigger(componentTypeOf<TweenPropertyComponent>()),
     SoundPosition(componentTypeOf<TweenPropertyComponent>()),
     SoundVolume(componentTypeOf<TweenPropertyComponent>()),
+
+    NoisyMoveX(componentTypeOf<TweenPropertyComponent>()),
+    NoisyMoveY(componentTypeOf<TweenPropertyComponent>()),
 
     ConfigureFunction(componentTypeOf<TweenPropertyComponent>())
 }

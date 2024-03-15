@@ -14,15 +14,15 @@ import kotlinx.serialization.Serializable
  *
  * For serialize and deserialize of component data all properties shall be of basic types.
  * Korge-specific objects shall not be added to any component. They will be stored
- * in the Korge specific systems.
+ * in Korge specific cache objects and used in systems.
  */
 @Serializable
-@SerialName("TiledMap")
-data class TiledMapComponent(
+@SerialName("TiledLevelMap")
+data class TiledLevelMapComponent(
     var assetName: String = "",
-) : Component<TiledMapComponent> {
-    override fun type(): ComponentType<TiledMapComponent> = TiledMapComponent
-    companion object : ComponentType<TiledMapComponent>() {
+) : Component<TiledLevelMapComponent> {
+    override fun type(): ComponentType<TiledLevelMapComponent> = TiledLevelMapComponent
+    companion object : ComponentType<TiledLevelMapComponent>() {
         /**
          * Hint: How you should read "Component Hook"
          *
@@ -30,9 +30,9 @@ data class TiledMapComponent(
          * This initialization can only use data from one component. Thus, it must be self-containable regarding the
          * save-state of an object. But this is often not the case -> check FamilyHooks.
          */
-        fun onComponentAdded(entity: Entity, component: TiledMapComponent) {}
-
-        fun onComponentRemoved(entity: Entity, component: TiledMapComponent) {}
+        // Not used here
+        // fun onComponentAdded(entity: Entity, component: TiledLevelMapComponent) {}
+        // fun onComponentRemoved(entity: Entity, component: TiledLevelMapComponent) {}
     }
 }
 
