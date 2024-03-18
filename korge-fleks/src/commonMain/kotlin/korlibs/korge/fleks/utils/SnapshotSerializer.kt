@@ -82,7 +82,7 @@ internal val internalModule = SerializersModule {
     }
     // Register tags (components without properties)
     polymorphic(UniqueId::class) {
-//        subclass(VisibleTag::class, VisibleTag.serializer())
+//        subclass(VisibleTag::class)
     }
 
     // Data class hierarchy used for AnimationScript component
