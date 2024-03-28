@@ -3,7 +3,6 @@ package korlibs.korge.fleks.familyHooks
 import com.github.quillraven.fleks.Family
 import com.github.quillraven.fleks.FamilyHook
 import com.github.quillraven.fleks.World
-import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.image.text.*
 import korlibs.korge.assetmanager.*
