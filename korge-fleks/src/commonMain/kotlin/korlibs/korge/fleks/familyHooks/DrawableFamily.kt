@@ -43,7 +43,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
     val view: View = when {
         entity has SpriteComponent -> {
             val sprite = entity[SpriteComponent]
-            val view = ImageDataViewEx(AssetStore.getImage(sprite.assetName), sprite.animationName, smoothing = false)
+            val view = ImageDataViewEx(AssetStore.getImageData(sprite.assetName), sprite.animationName, smoothing = false)
 
             // when animation finished playing trigger destruction of entity
             if (sprite.destroyOnPlayingFinished) view.onPlayFinished = {
