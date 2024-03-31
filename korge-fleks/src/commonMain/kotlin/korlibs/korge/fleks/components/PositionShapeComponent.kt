@@ -19,6 +19,8 @@ data class PositionShapeComponent(
     var initialized: Boolean = false,
     var x: Double = 0.0,
     var y: Double = 0.0,
+    var offsetX: Float = 0f,
+    var offsetY: Float = 0f,
     var width: Double = 0.0,
     var height: Double = 0.0,
     ) : Component<PositionShapeComponent> {
