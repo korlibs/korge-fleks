@@ -14,7 +14,7 @@ import korlibs.korge.view.View
 
 /**
  * This Family-Hook specifies an entity which controls an image layer of a sprite.
- * The graphics of a sprites, when created and loaded from Aseprite, can contain layers.
+ * The graphics of a sprite, when created and loaded from Aseprite, can contain layers.
  * Those layers can be controlled independently. E.g. the relative position of the layer
  * graphics inside the sprite or the visibility (alpha value) can be manipulated
  * independently per sprite layer. Also touch input can be caught and specific Invokable
@@ -25,14 +25,14 @@ import korlibs.korge.view.View
  * with the [SpriteComponent] data (graphics).
  * - [AppearanceComponent] (optional) : Contains values for [visibility][AppearanceComponent.visible], [alpha][AppearanceComponent.alpha] and
  * [color tint][AppearanceComponent.tint].
- * - [PositionShapeComponent] (optional) : Contains the [x][PositionShapeComponent.x] and [y][PositionShapeComponent.y] position of the
+ * - [PositionComponent] (optional) : Contains the [x][PositionComponent.x] and [y][PositionComponent.y] position of the
  * layer relative to the [SpriteComponent].
  * - [InputTouchButtonComponent] (optional) : Contains the [Invokable] functions when the player touches that layer on the display.
  *
  * One of the optional components must be added to the specific-layer entity. Otherwise, the [SpecificLayerComponent] component
  * will be useless.
  */
-fun specificLayerFamily(): Family = World.family { all(SpecificLayerComponent).any(SpecificLayerComponent, PositionShapeComponent, AppearanceComponent, InputTouchButtonComponent, OffsetComponent) }
+fun specificLayerFamily(): Family = World.family { all(SpecificLayerComponent).any(SpecificLayerComponent, PositionComponent, /*AppearanceComponent,*/ InputTouchButtonComponent, OffsetComponent) }
 
 val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
     val world = this
@@ -69,7 +69,7 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
                 KorgeViewCache.addOrUpdate(entity, view)
 
                 // Save current position of layer into PositionShape component
-                entity.getOrNull(PositionShapeComponent)?.let {
+                entity.getOrNull(PositionComponent)?.let {
                     it.x = view.x
                     it.y = view.y
                 }
@@ -82,11 +82,11 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
         error("onSpecificLayerFamilyAdded: No sprite layer name or parallax plane line number set for entity '${entity.id}'!")
     }
 
-    entity.getOrNull(AppearanceComponent)?.also {
-        view.visible = it.visible
-        view.alpha = it.alpha.toDouble()
-        it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
-    }
+//    entity.getOrNull(AppearanceComponent)?.also {
+//        view.visible = it.visible
+//        view.alpha = it.alpha.toDouble()
+//        it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
+//    }
 
     // Set properties in TouchInput when touch input was recognized
     // TouchInputSystem checks for those properties and executes specific Invokable function
@@ -111,15 +111,16 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
         }
     }
 
-    // Save current position of layer into PositionShape component
-    entity.getOrNull(PositionShapeComponent)?.let {
+    // Save current position of layer into PositionComponent
+/* This is most likely not needed anymore with the new SpriteRenderView
+    entity.getOrNull(PositionComponent)?.let {
         if (!it.initialized) {
             it.x = view.x
             it.y = view.y
             it.initialized = true
         }
     }
-
+*/
     KorgeViewCache.addOrUpdate(entity, view)
 }
 

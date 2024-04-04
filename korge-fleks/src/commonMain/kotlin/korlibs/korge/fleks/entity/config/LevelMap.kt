@@ -37,16 +37,18 @@ object LevelMap {
                 MapType.LDTK -> it += LdtkLevelMapComponent(levelMapConfig.worldName, levelMapConfig.levelName)
                 MapType.TILED -> it += TiledLevelMapComponent(levelMapConfig.assetName)
             }
-            it += PositionShapeComponent(
+            it += PositionComponent(
                 x = levelMapConfig.x,
                 y = levelMapConfig.y
             )
-            it += DrawableComponent(
-                drawOnLayer = levelMapConfig.layerName
-            )
-            it += AppearanceComponent(
-                alpha = levelMapConfig.alpha
-            )
+            it += SizeComponent()  // Size of level map needs to be set after loading of map is finished
+//            it += DrawableComponent(
+//                drawOnLayer = levelMapConfig.layerName
+//            )
+// TODO move alpha in *LevelMapComponent
+//            it += AppearanceComponent(
+//                alpha = levelMapConfig.alpha
+//            )
         }
         entity
     }

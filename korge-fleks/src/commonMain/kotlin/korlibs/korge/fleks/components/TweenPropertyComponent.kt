@@ -3,7 +3,6 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.AnySerializer
 import korlibs.korge.fleks.utils.EasingSerializer
-import korlibs.korge.fleks.utils.SerializeBase
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -32,8 +31,56 @@ data class TweenPropertyComponent (
     var timeProgress: Double = 0.0,              // in seconds
     @Serializable(with = EasingSerializer::class)
     var easing: Easing = Easing.LINEAR           // Changing function
-) : Component<TweenPropertyComponent>, SerializeBase {
+) : Component<TweenPropertyComponent> {
     override fun type(): ComponentType<TweenPropertyComponent> = property.type
+
+    /**
+     * All final [TweenProperty] names are organized in this enum. This is done to easily serialize the
+     * [property](TweenComponent.property) of the base [TweenPropertyComponent] data class.
+     */
+    enum class TweenProperty(val type: ComponentType<TweenPropertyComponent>) {
+        SpriteIsPlaying(componentTypeOf<TweenPropertyComponent>()),
+        SpriteForwardDirection(componentTypeOf<TweenPropertyComponent>()),
+        SpriteLoop(componentTypeOf<TweenPropertyComponent>()),
+        SpriteDestroyOnPlayingFinished(componentTypeOf<TweenPropertyComponent>()),
+        SpriteAnimName(componentTypeOf<TweenPropertyComponent>()),
+
+        AppearanceAlpha(componentTypeOf<TweenPropertyComponent>()),
+        AppearanceTint(componentTypeOf<TweenPropertyComponent>()),
+        AppearanceVisible(componentTypeOf<TweenPropertyComponent>()),
+
+        SpawnerNumberOfObjects(componentTypeOf<TweenPropertyComponent>()),
+        SpawnerInterval(componentTypeOf<TweenPropertyComponent>()),
+        SpawnerTimeVariation(componentTypeOf<TweenPropertyComponent>()),
+        SpawnerPositionVariation(componentTypeOf<TweenPropertyComponent>()),
+
+        // TODO not used yet in animation system
+        LifeCycleHealthCounter(componentTypeOf<TweenPropertyComponent>()),
+
+        PositionShapeX(componentTypeOf<TweenPropertyComponent>()),
+        PositionShapeY(componentTypeOf<TweenPropertyComponent>()),
+
+        OffsetX(componentTypeOf<TweenPropertyComponent>()),
+        OffsetY(componentTypeOf<TweenPropertyComponent>()),
+
+        LayoutCenterX(componentTypeOf<TweenPropertyComponent>()),
+        LayoutCenterY(componentTypeOf<TweenPropertyComponent>()),
+        LayoutOffsetX(componentTypeOf<TweenPropertyComponent>()),
+        LayoutOffsetY(componentTypeOf<TweenPropertyComponent>()),
+
+        SwitchLayerVisibilityOnVariance(componentTypeOf<TweenPropertyComponent>()),
+        SwitchLayerVisibilityOffVariance(componentTypeOf<TweenPropertyComponent>()),
+
+        SoundStartTrigger(componentTypeOf<TweenPropertyComponent>()),
+        SoundStopTrigger(componentTypeOf<TweenPropertyComponent>()),
+        SoundPosition(componentTypeOf<TweenPropertyComponent>()),
+        SoundVolume(componentTypeOf<TweenPropertyComponent>()),
+
+        NoisyMoveX(componentTypeOf<TweenPropertyComponent>()),
+        NoisyMoveY(componentTypeOf<TweenPropertyComponent>()),
+
+        ConfigureFunction(componentTypeOf<TweenPropertyComponent>())
+    }
 
     companion object {
         // TODO update unit test for this mapping from enum to here
@@ -79,52 +126,4 @@ data class TweenPropertyComponent (
 
         val ExecuteConfigureFunction = TweenProperty.ConfigureFunction.type
     }
-}
-
-/**
- * All final [TweenProperty] names are organized in this enum. This is done to easily serialize the
- * [property](TweenComponent.property) of the base [TweenPropertyComponent] data class.
- */
-enum class TweenProperty(val type: ComponentType<TweenPropertyComponent>) {
-    SpriteIsPlaying(componentTypeOf<TweenPropertyComponent>()),
-    SpriteForwardDirection(componentTypeOf<TweenPropertyComponent>()),
-    SpriteLoop(componentTypeOf<TweenPropertyComponent>()),
-    SpriteDestroyOnPlayingFinished(componentTypeOf<TweenPropertyComponent>()),
-    SpriteAnimName(componentTypeOf<TweenPropertyComponent>()),
-
-    AppearanceAlpha(componentTypeOf<TweenPropertyComponent>()),
-    AppearanceTint(componentTypeOf<TweenPropertyComponent>()),
-    AppearanceVisible(componentTypeOf<TweenPropertyComponent>()),
-
-    SpawnerNumberOfObjects(componentTypeOf<TweenPropertyComponent>()),
-    SpawnerInterval(componentTypeOf<TweenPropertyComponent>()),
-    SpawnerTimeVariation(componentTypeOf<TweenPropertyComponent>()),
-    SpawnerPositionVariation(componentTypeOf<TweenPropertyComponent>()),
-
-    // TODO not used yet in animation system
-    LifeCycleHealthCounter(componentTypeOf<TweenPropertyComponent>()),
-
-    PositionShapeX(componentTypeOf<TweenPropertyComponent>()),
-    PositionShapeY(componentTypeOf<TweenPropertyComponent>()),
-
-    OffsetX(componentTypeOf<TweenPropertyComponent>()),
-    OffsetY(componentTypeOf<TweenPropertyComponent>()),
-
-    LayoutCenterX(componentTypeOf<TweenPropertyComponent>()),
-    LayoutCenterY(componentTypeOf<TweenPropertyComponent>()),
-    LayoutOffsetX(componentTypeOf<TweenPropertyComponent>()),
-    LayoutOffsetY(componentTypeOf<TweenPropertyComponent>()),
-
-    SwitchLayerVisibilityOnVariance(componentTypeOf<TweenPropertyComponent>()),
-    SwitchLayerVisibilityOffVariance(componentTypeOf<TweenPropertyComponent>()),
-
-    SoundStartTrigger(componentTypeOf<TweenPropertyComponent>()),
-    SoundStopTrigger(componentTypeOf<TweenPropertyComponent>()),
-    SoundPosition(componentTypeOf<TweenPropertyComponent>()),
-    SoundVolume(componentTypeOf<TweenPropertyComponent>()),
-
-    NoisyMoveX(componentTypeOf<TweenPropertyComponent>()),
-    NoisyMoveY(componentTypeOf<TweenPropertyComponent>()),
-
-    ConfigureFunction(componentTypeOf<TweenPropertyComponent>())
 }

@@ -13,7 +13,7 @@ internal class PositionShapeTest {
     @Test
     fun testPositionShapeSerialization() {
 
-        val compUnderTest = PositionShapeComponent(
+        val compUnderTest = PositionComponent(
             x = 5.2f,
             y = 42.1f,
         )
@@ -26,7 +26,7 @@ internal class PositionShapeTest {
 
         // get the component from entity with the same id from the new created world
         val newEntity = recreatedWorld.asEntityBag()[entity.id]
-        val newCompUnderTest = with (recreatedWorld) { newEntity[PositionShapeComponent] }
+        val newCompUnderTest = with (recreatedWorld) { newEntity[PositionComponent] }
 
         assertEquals(compUnderTest.x, newCompUnderTest.x, "Check 'x' property to be equal")
         assertEquals(compUnderTest.y, newCompUnderTest.y, "Check 'y' property to be equal")

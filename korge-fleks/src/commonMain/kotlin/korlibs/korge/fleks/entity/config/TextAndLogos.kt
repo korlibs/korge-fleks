@@ -43,7 +43,7 @@ object TextAndLogos {
         val logoConfig = AssetStore.getEntityConfig<LogoConfig>(config.name)
         entity.configure { entity ->
             // Make sure we have position component
-            entity.getOrAdd(PositionShapeComponent) { PositionShapeComponent() }
+            entity.getOrAdd(PositionComponent) { PositionComponent() }
 
             logoConfig.logoName?.let {
                 entity.getOrAdd(SpriteComponent) { SpriteComponent() }.also {
@@ -57,8 +57,8 @@ object TextAndLogos {
                 }
             }
 
-            entity += PositionShapeComponent()
-            entity += DrawableComponent(drawOnLayer = logoConfig.drawOnLayer)
+            entity += PositionComponent()
+//            entity += DrawableComponent(drawOnLayer = logoConfig.drawOnLayer)
 
             // Add Layout after adding PositionShapeComponent and DrawableComponent
             entity.getOrAdd(LayoutComponent) { LayoutComponent() }.also {
@@ -67,9 +67,10 @@ object TextAndLogos {
                 it.offsetX = logoConfig.offsetX
                 it.offsetY = logoConfig.offsetY
             }
-            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }.also {
-                it.alpha = logoConfig.alpha
-            }
+// TODO move into SpriteComponent and TextComponent
+//            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }.also {
+//                it.alpha = logoConfig.alpha
+//            }
             entity += LifeCycleComponent()
             logoConfig.function?.let { invokable ->
                 entity.getOrAdd(InputTouchButtonComponent) { InputTouchButtonComponent() }.also {
@@ -88,14 +89,15 @@ object TextAndLogos {
                 it.spriteLayer = layerConfig.layerName
                 it.parentEntity = layerConfig.parentEntity
             }
-            entity.getOrAdd(PositionShapeComponent) { PositionShapeComponent() }  // x, y will be set to view in SpecificLayer hook function
+            entity.getOrAdd(PositionComponent) { PositionComponent() }  // x, y will be set to view in SpecificLayer hook function
             entity.getOrAdd(OffsetComponent) { OffsetComponent() }.also {
                 it.x = layerConfig.offsetX
                 it.y = layerConfig.offsetY
             }
-            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }.also {
-                it.alpha = layerConfig.alpha
-            }
+// TODO move into SpecificLayerComponent
+//            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }.also {
+//                it.alpha = layerConfig.alpha
+//            }
         }
         entity
     }

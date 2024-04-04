@@ -26,7 +26,7 @@ class SpawnerSystem : IteratingSystem(
                 var x = 0.0
                 var y = 0.0
                 var setPosition = false
-                entity.getOrNull(PositionShapeComponent)?.let {
+                entity.getOrNull(PositionComponent)?.let {
                     x = it.x
                     y = it.y
                     setPosition = true
@@ -40,7 +40,7 @@ class SpawnerSystem : IteratingSystem(
                     // Get offset depending on current animation and frame index
                     val currentFrameIndex = (KorgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
                     val animationName = it.entity.getOrNull(SpriteComponent)?.animationName ?: ""
-                    val offset = it.list[animationName]?.get(currentFrameIndex)
+                    val offset = it.mapOfOffsetLists[animationName]?.get(currentFrameIndex)
                         ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
                     x += offset.x
                     y += offset.y
@@ -59,7 +59,7 @@ class SpawnerSystem : IteratingSystem(
                     }
                     // Directly set position
                     if (setPosition) newEntity.configure {
-                        it += PositionShapeComponent(x = xx, y = yy)
+                        it += PositionComponent(x = xx, y = yy)
                     }
 
                     // Call the configured spawner function for configuring new objects

@@ -3,7 +3,9 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.TweenProperty.*
+import korlibs.korge.fleks.components.TweenPropertyComponent.TweenProperty
+import korlibs.korge.fleks.components.TweenPropertyComponent.TweenProperty.*
+import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.korge.fleks.entity.config.isInvalidEntity
 import korlibs.math.interpolation.Easing
@@ -114,14 +116,14 @@ class TweenSequenceSystem : IteratingSystem(
         currentTween = tween
         currentParentTween = parentTween
         when (tween) {
-            is TweenAppearance -> tween.entity.getOrError(AppearanceComponent).let { start ->
-                tween.alpha?.let { end -> createAnimateComponent(AppearanceAlpha, value = start.alpha, change = end - start.alpha) }
-                tween.tint?.let { end ->  createAnimateComponent(AppearanceTint, start.tint ?: Rgb.WHITE,
-                    Rgb(r = end.r - (start.tint?.r ?: 0xff), g = end.g - (start.tint?.g ?: 0xff), b = end.b - (start.tint?.b ?: 0xff))
-                ) }
-                tween.visible?.let { value -> createAnimateComponent(AppearanceVisible, value) }
-            }
-            is TweenPositionShape -> tween.entity.getOrError(PositionShapeComponent).let { start ->
+//            is TweenAppearance -> tween.entity.getOrError(AppearanceComponent).let { start ->
+//                tween.alpha?.let { end -> createAnimateComponent(AppearanceAlpha, value = start.alpha, change = end - start.alpha) }
+//                tween.tint?.let { end ->  createAnimateComponent(AppearanceTint, start.tint ?: Rgb.WHITE,
+//                    Rgb(r = end.r - (start.tint?.r ?: 0xff), g = end.g - (start.tint?.g ?: 0xff), b = end.b - (start.tint?.b ?: 0xff))
+//                ) }
+//                tween.visible?.let { value -> createAnimateComponent(AppearanceVisible, value) }
+//            }
+            is TweenPositionShape -> tween.entity.getOrError(PositionComponent).let { start ->
                 tween.x?.let { end -> createAnimateComponent(PositionShapeX, start.x, end - start.x) }
                 tween.y?.let { end -> createAnimateComponent(PositionShapeY, start.y, end - start.y) }
             }

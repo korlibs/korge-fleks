@@ -25,6 +25,7 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoun
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStartTrigger
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStopTrigger
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundVolume
+import korlibs.korge.fleks.components.SpriteComponent.Rgb
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.components.*
 import korlibs.korge.parallax.ImageDataViewEx
@@ -39,17 +40,17 @@ import kotlin.reflect.KMutableProperty0
  * When the animation is over than the Animate component is removed again from the entity.
  * Adding Animate components can be done e.g. by the AnimationSequence Entity Component configuration.
  */
-class AnimateAppearanceSystem : IteratingSystem(
-    family { all(AppearanceComponent).any(TweenAppearanceAlphaComponent, TweenAppearanceTint, TweenAppearanceVisible) },
-    interval = EachFrame
-) {
-    override fun onTickEntity(entity: Entity) {
-        val appearance = entity[AppearanceComponent]
-        updateProperty(entity, TweenAppearanceAlphaComponent, appearance::alpha)
-        updateProperty(entity, TweenAppearanceTint, appearance::tint)
-        updateProperty(entity, TweenAppearanceVisible, appearance::visible)
-    }
-}
+//class AnimateAppearanceSystem : IteratingSystem(
+//    family { all(AppearanceComponent).any(TweenAppearanceAlphaComponent, TweenAppearanceTint, TweenAppearanceVisible) },
+//    interval = EachFrame
+//) {
+//    override fun onTickEntity(entity: Entity) {
+//        val appearance = entity[AppearanceComponent]
+//        updateProperty(entity, TweenAppearanceAlphaComponent, appearance::alpha)
+//        updateProperty(entity, TweenAppearanceTint, appearance::tint)
+//        updateProperty(entity, TweenAppearanceVisible, appearance::visible)
+//    }
+//}
 
 class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
     family { all(SwitchLayerVisibilityComponent).any(TweenSwitchLayerVisibilityOnVariance, TweenSwitchLayerVisibilityOffVariance) },
@@ -67,7 +68,7 @@ class AnimatePositionShapeSystem : IteratingSystem(
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
-        entity.getOrNull(PositionShapeComponent)?.let {
+        entity.getOrNull(PositionComponent)?.let {
             updateProperty(entity, TweenPositionShapeXComponent, it::x)
             updateProperty(entity, TweenPositionShapeYComponent, it::y)
         }

@@ -29,14 +29,15 @@ import korlibs.math.geom.*
  * created and added to the [KorgeViewSystem]. This is done in [onDrawableFamilyAdded] family hook here rather than in
  * component hook because we are sure that all needed components are set up before in the [World].
  */
-fun drawableFamily(): Family = World.family { all(DrawableComponent, PositionShapeComponent).any(DrawableComponent, LayoutComponent, AppearanceComponent, InputTouchButtonComponent) }
+fun drawableFamily(): Family = World.family { all(/*DrawableComponent,*/ PositionComponent, SizeComponent).any(/*DrawableComponent,*/ LayoutComponent, /*AppearanceComponent,*/ InputTouchButtonComponent) }
 
 val onDrawableFamilyAdded: FamilyHook = { entity ->
     val world = this
     val layers = inject<HashMap<String, Container>>("Layers")
 
-    val drawable = entity[DrawableComponent]
-    val positionShapeComponent = entity[PositionShapeComponent]
+//    val drawable = entity[DrawableComponent]
+    val positionComponent = entity[PositionComponent]
+    val sizeComponent = entity[SizeComponent]
     val width: Double
     val height: Double
 
@@ -129,50 +130,49 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         else -> error("onDrawableFamilyAdded: No Parallax, ParallaxLayer, TiledMap, Sprite or Text component found!")
     }
 
-    entity.getOrNull(AppearanceComponent)?.also {
-        view.visible = it.visible
-        view.alpha = it.alpha.toDouble()
-        it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
-    }
+//    entity.getOrNull(AppearanceComponent)?.also {
+//        view.visible = it.visible
+//        view.alpha = it.alpha.toDouble()
+//        it.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
+//    }
 
-    when (val layer = layers[drawable.drawOnLayer]) {
-        null -> error("onDrawableFamilyAdded: Cannot add view for entity '${entity.id}' to layer '${drawable.drawOnLayer}'!")
-        else -> {
-            layer.addChild(view)
-            KorgeViewCache.addOrUpdate(entity, view)
-
-            if (entity has ParallaxComponent) {
-                // TODO remove hardcoded asset type
-                configureAssetUpdater(AssetType.World) {
-                    onBackgroundChanged {
-                        val parallax = entity[ParallaxComponent]
-                        val parallaxConfig = AssetStore.getBackground(parallax.config.name)
-                        val newView = ParallaxDataView(parallaxConfig)
-
-                        // Remove view object with old image
-                        (KorgeViewCache.getOrNull(entity) ?: error("onBackgroundChanged: Cannot remove view of entity '${entity.id}' from layer '${entity[DrawableComponent].drawOnLayer}'!")).removeFromParent()
-                        KorgeViewCache.remove(entity)
-
-                        // Add new view object to the view cache and make it visible
-                        layer.addChild(newView)
-                        KorgeViewCache.addOrUpdate(entity, newView)
-                    }
-                }
-            }
-
-        }
-    }
+//    when (val layer = layers[drawable.drawOnLayer]) {
+//        null -> error("onDrawableFamilyAdded: Cannot add view for entity '${entity.id}' to layer '${drawable.drawOnLayer}'!")
+//        else -> {
+//            layer.addChild(view)
+//            KorgeViewCache.addOrUpdate(entity, view)
+//
+//            if (entity has ParallaxComponent) {
+//                // TODO remove hardcoded asset type
+//                configureAssetUpdater(AssetType.World) {
+//                    onBackgroundChanged {
+//                        val parallax = entity[ParallaxComponent]
+//                        val parallaxConfig = AssetStore.getBackground(parallax.config.name)
+//                        val newView = ParallaxDataView(parallaxConfig)
+//
+//                        // Remove view object with old image
+//                        (KorgeViewCache.getOrNull(entity) ?: error("onBackgroundChanged: Cannot remove view of entity '${entity.id}' from layer '${entity[DrawableComponent].drawOnLayer}'!")).removeFromParent()
+//                        KorgeViewCache.remove(entity)
+//
+//                        // Add new view object to the view cache and make it visible
+//                        layer.addChild(newView)
+//                        KorgeViewCache.addOrUpdate(entity, newView)
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     // Update position of view with initial position
-    view.x = positionShapeComponent.x
-    view.y = positionShapeComponent.y
+    view.x = positionComponent.x
+    view.y = positionComponent.y
 
     if (entity has LayoutComponent) {
         val layout = entity[LayoutComponent]
         if (layout.centerX) view.centerXOnStage()
         if (layout.centerY) view.centerYOnStage()
-        positionShapeComponent.x = view.x + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
-        positionShapeComponent.y = view.y + layout.offsetY
+        positionComponent.x = view.x + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
+        positionComponent.y = view.y + layout.offsetY
     }
 
     // Set properties in TouchInput when touch input was recognized
@@ -198,11 +198,11 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         }
     }
 
-    positionShapeComponent.width = width
-    positionShapeComponent.height = height
+    sizeComponent.width = width
+    sizeComponent.height = height
 }
 
 val onDrawableFamilyRemoved: FamilyHook = { entity ->
-    (KorgeViewCache.getOrNull(entity) ?: error("onDrawableFamilyRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[DrawableComponent].drawOnLayer}'!")).removeFromParent()
+//    (KorgeViewCache.getOrNull(entity) ?: error("onDrawableFamilyRemoved: Cannot remove view of entity '${entity.id}' from layer '${entity[DrawableComponent].drawOnLayer}'!")).removeFromParent()
     KorgeViewCache.remove(entity)
 }

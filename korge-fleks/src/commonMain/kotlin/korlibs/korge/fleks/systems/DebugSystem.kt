@@ -2,8 +2,7 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.DrawableComponent
-import korlibs.korge.fleks.components.PositionShapeComponent
+import korlibs.korge.fleks.components.PositionComponent
 
 /**
  *
@@ -14,10 +13,15 @@ class DebugSystem(
 //    private val layers: HashMap<String, Container> = World.inject(),
 //    private val assets: GameAssets = World.inject()
 ) : IteratingSystem(
-    family { all(DrawableComponent, PositionShapeComponent) },
+    family { all(PositionComponent) },
     interval = EachFrame
 ) {
+    private var counter = 0
     override fun onTickEntity(entity: Entity) {
+
+        println("Set $counter")
+        counter++
+
 /*            entity.getOrNull(Parallax)?.let { parallax ->
                 // Remove old view
                 korgeViewCache.getOrNull(entity)?.removeFromParent()

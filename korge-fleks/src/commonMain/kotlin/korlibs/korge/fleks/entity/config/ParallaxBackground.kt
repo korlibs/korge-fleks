@@ -75,9 +75,8 @@ object ParallaxBackground {
 
         entity.configure {
             it += ParallaxComponent(config = parallaxConfig.assetName)
-            it += PositionShapeComponent()
-            it += DrawableComponent(drawOnLayer = parallaxConfig.drawOnLayer)
-            it += AppearanceComponent(alpha = 1.0)
+            it += PositionComponent()
+//            it += DrawableComponent(drawOnLayer = parallaxConfig.drawOnLayer)
             // All sub-entity IDs are here for quick lookup by its layer name and for recycling of the overall background entity object
             it += SubEntitiesComponent(moveWithParent = false)
         }
@@ -147,15 +146,14 @@ object ParallaxBackground {
                 it.spriteLayer = layerName
                 it.parallaxPlaneLine = layerLine
             }
-            entity.getOrAdd(PositionShapeComponent) { PositionShapeComponent() }
-            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }
+            entity.getOrAdd(PositionComponent) { PositionComponent() }
             speedFactor?.let { speedFactor ->
-                entity.getOrAdd(ParallaxMotionComponent) { ParallaxMotionComponent() }.also {
-                    it.isScrollingHorizontally = isHorizontal
-                    it.speedFactor = speedFactor
-                    it.selfSpeedX = selfSpeedX
-                    it.selfSpeedY = selfSpeedY
-                }
+//                entity.getOrAdd(ParallaxMotionComponent) { ParallaxMotionComponent() }.also {
+//                    it.isScrollingHorizontally = isHorizontal
+//                    it.speedFactor = speedFactor
+//                    it.selfSpeedX = selfSpeedX
+//                    it.selfSpeedY = selfSpeedY
+//                }
             }
         }
         entity

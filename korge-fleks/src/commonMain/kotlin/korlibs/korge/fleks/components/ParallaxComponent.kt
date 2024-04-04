@@ -4,7 +4,6 @@ import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import korlibs.korge.fleks.entity.config.nothing
 import korlibs.korge.fleks.utils.Identifier
-import korlibs.korge.fleks.utils.SerializeBase
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

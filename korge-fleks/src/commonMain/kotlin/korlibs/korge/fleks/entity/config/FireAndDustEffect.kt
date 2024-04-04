@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.fleks.utils.random
 
@@ -55,10 +56,9 @@ object FireAndDustEffect {
                 it.animationName = effectConfig.animationName
                 it.isPlaying = true
             }
-            entity.getOrAdd(DrawableComponent) { DrawableComponent() }.also {
-                it.drawOnLayer = effectConfig.drawOnLayer
-            }
-            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }
+//            entity.getOrAdd(DrawableComponent) { DrawableComponent() }.also {
+//                it.drawOnLayer = effectConfig.drawOnLayer
+//            }
             entity.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }
             if (effectConfig.fadeOutDuration > 0f) {
                 entity.getOrAdd(TweenSequenceComponent) { TweenSequenceComponent() }.also {

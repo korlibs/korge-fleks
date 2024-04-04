@@ -2,6 +2,10 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.SpriteComponent.Rgb
+import korlibs.korge.fleks.components.OffsetByFrameIndexComponent.Point
+import korlibs.korge.fleks.components.SwitchLayerVisibilityComponent.LayerVisibility
+import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.math.interpolation.Easing
@@ -20,7 +24,8 @@ import kotlin.jvm.JvmInline
 
 
 /**
- * All Fleks components which should be serializable needs to derive from this interface.
+ * All data classes (not deriving from Fleks Component<...>) which are used within components need to be serializable by
+ * deriving from this interface.
  */
 interface SerializeBase
 
@@ -58,16 +63,14 @@ internal val internalModule = SerializersModule {
         subclass(TweenPropertyComponent::class)
         subclass(TweenSequenceComponent::class)
         subclass(InfoComponent::class)
-        subclass(DrawableComponent::class)
-        subclass(AppearanceComponent::class)
         subclass(SpecificLayerComponent::class)
         subclass(SwitchLayerVisibilityComponent::class)
         subclass(InputTouchButtonComponent::class)
         subclass(LayoutComponent::class)
         subclass(LifeCycleComponent::class)
         subclass(ParallaxComponent::class)
-        subclass(ParallaxMotionComponent::class)
-        subclass(PositionShapeComponent::class)
+//        subclass(ParallaxMotionComponent::class)
+        subclass(PositionComponent::class)
         subclass(OffsetComponent::class)
         subclass(OffsetByFrameIndexComponent::class)
         subclass(MotionComponent::class)
@@ -82,7 +85,7 @@ internal val internalModule = SerializersModule {
     }
     // Register tags (components without properties)
     polymorphic(UniqueId::class) {
-//        subclass(VisibleTag::class)
+        subclass(RenderLayerTag::class)
     }
 
     // Data class hierarchy used for AnimationScript component

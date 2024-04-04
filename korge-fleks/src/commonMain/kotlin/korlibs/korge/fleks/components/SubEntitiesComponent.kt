@@ -3,7 +3,6 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
-import korlibs.korge.fleks.utils.SerializeBase
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -13,7 +12,7 @@ import kotlinx.serialization.Serializable
 data class SubEntitiesComponent(
     var entities: MutableMap<String, Entity> = mutableMapOf(),
     var moveWithParent: Boolean = true
-) : Component<SubEntitiesComponent>, SerializeBase {
+) : Component<SubEntitiesComponent> {
     override fun type(): ComponentType<SubEntitiesComponent> = SubEntitiesComponent
     companion object : ComponentType<SubEntitiesComponent>()
 

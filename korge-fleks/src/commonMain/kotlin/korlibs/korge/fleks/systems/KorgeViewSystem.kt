@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.image.color.RGBA
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.OffsetByFrameIndexComponent.*
 import korlibs.korge.fleks.components.SpriteComponent
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.utils.random
@@ -17,15 +18,16 @@ import korlibs.time.TimeSpan
  * In case the [DrawableComponent] entity is of type [SpriteComponent] it takes the image configuration from
  * [SpriteComponent] component to setup and control the sprite animations.
  */
+
 class KorgeViewSystem : IteratingSystem(
-    family { all(AppearanceComponent).any(AppearanceComponent, SwitchLayerVisibilityComponent, SpecificLayerComponent, PositionShapeComponent, OffsetComponent) },
+    family { /*all(AppearanceComponent).*/any(/*AppearanceComponent,*/ SwitchLayerVisibilityComponent, SpecificLayerComponent, PositionComponent, OffsetComponent) },
     interval = EachFrame
 ) {
     var updateViewsEnabled: Boolean = true
     private var lastY: Double = 0.0
 
     override fun onTickEntity(entity: Entity) {
-        val appearance = entity[AppearanceComponent]
+/*        val appearance = entity[AppearanceComponent]
 
         if (updateViewsEnabled) {
             // TODO this can be re-written with help of SpecificLayer ???
@@ -49,7 +51,7 @@ class KorgeViewSystem : IteratingSystem(
             // Get offset depending on current animation and frame index
             val currentFrameIndex = (KorgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
             val animationName = it.entity.getOrNull(SpriteComponent)?.animationName ?: ""
-            val frameOffset = it.list[animationName]?.get(currentFrameIndex)
+            val frameOffset = it.mapOfOffsetLists[animationName]?.get(currentFrameIndex)
                 ?: error("KorgeViewSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
             offset.x += frameOffset.x
             offset.y += frameOffset.y
@@ -61,9 +63,9 @@ class KorgeViewSystem : IteratingSystem(
                 view.alpha = appearance.alpha.toDouble()
                 appearance.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
 
-                if (entity has PositionShapeComponent) {
-                    val positionShapeComponent = entity[PositionShapeComponent]
-                    view.pos = korlibs.math.geom.Point(positionShapeComponent.x - offset.x, positionShapeComponent.y - offset.y)
+                if (entity has PositionComponent) {
+                    val positionComponent = entity[PositionComponent]
+                    view.pos = korlibs.math.geom.Point(positionComponent.x - offset.x, positionComponent.y - offset.y)
                 }
 
 //                println("[${entity.id}] Y: ${view.y} (Position: ${positionShape.y} delta: ${lastY - positionShape.y})")
@@ -77,7 +79,7 @@ class KorgeViewSystem : IteratingSystem(
                 if (view is ImageDataViewEx) view.update(TimeSpan(deltaTime.toDouble() * 1000.0))
                 else if (view is ParallaxDataView) view.update(TimeSpan(deltaTime.toDouble() * 1000.0))
             }
-
         }
+// */
     }
 }
