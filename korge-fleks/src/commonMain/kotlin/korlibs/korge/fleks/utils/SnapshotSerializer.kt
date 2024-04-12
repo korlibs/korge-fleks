@@ -1,8 +1,9 @@
 package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.*
+import korlibs.image.color.*
+import korlibs.io.lang.*
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.SpriteComponent.Rgb
 import korlibs.korge.fleks.components.OffsetByFrameIndexComponent.Point
 import korlibs.korge.fleks.components.SwitchLayerVisibilityComponent.LayerVisibility
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
@@ -53,7 +54,7 @@ value class Identifier(val name: String)
 internal val internalModule = SerializersModule {
     // Register data classes
     polymorphic(SerializeBase::class) {
-        subclass(Rgb::class)
+// TODO        subclass(Rgb::class)
         subclass(LayerVisibility::class)
         subclass(Point::class)
     }
@@ -153,6 +154,29 @@ object EntitySerializer : KSerializer<Entity> {
 }
 
 /**
+ * A serializer strategy for Korge RGBA type. The color value is saved as integer number.
+ */
+object RGBAAsInt : KSerializer<RGBA> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("RGBAAsInt", PrimitiveKind.INT)
+    override fun serialize(encoder: Encoder, value: RGBA) = encoder.encodeInt(value.value)
+    override fun deserialize(decoder: Decoder): RGBA = RGBA(decoder.decodeInt())
+}
+
+/**
+ * A serializer strategy for Korge RGBA type. The color value is saved as hex String (#xxxxxxxx).
+ */
+object RGBAAsString : KSerializer<RGBA> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("RGBAAsString", PrimitiveKind.STRING)
+    override fun serialize(encoder: Encoder, value: RGBA) = encoder.encodeString(value.hexString)
+    override fun deserialize(decoder: Decoder): RGBA = RGBA(
+        decoder.decodeString().substr(1, 2).toInt(16),
+        decoder.decodeString().substr(3, 2).toInt(16),
+        decoder.decodeString().substr(5, 2).toInt(16),
+        decoder.decodeString().substr(7, 2).toInt(16),
+    )
+}
+
+/**
  * A simple serializer strategy for Easing types. It serializes the easing class name as string.
  */
 object EasingSerializer : KSerializer<Easing> {
@@ -180,7 +204,7 @@ object AnyAsString : KSerializer<Any> {
         when (value) {
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("String", value.toString()))
             is Double -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Double", value.toString()))
-            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Rgb", value.toString()))
+//            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Rgb", value.toString()))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
     }
@@ -190,7 +214,7 @@ object AnyAsString : KSerializer<Any> {
         return when (containerForAny.type) {
             "String" -> containerForAny.value
             "Double" -> containerForAny.value.toDouble()
-            "Rgb" -> Rgb.fromString(containerForAny.value)
+//            "Rgb" -> Rgb.fromString(containerForAny.value)
             else -> throw SerializationException("AnySerializer: No rule to deserialize type '${containerForAny.type}'!")
         }
     }
@@ -213,7 +237,7 @@ object AnySerializer : KSerializer<Any> {
         val int: Int? = null,
         val string: String? = null,
         val boolean: Boolean? = null,
-        val rgb: Rgb? = null
+// TODO       val rgb: Rgb? = null
     )
 
     override fun serialize(encoder: Encoder, value: Any) {
@@ -223,7 +247,7 @@ object AnySerializer : KSerializer<Any> {
             is Int -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(int = value))
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(string = value))
             is Boolean -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(boolean = value))
-            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
+// TODO           is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
     }
@@ -231,7 +255,7 @@ object AnySerializer : KSerializer<Any> {
     override fun deserialize(decoder: Decoder): Any {
         val containerForAny = decoder.decodeSerializableValue(ContainerForAny.serializer())
         return (containerForAny.double ?: containerForAny.float ?: containerForAny.int ?:
-                containerForAny.string ?: containerForAny.boolean ?: containerForAny.rgb ?:
+                containerForAny.string ?: containerForAny.boolean ?: /* TODO containerForAny.rgb ?:*/
                 throw SerializationException("AnySerializer: No non-null property in ContainerForAny found!"))
     }
 }

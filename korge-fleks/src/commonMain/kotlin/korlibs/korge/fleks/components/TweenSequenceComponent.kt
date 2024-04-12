@@ -127,7 +127,7 @@ data class TweenSequenceComponent(
     @SerialName("TweenAppearance")
     data class TweenAppearance(
         val alpha: Double? = null,
-        val tint: SpriteComponent.Rgb? = null,
+// TODO        val tint: SpriteComponent.Rgb? = null,
         val visible: Boolean? = null,
 
         override var entity: Entity,

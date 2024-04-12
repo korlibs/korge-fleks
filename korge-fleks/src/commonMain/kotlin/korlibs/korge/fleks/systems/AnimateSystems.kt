@@ -25,7 +25,6 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoun
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStartTrigger
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStopTrigger
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundVolume
-import korlibs.korge.fleks.components.SpriteComponent.Rgb
 import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.components.*
 import korlibs.korge.parallax.ImageDataViewEx
@@ -192,6 +191,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
     }
 }
 
+/* TODO take into use
 @JvmName("updatePropertyRgb")
 fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Rgb?>) {
     entity.getOrNull(component)?.let {
@@ -204,8 +204,8 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
             it.timeProgress += deltaTime
         }
     }
-
 }
+*/
 
 @JvmName("updatePropertyBoolean")
 fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Boolean>, block: EntityUpdateContext.() -> Unit = {}) {
