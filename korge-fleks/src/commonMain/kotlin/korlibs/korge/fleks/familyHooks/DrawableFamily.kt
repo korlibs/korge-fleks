@@ -84,7 +84,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
             height = ldtkLevel.pxHei.toDouble()
             view
         }
-
+/*
         entity has ParallaxComponent -> {
             val parallax = entity[ParallaxComponent]
             val parallaxConfig = AssetStore.getBackground(parallax.config.name)
@@ -107,7 +107,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 
             view
         }
-
+*/
         entity has TextComponent -> {
             val component = entity[TextComponent]
             val richTextData = RichTextData(
@@ -164,15 +164,15 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
 //    }
 
     // Update position of view with initial position
-    view.x = positionComponent.x
-    view.y = positionComponent.y
+//    view.x = positionComponent.x
+//    view.y = positionComponent.y
 
     if (entity has LayoutComponent) {
         val layout = entity[LayoutComponent]
         if (layout.centerX) view.centerXOnStage()
         if (layout.centerY) view.centerYOnStage()
-        positionComponent.x = view.x + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
-        positionComponent.y = view.y + layout.offsetY
+//        positionComponent.x = view.x + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
+//        positionComponent.y = view.y + layout.offsetY
     }
 
     // Set properties in TouchInput when touch input was recognized

@@ -6,8 +6,8 @@ import kotlinx.serialization.*
 @Serializable
 @SerialName("Offset")
 data class OffsetComponent(
-    var x: Double = 0.0,
-    var y: Double = 0.0
+    var x: Float = 0f,
+    var y: Float = 0f
 ) : Component<OffsetComponent> {
     override fun type(): ComponentType<OffsetComponent> = OffsetComponent
     companion object : ComponentType<OffsetComponent>()

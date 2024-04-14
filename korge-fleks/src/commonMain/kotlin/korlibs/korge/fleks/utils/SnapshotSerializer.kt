@@ -69,7 +69,7 @@ internal val internalModule = SerializersModule {
         subclass(InputTouchButtonComponent::class)
         subclass(LayoutComponent::class)
         subclass(LifeCycleComponent::class)
-        subclass(ParallaxComponent::class)
+//        subclass(ParallaxComponent::class)
 //        subclass(ParallaxMotionComponent::class)
         subclass(PositionComponent::class)
         subclass(OffsetComponent::class)

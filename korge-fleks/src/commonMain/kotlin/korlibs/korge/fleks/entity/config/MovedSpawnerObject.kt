@@ -28,14 +28,14 @@ object MovedSpawnerObject {
         // TODO give the meteorite an image
 
         // OffsetComponent
-        val offsetX: Double = 0.0,              // offset to pivot point of meteorite
-        val offsetY: Double = 0.0,
+        val offsetX: Float = 0f,              // offset to pivot point of meteorite
+        val offsetY: Float = 0f,
 
         // MotionComponent
-        val velocityX: Double = 0.0,
-        val velocityY: Double = 0.0,
-        val velocityVariationX: Double = 0.0,
-        val velocityVariationY: Double = 0.0,
+        val velocityX: Float = 0f,
+        val velocityY: Float = 0f,
+        val velocityVariationX: Float = 0f,
+        val velocityVariationY: Float = 0f,
         ) : ConfigBase
 
     // Used in component properties to specify invokable function
@@ -55,10 +55,10 @@ object MovedSpawnerObject {
             entity.getOrAdd(MotionComponent) { MotionComponent() }.also {
                 var velocityXX = spawnerConfig.velocityX
                 var velocityYY = spawnerConfig.velocityY
-                if (spawnerConfig.velocityVariationX != 0.0) {
+                if (spawnerConfig.velocityVariationX != 0f) {
                     velocityXX += (-spawnerConfig.velocityVariationX..spawnerConfig.velocityVariationX).random()
                 }
-                if (spawnerConfig.velocityVariationY != 0.0) {
+                if (spawnerConfig.velocityVariationY != 0f) {
                     velocityYY += (-spawnerConfig.velocityVariationY..spawnerConfig.velocityVariationY).random()
                 }
                 it.velocityX = velocityXX

@@ -20,7 +20,7 @@ data class OffsetByFrameIndexComponent(
 
     @Serializable
     @SerialName("Point")
-    data class Point(var x: Double = 0.0, var y: Double = 0.0) : SerializeBase
+    data class Point(var x: Float = 0f, var y: Float = 0f) : SerializeBase
 
     override fun type(): ComponentType<OffsetByFrameIndexComponent> = OffsetByFrameIndexComponent
     companion object : ComponentType<OffsetByFrameIndexComponent>()

@@ -15,8 +15,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("Position")
 data class PositionComponent(
-    var x: Double = 0.0,
-    var y: Double = 0.0,
+    var x: Float = 0f,
+    var y: Float = 0f,
 ) : Component<PositionComponent> {
     override fun type(): ComponentType<PositionComponent> = PositionComponent
     companion object : ComponentType<PositionComponent>()

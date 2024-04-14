@@ -18,14 +18,14 @@ object FireAndDustEffect {
     data class Config(
         val assetName: String,
         val animationName: String,
-        val offsetX: Double = 0.0,
-        val offsetY: Double = 0.0,
-        val velocityX: Double = 0.0,
-        val velocityY: Double = 0.0,
-        val velocityVariationX: Double = 0.0,
-        val velocityVariationY: Double = 0.0,
+        val offsetX: Float = 0f,
+        val offsetY: Float = 0f,
+        val velocityX: Float = 0f,
+        val velocityY: Float = 0f,
+        val velocityVariationX: Float = 0f,
+        val velocityVariationY: Float = 0f,
         val drawOnLayer: String,
-        val fadeOutDuration: Double = 0.0
+        val fadeOutDuration: Float = 0f
     ) : ConfigBase
 
     // Used in component properties to specify invokable function
@@ -42,10 +42,10 @@ object FireAndDustEffect {
             entity.getOrAdd(MotionComponent) { MotionComponent() }.also {
                 var velocityXX = effectConfig.velocityX
                 var velocityYY = effectConfig.velocityY
-                if (effectConfig.velocityVariationX != 0.0) {
+                if (effectConfig.velocityVariationX != 0f) {
                     velocityXX += (-effectConfig.velocityVariationX..effectConfig.velocityVariationX).random()
                 }
-                if (effectConfig.velocityVariationY != 0.0) {
+                if (effectConfig.velocityVariationY != 0f) {
                     velocityYY += (-effectConfig.velocityVariationY..effectConfig.velocityVariationY).random()
                 }
                 it.velocityX = velocityXX
@@ -64,7 +64,7 @@ object FireAndDustEffect {
                 entity.getOrAdd(TweenSequenceComponent) { TweenSequenceComponent() }.also {
                     it.tweens = listOf(
                         // Fade out effect objects
-                        TweenAppearance(entity = entity, alpha = 0.0, duration = effectConfig.fadeOutDuration),
+                        TweenAppearance(entity = entity, alpha = 0f, duration = effectConfig.fadeOutDuration),
                         DeleteEntity(entity = entity)
                     )
                 }

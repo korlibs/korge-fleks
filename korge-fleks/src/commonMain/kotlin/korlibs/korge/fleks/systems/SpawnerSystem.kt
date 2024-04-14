@@ -23,8 +23,8 @@ class SpawnerSystem : IteratingSystem(
         val spawner = entity[SpawnerComponent]
         if (spawner.interval > 0) {
             if (spawner.nextSpawnIn <= 0) {
-                var x = 0.0
-                var y = 0.0
+                var x = 0f
+                var y = 0f
                 var setPosition = false
                 entity.getOrNull(PositionComponent)?.let {
                     x = it.x
@@ -53,7 +53,7 @@ class SpawnerSystem : IteratingSystem(
                     val newEntity =
                         if (spawner.newEntity.isInvalidEntity()) world.entity {}  // create new entity
                         else spawner.newEntity  // use given entity
-                    if (spawner.positionVariation != 0.0) {
+                    if (spawner.positionVariation != 0f) {
                         xx = x + (-spawner.positionVariation..spawner.positionVariation).random()
                         yy = y + (-spawner.positionVariation..spawner.positionVariation).random()
                     }

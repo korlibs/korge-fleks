@@ -17,9 +17,9 @@ object LevelMap {
         val worldName: String = "",
         val levelName: String = "",
         val layerName: String,
-        val x: Double = 0.0,
-        val y: Double = 0.0,
-        val alpha: Double = 1.0
+        val x: Float = 0f,
+        val y: Float = 0f,
+        val alpha: Float = 1f
     ) : ConfigBase
 
     enum class MapType { LDTK, TILED }

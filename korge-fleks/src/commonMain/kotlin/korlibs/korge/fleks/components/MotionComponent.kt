@@ -6,10 +6,10 @@ import kotlinx.serialization.*
 @Serializable
 @SerialName("Motion")
 data class MotionComponent(
-    var accelX: Double = 0.0,
-    var accelY: Double = 0.0,
-    var velocityX: Double = 0.0,
-    var velocityY: Double = 0.0
+    var accelX: Float = 0f,
+    var accelY: Float = 0f,
+    var velocityX: Float = 0f,
+    var velocityY: Float = 0f
 ) : Component<MotionComponent> {
     override fun type(): ComponentType<MotionComponent> = MotionComponent
     companion object : ComponentType<MotionComponent>()

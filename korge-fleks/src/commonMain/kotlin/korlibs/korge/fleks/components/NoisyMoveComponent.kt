@@ -18,48 +18,48 @@ import kotlinx.serialization.*
 @SerialName("NoisyMove")
 data class NoisyMoveComponent(
     // trigger variance for start moving: (1.0) - trigger immediately when possible, (0.0) - no trigger for start moving at all
-    var triggerVariance: Double = 0.0,
+    var triggerVariance: Float = 0f,
     // terminate variance for stop moving: (1.0) - always terminate previous trigger, (0.0) - triggered moving stays forever
-    var terminateVariance: Double = 0.0,
-    var interval: Double = 0.0,          // in seconds
-    var intervalVariance: Double = 0.0,  // in seconds
-    var xTarget: Double = 0.0,
-    var yTarget: Double = 0.0,
-    var xVariance: Double = 0.0,
-    var yVariance: Double = 0.0,
+    var terminateVariance: Float = 0f,
+    var interval: Float = 0f,          // in seconds
+    var intervalVariance: Float = 0f,  // in seconds
+    var xTarget: Float = 0f,
+    var yTarget: Float = 0f,
+    var xVariance: Float = 0f,
+    var yVariance: Float = 0f,
 
     /** Final absolute move values which are applied to the [PositionComponent]'s (x,y) properties of the entity in [KorgeViewSystem] */
     var triggered: Boolean = false,
-    var x: Double = 0.0,
-    var y: Double = 0.0,
+    var x: Float = 0f,
+    var y: Float = 0f,
 
     // Internal runtime data
-    var timeProgress: Double = 0.0,
-    var waitTime: Double = 0.0
+    var timeProgress: Float = 0f,
+    var waitTime: Float = 0f
 ) : Component<NoisyMoveComponent> {
     override fun type() = NoisyMoveComponent
 
     override fun World.onAdd(entity: Entity) {
 
-        timeProgress = 0.0
-        waitTime = interval + if (intervalVariance != 0.0) (-intervalVariance..intervalVariance).random() else 0.0
+        timeProgress = 0f
+        waitTime = interval + if (intervalVariance != 0f) (-intervalVariance..intervalVariance).random() else 0f
 
         val startX = x
         val startY = y
-        val endX = xTarget + if (xVariance != 0.0) (-xVariance..xVariance).random() else 0.0
-        val endY = yTarget + if (yVariance != 0.0) (-yVariance..yVariance).random() else 0.0
+        val endX = xTarget + if (xVariance != 0f) (-xVariance..xVariance).random() else 0f
+        val endY = yTarget + if (yVariance != 0f) (-yVariance..yVariance).random() else 0f
         updateAnimateComponent(this, entity, TweenProperty.NoisyMoveX, value = startX, change = endX - startX, waitTime, Easing.EASE_IN_OLD)
         updateAnimateComponent(this, entity, TweenProperty.NoisyMoveY, value = startY, change = endY - startY, waitTime, Easing.EASE_IN_OUT)
 
     }
 
-    fun updateAnimateComponent(world: World, entity: Entity, componentProperty: TweenProperty, value: Any, change: Any = Unit, duration: Double? = null, easing: Easing? = null) = with (world) {
+    fun updateAnimateComponent(world: World, entity: Entity, componentProperty: TweenProperty, value: Any, change: Any = Unit, duration: Float? = null, easing: Easing? = null) = with (world) {
         entity.configure { animatedEntity ->
             animatedEntity.getOrAdd(componentProperty.type) { TweenPropertyComponent(componentProperty) }.also {
                 it.change = change
                 it.value = value
-                it.duration = duration ?: 0.0
-                it.timeProgress = 0.0
+                it.duration = duration ?: 0f
+                it.timeProgress = 0f
                 it.easing = easing ?: Easing.LINEAR
             }
         }

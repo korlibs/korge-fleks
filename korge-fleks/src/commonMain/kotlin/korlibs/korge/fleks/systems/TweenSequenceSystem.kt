@@ -67,14 +67,14 @@ class TweenSequenceSystem : IteratingSystem(
                     }
                     // check for initial delay of new tween
                     val currentTween = tweenSequence.tweens[tweenSequence.index]
-                    tweenSequence.waitTime = currentTween.delay ?: 0.0
-                    if (tweenSequence.waitTime != 0.0)
+                    tweenSequence.waitTime = currentTween.delay ?: 0f
+                    if (tweenSequence.waitTime != 0f)
                         return
                     currentTween
                 } else tweenSequence.tweens[tweenSequence.index]
 
             tweenSequence.executed = true
-            tweenSequence.waitTime = currentTween.duration ?: 0.0
+            tweenSequence.waitTime = currentTween.duration ?: 0f
 
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
@@ -89,7 +89,7 @@ class TweenSequenceSystem : IteratingSystem(
                                     tweens = listOf(
                                         // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
                                         tween.also { tween ->
-                                            if (tween.duration == null) tween.duration = currentTween.duration ?: 0.0
+                                            if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
                                             if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
                                         },
                                         // After finish the tween delete the entity again - it is not needed anymore
@@ -184,8 +184,8 @@ class TweenSequenceSystem : IteratingSystem(
             animatedEntity.getOrAdd(componentProperty.type) { TweenPropertyComponent(componentProperty) }.also {
                 it.change = change
                 it.value = value
-                it.duration = currentTween.duration ?: currentParentTween.duration ?: 0.0
-                it.timeProgress = 0.0
+                it.duration = currentTween.duration ?: currentParentTween.duration ?: 0f
+                it.timeProgress = 0f
                 it.easing = currentTween.easing ?: currentParentTween.easing ?: Easing.LINEAR
             }
         }

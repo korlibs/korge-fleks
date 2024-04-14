@@ -12,9 +12,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("Rigidbody")
 data class RigidbodyComponent(
-    var mass: Double = 0.0,      // mass to calculate inertia of the object
-    var damping: Double = 0.0,   // e.g. air resistance of the object when falling
-    var friction: Double = 0.0,  // e.g. friction of the object when it moves over surfaces
+    var mass: Float = 0f,      // mass to calculate inertia of the object
+    var damping: Float = 0f,   // e.g. air resistance of the object when falling
+    var friction: Float = 0f,  // e.g. friction of the object when it moves over surfaces
 ) : Component<RigidbodyComponent> {
     override fun type(): ComponentType<RigidbodyComponent> = RigidbodyComponent
     companion object : ComponentType<RigidbodyComponent>()

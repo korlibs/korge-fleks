@@ -50,7 +50,7 @@ object ParallaxBackground {
                     world = world,
                     entity = layerMap[conf.name],
                     layerName = conf.name,
-                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
+//                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                     selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                     isHorizontal = isHorizontal
                 )
@@ -61,7 +61,7 @@ object ParallaxBackground {
                     world = world,
                     entity = layerMap[conf.name],
                     layerName = conf.name,
-                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
+//                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                     selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                     isHorizontal = isHorizontal
                 )
@@ -74,7 +74,7 @@ object ParallaxBackground {
         val parallaxConfig = AssetStore.getEntityConfig<Config>(config.name)
 
         entity.configure {
-            it += ParallaxComponent(config = parallaxConfig.assetName)
+//            it += ParallaxComponent(config = parallaxConfig.assetName)
             it += PositionComponent()
 //            it += DrawableComponent(drawOnLayer = parallaxConfig.drawOnLayer)
             // All sub-entity IDs are here for quick lookup by its layer name and for recycling of the overall background entity object
@@ -105,14 +105,14 @@ object ParallaxBackground {
             planeConf.attachedLayersFront?.fastForEach { conf ->
                 val layer = KorgeViewCache.getLayer(entity, conf.name)
                 layerMap.entities[conf.name] = createSubEntityForLayer(world, entity, conf.name,
-                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
+//                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                     selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                     isHorizontal = isHorizontal)
             }
             planeConf.attachedLayersRear?.fastForEach { conf ->
                 val layer = KorgeViewCache.getLayer(entity, conf.name)
                 layerMap.entities[conf.name] = createSubEntityForLayer(world, entity, conf.name,
-                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
+//                    speedFactor = view.parallaxPlaneSpeedFactor[layer.y.toInt() - offset + (layer.height.toInt().takeIf { conf.attachBottomRight } ?: 0)],
                     selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                     isHorizontal = isHorizontal)
             }
@@ -120,7 +120,7 @@ object ParallaxBackground {
             view.parallaxLines.fastForEachWithIndex { index, it -> it?.let { line ->
                 // Here we need to take speedFactor per line into account
                 layerMap.entities[planeConf.name + index] = createSubEntityForLayer(world, entity, layerLine = index,
-                    speedFactor = view.parallaxPlaneSpeedFactor[line.y.toInt() - offset],
+//                    speedFactor = view.parallaxPlaneSpeedFactor[line.y.toInt() - offset],
                     selfSpeedX = selfSpeedX, selfSpeedY = selfSpeedY,
                     isHorizontal = isHorizontal)
             }}
@@ -133,12 +133,12 @@ object ParallaxBackground {
         Invokable.register(configureParallaxBackground, configureParallaxBackgroundFct)
     }
 
-    private fun createSubEntityForLayer(world: World, parentEntity: Entity, layerName: String? = null, layerLine: Int? = null, speedFactor: Double? = null,
+    private fun createSubEntityForLayer(world: World, parentEntity: Entity, layerName: String? = null, layerLine: Int? = null, speedFactor: Float? = null,
                                         selfSpeedX: Double = 0.0, selfSpeedY: Double = 0.0, isHorizontal: Boolean = true) : Entity {
         return configureSubEntityForLayer(world, world.entity(), parentEntity, layerName, layerLine, speedFactor, selfSpeedX, selfSpeedY, isHorizontal)
     }
 
-    private fun configureSubEntityForLayer(world: World, entity: Entity, parentEntity: Entity? = null, layerName: String?, layerLine: Int? = null, speedFactor: Double? = null,
+    private fun configureSubEntityForLayer(world: World, entity: Entity, parentEntity: Entity? = null, layerName: String?, layerLine: Int? = null, speedFactor: Float? = null,
                                            selfSpeedX: Double = 0.0, selfSpeedY: Double = 0.0, isHorizontal: Boolean = true) : Entity  = with(world) {
         entity.configure { entity ->
             entity.getOrAdd(SpecificLayerComponent) { SpecificLayerComponent() }.also {
