@@ -11,7 +11,9 @@ import korlibs.korge.fleks.components.*
 class PositionSystem : IteratingSystem(
     family {
         all(PositionComponent)  // Position component absolutely needed for movement of entity objects
-            .any(PositionComponent, MotionComponent, /*ParallaxMotionComponent,*/ RigidbodyComponent, SubEntitiesComponent)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
+        .any(PositionComponent, MotionComponent, /*ParallaxMotionComponent,*/ RigidbodyComponent, SubEntitiesComponent)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
+// TODO activate when ParallaxComponent is moved into Korge-fleks
+//        .none(ParallaxComponent)
     },
     interval = EachFrame
 ) {
@@ -33,8 +35,8 @@ class PositionSystem : IteratingSystem(
         if (entity has MotionComponent) {
             val motion = entity[MotionComponent]
             // s(t) = a/2 * t^2 + v * t + s(t-1)
-            positionComponent.x = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityX * deltaTime + positionComponent.x
-            positionComponent.y = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityY * deltaTime + positionComponent.y
+//            positionComponent.x = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityX * deltaTime + positionComponent.x
+//            positionComponent.y = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityY * deltaTime + positionComponent.y
         }
 /*
         if (entity has ParallaxMotionComponent) {

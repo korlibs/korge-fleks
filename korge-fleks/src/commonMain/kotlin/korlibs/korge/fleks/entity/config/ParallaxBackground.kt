@@ -32,7 +32,7 @@ object ParallaxBackground {
 
     private val configureParallaxLayersFct = fun(world: World, entity: Entity, assetConfig: Identifier): Entity = with(world) {
         println("Re-configure attached parallax Layers")
-
+/*
         val config = AssetStore.getBackground(assetConfig.name).config
         val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
         val view = KorgeViewCache[entity] as ParallaxDataView
@@ -67,6 +67,7 @@ object ParallaxBackground {
                 )
             }
         }
+*/
         entity
     }
 
@@ -84,7 +85,7 @@ object ParallaxBackground {
         // Once the base ParallaxDataView is created with above base entity we can access it from the cache
         val view = KorgeViewCache[entity] as ParallaxDataView
         val layerMap = entity[SubEntitiesComponent]
-
+/*
         val parallaxDataContainer = AssetStore.getBackground(parallaxConfig.assetName.name).config
         val isHorizontal = parallaxDataContainer.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
 
@@ -125,6 +126,7 @@ object ParallaxBackground {
                     isHorizontal = isHorizontal)
             }}
         }
+*/
         entity
     }
 
