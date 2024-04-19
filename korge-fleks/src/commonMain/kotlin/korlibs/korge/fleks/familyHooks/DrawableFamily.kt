@@ -45,7 +45,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
         entity has SpriteComponent -> {
             val sprite = entity[SpriteComponent]
             val view = ImageDataViewEx(AssetStore.getImageData(sprite.assetName), sprite.animationName, smoothing = false)
-
+/*
             // when animation finished playing trigger destruction of entity
             if (sprite.destroyOnPlayingFinished) view.onPlayFinished = {
                 entity.configure { entity ->
@@ -53,7 +53,7 @@ val onDrawableFamilyAdded: FamilyHook = { entity ->
                 }
             }
             if (sprite.isPlaying) view.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
-
+*/
             width =
                 view.data?.width?.toDouble() ?: error("onDrawableFamilyAdded: Cannot get width of sprite ImageAnimView!")
             height =

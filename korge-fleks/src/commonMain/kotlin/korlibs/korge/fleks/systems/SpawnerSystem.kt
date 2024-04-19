@@ -38,7 +38,8 @@ class SpawnerSystem : IteratingSystem(
                 }
                 entity.getOrNull(OffsetByFrameIndexComponent)?.let {
                     // Get offset depending on current animation and frame index
-                    val currentFrameIndex = (KorgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
+// TODO
+                    val currentFrameIndex = 0  //(KorgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
                     val animationName = it.entity.getOrNull(SpriteComponent)?.animationName ?: ""
                     val offset = it.mapOfOffsetLists[animationName]?.get(currentFrameIndex)
                         ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")

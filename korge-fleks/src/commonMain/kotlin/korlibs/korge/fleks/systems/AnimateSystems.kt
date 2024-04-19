@@ -90,13 +90,14 @@ class AnimateSpriteSystem : IteratingSystem(
         updateProperty(entity, TweenSpriteForwardDirection, sprite::forwardDirection)
         updateProperty(entity, TweenSpriteLoop, sprite::loop)
         updateProperty(entity, TweenSpriteDestroyOnPlayingFinished, sprite::destroyOnPlayingFinished) {
-            if (sprite.destroyOnPlayingFinished)
-            imageView.onPlayFinished = { entity.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }.also { lifeCycle -> lifeCycle.healthCounter = 0 } }
-            else
-            imageView.onPlayFinished = {}
+// TODO
+//            if (sprite.destroyOnPlayingFinished)
+//            imageView.onPlayFinished = { entity.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }.also { lifeCycle -> lifeCycle.healthCounter = 0 } }
+//            else
+//            imageView.onPlayFinished = {}
         }
 
-        if (sprite.isPlaying) imageView.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
+ //       if (sprite.isPlaying) imageView.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
     }
 }
 

@@ -49,16 +49,16 @@ val onSpecificLayerFamilyAdded: FamilyHook = { entity ->
                 pView as ParallaxDataView
 
                 KorgeViewCache.remove(entity)
-                KorgeViewCache.addOrUpdate(entity,
-                    pView.parallaxLines[specificLayer.parallaxPlaneLine!!]
-                        ?: error("onSpecificLayerFamilyAdded: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
-                )
+//                KorgeViewCache.addOrUpdate(entity,
+//                    pView.parallaxLines[specificLayer.parallaxPlaneLine!!]
+//                        ?: error("onSpecificLayerFamilyAdded: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
+//                )
             }
         }
 
         val pView = KorgeViewCache[specificLayer.parentEntity]
         pView as ParallaxDataView
-        pView.parallaxLines[specificLayer.parallaxPlaneLine!!] ?: error("onSpecificLayerFamilyAdded: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
+//        pView.parallaxLines[specificLayer.parallaxPlaneLine!!] ?: error("onSpecificLayerFamilyAdded: Parallax Line '${specificLayer.parallaxPlaneLine}' is null!")
     } else if (specificLayer.spriteLayer != null) {
 
         // TODO remove hardcoded asset type
