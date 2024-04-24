@@ -86,18 +86,18 @@ class AnimateSpriteSystem : IteratingSystem(
         val sprite = entity[SpriteComponent]
         val imageView = KorgeViewCache[entity] as ImageDataViewEx
         updateProperty(entity, TweenSpriteAnimName, sprite::animationName) { imageView.animation = sprite.animationName }
-        updateProperty(entity, TweenSpriteIsPlaying, sprite::isPlaying)
-        updateProperty(entity, TweenSpriteForwardDirection, sprite::forwardDirection)
-        updateProperty(entity, TweenSpriteLoop, sprite::loop)
-        updateProperty(entity, TweenSpriteDestroyOnPlayingFinished, sprite::destroyOnPlayingFinished) {
+//        updateProperty(entity, TweenSpriteIsPlaying, sprite::isPlaying)
+//        updateProperty(entity, TweenSpriteForwardDirection, sprite::forwardDirection)
+//        updateProperty(entity, TweenSpriteLoop, sprite::loop)
+//        updateProperty(entity, TweenSpriteDestroyOnPlayingFinished, sprite::destroyOnPlayingFinished) {
 // TODO
 //            if (sprite.destroyOnPlayingFinished)
 //            imageView.onPlayFinished = { entity.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }.also { lifeCycle -> lifeCycle.healthCounter = 0 } }
 //            else
 //            imageView.onPlayFinished = {}
-        }
+//        }
 
- //       if (sprite.isPlaying) imageView.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
+//        if (sprite.isPlaying) imageView.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
     }
 }
 

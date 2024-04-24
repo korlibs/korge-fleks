@@ -54,8 +54,9 @@ object FireAndDustEffect {
             entity.getOrAdd(SpriteComponent) { SpriteComponent() }.also {
                 it.assetName = effectConfig.assetName
                 it.animationName = effectConfig.animationName
-                it.isPlaying = true
+//                it.isPlaying = true
             }
+
 //            entity.getOrAdd(DrawableComponent) { DrawableComponent() }.also {
 //                it.drawOnLayer = effectConfig.drawOnLayer
 //            }
