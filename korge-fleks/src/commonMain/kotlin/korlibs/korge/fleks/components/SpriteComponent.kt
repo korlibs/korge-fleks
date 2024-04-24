@@ -28,11 +28,7 @@ data class SpriteComponent(
     var anchorX: Float = 0f,  // x,y position of the pivot point within the sprite
     var anchorY: Float = 0f,
 
-    // Animation related properties
-    var isPlaying: Boolean = false,
-    var forwardDirection: Boolean = true,
-    var loop: Boolean = false,
-    var destroyOnPlayingFinished: Boolean = true,
+    val layerIndex: Int = 0
 ) : Component<SpriteComponent> {
     override fun type(): ComponentType<SpriteComponent> = SpriteComponent
     companion object : ComponentType<SpriteComponent>()

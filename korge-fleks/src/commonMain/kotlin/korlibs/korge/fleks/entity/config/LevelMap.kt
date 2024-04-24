@@ -5,6 +5,7 @@ import com.github.quillraven.fleks.World
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.assetmanager.ConfigBase
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.Identifier
 
 
@@ -16,7 +17,7 @@ object LevelMap {
         val assetName: String = "",
         val worldName: String = "",
         val levelName: String = "",
-        val layerName: String,
+        val layerTag: RenderLayerTag,
         val x: Float = 0f,
         val y: Float = 0f,
         val alpha: Float = 1f
@@ -42,13 +43,12 @@ object LevelMap {
                 y = levelMapConfig.y
             )
             it += SizeComponent()  // Size of level map needs to be set after loading of map is finished
-//            it += DrawableComponent(
-//                drawOnLayer = levelMapConfig.layerName
-//            )
-// TODO move alpha in *LevelMapComponent
-//            it += AppearanceComponent(
-//                alpha = levelMapConfig.alpha
-//            )
+            it += RgbaComponent()
+            it += RgbaComponent().apply {
+                alpha = levelMapConfig.alpha
+            }
+            it += levelMapConfig.layerTag
+            it += ViewTag
         }
         entity
     }

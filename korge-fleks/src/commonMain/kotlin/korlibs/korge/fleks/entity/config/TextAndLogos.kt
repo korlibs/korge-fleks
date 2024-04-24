@@ -64,8 +64,8 @@ object TextAndLogos {
             entity.getOrAdd(LayoutComponent) { LayoutComponent() }.also {
                 it.centerX = logoConfig.centerX
                 it.centerY = logoConfig.centerY
-                it.offsetX = logoConfig.offsetX
-                it.offsetY = logoConfig.offsetY
+                it.offsetX = logoConfig.offsetX.toFloat()
+                it.offsetY = logoConfig.offsetY.toFloat()
             }
 // TODO move into SpriteComponent and TextComponent
 //            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }.also {

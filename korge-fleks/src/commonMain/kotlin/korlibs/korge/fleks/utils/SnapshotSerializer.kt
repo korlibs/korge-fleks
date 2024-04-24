@@ -9,6 +9,7 @@ import korlibs.korge.fleks.components.SwitchLayerVisibilityComponent.LayerVisibi
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.entity.config.Invokable
+import korlibs.korge.fleks.tags.RenderLayerTag
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
