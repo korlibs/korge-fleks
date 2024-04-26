@@ -22,7 +22,7 @@ class RgbaComponent(
             field = value
         }
 
-    var rgb: Rgb = Rgb(rgba.r, rgba.g, rgba.b)
+    var tint: Rgb = Rgb(rgba.r, rgba.g, rgba.b)
         get() = Rgb(rgba.r, rgba.g, rgba.b)
         set(value) {
             rgba = rgba.withRGB(value.r, value.g, value.b)

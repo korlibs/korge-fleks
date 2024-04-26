@@ -43,7 +43,6 @@ object LevelMap {
                 y = levelMapConfig.y
             )
             it += SizeComponent()  // Size of level map needs to be set after loading of map is finished
-            it += RgbaComponent()
             it += RgbaComponent().apply {
                 alpha = levelMapConfig.alpha
             }

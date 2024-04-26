@@ -78,8 +78,8 @@ val onViewFamilyAdded: FamilyHook = { entity ->
     view.x = positionComponent.x.toDouble()
     view.y = positionComponent.y.toDouble()
 
-    sizeComponent.width = width
-    sizeComponent.height = height
+    sizeComponent.width = width.toFloat()
+    sizeComponent.height = height.toFloat()
 }
 
 val onViewFamilyRemoved: FamilyHook = { entity ->

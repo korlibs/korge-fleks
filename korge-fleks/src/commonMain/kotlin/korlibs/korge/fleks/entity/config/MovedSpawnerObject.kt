@@ -45,7 +45,7 @@ object MovedSpawnerObject {
     private val configureSpawnerObjectFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
         val spawnerConfig = AssetStore.getEntityConfig<Config>(config.name)
 
-        // PositionShapeComponent might already be set by SpawnerSystem and it already contains the position
+        // PositionComponent might already be set by SpawnerSystem and it already contains the position
 
         entity.configure { entity ->
 //            entity.getOrAdd(OffsetComponent) { OffsetComponent() }.also {

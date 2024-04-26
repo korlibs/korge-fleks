@@ -3,6 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.entity.config.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,7 +18,7 @@ data class TweenSequenceComponent(
 
     // Internal runtime data
     var index: Int = 0,              // This points to the animation step which is currently in progress
-    var timeProgress: Double = 0.0,  // Elapsed time for the object to be animated
+    var timeProgress: Float = 0f,    // Elapsed time for the object to be animated
     var waitTime: Float = 0f,
     var executed: Boolean = false,
     var initialized: Boolean = false
@@ -78,10 +79,6 @@ data class TweenSequenceComponent(
         override var easing: Easing? = null           // not used
     ) : TweenBase
 
-
-    /**
-     * Animation Component data classes based on TweenBaseHasEntity
-     */
     @Serializable
     @SerialName("TweenSequence.DeleteEntity")
     data class DeleteEntity(
@@ -99,8 +96,8 @@ data class TweenSequenceComponent(
     data class SpawnEntity(
         var config: Identifier,             // name of config for configuring spawned entity
         var function: Identifier,           // name of function which configures the spawned entity
-        var x: Double = 0.0,                // position where entity will be spawned
-        var y: Double = 0.0,
+        var x: Float = 0f,                  // position where entity will be spawned
+        var y: Float = 0f,
 
         override var entity: Entity = invalidEntity, // when entity is not given (=invalidEntity) than it will be created
         override var delay: Float? = null,
@@ -122,12 +119,15 @@ data class TweenSequenceComponent(
         override var easing: Easing? = null           // not used
     ) : TweenBase
 
-    // Following component classes are for triggering tweens on specific properties of components
+
+    /**
+     *  Following component classes are for triggering tweens on specific properties of components
+     */
     @Serializable
-    @SerialName("TweenAppearance")
-    data class TweenAppearance(
+    @SerialName("TweenRgba")
+    data class TweenRgba(
         val alpha: Float? = null,
-// TODO        val tint: SpriteComponent.Rgb? = null,
+        val tint: Rgb? = null,
         val visible: Boolean? = null,
 
         override var entity: Entity,
@@ -139,9 +139,9 @@ data class TweenSequenceComponent(
 
     @Serializable
     @SerialName("TweenPosition")
-    data class TweenPositionShape(
-        val x: Double? = null,
-        val y: Double? = null,
+    data class TweenPosition(
+        val x: Float? = null,
+        val y: Float? = null,
 
         override var entity: Entity,
         override var delay: Float? = null,
@@ -153,8 +153,8 @@ data class TweenSequenceComponent(
     @Serializable
     @SerialName("TweenOffset")
     data class TweenOffset(
-        val x: Double? = null,
-        val y: Double? = null,
+        val x: Float? = null,
+        val y: Float? = null,
 
         override var entity: Entity,
         override var delay: Float? = null,
@@ -168,8 +168,8 @@ data class TweenSequenceComponent(
     data class TweenLayout(
         val centerX: Boolean? = null,
         val centerY: Boolean? = null,
-        val offsetX: Double? = null,
-        val offsetY: Double? = null,
+        val offsetX: Float? = null,
+        val offsetY: Float? = null,
 
         override var entity: Entity,
         override var delay: Float? = null,
@@ -197,8 +197,8 @@ data class TweenSequenceComponent(
     @Serializable
     @SerialName("TweenSwitchLayerVisibility")
     data class TweenSwitchLayerVisibility(
-        var offVariance: Double? = null,
-        var onVariance: Double? = null,
+        var offVariance: Float? = null,
+        var onVariance: Float? = null,
         var spriteLayers: List<String>? = null,
 
         override var entity: Entity,
@@ -214,7 +214,7 @@ data class TweenSequenceComponent(
         var numberOfObjects: Int? = null,
         var interval: Int? = null,
         var timeVariation: Int? = null,
-        var positionVariation: Double? = null,
+        var positionVariation: Float? = null,
 
         override var entity: Entity,
         override var delay: Float? = null,
@@ -228,8 +228,8 @@ data class TweenSequenceComponent(
     data class TweenSound(
         var startTrigger: Boolean? = null,
         var stopTrigger: Boolean? = null,
-        var position: Double? = null,
-        var volume: Double? = null,
+        var position: Float? = null,
+        var volume: Float? = null,
 
         override var entity: Entity,
         override var delay: Float? = null,

@@ -45,8 +45,8 @@ data class TweenPropertyComponent (
         SpriteDestroyOnPlayingFinished(componentTypeOf<TweenPropertyComponent>()),
         SpriteAnimName(componentTypeOf<TweenPropertyComponent>()),
 
-        AppearanceAlpha(componentTypeOf<TweenPropertyComponent>()),
-        AppearanceTint(componentTypeOf<TweenPropertyComponent>()),
+        RgbaAlpha(componentTypeOf<TweenPropertyComponent>()),
+        RgbaTint(componentTypeOf<TweenPropertyComponent>()),
         AppearanceVisible(componentTypeOf<TweenPropertyComponent>()),
 
         SpawnerNumberOfObjects(componentTypeOf<TweenPropertyComponent>()),
@@ -57,8 +57,8 @@ data class TweenPropertyComponent (
         // TODO not used yet in animation system
         LifeCycleHealthCounter(componentTypeOf<TweenPropertyComponent>()),
 
-        PositionShapeX(componentTypeOf<TweenPropertyComponent>()),
-        PositionShapeY(componentTypeOf<TweenPropertyComponent>()),
+        PositionX(componentTypeOf<TweenPropertyComponent>()),
+        PositionY(componentTypeOf<TweenPropertyComponent>()),
 
         OffsetX(componentTypeOf<TweenPropertyComponent>()),
         OffsetY(componentTypeOf<TweenPropertyComponent>()),
@@ -91,8 +91,8 @@ data class TweenPropertyComponent (
         val TweenSpriteDestroyOnPlayingFinished = TweenProperty.SpriteDestroyOnPlayingFinished.type
         val TweenSpriteAnimName = TweenProperty.SpriteAnimName.type
 
-        val TweenAppearanceAlphaComponent = TweenProperty.AppearanceAlpha.type
-        val TweenAppearanceTint = TweenProperty.AppearanceTint.type
+        val TweenRgbaAlphaComponent = TweenProperty.RgbaAlpha.type
+        val TweenRgbaTint = TweenProperty.RgbaTint.type
         val TweenAppearanceVisible = TweenProperty.AppearanceVisible.type
 
         val TweenSpawnerNumberOfObjects = TweenProperty.SpawnerNumberOfObjects.type
@@ -102,8 +102,8 @@ data class TweenPropertyComponent (
 
         val TweenLifeCycleHealthCounter = TweenProperty.LifeCycleHealthCounter.type
 
-        val TweenPositionShapeXComponent = TweenProperty.PositionShapeX.type
-        val TweenPositionShapeYComponent = TweenProperty.PositionShapeY.type
+        val TweenPositionXComponent = TweenProperty.PositionX.type
+        val TweenPositionYComponent = TweenProperty.PositionY.type
 
         val TweenOffsetX = TweenProperty.OffsetX.type
         val TweenOffsetY = TweenProperty.OffsetY.type

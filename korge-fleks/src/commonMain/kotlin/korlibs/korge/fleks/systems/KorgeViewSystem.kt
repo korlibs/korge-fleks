@@ -2,15 +2,11 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.image.color.RGBA
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.OffsetByFrameIndexComponent.*
 import korlibs.korge.fleks.components.SpriteComponent
+import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.KorgeViewCache
-import korlibs.korge.fleks.utils.random
-import korlibs.korge.parallax.ImageDataViewEx
-import korlibs.korge.parallax.ParallaxDataView
-import korlibs.time.TimeSpan
 
 /**
  * This system is updating the view objects for all [DrawableComponent] entities.
@@ -20,7 +16,7 @@ import korlibs.time.TimeSpan
  */
 
 class KorgeViewSystem : IteratingSystem(
-    family { /*all(AppearanceComponent).*/any(/*AppearanceComponent,*/ SwitchLayerVisibilityComponent, SpecificLayerComponent, PositionComponent, OffsetComponent) },
+    family { all(ViewTag, RgbaComponent, PositionComponent) },
     interval = EachFrame
 ) {
     var updateViewsEnabled: Boolean = true
@@ -56,29 +52,20 @@ class KorgeViewSystem : IteratingSystem(
             offset.x += frameOffset.x
             offset.y += frameOffset.y
         }
+*/
+        val rgbaComponent = entity[RgbaComponent]
+        val positionComponent = entity[PositionComponent]
 
         KorgeViewCache[entity].let { view ->
-            if (appearance.visible) {
-                view.visible = true
-                view.alpha = appearance.alpha.toDouble()
-                appearance.tint?.also { tint -> view.colorMul = RGBA(tint.r, tint.g, tint.b, 0xff) }
+            view.tint = rgbaComponent.rgba
+// TODO           view.pos = korlibs.math.geom.Point(positionComponent.x - offset.x, positionComponent.y - offset.y)
+            view.pos = korlibs.math.geom.Point(positionComponent.x, positionComponent.y)
 
-                if (entity has PositionComponent) {
-                    val positionComponent = entity[PositionComponent]
-                    view.pos = korlibs.math.geom.Point(positionComponent.x - offset.x, positionComponent.y - offset.y)
-                }
 
-//                println("[${entity.id}] Y: ${view.y} (Position: ${positionShape.y} delta: ${lastY - positionShape.y})")
-//                lastY = positionShape.y
-
-            } else {
-                view.visible = false
-            }
-
-            if (updateViewsEnabled) {
-                if (view is ImageDataViewEx) view.update(TimeSpan(deltaTime.toDouble() * 1000.0))
-                else if (view is ParallaxDataView) view.update(TimeSpan(deltaTime.toDouble() * 1000.0))
-            }
+//            if (updateViewsEnabled) {
+//                if (view is ImageDataViewEx) view.update(TimeSpan(deltaTime.toDouble() * 1000.0))
+//                else if (view is ParallaxDataView) view.update(TimeSpan(deltaTime.toDouble() * 1000.0))
+//            }
         }
 // */
     }

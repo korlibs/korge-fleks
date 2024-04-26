@@ -9,8 +9,8 @@ import kotlinx.serialization.*
 @Serializable
 @SerialName("Size")
 data class SizeComponent(
-    var width: Double = 0.0,
-    var height: Double = 0.0,
+    var width: Float = 0f,
+    var height: Float = 0f,
 ) : Component<SizeComponent> {
     override fun type(): ComponentType<SizeComponent> = SizeComponent
     companion object : ComponentType<SizeComponent>()

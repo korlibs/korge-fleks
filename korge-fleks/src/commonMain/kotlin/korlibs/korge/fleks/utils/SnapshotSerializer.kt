@@ -9,7 +9,7 @@ import korlibs.korge.fleks.components.SwitchLayerVisibilityComponent.LayerVisibi
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.entity.config.Invokable
-import korlibs.korge.fleks.tags.RenderLayerTag
+import korlibs.korge.fleks.tags.*
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -62,32 +62,36 @@ internal val internalModule = SerializersModule {
 
     // Register component classes
     polymorphic(Component::class) {
-        subclass(TweenPropertyComponent::class)
-        subclass(TweenSequenceComponent::class)
         subclass(InfoComponent::class)
-        subclass(SpecificLayerComponent::class)
-        subclass(SwitchLayerVisibilityComponent::class)
         subclass(InputTouchButtonComponent::class)
         subclass(LayoutComponent::class)
+        subclass(LdtkLevelMapComponent::class)
         subclass(LifeCycleComponent::class)
-//        subclass(ParallaxComponent::class)
-//        subclass(ParallaxMotionComponent::class)
-        subclass(PositionComponent::class)
-        subclass(OffsetComponent::class)
-        subclass(OffsetByFrameIndexComponent::class)
         subclass(MotionComponent::class)
+        subclass(NoisyMoveComponent::class)
+        subclass(OffsetByFrameIndexComponent::class)
+        subclass(OffsetComponent::class)
+        subclass(ParallaxComponent::class)
+        subclass(PositionComponent::class)
+        subclass(RgbaComponent::class)
         subclass(RigidbodyComponent::class)
+        subclass(SizeComponent::class)
         subclass(SoundComponent::class)
         subclass(SpawnerComponent::class)
+        subclass(SpecificLayerComponent::class)
+//        subclass(SpriteAnimationComponent::class)
         subclass(SpriteComponent::class)
         subclass(SubEntitiesComponent::class)
+        subclass(SwitchLayerVisibilityComponent::class)
         subclass(TextComponent::class)
         subclass(TiledLevelMapComponent::class)
-        subclass(LdtkLevelMapComponent::class)
+        subclass(TweenPropertyComponent::class)
+        subclass(TweenSequenceComponent::class)
     }
     // Register tags (components without properties)
     polymorphic(UniqueId::class) {
         subclass(RenderLayerTag::class)
+        subclass(ViewTag::class)
     }
 
     // Data class hierarchy used for AnimationScript component
@@ -98,8 +102,8 @@ internal val internalModule = SerializersModule {
         subclass(SpawnEntity::class)
         subclass(ExecuteConfigFunction::class)
         subclass(DeleteEntity::class)
-        subclass(TweenAppearance::class)
-        subclass(TweenPositionShape::class)
+        subclass(TweenRgba::class)
+        subclass(TweenPosition::class)
         subclass(TweenOffset::class)
         subclass(TweenLayout::class)
         subclass(TweenSprite::class)

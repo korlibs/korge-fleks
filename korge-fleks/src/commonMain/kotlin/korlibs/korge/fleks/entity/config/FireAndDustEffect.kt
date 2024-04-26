@@ -65,7 +65,7 @@ object FireAndDustEffect {
                 entity.getOrAdd(TweenSequenceComponent) { TweenSequenceComponent() }.also {
                     it.tweens = listOf(
                         // Fade out effect objects
-                        TweenAppearance(entity = entity, alpha = 0f, duration = effectConfig.fadeOutDuration),
+                        TweenRgba(entity = entity, alpha = 0f, duration = effectConfig.fadeOutDuration),
                         DeleteEntity(entity = entity)
                     )
                 }

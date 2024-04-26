@@ -60,7 +60,7 @@ object TextAndLogos {
             entity += PositionComponent()
 //            entity += DrawableComponent(drawOnLayer = logoConfig.drawOnLayer)
 
-            // Add Layout after adding PositionShapeComponent and DrawableComponent
+            // Add Layout after adding PositionComponent
             entity.getOrAdd(LayoutComponent) { LayoutComponent() }.also {
                 it.centerX = logoConfig.centerX
                 it.centerY = logoConfig.centerY
