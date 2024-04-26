@@ -14,9 +14,9 @@ object LevelMap {
     // Config data class
     data class Config(
         val mapType: MapType,
-        val assetName: String = "",
-        val worldName: String = "",
-        val levelName: String = "",
+        val assetName: String = "",  // Used with Tiled based maps
+        val worldName: String = "",  // Used with LDtk based maps
+        val levelName: String = "",  // Used with LDtk based maps
         val layerTag: RenderLayerTag,
         val x: Float = 0f,
         val y: Float = 0f,
