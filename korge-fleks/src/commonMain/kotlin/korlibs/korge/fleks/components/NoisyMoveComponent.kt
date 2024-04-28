@@ -48,8 +48,8 @@ data class NoisyMoveComponent(
         val startY = y
         val endX = xTarget + if (xVariance != 0f) (-xVariance..xVariance).random() else 0f
         val endY = yTarget + if (yVariance != 0f) (-yVariance..yVariance).random() else 0f
-        updateAnimateComponent(this, entity, TweenProperty.NoisyMoveX, value = startX, change = endX - startX, waitTime, Easing.EASE_IN_OLD)
-        updateAnimateComponent(this, entity, TweenProperty.NoisyMoveY, value = startY, change = endY - startY, waitTime, Easing.EASE_IN_OUT)
+// TODO        updateAnimateComponent(this, entity, TweenProperty.NoisyMoveX, value = startX, change = endX - startX, waitTime, Easing.EASE_IN_OLD)
+//        updateAnimateComponent(this, entity, TweenProperty.NoisyMoveY, value = startY, change = endY - startY, waitTime, Easing.EASE_IN_OUT)
 
     }
 

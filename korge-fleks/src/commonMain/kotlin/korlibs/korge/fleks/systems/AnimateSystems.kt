@@ -4,25 +4,12 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionXComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionYComponent
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteAnimName
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteIsPlaying
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteForwardDirection
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteLoop
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteDestroyOnPlayingFinished
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpawnerNumberOfObjects
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpawnerInterval
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpawnerTimeVariation
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpawnerPositionVariation
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenLifeCycleHealthCounter
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenOffsetX
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenOffsetY
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundPosition
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStartTrigger
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStopTrigger
-import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundVolume
-import korlibs.korge.fleks.utils.KorgeViewCache
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenOffsetXComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenOffsetYComponent
 import korlibs.korge.fleks.components.*
-import korlibs.korge.parallax.ImageDataViewEx
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenRgbaAlphaComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenRgbaTintComponent
+import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import kotlin.jvm.JvmName
 import kotlin.reflect.KMutableProperty0
 
@@ -34,17 +21,17 @@ import kotlin.reflect.KMutableProperty0
  * When the animation is over than the Animate component is removed again from the entity.
  * Adding Animate components can be done e.g. by the AnimationSequence Entity Component configuration.
  */
-//class AnimateAppearanceSystem : IteratingSystem(
-//    family { all(AppearanceComponent).any(TweenAppearanceAlphaComponent, TweenAppearanceTint, TweenAppearanceVisible) },
-//    interval = EachFrame
-//) {
-//    override fun onTickEntity(entity: Entity) {
-//        val appearance = entity[AppearanceComponent]
-//        updateProperty(entity, TweenAppearanceAlphaComponent, appearance::alpha)
-//        updateProperty(entity, TweenAppearanceTint, appearance::tint)
-//        updateProperty(entity, TweenAppearanceVisible, appearance::visible)
-//    }
-//}
+class TweenRgbaSystem : IteratingSystem(
+    family { all(RgbaComponent).any(TweenRgbaAlphaComponent, TweenRgbaTintComponent) },
+    interval = EachFrame
+) {
+    override fun onTickEntity(entity: Entity) {
+        entity.getOrNull(RgbaComponent)?.let {
+            updateProperty(entity, TweenRgbaAlphaComponent, it::alpha)
+            updateProperty(entity, TweenRgbaTintComponent, it::tint)
+        }
+    }
+}
 
 //class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
 //    family { all(SwitchLayerVisibilityComponent).any(TweenSwitchLayerVisibilityOnVariance, TweenSwitchLayerVisibilityOffVariance) },
@@ -58,7 +45,7 @@ import kotlin.reflect.KMutableProperty0
 //}
 
 class TweenPositionSystem : IteratingSystem(
-    family { any(TweenPositionXComponent, TweenPositionYComponent, TweenOffsetX, TweenOffsetY) },
+    family { any(TweenPositionXComponent, TweenPositionYComponent, TweenOffsetXComponent, TweenOffsetYComponent) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
@@ -67,20 +54,20 @@ class TweenPositionSystem : IteratingSystem(
             updateProperty(entity, TweenPositionYComponent, it::y)
         }
         entity.getOrNull(OffsetComponent)?.let {
-            updateProperty(entity, TweenOffsetX, it::x)
-            updateProperty(entity, TweenOffsetY, it::y)
+            updateProperty(entity, TweenOffsetXComponent, it::x)
+            updateProperty(entity, TweenOffsetYComponent, it::y)
         }
     }
 }
 
-class TweenSpriteSystem : IteratingSystem(
-    family { all(SpriteComponent).any(TweenSpriteAnimName, TweenSpriteIsPlaying, TweenSpriteForwardDirection, TweenSpriteLoop, TweenSpriteDestroyOnPlayingFinished) },
-    interval = EachFrame
-) {
-    override fun onTickEntity(entity: Entity) {
-        val sprite = entity[SpriteComponent]
-        val imageView = KorgeViewCache[entity] as ImageDataViewEx
-        updateProperty(entity, TweenSpriteAnimName, sprite::animationName) { imageView.animation = sprite.animationName }
+//class TweenSpriteSystem : IteratingSystem(
+//    family { all(SpriteComponent).any(TweenSpriteAnimName, TweenSpriteIsPlaying, TweenSpriteForwardDirection, TweenSpriteLoop, TweenSpriteDestroyOnPlayingFinished) },
+//    interval = EachFrame
+//) {
+//    override fun onTickEntity(entity: Entity) {
+//        val sprite = entity[SpriteComponent]
+//        val imageView = KorgeViewCache[entity] as ImageDataViewEx
+//        updateProperty(entity, TweenSpriteAnimName, sprite::animationName) { imageView.animation = sprite.animationName }
 //        updateProperty(entity, TweenSpriteIsPlaying, sprite::isPlaying)
 //        updateProperty(entity, TweenSpriteForwardDirection, sprite::forwardDirection)
 //        updateProperty(entity, TweenSpriteLoop, sprite::loop)
@@ -91,10 +78,10 @@ class TweenSpriteSystem : IteratingSystem(
 //            else
 //            imageView.onPlayFinished = {}
 //        }
-
+//
 //        if (sprite.isPlaying) imageView.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
-    }
-}
+//    }
+//}
 
 //class AnimateSpawnerSystem : IteratingSystem(
 //    family { all(SpawnerComponent).any(TweenSpawnerNumberOfObjects, TweenSpawnerInterval, TweenSpawnerTimeVariation, TweenSpawnerPositionVariation) },
@@ -187,21 +174,19 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
     }
 }
 
-/* TODO take into use
 @JvmName("updatePropertyRgb")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Rgb?>) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Rgb>) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration) entity.configure { entity ->
             value.set(it.change as Rgb + it.value as Rgb)
             entity -= component
         } else {
-            val time: Double = it.timeProgress / it.duration
+            val time: Float = it.timeProgress / it.duration
             value.set(it.change as Rgb * it.easing.invoke(time) + it.value as Rgb)
             it.timeProgress += deltaTime
         }
     }
 }
-*/
 
 @JvmName("updatePropertyBoolean")
 fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Boolean>, block: EntityUpdateContext.() -> Unit = {}) {

@@ -47,7 +47,7 @@ object TextAndLogos {
 
             logoConfig.logoName?.let {
                 entity.getOrAdd(SpriteComponent) { SpriteComponent() }.also {
-                    it.assetName = logoConfig.logoName
+                    it.name = logoConfig.logoName
                 }
             }
             logoConfig.text?.let {

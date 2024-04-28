@@ -70,7 +70,7 @@ data class TweenSequenceComponent(
     ) : TweenBase
 
     @Serializable
-    @SerialName("TweenSequence.Wait")
+    @SerialName("Wait")
     data class Wait(
         override var entity: Entity = invalidEntity,  // not used
         override var delay: Float? = null,            // Not used
@@ -80,7 +80,7 @@ data class TweenSequenceComponent(
     ) : TweenBase
 
     @Serializable
-    @SerialName("TweenSequence.DeleteEntity")
+    @SerialName("DeleteEntity")
     data class DeleteEntity(
         val healthCounter: Int = 0,             // set healthCounter to zero to delete the entity immediately
 
@@ -92,7 +92,7 @@ data class TweenSequenceComponent(
     ) : TweenBase
 
     @Serializable
-    @SerialName("TweenSequence.SpawnEntity")
+    @SerialName("SpawnEntity")
     data class SpawnEntity(
         var config: Identifier,             // name of config for configuring spawned entity
         var function: Identifier,           // name of function which configures the spawned entity
@@ -107,7 +107,7 @@ data class TweenSequenceComponent(
     ) : TweenBase
 
     @Serializable
-    @SerialName("TweenSequence.ExecuteConfigFunction")
+    @SerialName("ExecuteConfigFunction")
     data class ExecuteConfigFunction(
         var function: Identifier,                     // name of function which configures the spawned entity
         var config: Identifier = nothing,             // [optional] name of config for configuring spawned entity

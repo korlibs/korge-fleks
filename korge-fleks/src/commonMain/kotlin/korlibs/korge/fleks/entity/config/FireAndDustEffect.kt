@@ -52,8 +52,8 @@ object FireAndDustEffect {
                 it.velocityY = velocityYY
             }
             entity.getOrAdd(SpriteComponent) { SpriteComponent() }.also {
-                it.assetName = effectConfig.assetName
-                it.animationName = effectConfig.animationName
+                it.name = effectConfig.assetName
+                it.animation = effectConfig.animationName
 //                it.isPlaying = true
             }
 

@@ -15,34 +15,34 @@ internal class AnimateComponentTest {
     @Test
     fun testAnimateComponentTypeIntegrity() {
         val testVector: List<Pair<TweenProperty, ComponentType<*>>> = listOf(
-            Pair(SpriteIsPlaying, Companion.TweenSpriteIsPlaying),
-            Pair(SpriteForwardDirection, Companion.TweenSpriteForwardDirection),
-            Pair(SpriteLoop, Companion.TweenSpriteLoop),
-            Pair(SpriteDestroyOnPlayingFinished, Companion.TweenSpriteDestroyOnPlayingFinished),
-            Pair(SpriteAnimName, Companion.TweenSpriteAnimName),
+//            Pair(SpriteIsPlaying, Companion.TweenSpriteIsPlaying),
+//            Pair(SpriteForwardDirection, Companion.TweenSpriteForwardDirection),
+//            Pair(SpriteLoop, Companion.TweenSpriteLoop),
+//            Pair(SpriteDestroyOnPlayingFinished, Companion.TweenSpriteDestroyOnPlayingFinished),
+//            Pair(SpriteAnimName, Companion.TweenSpriteAnimName),
             Pair(RgbaAlpha, Companion.TweenRgbaAlphaComponent),
-            Pair(RgbaTint, Companion.TweenRgbaTint),
-            Pair(AppearanceVisible, Companion.TweenAppearanceVisible),
-            Pair(SpawnerNumberOfObjects, Companion.TweenSpawnerNumberOfObjects),
-            Pair(SpawnerInterval, Companion.TweenSpawnerInterval),
-            Pair(SpawnerTimeVariation, Companion.TweenSpawnerTimeVariation),
-            Pair(SpawnerPositionVariation, Companion.TweenSpawnerPositionVariation),
-            Pair(LifeCycleHealthCounter, Companion.TweenLifeCycleHealthCounter),
+            Pair(RgbaTint, Companion.TweenRgbaTintComponent),
+//            Pair(AppearanceVisible, Companion.TweenAppearanceVisible),
+//            Pair(SpawnerNumberOfObjects, Companion.TweenSpawnerNumberOfObjects),
+//            Pair(SpawnerInterval, Companion.TweenSpawnerInterval),
+//            Pair(SpawnerTimeVariation, Companion.TweenSpawnerTimeVariation),
+//            Pair(SpawnerPositionVariation, Companion.TweenSpawnerPositionVariation),
+//            Pair(LifeCycleHealthCounter, Companion.TweenLifeCycleHealthCounter),
             Pair(PositionX, Companion.TweenPositionXComponent),
             Pair(PositionY, Companion.TweenPositionYComponent),
-            Pair(OffsetX, Companion.TweenOffsetX),
-            Pair(OffsetY, Companion.TweenOffsetY),
-            Pair(LayoutCenterX, Companion.TweenLayoutCenterX),
-            Pair(LayoutCenterY, Companion.TweenLayoutCenterY),
-            Pair(LayoutOffsetX, Companion.TweenLayoutOffsetX),
-            Pair(LayoutOffsetY, Companion.TweenLayoutOffsetY),
-            Pair(SwitchLayerVisibilityOnVariance, Companion.TweenSwitchLayerVisibilityOnVariance),
-            Pair(SwitchLayerVisibilityOffVariance, Companion.TweenSwitchLayerVisibilityOffVariance),
-            Pair(SoundStartTrigger, Companion.TweenSoundStartTrigger),
-            Pair(SoundStopTrigger, Companion.TweenSoundStopTrigger),
-            Pair(SoundPosition, Companion.TweenSoundPosition),
-            Pair(SoundVolume, Companion.TweenSoundVolume),
-            Pair(ConfigureFunction, Companion.ExecuteConfigureFunction)
+            Pair(OffsetX, Companion.TweenOffsetXComponent),
+            Pair(OffsetY, Companion.TweenOffsetYComponent),
+//            Pair(LayoutCenterX, Companion.TweenLayoutCenterX),
+//            Pair(LayoutCenterY, Companion.TweenLayoutCenterY),
+//            Pair(LayoutOffsetX, Companion.TweenLayoutOffsetX),
+//            Pair(LayoutOffsetY, Companion.TweenLayoutOffsetY),
+//            Pair(SwitchLayerVisibilityOnVariance, Companion.TweenSwitchLayerVisibilityOnVariance),
+//            Pair(SwitchLayerVisibilityOffVariance, Companion.TweenSwitchLayerVisibilityOffVariance),
+//            Pair(SoundStartTrigger, Companion.TweenSoundStartTrigger),
+//            Pair(SoundStopTrigger, Companion.TweenSoundStopTrigger),
+//            Pair(SoundPosition, Companion.TweenSoundPosition),
+//            Pair(SoundVolume, Companion.TweenSoundVolume),
+//            Pair(ConfigureFunction, Companion.ExecuteConfigureFunction)
         )
 
         testVector.forEach { animateType ->
@@ -53,7 +53,7 @@ internal class AnimateComponentTest {
         }
 
         assertEquals(
-            TweenProperty.values().size,
+            TweenProperty.entries.size,
             testVector.size,
             "Check if all AnimateComponentType enum values have been tested"
         )

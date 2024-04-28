@@ -1,12 +1,14 @@
 package korlibs.korge.fleks.tags
 
 import com.github.quillraven.fleks.*
+import kotlinx.serialization.*
 
 
 /**
  * The [RenderLayerTag] component is used to specify which renderer is drawing the specific entity.
  * With that also layering of entity graphics is achieved.
  */
+@Serializable @SerialName("RenderLayer")
 enum class RenderLayerTag : EntityTags by entityTagOf() {
     BG_LEVELMAP,
     BG_PARALLAX,

@@ -2,12 +2,10 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.utils.KorgeViewCache
 import korlibs.korge.fleks.utils.random
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.korge.fleks.entity.config.isInvalidEntity
-import korlibs.korge.parallax.ImageDataViewEx
 
 /**
  * This system is responsible to spawn new entity objects. It shall be the only system which spawns new objects.
@@ -40,7 +38,7 @@ class SpawnerSystem : IteratingSystem(
                     // Get offset depending on current animation and frame index
 // TODO
                     val currentFrameIndex = 0  //(KorgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
-                    val animationName = it.entity.getOrNull(SpriteComponent)?.animationName ?: ""
+                    val animationName = it.entity.getOrNull(SpriteComponent)?.animation ?: ""
                     val offset = it.mapOfOffsetLists[animationName]?.get(currentFrameIndex)
                         ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
                     x += offset.x

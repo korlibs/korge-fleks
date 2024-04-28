@@ -11,7 +11,8 @@ import kotlin.math.*
 @Serializable
 @SerialName("Rgba")
 class RgbaComponent(
-    @Serializable(with = RGBAAsString::class)
+//    @Serializable(with = RGBAAsString::class)  -- deserialization does not work with it???
+    @Serializable(with = RGBAAsInt::class)
     var rgba: RGBA = Colors.WHITE,
 ) : Component<RgbaComponent> {
 
@@ -37,10 +38,10 @@ class RgbaComponent(
         var b: Int = 0xff
     ) : SerializeBase {
         operator fun plus(other: Rgb) = Rgb(r + other.r, g + other.g, b + other.b)
-        operator fun times(f: Double) = Rgb(
-            (r.toDouble() * f).roundToInt(),
-            (g.toDouble() * f).roundToInt(),
-            (b.toDouble() * f).roundToInt()
+        operator fun times(f: Float) = Rgb(
+            (r.toFloat() * f).roundToInt(),
+            (g.toFloat() * f).roundToInt(),
+            (b.toFloat() * f).roundToInt()
         )
 
         override fun toString(): String = "#%02x%02x%02x".format(r, g, b)

@@ -7,6 +7,7 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.OffsetByFrameIndexComponent.Point
 import korlibs.korge.fleks.components.SwitchLayerVisibilityComponent.LayerVisibility
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
+import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.entity.config.Invokable
 import korlibs.korge.fleks.tags.*
@@ -55,7 +56,7 @@ value class Identifier(val name: String)
 internal val internalModule = SerializersModule {
     // Register data classes
     polymorphic(SerializeBase::class) {
-// TODO        subclass(Rgb::class)
+        subclass(Rgb::class)
         subclass(LayerVisibility::class)
         subclass(Point::class)
     }
@@ -79,7 +80,6 @@ internal val internalModule = SerializersModule {
         subclass(SoundComponent::class)
         subclass(SpawnerComponent::class)
         subclass(SpecificLayerComponent::class)
-//        subclass(SpriteAnimationComponent::class)
         subclass(SpriteComponent::class)
         subclass(SubEntitiesComponent::class)
         subclass(SwitchLayerVisibilityComponent::class)
@@ -90,7 +90,7 @@ internal val internalModule = SerializersModule {
     }
     // Register tags (components without properties)
     polymorphic(UniqueId::class) {
-        subclass(RenderLayerTag::class)
+        subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
         subclass(ViewTag::class)
     }
 
@@ -274,7 +274,7 @@ object AnySerializer : KSerializer<Any> {
  * Use this serializer to register the enum in the serializers module, e.g.:
  * `subclass( <enum>::class, PolymorphicEnumSerializer( <enum>.serializer() )`
  *
- * Currently, not used in Korge-fleks.
+ * This serializer is used for serializing enum tags from Fleks.
  */
 @OptIn( ExperimentalSerializationApi::class )
 class PolymorphicEnumSerializer<T : Enum<T>>( private val enumSerializer: KSerializer<T>) : KSerializer<T>

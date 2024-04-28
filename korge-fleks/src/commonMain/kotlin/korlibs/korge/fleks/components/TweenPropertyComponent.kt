@@ -39,23 +39,22 @@ data class TweenPropertyComponent (
      * [property](TweenComponent.property) of the base [TweenPropertyComponent] data class.
      */
     enum class TweenProperty(val type: ComponentType<TweenPropertyComponent>) {
-        SpriteIsPlaying(componentTypeOf<TweenPropertyComponent>()),
-        SpriteForwardDirection(componentTypeOf<TweenPropertyComponent>()),
-        SpriteLoop(componentTypeOf<TweenPropertyComponent>()),
-        SpriteDestroyOnPlayingFinished(componentTypeOf<TweenPropertyComponent>()),
-        SpriteAnimName(componentTypeOf<TweenPropertyComponent>()),
+//        SpriteIsPlaying(componentTypeOf<TweenPropertyComponent>()),
+//        SpriteForwardDirection(componentTypeOf<TweenPropertyComponent>()),
+//        SpriteLoop(componentTypeOf<TweenPropertyComponent>()),
+//        SpriteDestroyOnPlayingFinished(componentTypeOf<TweenPropertyComponent>()),
+//        SpriteAnimName(componentTypeOf<TweenPropertyComponent>()),
 
         RgbaAlpha(componentTypeOf<TweenPropertyComponent>()),
         RgbaTint(componentTypeOf<TweenPropertyComponent>()),
-        AppearanceVisible(componentTypeOf<TweenPropertyComponent>()),
 
-        SpawnerNumberOfObjects(componentTypeOf<TweenPropertyComponent>()),
-        SpawnerInterval(componentTypeOf<TweenPropertyComponent>()),
-        SpawnerTimeVariation(componentTypeOf<TweenPropertyComponent>()),
-        SpawnerPositionVariation(componentTypeOf<TweenPropertyComponent>()),
+//        SpawnerNumberOfObjects(componentTypeOf<TweenPropertyComponent>()),
+//        SpawnerInterval(componentTypeOf<TweenPropertyComponent>()),
+//        SpawnerTimeVariation(componentTypeOf<TweenPropertyComponent>()),
+//        SpawnerPositionVariation(componentTypeOf<TweenPropertyComponent>()),
 
         // TODO not used yet in animation system
-        LifeCycleHealthCounter(componentTypeOf<TweenPropertyComponent>()),
+//        LifeCycleHealthCounter(componentTypeOf<TweenPropertyComponent>()),
 
         PositionX(componentTypeOf<TweenPropertyComponent>()),
         PositionY(componentTypeOf<TweenPropertyComponent>()),
@@ -63,67 +62,66 @@ data class TweenPropertyComponent (
         OffsetX(componentTypeOf<TweenPropertyComponent>()),
         OffsetY(componentTypeOf<TweenPropertyComponent>()),
 
-        LayoutCenterX(componentTypeOf<TweenPropertyComponent>()),
-        LayoutCenterY(componentTypeOf<TweenPropertyComponent>()),
-        LayoutOffsetX(componentTypeOf<TweenPropertyComponent>()),
-        LayoutOffsetY(componentTypeOf<TweenPropertyComponent>()),
+//        LayoutCenterX(componentTypeOf<TweenPropertyComponent>()),
+//        LayoutCenterY(componentTypeOf<TweenPropertyComponent>()),
+//        LayoutOffsetX(componentTypeOf<TweenPropertyComponent>()),
+//        LayoutOffsetY(componentTypeOf<TweenPropertyComponent>()),
 
-        SwitchLayerVisibilityOnVariance(componentTypeOf<TweenPropertyComponent>()),
-        SwitchLayerVisibilityOffVariance(componentTypeOf<TweenPropertyComponent>()),
+//        SwitchLayerVisibilityOnVariance(componentTypeOf<TweenPropertyComponent>()),
+//        SwitchLayerVisibilityOffVariance(componentTypeOf<TweenPropertyComponent>()),
 
-        SoundStartTrigger(componentTypeOf<TweenPropertyComponent>()),
-        SoundStopTrigger(componentTypeOf<TweenPropertyComponent>()),
-        SoundPosition(componentTypeOf<TweenPropertyComponent>()),
-        SoundVolume(componentTypeOf<TweenPropertyComponent>()),
+//        SoundStartTrigger(componentTypeOf<TweenPropertyComponent>()),
+//        SoundStopTrigger(componentTypeOf<TweenPropertyComponent>()),
+//        SoundPosition(componentTypeOf<TweenPropertyComponent>()),
+//        SoundVolume(componentTypeOf<TweenPropertyComponent>()),
 
-        NoisyMoveX(componentTypeOf<TweenPropertyComponent>()),
-        NoisyMoveY(componentTypeOf<TweenPropertyComponent>()),
+//        NoisyMoveX(componentTypeOf<TweenPropertyComponent>()),
+//        NoisyMoveY(componentTypeOf<TweenPropertyComponent>()),
 
-        ConfigureFunction(componentTypeOf<TweenPropertyComponent>())
+//        ConfigureFunction(componentTypeOf<TweenPropertyComponent>())
     }
 
     companion object {
         // TODO update unit test for this mapping from enum to here
 
-        val TweenSpriteIsPlaying = TweenProperty.SpriteIsPlaying.type
-        val TweenSpriteForwardDirection = TweenProperty.SpriteForwardDirection.type
-        val TweenSpriteLoop = TweenProperty.SpriteLoop.type
-        val TweenSpriteDestroyOnPlayingFinished = TweenProperty.SpriteDestroyOnPlayingFinished.type
-        val TweenSpriteAnimName = TweenProperty.SpriteAnimName.type
+//        val TweenSpriteIsPlaying = TweenProperty.SpriteIsPlaying.type
+//        val TweenSpriteForwardDirection = TweenProperty.SpriteForwardDirection.type
+//        val TweenSpriteLoop = TweenProperty.SpriteLoop.type
+//        val TweenSpriteDestroyOnPlayingFinished = TweenProperty.SpriteDestroyOnPlayingFinished.type
+//        val TweenSpriteAnimName = TweenProperty.SpriteAnimName.type
 
         val TweenRgbaAlphaComponent = TweenProperty.RgbaAlpha.type
-        val TweenRgbaTint = TweenProperty.RgbaTint.type
-        val TweenAppearanceVisible = TweenProperty.AppearanceVisible.type
+        val TweenRgbaTintComponent = TweenProperty.RgbaTint.type
 
-        val TweenSpawnerNumberOfObjects = TweenProperty.SpawnerNumberOfObjects.type
-        val TweenSpawnerInterval = TweenProperty.SpawnerInterval.type
-        val TweenSpawnerTimeVariation = TweenProperty.SpawnerTimeVariation.type
-        val TweenSpawnerPositionVariation = TweenProperty.SpawnerPositionVariation.type
+//        val TweenSpawnerNumberOfObjects = TweenProperty.SpawnerNumberOfObjects.type
+//        val TweenSpawnerInterval = TweenProperty.SpawnerInterval.type
+//        val TweenSpawnerTimeVariation = TweenProperty.SpawnerTimeVariation.type
+//        val TweenSpawnerPositionVariation = TweenProperty.SpawnerPositionVariation.type
 
-        val TweenLifeCycleHealthCounter = TweenProperty.LifeCycleHealthCounter.type
+//        val TweenLifeCycleHealthCounter = TweenProperty.LifeCycleHealthCounter.type
 
         val TweenPositionXComponent = TweenProperty.PositionX.type
         val TweenPositionYComponent = TweenProperty.PositionY.type
 
-        val TweenOffsetX = TweenProperty.OffsetX.type
-        val TweenOffsetY = TweenProperty.OffsetY.type
+        val TweenOffsetXComponent = TweenProperty.OffsetX.type
+        val TweenOffsetYComponent = TweenProperty.OffsetY.type
 
-        val TweenLayoutCenterX = TweenProperty.LayoutCenterX.type
-        val TweenLayoutCenterY = TweenProperty.LayoutCenterY.type
-        val TweenLayoutOffsetX = TweenProperty.LayoutOffsetX.type
-        val TweenLayoutOffsetY = TweenProperty.LayoutOffsetY.type
+//        val TweenLayoutCenterX = TweenProperty.LayoutCenterX.type
+//        val TweenLayoutCenterY = TweenProperty.LayoutCenterY.type
+//        val TweenLayoutOffsetX = TweenProperty.LayoutOffsetX.type
+//        val TweenLayoutOffsetY = TweenProperty.LayoutOffsetY.type
 
-        val TweenSwitchLayerVisibilityOnVariance = TweenProperty.SwitchLayerVisibilityOnVariance.type
-        val TweenSwitchLayerVisibilityOffVariance = TweenProperty.SwitchLayerVisibilityOffVariance.type
+//        val TweenSwitchLayerVisibilityOnVariance = TweenProperty.SwitchLayerVisibilityOnVariance.type
+//        val TweenSwitchLayerVisibilityOffVariance = TweenProperty.SwitchLayerVisibilityOffVariance.type
 
-        val TweenSoundStartTrigger = TweenProperty.SoundStartTrigger.type
-        val TweenSoundStopTrigger = TweenProperty.SoundStopTrigger.type
-        val TweenSoundPosition = TweenProperty.SoundPosition.type
-        val TweenSoundVolume = TweenProperty.SoundVolume.type
+//        val TweenSoundStartTrigger = TweenProperty.SoundStartTrigger.type
+//        val TweenSoundStopTrigger = TweenProperty.SoundStopTrigger.type
+//        val TweenSoundPosition = TweenProperty.SoundPosition.type
+//        val TweenSoundVolume = TweenProperty.SoundVolume.type
 
-        val TweenNoisyMoveX = TweenProperty.NoisyMoveX.type
-        val TweenNoisyMoveY = TweenProperty.NoisyMoveY.type
+//        val TweenNoisyMoveX = TweenProperty.NoisyMoveX.type
+//        val TweenNoisyMoveY = TweenProperty.NoisyMoveY.type
 
-        val ExecuteConfigureFunction = TweenProperty.ConfigureFunction.type
+//        val ExecuteConfigureFunction = TweenProperty.ConfigureFunction.type
     }
 }

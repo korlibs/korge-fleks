@@ -132,35 +132,35 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.x?.let { end -> createAnimateComponent(OffsetX, start.x, end - start.x) }
                 tween.y?.let { end -> createAnimateComponent(OffsetY, start.y, end - start.y) }
             }
-            is TweenLayout -> tween.entity.getOrError(LayoutComponent).let { start ->
-                tween.centerX?.let { value -> createAnimateComponent(LayoutCenterX, value) }
-                tween.centerY?.let { value -> createAnimateComponent(LayoutCenterY, value) }
-                tween.offsetX?.let { end -> createAnimateComponent(LayoutOffsetX, start.offsetX, end - start.offsetX) }
-                tween.offsetY?.let { end -> createAnimateComponent(LayoutOffsetY, start.offsetY, end - start.offsetY) }
-            }
-            is TweenSprite -> tween.entity.getOrError(SpriteComponent).let { _ ->  // make sure to-be-animated-entity is of type sprite
-                tween.animationName?.let { value -> createAnimateComponent(SpriteAnimName, value) }
-                tween.isPlaying?.let { value -> createAnimateComponent(SpriteIsPlaying, value) }
-                tween.forwardDirection?.let { value -> createAnimateComponent(SpriteForwardDirection, value) }
-                tween.loop?.let { value -> createAnimateComponent(SpriteLoop, value) }
-                tween.destroyOnPlayingFinished?.let { value -> createAnimateComponent(SpriteDestroyOnPlayingFinished, value) }
-            }
-            is TweenSwitchLayerVisibility -> tween.entity.getOrError(SwitchLayerVisibilityComponent).let { start ->
-                tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
-                tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
-            }
-            is TweenSpawner -> tween.entity.getOrError(SpawnerComponent).let { start ->
-                tween.numberOfObjects?.let { end -> createAnimateComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }
-                tween.interval?.let { end -> createAnimateComponent(SpawnerInterval, start.interval, end - start.interval) }
-                tween.timeVariation?.let { end -> createAnimateComponent(SpawnerTimeVariation, start.timeVariation, end - start.timeVariation) }
-                tween.positionVariation?.let { end -> createAnimateComponent(SpawnerPositionVariation, start.positionVariation, end - start.positionVariation) }
-            }
-            is TweenSound -> tween.entity.getOrError(SoundComponent).let{ start ->
-                tween.startTrigger?.let { value -> createAnimateComponent(SoundStartTrigger, value) }
-                tween.stopTrigger?.let { value -> createAnimateComponent(SoundStopTrigger, value) }
-                tween.position?.let { end -> createAnimateComponent(SoundPosition, start.position, end - start.position) }
-                tween.volume?.let { end -> createAnimateComponent(SoundVolume, start.volume, end - start.volume) }
-            }
+//            is TweenLayout -> tween.entity.getOrError(LayoutComponent).let { start ->
+//                tween.centerX?.let { value -> createAnimateComponent(LayoutCenterX, value) }
+//                tween.centerY?.let { value -> createAnimateComponent(LayoutCenterY, value) }
+//                tween.offsetX?.let { end -> createAnimateComponent(LayoutOffsetX, start.offsetX, end - start.offsetX) }
+//                tween.offsetY?.let { end -> createAnimateComponent(LayoutOffsetY, start.offsetY, end - start.offsetY) }
+//            }
+//            is TweenSprite -> tween.entity.getOrError(SpriteComponent).let { _ ->  // make sure to-be-animated-entity is of type sprite
+//                tween.animationName?.let { value -> createAnimateComponent(SpriteAnimName, value) }
+//                tween.isPlaying?.let { value -> createAnimateComponent(SpriteIsPlaying, value) }
+//                tween.forwardDirection?.let { value -> createAnimateComponent(SpriteForwardDirection, value) }
+//                tween.loop?.let { value -> createAnimateComponent(SpriteLoop, value) }
+//                tween.destroyOnPlayingFinished?.let { value -> createAnimateComponent(SpriteDestroyOnPlayingFinished, value) }
+//            }
+//            is TweenSwitchLayerVisibility -> tween.entity.getOrError(SwitchLayerVisibilityComponent).let { start ->
+//                tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
+//                tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
+//            }
+//            is TweenSpawner -> tween.entity.getOrError(SpawnerComponent).let { start ->
+//                tween.numberOfObjects?.let { end -> createAnimateComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }
+//                tween.interval?.let { end -> createAnimateComponent(SpawnerInterval, start.interval, end - start.interval) }
+//                tween.timeVariation?.let { end -> createAnimateComponent(SpawnerTimeVariation, start.timeVariation, end - start.timeVariation) }
+//                tween.positionVariation?.let { end -> createAnimateComponent(SpawnerPositionVariation, start.positionVariation, end - start.positionVariation) }
+//            }
+//            is TweenSound -> tween.entity.getOrError(SoundComponent).let{ start ->
+//                tween.startTrigger?.let { value -> createAnimateComponent(SoundStartTrigger, value) }
+//                tween.stopTrigger?.let { value -> createAnimateComponent(SoundStopTrigger, value) }
+//                tween.position?.let { end -> createAnimateComponent(SoundPosition, start.position, end - start.position) }
+//                tween.volume?.let { end -> createAnimateComponent(SoundVolume, start.volume, end - start.volume) }
+//            }
             // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
             is SpawnEntity -> {
                 val spawnedEntity = if (tween.entity.isInvalidEntity()) world.entity() else tween.entity
