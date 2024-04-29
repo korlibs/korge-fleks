@@ -21,7 +21,7 @@ import korlibs.math.geom.*
  * created and added to the [KorgeViewSystem]. This is done in [KorgeView.onAdded] family hook here rather than in
  * component hook because we are sure that all needed components are set up before in the [World].
  */
-object KorgeView {
+class KorgeView {
     val family: Family = World.family { all(ViewTag, PositionComponent, SizeComponent) }
 
     val onAdded: FamilyHook = { entity ->

@@ -99,7 +99,7 @@ fun AssetStore.getImageFrame(name: String, animation: String? = null, frameIndex
         if (spriteAnimations.contains(animation)) {
             spriteAnimations[animation]!!.frames
         } else {
-            println("WARNING - AssetStore: Image animation '$animation' not found!")
+            println("WARNING -- AssetStore: Image animation '$animation' not found!")
             return ImageFrame(0)
         }
     } else {

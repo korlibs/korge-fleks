@@ -47,7 +47,6 @@ object LevelMap {
                 alpha = levelMapConfig.alpha
             }
             it += levelMapConfig.layerTag
-            it += ViewTag
         }
         entity
     }

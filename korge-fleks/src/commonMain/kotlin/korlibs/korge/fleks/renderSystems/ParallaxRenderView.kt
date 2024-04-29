@@ -17,17 +17,15 @@ import korlibs.math.geom.*
  * Creates a new [ParallaxRenderView], allowing to configure with [callback], and attaches the newly created view to the
  * receiver "this".
  *
- * @param viewName is used for debugging. This string is shown in the debug view of Korge.
  * @param viewPortSize is the virtual width and height of the game display/screen.
  * @param world is the Fleks world where the parallax entities are created.
  * @param layerTag is a special Fleks component which tells the [ParallaxRenderView] which entities it has to render.
  * @param callback can be used to configure the [ParallaxRenderView] object.
  */
-inline fun Container.parallaxRenderView(viewName: String, viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ParallaxRenderView.() -> Unit = {}) =
-    ParallaxRenderView(viewName, viewPortSize, world, layerTag).addTo(this, callback)
+inline fun Container.parallaxRenderView(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ParallaxRenderView.() -> Unit = {}) =
+    ParallaxRenderView(viewPortSize, world, layerTag).addTo(this, callback)
 
 class ParallaxRenderView(
-    viewName: String,
     private val viewPortSize: SizeInt,
     world: World,
     layerTag: RenderLayerTag
@@ -265,7 +263,7 @@ class ParallaxRenderView(
         if (value >= max) value - max else if (value < min) value + max else value
 
     init {
-        name = viewName
+        name = layerTag.toString()
         family = world.family { all(layerTag, PositionComponent, ParallaxComponent, RgbaComponent)}
     }
 }
