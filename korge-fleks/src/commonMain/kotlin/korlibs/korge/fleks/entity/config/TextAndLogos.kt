@@ -103,7 +103,7 @@ object TextAndLogos {
     }
 
     init {
-        Invokable.register(configureLogo, configureLogoFct)
-        Invokable.register(configureLogoLayer, configureLogoLayerFct)
+        EntityFactory.register(configureLogo, configureLogoFct)
+        EntityFactory.register(configureLogoLayer, configureLogoLayerFct)
     }
 }

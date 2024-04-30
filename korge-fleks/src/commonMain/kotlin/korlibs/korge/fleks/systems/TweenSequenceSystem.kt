@@ -7,7 +7,7 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.TweenProperty
 import korlibs.korge.fleks.components.TweenPropertyComponent.TweenProperty.*
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
-import korlibs.korge.fleks.entity.config.Invokable
+import korlibs.korge.fleks.entity.config.EntityFactory
 import korlibs.korge.fleks.entity.config.isInvalidEntity
 import korlibs.math.interpolation.Easing
 
@@ -164,12 +164,12 @@ class TweenSequenceSystem : IteratingSystem(
             // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
             is SpawnEntity -> {
                 val spawnedEntity = if (tween.entity.isInvalidEntity()) world.entity() else tween.entity
-                Invokable.invoke(tween.function, world, spawnedEntity, tween.config)
+                EntityFactory.createEntity(tween.function, world, spawnedEntity, tween.config)
             }
             // Directly deletes the given entity from the tween
             is DeleteEntity -> tween.entity.configure { entityToDelete -> world -= entityToDelete }
             // Runs the config-function on the given entity from the tween
-            is ExecuteConfigFunction -> Invokable.invoke(tween.function, world, tween.entity, tween.config)
+            is ExecuteConfigFunction -> EntityFactory.createEntity(tween.function, world, tween.entity, tween.config)
             else -> {
                 when (tween) {
                     is SpawnNewTweenSequence -> error("AnimationScriptSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens")

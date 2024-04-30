@@ -9,7 +9,7 @@ import korlibs.korge.fleks.components.SwitchLayerVisibilityComponent.LayerVisibi
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import korlibs.korge.assetmanager.AssetStore
-import korlibs.korge.fleks.entity.config.Invokable
+import korlibs.korge.fleks.entity.config.EntityFactory
 import korlibs.korge.fleks.tags.*
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
@@ -42,7 +42,7 @@ typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
  * Class for serializing identifier objects for entity configs and functions in components.
  *
  * These identifiers are used to access a specific entity configuration from the [AssetStore].
- * They are also used to access a specific lambda function through the [Invokable] object.
+ * They are also used to access a specific lambda function through the [EntityFactory] object.
  * It wraps a string value. Using this [Identifier] object everywhere in the code is more error-prone than using a plain string.
  * Since strings can have typos which are not realized at compile time.
  */

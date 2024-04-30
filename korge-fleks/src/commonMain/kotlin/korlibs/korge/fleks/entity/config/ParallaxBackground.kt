@@ -2,14 +2,11 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.datastructure.iterators.fastForEach
-import korlibs.datastructure.iterators.fastForEachWithIndex
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.assetmanager.ConfigBase
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.fleks.utils.KorgeViewCache
-import korlibs.korge.parallax.ParallaxConfig
 import korlibs.korge.parallax.ParallaxDataView
 
 
@@ -131,8 +128,8 @@ object ParallaxBackground {
     }
 
     init {
-        Invokable.register(configureParallaxLayers, configureParallaxLayersFct)
-        Invokable.register(configureParallaxBackground, configureParallaxBackgroundFct)
+        EntityFactory.register(configureParallaxLayers, configureParallaxLayersFct)
+        EntityFactory.register(configureParallaxBackground, configureParallaxBackgroundFct)
     }
 
     private fun createSubEntityForLayer(world: World, parentEntity: Entity, layerName: String? = null, layerLine: Int? = null, speedFactor: Float? = null,

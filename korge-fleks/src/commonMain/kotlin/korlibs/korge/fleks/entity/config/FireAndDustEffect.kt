@@ -80,6 +80,6 @@ object FireAndDustEffect {
     }
 
     init {
-        Invokable.register(configureEffectObject, configureEffectObjectFct)
+        EntityFactory.register(configureEffectObject, configureEffectObjectFct)
     }
 }

@@ -162,6 +162,6 @@ object MovedSpawnerObject {
     }
 
     init {
-        Invokable.register(configureSpawnerObject, configureSpawnerObjectFct)
+        EntityFactory.register(configureSpawnerObject, configureSpawnerObjectFct)
     }
 }
