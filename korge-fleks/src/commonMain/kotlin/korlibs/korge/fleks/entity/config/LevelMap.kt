@@ -36,12 +36,12 @@ data class LevelMap(
                 TileMapType.TILED -> it += TiledLevelMapComponent(assetName)
             }
             it += PositionComponent(
-                x = x,
-                y = y
+                x = this@LevelMap.x,
+                y = this@LevelMap.y
             )
             it += SizeComponent()  // Size of level map needs to be set after loading of map is finished
             it += RgbaComponent().apply {
-                alpha = alpha
+                alpha = this@LevelMap.alpha
             }
             it += layerTag
         }
