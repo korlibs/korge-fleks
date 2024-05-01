@@ -16,7 +16,7 @@ import korlibs.korge.fleks.tags.*
  *
  * This class creates a level map background entity which is used for various backgrounds in the game and intro.
  */
-class LevelMap(
+data class LevelMap(
     override val name: String,
 
     private val mapType: TileMapType,

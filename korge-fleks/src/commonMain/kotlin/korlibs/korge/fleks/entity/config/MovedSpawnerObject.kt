@@ -12,7 +12,7 @@ import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
  * This object prototype can be used to create objects which are moving and spawn a trail.
  *
  */
-class MovedSpawnerObject(
+data class MovedSpawnerObject(
     override val name: String,
 
     // SpawnerComponent for creating the fire trail

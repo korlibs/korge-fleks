@@ -9,7 +9,7 @@ import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 
 
-class ParallaxBackground(
+data class ParallaxBackground(
     override val name: String,
     
     private val assetName: String,

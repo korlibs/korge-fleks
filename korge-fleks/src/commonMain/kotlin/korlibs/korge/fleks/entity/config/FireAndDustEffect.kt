@@ -14,7 +14,7 @@ import korlibs.korge.fleks.utils.random
  * Function to generate effect objects like explosions, shoots, dust, etc.
  *
  */
-class FireAndDustEffect(
+data class FireAndDustEffect(
     override val name: String,
     val assetName: String,
     val animationName: String,
