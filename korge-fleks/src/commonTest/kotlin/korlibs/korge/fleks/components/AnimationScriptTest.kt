@@ -3,7 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.configureWorld
 import korlibs.math.interpolation.Easing
-import korlibs.korge.fleks.entity.config.EntityFactory
+import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.utils.Identifier
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -2,9 +2,10 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
+import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.fleks.utils.random
 
@@ -13,47 +14,45 @@ import korlibs.korge.fleks.utils.random
  * Function to generate effect objects like explosions, shoots, dust, etc.
  *
  */
-object FireAndDustEffect {
-
-    data class Config(
-        val assetName: String,
-        val animationName: String,
-        val offsetX: Float = 0f,
-        val offsetY: Float = 0f,
-        val velocityX: Float = 0f,
-        val velocityY: Float = 0f,
-        val velocityVariationX: Float = 0f,
-        val velocityVariationY: Float = 0f,
-        val drawOnLayer: String,
-        val fadeOutDuration: Float = 0f
-    ) : ConfigBase
+class FireAndDustEffect(
+    override val name: String,
+    val assetName: String,
+    val animationName: String,
+    val offsetX: Float = 0f,
+    val offsetY: Float = 0f,
+    val velocityX: Float = 0f,
+    val velocityY: Float = 0f,
+    val velocityVariationX: Float = 0f,
+    val velocityVariationY: Float = 0f,
+    val drawOnLayer: String,
+    val fadeOutDuration: Float = 0f
+) : EntityConfig {
 
     // Used in component properties to specify invokable function
     val configureEffectObject = Identifier(name = "configureEffectObject")
 
     // Configure function which applies the config to the entity's components
-    private val configureEffectObjectFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
-        val effectConfig = AssetStore.getEntityConfig<Config>(config.name)
+    override val functionImpl = fun(world: World, entity: Entity) = with(world) {
         entity.configure { entity ->
             entity.getOrAdd(OffsetComponent) { OffsetComponent() }.also {
-                it.x = effectConfig.offsetX
-                it.y = effectConfig.offsetY
+                it.x = offsetX
+                it.y = offsetY
             }
             entity.getOrAdd(MotionComponent) { MotionComponent() }.also {
-                var velocityXX = effectConfig.velocityX
-                var velocityYY = effectConfig.velocityY
-                if (effectConfig.velocityVariationX != 0f) {
-                    velocityXX += (-effectConfig.velocityVariationX..effectConfig.velocityVariationX).random()
+                var velocityXX = velocityX
+                var velocityYY = velocityY
+                if (velocityVariationX != 0f) {
+                    velocityXX += (-velocityVariationX..velocityVariationX).random()
                 }
-                if (effectConfig.velocityVariationY != 0f) {
-                    velocityYY += (-effectConfig.velocityVariationY..effectConfig.velocityVariationY).random()
+                if (velocityVariationY != 0f) {
+                    velocityYY += (-velocityVariationY..velocityVariationY).random()
                 }
                 it.velocityX = velocityXX
                 it.velocityY = velocityYY
             }
             entity.getOrAdd(SpriteComponent) { SpriteComponent() }.also {
-                it.name = effectConfig.assetName
-                it.animation = effectConfig.animationName
+                it.name = assetName
+                it.animation = animationName
 //                it.isPlaying = true
             }
 
@@ -61,11 +60,11 @@ object FireAndDustEffect {
 //                it.drawOnLayer = effectConfig.drawOnLayer
 //            }
             entity.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }
-            if (effectConfig.fadeOutDuration > 0f) {
+            if (fadeOutDuration > 0f) {
                 entity.getOrAdd(TweenSequenceComponent) { TweenSequenceComponent() }.also {
                     it.tweens = listOf(
                         // Fade out effect objects
-                        TweenRgba(entity = entity, alpha = 0f, duration = effectConfig.fadeOutDuration),
+                        TweenRgba(entity = entity, alpha = 0f, duration = fadeOutDuration),
                         DeleteEntity(entity = entity)
                     )
                 }
@@ -80,6 +79,6 @@ object FireAndDustEffect {
     }
 
     init {
-        EntityFactory.register(configureEffectObject, configureEffectObjectFct)
+        EntityFactory.register(this)
     }
 }

@@ -14,7 +14,7 @@ import kotlinx.serialization.*
 @Serializable
 @SerialName("OffsetByFrameIndex")
 data class OffsetByFrameIndexComponent(
-    var entity: Entity = invalidEntity,  // TODO remove - it will not be needed with new sprite render view system - frame index is coming from SpriteAnimationComponent
+    var entity: Entity = Entity.NONE,     // TODO remove - it will not be needed with new sprite render view system - frame index is coming from SpriteAnimationComponent
     var mapOfOffsetLists: Map<String, List<Point>> = emptyMap()
 ) : Component<OffsetByFrameIndexComponent> {
 

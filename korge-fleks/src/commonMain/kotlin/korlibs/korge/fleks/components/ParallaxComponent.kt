@@ -4,7 +4,6 @@ import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import korlibs.image.color.*
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.entity.config.nothing
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.parallax.*
 import kotlinx.serialization.SerialName
@@ -19,7 +18,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("Parallax")
 data class ParallaxComponent(
-    var config: Identifier = nothing,
+    var config: String = "",
 
     // List of layers
     val backgroundLayers: List<Layer> = listOf(),

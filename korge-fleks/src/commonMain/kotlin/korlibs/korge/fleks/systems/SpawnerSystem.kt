@@ -4,8 +4,7 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.utils.random
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.entity.config.EntityFactory
-import korlibs.korge.fleks.entity.config.isInvalidEntity
+import korlibs.korge.fleks.entity.EntityFactory
 
 /**
  * This system is responsible to spawn new entity objects. It shall be the only system which spawns new objects.
@@ -50,7 +49,7 @@ class SpawnerSystem : IteratingSystem(
                     var xx = x
                     var yy = y
                     val newEntity =
-                        if (spawner.newEntity.isInvalidEntity()) world.entity {}  // create new entity
+                        if (spawner.newEntity == Entity.NONE) world.entity {}  // create new entity
                         else spawner.newEntity  // use given entity
                     if (spawner.positionVariation != 0f) {
                         xx = x + (-spawner.positionVariation..spawner.positionVariation).random()
@@ -62,7 +61,7 @@ class SpawnerSystem : IteratingSystem(
                     }
 
                     // Call the configured spawner function for configuring new objects
-                    EntityFactory.createEntity(spawner.function, world, newEntity, spawner.config)
+                    EntityFactory.createEntity(spawner.entityConfig, world, newEntity)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects

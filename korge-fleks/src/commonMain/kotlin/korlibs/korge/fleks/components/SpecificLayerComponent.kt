@@ -3,8 +3,6 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
-import korlibs.korge.fleks.entity.config.invalidEntity
-import korlibs.korge.fleks.utils.SerializeBase
 import korlibs.util.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,7 +24,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("SpecificLayer")
 data class SpecificLayerComponent(
-    var parentEntity: Entity = invalidEntity,  // The entity which contains the sprite data with layers (ImageAnimView)
+    var parentEntity: Entity = Entity.NONE,  // The entity which contains the sprite data with layers (ImageAnimView)
     var spriteLayer: String? = null,
     var parallaxPlaneLine: Int? = null
 ) : Component<SpecificLayerComponent> {

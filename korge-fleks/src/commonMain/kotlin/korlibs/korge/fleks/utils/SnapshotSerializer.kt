@@ -9,7 +9,7 @@ import korlibs.korge.fleks.components.SwitchLayerVisibilityComponent.LayerVisibi
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import korlibs.korge.assetmanager.AssetStore
-import korlibs.korge.fleks.entity.config.EntityFactory
+import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*

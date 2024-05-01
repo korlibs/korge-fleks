@@ -15,9 +15,9 @@ class ParallaxSystem(
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
-        val (config, backgroundLayers, attachedLayersRear, parallaxPlane, attachedLayersFront, foregroundLayers) = entity[ParallaxComponent]
+        val (configName, backgroundLayers, attachedLayersRear, parallaxPlane, attachedLayersFront, foregroundLayers) = entity[ParallaxComponent]
         val (_, _, velocityX, velocityY) = entity[MotionComponent]
-        val parallaxDataContainer = AssetStore.getBackground(config.name)
+        val parallaxDataContainer = AssetStore.getBackground(configName)
 
         // Update local positions for each layer which is configured to be moving (speedFactor not null or zero)
         backgroundLayers.fastForEachWithIndex { index, layer ->

@@ -2,34 +2,39 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.assetmanager.AssetStore
-import korlibs.korge.assetmanager.ConfigBase
+import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.utils.Identifier
-import korlibs.korge.fleks.utils.KorgeViewCache
-import korlibs.korge.parallax.ParallaxDataView
+import korlibs.korge.fleks.tags.*
+import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 
 
-object ParallaxBackground {
+class ParallaxBackground(
+    override val name: String,
+    
+    private val assetName: String,
+    private val layerTag: RenderLayerTag,
+    private val x: Float = 0f,
+    private val y: Float = 0f,
+    private val tint: RgbaComponent.Rgb = RgbaComponent.Rgb.WHITE,
+    private val alpha: Float = 1f
+) : EntityConfig {
 
-    data class Config(
-        val assetName: Identifier,
-        val drawOnLayer: String
-    ) : ConfigBase
-
-    // Used in component properties to specify invokable function
-    val configureParallaxLayers = Identifier(name = "configureParallaxLayers")
-    val configureParallaxBackground = Identifier(name = "configureParallaxBackground")
+    private val numberBackgroundLayers = AssetStore.getBackground(assetName).config.backgroundLayers?.size ?: 0
+    private val numberAttachedRearLayers = AssetStore.getBackground(assetName).config.parallaxPlane?.attachedLayersRear?.size ?: 0
+    private val numberParallaxPlaneLines = AssetStore.getBackground(assetName).parallaxPlane?.imageDatas?.size ?: 0
+    private val numberAttachedFrontLayers = AssetStore.getBackground(assetName).config.parallaxPlane?.attachedLayersFront?.size ?: 0
+    private val numberForegroundLayers = AssetStore.getBackground(assetName).config.foregroundLayers?.size ?: 0
 
     // Game object related functions
-    fun create(world: World, config: Identifier) = configureParallaxBackgroundFct(world, world.entity(), config)
+//    fun create(world: World, config: Identifier) = configureParallaxBackgroundFct(world, world.entity(), config)
     fun getEntityByLayerName(world: World, entity: Entity, name: String): Entity = with (world) {
         return entity[SubEntitiesComponent][name]
     }
-
-    private val configureParallaxLayersFct = fun(world: World, entity: Entity, assetConfig: Identifier): Entity = with(world) {
-        println("Re-configure attached parallax Layers")
 /*
+    override val functionImpl = fun(world: World, entity: Entity, assetConfig: Identifier): Entity = with(world) {
+        println("Re-configure attached parallax Layers")
+
         val config = AssetStore.getBackground(assetConfig.name).config
         val isHorizontal = config.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
         val view = KorgeViewCache[entity] as ParallaxDataView
@@ -64,25 +69,42 @@ object ParallaxBackground {
                 )
             }
         }
+        entity
+    }
 */
+    override val functionImpl = fun(world: World, entity: Entity): Entity = with(world) {
+        entity.configure {
+        it += PositionComponent(
+            x = this@ParallaxBackground.x,
+            y = this@ParallaxBackground.y
+        )  // global position for the whole parallax background
+        it += ParallaxComponent(
+            config = assetName,
+            backgroundLayers = List(numberBackgroundLayers) { ParallaxComponent.Layer() },
+            attachedLayersRear = List(numberAttachedRearLayers) { ParallaxComponent.Layer() },
+            parallaxPlane = List(numberParallaxPlaneLines) { ParallaxComponent.Layer() },
+            attachedLayersFront = List(numberAttachedFrontLayers) { ParallaxComponent.Layer() },
+            foregroundLayers = List(numberForegroundLayers) { ParallaxComponent.Layer() }
+        )
+        it += RgbaComponent().apply {
+            tint = this@ParallaxBackground.tint
+            alpha = this@ParallaxBackground.alpha
+        }
+        it += layerTag
+        it += MotionComponent(
+// TODO                velocityX = 5f  // world units per second
+        )
+        // All sub-entity IDs are here for quick lookup by its layer name and for recycling of the overall background entity object
+// TODO            it += SubEntitiesComponent(moveWithParent = false)
+        }
         entity
     }
 
-    private val configureParallaxBackgroundFct = fun(world: World, entity: Entity, config: Identifier): Entity = with(world) {
-        val parallaxConfig = AssetStore.getEntityConfig<Config>(config.name)
-
-        entity.configure {
-//            it += ParallaxComponent(config = parallaxConfig.assetName)
-            it += PositionComponent()
-//            it += DrawableComponent(drawOnLayer = parallaxConfig.drawOnLayer)
-            // All sub-entity IDs are here for quick lookup by its layer name and for recycling of the overall background entity object
-            it += SubEntitiesComponent(moveWithParent = false)
-        }
-
+/*
         // Once the base ParallaxDataView is created with above base entity we can access it from the cache
         val view = KorgeViewCache[entity] as ParallaxDataView
         val layerMap = entity[SubEntitiesComponent]
-/*
+
         val parallaxDataContainer = AssetStore.getBackground(parallaxConfig.assetName.name).config
         val isHorizontal = parallaxDataContainer.mode == ParallaxConfig.Mode.HORIZONTAL_PLANE
 
@@ -124,14 +146,11 @@ object ParallaxBackground {
             }}
         }
 */
-        entity
-    }
 
     init {
-        EntityFactory.register(configureParallaxLayers, configureParallaxLayersFct)
-        EntityFactory.register(configureParallaxBackground, configureParallaxBackgroundFct)
+        EntityFactory.register(this)
     }
-
+/*
     private fun createSubEntityForLayer(world: World, parentEntity: Entity, layerName: String? = null, layerLine: Int? = null, speedFactor: Float? = null,
                                         selfSpeedX: Double = 0.0, selfSpeedY: Double = 0.0, isHorizontal: Boolean = true) : Entity {
         return configureSubEntityForLayer(world, world.entity(), parentEntity, layerName, layerLine, speedFactor, selfSpeedX, selfSpeedY, isHorizontal)
@@ -157,4 +176,5 @@ object ParallaxBackground {
         }
         entity
     }
+*/
 }

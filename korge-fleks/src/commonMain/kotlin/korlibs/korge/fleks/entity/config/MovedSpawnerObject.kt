@@ -2,49 +2,43 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.utils.Identifier
 import korlibs.korge.fleks.utils.random
+import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 
 
 /**
  * This object prototype can be used to create objects which are moving and spawn a trail.
  *
  */
-object MovedSpawnerObject {
+class MovedSpawnerObject(
+    override val name: String,
 
-    data class Config(
-        // SpawnerComponent for creating the fire trail
-        var numberOfObjects: Int = 0,           // The spawner will generate this number of object when triggered after interval time
-        var interval: Int = 0,                  // 0 - disabled, 1 - every frame, 2 - every second frame, 3 - every third frame,...
-        var timeVariation: Int = 0,             // 0 - no variation, 1 - one frame variation, 2 - two frames variation, ...
-        var positionVariation: Double = 0.0,    // variation radius where objects will be spawned - 0.0 = no variation
-        var config: Identifier = nothing,       // Name of configuration which is used in below function to configure the new entity
-        var function: Identifier = nothing,     // Name of function which configures the new entity
-        var totalNumberOfObjects: Int = -1,     // -1 - unlimited number of objects spawned, x = x-number of objects spawned in total
+    // SpawnerComponent for creating the fire trail
+    var numberOfObjects: Int = 0,           // The spawner will generate this number of object when triggered after interval time
+    var interval: Int = 0,                  // 0 - disabled, 1 - every frame, 2 - every second frame, 3 - every third frame,...
+    var timeVariation: Int = 0,             // 0 - no variation, 1 - one frame variation, 2 - two frames variation, ...
+    var positionVariation: Double = 0.0,    // variation radius where objects will be spawned - 0.0 = no variation
+    var entityConfig: String = "",          // Name of entity config which configures the spawned entity object
+    var totalNumberOfObjects: Int = -1,     // -1 - unlimited number of objects spawned, x = x-number of objects spawned in total
 
-        // SpriteComponent
-        // TODO give the meteorite an image
+    // SpriteComponent
+    // TODO give the meteorite an image
 
-        // OffsetComponent
-        val offsetX: Float = 0f,              // offset to pivot point of meteorite
-        val offsetY: Float = 0f,
+    // OffsetComponent
+    val offsetX: Float = 0f,              // offset to pivot point of meteorite
+    val offsetY: Float = 0f,
 
-        // MotionComponent
-        val velocityX: Float = 0f,
-        val velocityY: Float = 0f,
-        val velocityVariationX: Float = 0f,
-        val velocityVariationY: Float = 0f,
-        ) : ConfigBase
-
-    // Used in component properties to specify invokable function
-    val configureSpawnerObject = Identifier(name = "configureSpawnerObject")
+    // MotionComponent
+    val velocityX: Float = 0f,
+    val velocityY: Float = 0f,
+    val velocityVariationX: Float = 0f,
+    val velocityVariationY: Float = 0f
+) : EntityConfig {
 
     // Configure function which applies the config to the entity's components
-    private val configureSpawnerObjectFct = fun(world: World, entity: Entity, config: Identifier) = with(world) {
-        val spawnerConfig = AssetStore.getEntityConfig<Config>(config.name)
-
+    override val functionImpl = fun(world: World, entity: Entity) = with(world) {
         // PositionComponent might already be set by SpawnerSystem and it already contains the position
 
         entity.configure { entity ->
@@ -53,13 +47,13 @@ object MovedSpawnerObject {
 //                it.y = spawnerConfig.offsetY
 //            }
             entity.getOrAdd(MotionComponent) { MotionComponent() }.also {
-                var velocityXX = spawnerConfig.velocityX
-                var velocityYY = spawnerConfig.velocityY
-                if (spawnerConfig.velocityVariationX != 0f) {
-                    velocityXX += (-spawnerConfig.velocityVariationX..spawnerConfig.velocityVariationX).random()
+                var velocityXX = velocityX
+                var velocityYY = velocityY
+                if (velocityVariationX != 0f) {
+                    velocityXX += (-velocityVariationX..velocityVariationX).random()
                 }
-                if (spawnerConfig.velocityVariationY != 0f) {
-                    velocityYY += (-spawnerConfig.velocityVariationY..spawnerConfig.velocityVariationY).random()
+                if (velocityVariationY != 0f) {
+                    velocityYY += (-velocityVariationY..velocityVariationY).random()
                 }
                 it.velocityX = velocityXX
                 it.velocityY = velocityYY
@@ -162,6 +156,6 @@ object MovedSpawnerObject {
     }
 
     init {
-        EntityFactory.register(configureSpawnerObject, configureSpawnerObjectFct)
+        EntityFactory.register(this)
     }
 }

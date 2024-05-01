@@ -50,7 +50,7 @@ data class TweenSequenceComponent(
     data class SpawnNewTweenSequence(
         val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in sequence
 
-        override var entity: Entity = invalidEntity,  // not used
+        override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,
         override var duration: Float? = null,
         @Serializable(with = EasingSerializer::class)
@@ -62,7 +62,7 @@ data class TweenSequenceComponent(
     data class ParallelTweens(
         val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in parallel
 
-        override var entity: Entity = invalidEntity,  // not used here
+        override var entity: Entity = Entity.NONE,    // not used here
         override var delay: Float? = 0f,              // in seconds
         override var duration: Float? = 0f,           // in seconds
         @Serializable(with = EasingSerializer::class)
@@ -72,7 +72,7 @@ data class TweenSequenceComponent(
     @Serializable
     @SerialName("Wait")
     data class Wait(
-        override var entity: Entity = invalidEntity,  // not used
+        override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,            // Not used
         override var duration: Float? = 0f,
         @Serializable(with = EasingSerializer::class)
@@ -94,12 +94,11 @@ data class TweenSequenceComponent(
     @Serializable
     @SerialName("SpawnEntity")
     data class SpawnEntity(
-        var config: Identifier,             // name of config for configuring spawned entity
-        var function: Identifier,           // name of function which configures the spawned entity
+        var entityConfig: String,           // name of the entity configuration which creates and configures the spawned entity
         var x: Float = 0f,                  // position where entity will be spawned
         var y: Float = 0f,
 
-        override var entity: Entity = invalidEntity, // when entity is not given (=invalidEntity) than it will be created
+        override var entity: Entity = Entity.NONE, // when entity is not given (=Entity.NONE) than it will be created
         override var delay: Float? = null,
         override var duration: Float? = 0f,    // not used - 0f for immediately
         @Serializable(with = EasingSerializer::class)
@@ -109,10 +108,9 @@ data class TweenSequenceComponent(
     @Serializable
     @SerialName("ExecuteConfigFunction")
     data class ExecuteConfigFunction(
-        var function: Identifier,                     // name of function which configures the spawned entity
-        var config: Identifier = nothing,             // [optional] name of config for configuring spawned entity
+        var entityConfig: String,                     // name of entity config which contains the function to configure the spawned entity
 
-        override var entity: Entity = invalidEntity,  // [optional] entity can be provided if needed in the configure-function
+        override var entity: Entity = Entity.NONE,    // [optional] entity can be provided if needed in the configure-function
         override var delay: Float? = null,            // not used
         override var duration: Float? = null,         // not used
         @Serializable(with = EasingSerializer::class)

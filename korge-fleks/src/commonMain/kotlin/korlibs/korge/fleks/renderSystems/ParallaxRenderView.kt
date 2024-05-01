@@ -39,9 +39,9 @@ class ParallaxRenderView(
             // Iterate over all entities which should be rendered in this view
             family.forEach { entity ->
                 val (globalX, globalY) = entity[PositionComponent]
-                val (config, backgroundLayers, attachedLayersRear, parallaxPlane, attachedLayersFront, foregroundLayers) = entity[ParallaxComponent]
+                val (configName, backgroundLayers, attachedLayersRear, parallaxPlane, attachedLayersFront, foregroundLayers) = entity[ParallaxComponent]
                 val (rgba) = entity[RgbaComponent]
-                val parallaxDataContainer = AssetStore.getBackground(config.name)
+                val parallaxDataContainer = AssetStore.getBackground(configName)
 
                 // Iterate over all parallax layers
                 val parallaxMode = parallaxDataContainer.config.mode

@@ -3,13 +3,12 @@ package korlibs.korge.fleks.entity.config
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import korlibs.korge.assetmanager.AssetStore
-import korlibs.korge.assetmanager.ConfigBase
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.*
 
 
-object TextAndLogos {
-
+class TextAndLogos {
+/*
     data class LogoConfig(
         val centerX: Boolean = false,
         val centerY: Boolean = false,
@@ -106,4 +105,5 @@ object TextAndLogos {
         EntityFactory.register(configureLogo, configureLogoFct)
         EntityFactory.register(configureLogoLayer, configureLogoLayerFct)
     }
+*/
 }
