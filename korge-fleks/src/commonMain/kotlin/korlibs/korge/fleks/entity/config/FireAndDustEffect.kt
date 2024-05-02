@@ -32,7 +32,7 @@ data class FireAndDustEffect(
     val configureEffectObject = Identifier(name = "configureEffectObject")
 
     // Configure function which applies the config to the entity's components
-    override val functionImpl = fun(world: World, entity: Entity) = with(world) {
+    override val configureEntity = fun(world: World, entity: Entity) = with(world) {
         entity.configure { entity ->
             entity.getOrAdd(OffsetComponent) { OffsetComponent() }.also {
                 it.x = offsetX

@@ -11,7 +11,7 @@ import korlibs.korge.fleks.tags.*
 
 /**
  * This class contains the config for a specific level map with given [name].
- * The function implementation [functionImpl] creates a new [LevelMap] entity and configures it
+ * The function implementation [configureEntity] creates a new [LevelMap] entity and configures it
  * with the specified config details.
  *
  * This class creates a level map background entity which is used for various backgrounds in the game and intro.
@@ -29,7 +29,7 @@ data class LevelMap(
     private val alpha: Float = 1f,
 ) : EntityConfig {
 
-    override val functionImpl = fun(world: World, entity: Entity) = with(world) {
+    override val configureEntity = fun(world: World, entity: Entity) = with(world) {
         entity.configure {
             when (mapType) {
                 TileMapType.LDTK -> it += LdtkLevelMapComponent(worldName, levelName)

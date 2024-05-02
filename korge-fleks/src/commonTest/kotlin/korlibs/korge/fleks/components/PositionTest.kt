@@ -5,13 +5,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-internal class PositionShapeTest {
+internal class PositionTest {
 
     private val expectedWorld = configureWorld {}
     private val recreatedWorld = configureWorld {}
 
     @Test
-    fun testPositionShapeSerialization() {
+    fun testPositionSerialization() {
 
         val compUnderTest = PositionComponent(
             x = 5.2f,

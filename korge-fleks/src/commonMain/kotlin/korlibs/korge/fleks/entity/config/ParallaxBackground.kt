@@ -72,7 +72,7 @@ data class ParallaxBackground(
         entity
     }
 */
-    override val functionImpl = fun(world: World, entity: Entity): Entity = with(world) {
+    override val configureEntity = fun(world: World, entity: Entity): Entity = with(world) {
         entity.configure {
         it += PositionComponent(
             x = this@ParallaxBackground.x,

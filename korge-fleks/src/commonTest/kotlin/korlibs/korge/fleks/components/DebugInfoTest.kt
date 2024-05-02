@@ -14,7 +14,7 @@ internal class DebugInfoTest {
 
         val info = InfoComponent(
             name = "DebugTest",
-            showPivotPoint = true
+            entityId = 42
         )
 
         val entity = expectedWorld.entity {
@@ -27,6 +27,6 @@ internal class DebugInfoTest {
         val newInfo = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][InfoComponent] }
 
         assertEquals(info.name, newInfo.name, "Check 'name' property to be equal")
-        assertEquals(info.showPivotPoint, newInfo.showPivotPoint, "Check 'showPivotPoint' property to be equal")
+        assertEquals(info.entityId, newInfo.entityId, "Check 'entityId' property to be equal")
     }
 }

@@ -19,10 +19,9 @@ korge {
 
     targetJvm()
     targetJs()
-    targetDesktop()
-    //targetDesktopCross()
-    //targetIos()
-    //targetAndroid()
+//	targetIos()
+    targetAndroid()
+
     serializationJson()
 }
 

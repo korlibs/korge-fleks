@@ -1,10 +1,10 @@
 package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.Entity
-import com.github.quillraven.fleks.configureWorld
+import com.github.quillraven.fleks.*
 import korlibs.math.interpolation.Easing
 import korlibs.korge.fleks.entity.EntityFactory
-import korlibs.korge.fleks.utils.Identifier
+import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
+import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -17,9 +17,7 @@ internal class AnimationScriptTest {
     @Test
     fun testAnimationScriptSerialization() {
 
-        EntityFactory.register(testConfigure, testConfigureFct)
-
-        val testIdentifier = Identifier("testEntityConfig")
+        val testEntityConfig = TestEntityConfig("testEntityConfig")
 
         val compUnderTest = TweenSequenceComponent(
             tweens = listOf(
@@ -28,15 +26,14 @@ internal class AnimationScriptTest {
                         ParallelTweens(
                             tweens = listOf(
                                 SpawnEntity(
-                                    config = testIdentifier,
-                                    function = testConfigure,
+                                    entityConfig = testEntityConfig.name,
                                     x = 10.2f,
                                     y = 20.3f,
                                     entity = Entity(43, 0u)
                                 ),
                                 DeleteEntity(entity = Entity(44, 0u)),
-                                TweenAppearance(entity = Entity(45, 0u)),
-                                TweenPositionShape(entity = Entity(46, 0u)),
+                                TweenRgba(entity = Entity(45, 0u)),
+                                TweenPosition(entity = Entity(46, 0u)),
                                 TweenOffset(entity = Entity(47, 0u)),
                                 TweenSprite(entity = Entity(48, 0u)),
                                 TweenSwitchLayerVisibility(entity = Entity(49, 0u)),
@@ -54,7 +51,7 @@ internal class AnimationScriptTest {
                 ),
                 Wait(duration = 3.2f)
             ),
-            index = 42,
+//            index = 42,
             timeProgress = 3.4f,
             waitTime = 5.6f,
             executed = true
@@ -86,12 +83,11 @@ internal class AnimationScriptTest {
         assertEquals(parallelTweens.easing, newParallelTweens.easing, "Check 'parallelTweens.easing' property to be equal")
         val spawnEntity = parallelTweens.tweens.first() as SpawnEntity
         val newSpawnEntity = newParallelTweens.tweens.first() as SpawnEntity
-        assertEquals(spawnEntity.config, newSpawnEntity.config, "spawnEntity.config' property to be equal")
-        assertEquals(spawnEntity.function, newSpawnEntity.function, "Check 'spawnEntity.function' property to be equal")
+        assertEquals(spawnEntity.entityConfig, newSpawnEntity.entityConfig, "spawnEntity.entityConfig' property to be equal")
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")
         assertEquals(spawnEntity.entity, newSpawnEntity.entity, "Check 'spawnEntity.entity' property to be equal")
-        val spawnedEntity = EntityFactory.createEntity(spawnEntity.function, recreatedWorld, Entity(4242, 0u), spawnEntity.config)
+        val spawnedEntity = EntityFactory.createEntity(spawnEntity.entityConfig, recreatedWorld, Entity(4242, 0u))
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
     }
 }

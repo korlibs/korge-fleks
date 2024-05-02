@@ -17,12 +17,12 @@ object EntityFactory {
 
     /**
      * This interface maps the string [name] to a specific entity configuration process.
-     * The entity will be created by the [functionImpl] which can be configured through additional
+     * The entity will be created by the [configureEntity] which can be configured through additional
      * config properties in the derived class.
      */
     interface EntityConfig {
         val name: String
-        val functionImpl: (World, Entity) -> Entity
+        val configureEntity: (World, Entity) -> Entity
     }
 
     private val entityConfigs: MutableMap<String, EntityConfig> = mutableMapOf()
@@ -32,7 +32,7 @@ object EntityFactory {
     }
 
     fun createEntity(name: String, world: World, entity: Entity) : Entity {
-        val configuredEntity = entityConfigs[name]?.functionImpl?.invoke(world, entity)
+        val configuredEntity = entityConfigs[name]?.configureEntity?.invoke(world, entity)
         if (configuredEntity != null) return configuredEntity
         else {
             println("WARNING: Cannot invoke! Function with name '$name' not registered in EntityFactory!")

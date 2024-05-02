@@ -242,7 +242,7 @@ object AnySerializer : KSerializer<Any> {
         val int: Int? = null,
         val string: String? = null,
         val boolean: Boolean? = null,
-// TODO       val rgb: Rgb? = null
+        val rgb: Rgb? = null
     )
 
     override fun serialize(encoder: Encoder, value: Any) {
@@ -252,7 +252,7 @@ object AnySerializer : KSerializer<Any> {
             is Int -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(int = value))
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(string = value))
             is Boolean -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(boolean = value))
-// TODO           is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
+            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
     }
@@ -260,7 +260,7 @@ object AnySerializer : KSerializer<Any> {
     override fun deserialize(decoder: Decoder): Any {
         val containerForAny = decoder.decodeSerializableValue(ContainerForAny.serializer())
         return (containerForAny.double ?: containerForAny.float ?: containerForAny.int ?:
-                containerForAny.string ?: containerForAny.boolean ?: /* TODO containerForAny.rgb ?:*/
+                containerForAny.string ?: containerForAny.boolean ?: containerForAny.rgb ?:
                 throw SerializationException("AnySerializer: No non-null property in ContainerForAny found!"))
     }
 }
