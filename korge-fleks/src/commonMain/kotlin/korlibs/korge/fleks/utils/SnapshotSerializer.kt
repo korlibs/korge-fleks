@@ -2,6 +2,7 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
+import korlibs.image.text.*
 import korlibs.io.lang.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.OffsetByFrameIndexComponent.Point
@@ -149,17 +150,26 @@ class SnapshotSerializer {
     }
 }
 
-object EntitySerializer : KSerializer<Entity> {
-    override val descriptor: SerialDescriptor  = PrimitiveSerialDescriptor("EntityAsInt", PrimitiveKind.INT)
-
-    override fun deserialize(decoder: Decoder): Entity = Entity(id = decoder.decodeInt(), 0u)
-
-    override fun serialize(encoder: Encoder, value: Entity) =
-        encoder.encodeInt(value.id)
+/**
+ * A serializer strategy for Korge [HorizontalAlign] type. The alignment ratio will be saved as double.
+ */
+object HorizontalAlignAsDouble : KSerializer<HorizontalAlign> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("HorizontalAlignAsDouble", PrimitiveKind.DOUBLE)
+    override fun serialize(encoder: Encoder, value: HorizontalAlign) = encoder.encodeDouble(value.ratio)
+    override fun deserialize(decoder: Decoder): HorizontalAlign = HorizontalAlign(decoder.decodeDouble())
 }
 
 /**
- * A serializer strategy for Korge RGBA type. The color value is saved as integer number.
+ * A serializer strategy for Korge [VerticalAlign] type. The alignment ratio will be saved as double.
+ */
+object VerticalAlignAsDouble : KSerializer<VerticalAlign> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("VerticalAlignAsDouble", PrimitiveKind.DOUBLE)
+    override fun serialize(encoder: Encoder, value: VerticalAlign) = encoder.encodeDouble(value.ratio)
+    override fun deserialize(decoder: Decoder): VerticalAlign = VerticalAlign(decoder.decodeDouble())
+}
+
+/**
+ * A serializer strategy for Korge [RGBA] type. The color value is saved as integer number.
  */
 object RGBAAsInt : KSerializer<RGBA> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("RGBAAsInt", PrimitiveKind.INT)
@@ -168,7 +178,7 @@ object RGBAAsInt : KSerializer<RGBA> {
 }
 
 /**
- * A serializer strategy for Korge RGBA type. The color value is saved as hex String (#xxxxxxxx).
+ * A serializer strategy for Korge [RGBA] type. The color value is saved as hex String (#xxxxxxxx).
  */
 object RGBAAsString : KSerializer<RGBA> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("RGBAAsString", PrimitiveKind.STRING)
@@ -182,7 +192,7 @@ object RGBAAsString : KSerializer<RGBA> {
 }
 
 /**
- * A simple serializer strategy for Easing types. It serializes the easing class name as string.
+ * A simple serializer strategy for Korge [Easing] types. It serializes the easing class name as string.
  */
 object EasingSerializer : KSerializer<Easing> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("EasingAsString", PrimitiveKind.STRING)
