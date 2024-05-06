@@ -10,17 +10,17 @@ import korlibs.math.geom.*
 
 
 /**
- * Creates a new [FastSpriteRenderView], allowing to configure with [callback], and attaches the newly created view to the
+ * Creates a new [FastSpriteRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver "this".
  *
- * The [FastSpriteRenderView] is rendering one texture per sprite to make it faster. It just takes the first layer
+ * The [FastSpriteRenderSystem] is rendering one texture per sprite to make it faster. It just takes the first layer
  * of an Aseprite file and ignored additional layers. Also, it does not sort the entities before rendering them.
  * This should be used for explosion and dust effects where the order of drawn textures is not significant.
  */
-inline fun Container.fastSpriteRenderView(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker FastSpriteRenderView.() -> Unit = {}) =
-    FastSpriteRenderView(viewPortSize, world, layerTag).addTo(this, callback)
+inline fun Container.fastSpriteRenderSystem(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker FastSpriteRenderSystem.() -> Unit = {}) =
+    FastSpriteRenderSystem(viewPortSize, world, layerTag).addTo(this, callback)
 
-class FastSpriteRenderView(
+class FastSpriteRenderSystem(
     private val viewPortSize: SizeInt,
     world: World,
     layerTag: RenderLayerTag
@@ -34,7 +34,7 @@ class FastSpriteRenderView(
             // Iterate over all entities which should be rendered in this view
             family.forEach { entity ->
                 val (x, y) = entity[PositionComponent]
-                val (name, anchorX, anchorY, _, animation, frameIndex) = entity[SpriteComponent]
+                val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
                 val (rgba) = entity[RgbaComponent]
                 val imageFrame = AssetStore.getImageFrame(name, animation, frameIndex)
 

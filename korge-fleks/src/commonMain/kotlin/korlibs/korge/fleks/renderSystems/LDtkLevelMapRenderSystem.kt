@@ -10,14 +10,14 @@ import korlibs.korge.view.align.*
 import korlibs.math.geom.*
 
 
-inline fun Container.ldtkLevelMapRenderView(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LDtkLevelMapRenderView.() -> Unit = {}) =
-    LDtkLevelMapRenderView(world, layerTag).addTo(this, callback)
+inline fun Container.ldtkLevelMapRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LDtkLevelMapRenderSystem.() -> Unit = {}) =
+    LDtkLevelMapRenderSystem(world, layerTag).addTo(this, callback)
 
 /**
  * Here we do not render the actual level map yet.
  * Instead, we add the view object for the level map to the container.
  */
-class LDtkLevelMapRenderView(
+class LDtkLevelMapRenderSystem(
     world: World,
     layerTag: RenderLayerTag
 ) : Container() {

@@ -15,7 +15,6 @@ import kotlinx.serialization.*
  * @param [name]
  * @param [anchorX] X offset of the sprite graphic to the zero-point of the sprite (pivot-point).
  * @param [anchorY] Y offset of the sprite graphic to the zero-point of the sprite (pivot-point).
- * @param [layerIndex] defines the order in which the sprite texture will be drawn. Higher numbers mean the sprite will be rendered on top of other sprites with smaller number.
  *
  * @param [animation]
  *
@@ -27,7 +26,6 @@ data class SpriteComponent(
     var name: String = "",
     var anchorX: Float = 0f,                          // x,y position of the pivot point within the sprite
     var anchorY: Float = 0f,
-    val layerIndex: Int = 0,
 
     var animation: String? = null,
     var frameIndex: Int = 0,                          // frame number of animation which is currently drawn

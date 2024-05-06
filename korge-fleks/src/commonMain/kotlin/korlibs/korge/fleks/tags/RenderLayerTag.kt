@@ -14,7 +14,7 @@ enum class RenderLayerTag : EntityTags by entityTagOf() {
     BG_PARALLAX,
     MAIN_LEVELMAP,
     MAIN_SPRITES,
-    MAIN_PARTICLES,
+    MAIN_EFFECTS,
     MAIN_FOREGROUND,
     FG_LEVELMAP,
     FG_PARALLAX,

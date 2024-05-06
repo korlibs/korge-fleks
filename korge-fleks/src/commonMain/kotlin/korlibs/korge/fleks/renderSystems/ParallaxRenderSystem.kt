@@ -14,18 +14,18 @@ import korlibs.korge.view.*
 import korlibs.math.geom.*
 
 /**
- * Creates a new [ParallaxRenderView], allowing to configure with [callback], and attaches the newly created view to the
+ * Creates a new [ParallaxRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver "this".
  *
  * @param viewPortSize is the virtual width and height of the game display/screen.
  * @param world is the Fleks world where the parallax entities are created.
- * @param layerTag is a special Fleks component which tells the [ParallaxRenderView] which entities it has to render.
- * @param callback can be used to configure the [ParallaxRenderView] object.
+ * @param layerTag is a special Fleks component which tells the [ParallaxRenderSystem] which entities it has to render.
+ * @param callback can be used to configure the [ParallaxRenderSystem] object.
  */
-inline fun Container.parallaxRenderView(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ParallaxRenderView.() -> Unit = {}) =
-    ParallaxRenderView(viewPortSize, world, layerTag).addTo(this, callback)
+inline fun Container.parallaxRenderSystem(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ParallaxRenderSystem.() -> Unit = {}) =
+    ParallaxRenderSystem(viewPortSize, world, layerTag).addTo(this, callback)
 
-class ParallaxRenderView(
+class ParallaxRenderSystem(
     private val viewPortSize: SizeInt,
     world: World,
     layerTag: RenderLayerTag

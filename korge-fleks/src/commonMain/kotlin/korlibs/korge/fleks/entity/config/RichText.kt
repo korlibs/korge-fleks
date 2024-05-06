@@ -21,6 +21,8 @@ data class RichText(
     private val width: Float,
     private val height: Float,
 
+    private val layerIndex: Int = 1,
+
     // Color and alpha channel of text graphics
     private val tint: RgbaComponent.Rgb = RgbaComponent.Rgb.WHITE,
     private val alpha: Float = 1f,
@@ -44,6 +46,7 @@ data class RichText(
                 horizontalAlign = this@RichText.horizontalAlign,
                 verticalAlign = this@RichText.verticalAlign
             )
+            it += LayerComponent(layerIndex = this@RichText.layerIndex)
             it += RgbaComponent().apply {
                 tint = this@RichText.tint
                 alpha = this@RichText.alpha

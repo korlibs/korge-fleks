@@ -13,12 +13,12 @@ import korlibs.math.geom.Point
 
 
 /**
- * Creates a new [SpriteDebugRenderView], allowing to configure with [callback], and attaches the newly created view to the
+ * Creates a new [DebugRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver this */
-inline fun Container.spriteDebugRenderView(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker SpriteDebugRenderView.() -> Unit = {}) =
-    SpriteDebugRenderView(viewPortSize, world, layerTag).addTo(this, callback)
+inline fun Container.debugRenderSystem(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker DebugRenderSystem.() -> Unit = {}) =
+    DebugRenderSystem(viewPortSize, world, layerTag).addTo(this, callback)
 
-class SpriteDebugRenderView(
+class DebugRenderSystem(
     private val viewPortSize: SizeInt,
     world: World,
     private val layerTag: RenderLayerTag
@@ -30,7 +30,7 @@ class SpriteDebugRenderView(
         ctx.useLineBatcher { batch ->
             family.forEach { entity ->
                 val (x, y) = entity[PositionComponent]
-                val (name, anchorX, anchorY, _, animation, frameIndex) = entity[SpriteComponent]
+                val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
                 val imageFrame = AssetStore.getImageFrame(name, animation, frameIndex)
                 val imageData = AssetStore.getImageData(name)
 
