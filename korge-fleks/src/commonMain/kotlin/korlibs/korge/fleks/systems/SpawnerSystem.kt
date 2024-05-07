@@ -24,13 +24,8 @@ class SpawnerSystem : IteratingSystem(
                 var y = 0f
                 var setPosition = false
                 entity.getOrNull(PositionComponent)?.let {
-                    x = it.x
-                    y = it.y
-                    setPosition = true
-                }
-                entity.getOrNull(OffsetComponent)?.let {
-                    x += it.x
-                    y += it.y
+                    x = it.x + it.offsetX
+                    y = it.y + it.offsetY
                     setPosition = true
                 }
                 entity.getOrNull(OffsetByFrameIndexComponent)?.let {

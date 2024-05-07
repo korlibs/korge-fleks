@@ -126,10 +126,8 @@ class TweenSequenceSystem : IteratingSystem(
             is TweenPosition -> tween.entity.getOrError(PositionComponent).let { start ->
                 tween.x?.let { end -> createAnimateComponent(PositionX, start.x, end - start.x) }
                 tween.y?.let { end -> createAnimateComponent(PositionY, start.y, end - start.y) }
-            }
-            is TweenOffset -> tween.entity.getOrError(OffsetComponent).let { start ->
-                tween.x?.let { end -> createAnimateComponent(OffsetX, start.x, end - start.x) }
-                tween.y?.let { end -> createAnimateComponent(OffsetY, start.y, end - start.y) }
+                tween.offsetX?.let { end -> createAnimateComponent(PositionOffsetX, start.offsetX, end - start.offsetX) }
+                tween.offsetY?.let { end -> createAnimateComponent(PositionOffsetY, start.offsetY, end - start.offsetY) }
             }
 //            is TweenLayout -> tween.entity.getOrError(LayoutComponent).let { start ->
 //                tween.centerX?.let { value -> createAnimateComponent(LayoutCenterX, value) }

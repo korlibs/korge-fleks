@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Generalized Animate Component Property data class. It is used for animating properties of other components
- * via the [TweenSequenceComponent] components and one of the systems in AnimateSystems.kt file.
+ * via the [TweenSequenceComponent] components and one of the systems in TweenAnimationSystems.kt file.
  *
  * value:  This is set to the previous or initial value
  * change: Value with which last value needs to be changed to reach the target value of the animation step
@@ -39,28 +39,27 @@ data class TweenPropertyComponent (
      * [property](TweenComponent.property) of the base [TweenPropertyComponent] data class.
      */
     enum class TweenProperty(val type: ComponentType<TweenPropertyComponent>) {
+        PositionOffsetX(componentTypeOf<TweenPropertyComponent>()),
+        PositionOffsetY(componentTypeOf<TweenPropertyComponent>()),
+        PositionX(componentTypeOf<TweenPropertyComponent>()),
+        PositionY(componentTypeOf<TweenPropertyComponent>()),
+
+        RgbaAlpha(componentTypeOf<TweenPropertyComponent>()),
+        RgbaTint(componentTypeOf<TweenPropertyComponent>()),
+
+        SpawnerInterval(componentTypeOf<TweenPropertyComponent>()),
+        SpawnerNumberOfObjects(componentTypeOf<TweenPropertyComponent>()),
+        SpawnerPositionVariation(componentTypeOf<TweenPropertyComponent>()),
+        SpawnerTimeVariation(componentTypeOf<TweenPropertyComponent>()),
+
 //        SpriteIsPlaying(componentTypeOf<TweenPropertyComponent>()),
 //        SpriteForwardDirection(componentTypeOf<TweenPropertyComponent>()),
 //        SpriteLoop(componentTypeOf<TweenPropertyComponent>()),
 //        SpriteDestroyOnPlayingFinished(componentTypeOf<TweenPropertyComponent>()),
 //        SpriteAnimName(componentTypeOf<TweenPropertyComponent>()),
 
-        RgbaAlpha(componentTypeOf<TweenPropertyComponent>()),
-        RgbaTint(componentTypeOf<TweenPropertyComponent>()),
-
-//        SpawnerNumberOfObjects(componentTypeOf<TweenPropertyComponent>()),
-//        SpawnerInterval(componentTypeOf<TweenPropertyComponent>()),
-//        SpawnerTimeVariation(componentTypeOf<TweenPropertyComponent>()),
-//        SpawnerPositionVariation(componentTypeOf<TweenPropertyComponent>()),
-
         // TODO not used yet in animation system
 //        LifeCycleHealthCounter(componentTypeOf<TweenPropertyComponent>()),
-
-        PositionX(componentTypeOf<TweenPropertyComponent>()),
-        PositionY(componentTypeOf<TweenPropertyComponent>()),
-
-        OffsetX(componentTypeOf<TweenPropertyComponent>()),
-        OffsetY(componentTypeOf<TweenPropertyComponent>()),
 
 //        LayoutCenterX(componentTypeOf<TweenPropertyComponent>()),
 //        LayoutCenterY(componentTypeOf<TweenPropertyComponent>()),
@@ -83,6 +82,18 @@ data class TweenPropertyComponent (
 
     companion object {
         // TODO update unit test for this mapping from enum to here
+        val TweenPositionOffsetXComponent = TweenProperty.PositionOffsetX.type
+        val TweenPositionOffsetYComponent = TweenProperty.PositionOffsetY.type
+        val TweenPositionXComponent = TweenProperty.PositionX.type
+        val TweenPositionYComponent = TweenProperty.PositionY.type
+
+        val TweenRgbaAlphaComponent = TweenProperty.RgbaAlpha.type
+        val TweenRgbaTintComponent = TweenProperty.RgbaTint.type
+
+        val TweenSpawnerIntervalComponent = TweenProperty.SpawnerInterval.type
+        val TweenSpawnerNumberOfObjectsComponent = TweenProperty.SpawnerNumberOfObjects.type
+        val TweenSpawnerPositionVariationComponent = TweenProperty.SpawnerPositionVariation.type
+        val TweenSpawnerTimeVariationComponent = TweenProperty.SpawnerTimeVariation.type
 
 //        val TweenSpriteIsPlaying = TweenProperty.SpriteIsPlaying.type
 //        val TweenSpriteForwardDirection = TweenProperty.SpriteForwardDirection.type
@@ -90,21 +101,10 @@ data class TweenPropertyComponent (
 //        val TweenSpriteDestroyOnPlayingFinished = TweenProperty.SpriteDestroyOnPlayingFinished.type
 //        val TweenSpriteAnimName = TweenProperty.SpriteAnimName.type
 
-        val TweenRgbaAlphaComponent = TweenProperty.RgbaAlpha.type
-        val TweenRgbaTintComponent = TweenProperty.RgbaTint.type
 
-//        val TweenSpawnerNumberOfObjects = TweenProperty.SpawnerNumberOfObjects.type
-//        val TweenSpawnerInterval = TweenProperty.SpawnerInterval.type
-//        val TweenSpawnerTimeVariation = TweenProperty.SpawnerTimeVariation.type
-//        val TweenSpawnerPositionVariation = TweenProperty.SpawnerPositionVariation.type
 
 //        val TweenLifeCycleHealthCounter = TweenProperty.LifeCycleHealthCounter.type
 
-        val TweenPositionXComponent = TweenProperty.PositionX.type
-        val TweenPositionYComponent = TweenProperty.PositionY.type
-
-        val TweenOffsetXComponent = TweenProperty.OffsetX.type
-        val TweenOffsetYComponent = TweenProperty.OffsetY.type
 
 //        val TweenLayoutCenterX = TweenProperty.LayoutCenterX.type
 //        val TweenLayoutCenterY = TweenProperty.LayoutCenterY.type

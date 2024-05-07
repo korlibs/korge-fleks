@@ -8,20 +8,26 @@ import korlibs.korge.fleks.components.*
 import korlibs.math.*
 import korlibs.time.*
 
-class SpriteAnimationSystem : IteratingSystem(
+class SpriteSystem : IteratingSystem(
     family = family { all(SpriteComponent) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
         val spriteComponent = entity[SpriteComponent]
 
-        val imageAnimation = AssetStore.getImageAnimation(spriteComponent.name, spriteComponent.animation)
+        // Update sprite offsets
+        // TODO
+        //   1. move offset lists from OffsetByFrameIndexComponent to static config
+        //   2. do instead:
+        //        Update offsetX and offsetY in PositionComponent depending on frame index
 
+        // Update sprite animation
         if (spriteComponent.running) {
 //            comp.time += deltaTime
             spriteComponent.nextFrameIn -= deltaTime
             if (spriteComponent.nextFrameIn <= 0f) {
 //                println("increment: ${comp.increment}, frameIndex: ${comp.frameIndex} was shown for: ${comp.time}")
+                val imageAnimation = AssetStore.getImageAnimation(spriteComponent.name, spriteComponent.animation)
                 val numframes = imageAnimation.frames.size
                 spriteComponent.frameIndex = (spriteComponent.frameIndex + spriteComponent.increment) umod numframes
 

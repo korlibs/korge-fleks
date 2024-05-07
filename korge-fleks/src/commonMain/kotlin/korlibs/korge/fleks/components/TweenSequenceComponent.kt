@@ -140,19 +140,8 @@ data class TweenSequenceComponent(
     data class TweenPosition(
         val x: Float? = null,
         val y: Float? = null,
-
-        override var entity: Entity,
-        override var delay: Float? = null,
-        override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null
-    ) : TweenBase
-
-    @Serializable
-    @SerialName("TweenOffset")
-    data class TweenOffset(
-        val x: Float? = null,
-        val y: Float? = null,
+        val offsetX: Float? = null,
+        val offsetY: Float? = null,
 
         override var entity: Entity,
         override var delay: Float? = null,
