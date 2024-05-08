@@ -2,13 +2,11 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
+import korlibs.image.format.*
 import korlibs.image.text.*
 import korlibs.io.lang.*
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.OffsetByFrameIndexComponent.Point
-import korlibs.korge.fleks.components.SwitchLayerVisibilityComponent.LayerVisibility
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
-import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
@@ -57,9 +55,9 @@ value class Identifier(val name: String)
 internal val internalModule = SerializersModule {
     // Register data classes
     polymorphic(SerializeBase::class) {
-        subclass(Rgb::class)
-        subclass(LayerVisibility::class)
-        subclass(Point::class)
+        subclass(RgbaComponent.Rgb::class)
+        subclass(OffsetByFrameIndexComponent.Point::class)
+        subclass(SpriteLayersComponent.LayerProperties::class)
     }
 
     // Register component classes
@@ -79,7 +77,7 @@ internal val internalModule = SerializersModule {
         subclass(SizeComponent::class)
         subclass(SoundComponent::class)
         subclass(SpawnerComponent::class)
-        subclass(SpecificLayerComponent::class)
+        subclass(SpriteLayersComponent::class)
         subclass(SpriteComponent::class)
         subclass(SubEntitiesComponent::class)
         subclass(SwitchLayerVisibilityComponent::class)
@@ -250,7 +248,8 @@ object AnySerializer : KSerializer<Any> {
         val int: Int? = null,
         val string: String? = null,
         val boolean: Boolean? = null,
-        val rgb: Rgb? = null
+        val rgb: RgbaComponent.Rgb? = null,
+        val direction: ImageAnimation.Direction? = null
     )
 
     override fun serialize(encoder: Encoder, value: Any) {
@@ -260,7 +259,8 @@ object AnySerializer : KSerializer<Any> {
             is Int -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(int = value))
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(string = value))
             is Boolean -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(boolean = value))
-            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
+            is RgbaComponent.Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
+            is ImageAnimation.Direction -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(direction = value))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
     }
@@ -269,6 +269,7 @@ object AnySerializer : KSerializer<Any> {
         val containerForAny = decoder.decodeSerializableValue(ContainerForAny.serializer())
         return (containerForAny.double ?: containerForAny.float ?: containerForAny.int ?:
                 containerForAny.string ?: containerForAny.boolean ?: containerForAny.rgb ?:
+                containerForAny.direction ?:
                 throw SerializationException("AnySerializer: No non-null property in ContainerForAny found!"))
     }
 }

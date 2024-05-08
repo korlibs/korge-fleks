@@ -2,6 +2,7 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import korlibs.image.format.*
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionXComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionYComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionOffsetXComponent
@@ -10,6 +11,16 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenRgbaAlphaComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenRgbaTintComponent
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpawnerIntervalComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpawnerNumberOfObjectsComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpawnerPositionVariationComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpawnerTimeVariationComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteAnimationComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteDestroyOnPlayingFinishedComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteDirectionComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteRunningComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSwitchLayerVisibilityOffVarianceComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSwitchLayerVisibilityOnVarianceComponent
 import kotlin.jvm.JvmName
 import kotlin.reflect.KMutableProperty0
 
@@ -46,6 +57,53 @@ class TweenRgbaSystem : IteratingSystem(
     }
 }
 
+class TweenSpawnerSystem : IteratingSystem(
+    family {
+        all(SpawnerComponent)
+            .any(TweenSpawnerIntervalComponent, TweenSpawnerNumberOfObjectsComponent, TweenSpawnerTimeVariationComponent, TweenSpawnerPositionVariationComponent) },
+    interval = EachFrame
+) {
+    override fun onTickEntity(entity: Entity) {
+        val spawnerComponent = entity[SpawnerComponent]
+        updateProperty(entity, TweenSpawnerNumberOfObjectsComponent, spawnerComponent::numberOfObjects)
+        updateProperty(entity, TweenSpawnerIntervalComponent, spawnerComponent::interval) {
+            // Reset next spawn counter so that changed interval will be taken into account instantly
+            spawnerComponent.nextSpawnIn = 0
+        }
+        updateProperty(entity, TweenSpawnerTimeVariationComponent, spawnerComponent::timeVariation)
+        updateProperty(entity, TweenSpawnerPositionVariationComponent, spawnerComponent::positionVariation)
+    }
+}
+
+class TweenSpriteSystem : IteratingSystem(
+    family {
+        all(SpriteComponent)
+            .any(TweenSpriteAnimationComponent, TweenSpriteRunningComponent, TweenSpriteDirectionComponent, TweenSpriteDestroyOnPlayingFinishedComponent) },
+    interval = EachFrame
+) {
+    override fun onTickEntity(entity: Entity) {
+        val spriteComponent = entity[SpriteComponent]
+        updateProperty(entity, TweenSpriteAnimationComponent, spriteComponent::animation)
+        updateProperty(entity, TweenSpriteRunningComponent, spriteComponent::running)
+        updateProperty(entity, TweenSpriteDirectionComponent, spriteComponent::direction)
+        updateProperty(entity, TweenSpriteDestroyOnPlayingFinishedComponent, spriteComponent::destroyOnAnimationFinished)
+    }
+}
+
+class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
+    family {
+        all(SwitchLayerVisibilityComponent)
+            .any(TweenSwitchLayerVisibilityOnVarianceComponent, TweenSwitchLayerVisibilityOffVarianceComponent) },
+    interval = EachFrame
+) {
+    override fun onTickEntity(entity: Entity) {
+        val visibilityComponent = entity[SwitchLayerVisibilityComponent]
+        updateProperty(entity, TweenSwitchLayerVisibilityOnVarianceComponent, visibilityComponent::onVariance)
+        updateProperty(entity, TweenSwitchLayerVisibilityOffVarianceComponent, visibilityComponent::offVariance)
+    }
+}
+
+
 //class TweenOffsetSystem : IteratingSystem(
 //    family { any() },
 //    interval = EachFrame
@@ -55,57 +113,6 @@ class TweenRgbaSystem : IteratingSystem(
 //            updateProperty(entity, TweenOffsetXComponent, it::x)
 //            updateProperty(entity, TweenOffsetYComponent, it::y)
 //        }
-//    }
-//}
-
-//class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
-//    family { all(SwitchLayerVisibilityComponent).any(TweenSwitchLayerVisibilityOnVariance, TweenSwitchLayerVisibilityOffVariance) },
-//    interval = EachFrame
-//) {
-//    override fun onTickEntity(entity: Entity) {
-//        val visibility = entity[SwitchLayerVisibilityComponent]
-//        updateProperty(entity, TweenSwitchLayerVisibilityOnVariance, visibility::offVariance)
-//        updateProperty(entity, TweenSwitchLayerVisibilityOffVariance, visibility::onVariance)
-//    }
-//}
-
-
-//class TweenSpriteSystem : IteratingSystem(
-//    family { all(SpriteComponent).any(TweenSpriteAnimName, TweenSpriteIsPlaying, TweenSpriteForwardDirection, TweenSpriteLoop, TweenSpriteDestroyOnPlayingFinished) },
-//    interval = EachFrame
-//) {
-//    override fun onTickEntity(entity: Entity) {
-//        val sprite = entity[SpriteComponent]
-//        val imageView = KorgeViewCache[entity] as ImageDataViewEx
-//        updateProperty(entity, TweenSpriteAnimName, sprite::animationName) { imageView.animation = sprite.animationName }
-//        updateProperty(entity, TweenSpriteIsPlaying, sprite::isPlaying)
-//        updateProperty(entity, TweenSpriteForwardDirection, sprite::forwardDirection)
-//        updateProperty(entity, TweenSpriteLoop, sprite::loop)
-//        updateProperty(entity, TweenSpriteDestroyOnPlayingFinished, sprite::destroyOnPlayingFinished) {
-// TODO
-//            if (sprite.destroyOnPlayingFinished)
-//            imageView.onPlayFinished = { entity.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }.also { lifeCycle -> lifeCycle.healthCounter = 0 } }
-//            else
-//            imageView.onPlayFinished = {}
-//        }
-//
-//        if (sprite.isPlaying) imageView.play(reverse = !sprite.forwardDirection, once = !sprite.loop)
-//    }
-//}
-
-//class AnimateSpawnerSystem : IteratingSystem(
-//    family { all(SpawnerComponent).any(TweenSpawnerNumberOfObjects, TweenSpawnerInterval, TweenSpawnerTimeVariation, TweenSpawnerPositionVariation) },
-//    interval = EachFrame
-//) {
-//    override fun onTickEntity(entity: Entity) {
-//        val spawner = entity[SpawnerComponent]
-//        updateProperty(entity, TweenSpawnerNumberOfObjects, spawner::numberOfObjects)
-//        updateProperty(entity, TweenSpawnerInterval, spawner::interval) {
-//            // Reset next spawn counter so that changed interval will be taken into account instantly
-//            spawner.nextSpawnIn = 0
-//        }
-//        updateProperty(entity, TweenSpawnerTimeVariation, spawner::timeVariation)
-//        updateProperty(entity, TweenSpawnerPositionVariation, spawner::positionVariation)
 //    }
 //}
 
@@ -131,6 +138,14 @@ class TweenRgbaSystem : IteratingSystem(
 //        updateProperty(entity, TweenSoundVolume, sound::volume)
 //    }
 //}
+
+fun SystemConfiguration.createTweenAnimationSystems() {
+    add(TweenRgbaSystem())
+    add(TweenPositionSystem())
+    add(TweenSpawnerSystem())
+    add(TweenSpriteSystem())
+    add(AnimateSwitchLayerVisibilitySystem())
+}
 
 /**
  *
@@ -194,6 +209,16 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
             val time: Float = it.timeProgress / it.duration
             value.set(it.change as Rgb * it.easing.invoke(time) + it.value as Rgb)
             it.timeProgress += deltaTime
+        }
+    }
+}
+
+@JvmName("updatePropertyDirectionNullable")
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<ImageAnimation.Direction?>) {
+    entity.getOrNull(component)?.let {
+        if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
+            value.set(it.value as ImageAnimation.Direction)
+            entity -= component
         }
     }
 }

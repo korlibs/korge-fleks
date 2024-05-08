@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.entity.config.*
+import korlibs.image.format.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import korlibs.math.interpolation.Easing
@@ -168,10 +168,10 @@ data class TweenSequenceComponent(
     @Serializable
     @SerialName("TweenSprite")
     data class TweenSprite(
-        var animationName: String? = null,
-        var isPlaying: Boolean? = null,
-        var forwardDirection: Boolean? = null,
-        var loop: Boolean? = null,
+        var animation: String? = null,
+        // do not tween the frameIndex, it is updated by the SpriteSystem
+        var running: Boolean? = null,
+        var direction: ImageAnimation.Direction? = null,
         var destroyOnPlayingFinished: Boolean? = null,
 
         override var entity: Entity,
@@ -186,7 +186,6 @@ data class TweenSequenceComponent(
     data class TweenSwitchLayerVisibility(
         var offVariance: Float? = null,
         var onVariance: Float? = null,
-        var spriteLayers: List<String>? = null,
 
         override var entity: Entity,
         override var delay: Float? = null,

@@ -52,11 +52,10 @@ data class TweenPropertyComponent (
         SpawnerPositionVariation(componentTypeOf<TweenPropertyComponent>()),
         SpawnerTimeVariation(componentTypeOf<TweenPropertyComponent>()),
 
-//        SpriteIsPlaying(componentTypeOf<TweenPropertyComponent>()),
-//        SpriteForwardDirection(componentTypeOf<TweenPropertyComponent>()),
-//        SpriteLoop(componentTypeOf<TweenPropertyComponent>()),
-//        SpriteDestroyOnPlayingFinished(componentTypeOf<TweenPropertyComponent>()),
-//        SpriteAnimName(componentTypeOf<TweenPropertyComponent>()),
+        SpriteRunning(componentTypeOf<TweenPropertyComponent>()),
+        SpriteDirection(componentTypeOf<TweenPropertyComponent>()),
+        SpriteDestroyOnPlayingFinished(componentTypeOf<TweenPropertyComponent>()),
+        SpriteAnimation(componentTypeOf<TweenPropertyComponent>()),
 
         // TODO not used yet in animation system
 //        LifeCycleHealthCounter(componentTypeOf<TweenPropertyComponent>()),
@@ -66,8 +65,8 @@ data class TweenPropertyComponent (
 //        LayoutOffsetX(componentTypeOf<TweenPropertyComponent>()),
 //        LayoutOffsetY(componentTypeOf<TweenPropertyComponent>()),
 
-//        SwitchLayerVisibilityOnVariance(componentTypeOf<TweenPropertyComponent>()),
-//        SwitchLayerVisibilityOffVariance(componentTypeOf<TweenPropertyComponent>()),
+        SwitchLayerVisibilityOnVariance(componentTypeOf<TweenPropertyComponent>()),
+        SwitchLayerVisibilityOffVariance(componentTypeOf<TweenPropertyComponent>()),
 
 //        SoundStartTrigger(componentTypeOf<TweenPropertyComponent>()),
 //        SoundStopTrigger(componentTypeOf<TweenPropertyComponent>()),
@@ -95,13 +94,10 @@ data class TweenPropertyComponent (
         val TweenSpawnerPositionVariationComponent = TweenProperty.SpawnerPositionVariation.type
         val TweenSpawnerTimeVariationComponent = TweenProperty.SpawnerTimeVariation.type
 
-//        val TweenSpriteIsPlaying = TweenProperty.SpriteIsPlaying.type
-//        val TweenSpriteForwardDirection = TweenProperty.SpriteForwardDirection.type
-//        val TweenSpriteLoop = TweenProperty.SpriteLoop.type
-//        val TweenSpriteDestroyOnPlayingFinished = TweenProperty.SpriteDestroyOnPlayingFinished.type
-//        val TweenSpriteAnimName = TweenProperty.SpriteAnimName.type
-
-
+        val TweenSpriteAnimationComponent = TweenProperty.SpriteAnimation.type
+        val TweenSpriteDirectionComponent = TweenProperty.SpriteDirection.type
+        val TweenSpriteDestroyOnPlayingFinishedComponent = TweenProperty.SpriteDestroyOnPlayingFinished.type
+        val TweenSpriteRunningComponent = TweenProperty.SpriteRunning.type
 
 //        val TweenLifeCycleHealthCounter = TweenProperty.LifeCycleHealthCounter.type
 
@@ -111,8 +107,8 @@ data class TweenPropertyComponent (
 //        val TweenLayoutOffsetX = TweenProperty.LayoutOffsetX.type
 //        val TweenLayoutOffsetY = TweenProperty.LayoutOffsetY.type
 
-//        val TweenSwitchLayerVisibilityOnVariance = TweenProperty.SwitchLayerVisibilityOnVariance.type
-//        val TweenSwitchLayerVisibilityOffVariance = TweenProperty.SwitchLayerVisibilityOffVariance.type
+        val TweenSwitchLayerVisibilityOnVarianceComponent = TweenProperty.SwitchLayerVisibilityOnVariance.type
+        val TweenSwitchLayerVisibilityOffVarianceComponent = TweenProperty.SwitchLayerVisibilityOffVariance.type
 
 //        val TweenSoundStartTrigger = TweenProperty.SoundStartTrigger.type
 //        val TweenSoundStopTrigger = TweenProperty.SoundStopTrigger.type

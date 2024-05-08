@@ -116,18 +116,18 @@ class TweenSequenceSystem : IteratingSystem(
         currentTween = tween
         currentParentTween = parentTween
         when (tween) {
-            is TweenRgba -> tween.entity.getOrError(RgbaComponent).let { start ->
-                tween.alpha?.let { end -> createAnimateComponent(RgbaAlpha, value = start.alpha, change = end - start.alpha) }
-                tween.tint?.let { end ->  createAnimateComponent(RgbaTint, start.tint,
+            is TweenRgba -> tween.entity.getOrWarning(RgbaComponent)?.let { start ->
+                tween.alpha?.let { end -> createTweenPropertyComponent(RgbaAlpha, value = start.alpha, change = end - start.alpha) }
+                tween.tint?.let { end ->  createTweenPropertyComponent(RgbaTint, start.tint,
                     Rgb(r = end.r - (start.tint.r), g = end.g - (start.tint.g), b = end.b - (start.tint.b))
                 ) }
-                tween.visible?.let { visible -> createAnimateComponent(RgbaAlpha, value = if (visible) 1f else 0f) }
+                tween.visible?.let { visible -> createTweenPropertyComponent(RgbaAlpha, value = if (visible) 1f else 0f) }
             }
-            is TweenPosition -> tween.entity.getOrError(PositionComponent).let { start ->
-                tween.x?.let { end -> createAnimateComponent(PositionX, start.x, end - start.x) }
-                tween.y?.let { end -> createAnimateComponent(PositionY, start.y, end - start.y) }
-                tween.offsetX?.let { end -> createAnimateComponent(PositionOffsetX, start.offsetX, end - start.offsetX) }
-                tween.offsetY?.let { end -> createAnimateComponent(PositionOffsetY, start.offsetY, end - start.offsetY) }
+            is TweenPosition -> tween.entity.getOrWarning(PositionComponent)?.let { start ->
+                tween.x?.let { end -> createTweenPropertyComponent(PositionX, start.x, end - start.x) }
+                tween.y?.let { end -> createTweenPropertyComponent(PositionY, start.y, end - start.y) }
+                tween.offsetX?.let { end -> createTweenPropertyComponent(PositionOffsetX, start.offsetX, end - start.offsetX) }
+                tween.offsetY?.let { end -> createTweenPropertyComponent(PositionOffsetY, start.offsetY, end - start.offsetY) }
             }
 //            is TweenLayout -> tween.entity.getOrError(LayoutComponent).let { start ->
 //                tween.centerX?.let { value -> createAnimateComponent(LayoutCenterX, value) }
@@ -135,23 +135,22 @@ class TweenSequenceSystem : IteratingSystem(
 //                tween.offsetX?.let { end -> createAnimateComponent(LayoutOffsetX, start.offsetX, end - start.offsetX) }
 //                tween.offsetY?.let { end -> createAnimateComponent(LayoutOffsetY, start.offsetY, end - start.offsetY) }
 //            }
-//            is TweenSprite -> tween.entity.getOrError(SpriteComponent).let { _ ->  // make sure to-be-animated-entity is of type sprite
-//                tween.animationName?.let { value -> createAnimateComponent(SpriteAnimName, value) }
-//                tween.isPlaying?.let { value -> createAnimateComponent(SpriteIsPlaying, value) }
-//                tween.forwardDirection?.let { value -> createAnimateComponent(SpriteForwardDirection, value) }
-//                tween.loop?.let { value -> createAnimateComponent(SpriteLoop, value) }
-//                tween.destroyOnPlayingFinished?.let { value -> createAnimateComponent(SpriteDestroyOnPlayingFinished, value) }
-//            }
-//            is TweenSwitchLayerVisibility -> tween.entity.getOrError(SwitchLayerVisibilityComponent).let { start ->
-//                tween.offVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
-//                tween.onVariance?.let { end -> createAnimateComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
-//            }
-//            is TweenSpawner -> tween.entity.getOrError(SpawnerComponent).let { start ->
-//                tween.numberOfObjects?.let { end -> createAnimateComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }
-//                tween.interval?.let { end -> createAnimateComponent(SpawnerInterval, start.interval, end - start.interval) }
-//                tween.timeVariation?.let { end -> createAnimateComponent(SpawnerTimeVariation, start.timeVariation, end - start.timeVariation) }
-//                tween.positionVariation?.let { end -> createAnimateComponent(SpawnerPositionVariation, start.positionVariation, end - start.positionVariation) }
-//            }
+            is TweenSprite -> tween.entity.getOrWarning(SpriteComponent)?.let { _ ->  // make sure to-be-animated-entity is of type sprite
+                tween.animation?.let { value -> createTweenPropertyComponent(SpriteAnimation, value) }
+                tween.running?.let { value -> createTweenPropertyComponent(SpriteRunning, value) }
+                tween.direction?.let { value -> createTweenPropertyComponent(SpriteDirection, value) }
+                tween.destroyOnPlayingFinished?.let { value -> createTweenPropertyComponent(SpriteDestroyOnPlayingFinished, value) }
+            }
+            is TweenSwitchLayerVisibility -> tween.entity.getOrWarning(SwitchLayerVisibilityComponent)?.let { start ->
+                tween.offVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
+                tween.onVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
+            }
+            is TweenSpawner -> tween.entity.getOrWarning(SpawnerComponent)?.let { start ->
+                tween.numberOfObjects?.let { end -> createTweenPropertyComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }
+                tween.interval?.let { end -> createTweenPropertyComponent(SpawnerInterval, start.interval, end - start.interval) }
+                tween.timeVariation?.let { end -> createTweenPropertyComponent(SpawnerTimeVariation, start.timeVariation, end - start.timeVariation) }
+                tween.positionVariation?.let { end -> createTweenPropertyComponent(SpawnerPositionVariation, start.positionVariation, end - start.positionVariation) }
+            }
 //            is TweenSound -> tween.entity.getOrError(SoundComponent).let{ start ->
 //                tween.startTrigger?.let { value -> createAnimateComponent(SoundStartTrigger, value) }
 //                tween.stopTrigger?.let { value -> createAnimateComponent(SoundStopTrigger, value) }
@@ -169,15 +168,15 @@ class TweenSequenceSystem : IteratingSystem(
             is ExecuteConfigFunction -> EntityFactory.createEntity(tween.entityConfig, world, tween.entity)
             else -> {
                 when (tween) {
-                    is SpawnNewTweenSequence -> error("AnimationScriptSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens")
-                    is Wait -> error("AnimationScriptSystem: \"Wait\" not allowed in ParallelTweens")
-                    else -> error("AnimationScriptSystem: Animate function for tween $tween not implemented!")
+                    is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens")
+                    is Wait -> println("WARNING - TweenSequenceSystem: \"Wait\" not allowed in ParallelTweens")
+                    else -> println("WARNING - TweenSequenceSystem: Animate function for tween $tween not implemented!")
                 }
             }
         }
     }
 
-    private fun createAnimateComponent(componentProperty: TweenProperty, value: Any, change: Any = Unit) {
+    private fun createTweenPropertyComponent(componentProperty: TweenProperty, value: Any, change: Any = Unit) {
         currentTween.entity.configure { animatedEntity ->
             animatedEntity.getOrAdd(componentProperty.type) { TweenPropertyComponent(componentProperty) }.also {
                 it.change = change
@@ -189,7 +188,12 @@ class TweenSequenceSystem : IteratingSystem(
         }
     }
 
-    private inline fun <reified T : Component<*>> Entity.getOrError(componentType: ComponentType<T>) : T {
-        return getOrNull(componentType) ?: error("AnimationScriptSystem: Entity '${this.id}' does not contain component type '${componentType}'!\nEntity snapshot: \n${world.snapshotOf(this)}".replace("), ", "),\n"))
+    private inline fun <reified T : Component<*>> Entity.getOrWarning(componentType: ComponentType<T>) : T? {
+        if (this has componentType) return get(componentType)
+        else {
+            println("WARNING - TweenSequenceSystem: Entity '${this.id}' does not contain component type '${componentType}'!\\nEntity" +
+                    "snapshot: \\n${world.snapshotOf(this)}\".replace(\"), \", \"),\\n\"))\n")
+            return null
+        }
     }
 }

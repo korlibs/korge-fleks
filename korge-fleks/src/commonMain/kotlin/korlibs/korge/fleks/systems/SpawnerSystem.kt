@@ -30,7 +30,7 @@ class SpawnerSystem : IteratingSystem(
                 }
                 entity.getOrNull(OffsetByFrameIndexComponent)?.let {
                     // Get offset depending on current animation and frame index
-// TODO
+// TODO refactor because this component will be deleted - offsets are part of static entity config
                     val currentFrameIndex = 0  //(KorgeViewCache[it.entity] as ImageDataViewEx).currentFrameIndex
                     val animationName = it.entity.getOrNull(SpriteComponent)?.animation ?: ""
                     val offset = it.mapOfOffsetLists[animationName]?.get(currentFrameIndex)
