@@ -176,7 +176,7 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
             entity -= component  // remove component from entity
         } else {
             // Calculate new value for the animated property
-            val time: Float = (it.timeProgress / it.duration).toFloat()
+            val time: Float = (it.timeProgress / it.duration)
             value.set(it.change as Float * it.easing.invoke(time) + it.value as Float)
             // Check if time of animation sequence is over - then we can remove the animation component again
             it.timeProgress += deltaTime

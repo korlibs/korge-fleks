@@ -121,7 +121,7 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.tint?.let { end ->  createTweenPropertyComponent(RgbaTint, start.tint,
                     Rgb(r = end.r - (start.tint.r), g = end.g - (start.tint.g), b = end.b - (start.tint.b))
                 ) }
-                tween.visible?.let { visible -> createTweenPropertyComponent(RgbaAlpha, value = if (visible) 1f else 0f) }
+                tween.visible?.let { visible -> createTweenPropertyComponent(RgbaAlpha, value = if (visible) 1f else 0f, change = 0f) }
             }
             is TweenPosition -> tween.entity.getOrWarning(PositionComponent)?.let { start ->
                 tween.x?.let { end -> createTweenPropertyComponent(PositionX, start.x, end - start.x) }
