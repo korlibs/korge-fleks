@@ -98,8 +98,8 @@ class AnimateSwitchLayerVisibilitySystem : IteratingSystem(
 ) {
     override fun onTickEntity(entity: Entity) {
         val visibilityComponent = entity[SwitchLayerVisibilityComponent]
-        updateProperty(entity, TweenSwitchLayerVisibilityOnVarianceComponent, visibilityComponent::onVariance)
         updateProperty(entity, TweenSwitchLayerVisibilityOffVarianceComponent, visibilityComponent::offVariance)
+        updateProperty(entity, TweenSwitchLayerVisibilityOnVarianceComponent, visibilityComponent::onVariance)
     }
 }
 

@@ -142,8 +142,8 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.destroyOnPlayingFinished?.let { value -> createTweenPropertyComponent(SpriteDestroyOnPlayingFinished, value) }
             }
             is TweenSwitchLayerVisibility -> tween.entity.getOrWarning(SwitchLayerVisibilityComponent)?.let { start ->
-                tween.offVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOnVariance, value = start.offVariance, change = end - start.offVariance) }
-                tween.onVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOffVariance, start.onVariance, end - start.onVariance) }
+                tween.offVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOffVariance, value = start.offVariance, change = end - start.offVariance) }
+                tween.onVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOnVariance, start.onVariance, end - start.onVariance) }
             }
             is TweenSpawner -> tween.entity.getOrWarning(SpawnerComponent)?.let { start ->
                 tween.numberOfObjects?.let { end -> createTweenPropertyComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }
