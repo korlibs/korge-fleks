@@ -4,7 +4,6 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.OffsetByFrameIndexComponent.*
-import korlibs.korge.fleks.components.SpriteComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.KorgeViewCache
 

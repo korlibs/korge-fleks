@@ -2,7 +2,7 @@ package korlibs.korge.fleks.entity
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.fleks.systems.SpawnerSystem
+//import korlibs.korge.fleks.systems.SpawnerSystem  // TODO enable after refactoring finished
 
 
 /**
