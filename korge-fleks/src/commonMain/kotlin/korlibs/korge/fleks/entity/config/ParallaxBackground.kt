@@ -26,11 +26,6 @@ data class ParallaxBackground(
     private val numberAttachedFrontLayers = AssetStore.getBackground(assetName).config.parallaxPlane?.attachedLayersFront?.size ?: 0
     private val numberForegroundLayers = AssetStore.getBackground(assetName).config.foregroundLayers?.size ?: 0
 
-    // Game object related functions
-//    fun create(world: World, config: Identifier) = configureParallaxBackgroundFct(world, world.entity(), config)
-    fun getEntityByLayerName(world: World, entity: Entity, name: String): Entity = with (world) {
-        return entity[SubEntitiesComponent][name]
-    }
 /*
     override val functionImpl = fun(world: World, entity: Entity, assetConfig: Identifier): Entity = with(world) {
         println("Re-configure attached parallax Layers")

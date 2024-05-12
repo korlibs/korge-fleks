@@ -79,7 +79,6 @@ internal val internalModule = SerializersModule {
         subclass(SpawnerComponent::class)
         subclass(SpriteLayersComponent::class)
 //        subclass(SpriteComponent::class)
-        subclass(SubEntitiesComponent::class)
         subclass(SwitchLayerVisibilityComponent::class)
         subclass(TextComponent::class)
         subclass(TiledLevelMapComponent::class)

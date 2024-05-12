@@ -11,7 +11,7 @@ import korlibs.korge.fleks.components.*
 class PositionSystem : IteratingSystem(
     family {
         all(PositionComponent)  // Position component absolutely needed for movement of entity objects
-        .any(MotionComponent, /*ParallaxMotionComponent,*/ RigidbodyComponent, SubEntitiesComponent)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
+        .any(MotionComponent, /*ParallaxMotionComponent,*/ RigidbodyComponent)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
 // TODO activate when ParallaxComponent is moved into Korge-fleks
 //        .none(ParallaxComponent)
     },
@@ -51,14 +51,5 @@ class PositionSystem : IteratingSystem(
             }
         }
 */
-        if (entity has SubEntitiesComponent && entity[SubEntitiesComponent].moveWithParent) {
-            entity[SubEntitiesComponent].entities.forEach {
-                val subEntity = it.value
-                subEntity.getOrNull(PositionComponent)?.let { subEntityPosition ->
-                    subEntityPosition.x = positionComponent.x
-                    subEntityPosition.y = positionComponent.y
-                }
-            }
-        }
     }
 }
