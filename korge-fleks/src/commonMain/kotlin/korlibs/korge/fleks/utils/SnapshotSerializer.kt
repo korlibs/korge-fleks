@@ -70,7 +70,7 @@ internal val internalModule = SerializersModule {
         subclass(MotionComponent::class)
         subclass(NoisyMoveComponent::class)
         subclass(OffsetByFrameIndexComponent::class)
-        subclass(ParallaxComponent::class)
+//        subclass(ParallaxComponent::class)
         subclass(PositionComponent::class)
         subclass(RgbaComponent::class)
         subclass(RigidbodyComponent::class)
