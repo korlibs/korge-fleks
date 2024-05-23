@@ -68,10 +68,10 @@ data class TweenPropertyComponent (
         SwitchLayerVisibilityOnVariance(componentTypeOf<TweenPropertyComponent>()),
         SwitchLayerVisibilityOffVariance(componentTypeOf<TweenPropertyComponent>()),
 
-//        SoundStartTrigger(componentTypeOf<TweenPropertyComponent>()),
-//        SoundStopTrigger(componentTypeOf<TweenPropertyComponent>()),
-//        SoundPosition(componentTypeOf<TweenPropertyComponent>()),
-//        SoundVolume(componentTypeOf<TweenPropertyComponent>()),
+        SoundStartTrigger(componentTypeOf<TweenPropertyComponent>()),
+        SoundStopTrigger(componentTypeOf<TweenPropertyComponent>()),
+        SoundPosition(componentTypeOf<TweenPropertyComponent>()),
+        SoundVolume(componentTypeOf<TweenPropertyComponent>()),
 
 //        NoisyMoveX(componentTypeOf<TweenPropertyComponent>()),
 //        NoisyMoveY(componentTypeOf<TweenPropertyComponent>()),
@@ -110,10 +110,10 @@ data class TweenPropertyComponent (
         val TweenSwitchLayerVisibilityOnVarianceComponent = TweenProperty.SwitchLayerVisibilityOnVariance.type
         val TweenSwitchLayerVisibilityOffVarianceComponent = TweenProperty.SwitchLayerVisibilityOffVariance.type
 
-//        val TweenSoundStartTrigger = TweenProperty.SoundStartTrigger.type
-//        val TweenSoundStopTrigger = TweenProperty.SoundStopTrigger.type
-//        val TweenSoundPosition = TweenProperty.SoundPosition.type
-//        val TweenSoundVolume = TweenProperty.SoundVolume.type
+        val TweenSoundStartTriggerComponent = TweenProperty.SoundStartTrigger.type
+        val TweenSoundStopTriggerComponent = TweenProperty.SoundStopTrigger.type
+        val TweenSoundPositionComponent = TweenProperty.SoundPosition.type
+        val TweenSoundVolumeComponent = TweenProperty.SoundVolume.type
 
 //        val TweenNoisyMoveX = TweenProperty.NoisyMoveX.type
 //        val TweenNoisyMoveY = TweenProperty.NoisyMoveY.type

@@ -75,7 +75,7 @@ internal val internalModule = SerializersModule {
         subclass(RgbaComponent::class)
         subclass(RigidbodyComponent::class)
         subclass(SizeComponent::class)
-        subclass(SoundComponent::class)
+//        subclass(SoundComponent::class)
         subclass(SpawnerComponent::class)
         subclass(SpriteLayersComponent::class)
 //        subclass(SpriteComponent::class)
