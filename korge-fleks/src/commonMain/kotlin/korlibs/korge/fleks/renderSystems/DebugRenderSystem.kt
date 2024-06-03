@@ -61,6 +61,11 @@ class DebugRenderSystem(
                     }
                 }
 
+                if (entity has TextComponent) {
+                    // TODO
+
+                }
+
                 // Draw pivot point (zero-point for game object)
                 batch.drawVector(Colors.YELLOW) {
                     circle(Point(xx, yy), 2)

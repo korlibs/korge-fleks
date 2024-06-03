@@ -31,12 +31,6 @@ import kotlin.jvm.JvmInline
  */
 interface SerializeBase
 
-// Some convenience aliases for Fleks snapshots of world and entities
-//typealias SerializableSnapshot = Map<Int, List<SerializeBase>>  // snapshot of Fleks world
-//typealias SerializableSnapshotOf = List<SerializeBase>  // snapshot of one entity
-typealias FleksSnapshot = Map<Entity, List<Component<*>>>  // snapshot data of Fleks world
-typealias FleksSnapshotOf = List<Component<*>>  // snapshot data of one entity
-
 /**
  * Class for serializing identifier objects for entity configs and functions in components.
  *
@@ -62,23 +56,25 @@ internal val internalModule = SerializersModule {
 
     // Register component classes
     polymorphic(Component::class) {
+        subclass(EntityLinkComponent::class)
         subclass(InfoComponent::class)
         subclass(InputTouchButtonComponent::class)
+        subclass(LayerComponent::class)
         subclass(LayoutComponent::class)
         subclass(LdtkLevelMapComponent::class)
         subclass(LifeCycleComponent::class)
         subclass(MotionComponent::class)
         subclass(NoisyMoveComponent::class)
         subclass(OffsetByFrameIndexComponent::class)
-//        subclass(ParallaxComponent::class)
+        subclass(ParallaxComponent::class)
         subclass(PositionComponent::class)
         subclass(RgbaComponent::class)
         subclass(RigidbodyComponent::class)
         subclass(SizeComponent::class)
-//        subclass(SoundComponent::class)
+        subclass(SoundComponent::class)
         subclass(SpawnerComponent::class)
         subclass(SpriteLayersComponent::class)
-//        subclass(SpriteComponent::class)
+        subclass(SpriteComponent::class)
         subclass(SwitchLayerVisibilityComponent::class)
         subclass(TextComponent::class)
         subclass(TiledLevelMapComponent::class)
@@ -214,7 +210,7 @@ object AnyAsString : KSerializer<Any> {
         when (value) {
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("String", value.toString()))
             is Double -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Double", value.toString()))
-//            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Rgb", value.toString()))
+            is RgbaComponent.Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Rgb", value.toString()))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
     }
@@ -224,7 +220,7 @@ object AnyAsString : KSerializer<Any> {
         return when (containerForAny.type) {
             "String" -> containerForAny.value
             "Double" -> containerForAny.value.toDouble()
-//            "Rgb" -> Rgb.fromString(containerForAny.value)
+            "Rgb" -> RgbaComponent.Rgb.fromString(containerForAny.value)
             else -> throw SerializationException("AnySerializer: No rule to deserialize type '${containerForAny.type}'!")
         }
     }

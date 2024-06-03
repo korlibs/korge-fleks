@@ -154,7 +154,11 @@ class TweenSoundSystem : IteratingSystem(
 //    }
 //}
 
-fun SystemConfiguration.createTweenAnimationSystems() {
+fun SystemConfiguration.setupTweenEngineSystems() {
+    // First add the tween sequence system - it creates TweenPropertyComponents
+    add(TweenSequenceSystem())
+
+    // Then add all tween animation systems - they update properties of components according to TweenPropertyComponents
     add(TweenRgbaSystem())
     add(TweenPositionSystem())
     add(TweenSpawnerSystem())
