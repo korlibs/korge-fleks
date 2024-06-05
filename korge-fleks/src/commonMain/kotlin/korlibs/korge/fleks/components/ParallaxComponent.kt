@@ -56,13 +56,15 @@ data class ParallaxComponent(
     ) : SerializeBase
 
     override fun World.onAdd(entity: Entity) {
+        val assetStore: AssetStore = this.inject(name = "AssetStore")
+
         // Get size for all layer lists to make sure that they fit to the parallax configuration
         // Same list sizes are also assumed in ParallaxRenderSystem
-        val numberBackgroundLayers = AssetStore.getBackground(name).config.backgroundLayers?.size ?: 0
-        val numberAttachedRearLayers = AssetStore.getBackground(name).config.parallaxPlane?.attachedLayersRear?.size ?: 0
-        val numberParallaxPlaneLines = AssetStore.getBackground(name).parallaxPlane?.imageDatas?.size ?: 0
-        val numberAttachedFrontLayers = AssetStore.getBackground(name).config.parallaxPlane?.attachedLayersFront?.size ?: 0
-        val numberForegroundLayers = AssetStore.getBackground(name).config.foregroundLayers?.size ?: 0
+        val numberBackgroundLayers = assetStore.getBackground(name).config.backgroundLayers?.size ?: 0
+        val numberAttachedRearLayers = assetStore.getBackground(name).config.parallaxPlane?.attachedLayersRear?.size ?: 0
+        val numberParallaxPlaneLines = assetStore.getBackground(name).parallaxPlane?.imageDatas?.size ?: 0
+        val numberAttachedFrontLayers = assetStore.getBackground(name).config.parallaxPlane?.attachedLayersFront?.size ?: 0
+        val numberForegroundLayers = assetStore.getBackground(name).config.foregroundLayers?.size ?: 0
 
         // TODO Check if isEmpty check is needed - it looks that loadSnapshot does not call components onAdd hook functions
         // Initialize all layer lists on component creation (don't do this after deserialization - list are not empty)

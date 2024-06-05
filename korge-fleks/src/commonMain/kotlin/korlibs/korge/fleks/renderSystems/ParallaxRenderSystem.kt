@@ -30,7 +30,8 @@ class ParallaxRenderSystem(
     world: World,
     layerTag: RenderLayerTag
 ) : View() {
-    private val family: Family = world.family { all(layerTag, PositionComponent, ParallaxComponent)}
+    private val family: Family = world.family { all(layerTag, PositionComponent, ParallaxComponent) }
+    private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
     override fun renderInternal(ctx: RenderContext) {
         // Custom Render Code
@@ -40,7 +41,7 @@ class ParallaxRenderSystem(
             family.forEach { entity ->
                 val globalPositionComponent = entity[PositionComponent]
                 val (configName, backgroundLayers, parallaxPlane, foregroundLayers) = entity[ParallaxComponent]
-                val parallaxDataContainer = AssetStore.getBackground(configName)
+                val parallaxDataContainer = assetStore.getBackground(configName)
 
                 // Iterate over all parallax layers
                 val parallaxMode = parallaxDataContainer.config.mode

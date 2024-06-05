@@ -3,6 +3,7 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.image.format.*
+import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionXComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionYComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionOffsetXComponent
@@ -87,14 +88,16 @@ class TweenSpriteSystem : IteratingSystem(
             .any(TweenSpriteAnimationComponent, TweenSpriteRunningComponent, TweenSpriteDirectionComponent, TweenSpriteDestroyOnPlayingFinishedComponent) },
     interval = EachFrame
 ) {
+    private val assetStore: AssetStore = world.inject(name = "AssetStore")
+
     override fun onTickEntity(entity: Entity) {
         val spriteComponent = entity[SpriteComponent]
         updateProperty(entity, TweenSpriteAnimationComponent, spriteComponent::animation) {
-            spriteComponent.setFrameIndex()
-            spriteComponent.setNextFrameIn()
+            spriteComponent.setFrameIndex(assetStore)
+            spriteComponent.setNextFrameIn(assetStore)
         }
         updateProperty(entity, TweenSpriteDirectionComponent, spriteComponent::direction) {
-            spriteComponent.setFrameIndex()
+            spriteComponent.setFrameIndex(assetStore)
             spriteComponent.setIncrement()
         }
         updateProperty(entity, TweenSpriteRunningComponent, spriteComponent::running) {

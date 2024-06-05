@@ -26,6 +26,7 @@ class FastSpriteRenderSystem(
     layerTag: RenderLayerTag
 ) : View() {
     private val family: Family
+    private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
     override fun renderInternal(ctx: RenderContext) {
         // Custom Render Code here
@@ -36,7 +37,7 @@ class FastSpriteRenderSystem(
                 val (x, y) = entity[PositionComponent]
                 val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
                 val (rgba) = entity[RgbaComponent]
-                val imageFrame = AssetStore.getImageFrame(name, animation, frameIndex)
+                val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
 
                 // Just take the first layer of an Aseprite image file
                 val texture = imageFrame.first ?: return@forEach

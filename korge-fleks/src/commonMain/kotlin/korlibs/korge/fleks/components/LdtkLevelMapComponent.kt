@@ -24,8 +24,10 @@ data class LdtkLevelMapComponent(
 
     // Get size of level map and save it into properties of this component
     override fun World.onAdd(entity: Entity) {
+        val assetStore: AssetStore = this.inject(name = "AssetStore")
+
         val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]
-        val ldtkLevel = AssetStore.getLdtkLevel(AssetStore.getLdtkWorld(ldtkLevelMapComponent.worldName), ldtkLevelMapComponent.levelName)
+        val ldtkLevel = assetStore.getLdtkLevel(assetStore.getLdtkWorld(ldtkLevelMapComponent.worldName), ldtkLevelMapComponent.levelName)
         width = ldtkLevel.pxWid.toFloat()
         height = ldtkLevel.pxHei.toFloat()
     }

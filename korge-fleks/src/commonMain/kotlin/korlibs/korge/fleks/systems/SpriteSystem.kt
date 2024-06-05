@@ -13,6 +13,8 @@ class SpriteSystem : IteratingSystem(
     family = family { all(SpriteComponent) },
     interval = EachFrame
 ) {
+    private val assetStore: AssetStore = world.inject(name = "AssetStore")
+
     override fun onTickEntity(entity: Entity) {
         val spriteComponent = entity[SpriteComponent]
 
@@ -28,7 +30,7 @@ class SpriteSystem : IteratingSystem(
             spriteComponent.nextFrameIn -= deltaTime
             if (spriteComponent.nextFrameIn <= 0f) {
 //                println("increment: ${comp.increment}, frameIndex: ${comp.frameIndex} was shown for: ${comp.time}")
-                val imageAnimation = AssetStore.getImageAnimation(spriteComponent.name, spriteComponent.animation)
+                val imageAnimation = assetStore.getImageAnimation(spriteComponent.name, spriteComponent.animation)
                 val numFrames = imageAnimation.frames.size
                 spriteComponent.frameIndex = (spriteComponent.frameIndex + spriteComponent.increment) umod numFrames
 

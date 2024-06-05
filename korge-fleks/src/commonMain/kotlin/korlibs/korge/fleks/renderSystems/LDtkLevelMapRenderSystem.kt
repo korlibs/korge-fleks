@@ -24,6 +24,7 @@ class LDtkLevelMapRenderSystem(
     private val family: Family
     private var levelMapEntity: Entity = Entity.NONE
     private var levelMapView: View? = null
+    private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
     init {
         name = layerTag.toString()
@@ -46,8 +47,8 @@ class LDtkLevelMapRenderSystem(
 
                         // Create new view for the level map and add it to the container
                         val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]
-                        val ldtkWorld = AssetStore.getLdtkWorld(ldtkLevelMapComponent.worldName)
-                        val ldtkLevel = AssetStore.getLdtkLevel(ldtkWorld, ldtkLevelMapComponent.levelName)
+                        val ldtkWorld = assetStore.getLdtkWorld(ldtkLevelMapComponent.worldName)
+                        val ldtkLevel = assetStore.getLdtkLevel(ldtkWorld, ldtkLevelMapComponent.levelName)
                         levelMapView = LDTKLevelView(
                             level = LDTKLevel(
                                 world = ldtkWorld,

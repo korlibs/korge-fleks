@@ -30,6 +30,7 @@ class ObjectRenderSystem(
     private val family: Family = world.family { all(layerTag, LayerComponent, PositionComponent, RgbaComponent)
         .any(LayerComponent, SpriteComponent, TextComponent, SpriteLayersComponent)
     }
+    private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
 
     @OptIn(KorgeExperimental::class)
@@ -45,7 +46,7 @@ class ObjectRenderSystem(
             // Rendering path for sprites
             if (entity has SpriteComponent) {
                 val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
-                val imageFrame = AssetStore.getImageFrame(name, animation, frameIndex)
+                val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
 
                 if (entity has SpriteLayersComponent) {
                     val (layerMap) = entity[SpriteLayersComponent]
@@ -93,7 +94,7 @@ class ObjectRenderSystem(
                     var n = 0
                     RichTextData(
                         text = text,
-                        font = AssetStore.getFont(fontName)
+                        font = assetStore.getFont(fontName)
                     ).place(
                         bounds = Rectangle(x, y, width, height),
                         wordWrap = wordWrap,

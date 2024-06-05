@@ -52,14 +52,14 @@ data class SpriteComponent(
     override fun type(): ComponentType<SpriteComponent> = SpriteComponent
 
     // Set frameIndex for starting animation
-    fun setFrameIndex() {
+    fun setFrameIndex(assetStore: AssetStore) {
         frameIndex = if (direction == REVERSE || direction == ONCE_REVERSE)
-            AssetStore.getAnimationNumberOfFrames(name, animation) - 1 else 0
+            assetStore.getAnimationNumberOfFrames(name, animation) - 1 else 0
     }
 
     // Set frame time for first frame
-    fun setNextFrameIn() {
-        nextFrameIn = AssetStore.getAnimationFrameDuration(name, animation, frameIndex)
+    fun setNextFrameIn(assetStore: AssetStore) {
+        nextFrameIn = assetStore.getAnimationFrameDuration(name, animation, frameIndex)
     }
 
     // Init increment for setting frameIndex
@@ -75,15 +75,17 @@ data class SpriteComponent(
     }
 
     /**
-     * Initialize animation properties with data from AssetStore.
+     * Initialize animation properties with data from [AssetStore].
      */
     override fun World.onAdd(entity: Entity) {
+        val assetStore: AssetStore = this.inject(name = "AssetStore")
+
         // Set direction from Aseprite if not specified in the component
         if (direction == null) {
-            direction = AssetStore.getAnimationDirection(name, animation)
+            direction = assetStore.getAnimationDirection(name, animation)
         }
-        setFrameIndex()
-        setNextFrameIn()
+        setFrameIndex(assetStore)
+        setNextFrameIn(assetStore)
         setIncrement()
 
 //        println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")

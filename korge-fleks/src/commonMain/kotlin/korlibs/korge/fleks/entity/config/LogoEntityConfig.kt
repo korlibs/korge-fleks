@@ -31,10 +31,12 @@ data class LogoEntityConfig(
 ) : EntityFactory.EntityConfig {
 
     override val configureEntity = fun(world: World, entity: Entity) : Entity = with(world) {
+        val assetStore: AssetStore = inject(name = "AssetStore")
+
         entity.configure {
             it += PositionComponent(
-                x = offsetX + (if (centerX) (AppConfig.TARGET_VIRTUAL_WIDTH - AssetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f),
-                y = offsetY + (if (centerY) (AppConfig.TARGET_VIRTUAL_HEIGHT - AssetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
+                x = offsetX + (if (centerX) (AppConfig.TARGET_VIRTUAL_WIDTH - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f),
+                y = offsetY + (if (centerY) (AppConfig.TARGET_VIRTUAL_HEIGHT - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
             )
             it += SpriteComponent(
                 name = assetName

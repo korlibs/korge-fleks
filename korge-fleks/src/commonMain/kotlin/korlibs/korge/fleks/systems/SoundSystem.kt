@@ -18,6 +18,7 @@ class SoundSystem : IteratingSystem(
     },
     interval = EachFrame
 ) {
+    private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
     var soundEnabled: Boolean = true
     private var soundEnabledNext: Boolean = false
@@ -50,7 +51,7 @@ class SoundSystem : IteratingSystem(
         val soundComponent = entity[SoundComponent]
 
 
-        val soundChannel = AssetStore.getSound(soundComponent.name)
+        val soundChannel = assetStore.getSound(soundComponent.name)
 
         // Sound enabling/disabling triggered from outside
         if (soundEnabled == soundEnabledNext) {

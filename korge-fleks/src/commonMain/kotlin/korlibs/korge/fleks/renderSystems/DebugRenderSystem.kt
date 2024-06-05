@@ -24,6 +24,7 @@ class DebugRenderSystem(
     private val layerTag: RenderLayerTag
 ) : View() {
     private val family: Family
+    private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
     override fun renderInternal(ctx: RenderContext) {
         // Custom Render Code here
@@ -36,8 +37,8 @@ class DebugRenderSystem(
                 // In case the entity is a sprite than render the overall sprite size and the texture bounding boxes
                 if (entity has SpriteComponent) {
                     val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
-                    val imageFrame = AssetStore.getImageFrame(name, animation, frameIndex)
-                    val imageData = AssetStore.getImageData(name)
+                    val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
+                    val imageData = assetStore.getImageData(name)
 
                     // Draw sprite bounds
                     batch.drawVector(Colors.RED) {
