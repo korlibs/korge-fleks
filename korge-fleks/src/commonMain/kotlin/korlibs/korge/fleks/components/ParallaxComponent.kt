@@ -30,7 +30,8 @@ data class ParallaxComponent(
     @Serializable
     @SerialName("Parallax.Layer")
     data class Layer(
-        var entity: Entity = Entity.NONE,  // Link to entity for tween animation
+//        var entity: Entity = Entity.NONE,  // Link to entity for tween animation
+        var entityId: Int = -1,
         /**
          * Local position of layer relative to the top-left point of the parallax entity (global PositionComponent).
          */
@@ -55,6 +56,9 @@ data class ParallaxComponent(
         var attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
     ) : SerializeBase
 
+    /**
+     * Hint: The onAdd hook function is not called when a fleks world is loaded from a snapshot.
+     */
     override fun World.onAdd(entity: Entity) {
         val assetStore: AssetStore = this.inject(name = "AssetStore")
 
@@ -66,50 +70,84 @@ data class ParallaxComponent(
         val numberAttachedFrontLayers = assetStore.getBackground(name).config.parallaxPlane?.attachedLayersFront?.size ?: 0
         val numberForegroundLayers = assetStore.getBackground(name).config.foregroundLayers?.size ?: 0
 
-        // TODO Check if isEmpty check is needed - it looks that loadSnapshot does not call components onAdd hook functions
-        // Initialize all layer lists on component creation (don't do this after deserialization - list are not empty)
-        if (backgroundLayers.isEmpty()) backgroundLayers = List(numberBackgroundLayers) { Layer() }
-        if (foregroundLayers.isEmpty()) foregroundLayers = List(numberForegroundLayers) { Layer() }
-        if (parallaxPlane.attachedLayersRearPositions.isEmpty()) parallaxPlane.attachedLayersRearPositions = MutableList(numberAttachedRearLayers) { 0f }
-        if (parallaxPlane.linePositions.isEmpty()) parallaxPlane.linePositions = MutableList(numberParallaxPlaneLines) { 0f }
-        if (parallaxPlane.attachedLayersFrontPositions.isEmpty()) parallaxPlane.attachedLayersFrontPositions = MutableList(numberAttachedFrontLayers) { 0f }
-
-        // TODO this below will not work after deserialization because below entities might not yet exist in the world
-        //      they are created later
-        //      -> after deserialization some cleanup and setup needs to be done
-        //         check how the tasks here can be done in a deserialization post process step
+        // Initialize all layer lists on component creation
+        backgroundLayers = List(numberBackgroundLayers) { Layer() }
+        foregroundLayers = List(numberForegroundLayers) { Layer() }
+        parallaxPlane.attachedLayersRearPositions = MutableList(numberAttachedRearLayers) { 0f }
+        parallaxPlane.linePositions = MutableList(numberParallaxPlaneLines) { 0f }
+        parallaxPlane.attachedLayersFrontPositions = MutableList(numberAttachedFrontLayers) { 0f }
 
         // Create new entities for controlling position and color of each layer e.g. by the TweenEngineSystem
         // We share here the component objects from ParallaxComponent
         backgroundLayers.forEach { layer ->
-            // Create new entity if it does not yet exist - after deserialization of the world the entity was already created
-            if (layer.entity == Entity.NONE) layer.entity = entity {}
-            // Add or overwrite existing (in case after deserialization) components
-            layer.entity = entity {
+            // Create new entity and add existing components from the parallax layer config
+//            layer.entity = entity {
+            val newEntity = entity {}
+            layer.entityId = newEntity.id
+            newEntity.configure {
                 it += layer.position
                 it += layer.rgba
             }
+            println("create bg entity: $newEntity")
         }
         foregroundLayers.forEach { layer ->
-            // Create new entity if it does not yet exist - after deserialization of the world the entity was already created
-            if (layer.entity == Entity.NONE) layer.entity = entity {}
-            // Add or overwrite existing (in case after deserialization) components
-            layer.entity = entity {
+//            layer.entity = entity {
+            val newEntity = entity {}
+            layer.entityId = newEntity.id
+            newEntity.configure {
                 it += layer.position
                 it += layer.rgba
             }
         }
-        if (parallaxPlane.entity == Entity.NONE) parallaxPlane.entity = entity {}
         parallaxPlane.entity = entity {
             it += parallaxPlane.position
             it += parallaxPlane.rgba
         }
     }
 
-    override fun World.onRemove(entity: Entity) {
-
+    // TODO
+    //      -> after deserialization some cleanup and setup needs to be done
+    //         go through each layer entity and copy the Position and RgbaComponent from the ParallaxComponent lists
+    fun updateLayerEntities(world: World) = with(world){
+        // Overwrite existing components with those from the parallax layer config
+        backgroundLayers.forEach { layer ->
+//            layer.entity.configure {
+            Entity(layer.entityId, 0u).configure {
+                it += layer.position
+                it += layer.rgba
+            }
+        }
+        foregroundLayers.forEach { layer ->
+//            layer.entity.configure {
+            Entity(layer.entityId, 0u).configure {
+                it += layer.position
+                it += layer.rgba
+            }
+        }
+        parallaxPlane.entity.configure {
+            it += parallaxPlane.position
+            it += parallaxPlane.rgba
+        }
     }
 
     override fun type(): ComponentType<ParallaxComponent> = ParallaxComponent
     companion object : ComponentType<ParallaxComponent>()
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

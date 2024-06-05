@@ -10,6 +10,7 @@ import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
+import korlibs.korge.view.*
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -49,42 +50,44 @@ value class Identifier(val name: String)
 internal val internalModule = SerializersModule {
     // Register data classes
     polymorphic(SerializeBase::class) {
-        subclass(RgbaComponent.Rgb::class)
-        subclass(OffsetByFrameIndexComponent.Point::class)
-        subclass(SpriteLayersComponent.LayerProperties::class)
+        subclass(ParallaxComponent.Layer::class)
+        subclass(ParallaxComponent.Plane::class)
+        subclass(RgbaComponent.Rgb::class, RgbaComponent.Rgb.serializer())
+        subclass(OffsetByFrameIndexComponent.Point::class, OffsetByFrameIndexComponent.Point.serializer())
+        subclass(SpriteLayersComponent.LayerProperties::class, SpriteLayersComponent.LayerProperties.serializer())
     }
 
     // Register component classes
     polymorphic(Component::class) {
-        subclass(EntityLinkComponent::class)
-        subclass(InfoComponent::class)
-        subclass(InputTouchButtonComponent::class)
-        subclass(LayerComponent::class)
-        subclass(LayoutComponent::class)
-        subclass(LdtkLevelMapComponent::class)
-        subclass(LifeCycleComponent::class)
-        subclass(MotionComponent::class)
-        subclass(NoisyMoveComponent::class)
-        subclass(OffsetByFrameIndexComponent::class)
-        subclass(ParallaxComponent::class)
-        subclass(PositionComponent::class)
-        subclass(RgbaComponent::class)
-        subclass(RigidbodyComponent::class)
-        subclass(SizeComponent::class)
-        subclass(SoundComponent::class)
-        subclass(SpawnerComponent::class)
-        subclass(SpriteLayersComponent::class)
-        subclass(SpriteComponent::class)
-        subclass(SwitchLayerVisibilityComponent::class)
-        subclass(TextComponent::class)
-        subclass(TiledLevelMapComponent::class)
-        subclass(TweenPropertyComponent::class)
-        subclass(TweenSequenceComponent::class)
+        subclass(EntityLinkComponent::class, EntityLinkComponent.serializer())
+        subclass(InfoComponent::class, InfoComponent.serializer())
+        subclass(InputTouchButtonComponent::class, InputTouchButtonComponent.serializer())
+        subclass(LayerComponent::class, LayerComponent.serializer())
+        subclass(LayoutComponent::class, LayoutComponent.serializer())
+        subclass(LdtkLevelMapComponent::class, LdtkLevelMapComponent.serializer())
+        subclass(LifeCycleComponent::class, LifeCycleComponent.serializer())
+        subclass(MotionComponent::class, MotionComponent.serializer())
+        subclass(NoisyMoveComponent::class, NoisyMoveComponent.serializer())
+        subclass(OffsetByFrameIndexComponent::class, OffsetByFrameIndexComponent.serializer())
+        subclass(ParallaxComponent::class, ParallaxComponent.serializer())
+        subclass(PositionComponent::class, PositionComponent.serializer())
+        subclass(RgbaComponent::class, RgbaComponent.serializer())
+        subclass(RigidbodyComponent::class, RigidbodyComponent.serializer())
+        subclass(SizeComponent::class, SizeComponent.serializer())
+        subclass(SoundComponent::class, SoundComponent.serializer())
+        subclass(SpawnerComponent::class, SpawnerComponent.serializer())
+        subclass(SpriteLayersComponent::class, SpriteLayersComponent.serializer())
+        subclass(SpriteComponent::class, SpriteComponent.serializer())
+        subclass(SwitchLayerVisibilityComponent::class, SwitchLayerVisibilityComponent.serializer())
+        subclass(TextComponent::class, TextComponent.serializer())
+        subclass(TiledLevelMapComponent::class, TiledLevelMapComponent.serializer())
+        subclass(TweenPropertyComponent::class, TweenPropertyComponent.serializer())
+        subclass(TweenSequenceComponent::class, TweenSequenceComponent.serializer())
     }
     // Register tags (components without properties)
     polymorphic(UniqueId::class) {
         subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
-        subclass(ViewTag::class)
+        subclass(ViewTag::class, ViewTag.serializer())
     }
 
     // Data class hierarchy used for AnimationScript component
@@ -95,8 +98,8 @@ internal val internalModule = SerializersModule {
         subclass(SpawnEntity::class)
         subclass(ExecuteConfigFunction::class)
         subclass(DeleteEntity::class)
-        subclass(TweenRgba::class)
-        subclass(TweenPosition::class)
+        subclass(TweenRgba::class, TweenRgba.serializer())
+        subclass(TweenPosition::class, TweenPosition.serializer())
         subclass(TweenLayout::class)
         subclass(TweenSprite::class)
         subclass(TweenSwitchLayerVisibility::class)
