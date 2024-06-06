@@ -29,10 +29,11 @@ data class TweenSequenceComponent(
      * Initialize internal waitTime property with delay value of first tweens if available.
      */
     override fun World.onAdd(entity: Entity) {
-        if (!initialized) {
-            if (tweens.isNotEmpty()) waitTime = tweens[index].delay ?: 0f
-            initialized = true
-        }
+        // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
+        if (initialized) return
+        else initialized = true
+
+        if (tweens.isNotEmpty()) waitTime = tweens[index].delay ?: 0f
     }
 
     interface TweenBase {

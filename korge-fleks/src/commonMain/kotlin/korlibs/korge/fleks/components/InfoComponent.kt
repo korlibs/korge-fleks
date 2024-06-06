@@ -10,11 +10,18 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Info")
 data class InfoComponent(
     var name: String = "noName",
-    var entityId: Int = -1
+    var entityId: Int = -1,
+
+    // internal
+    var initialized: Boolean = false
 ) : Component<InfoComponent> {
     override fun type(): ComponentType<InfoComponent> = InfoComponent
 
     override fun World.onAdd(entity: Entity) {
+        // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
+        if (initialized) return
+        else initialized = true
+
         entityId = entity.id
         EntityByName.add(name, entity)
     }

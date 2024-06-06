@@ -18,12 +18,19 @@ data class LdtkLevelMapComponent(
     var levelName: String = "",
     var layerName: String? = null,  // TODO enable LDtkLevelView to show only defined layers
     var width: Float = 0f,  // Size of the level map
-    var height: Float = 0f
+    var height: Float = 0f,
+
+    // internal
+    var initialized: Boolean = false
 ) : Component<LdtkLevelMapComponent> {
     override fun type(): ComponentType<LdtkLevelMapComponent> = LdtkLevelMapComponent
 
     // Get size of level map and save it into properties of this component
     override fun World.onAdd(entity: Entity) {
+        // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
+        if (initialized) return
+        else initialized = true
+
         val assetStore: AssetStore = this.inject(name = "AssetStore")
 
         val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]

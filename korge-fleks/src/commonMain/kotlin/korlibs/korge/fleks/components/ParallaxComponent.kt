@@ -24,14 +24,16 @@ data class ParallaxComponent(
     // List of layers
     var backgroundLayers: List<Layer> = listOf(),
     var parallaxPlane: Plane = Plane(),
-    var foregroundLayers: List<Layer> = listOf()
+    var foregroundLayers: List<Layer> = listOf(),
+
+    // internal
+    var initialized: Boolean = false
 ) : Component<ParallaxComponent> {
 
     @Serializable
     @SerialName("Parallax.Layer")
     data class Layer(
-//        var entity: Entity = Entity.NONE,  // Link to entity for tween animation
-        var entityId: Int = -1,
+        var entity: Entity = Entity.NONE,  // Link to entity for tween animation
         /**
          * Local position of layer relative to the top-left point of the parallax entity (global PositionComponent).
          */
@@ -60,6 +62,10 @@ data class ParallaxComponent(
      * Hint: The onAdd hook function is not called when a fleks world is loaded from a snapshot.
      */
     override fun World.onAdd(entity: Entity) {
+        // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
+        if (initialized) return
+        else initialized = true
+
         val assetStore: AssetStore = this.inject(name = "AssetStore")
 
         // Get size for all layer lists to make sure that they fit to the parallax configuration
@@ -81,20 +87,14 @@ data class ParallaxComponent(
         // We share here the component objects from ParallaxComponent
         backgroundLayers.forEach { layer ->
             // Create new entity and add existing components from the parallax layer config
-//            layer.entity = entity {
-            val newEntity = entity {}
-            layer.entityId = newEntity.id
-            newEntity.configure {
+            layer.entity = entity {
                 it += layer.position
                 it += layer.rgba
             }
-            println("create bg entity: $newEntity")
+            println("create bg entity: ${layer.entity}")
         }
         foregroundLayers.forEach { layer ->
-//            layer.entity = entity {
-            val newEntity = entity {}
-            layer.entityId = newEntity.id
-            newEntity.configure {
+            layer.entity = entity {
                 it += layer.position
                 it += layer.rgba
             }
@@ -111,15 +111,13 @@ data class ParallaxComponent(
     fun updateLayerEntities(world: World) = with(world){
         // Overwrite existing components with those from the parallax layer config
         backgroundLayers.forEach { layer ->
-//            layer.entity.configure {
-            Entity(layer.entityId, 0u).configure {
+            layer.entity.configure {
                 it += layer.position
                 it += layer.rgba
             }
         }
         foregroundLayers.forEach { layer ->
-//            layer.entity.configure {
-            Entity(layer.entityId, 0u).configure {
+            layer.entity.configure {
                 it += layer.position
                 it += layer.rgba
             }

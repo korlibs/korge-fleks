@@ -47,7 +47,8 @@ data class SpriteComponent(
 
     // internal, do not set directly
     var increment: Int = -2,                          // out of [-1, 0, 1]; will be added to frameIndex each new frame
-    var nextFrameIn: Float = 0f                       // time in seconds until next frame of animation shall be shown
+    var nextFrameIn: Float = 0f,                      // time in seconds until next frame of animation shall be shown
+    var initialized: Boolean = false
 ) : Component<SpriteComponent> {
     override fun type(): ComponentType<SpriteComponent> = SpriteComponent
 
@@ -78,6 +79,10 @@ data class SpriteComponent(
      * Initialize animation properties with data from [AssetStore].
      */
     override fun World.onAdd(entity: Entity) {
+        // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
+        if (initialized) return
+        else initialized = true
+
         val assetStore: AssetStore = this.inject(name = "AssetStore")
 
         // Set direction from Aseprite if not specified in the component

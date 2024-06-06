@@ -35,11 +35,17 @@ data class NoisyMoveComponent(
 
     // Internal runtime data
     var timeProgress: Float = 0f,
-    var waitTime: Float = 0f
+    var waitTime: Float = 0f,
+
+    // internal
+    var initialized: Boolean = false
 ) : Component<NoisyMoveComponent> {
     override fun type() = NoisyMoveComponent
 
     override fun World.onAdd(entity: Entity) {
+        // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
+        if (initialized) return
+        else initialized = true
 
         timeProgress = 0f
         waitTime = interval + if (intervalVariance != 0f) (-intervalVariance..intervalVariance).random() else 0f
