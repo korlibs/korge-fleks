@@ -11,7 +11,7 @@ import kotlin.coroutines.*
 
 
 class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
-    interval = Fixed(step = 0.5f)
+    interval = Fixed(step = 1/30.0f)
 ) {
 
     private val snapshotSerializer = SnapshotSerializer().apply {
@@ -19,23 +19,20 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     }
 
     private val recording: MutableList<String> = mutableListOf()
+    private var rewindSeek: Int = 0
+    private var gameRunning: Boolean = true
 
     // TODO remove later
     private var worldSnapshot: String? = null
 
     companion object {
-        fun SystemConfiguration.setup(module: SerializersModule): SnapshotSerializerSystem {
-            val system = SnapshotSerializerSystem(module)
-            add(system)
-            return system
-        }
+        fun SystemConfiguration.setup(module: SerializersModule) = add(SnapshotSerializerSystem(module))
     }
 
     override fun onTick() {
         val jsonSnapshot = snapshotSerializer.json().encodeToString(world.snapshot())
         recording.add(jsonSnapshot)
-
-
+        rewindSeek = recording.size - 1
     }
 
 
@@ -89,4 +86,34 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         }
     }
 
+    fun pause() {
+        gameRunning = !gameRunning
+        world.systems.forEach { system ->
+            when (system) {
+                // Sound system needs special handling, because it has to stop all sounds which are playing
+                is SoundSystem -> system.soundEnabled = gameRunning
+                else -> system.enabled = gameRunning
+            }
+        }
+    }
+
+    fun rewind(fast: Boolean = false) {
+        if (!gameRunning) {
+            if (fast) rewindSeek -= 4
+            else rewindSeek--
+            if (rewindSeek < 0) rewindSeek = 0
+            val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(recording[rewindSeek])
+            world.loadSnapshot(snapshot)
+        }
+    }
+
+    fun forward(fast: Boolean = false) {
+        if (!gameRunning) {
+            if (fast) rewindSeek += 4
+            else rewindSeek++
+            if (rewindSeek > recording.size - 1) rewindSeek = recording.size - 1
+            val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(recording[rewindSeek])
+            world.loadSnapshot(snapshot)
+        }
+    }
 }

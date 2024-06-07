@@ -28,7 +28,7 @@ data class NoisyMoveComponent(
     var xVariance: Float = 0f,
     var yVariance: Float = 0f,
 
-    /** Final absolute move values which are applied to the [PositionComponent]'s (x,y) properties of the entity in [KorgeViewSystem] */
+    /** Final absolute move values which are applied to the [PositionComponent]'s (x,y) properties of the entity */
     var triggered: Boolean = false,
     var x: Float = 0f,
     var y: Float = 0f,
