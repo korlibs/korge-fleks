@@ -58,8 +58,9 @@ class RgbaComponent(
         }
     }
 
-    override fun type(): ComponentType<RgbaComponent> = RgbaComponent
     operator fun component1(): RGBA = rgba
+    override fun toString(): String = rgba.hexString
 
+    override fun type(): ComponentType<RgbaComponent> = RgbaComponent
     companion object : ComponentType<RgbaComponent>()
 }

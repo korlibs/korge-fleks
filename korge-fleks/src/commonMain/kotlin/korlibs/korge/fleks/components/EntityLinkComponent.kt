@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.components
 
-
 import com.github.quillraven.fleks.*
 import kotlinx.serialization.*
 
