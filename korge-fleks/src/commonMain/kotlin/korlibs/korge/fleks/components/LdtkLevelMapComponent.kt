@@ -40,4 +40,7 @@ data class LdtkLevelMapComponent(
     }
 
     companion object : ComponentType<LdtkLevelMapComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : LdtkLevelMapComponent = this.copy()
 }

@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 
@@ -15,4 +16,7 @@ data class SwitchLayerVisibilityComponent(
 ) : Component<SwitchLayerVisibilityComponent> {
     override fun type() = SwitchLayerVisibilityComponent
     companion object : ComponentType<SwitchLayerVisibilityComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : SwitchLayerVisibilityComponent = this.copy()
 }

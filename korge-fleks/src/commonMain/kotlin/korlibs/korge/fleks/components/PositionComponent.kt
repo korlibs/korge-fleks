@@ -20,4 +20,7 @@ data class PositionComponent(
 ) : Component<PositionComponent> {
     override fun type(): ComponentType<PositionComponent> = PositionComponent
     companion object : ComponentType<PositionComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : PositionComponent = this.copy()
 }

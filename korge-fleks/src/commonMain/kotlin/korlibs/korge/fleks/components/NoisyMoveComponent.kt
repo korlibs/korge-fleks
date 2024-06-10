@@ -72,4 +72,7 @@ data class NoisyMoveComponent(
     }
 
     companion object : ComponentType<NoisyMoveComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : NoisyMoveComponent = this.copy()
 }

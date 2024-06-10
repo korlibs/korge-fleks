@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -22,16 +23,8 @@ data class TiledLevelMapComponent(
     var assetName: String = "",
 ) : Component<TiledLevelMapComponent> {
     override fun type(): ComponentType<TiledLevelMapComponent> = TiledLevelMapComponent
-    companion object : ComponentType<TiledLevelMapComponent>() {
-        /**
-         * Hint: How you should read "Component Hook"
-         *
-         * A component listener creates and initializes the internal object(s) with all parameters of the component.
-         * This initialization can only use data from one component. Thus, it must be self-containable regarding the
-         * save-state of an object. But this is often not the case -> check FamilyHooks.
-         */
-        // Not used here
-        // fun onComponentAdded(entity: Entity, component: TiledLevelMapComponent) {}
-        // fun onComponentRemoved(entity: Entity, component: TiledLevelMapComponent) {}
-    }
+    companion object : ComponentType<TiledLevelMapComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : TiledLevelMapComponent = this.copy()
 }

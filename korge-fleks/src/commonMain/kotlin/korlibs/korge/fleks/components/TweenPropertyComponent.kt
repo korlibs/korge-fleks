@@ -1,8 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.AnySerializer
-import korlibs.korge.fleks.utils.EasingSerializer
+import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -120,4 +119,9 @@ data class TweenPropertyComponent (
 
 //        val ExecuteConfigureFunction = TweenProperty.ConfigureFunction.type
     }
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+//    fun clone() : TextComponent =
+//        this.copy(
+//        )
 }

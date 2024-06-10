@@ -25,7 +25,7 @@ data class SpriteLayersComponent(
         var offsetY: Float = 0f,
         @Serializable(with = RGBAAsInt::class)
         var rgba: RGBA = Colors.WHITE
-    ) : SerializeBase {
+    ) : SerializeBase<LayerProperties> {
         // true (alpha > 0) - false (alpha == 0)
         var visibility: Boolean = rgba.a != 0
             get() = rgba.a != 0
@@ -33,8 +33,22 @@ data class SpriteLayersComponent(
                 rgba = if (value) rgba.withAf(1f) else rgba.withAf(0f)
                 field = value
             }
+
+        // Hint to myself: Check if deep copy is needed on any change in the component!
+        override fun clone(): LayerProperties =
+            this.copy(
+                // Perform deep copy of rgba
+                rgba = rgba.cloneRgba()
+            )
     }
 
     override fun type() = SpriteLayersComponent
     companion object : ComponentType<SpriteLayersComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : SpriteLayersComponent =
+        this.copy(
+            // Perform deep copy
+            layerMap = layerMap.clone()
+        )
 }

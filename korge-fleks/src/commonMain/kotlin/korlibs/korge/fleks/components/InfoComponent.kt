@@ -32,11 +32,7 @@ data class InfoComponent(
 
     companion object : ComponentType<InfoComponent>()
 
-    fun clone() : InfoComponent =
-        InfoComponent(
-            name = name,
-            entityId = entityId,
-            initialized = initialized
-        )
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : InfoComponent = this.copy()
 }
 

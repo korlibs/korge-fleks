@@ -17,4 +17,7 @@ data class LayerComponent(
 ) : Component<LayerComponent> {
     override fun type(): ComponentType<LayerComponent> = LayerComponent
     companion object : ComponentType<LayerComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : LayerComponent = this.copy()
 }

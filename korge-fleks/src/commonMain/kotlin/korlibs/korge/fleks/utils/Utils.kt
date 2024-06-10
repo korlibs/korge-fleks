@@ -1,6 +1,11 @@
 package korlibs.korge.fleks.utils
 
+import com.github.quillraven.fleks.*
+import korlibs.image.color.*
+import korlibs.image.text.*
+import kotlin.jvm.*
 import kotlin.random.Random
+
 
 fun ClosedFloatingPointRange<Double>.random() = Random.nextDouble(start, endInclusive)
 fun ClosedFloatingPointRange<Float>.random() = Random.nextDouble(start.toDouble(), endInclusive.toDouble()).toFloat()
@@ -23,4 +28,62 @@ internal fun interpolateString(ratio: Double, l: String, r: String): String = wh
 internal fun interpolateBoolean(ratio: Double, l: Boolean, r: Boolean): Boolean = when {
     ratio < 0.5 -> l
     else -> r
+}
+
+/**
+ * Clone function for a Map object with [SerializeBase] values.
+ */
+@JvmName("MapSerializeBaseClone")
+fun<K, T> Map<K, SerializeBase<T>>.clone() : Map<K, T> {
+    val mapCopy = mutableMapOf<K, T>()
+    forEach { (key, value) ->
+        // Perform deep copy of map value elements
+        mapCopy[key] = value.clone()
+    }
+    return mapCopy
+}
+
+/**
+ * Clone function for a Map object with List values.
+ */
+@JvmName("MapListSerializeBaseClone")
+fun<K, T> Map<K, List<SerializeBase<T>>>.clone() : Map<K, List<T>> {
+    val mapCopy = mutableMapOf<K, List<T>>()
+    forEach { (key, value) ->
+        // Perform deep copy of map value elements
+        mapCopy[key] = value.clone()
+    }
+    return mapCopy
+}
+
+/**
+ * Clone function for [Entity] objects. Just for naming consistency.
+ */
+fun Entity.clone() : Entity = Entity(id, version)
+
+/**
+ * Clone function (deep copy) for [HorizontalAlign] enum objects.
+ */
+fun HorizontalAlign.clone() : HorizontalAlign = HorizontalAlign(this.ratio)
+
+/**
+ * Clone function (deep copy) for [VerticalAlign] enum objects.
+ */
+fun VerticalAlign.clone() : VerticalAlign = VerticalAlign(this.ratio)
+
+/**
+ * Clone function (deep copy) for [RGBA] objects.
+ */
+fun RGBA.cloneRgba() : RGBA = RGBA(this.value)
+
+/**
+ * Clone function (deep copy) for [List] elements.
+ */
+fun<T> List<SerializeBase<T>>.clone() : List<T> {
+    val listCopy = mutableListOf<T>()
+    // Perform deep copy of list elements
+    forEach { element ->
+        listCopy.add(element.clone())
+    }
+    return listCopy
 }

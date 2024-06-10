@@ -52,14 +52,30 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 when (component) {
                     is EntityLinkComponent -> componentsCopy.add(component.clone())
                     is InfoComponent -> componentsCopy.add(component.clone())
-                    //is PositionComponent -> {}
-                    //is RgbaComponent -> {}
-                    //is MotionComponent -> {}
-                    //is SpriteComponent -> {}
-
-                    // TODO add all components
-
+                    is InputTouchButtonComponent -> componentsCopy.add(component.clone())
+                    is LayerComponent-> componentsCopy.add(component.clone())
+                    is LayoutComponent -> componentsCopy.add(component.clone())
+                    is LdtkLevelMapComponent -> componentsCopy.add(component.clone())
+                    is LifeCycleComponent -> componentsCopy.add(component.clone())
+                    is MotionComponent -> componentsCopy.add(component.clone())
+                    is NoisyMoveComponent -> componentsCopy.add(component.clone())
+                    is OffsetByFrameIndexComponent -> componentsCopy.add(component.clone())
+                    is ParallaxComponent -> componentsCopy.add(component.clone())
+                    is PositionComponent -> componentsCopy.add(component.clone())
+                    is RgbaComponent -> componentsCopy.add(component.clone())
+                    is RigidbodyComponent -> componentsCopy.add(component.clone())
+                    is SizeComponent -> componentsCopy.add(component.clone())
+                    is SoundComponent -> componentsCopy.add(component.clone())
+                    is SpawnerComponent -> componentsCopy.add(component.clone())
+                    is SpriteComponent -> componentsCopy.add(component.clone())
+                    is SpriteLayersComponent -> componentsCopy.add(component.clone())
+                    is SwitchLayerVisibilityComponent -> componentsCopy.add(component.clone())
+                    is TextComponent -> componentsCopy.add(component.clone())
+                    is TiledLevelMapComponent -> componentsCopy.add(component.clone())
+//                    is TweenPropertyComponent -> componentsCopy.add(component.clone())
+//                    is TweenSequenceComponent -> componentsCopy.add(component.clone())
                     else -> {
+// TODO add this here again
 //                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem!")
                     }
                 }

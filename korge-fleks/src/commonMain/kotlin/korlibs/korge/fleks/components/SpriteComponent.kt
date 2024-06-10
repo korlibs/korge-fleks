@@ -97,6 +97,12 @@ data class SpriteComponent(
     }
 
     companion object : ComponentType<SpriteComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : SpriteComponent =
+        this.copy(
+            direction = direction  // normal ordinary enum - no deep copy needed
+        )
 }
 
 fun AssetStore.getImageAnimation(name: String, animation: String? = null) : ImageAnimation {

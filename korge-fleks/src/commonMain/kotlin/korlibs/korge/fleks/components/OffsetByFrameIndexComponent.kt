@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.entity.config.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
@@ -14,14 +13,28 @@ import kotlinx.serialization.*
 @Serializable
 @SerialName("OffsetByFrameIndex")
 data class OffsetByFrameIndexComponent(
-    var entity: Entity = Entity.NONE,     // TODO remove - it will not be needed with new sprite render view system - frame index is coming from SpriteAnimationComponent
+    var entity: Entity = Entity.NONE,
     var mapOfOffsetLists: Map<String, List<Point>> = emptyMap()
 ) : Component<OffsetByFrameIndexComponent> {
 
     @Serializable
     @SerialName("Point")
-    data class Point(var x: Float = 0f, var y: Float = 0f) : SerializeBase
+    data class Point(
+        var x: Float = 0f,
+        var y: Float = 0f
+    ) : SerializeBase<Point> {
+
+        override fun clone(): Point = this.copy()
+    }
 
     override fun type(): ComponentType<OffsetByFrameIndexComponent> = OffsetByFrameIndexComponent
     companion object : ComponentType<OffsetByFrameIndexComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : OffsetByFrameIndexComponent =
+        this.copy(
+            // Perform deep copy of Entity and map
+            entity = entity.clone(),
+            mapOfOffsetLists = mapOfOffsetLists.clone()
+        )
 }

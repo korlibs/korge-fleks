@@ -18,10 +18,10 @@ data class EntityLinkComponent(
     override fun type() = EntityLinkComponent
     companion object : ComponentType<EntityLinkComponent>()
 
-    //
+    // Hint to myself: Check if deep copy is needed on any change in the component!
     fun clone() : EntityLinkComponent =
-        EntityLinkComponent(
-            linkedEntity = Entity(linkedEntity.id, linkedEntity.version),
-            moveWith = moveWith
+        this.copy(
+            // Perform deep copy of Entity
+            linkedEntity = Entity(linkedEntity.id, linkedEntity.version)
         )
 }

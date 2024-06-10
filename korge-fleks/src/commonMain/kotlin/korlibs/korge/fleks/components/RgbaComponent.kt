@@ -10,7 +10,7 @@ import kotlin.math.*
 
 @Serializable
 @SerialName("Rgba")
-class RgbaComponent(
+data class RgbaComponent(
 //    @Serializable(with = RGBAAsString::class)  -- deserialization does not work with it???
     @Serializable(with = RGBAAsInt::class)
     var rgba: RGBA = Colors.WHITE,
@@ -36,7 +36,7 @@ class RgbaComponent(
         var r: Int = 0xff,
         var g: Int = 0xff,
         var b: Int = 0xff
-    ) : SerializeBase {
+    ) : SerializeBase<Rgb> {
         operator fun plus(other: Rgb) = Rgb(r + other.r, g + other.g, b + other.b)
         operator fun times(f: Float) = Rgb(
             (r.toFloat() * f).roundToInt(),
@@ -56,11 +56,18 @@ class RgbaComponent(
                 value.substr(3,2).toInt(16),
                 value.substr(5,2).toInt(16))
         }
+
+        override fun clone(): Rgb = this.copy()
     }
 
-    operator fun component1(): RGBA = rgba
     override fun toString(): String = "RgbaComponent(rgba=${rgba.hexString})"
-
     override fun type(): ComponentType<RgbaComponent> = RgbaComponent
     companion object : ComponentType<RgbaComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : RgbaComponent =
+        this.copy(
+            // Perform deep copy
+            rgba = rgba.cloneRgba()
+        )
 }

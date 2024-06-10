@@ -28,4 +28,12 @@ data class TextComponent(
 ) : Component<TextComponent> {
     override fun type(): ComponentType<TextComponent> = TextComponent
     companion object : ComponentType<TextComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : TextComponent =
+        this.copy(
+            // Perform deep copy of Alignment enums
+            horizontalAlign = horizontalAlign.clone(),
+            verticalAlign = verticalAlign.clone()
+        )
 }

@@ -29,7 +29,9 @@ import kotlin.jvm.JvmInline
  * All data classes (not deriving from Fleks Component<...>) which are used within components need to be serializable by
  * deriving from this interface.
  */
-interface SerializeBase
+interface SerializeBase<out T> {
+    fun clone(): T
+}
 
 /**
  * Class for serializing identifier objects for entity configs and functions in components.

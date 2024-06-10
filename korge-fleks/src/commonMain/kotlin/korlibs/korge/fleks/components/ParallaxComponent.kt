@@ -1,11 +1,10 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.image.color.*
 import korlibs.korge.assetmanager.*
-import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.parallax.*
+import korlibs.korge.fleks.systems.*
+import korlibs.korge.fleks.renderSystems.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -39,8 +38,16 @@ data class ParallaxComponent(
          */
         val position: PositionComponent = PositionComponent(),
         val rgba: RgbaComponent = RgbaComponent()
-    ) : SerializeBase
+    ) : SerializeBase<Layer> {
 
+        // perform deep copy
+        override fun clone(): Layer =
+            Layer(
+                entity = entity.clone(),
+                position = position.clone(),
+                rgba = rgba.clone()
+            )
+    }
 
     @Serializable
     @SerialName("Parallax.Plane")
@@ -56,7 +63,19 @@ data class ParallaxComponent(
         var linePositions: MutableList<Float> = mutableListOf(),
         var attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
         var attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
-    ) : SerializeBase
+    ) : SerializeBase<Plane> {
+
+        // perform deep copy
+        override fun clone(): Plane =
+            Plane(
+                entity = entity.clone(),
+                position = position.clone(),
+                rgba = rgba.clone(),
+                linePositions = linePositions.toMutableList(),
+                attachedLayersRearPositions = attachedLayersRearPositions.toMutableList(),
+                attachedLayersFrontPositions = attachedLayersFrontPositions.toMutableList()
+            )
+    }
 
     /**
      * Hint: The onAdd hook function is not called when a fleks world is loaded from a snapshot.
@@ -130,22 +149,12 @@ data class ParallaxComponent(
 
     override fun type(): ComponentType<ParallaxComponent> = ParallaxComponent
     companion object : ComponentType<ParallaxComponent>()
+
+    // Hint to myself: Check if deep copy is needed on any change in the component!
+    fun clone() : ParallaxComponent =
+        this.copy(
+            backgroundLayers = backgroundLayers.clone(),
+            parallaxPlane = parallaxPlane.clone(),
+            foregroundLayers = foregroundLayers.clone()
+        )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
