@@ -31,4 +31,12 @@ data class InfoComponent(
     }
 
     companion object : ComponentType<InfoComponent>()
+
+    fun clone() : InfoComponent =
+        InfoComponent(
+            name = name,
+            entityId = entityId,
+            initialized = initialized
+        )
 }
+

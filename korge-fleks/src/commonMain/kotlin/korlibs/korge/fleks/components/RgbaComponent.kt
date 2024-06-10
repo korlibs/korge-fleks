@@ -59,7 +59,7 @@ class RgbaComponent(
     }
 
     operator fun component1(): RGBA = rgba
-    override fun toString(): String = rgba.hexString
+    override fun toString(): String = "RgbaComponent(rgba=${rgba.hexString})"
 
     override fun type(): ComponentType<RgbaComponent> = RgbaComponent
     companion object : ComponentType<RgbaComponent>()

@@ -10,7 +10,6 @@ import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.assetmanager.AssetStore
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
-import korlibs.korge.view.*
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind

@@ -19,6 +19,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     }
 
     private val recording: MutableList<String> = mutableListOf()
+    private val snapshotRecording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
+
     private var rewindSeek: Int = 0
     private var gameRunning: Boolean = true
 
@@ -33,6 +35,46 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         val jsonSnapshot = snapshotSerializer.json().encodeToString(world.snapshot())
         recording.add(jsonSnapshot)
         rewindSeek = recording.size - 1
+
+        // TODO make deep copy of world snapshot
+
+        val snapshot = world.snapshot()
+
+        // Deep copy of world snapshot for storing it for game recording
+        val snapshotCopy = mutableMapOf<Entity, Snapshot>()
+
+        // Create deep copy of all components and tags of an entity
+        snapshot.forEach { (entity, value) ->
+            val componentsCopy = mutableListOf<Component<*>>()
+            val tagsCopy = mutableListOf<UniqueId<*>>()
+
+            value.components.forEach { component ->
+                when (component) {
+                    is EntityLinkComponent -> componentsCopy.add(component.clone())
+                    is InfoComponent -> componentsCopy.add(component.clone())
+                    //is PositionComponent -> {}
+                    //is RgbaComponent -> {}
+                    //is MotionComponent -> {}
+                    //is SpriteComponent -> {}
+
+                    // TODO add all components
+
+                    else -> {
+//                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem!")
+                    }
+                }
+            }
+
+            value.tags.forEach { tag ->
+
+                // TODO same for tags
+
+            }
+
+            // Create snapshot of entity as deep copy of all components and tags
+            snapshotCopy[entity] = wildcardSnapshotOf(componentsCopy, tagsCopy)
+        }
+        snapshotRecording.add(snapshotCopy)
     }
 
 

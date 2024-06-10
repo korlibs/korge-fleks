@@ -17,4 +17,11 @@ data class EntityLinkComponent(
 ) : Component<EntityLinkComponent> {
     override fun type() = EntityLinkComponent
     companion object : ComponentType<EntityLinkComponent>()
+
+    //
+    fun clone() : EntityLinkComponent =
+        EntityLinkComponent(
+            linkedEntity = Entity(linkedEntity.id, linkedEntity.version),
+            moveWith = moveWith
+        )
 }
