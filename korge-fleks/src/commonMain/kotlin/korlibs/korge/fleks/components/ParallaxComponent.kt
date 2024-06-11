@@ -40,12 +40,16 @@ data class ParallaxComponent(
         val rgba: RgbaComponent = RgbaComponent()
     ) : SerializeBase<Layer> {
 
-        // perform deep copy
-        override fun clone(): Layer =
+        // Perform deep copy with special handling for position and rgba.
+        // World is needed because we need to get the components for an entity from a specific world.
+        // Use component objects from saved entity so that the connection between ParallaxComponent and
+        // the layer entity is not destroyed.
+        override fun clone(): Layer = throw RuntimeException("Do not use clone() for Plane objects!")
+        fun World.clone(): Layer =
             Layer(
                 entity = entity.clone(),
-                position = position.clone(),
-                rgba = rgba.clone()
+                position = entity[PositionComponent],
+                rgba = entity[RgbaComponent]
             )
     }
 
@@ -65,12 +69,16 @@ data class ParallaxComponent(
         var attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
     ) : SerializeBase<Plane> {
 
-        // perform deep copy
-        override fun clone(): Plane =
+        // Perform deep copy with special handling for position and rgba.
+        // World is needed because we need to get the components for an entity from a specific world.
+        // Use component objects from saved entity so that the connection between ParallaxComponent and
+        // the layer entity is not destroyed.
+        override fun clone(): Plane = throw RuntimeException("Do not use clone() for Plane objects!")
+        fun World.clone(): Plane =
             Plane(
                 entity = entity.clone(),
-                position = position.clone(),
-                rgba = rgba.clone(),
+                position = entity[PositionComponent],
+                rgba = entity[RgbaComponent],
                 linePositions = linePositions.toMutableList(),
                 attachedLayersRearPositions = attachedLayersRearPositions.toMutableList(),
                 attachedLayersFrontPositions = attachedLayersFrontPositions.toMutableList()
@@ -124,9 +132,10 @@ data class ParallaxComponent(
         }
     }
 
-    // TODO
-    //      -> after deserialization some cleanup and setup needs to be done
-    //         go through each layer entity and copy the Position and RgbaComponent from the ParallaxComponent lists
+    /**
+     * After deserialization some cleanup and setup needs to be done
+     * go through each layer entity and copy the Position and RgbaComponent from the ParallaxComponent lists.
+     */
     fun updateLayerEntities(world: World) = with(world){
         // Overwrite existing components with those from the parallax layer config
         backgroundLayers.forEach { layer ->
@@ -151,10 +160,17 @@ data class ParallaxComponent(
     companion object : ComponentType<ParallaxComponent>()
 
     // Hint to myself: Check if deep copy is needed on any change in the component!
-    fun clone() : ParallaxComponent =
-        this.copy(
-            backgroundLayers = backgroundLayers.clone(),
-            parallaxPlane = parallaxPlane.clone(),
-            foregroundLayers = foregroundLayers.clone()
+    fun clone(world: World) : ParallaxComponent {
+        val bgLayers = mutableListOf<Layer>()
+        val fgLayers = mutableListOf<Layer>()
+        // Perform special deep copy of list elements
+        backgroundLayers.forEach { element -> bgLayers.add(element.run { world.clone() }) }
+        foregroundLayers.forEach { element -> fgLayers.add(element.run { world.clone() }) }
+
+        return this.copy(
+            backgroundLayers = bgLayers,
+            parallaxPlane = parallaxPlane.run { world.clone() },
+            foregroundLayers = fgLayers
         )
+    }
 }

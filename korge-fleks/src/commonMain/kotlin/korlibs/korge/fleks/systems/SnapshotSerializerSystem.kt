@@ -18,7 +18,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         register("module", module)
     }
 
-    private val recording: MutableList<String> = mutableListOf()
+    private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
     private val snapshotRecording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
 
     private var rewindSeek: Int = 0
@@ -26,6 +26,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 
     // TODO remove later
     private var worldSnapshot: String? = null
+    private val family: Family = world.family { all(ParallaxComponent) }
 
     companion object {
         fun SystemConfiguration.setup(module: SerializersModule) = add(SnapshotSerializerSystem(module))
@@ -33,18 +34,26 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 
     override fun onTick() {
         val jsonSnapshot = snapshotSerializer.json().encodeToString(world.snapshot())
-        recording.add(jsonSnapshot)
+        val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(jsonSnapshot)
+        recording.add(snapshot)
         rewindSeek = recording.size - 1
+
+        // Do some post-processing
+        // Update ParallaxComponents
+        family.forEach { entity ->
+            val parallaxComponent = entity[ParallaxComponent]
+            parallaxComponent.updateLayerEntities(world)
+        }
 
         // TODO make deep copy of world snapshot
 
-        val snapshot = world.snapshot()
+        val worldSnapshot = world.snapshot()
 
         // Deep copy of world snapshot for storing it for game recording
         val snapshotCopy = mutableMapOf<Entity, Snapshot>()
 
         // Create deep copy of all components and tags of an entity
-        snapshot.forEach { (entity, value) ->
+        worldSnapshot.forEach { (entity, value) ->
             val componentsCopy = mutableListOf<Component<*>>()
             val tagsCopy = mutableListOf<UniqueId<*>>()
 
@@ -60,7 +69,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                     is MotionComponent -> componentsCopy.add(component.clone())
                     is NoisyMoveComponent -> componentsCopy.add(component.clone())
                     is OffsetByFrameIndexComponent -> componentsCopy.add(component.clone())
-                    is ParallaxComponent -> componentsCopy.add(component.clone())
+                    is ParallaxComponent -> componentsCopy.add(component.clone(world))
                     is PositionComponent -> componentsCopy.add(component.clone())
                     is RgbaComponent -> componentsCopy.add(component.clone())
                     is RigidbodyComponent -> componentsCopy.add(component.clone())
@@ -72,6 +81,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                     is SwitchLayerVisibilityComponent -> componentsCopy.add(component.clone())
                     is TextComponent -> componentsCopy.add(component.clone())
                     is TiledLevelMapComponent -> componentsCopy.add(component.clone())
+// TODO
 //                    is TweenPropertyComponent -> componentsCopy.add(component.clone())
 //                    is TweenSequenceComponent -> componentsCopy.add(component.clone())
                     else -> {
@@ -160,8 +170,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             if (fast) rewindSeek -= 4
             else rewindSeek--
             if (rewindSeek < 0) rewindSeek = 0
-            val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(recording[rewindSeek])
-            world.loadSnapshot(snapshot)
+            world.loadSnapshot(recording[rewindSeek])
         }
     }
 
@@ -170,8 +179,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             if (fast) rewindSeek += 4
             else rewindSeek++
             if (rewindSeek > recording.size - 1) rewindSeek = recording.size - 1
-            val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(recording[rewindSeek])
-            world.loadSnapshot(snapshot)
+            world.loadSnapshot(recording[rewindSeek])
         }
     }
 }
