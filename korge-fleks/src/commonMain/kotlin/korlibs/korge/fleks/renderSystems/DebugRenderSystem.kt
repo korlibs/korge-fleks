@@ -62,9 +62,17 @@ class DebugRenderSystem(
                     }
                 }
 
-                if (entity has TextComponent) {
-                    // TODO
-
+                if (entity has TextFieldComponent) {
+                    // Draw sprite bounds
+                    batch.drawVector(Colors.RED) {
+                        val (_, _, _, _, width, height) = entity[TextFieldComponent]
+                        rect(
+                            x = xx,
+                            y = yy,
+                            width = width,
+                            height = height
+                        )
+                    }
                 }
 
                 // Draw pivot point (zero-point for game object)

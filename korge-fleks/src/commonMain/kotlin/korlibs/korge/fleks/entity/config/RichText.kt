@@ -20,6 +20,7 @@ data class RichText(
     private val y: Float = 0f,
     private val width: Float,
     private val height: Float,
+    private val textRangeEnd: Int = Int.MAX_VALUE,
 
     private val layerIndex: Int = 1,
 
@@ -38,9 +39,10 @@ data class RichText(
                 x = this@RichText.x,
                 y = this@RichText.y
             )
-            it += TextComponent(
+            it += TextFieldComponent(
                 text = this@RichText.text,
                 fontName = this@RichText.fontName,
+                textRangeEnd = this@RichText.textRangeEnd,
                 width = this@RichText.width,
                 height = this@RichText.height,
                 horizontalAlign = this@RichText.horizontalAlign,
@@ -52,6 +54,7 @@ data class RichText(
                 alpha = this@RichText.alpha
             }
             it += layerTag
+//            it += RenderLayerTag.DEBUG
         }
         return entity
     }

@@ -80,7 +80,7 @@ internal val internalModule = SerializersModule {
         subclass(SpriteLayersComponent::class)
         subclass(SpriteComponent::class)
         subclass(SwitchLayerVisibilityComponent::class)
-        subclass(TextComponent::class)
+        subclass(TextFieldComponent::class)
         subclass(TiledLevelMapComponent::class)
         subclass(TweenPropertyComponent::class)
         subclass(TweenSequenceComponent::class)
@@ -106,6 +106,7 @@ internal val internalModule = SerializersModule {
         subclass(TweenSwitchLayerVisibility::class)
         subclass(TweenSpawner::class)
         subclass(TweenSound::class)
+        subclass(TweenTextField::class)
     }
 }
 

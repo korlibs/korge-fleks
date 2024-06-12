@@ -28,7 +28,7 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, LayerComponent, PositionComponent, RgbaComponent)
-        .any(LayerComponent, SpriteComponent, TextComponent, SpriteLayersComponent)
+        .any(LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
@@ -87,8 +87,8 @@ class ObjectRenderSystem(
                 }
             }
             // Rendering path for text
-            else if (entity has TextComponent) {
-                val (text, fontName, textRangeStart, textRangeEnd, width, height, wordWrap,  horizontalAlign, verticalAlign) = entity[TextComponent]
+            else if (entity has TextFieldComponent) {
+                val (text, fontName, textRangeStart, textRangeEnd, width, height, wordWrap,  horizontalAlign, verticalAlign) = entity[TextFieldComponent]
 
                 renderCtx2d(ctx) { render ->
                     var n = 0

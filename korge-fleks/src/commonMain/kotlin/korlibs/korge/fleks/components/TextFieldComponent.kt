@@ -12,7 +12,7 @@ import kotlinx.serialization.*
  */
 @Serializable
 @SerialName("Text")
-data class TextComponent(
+data class TextFieldComponent(
     var text: String = "",
     var fontName: String = "",
 
@@ -25,12 +25,12 @@ data class TextComponent(
     var wordWrap: Boolean = true,
     @Serializable(with = HorizontalAlignAsDouble::class) var horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VerticalAlignAsDouble::class) var verticalAlign: VerticalAlign = VerticalAlign.TOP
-) : Component<TextComponent> {
-    override fun type(): ComponentType<TextComponent> = TextComponent
-    companion object : ComponentType<TextComponent>()
+) : Component<TextFieldComponent> {
+    override fun type(): ComponentType<TextFieldComponent> = TextFieldComponent
+    companion object : ComponentType<TextFieldComponent>()
 
     // Hint to myself: Check if deep copy is needed on any change in the component!
-    fun clone() : TextComponent =
+    fun clone() : TextFieldComponent =
         this.copy(
             // Perform deep copy of Alignment enums
             horizontalAlign = horizontalAlign.clone(),

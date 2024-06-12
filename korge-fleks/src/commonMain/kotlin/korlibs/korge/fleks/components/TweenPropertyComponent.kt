@@ -76,6 +76,11 @@ data class TweenPropertyComponent (
 //        NoisyMoveY(componentTypeOf<TweenPropertyComponent>()),
 
 //        ConfigureFunction(componentTypeOf<TweenPropertyComponent>())
+
+        TextFieldText(componentTypeOf<TweenPropertyComponent>()),
+        TextFieldTextRangeStart(componentTypeOf<TweenPropertyComponent>()),
+        TextFieldTextRangeEnd(componentTypeOf<TweenPropertyComponent>()),
+
     }
 
     companion object {
@@ -118,6 +123,10 @@ data class TweenPropertyComponent (
 //        val TweenNoisyMoveY = TweenProperty.NoisyMoveY.type
 
 //        val ExecuteConfigureFunction = TweenProperty.ConfigureFunction.type
+
+        val TweenTextFieldTextComponent = TweenProperty.TextFieldText.type
+        val TweenTextFieldTextRangeStartComponent = TweenProperty.TextFieldTextRangeStart.type
+        val TweenTextFieldTextRangeEndComponent = TweenProperty.TextFieldTextRangeEnd.type
     }
 
     // Hint to myself: Check if deep copy is needed on any change in the component!

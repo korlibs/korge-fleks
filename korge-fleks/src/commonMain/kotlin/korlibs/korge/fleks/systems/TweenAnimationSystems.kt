@@ -26,6 +26,9 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpri
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSpriteRunningComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSwitchLayerVisibilityOffVarianceComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSwitchLayerVisibilityOnVarianceComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextRangeEndComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextRangeStartComponent
 import kotlin.jvm.JvmName
 import kotlin.reflect.KMutableProperty0
 
@@ -135,6 +138,20 @@ class TweenSoundSystem : IteratingSystem(
     }
 }
 
+class TweenTextFieldSystem : IteratingSystem(
+    family {
+        all(TextFieldComponent)
+            .any(TweenTextFieldTextComponent, TweenTextFieldTextRangeStartComponent, TweenTextFieldTextRangeEndComponent) },
+    interval = EachFrame
+) {
+    override fun onTickEntity(entity: Entity) {
+        val textFieldComponent = entity[TextFieldComponent]
+        updateProperty(entity, TweenTextFieldTextComponent, textFieldComponent::text)
+        updateProperty(entity, TweenTextFieldTextRangeStartComponent, textFieldComponent::textRangeStart)
+        updateProperty(entity, TweenTextFieldTextRangeEndComponent, textFieldComponent::textRangeEnd)
+    }
+}
+
 //class TweenOffsetSystem : IteratingSystem(
 //    family { any() },
 //    interval = EachFrame
@@ -168,6 +185,7 @@ fun SystemConfiguration.setupTweenEngineSystems() {
     add(TweenSpriteSystem())
     add(TweenSwitchLayerVisibilitySystem())
     add(TweenSoundSystem())
+    add(TweenTextFieldSystem())
 }
 
 /**
@@ -264,6 +282,16 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
         if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
             value.set(it.value as String)
             block.invoke(this)
+            entity -= component
+        }
+    }
+}
+
+@JvmName("updatePropertyString")
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<String>) {
+    entity.getOrNull(component)?.let {
+        if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
+            value.set(it.value as String)
             entity -= component
         }
     }

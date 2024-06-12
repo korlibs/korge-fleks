@@ -79,7 +79,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                     is SpriteComponent -> componentsCopy.add(component.clone())
                     is SpriteLayersComponent -> componentsCopy.add(component.clone())
                     is SwitchLayerVisibilityComponent -> componentsCopy.add(component.clone())
-                    is TextComponent -> componentsCopy.add(component.clone())
+                    is TextFieldComponent -> componentsCopy.add(component.clone())
                     is TiledLevelMapComponent -> componentsCopy.add(component.clone())
 // TODO
 //                    is TweenPropertyComponent -> componentsCopy.add(component.clone())
