@@ -24,8 +24,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     private var rewindSeek: Int = 0
     private var gameRunning: Boolean = true
 
-    // TODO remove later
-    private var worldSnapshot: String? = null
     private val family: Family = world.family { all(ParallaxComponent) }
 
     companion object {
@@ -106,33 +104,14 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 
     fun loadGameState(world: World, coroutineContext: CoroutineContext) {
         launchImmediately(context = coroutineContext) {
-            if (worldSnapshot == null) {
-                val vfs = resourcesVfs["save_game.json"]
-                if (vfs.exists()) {
-                    worldSnapshot = vfs.readString()
-//                snapshotDeleted = false
-                }
-            }
-            if (worldSnapshot != null) {
+            val vfs = resourcesVfs["save_game.json"]
+            if (vfs.exists()) {
+                val worldSnapshot = vfs.readString()
                 val family: Family = world.family { all(ParallaxComponent) }
 
-//            family.forEach {
-//                println("Before loading: $it")
-//                it[ParallaxComponent].backgroundLayers.forEach { bg ->
-//                    println("bg: $bg")
-//                }
-//            }
-
-                val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(worldSnapshot!!)
+                val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(worldSnapshot)
                 world.loadSnapshot(snapshot)
                 println("snapshot loaded!")
-
-//                family.forEach {
-//                    println("After loading: $it")
-//                    it[ParallaxComponent].backgroundLayers.forEach { bg ->
-//                        println("bg: $bg")
-//                    }
-//                }
 
                 // Do some post-processing
                 // Update ParallaxComponents
@@ -140,22 +119,23 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                     val parallaxComponent = entity[ParallaxComponent]
                     parallaxComponent.updateLayerEntities(world)
                 }
-            } else println("snapshot not loaded!")
+            } else println("WARNING: Cannot find snapshot file. Snapshot was not loaded!")
         }
     }
 
     fun saveGameState(world: World, coroutineContext: CoroutineContext) {
-        worldSnapshot = snapshotSerializer.json(pretty = true).encodeToString(world.snapshot())
+        val worldSnapshot = snapshotSerializer.json(pretty = true).encodeToString(world.snapshot())
         launchImmediately(context = coroutineContext) {
             val vfs = resourcesVfs["save_game.json"]
-            vfs.writeString(worldSnapshot!!)
+            vfs.writeString(worldSnapshot)
             println("Snapshot saved!")
 //            snapshotDeleted = false
         }
     }
 
-    fun pause() {
+    fun triggerPause() {
         gameRunning = !gameRunning
+
         world.systems.forEach { system ->
             when (system) {
                 // Sound system needs special handling, because it has to stop all sounds which are playing
@@ -163,9 +143,14 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 else -> system.enabled = gameRunning
             }
         }
+        // When game is resuming than delete all recordings which are beyond the new play position
+        if (gameRunning) {
+            while (rewindSeek < recording.size) { recording.removeLast() }
+        }
     }
 
     fun rewind(fast: Boolean = false) {
+        if (gameRunning) triggerPause()
         if (!gameRunning) {
             if (fast) rewindSeek -= 4
             else rewindSeek--
@@ -175,6 +160,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     }
 
     fun forward(fast: Boolean = false) {
+        if (gameRunning) triggerPause()
         if (!gameRunning) {
             if (fast) rewindSeek += 4
             else rewindSeek++
