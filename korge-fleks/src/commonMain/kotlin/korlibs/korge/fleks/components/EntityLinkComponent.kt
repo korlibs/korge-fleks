@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 
@@ -22,6 +23,6 @@ data class EntityLinkComponent(
     fun clone() : EntityLinkComponent =
         this.copy(
             // Perform deep copy of Entity
-            linkedEntity = Entity(linkedEntity.id, linkedEntity.version)
+            linkedEntity = linkedEntity.clone()  // Entity(linkedEntity.id, linkedEntity.version)
         )
 }

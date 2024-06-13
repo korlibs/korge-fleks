@@ -80,11 +80,11 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                     is TextFieldComponent -> componentsCopy.add(component.clone())
                     is TiledLevelMapComponent -> componentsCopy.add(component.clone())
 // TODO
-//                    is TweenPropertyComponent -> componentsCopy.add(component.clone())
-//                    is TweenSequenceComponent -> componentsCopy.add(component.clone())
+                    is TweenPropertyComponent -> componentsCopy.add(component.clone())
+                    is TweenSequenceComponent -> componentsCopy.add(component.clone(world))
                     else -> {
 // TODO add this here again
-//                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem!")
+                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem!")
                     }
                 }
             }

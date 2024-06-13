@@ -5,6 +5,7 @@ import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encoding.*
 
 
 /**
@@ -130,7 +131,13 @@ data class TweenPropertyComponent (
     }
 
     // Hint to myself: Check if deep copy is needed on any change in the component!
-//    fun clone() : TextComponent =
-//        this.copy(
-//        )
+    fun clone() : TweenPropertyComponent =
+        this.copy(
+            // TODO check if we need to handle Any here differently - like do a deep copy of the underlying object
+            change = change,
+            value = value,
+            // TODO check if this is sufficient or if we need to create the easing with
+            //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
+            easing = easing
+        )
 }
