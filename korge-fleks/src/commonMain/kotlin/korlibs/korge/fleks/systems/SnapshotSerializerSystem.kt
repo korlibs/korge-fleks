@@ -14,19 +14,20 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     interval = Fixed(step = 1/30.0f)
 ) {
 
-    private val snapshotSerializer = SnapshotSerializer().apply {
-        register("module", module)
-    }
-
+    private val family: Family = world.family { all(ParallaxComponent) }
+    private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
     private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
-    private val snapshotRecording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
-
     private var rewindSeek: Int = 0
     private var gameRunning: Boolean = true
 
-    private val family: Family = world.family { all(ParallaxComponent) }
-
     companion object {
+        /**
+         * Setup function for creating the SnapshotSerializerSystem. Here it is possible to
+         * add [SerializersModule] as parameter. This enables to add components, tags and config data
+         * classes outside Korge-fleks.
+         *
+         * TODO: Need to check how we can add "external" components into deep copy creation in onTick function
+         */
         fun SystemConfiguration.setup(module: SerializersModule) = add(SnapshotSerializerSystem(module))
     }
 
@@ -41,6 +42,9 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             val tagsCopy = mutableListOf<UniqueId<*>>()
 
             value.components.forEach { component ->
+                // Hint: Cloning of components is done WITHOUT any world functions or features because world functions
+                //       will NOT operate on the components which were copied into the snapshot, instead they will
+                //       operate with components of entities in the current world! This is not what we want!
                 when (component) {
                     is EntityLinkComponent -> componentsCopy.add(component.clone())
                     is InfoComponent -> componentsCopy.add(component.clone())
@@ -65,7 +69,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                     is TextFieldComponent -> componentsCopy.add(component.clone())
                     is TiledLevelMapComponent -> componentsCopy.add(component.clone())
                     is TweenPropertyComponent -> componentsCopy.add(component.clone())
-                    is TweenSequenceComponent -> componentsCopy.add(component.clone(world))
+                    is TweenSequenceComponent -> componentsCopy.add(component.clone())
                     else -> {
                         println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem!")
                     }
