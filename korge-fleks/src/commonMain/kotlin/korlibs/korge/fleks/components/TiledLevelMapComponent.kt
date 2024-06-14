@@ -25,6 +25,6 @@ data class TiledLevelMapComponent(
     override fun type(): ComponentType<TiledLevelMapComponent> = TiledLevelMapComponent
     companion object : ComponentType<TiledLevelMapComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : TiledLevelMapComponent = this.copy()
 }

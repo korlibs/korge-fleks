@@ -32,7 +32,7 @@ data class InfoComponent(
 
     companion object : ComponentType<InfoComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : InfoComponent = this.copy()
 }
 

@@ -17,6 +17,6 @@ data class InputTouchButtonComponent(
     override fun type(): ComponentType<InputTouchButtonComponent> = InputTouchButtonComponent
     companion object : ComponentType<InputTouchButtonComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : InputTouchButtonComponent = this.copy()
 }

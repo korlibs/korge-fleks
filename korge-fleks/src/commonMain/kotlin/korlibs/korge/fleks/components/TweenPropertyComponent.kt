@@ -22,15 +22,12 @@ import kotlinx.serialization.encoding.*
 data class TweenPropertyComponent (
     var property: TweenProperty,
 
-    @Serializable(with = AnySerializer::class)
-    var change: Any = Unit,
-    @Serializable(with = AnySerializer::class)
-    var value: Any = Unit,
+    @Serializable(with = AnySerializer::class) var change: Any = Unit,
+    @Serializable(with = AnySerializer::class) var value: Any = Unit,
 
     var duration: Float = 0f,                    // in seconds
     var timeProgress: Float = 0f,                // in seconds
-    @Serializable(with = EasingSerializer::class)
-    var easing: Easing = Easing.LINEAR           // Changing function
+    @Serializable(with = EasingSerializer::class) var easing: Easing = Easing.LINEAR  // Changing function
 ) : Component<TweenPropertyComponent> {
     override fun type(): ComponentType<TweenPropertyComponent> = property.type
 
@@ -130,14 +127,11 @@ data class TweenPropertyComponent (
         val TweenTextFieldTextRangeEndComponent = TweenProperty.TextFieldTextRangeEnd.type
     }
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : TweenPropertyComponent =
         this.copy(
-            // TODO check if we need to handle Any here differently - like do a deep copy of the underlying object
             change = change,
             value = value,
-            // TODO check if this is sufficient or if we need to create the easing with
-            //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
             easing = easing
         )
 }

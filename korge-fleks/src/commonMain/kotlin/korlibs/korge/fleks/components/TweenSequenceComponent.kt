@@ -40,104 +40,89 @@ data class TweenSequenceComponent(
         var delay: Float?
         var duration: Float?
         var easing: Easing?
-        fun World.clone(): TweenBase
+        fun clone(): TweenBase
     }
 
     /**
      * Animation Component data classes based on TweenBase
      */
-    @Serializable
-    @SerialName("SpawnNewTweenSequence")
+    @Serializable @SerialName("SpawnNewTweenSequence")
     data class SpawnNewTweenSequence(
         val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in sequence
 
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null           // not used
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
-        override fun World.clone(): SpawnNewTweenSequence {
+        override fun clone(): SpawnNewTweenSequence {
             val copyOfTweens: MutableList<TweenBase> = mutableListOf()
             // Perform special deep copy of list elements
-            tweens.forEach { element -> copyOfTweens.add(element.run { this@clone.clone() }) }
+            tweens.forEach { element -> copyOfTweens.add(element.clone()) }
 
-            return this@SpawnNewTweenSequence.copy(
+            return this.copy(
                 tweens = copyOfTweens,
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
+                // Hint: it is not needed to copy "easing" property by creating new one like below:
+                // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
             )
         }
     }
 
-    @Serializable
-    @SerialName("ParallelTweens")
+    @Serializable @SerialName("ParallelTweens")
     data class ParallelTweens(
         val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in parallel
 
         override var entity: Entity = Entity.NONE,    // not used here
         override var delay: Float? = 0f,              // in seconds
         override var duration: Float? = 0f,           // in seconds
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = Easing.LINEAR  // function to change the properties
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = Easing.LINEAR  // function to change the properties
     ) : TweenBase {
-        override fun World.clone(): ParallelTweens {
+        override fun clone(): ParallelTweens {
             val copyOfTweens: MutableList<TweenBase> = mutableListOf()
             // Perform special deep copy of list elements
-            tweens.forEach { element -> copyOfTweens.add(element.run { this@clone.clone() }) }
+            tweens.forEach { element -> copyOfTweens.add(element.clone()) }
 
-            return this@ParallelTweens.copy(
+            return this.copy(
                 tweens = copyOfTweens,
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
         }
     }
 
-    @Serializable
-    @SerialName("Wait")
+    @Serializable @SerialName("Wait")
     data class Wait(
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,            // Not used
         override var duration: Float? = 0f,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null           // not used
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
-        override fun World.clone(): Wait =
-            this@Wait.copy(
+        override fun clone(): Wait =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("DeleteEntity")
+    @Serializable @SerialName("DeleteEntity")
     data class DeleteEntity(
         val healthCounter: Int = 0,             // set healthCounter to zero to delete the entity immediately
 
         override var entity: Entity,
         override var delay: Float? = null,      // not used
         override var duration: Float? = null,   // not used
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null     // not used
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
-        override fun World.clone(): DeleteEntity =
-            this@DeleteEntity.copy(
+        override fun clone(): DeleteEntity =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("SpawnEntity")
+    @Serializable @SerialName("SpawnEntity")
     data class SpawnEntity(
         var entityConfig: String,           // name of the entity configuration which creates and configures the spawned entity
         var x: Float = 0f,                  // position where entity will be spawned
@@ -146,34 +131,27 @@ data class TweenSequenceComponent(
         override var entity: Entity = Entity.NONE, // when entity is not given (=Entity.NONE) than it will be created
         override var delay: Float? = null,
         override var duration: Float? = 0f,    // not used - 0f for immediately
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null    // not used
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
-        override fun World.clone(): SpawnEntity =
-            this@SpawnEntity.copy(
+        override fun clone(): SpawnEntity =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("ExecuteConfigFunction")
+    @Serializable @SerialName("ExecuteConfigFunction")
     data class ExecuteConfigFunction(
         var entityConfig: String,                     // name of entity config which contains the function to configure the spawned entity
 
         override var entity: Entity = Entity.NONE,    // [optional] entity can be provided if needed in the configure-function
         override var delay: Float? = null,            // not used
         override var duration: Float? = null,         // not used
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null           // not used
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
-        override fun World.clone(): ExecuteConfigFunction =
-            this@ExecuteConfigFunction.copy(
+        override fun clone(): ExecuteConfigFunction =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
@@ -181,8 +159,7 @@ data class TweenSequenceComponent(
     /**
      *  Following component classes are for triggering tweens on specific properties of components
      */
-    @Serializable
-    @SerialName("TweenTextField")
+    @Serializable @SerialName("TweenTextField")
     data class TweenTextField(
         val text: String? = null,
         val textRangeStart: Int? = null,
@@ -191,20 +168,16 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
     ) : TweenBase {
-        override fun World.clone(): TweenTextField =
-            this@TweenTextField.copy(
+        override fun clone(): TweenTextField =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("TweenRgba")
+    @Serializable @SerialName("TweenRgba")
     data class TweenRgba(
         val alpha: Float? = null,
         val tint: Rgb? = null,
@@ -213,21 +186,17 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
     ) : TweenBase {
-        override fun World.clone(): TweenRgba =
-            this@TweenRgba.copy(
+        override fun clone(): TweenRgba =
+            this.copy(
                 tint = tint?.clone(),
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("TweenPosition")
+    @Serializable @SerialName("TweenPosition")
     data class TweenPosition(
         val x: Float? = null,
         val y: Float? = null,
@@ -237,20 +206,16 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
     ) : TweenBase {
-        override fun World.clone(): TweenPosition =
-            this@TweenPosition.copy(
+        override fun clone(): TweenPosition =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("TweenLayout")
+    @Serializable @SerialName("TweenLayout")
     data class TweenLayout(
         val centerX: Boolean? = null,
         val centerY: Boolean? = null,
@@ -260,20 +225,16 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
     ) : TweenBase {
-        override fun World.clone(): TweenLayout =
-            this@TweenLayout.copy(
+        override fun clone(): TweenLayout =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("TweenSprite")
+    @Serializable @SerialName("TweenSprite")
     data class TweenSprite(
         var animation: String? = null,
         // do not tween the frameIndex, it is updated by the SpriteSystem
@@ -284,21 +245,17 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
     ) : TweenBase {
-        override fun World.clone(): TweenSprite =
-            this@TweenSprite.copy(
+        override fun clone(): TweenSprite =
+            this.copy(
                 direction = direction,
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("TweenSwitchLayerVisibility")
+    @Serializable @SerialName("TweenSwitchLayerVisibility")
     data class TweenSwitchLayerVisibility(
         var offVariance: Float? = null,
         var onVariance: Float? = null,
@@ -306,20 +263,16 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
     ) : TweenBase {
-        override fun World.clone(): TweenSwitchLayerVisibility =
-            this@TweenSwitchLayerVisibility.copy(
+        override fun clone(): TweenSwitchLayerVisibility =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("TweenSpawner")
+    @Serializable @SerialName("TweenSpawner")
     data class TweenSpawner(
         var numberOfObjects: Int? = null,
         var interval: Int? = null,
@@ -329,20 +282,16 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
     ) : TweenBase {
-        override fun World.clone(): TweenSpawner =
-            this@TweenSpawner.copy(
+        override fun clone(): TweenSpawner =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
-    @Serializable
-    @SerialName("TweenSound")
+    @Serializable @SerialName("TweenSound")
     data class TweenSound(
         var startTrigger: Boolean? = null,
         var stopTrigger: Boolean? = null,
@@ -352,25 +301,22 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class)
-        override var easing: Easing? = null
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
     ) : TweenBase {
-        override fun World.clone(): TweenSound =
-            this@TweenSound.copy(
+        override fun clone(): TweenSound =
+            this.copy(
                 entity = entity.clone(),
-                // TODO check if this is sufficient or if we need to create the easing with
-                //easing = Easing.ALL[easing::class.toString().substringAfter('$')]
                 easing = easing
             )
     }
 
     companion object : ComponentType<TweenSequenceComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
-    fun clone(world: World) : TweenSequenceComponent {
+    // Author's hint: Check if deep copy is needed on any change in the component!
+    fun clone() : TweenSequenceComponent {
         val copyOfTweens: MutableList<TweenBase> = mutableListOf()
         // Perform special deep copy of list elements
-        tweens.forEach { element -> copyOfTweens.add(element.run { world.clone() }) }
+        tweens.forEach { element -> copyOfTweens.add(element.clone()) }
 
         return this.copy(
             tweens = copyOfTweens

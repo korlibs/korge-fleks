@@ -25,7 +25,7 @@ data class SpawnerComponent(
     override fun type(): ComponentType<SpawnerComponent> = SpawnerComponent
     companion object : ComponentType<SpawnerComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : SpawnerComponent =
         this.copy(
             // Perform deep copy

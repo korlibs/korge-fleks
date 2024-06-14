@@ -14,6 +14,6 @@ data class MotionComponent(
     override fun type(): ComponentType<MotionComponent> = MotionComponent
     companion object : ComponentType<MotionComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : MotionComponent = this.copy()
 }

@@ -29,7 +29,7 @@ data class TextFieldComponent(
     override fun type(): ComponentType<TextFieldComponent> = TextFieldComponent
     companion object : ComponentType<TextFieldComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : TextFieldComponent =
         this.copy(
             // Perform deep copy of Alignment enums

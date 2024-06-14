@@ -17,6 +17,6 @@ data class SwitchLayerVisibilityComponent(
     override fun type() = SwitchLayerVisibilityComponent
     companion object : ComponentType<SwitchLayerVisibilityComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : SwitchLayerVisibilityComponent = this.copy()
 }

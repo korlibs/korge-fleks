@@ -22,6 +22,6 @@ data class LayoutComponent(
     override fun type(): ComponentType<LayoutComponent> = LayoutComponent
     companion object : ComponentType<LayoutComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : LayoutComponent = this.copy()
 }

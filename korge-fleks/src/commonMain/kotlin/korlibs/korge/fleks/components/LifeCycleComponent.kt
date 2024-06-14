@@ -14,6 +14,6 @@ data class LifeCycleComponent(
     override fun type(): ComponentType<LifeCycleComponent> = LifeCycleComponent
     companion object : ComponentType<LifeCycleComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : LifeCycleComponent = this.copy()
 }

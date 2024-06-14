@@ -12,8 +12,7 @@ import kotlin.math.*
 @SerialName("Rgba")
 data class RgbaComponent(
 //    @Serializable(with = RGBAAsString::class)  -- deserialization does not work with it???
-    @Serializable(with = RGBAAsInt::class)
-    var rgba: RGBA = Colors.WHITE,
+    @Serializable(with = RGBAAsInt::class) var rgba: RGBA = Colors.WHITE,
 ) : Component<RgbaComponent> {
 
     var alpha: Float = rgba.af
@@ -64,7 +63,7 @@ data class RgbaComponent(
     override fun type(): ComponentType<RgbaComponent> = RgbaComponent
     companion object : ComponentType<RgbaComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : RgbaComponent =
         this.copy(
             // Perform deep copy

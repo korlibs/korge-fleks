@@ -19,6 +19,6 @@ data class RigidbodyComponent(
     override fun type(): ComponentType<RigidbodyComponent> = RigidbodyComponent
     companion object : ComponentType<RigidbodyComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : RigidbodyComponent = this.copy()
 }

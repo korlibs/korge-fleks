@@ -30,6 +30,6 @@ data class SoundComponent(
     override fun type(): ComponentType<SoundComponent> = SoundComponent
     companion object : ComponentType<SoundComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : SoundComponent = this.copy()
 }

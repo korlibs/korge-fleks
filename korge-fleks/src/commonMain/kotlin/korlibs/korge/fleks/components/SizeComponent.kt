@@ -15,6 +15,6 @@ data class SizeComponent(
     override fun type(): ComponentType<SizeComponent> = SizeComponent
     companion object : ComponentType<SizeComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : SizeComponent = this.copy()
 }

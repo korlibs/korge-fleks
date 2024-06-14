@@ -31,23 +31,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     }
 
     override fun onTick() {
-        val jsonSnapshot = snapshotSerializer.json().encodeToString(world.snapshot())
-        val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(jsonSnapshot)
-        recording.add(snapshot)
-        rewindSeek = recording.size - 1
-
-        // Do some post-processing
-        // Update ParallaxComponents
-        family.forEach { entity ->
-            val parallaxComponent = entity[ParallaxComponent]
-            parallaxComponent.updateLayerEntities(world)
-        }
-
-        // TODO make deep copy of world snapshot
 
         val worldSnapshot = world.snapshot()
-
-        // Deep copy of world snapshot for storing it for game recording
         val snapshotCopy = mutableMapOf<Entity, Snapshot>()
 
         // Create deep copy of all components and tags of an entity
@@ -67,7 +52,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                     is MotionComponent -> componentsCopy.add(component.clone())
                     is NoisyMoveComponent -> componentsCopy.add(component.clone())
                     is OffsetByFrameIndexComponent -> componentsCopy.add(component.clone())
-                    is ParallaxComponent -> componentsCopy.add(component.clone(world))
+                    is ParallaxComponent -> componentsCopy.add(component.clone())
                     is PositionComponent -> componentsCopy.add(component.clone())
                     is RgbaComponent -> componentsCopy.add(component.clone())
                     is RigidbodyComponent -> componentsCopy.add(component.clone())
@@ -79,26 +64,26 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                     is SwitchLayerVisibilityComponent -> componentsCopy.add(component.clone())
                     is TextFieldComponent -> componentsCopy.add(component.clone())
                     is TiledLevelMapComponent -> componentsCopy.add(component.clone())
-// TODO
                     is TweenPropertyComponent -> componentsCopy.add(component.clone())
                     is TweenSequenceComponent -> componentsCopy.add(component.clone(world))
                     else -> {
-// TODO add this here again
                         println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem!")
                     }
                 }
             }
 
-            value.tags.forEach { tag ->
-
-                // TODO same for tags
-
-            }
+            value.tags.forEach { tag -> tagsCopy.add(tag) }
 
             // Create snapshot of entity as deep copy of all components and tags
             snapshotCopy[entity] = wildcardSnapshotOf(componentsCopy, tagsCopy)
         }
-        snapshotRecording.add(snapshotCopy)
+
+// Fallback: If needed deep copy of snapshot can be done via serialization and deserialization
+//        val jsonSnapshot = snapshotSerializer.json().encodeToString(world.snapshot())
+//        val snapshotCopy: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(jsonSnapshot)
+
+        recording.add(snapshotCopy)
+        rewindSeek = recording.size - 1
     }
 
 
@@ -113,12 +98,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 world.loadSnapshot(snapshot)
                 println("snapshot loaded!")
 
-                // Do some post-processing
-                // Update ParallaxComponents
-                family.forEach { entity ->
-                    val parallaxComponent = entity[ParallaxComponent]
-                    parallaxComponent.updateLayerEntities(world)
-                }
+                postProcessing()
+
             } else println("WARNING: Cannot find snapshot file. Snapshot was not loaded!")
         }
     }
@@ -129,7 +110,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             val vfs = resourcesVfs["save_game.json"]
             vfs.writeString(worldSnapshot)
             println("Snapshot saved!")
-//            snapshotDeleted = false
         }
     }
 
@@ -146,6 +126,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         // When game is resuming than delete all recordings which are beyond the new play position
         if (gameRunning) {
             while (rewindSeek < recording.size) { recording.removeLast() }
+            postProcessing()
         }
     }
 
@@ -167,5 +148,15 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             if (rewindSeek > recording.size - 1) rewindSeek = recording.size - 1
             world.loadSnapshot(recording[rewindSeek])
         }
+    }
+
+    private fun postProcessing() {
+        // Do some post-processing
+        family.forEach { entity ->
+            // Update ParallaxComponents
+            val parallaxComponent = entity[ParallaxComponent]
+            parallaxComponent.run { world.updateLayerEntities() }
+        }
+
     }
 }

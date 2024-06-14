@@ -30,7 +30,7 @@ data class OffsetByFrameIndexComponent(
     override fun type(): ComponentType<OffsetByFrameIndexComponent> = OffsetByFrameIndexComponent
     companion object : ComponentType<OffsetByFrameIndexComponent>()
 
-    // Hint to myself: Check if deep copy is needed on any change in the component!
+    // Author's hint: Check if deep copy is needed on any change in the component!
     fun clone() : OffsetByFrameIndexComponent =
         this.copy(
             // Perform deep copy of Entity and map
