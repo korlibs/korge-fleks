@@ -32,8 +32,7 @@ import kotlinx.serialization.*
  *
  * Other parameters should not be set directly. They are used internally by [SpriteSystem].
  */
-@Serializable
-@SerialName("Sprite")
+@Serializable @SerialName("Sprite")
 data class SpriteComponent(
     var name: String = "",
     var anchorX: Float = 0f,                          // x,y position of the pivot point within the sprite

@@ -10,8 +10,7 @@ import kotlinx.serialization.*
  * @param [layerIndex] defines the order in which objects like textures or shapes will be drawn.
  * Higher numbers mean that the object will be rendered on top of other objects with smaller number.
  */
-@Serializable
-@SerialName("Layer")
+@Serializable @SerialName("Layer")
 data class LayerComponent(
     val layerIndex: Int = 0
 ) : Component<LayerComponent> {

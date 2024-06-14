@@ -14,8 +14,7 @@ import kotlinx.serialization.Serializable
  * according to world level movements.
  * In the [ParallaxRenderSystem] for drawing the background.
  */
-@Serializable
-@SerialName("Parallax")
+@Serializable @SerialName("Parallax")
 data class ParallaxComponent(
     var name: String = "",
 
@@ -29,8 +28,7 @@ data class ParallaxComponent(
     var initialized: Boolean = false
 ) : Component<ParallaxComponent> {
 
-    @Serializable
-    @SerialName("Parallax.Layer")
+    @Serializable @SerialName("Parallax.Layer")
     data class Layer(
         var entity: Entity = Entity.NONE,  // Link to entity for tween animation
         /**
@@ -49,8 +47,7 @@ data class ParallaxComponent(
             )
     }
 
-    @Serializable
-    @SerialName("Parallax.Plane")
+    @Serializable @SerialName("Parallax.Plane")
     data class Plane(
         var entity: Entity = Entity.NONE,  // Link to entity for tween animation
         /**

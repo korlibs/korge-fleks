@@ -14,8 +14,7 @@ import kotlinx.serialization.*
  * Add this component to an entity together with PositionShape component to randomly change the position withing
  * the specified [xVariance] and [yVariance].
  */
-@Serializable
-@SerialName("NoisyMove")
+@Serializable @SerialName("NoisyMove")
 data class NoisyMoveComponent(
     // trigger variance for start moving: (1.0) - trigger immediately when possible, (0.0) - no trigger for start moving at all
     var triggerVariance: Float = 0f,

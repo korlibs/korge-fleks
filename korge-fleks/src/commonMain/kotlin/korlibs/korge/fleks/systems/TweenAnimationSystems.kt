@@ -152,18 +152,6 @@ class TweenTextFieldSystem : IteratingSystem(
     }
 }
 
-//class TweenOffsetSystem : IteratingSystem(
-//    family { any() },
-//    interval = EachFrame
-//) {
-//    override fun onTickEntity(entity: Entity) {
-//        entity.getOrNull(OffsetComponent)?.let {
-//            updateProperty(entity, TweenOffsetXComponent, it::x)
-//            updateProperty(entity, TweenOffsetYComponent, it::y)
-//        }
-//    }
-//}
-
 //class AnimateLifeCycleSystem : IteratingSystem(
 //    family { all(LifeCycleComponent).any(TweenLifeCycleHealthCounter) },
 //    interval = EachFrame
@@ -189,7 +177,7 @@ fun SystemConfiguration.setupTweenEngineSystems() {
 }
 
 /**
- *
+ * Below functions are updating the property of the to be animated component.
  */
 @JvmName("updatePropertyDouble")
 fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenPropertyComponent>, value: KMutableProperty0<Double>) {

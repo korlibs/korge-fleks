@@ -6,6 +6,7 @@ import korlibs.korge.fleks.utils.random
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.EntityFactory
 
+
 /**
  * This system is responsible to spawn new entity objects. It shall be the only system which spawns new objects.
  * It can be configured to periodically spawn entities until a total number of spawned objects is reached, or
@@ -22,13 +23,15 @@ class SpawnerSystem : IteratingSystem(
             if (spawner.nextSpawnIn <= 0) {
                 var x = 0f
                 var y = 0f
-                var spx = 0f
-                var spy = 0f
+// DEBUGGING
+//                var spx = 0f
+//                var spy = 0f
                 entity.getOrNull(PositionComponent)?.let {
                     x = it.x + it.offsetX
                     y = it.y + it.offsetY
-                    spx = it.x + it.offsetX
-                    spy = it.y + it.offsetY
+// DEBUGGING
+//                    spx = it.x + it.offsetX
+//                    spy = it.y + it.offsetY
                 }
                 entity.getOrNull(OffsetByFrameIndexComponent)?.let {
                     // Get offset depending on current animation and frame index
@@ -56,6 +59,7 @@ class SpawnerSystem : IteratingSystem(
                         it += PositionComponent(x = xx, y = yy)
                     }
 
+// DEBUGGING
 //                    if (spawner.entityConfig == "introSpaceshipRightWingDust") println("Spawning: newEntity: $newEntity - spaceship pos: ($spx, $spy) - spawing pos: ($xx, $yy")
 //                    if (spawner.entityConfig == "introSpaceshipLeftWingDust") println("Spawning: newEntity: $newEntity - spaceship pos: ($spx, $spy) - spawing pos: ($xx, $yy)")
 

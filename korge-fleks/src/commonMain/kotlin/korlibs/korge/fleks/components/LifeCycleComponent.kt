@@ -6,8 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-@Serializable
-@SerialName("LifeCycle")
+@Serializable @SerialName("LifeCycle")
 data class LifeCycleComponent(
     var healthCounter: Int = 100
 ) : Component<LifeCycleComponent> {

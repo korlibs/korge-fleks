@@ -5,8 +5,7 @@ import korlibs.korge.assetmanager.*
 import kotlinx.serialization.*
 
 
-@Serializable
-@SerialName("LdtkLevelMap")
+@Serializable @SerialName("LdtkLevelMap")
 data class LdtkLevelMapComponent(
     /**
      * The name of the LDtk world in the Asset manager

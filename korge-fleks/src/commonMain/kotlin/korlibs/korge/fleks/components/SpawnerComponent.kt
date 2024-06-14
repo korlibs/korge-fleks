@@ -7,8 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-@Serializable
-@SerialName("Spawner")
+@Serializable @SerialName("Spawner")
 data class SpawnerComponent(
     // Config for spawner
     var numberOfObjects: Int = 1,                  // The spawner will generate this number of object when triggered after interval time

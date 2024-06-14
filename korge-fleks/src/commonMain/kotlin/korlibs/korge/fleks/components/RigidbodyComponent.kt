@@ -9,8 +9,7 @@ import kotlinx.serialization.Serializable
 /**
  * This is a very basic definition of a rigid body which does not take rotation into account.
  */
-@Serializable
-@SerialName("Rigidbody")
+@Serializable @SerialName("Rigidbody")
 data class RigidbodyComponent(
     var mass: Float = 0f,      // mass to calculate inertia of the object
     var damping: Float = 0f,   // e.g. air resistance of the object when falling

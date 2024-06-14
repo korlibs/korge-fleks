@@ -11,10 +11,8 @@ import korlibs.korge.fleks.components.*
 class PositionSystem : IteratingSystem(
     family {
         all(PositionComponent)  // Position component absolutely needed for movement of entity objects
-        .any(MotionComponent, /*ParallaxMotionComponent,*/ RigidbodyComponent)  // Rigidbody, CubicBezierLine, ect. not necessarily needed for movement
+        .any(MotionComponent, RigidbodyComponent)  // Motion, eigidbody, ect. not necessarily needed for movement
         .none(ParallaxComponent)
-// TODO activate when ParallaxComponent is moved into Korge-fleks
-//        .none(ParallaxComponent)
     },
     interval = EachFrame
 ) {
@@ -39,18 +37,5 @@ class PositionSystem : IteratingSystem(
             positionComponent.x = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityX * deltaTime + positionComponent.x
             positionComponent.y = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityY * deltaTime + positionComponent.y
         }
-/*
-        if (entity has ParallaxMotionComponent) {
-            val motion = entity[ParallaxMotionComponent]
-            // s(t) = v * t + s(t-1)
-            if (motion.isScrollingHorizontally) {
-                positionComponent.x = ((deltaX * motion.speedFactor) + (motion.selfSpeedX * motion.speedFactor)) * deltaTime + positionComponent.x
-                // TODO get height of parallax background and scroll Y per deltaY [0..1] inside of height
-            } else {
-                positionComponent.y = ((deltaY * motion.speedFactor) + (motion.selfSpeedY * motion.speedFactor)) * deltaTime + positionComponent.y
-                // TODO same as above for X
-            }
-        }
-*/
     }
 }

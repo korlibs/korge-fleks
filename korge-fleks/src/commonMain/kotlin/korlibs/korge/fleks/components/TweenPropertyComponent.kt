@@ -17,8 +17,7 @@ import kotlinx.serialization.encoding.*
  *
  * In case of single switch: This value is set when easing > 0.5
  */
-@Serializable
-@SerialName("TweenPropertyComponent")
+@Serializable @SerialName("TweenPropertyComponent")
 data class TweenPropertyComponent (
     var property: TweenProperty,
 
@@ -57,11 +56,6 @@ data class TweenPropertyComponent (
         // TODO not used yet in animation system
 //        LifeCycleHealthCounter(componentTypeOf<TweenPropertyComponent>()),
 
-//        LayoutCenterX(componentTypeOf<TweenPropertyComponent>()),
-//        LayoutCenterY(componentTypeOf<TweenPropertyComponent>()),
-//        LayoutOffsetX(componentTypeOf<TweenPropertyComponent>()),
-//        LayoutOffsetY(componentTypeOf<TweenPropertyComponent>()),
-
         SwitchLayerVisibilityOnVariance(componentTypeOf<TweenPropertyComponent>()),
         SwitchLayerVisibilityOffVariance(componentTypeOf<TweenPropertyComponent>()),
 
@@ -72,8 +66,6 @@ data class TweenPropertyComponent (
 
 //        NoisyMoveX(componentTypeOf<TweenPropertyComponent>()),
 //        NoisyMoveY(componentTypeOf<TweenPropertyComponent>()),
-
-//        ConfigureFunction(componentTypeOf<TweenPropertyComponent>())
 
         TextFieldText(componentTypeOf<TweenPropertyComponent>()),
         TextFieldTextRangeStart(componentTypeOf<TweenPropertyComponent>()),
@@ -103,12 +95,6 @@ data class TweenPropertyComponent (
 
 //        val TweenLifeCycleHealthCounter = TweenProperty.LifeCycleHealthCounter.type
 
-
-//        val TweenLayoutCenterX = TweenProperty.LayoutCenterX.type
-//        val TweenLayoutCenterY = TweenProperty.LayoutCenterY.type
-//        val TweenLayoutOffsetX = TweenProperty.LayoutOffsetX.type
-//        val TweenLayoutOffsetY = TweenProperty.LayoutOffsetY.type
-
         val TweenSwitchLayerVisibilityOnVarianceComponent = TweenProperty.SwitchLayerVisibilityOnVariance.type
         val TweenSwitchLayerVisibilityOffVarianceComponent = TweenProperty.SwitchLayerVisibilityOffVariance.type
 
@@ -119,8 +105,6 @@ data class TweenPropertyComponent (
 
 //        val TweenNoisyMoveX = TweenProperty.NoisyMoveX.type
 //        val TweenNoisyMoveY = TweenProperty.NoisyMoveY.type
-
-//        val ExecuteConfigureFunction = TweenProperty.ConfigureFunction.type
 
         val TweenTextFieldTextComponent = TweenProperty.TextFieldText.type
         val TweenTextFieldTextRangeStartComponent = TweenProperty.TextFieldTextRangeStart.type

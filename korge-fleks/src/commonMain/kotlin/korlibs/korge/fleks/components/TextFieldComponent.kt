@@ -10,8 +10,7 @@ import kotlinx.serialization.*
 /**
  * This component contains [text] which can be drawn with [fontName] with the DialogRenderView.
  */
-@Serializable
-@SerialName("Text")
+@Serializable @SerialName("Text")
 data class TextFieldComponent(
     var text: String = "",
     var fontName: String = "",

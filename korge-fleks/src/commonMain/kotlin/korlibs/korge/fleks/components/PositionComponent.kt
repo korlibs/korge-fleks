@@ -10,8 +10,7 @@ import kotlinx.serialization.Serializable
  * This component is used to add position related properties to an entity.
  * The data from this component will be processed e.g. by the [ObjectRenderSystem] in Korge-fleks.
  */
-@Serializable
-@SerialName("Position")
+@Serializable @SerialName("Position")
 data class PositionComponent(
     var x: Float = 0f,
     var y: Float = 0f,

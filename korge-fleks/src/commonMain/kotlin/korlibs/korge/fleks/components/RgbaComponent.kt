@@ -8,8 +8,7 @@ import korlibs.util.*
 import kotlinx.serialization.*
 import kotlin.math.*
 
-@Serializable
-@SerialName("Rgba")
+@Serializable @SerialName("Rgba")
 data class RgbaComponent(
 //    @Serializable(with = RGBAAsString::class)  -- deserialization does not work with it???
     @Serializable(with = RGBAAsInt::class) var rgba: RGBA = Colors.WHITE,
@@ -29,8 +28,7 @@ data class RgbaComponent(
             field = value
         }
 
-    @Serializable
-    @SerialName("Rgb")
+    @Serializable @SerialName("Rgb")
     data class Rgb(
         var r: Int = 0xff,
         var g: Int = 0xff,

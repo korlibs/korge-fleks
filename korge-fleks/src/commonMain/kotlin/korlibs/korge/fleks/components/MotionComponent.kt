@@ -3,8 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.*
 import kotlinx.serialization.*
 
-@Serializable
-@SerialName("Motion")
+@Serializable @SerialName("Motion")
 data class MotionComponent(
     var accelX: Float = 0f,
     var accelY: Float = 0f,

@@ -215,25 +215,6 @@ data class TweenSequenceComponent(
             )
     }
 
-    @Serializable @SerialName("TweenLayout")
-    data class TweenLayout(
-        val centerX: Boolean? = null,
-        val centerY: Boolean? = null,
-        val offsetX: Float? = null,
-        val offsetY: Float? = null,
-
-        override var entity: Entity,
-        override var delay: Float? = null,
-        override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
-    ) : TweenBase {
-        override fun clone(): TweenLayout =
-            this.copy(
-                entity = entity.clone(),
-                easing = easing
-            )
-    }
-
     @Serializable @SerialName("TweenSprite")
     data class TweenSprite(
         var animation: String? = null,

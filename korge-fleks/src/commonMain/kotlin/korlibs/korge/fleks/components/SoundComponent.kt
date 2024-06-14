@@ -16,8 +16,7 @@ import kotlinx.serialization.Serializable
  *
  * TODO: Remove Sound component from entity when it has finished playing
  */
-@Serializable
-@SerialName("Sound")
+@Serializable @SerialName("Sound")
 data class SoundComponent(
     var name: String = "",
     var startTrigger: Boolean = false,  // to play this sound effect set this to "true"

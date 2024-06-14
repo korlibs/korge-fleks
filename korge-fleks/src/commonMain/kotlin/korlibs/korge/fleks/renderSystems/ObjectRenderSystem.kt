@@ -25,7 +25,7 @@ class ObjectRenderSystem(
     private val viewPortSize: SizeInt,
     world: World,
     layerTag: RenderLayerTag,
-    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
+    private val comparator: EntityComparator =compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, LayerComponent, PositionComponent, RgbaComponent)
         .any(LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent)

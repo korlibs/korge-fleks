@@ -129,12 +129,6 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.offsetX?.let { end -> createTweenPropertyComponent(PositionOffsetX, start.offsetX, end - start.offsetX) }
                 tween.offsetY?.let { end -> createTweenPropertyComponent(PositionOffsetY, start.offsetY, end - start.offsetY) }
             }
-//            is TweenLayout -> tween.entity.getOrError(LayoutComponent).let { start ->
-//                tween.centerX?.let { value -> createAnimateComponent(LayoutCenterX, value) }
-//                tween.centerY?.let { value -> createAnimateComponent(LayoutCenterY, value) }
-//                tween.offsetX?.let { end -> createAnimateComponent(LayoutOffsetX, start.offsetX, end - start.offsetX) }
-//                tween.offsetY?.let { end -> createAnimateComponent(LayoutOffsetY, start.offsetY, end - start.offsetY) }
-//            }
             is TweenSprite -> tween.entity.getOrWarning(SpriteComponent)?.let { _ ->  // make sure to-be-animated-entity is of type sprite
                 tween.animation?.let { value -> createTweenPropertyComponent(SpriteAnimation, value) }
                 tween.running?.let { value -> createTweenPropertyComponent(SpriteRunning, value) }

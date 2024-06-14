@@ -10,15 +10,13 @@ import kotlinx.serialization.*
  *
  * @param mapOfOffsetLists A map which saves a list of offsets (values) for each animation frame per animation name (keys).
  */
-@Serializable
-@SerialName("OffsetByFrameIndex")
+@Serializable @SerialName("OffsetByFrameIndex")
 data class OffsetByFrameIndexComponent(
     var entity: Entity = Entity.NONE,
     var mapOfOffsetLists: Map<String, List<Point>> = emptyMap()
 ) : Component<OffsetByFrameIndexComponent> {
 
-    @Serializable
-    @SerialName("Point")
+    @Serializable @SerialName("Point")
     data class Point(
         var x: Float = 0f,
         var y: Float = 0f

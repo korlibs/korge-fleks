@@ -7,8 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-@Serializable
-@SerialName("InputTouchButton")
+@Serializable @SerialName("InputTouchButton")
 data class InputTouchButtonComponent(
     var pressed: Boolean = false,
     var triggerImmediately: Boolean = false,

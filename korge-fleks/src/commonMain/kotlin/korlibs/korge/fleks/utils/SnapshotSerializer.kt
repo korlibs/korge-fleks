@@ -88,7 +88,6 @@ internal val internalModule = SerializersModule {
     // Register tags (components without properties)
     polymorphic(UniqueId::class) {
         subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
-        subclass(ViewTag::class)
     }
 
     // Data class hierarchy used for AnimationScript component
@@ -101,7 +100,6 @@ internal val internalModule = SerializersModule {
         subclass(DeleteEntity::class)
         subclass(TweenRgba::class)
         subclass(TweenPosition::class)
-        subclass(TweenLayout::class)
         subclass(TweenSprite::class)
         subclass(TweenSwitchLayerVisibility::class)
         subclass(TweenSpawner::class)
