@@ -33,7 +33,7 @@ data class RgbaComponent(
         var r: Int = 0xff,
         var g: Int = 0xff,
         var b: Int = 0xff
-    ) : SerializeBase<Rgb> {
+    ) : CloneableData<Rgb> {
         operator fun plus(other: Rgb) = Rgb(r + other.r, g + other.g, b + other.b)
         operator fun times(f: Float) = Rgb(
             (r.toFloat() * f).roundToInt(),

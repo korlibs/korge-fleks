@@ -20,7 +20,7 @@ data class OffsetByFrameIndexComponent(
     data class Point(
         var x: Float = 0f,
         var y: Float = 0f
-    ) : SerializeBase<Point> {
+    ) : CloneableData<Point> {
 
         override fun clone(): Point = this.copy()
     }

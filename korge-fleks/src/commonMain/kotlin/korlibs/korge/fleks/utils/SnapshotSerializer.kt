@@ -29,11 +29,15 @@ import kotlin.jvm.JvmInline
  * All data classes (not deriving from Fleks Component<...>) which are used within components need to be serializable by
  * deriving from this interface.
  */
-interface SerializeBase<out T> {
+interface CloneableData<out T> {
     fun clone(): T
 }
 
-// TODO
+/**
+ * All components which shall be recorded (serialized) in SnapshotSerializerSystem needs to be derived from
+ * [CloneableComponent].
+ * The clone function needs to be implemented to perform a deep copy of all properties of the component.
+ */
 abstract class CloneableComponent<T> : Component<T> {
     abstract fun clone(): Component<T>
 }
@@ -55,7 +59,7 @@ value class Identifier(val name: String)
  */
 internal val internalModule = SerializersModule {
     // Register data classes
-    polymorphic(SerializeBase::class) {
+    polymorphic(CloneableData::class) {
         subclass(ParallaxComponent.Layer::class)
         subclass(ParallaxComponent.Plane::class)
         subclass(RgbaComponent.Rgb::class)
@@ -114,7 +118,37 @@ internal val internalModule = SerializersModule {
 }
 
 /**
- * TODO document class here
+ * The JsonSerializer is used to store the world snapshot to persistent storage.
+ * All Korge-fleks internal components are already registered as polymorphic subclass
+ * in the internal module.
+ *
+ * For all Components and tags which are defined outside Korge-fleks an external
+ * module needs to be set up and registered. This can be done like below in the
+ * configuration of the fleks world:
+ *
+ * configureWorld {
+ *     systems {
+ *         SnapshotSerializerSystem.run {
+ *             setup(
+ *                 module = SerializersModule {
+ *                     // Register additional own data classes here
+ *                     polymorphic(SerializeBase::class) {
+ *                         subclass(MyData::class)
+ *                     }
+ *                     // Register additional own component classes here
+ *                     polymorphic(Component::class) {
+ *                         subclass(MyComponent::class)
+ *                     }
+ *                     // Register additional own tags (components without properties) here
+ *                     polymorphic(UniqueId::class) {
+ *                         subclass(MyTag::class)
+ *                     }
+ *                 }
+ *             )
+ *         }
+ *     }
+ * }
+ *
  */
 class SnapshotSerializer {
 

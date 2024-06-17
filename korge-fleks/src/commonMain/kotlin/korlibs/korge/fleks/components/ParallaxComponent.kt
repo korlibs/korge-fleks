@@ -36,7 +36,7 @@ data class ParallaxComponent(
          */
         val position: PositionComponent = PositionComponent(),
         val rgba: RgbaComponent = RgbaComponent()
-    ) : SerializeBase<Layer> {
+    ) : CloneableData<Layer> {
 
         // Perform deep copy with special handling for entity, position and rgba.
         override fun clone(): Layer =
@@ -60,7 +60,7 @@ data class ParallaxComponent(
         var linePositions: MutableList<Float> = mutableListOf(),
         var attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
         var attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
-    ) : SerializeBase<Plane> {
+    ) : CloneableData<Plane> {
 
         // Perform deep copy with special handling
         override fun clone(): Plane =

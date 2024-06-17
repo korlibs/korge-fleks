@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import korlibs.image.color.*
 import korlibs.korge.fleks.utils.*
@@ -22,7 +21,7 @@ data class SpriteLayersComponent(
         var offsetX: Float = 0f,
         var offsetY: Float = 0f,
         @Serializable(with = RGBAAsInt::class) var rgba: RGBA = Colors.WHITE
-    ) : SerializeBase<LayerProperties> {
+    ) : CloneableData<LayerProperties> {
         // true (alpha > 0) - false (alpha == 0)
         var visibility: Boolean = rgba.a != 0
             get() = rgba.a != 0

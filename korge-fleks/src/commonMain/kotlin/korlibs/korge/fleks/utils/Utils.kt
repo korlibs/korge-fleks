@@ -31,10 +31,10 @@ internal fun interpolateBoolean(ratio: Double, l: Boolean, r: Boolean): Boolean 
 }
 
 /**
- * Clone function for a Map object with [SerializeBase] values.
+ * Clone function for a Map object with [CloneableData] values.
  */
-@JvmName("MapSerializeBaseClone")
-fun<K, T> Map<K, SerializeBase<T>>.clone() : Map<K, T> {
+@JvmName("MapOfCloneableData")
+fun<K, T> Map<K, CloneableData<T>>.clone() : Map<K, T> {
     val mapCopy = mutableMapOf<K, T>()
     forEach { (key, value) ->
         // Perform deep copy of map value elements
@@ -46,8 +46,8 @@ fun<K, T> Map<K, SerializeBase<T>>.clone() : Map<K, T> {
 /**
  * Clone function for a Map object with List values.
  */
-@JvmName("MapListSerializeBaseClone")
-fun<K, T> Map<K, List<SerializeBase<T>>>.clone() : Map<K, List<T>> {
+@JvmName("MapOfListCloneableData")
+fun<K, T> Map<K, List<CloneableData<T>>>.clone() : Map<K, List<T>> {
     val mapCopy = mutableMapOf<K, List<T>>()
     forEach { (key, value) ->
         // Perform deep copy of map value elements
@@ -79,7 +79,7 @@ fun RGBA.cloneRgba() : RGBA = RGBA(this.value)
 /**
  * Clone function (deep copy) for [List] elements.
  */
-fun<T> List<SerializeBase<T>>.clone() : List<T> {
+fun<T> List<CloneableData<T>>.clone() : List<T> {
     val listCopy = mutableListOf<T>()
     // Perform deep copy of list elements
     forEach { element ->
