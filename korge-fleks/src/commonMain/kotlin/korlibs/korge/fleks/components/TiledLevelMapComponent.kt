@@ -20,10 +20,10 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("TiledLevelMap")
 data class TiledLevelMapComponent(
     var assetName: String = "",
-) : Component<TiledLevelMapComponent> {
+) : CloneableComponent<TiledLevelMapComponent>() {
     override fun type(): ComponentType<TiledLevelMapComponent> = TiledLevelMapComponent
     companion object : ComponentType<TiledLevelMapComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : TiledLevelMapComponent = this.copy()
+    override fun clone(): TiledLevelMapComponent = this.copy()
 }

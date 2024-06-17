@@ -10,6 +10,12 @@ import kotlinx.serialization.modules.*
 import kotlin.coroutines.*
 
 
+/**
+ * This system operates on a world snapshot of Fleks and stores it in an array for (fast) rewind and forward.
+ *
+ * Hint: The world snapshot recording will only work on components which are derived from [CloneableComponent].
+ * Please make sure you are not deriving any additional components from [Component].
+ */
 class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     interval = Fixed(step = 1/30.0f)
 ) {
@@ -25,57 +31,29 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
          * Setup function for creating the SnapshotSerializerSystem. Here it is possible to
          * add [SerializersModule] as parameter. This enables to add components, tags and config data
          * classes outside Korge-fleks.
-         *
-         * TODO: Need to check how we can add "external" components into deep copy creation in onTick function
          */
         fun SystemConfiguration.setup(module: SerializersModule) = add(SnapshotSerializerSystem(module))
     }
 
     override fun onTick() {
-
-        val worldSnapshot = world.snapshot()
         val snapshotCopy = mutableMapOf<Entity, Snapshot>()
 
         // Create deep copy of all components and tags of an entity
-        worldSnapshot.forEach { (entity, value) ->
+        world.snapshot().forEach { (entity, value) ->
             val componentsCopy = mutableListOf<Component<*>>()
             val tagsCopy = mutableListOf<UniqueId<*>>()
 
             value.components.forEach { component ->
-                // Hint: Cloning of components is done WITHOUT any world functions or features because world functions
+                // Hint: Cloning of components is done WITHOUT any world functions or features involved because world functions
                 //       will NOT operate on the components which were copied into the snapshot, instead they will
                 //       operate with components of entities in the current world! This is not what we want!
                 when (component) {
-                    is EntityLinkComponent -> componentsCopy.add(component.clone())
-                    is InfoComponent -> componentsCopy.add(component.clone())
-                    is InputTouchButtonComponent -> componentsCopy.add(component.clone())
-                    is LayerComponent-> componentsCopy.add(component.clone())
-                    is LayoutComponent -> componentsCopy.add(component.clone())
-                    is LdtkLevelMapComponent -> componentsCopy.add(component.clone())
-                    is LifeCycleComponent -> componentsCopy.add(component.clone())
-                    is MotionComponent -> componentsCopy.add(component.clone())
-                    is NoisyMoveComponent -> componentsCopy.add(component.clone())
-                    is OffsetByFrameIndexComponent -> componentsCopy.add(component.clone())
-                    is ParallaxComponent -> componentsCopy.add(component.clone())
-                    is PositionComponent -> componentsCopy.add(component.clone())
-                    is RgbaComponent -> componentsCopy.add(component.clone())
-                    is RigidbodyComponent -> componentsCopy.add(component.clone())
-                    is SizeComponent -> componentsCopy.add(component.clone())
-                    is SoundComponent -> componentsCopy.add(component.clone())
-                    is SpawnerComponent -> componentsCopy.add(component.clone())
-                    is SpriteComponent -> componentsCopy.add(component.clone())
-                    is SpriteLayersComponent -> componentsCopy.add(component.clone())
-                    is SwitchLayerVisibilityComponent -> componentsCopy.add(component.clone())
-                    is TextFieldComponent -> componentsCopy.add(component.clone())
-                    is TiledLevelMapComponent -> componentsCopy.add(component.clone())
-                    is TweenPropertyComponent -> componentsCopy.add(component.clone())
-                    is TweenSequenceComponent -> componentsCopy.add(component.clone())
+                    is CloneableComponent<*> -> componentsCopy.add(component.clone())
                     else -> {
-                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem!")
+                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from CloneableComponent<T>!")
                     }
                 }
             }
-
             value.tags.forEach { tag -> tagsCopy.add(tag) }
 
             // Create snapshot of entity as deep copy of all components and tags
@@ -86,18 +64,16 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 //        val jsonSnapshot = snapshotSerializer.json().encodeToString(world.snapshot())
 //        val snapshotCopy: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(jsonSnapshot)
 
+        // Store copy of word snapshot
         recording.add(snapshotCopy)
         rewindSeek = recording.size - 1
     }
-
 
     fun loadGameState(world: World, coroutineContext: CoroutineContext) {
         launchImmediately(context = coroutineContext) {
             val vfs = resourcesVfs["save_game.json"]
             if (vfs.exists()) {
                 val worldSnapshot = vfs.readString()
-                val family: Family = world.family { all(ParallaxComponent) }
-
                 val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(worldSnapshot)
                 world.loadSnapshot(snapshot)
                 println("snapshot loaded!")
@@ -154,6 +130,9 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         }
     }
 
+    /**
+     *
+     */
     private fun postProcessing() {
         // Do some post-processing
         family.forEach { entity ->
@@ -162,5 +141,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             parallaxComponent.run { world.updateLayerEntities() }
         }
 
+        // TODO Add possibility to invoke post processing for externally added components
     }
 }

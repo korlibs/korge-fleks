@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.assetmanager.*
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 
@@ -21,7 +22,7 @@ data class LdtkLevelMapComponent(
 
     // internal
     var initialized: Boolean = false
-) : Component<LdtkLevelMapComponent> {
+) : CloneableComponent<LdtkLevelMapComponent>() {
     override fun type(): ComponentType<LdtkLevelMapComponent> = LdtkLevelMapComponent
 
     // Get size of level map and save it into properties of this component
@@ -41,5 +42,5 @@ data class LdtkLevelMapComponent(
     companion object : ComponentType<LdtkLevelMapComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : LdtkLevelMapComponent = this.copy()
+    override fun clone(): LdtkLevelMapComponent = this.copy()
 }

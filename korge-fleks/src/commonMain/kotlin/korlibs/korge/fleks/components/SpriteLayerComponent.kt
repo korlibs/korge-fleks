@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("SpecificLayer")
 data class SpriteLayersComponent(
     var layerMap: Map<String, LayerProperties> = mapOf()
-) : Component<SpriteLayersComponent> {
+) : CloneableComponent<SpriteLayersComponent>() {
 
     @Serializable @SerialName("LayerVisibility")
     data class LayerProperties(
@@ -43,7 +43,7 @@ data class SpriteLayersComponent(
     companion object : ComponentType<SpriteLayersComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : SpriteLayersComponent =
+    override fun clone(): SpriteLayersComponent =
         this.copy(
             // Perform deep copy
             layerMap = layerMap.clone()

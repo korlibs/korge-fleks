@@ -14,7 +14,7 @@ import kotlinx.serialization.*
 data class OffsetByFrameIndexComponent(
     var entity: Entity = Entity.NONE,
     var mapOfOffsetLists: Map<String, List<Point>> = emptyMap()
-) : Component<OffsetByFrameIndexComponent> {
+) : CloneableComponent<OffsetByFrameIndexComponent>() {
 
     @Serializable @SerialName("Point")
     data class Point(
@@ -29,7 +29,7 @@ data class OffsetByFrameIndexComponent(
     companion object : ComponentType<OffsetByFrameIndexComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : OffsetByFrameIndexComponent =
+    override fun clone(): OffsetByFrameIndexComponent =
         this.copy(
             // Perform deep copy of Entity and map
             entity = entity.clone(),

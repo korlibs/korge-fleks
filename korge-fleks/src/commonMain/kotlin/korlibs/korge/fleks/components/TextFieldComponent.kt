@@ -24,12 +24,12 @@ data class TextFieldComponent(
     var wordWrap: Boolean = true,
     @Serializable(with = HorizontalAlignAsDouble::class) var horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VerticalAlignAsDouble::class) var verticalAlign: VerticalAlign = VerticalAlign.TOP
-) : Component<TextFieldComponent> {
+) : CloneableComponent<TextFieldComponent>() {
     override fun type(): ComponentType<TextFieldComponent> = TextFieldComponent
     companion object : ComponentType<TextFieldComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : TextFieldComponent =
+    override fun clone(): TextFieldComponent =
         this.copy(
             // Perform deep copy of Alignment enums
             horizontalAlign = horizontalAlign.clone(),

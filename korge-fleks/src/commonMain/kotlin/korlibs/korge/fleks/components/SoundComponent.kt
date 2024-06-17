@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -25,10 +26,10 @@ data class SoundComponent(
     var volume: Double = 1.0,
     var isPlaying: Boolean = false,
     var loop: Boolean = false  // TODO not yet implemented
-) : Component<SoundComponent> {
+) : CloneableComponent<SoundComponent>() {
     override fun type(): ComponentType<SoundComponent> = SoundComponent
     companion object : ComponentType<SoundComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : SoundComponent = this.copy()
+    override fun clone(): SoundComponent = this.copy()
 }

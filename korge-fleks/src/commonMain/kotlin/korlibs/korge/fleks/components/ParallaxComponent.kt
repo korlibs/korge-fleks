@@ -26,7 +26,7 @@ data class ParallaxComponent(
 
     // internal
     var initialized: Boolean = false
-) : Component<ParallaxComponent> {
+) : CloneableComponent<ParallaxComponent>() {
 
     @Serializable @SerialName("Parallax.Layer")
     data class Layer(
@@ -149,7 +149,7 @@ data class ParallaxComponent(
     companion object : ComponentType<ParallaxComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : ParallaxComponent {
+    override fun clone(): ParallaxComponent {
         val bgLayers = mutableListOf<Layer>()
         val fgLayers = mutableListOf<Layer>()
         // Perform special deep copy of list elements

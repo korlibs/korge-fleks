@@ -27,7 +27,7 @@ data class TweenPropertyComponent (
     var duration: Float = 0f,                    // in seconds
     var timeProgress: Float = 0f,                // in seconds
     @Serializable(with = EasingSerializer::class) var easing: Easing = Easing.LINEAR  // Changing function
-) : Component<TweenPropertyComponent> {
+) : CloneableComponent<TweenPropertyComponent>() {
     override fun type(): ComponentType<TweenPropertyComponent> = property.type
 
     /**
@@ -112,7 +112,7 @@ data class TweenPropertyComponent (
     }
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : TweenPropertyComponent =
+    override fun clone(): TweenPropertyComponent =
         this.copy(
             change = change,
             value = value,

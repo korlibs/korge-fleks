@@ -14,7 +14,7 @@ data class InfoComponent(
 
     // internal
     var initialized: Boolean = false
-) : Component<InfoComponent> {
+) : CloneableComponent<InfoComponent>() {
     override fun type(): ComponentType<InfoComponent> = InfoComponent
 
     override fun World.onAdd(entity: Entity) {
@@ -33,6 +33,6 @@ data class InfoComponent(
     companion object : ComponentType<InfoComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : InfoComponent = this.copy()
+    override fun clone(): InfoComponent = this.copy()
 }
 

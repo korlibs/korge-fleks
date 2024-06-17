@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 
@@ -13,10 +14,10 @@ import kotlinx.serialization.*
 @Serializable @SerialName("Layer")
 data class LayerComponent(
     val layerIndex: Int = 0
-) : Component<LayerComponent> {
+) : CloneableComponent<LayerComponent>() {
     override fun type(): ComponentType<LayerComponent> = LayerComponent
     companion object : ComponentType<LayerComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : LayerComponent = this.copy()
+    override fun clone(): LayerComponent = this.copy()
 }

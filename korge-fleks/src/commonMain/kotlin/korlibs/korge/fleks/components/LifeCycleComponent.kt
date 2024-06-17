@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,10 +10,10 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("LifeCycle")
 data class LifeCycleComponent(
     var healthCounter: Int = 100
-) : Component<LifeCycleComponent> {
+) : CloneableComponent<LifeCycleComponent>() {
     override fun type(): ComponentType<LifeCycleComponent> = LifeCycleComponent
     companion object : ComponentType<LifeCycleComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : LifeCycleComponent = this.copy()
+    override fun clone(): LifeCycleComponent = this.copy()
 }

@@ -17,10 +17,10 @@ data class LayoutComponent(
     var centerY: Boolean = false,
     var offsetX: Float = 0f,
     var offsetY: Float = 0f
-) : Component<LayoutComponent> {
+) : CloneableComponent<LayoutComponent>() {
     override fun type(): ComponentType<LayoutComponent> = LayoutComponent
     companion object : ComponentType<LayoutComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : LayoutComponent = this.copy()
+    override fun clone(): LayoutComponent = this.copy()
 }

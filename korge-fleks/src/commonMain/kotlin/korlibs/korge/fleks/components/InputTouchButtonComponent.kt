@@ -12,10 +12,10 @@ data class InputTouchButtonComponent(
     var pressed: Boolean = false,
     var triggerImmediately: Boolean = false,
     var entityConfig: String = "",
-) : Component<InputTouchButtonComponent> {
+) : CloneableComponent<InputTouchButtonComponent>() {
     override fun type(): ComponentType<InputTouchButtonComponent> = InputTouchButtonComponent
     companion object : ComponentType<InputTouchButtonComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : InputTouchButtonComponent = this.copy()
+    override fun clone(): InputTouchButtonComponent = this.copy()
 }

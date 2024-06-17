@@ -14,12 +14,12 @@ data class EntityLinkComponent(
     // Configure what to do with the linked entity
     var moveWith: Boolean = true
 
-) : Component<EntityLinkComponent> {
+) : CloneableComponent<EntityLinkComponent>() {
     override fun type() = EntityLinkComponent
     companion object : ComponentType<EntityLinkComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : EntityLinkComponent =
+    override fun clone(): EntityLinkComponent =
         this.copy(
             // Perform deep copy of Entity
             linkedEntity = linkedEntity.clone()  // Entity(linkedEntity.id, linkedEntity.version)

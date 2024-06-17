@@ -38,7 +38,7 @@ data class NoisyMoveComponent(
 
     // internal
     var initialized: Boolean = false
-) : Component<NoisyMoveComponent> {
+) : CloneableComponent<NoisyMoveComponent>() {
     override fun type() = NoisyMoveComponent
 
     override fun World.onAdd(entity: Entity) {
@@ -73,5 +73,5 @@ data class NoisyMoveComponent(
     companion object : ComponentType<NoisyMoveComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : NoisyMoveComponent = this.copy()
+    override fun clone(): NoisyMoveComponent = this.copy()
 }

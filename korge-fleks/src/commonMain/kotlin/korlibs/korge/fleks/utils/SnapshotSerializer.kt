@@ -33,6 +33,11 @@ interface SerializeBase<out T> {
     fun clone(): T
 }
 
+// TODO
+abstract class CloneableComponent<T> : Component<T> {
+    abstract fun clone(): Component<T>
+}
+
 /**
  * Class for serializing identifier objects for entity configs and functions in components.
  *

@@ -3,6 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -20,12 +21,12 @@ data class SpawnerComponent(
     // internal state
     var nextSpawnIn: Int = 0,
     var numberOfObjectsSpawned: Int = 0
-) : Component<SpawnerComponent> {
+) : CloneableComponent<SpawnerComponent>() {
     override fun type(): ComponentType<SpawnerComponent> = SpawnerComponent
     companion object : ComponentType<SpawnerComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    fun clone() : SpawnerComponent =
+    override fun clone(): SpawnerComponent =
         this.copy(
             // Perform deep copy
             newEntity = newEntity.copy()
