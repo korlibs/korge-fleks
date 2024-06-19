@@ -77,5 +77,30 @@ class LDtkLevelMapRenderSystem(
                 }
             }
         }
+
+        configureAssetUpdater(AssetType.World) {
+            onLdtkLevelMapChanged {
+                // remove old ldtk view and create new one
+                if (levelMapEntity != Entity.NONE) {
+                    // Possibly remove old level map view from container
+                    levelMapView?.removeFromParent()
+
+                    // Create new view for the level map and add it to the container
+                    with(world) {
+                        val ldtkLevelMapComponent = levelMapEntity[LdtkLevelMapComponent]
+                        val ldtkWorld = assetStore.getLdtkWorld(ldtkLevelMapComponent.worldName)
+                        val ldtkLevel = assetStore.getLdtkLevel(ldtkWorld, ldtkLevelMapComponent.levelName)
+                        levelMapView = LDTKLevelView(
+                            level = LDTKLevel(
+                                world = ldtkWorld,
+                                level = ldtkLevel
+                            )
+                        )
+                    }
+                    addChild(levelMapView!!)
+                    println("Recreate View for entity ${levelMapEntity.id} in '$name'")
+                }
+            }
+        }
     }
 }
