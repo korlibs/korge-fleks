@@ -25,3 +25,20 @@ data class EntityLinkComponent(
             linkedEntity = linkedEntity.clone()  // Entity(linkedEntity.id, linkedEntity.version)
         )
 }
+
+data class SubEntitiesComponent(
+    var subEntities: List<Entity> = listOf(),
+    // Configure what to do with the linked entities
+    var moveWith: Boolean = false,
+    var delete: Boolean = false
+) : CloneableComponent<SubEntitiesComponent>() {
+    override fun type() = SubEntitiesComponent
+    companion object : ComponentType<SubEntitiesComponent>()
+
+    // Author's hint: Check if deep copy is needed on any change in the component!
+    override fun clone(): SubEntitiesComponent =
+        this.copy(
+            // Perform deep copy of Entity List
+            subEntities = subEntities.clone()
+        )
+}

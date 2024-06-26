@@ -77,13 +77,27 @@ fun VerticalAlign.clone() : VerticalAlign = VerticalAlign(this.ratio)
 fun RGBA.cloneRgba() : RGBA = RGBA(this.value)
 
 /**
- * Clone function (deep copy) for [List] elements.
+ * Clone function (deep copy) for [List] of [CloneableData] elements.
  */
+@JvmName("ListOfCloneableData")
 fun<T> List<CloneableData<T>>.clone() : List<T> {
     val listCopy = mutableListOf<T>()
     // Perform deep copy of list elements
     forEach { element ->
         listCopy.add(element.clone())
+    }
+    return listCopy
+}
+
+/**
+ * Clone function (deep copy) for [List] of [Entity] elements.
+ */
+@JvmName("ListOfEntities")
+fun List<Entity>.clone() : List<Entity> {
+    val listCopy = mutableListOf<Entity>()
+    // Perform deep copy of list elements
+    forEach { entity ->
+        listCopy.add(entity.clone())
     }
     return listCopy
 }
