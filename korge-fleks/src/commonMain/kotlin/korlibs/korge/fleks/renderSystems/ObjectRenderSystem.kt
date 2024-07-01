@@ -28,7 +28,7 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator =compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, LayerComponent, PositionComponent, RgbaComponent)
-        .any(LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent)
+        .any(LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
@@ -83,6 +83,26 @@ class ObjectRenderSystem(
                                 program = null
                             )
                         }
+                    }
+                }
+            }
+            else if (entity has LayeredSpriteComponent) {
+                val (name, anchorX, anchorY, animation, frameIndex, _, _, _, _, _, _, _, layerList) = entity[LayeredSpriteComponent]
+                val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
+
+                ctx.useBatcher { batch ->
+                    // Iterate over all layers of each sprite for the frame number
+                    imageFrame.layerData.fastForEachWithIndex { index, image ->
+                        val layer = layerList[index]
+                        batch.drawQuad(
+                            tex = ctx.getTex(image.slice),
+                            x = x + image.targetX - anchorX + layer.position.x + layer.position.offsetX,
+                            y = y + image.targetY - anchorY + layer.position.y + layer.position.offsetY,
+                            filtering = false,
+                            colorMul = layer.rgba.rgba,
+                            // TODO: Add possibility to use a custom shader - add ShaderComponent or similar
+                            program = null
+                        )
                     }
                 }
             }

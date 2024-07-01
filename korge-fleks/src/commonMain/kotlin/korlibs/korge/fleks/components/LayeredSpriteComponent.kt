@@ -34,8 +34,7 @@ data class LayeredSpriteComponent(
     var initialized: Boolean = false,
 
     // internal
-    // TODO set during loading of aseprite files
-    var layerMap: Map<String, Layer> = mapOf(),
+    var layerMap: Map<String, Layer> = mapOf(),  // TODO check - maybe not needed if it is accessed only here
     var layerList: List<Layer> = listOf()
 ): CloneableComponent<LayeredSpriteComponent>() {
 
@@ -112,6 +111,16 @@ data class LayeredSpriteComponent(
         }
         layerMap = map
         layerList = list
+
+        // Create new entities for controlling position and color of each layer e.g. by the TweenEngineSystem
+        layerList.forEach { layer ->
+            // Create new entity and add existing components from the sprite layer config
+            layer.entity = entity {
+                it += layer.position
+                it += layer.rgba
+            }
+            println("create layer entity: ${layer.entity}")
+        }
 
 //        println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
     }
