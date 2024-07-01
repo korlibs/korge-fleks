@@ -65,6 +65,7 @@ internal val internalModule = SerializersModule {
         subclass(RgbaComponent.Rgb::class)
         subclass(OffsetByFrameIndexComponent.Point::class)
         subclass(SpriteLayersComponent.LayerProperties::class)
+        subclass(LayeredSpriteComponent.Layer::class)
     }
 
     // Register component classes
@@ -73,6 +74,7 @@ internal val internalModule = SerializersModule {
         subclass(InfoComponent::class)
         subclass(InputTouchButtonComponent::class)
         subclass(LayerComponent::class)
+        subclass(LayeredSpriteComponent::class)
         subclass(LayoutComponent::class)
         subclass(LdtkLevelMapComponent::class)
         subclass(LifeCycleComponent::class)
@@ -88,6 +90,7 @@ internal val internalModule = SerializersModule {
         subclass(SpawnerComponent::class)
         subclass(SpriteLayersComponent::class)
         subclass(SpriteComponent::class)
+        subclass(SubEntitiesComponent::class)
         subclass(SwitchLayerVisibilityComponent::class)
         subclass(TextFieldComponent::class)
         subclass(TiledLevelMapComponent::class)

@@ -125,6 +125,23 @@ data class LayeredSpriteComponent(
 //        println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
     }
 
+    /**
+     * After deserialization some cleanup and setup needs to be done
+     * go through each layer entity and copy the Position and RgbaComponent from the layer lists.
+     */
+    fun World.updateLayerEntities() {
+        // Overwrite existing components with those from the layer config list
+        val newMap = mutableMapOf<String, Layer>()
+        layerList.forEach { layer ->
+            layer.entity.configure {
+                it += layer.position
+                it += layer.rgba
+            }
+            newMap[layer.name] = layer
+        }
+        layerMap = newMap
+    }
+
     override fun type() = LayeredSpriteComponent
     companion object : ComponentType<LayeredSpriteComponent>()
 
@@ -133,6 +150,7 @@ data class LayeredSpriteComponent(
         this.copy(
             // Perform deep copy
             direction = direction,  // normal ordinary enum - no deep copy needed
-            layerMap = layerMap.clone(),
+            layerList = layerList.clone(),
+            layerMap = layerMap.clone()
         )
 }

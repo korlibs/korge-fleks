@@ -140,6 +140,10 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             val parallaxComponent = entity[ParallaxComponent]
             parallaxComponent.run { world.updateLayerEntities() }
         }
+        world.family { all(LayeredSpriteComponent) }.forEach { entity ->
+            val layeredSpriteComponent = entity[LayeredSpriteComponent]
+            layeredSpriteComponent.run { world.updateLayerEntities() }
+        }
 
         // TODO Add possibility to invoke post processing for externally added components
     }

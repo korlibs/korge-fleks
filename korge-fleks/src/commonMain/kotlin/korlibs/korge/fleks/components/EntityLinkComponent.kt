@@ -26,6 +26,7 @@ data class EntityLinkComponent(
         )
 }
 
+@Serializable @SerialName("SubEntities")
 data class SubEntitiesComponent(
     var subEntities: List<Entity> = listOf(),
     // Configure what to do with the linked entities
