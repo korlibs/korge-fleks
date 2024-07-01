@@ -33,13 +33,14 @@ data class LayeredSpriteComponent(
     var nextFrameIn: Float = 0f,                      // time in seconds until next frame of animation shall be shown
     var initialized: Boolean = false,
 
-    // internal
-    var layerMap: Map<String, Layer> = mapOf(),  // TODO check - maybe not needed if it is accessed only here
-    var layerList: List<Layer> = listOf()
+    // internally used for rendering and tween animation of layer position and rgba (alpha channel)
+    var layerList: List<Layer> = listOf(),
+    var layerMap: Map<String, Layer> = mapOf()
 ): CloneableComponent<LayeredSpriteComponent>() {
 
     @Serializable @SerialName("LayeredSprite.Layer")
     data class Layer(
+        val name: String,
         var entity: Entity = Entity.NONE,  // Link to entity for tween animation
         /**
          * Local position of layer relative to the top-left point of the parallax entity (global PositionComponent).
@@ -50,13 +51,12 @@ data class LayeredSpriteComponent(
 
         // Perform deep copy with special handling for entity, position and rgba.
         override fun clone(): Layer =
-            Layer(
+            this.copy(
                 entity = entity.clone(),
                 position = position.clone(),
                 rgba = rgba.clone()
             )
     }
-
 
     // Set frameIndex for starting animation
     fun setFrameIndex(assetStore: AssetStore) {
@@ -102,10 +102,10 @@ data class LayeredSpriteComponent(
         // Create map and list of all layers of the sprite textures
         val map = mutableMapOf<String, Layer>()
         val list = mutableListOf<Layer>()
-        assetStore.getImageAnimation(name, animation).firstFrame.layerData.forEach {
-            val layer = Layer()
-            if (it.layer.name != null) {
-                map[it.layer.name!!] = layer
+        assetStore.getImageAnimation(name, animation).firstFrame.layerData.forEach { data ->
+            if (data.layer.name != null) {
+                val layer = Layer(name = data.layer.name!!)
+                map[data.layer.name!!] = layer
                 list.add(layer)
             }
         }
@@ -119,7 +119,7 @@ data class LayeredSpriteComponent(
                 it += layer.position
                 it += layer.rgba
             }
-            println("create layer entity: ${layer.entity}")
+            println("create entity '${layer.entity.id}' for layer '${layer.name}'")
         }
 
 //        println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
@@ -134,6 +134,5 @@ data class LayeredSpriteComponent(
             // Perform deep copy
             direction = direction,  // normal ordinary enum - no deep copy needed
             layerMap = layerMap.clone(),
-            layerList = layerList.clone()
         )
 }

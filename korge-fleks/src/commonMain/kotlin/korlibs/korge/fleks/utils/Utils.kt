@@ -57,6 +57,19 @@ fun<K, T> Map<K, List<CloneableData<T>>>.clone() : Map<K, List<T>> {
 }
 
 /**
+ * Clone function for a Map object with [Entity] values.
+ */
+@JvmName("MapOfEnities")
+fun<T> Map<T, Entity>.clone() : Map<T, Entity> {
+    val mapCopy = mutableMapOf<T, Entity>()
+    forEach { (key, value) ->
+        // Perform deep copy of map value elements
+        mapCopy[key] = value.clone()
+    }
+    return mapCopy
+}
+
+/**
  * Clone function for [Entity] objects. Just for naming consistency.
  */
 fun Entity.clone() : Entity = Entity(id, version)

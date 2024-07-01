@@ -25,7 +25,7 @@ class ObjectRenderSystem(
     private val viewPortSize: SizeInt,
     world: World,
     layerTag: RenderLayerTag,
-    private val comparator: EntityComparator =compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
+    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, LayerComponent, PositionComponent, RgbaComponent)
         .any(LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent)
@@ -87,13 +87,14 @@ class ObjectRenderSystem(
                 }
             }
             else if (entity has LayeredSpriteComponent) {
-                val (name, anchorX, anchorY, animation, frameIndex, _, _, _, _, _, _, _, layerList) = entity[LayeredSpriteComponent]
+                val (name, anchorX, anchorY, animation, frameIndex, _, _, _, _, _, _, layerList) = entity[LayeredSpriteComponent]
                 val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
 
                 ctx.useBatcher { batch ->
                     // Iterate over all layers of each sprite for the frame number
-                    imageFrame.layerData.fastForEachWithIndex { index, image ->
-                        val layer = layerList[index]
+                    layerList.fastForEachWithIndex { index, layer ->
+                        // Get image data for specific layer from asset store
+                        val image = imageFrame.layerData[index]
                         batch.drawQuad(
                             tex = ctx.getTex(image.slice),
                             x = x + image.targetX - anchorX + layer.position.x + layer.position.offsetX,
