@@ -94,9 +94,11 @@ data class TweenSequenceComponent(
 
     @Serializable @SerialName("Wait")
     data class Wait(
+        override var duration: Float? = Float.MAX_VALUE,  // Use duration by setting explicitly a value
+        val eventIdx: Int? = null,                     // Wait for a specific event if eventId is not "null" - need to unblock from infinite wait (Float.MAX_VALUE)
+
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,            // Not used
-        override var duration: Float? = 0f,
         @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): Wait =
@@ -108,8 +110,6 @@ data class TweenSequenceComponent(
 
     @Serializable @SerialName("DeleteEntity")
     data class DeleteEntity(
-        val healthCounter: Int = 0,             // set healthCounter to zero to delete the entity immediately
-
         override var entity: Entity,
         override var delay: Float? = null,      // not used
         override var duration: Float? = null,   // not used

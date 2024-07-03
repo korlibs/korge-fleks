@@ -15,7 +15,8 @@ class LifeCycleSystem : IteratingSystem(
 
         if (lifeCycle.healthCounter <= 0) {
             world -= entity
-//            println("LifeCycleSystem: Remove entity '${entity.id}'")
+            // TODO delete all subEntities
+            println("LifeCycleSystem: Remove entity '${entity.id}'")
         }
     }
 }

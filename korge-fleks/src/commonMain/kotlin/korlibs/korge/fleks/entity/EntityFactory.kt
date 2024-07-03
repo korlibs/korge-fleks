@@ -22,6 +22,8 @@ object EntityFactory {
     interface EntityConfig {
         val name: String
         val configureEntity: (World, Entity) -> Entity
+        // TODO add possibility for a specific entityConfig at creation of the game object
+        //val configureEntity: (World, Entity, EntityConfig) -> Entity
     }
 
     private val entityConfigs: MutableMap<String, EntityConfig> = mutableMapOf()

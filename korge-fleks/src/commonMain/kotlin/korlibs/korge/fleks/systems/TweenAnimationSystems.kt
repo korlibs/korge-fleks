@@ -2,6 +2,7 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import com.github.quillraven.fleks.collection.*
 import korlibs.image.format.*
 import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionXComponent
@@ -12,6 +13,7 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenRgbaAlphaComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenRgbaTintComponent
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenEventSubscribeComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundPositionComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStartTriggerComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStopTriggerComponent
@@ -29,6 +31,7 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSwit
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextRangeEndComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextRangeStartComponent
+import korlibs.korge.fleks.entity.*
 import kotlin.jvm.JvmName
 import kotlin.reflect.KMutableProperty0
 
@@ -152,6 +155,40 @@ class TweenTextFieldSystem : IteratingSystem(
     }
 }
 
+class TweenEventSystem : IteratingSystem(
+    family = family { all(TweenSequenceComponent, TweenEventSubscribeComponent) },
+    interval = EachFrame
+) {
+    // Event bitmap
+    private val eventMap: BitArray = BitArray()
+
+    fun setEvent(idx: Int) {
+        eventMap.set(idx)
+    }
+
+    override fun onTickEntity(entity: Entity) {
+        val (_, eventIdx) = entity[TweenEventSubscribeComponent]
+
+        // Set event if the entity is publishing it
+//        if (publish) {
+//            eventMap.set(event)
+//        }
+
+        val subscribe = true  // TweenEventSubscribeComponent
+
+        // Run the specific event config function on the entity which is subscribed to this event
+        if (subscribe && eventMap[eventIdx as Int]) {
+            // Unblock tween script
+            val tweenSequence = entity[TweenSequenceComponent]
+            tweenSequence.waitTime = 0f
+            // Reset config
+            eventMap.clear(eventIdx)
+            entity.configure { it -= TweenEventSubscribeComponent }
+        }
+    }
+}
+
+
 //class AnimateLifeCycleSystem : IteratingSystem(
 //    family { all(LifeCycleComponent).any(TweenLifeCycleHealthCounter) },
 //    interval = EachFrame
@@ -174,6 +211,7 @@ fun SystemConfiguration.setupTweenEngineSystems() {
     add(TweenSwitchLayerVisibilitySystem())
     add(TweenSoundSystem())
     add(TweenTextFieldSystem())
+    add(TweenEventSystem())
 }
 
 /**

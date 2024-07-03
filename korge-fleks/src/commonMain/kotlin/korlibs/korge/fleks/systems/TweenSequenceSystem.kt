@@ -162,13 +162,25 @@ class TweenSequenceSystem : IteratingSystem(
                 EntityFactory.createEntity(tween.entityConfig, world, spawnedEntity)
             }
             // Directly deletes the given entity from the tween
-            is DeleteEntity -> tween.entity.configure { entityToDelete -> world -= entityToDelete }
+            is DeleteEntity -> {
+                if (tween.entity has SubEntitiesComponent) {
+                    // Delete first all sub-entities
+                    tween.entity[SubEntitiesComponent].subEntities.forEach {
+                        world -= it
+                    }
+                }
+                world -= tween.entity
+            }
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.createEntity(tween.entityConfig, world, tween.entity)
+            is Wait -> {
+                tween.eventIdx?.let {
+                    eventIdx -> createTweenPropertyComponent(EventSubscribe, value = eventIdx)
+                }
+            }
             else -> {
                 when (tween) {
                     is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens")
-                    is Wait -> println("WARNING - TweenSequenceSystem: \"Wait\" not allowed in ParallelTweens")
                     else -> println("WARNING - TweenSequenceSystem: Animate function for tween $tween not implemented!")
                 }
             }

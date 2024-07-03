@@ -71,6 +71,8 @@ data class TweenPropertyComponent (
         TextFieldTextRangeStart(componentTypeOf<TweenPropertyComponent>()),
         TextFieldTextRangeEnd(componentTypeOf<TweenPropertyComponent>()),
 
+        EventSubscribe(componentTypeOf<TweenPropertyComponent>())
+
     }
 
     companion object {
@@ -109,6 +111,8 @@ data class TweenPropertyComponent (
         val TweenTextFieldTextComponent = TweenProperty.TextFieldText.type
         val TweenTextFieldTextRangeStartComponent = TweenProperty.TextFieldTextRangeStart.type
         val TweenTextFieldTextRangeEndComponent = TweenProperty.TextFieldTextRangeEnd.type
+
+        val TweenEventSubscribeComponent = TweenProperty.EventSubscribe.type
     }
 
     // Author's hint: Check if deep copy is needed on any change in the component!
