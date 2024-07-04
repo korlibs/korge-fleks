@@ -95,7 +95,7 @@ data class TweenSequenceComponent(
     @Serializable @SerialName("Wait")
     data class Wait(
         override var duration: Float? = Float.MAX_VALUE,  // Use duration by setting explicitly a value
-        val eventIdx: Int? = null,                     // Wait for a specific event if eventId is not "null" - need to unblock from infinite wait (Float.MAX_VALUE)
+        val event: Int? = null,                       // Wait for a specific event if eventId is not "null" - need to unblock from infinite wait (Float.MAX_VALUE)
 
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,            // Not used

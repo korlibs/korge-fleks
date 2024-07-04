@@ -103,10 +103,8 @@ class TweenSequenceSystem : IteratingSystem(
                         }
                     }
                 }
-                // In case of "Wait" the duration was already set above
-                else -> {
-                    if (currentTween !is Wait) checkTween(currentTween, defaultTweenValues)
-                }
+                // In case of "Wait"-Tween "waitTime = duration" was already set above
+                else -> checkTween(currentTween, defaultTweenValues)
             }
         }
         else tweenSequence.timeProgress += deltaTime
@@ -173,11 +171,7 @@ class TweenSequenceSystem : IteratingSystem(
             }
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.createEntity(tween.entityConfig, world, tween.entity)
-            is Wait -> {
-                tween.eventIdx?.let {
-                    eventIdx -> createTweenPropertyComponent(EventSubscribe, value = eventIdx)
-                }
-            }
+            is Wait -> tween.event?.let { event -> createTweenPropertyComponent(EventSubscribe, value = event) }
             else -> {
                 when (tween) {
                     is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens")

@@ -71,6 +71,7 @@ data class TweenPropertyComponent (
         TextFieldTextRangeStart(componentTypeOf<TweenPropertyComponent>()),
         TextFieldTextRangeEnd(componentTypeOf<TweenPropertyComponent>()),
 
+        EventPublish(componentTypeOf<TweenPropertyComponent>()),
         EventSubscribe(componentTypeOf<TweenPropertyComponent>())
 
     }
@@ -112,6 +113,7 @@ data class TweenPropertyComponent (
         val TweenTextFieldTextRangeStartComponent = TweenProperty.TextFieldTextRangeStart.type
         val TweenTextFieldTextRangeEndComponent = TweenProperty.TextFieldTextRangeEnd.type
 
+        val TweenEventPublishComponent = TweenProperty.EventPublish.type
         val TweenEventSubscribeComponent = TweenProperty.EventSubscribe.type
     }
 
