@@ -85,7 +85,7 @@ class TweenSequenceSystem : IteratingSystem(
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
                             // Tween has its own delay -> spawn a new TweenSequence for it
-                            world.createEntity("ParallelTween: ${tween::class.simpleName} for entity '${tween.entity.id}'") {
+                            world.entity("ParallelTween: ${tween::class.simpleName} for entity '${tween.entity.id}'") {
                                 it += TweenSequenceComponent(
                                     tweens = listOf(
                                         // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
@@ -157,7 +157,7 @@ class TweenSequenceSystem : IteratingSystem(
             }
             // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
             is SpawnEntity -> {
-                val spawnedEntity = if (tween.entity == Entity.NONE) world.entity() else tween.entity
+                val spawnedEntity = if (tween.entity == Entity.NONE) world.entity("SpawnEntity: ${tween.entityConfig}") else tween.entity
                 EntityFactory.createEntity(tween.entityConfig, world, spawnedEntity)
             }
             // Directly deletes the given entity from the tween

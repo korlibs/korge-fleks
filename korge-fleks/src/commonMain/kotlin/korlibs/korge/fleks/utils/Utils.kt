@@ -35,7 +35,7 @@ internal fun interpolateBoolean(ratio: Double, l: Boolean, r: Boolean): Boolean 
 /**
  * Create new entity and add a name to it for easier debugging/tracing.
  */
-fun World.createEntity(name: String, configuration: EntityCreateContext.(Entity) -> Unit) : Entity {
+fun World.entity(name: String, configuration: EntityCreateContext.(Entity) -> Unit = {}) : Entity {
     return entity(configuration).apply { configure { it += InfoComponent(name) } }
 }
 

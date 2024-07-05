@@ -103,19 +103,18 @@ data class ParallaxComponent(
         // We share here the component objects from ParallaxComponent
         backgroundLayers.forEach { layer ->
             // Create new entity and add existing components from the parallax layer config
-            layer.entity = entity {
+            layer.entity = this.entity("Parallax BG layer of entity '${entity.id}'") {
                 it += layer.position
                 it += layer.rgba
             }
-            println("create bg entity: ${layer.entity}")
         }
         foregroundLayers.forEach { layer ->
-            layer.entity = entity {
+            layer.entity = this.entity("Parallax FG layer of entity '${entity.id}'") {
                 it += layer.position
                 it += layer.rgba
             }
         }
-        parallaxPlane.entity = entity {
+        parallaxPlane.entity = this.entity("Parallax plane of entity '${entity.id}'") {
             it += parallaxPlane.position
             it += parallaxPlane.rgba
         }

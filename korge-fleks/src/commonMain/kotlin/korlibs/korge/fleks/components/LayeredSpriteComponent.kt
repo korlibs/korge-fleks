@@ -115,7 +115,7 @@ data class LayeredSpriteComponent(
         // Create new entities for controlling position and color of each layer e.g. by the TweenEngineSystem
         layerList.forEach { layer ->
             // Create new entity and add existing components from the sprite layer config
-            layer.entity = entity {
+            layer.entity = this.entity("Sprite layer '${layer.name}' of entity '${entity.id}'") {
                 it += layer.position
                 it += layer.rgba
             }
