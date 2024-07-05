@@ -8,6 +8,7 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.TweenProperty.*
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import korlibs.korge.fleks.entity.EntityFactory
+import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.Easing
 
 /**
@@ -160,15 +161,7 @@ class TweenSequenceSystem : IteratingSystem(
                 EntityFactory.createEntity(tween.entityConfig, world, spawnedEntity)
             }
             // Directly deletes the given entity from the tween
-            is DeleteEntity -> {
-                if (tween.entity has SubEntitiesComponent) {
-                    // Delete first all sub-entities
-                    tween.entity[SubEntitiesComponent].subEntities.forEach {
-                        world -= it
-                    }
-                }
-                world -= tween.entity
-            }
+            is DeleteEntity -> world.deleteComplex(tween.entity)
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.createEntity(tween.entityConfig, world, tween.entity)
             is Wait -> tween.event?.let { event -> createTweenPropertyComponent(EventSubscribe, value = event) }

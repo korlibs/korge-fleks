@@ -3,6 +3,8 @@ package korlibs.korge.fleks.utils
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.image.text.*
+import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.systems.*
 import kotlin.jvm.*
 import kotlin.random.Random
 
@@ -28,6 +30,13 @@ internal fun interpolateString(ratio: Double, l: String, r: String): String = wh
 internal fun interpolateBoolean(ratio: Double, l: Boolean, r: Boolean): Boolean = when {
     ratio < 0.5 -> l
     else -> r
+}
+
+/**
+ * Delete function for entity which let the [LifeCycleSystem] delete and cleanup all sub-entities, too.
+ */
+fun World.deleteComplex(entity: Entity) {
+    entity.configure { it.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }.apply { healthCounter = 0 } }
 }
 
 /**
