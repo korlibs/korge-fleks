@@ -85,7 +85,7 @@ class TweenSequenceSystem : IteratingSystem(
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
                             // Tween has its own delay -> spawn a new TweenSequence for it
-                            world.entity {
+                            world.createEntity("ParallelTween: ${tween::class.simpleName} for entity '${tween.entity.id}'") {
                                 it += TweenSequenceComponent(
                                     tweens = listOf(
                                         // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence

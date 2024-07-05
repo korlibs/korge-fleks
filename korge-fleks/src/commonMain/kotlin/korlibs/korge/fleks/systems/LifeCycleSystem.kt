@@ -15,15 +15,20 @@ class LifeCycleSystem : IteratingSystem(
             // Delete first all sub-entities
             entity.getOrNull(SubEntitiesComponent)?.subEntities?.forEach {
                 world -= it
-                println("LifeCycleSystem: Remove sub-entity '${entity.id}'")
+                debugPrint(entity, "sub")
             }
             // Delete first all layer entities
             entity.getOrNull(LayeredSpriteComponent)?.layerList?.forEach {
                 world -= it.entity
-                println("LifeCycleSystem: Remove layer-entity '${entity.id}'")
+                debugPrint(entity, "layer")
             }
             world -= entity
-            println("LifeCycleSystem: Remove base-entity '${entity.id}'")
+            debugPrint(entity, "base")
         }
+    }
+
+    private fun debugPrint(entity: Entity, type: String) {
+        val name: String = entity.getOrNull(InfoComponent)?.name ?: "no name"
+        println("LifeCycleSystem: Remove $type-entity '${entity.id}' ($name)")
     }
 }
