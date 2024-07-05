@@ -15,12 +15,12 @@ class LifeCycleSystem : IteratingSystem(
             // Delete first all sub-entities
             entity.getOrNull(SubEntitiesComponent)?.subEntities?.forEach {
                 world -= it
-                debugPrint(entity, "sub")
+                debugPrint(it, "sub")
             }
             // Delete first all layer entities
             entity.getOrNull(LayeredSpriteComponent)?.layerList?.forEach {
                 world -= it.entity
-                debugPrint(entity, "layer")
+                debugPrint(it.entity, "layer")
             }
             world -= entity
             debugPrint(entity, "base")
