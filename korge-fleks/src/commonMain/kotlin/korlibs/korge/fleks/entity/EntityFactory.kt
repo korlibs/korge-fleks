@@ -2,6 +2,8 @@ package korlibs.korge.fleks.entity
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.utils.*
 
 
 /**
@@ -10,7 +12,7 @@ import com.github.quillraven.fleks.World
  *
  * New [EntityConfig]'s needs to be added to the factory with the [register] method. That makes the
  * [EntityConfig] available everywhere in the game by just its name.
- * Systems like [SpawnerSystem] call [createEntity] with a name parameter which maps to a specific [EntityConfig].
+ * Systems like [SpawnerSystem] call [configureEntity] with an entityConfig name parameter which maps to a specific [EntityConfig].
  */
 object EntityFactory {
 
@@ -32,12 +34,19 @@ object EntityFactory {
         entityConfigs[entityConfig.name] = entityConfig
     }
 
-    fun createEntity(name: String, world: World, entity: Entity) : Entity {
-        val configuredEntity = entityConfigs[name]?.configureEntity?.invoke(world, entity)
-        if (configuredEntity != null) return configuredEntity
-        else {
-            println("WARNING: Cannot invoke! Function with name '$name' not registered in EntityFactory!")
-            return entity
+    fun configureEntity(entityConfig: String, world: World, entity: Entity) : Entity {
+        with (world) {
+            // Make sure we have entity with InfoComponent for better traceability
+            val baseEntity = if (entity == Entity.NONE) entity(entityConfig)
+            else entity.apply { configure { it += InfoComponent(entityConfig) } }
+
+            val configuredEntity = entityConfigs[entityConfig]?.configureEntity?.invoke(world, baseEntity)
+            if (configuredEntity != null) return configuredEntity
+            else {
+                println("WARNING: Cannot invoke! EntityConfig with name '$entityConfig' not registered in EntityFactory!")
+                return entity
+            }
         }
+
     }
 }

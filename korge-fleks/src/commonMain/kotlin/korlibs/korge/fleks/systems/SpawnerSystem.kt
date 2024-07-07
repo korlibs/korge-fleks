@@ -64,7 +64,7 @@ class SpawnerSystem : IteratingSystem(
 //                    if (spawner.entityConfig == "introSpaceshipLeftWingDust") println("Spawning: newEntity: $newEntity - spaceship pos: ($spx, $spy) - spawing pos: ($xx, $yy)")
 
                     // Call the configured spawner function for configuring new objects
-                    EntityFactory.createEntity(spawner.entityConfig, world, newEntity)
+                    EntityFactory.configureEntity(spawner.entityConfig, world, newEntity)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects

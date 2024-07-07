@@ -28,7 +28,7 @@ class EventSystem : IteratingSystem(
 
         // Run the specific event config function on the entity which is subscribed to this event
         if (subscribe && eventMap[event]) {
-            EntityFactory.createEntity(eventConfig, world, entity)
+            EntityFactory.configureEntity(eventConfig, world, entity)
         }
     }
 }
