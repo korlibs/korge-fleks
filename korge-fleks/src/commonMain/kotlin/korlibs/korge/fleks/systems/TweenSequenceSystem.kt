@@ -161,7 +161,7 @@ class TweenSequenceSystem : IteratingSystem(
                 EntityFactory.configureEntity(tween.entityConfig, world, spawnedEntity)
             }
             // Directly deletes the given entity from the tween
-            is DeleteEntity -> world.deleteComplex(tween.entity)
+            is DeleteEntity -> world.deleteViaLifeCycle(tween.entity)
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.configureEntity(tween.entityConfig, world, tween.entity)
             is Wait -> tween.event?.let { event -> createTweenPropertyComponent(EventSubscribe, value = event) }

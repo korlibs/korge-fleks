@@ -33,20 +33,6 @@ internal fun interpolateBoolean(ratio: Double, l: Boolean, r: Boolean): Boolean 
 }
 
 /**
- * Create new entity and add a name to it for easier debugging/tracing.
- */
-fun World.entity(name: String, configuration: EntityCreateContext.(Entity) -> Unit = {}) : Entity {
-    return entity(configuration).apply { configure { it += InfoComponent(name) } }
-}
-
-/**
- * Delete function for entity which let the [LifeCycleSystem] delete and cleanup all sub-entities, too.
- */
-fun World.deleteComplex(entity: Entity) {
-    entity.configure { it.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }.apply { healthCounter = 0 } }
-}
-
-/**
  * Clone function for a Map object with [CloneableData] values.
  */
 @JvmName("MapOfCloneableData")
@@ -84,11 +70,6 @@ fun<T> Map<T, Entity>.clone() : Map<T, Entity> {
     }
     return mapCopy
 }
-
-/**
- * Clone function for [Entity] objects. Just for naming consistency.
- */
-fun Entity.clone() : Entity = Entity(id, version)
 
 /**
  * Clone function (deep copy) for [HorizontalAlign] enum objects.
