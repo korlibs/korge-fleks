@@ -158,12 +158,12 @@ class TweenSequenceSystem : IteratingSystem(
             // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
             is SpawnEntity -> {
                 val spawnedEntity = if (tween.entity == Entity.NONE) world.entity("SpawnEntity: ${tween.entityConfig}") else tween.entity
-                EntityFactory.configureEntity(tween.entityConfig, world, spawnedEntity)
+                EntityFactory.configure(tween.entityConfig, world, spawnedEntity)
             }
             // Directly deletes the given entity from the tween
             is DeleteEntity -> world.deleteViaLifeCycle(tween.entity)
             // Runs the config-function on the given entity from the tween
-            is ExecuteConfigFunction -> EntityFactory.configureEntity(tween.entityConfig, world, tween.entity)
+            is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.entity)
             is Wait -> tween.event?.let { event -> createTweenPropertyComponent(EventSubscribe, value = event) }
             else -> {
                 when (tween) {

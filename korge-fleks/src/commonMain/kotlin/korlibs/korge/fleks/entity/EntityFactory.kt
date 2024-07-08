@@ -12,7 +12,7 @@ import korlibs.korge.fleks.utils.*
  *
  * New [EntityConfig]'s needs to be added to the factory with the [register] method. That makes the
  * [EntityConfig] available everywhere in the game by just its name.
- * Systems like [SpawnerSystem] call [configureEntity] with a name parameter which maps to a specific [EntityConfig].
+ * Systems like [SpawnerSystem] call [configure] with a name parameter which maps to a specific [EntityConfig].
  */
 object EntityFactory {
 
@@ -34,8 +34,8 @@ object EntityFactory {
         entityConfigs[entityConfig.name] = entityConfig
     }
 
-    fun createAndConfigureEntity(entityConfig: String, world: World) : Entity = configureEntity(entityConfig, world, Entity.NONE)
-    fun configureEntity(entityConfig: String, world: World, entity: Entity) : Entity {
+    fun createAndConfigure(entityConfig: String, world: World) : Entity = configure(entityConfig, world, Entity.NONE)
+    fun configure(entityConfig: String, world: World, entity: Entity) : Entity {
         with (world) {
             // Make sure we have entity with InfoComponent for better traceability
             val baseEntity = if (entity == Entity.NONE) entity(entityConfig)

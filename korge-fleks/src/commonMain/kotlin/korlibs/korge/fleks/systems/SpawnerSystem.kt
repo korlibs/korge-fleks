@@ -2,9 +2,8 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.utils.random
+import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.entity.EntityFactory
 
 
 /**
@@ -64,7 +63,7 @@ class SpawnerSystem : IteratingSystem(
 //                    if (spawner.entityConfig == "introSpaceshipLeftWingDust") println("Spawning: newEntity: $newEntity - spaceship pos: ($spx, $spy) - spawing pos: ($xx, $yy)")
 
                     // Call the configured spawner function for configuring new objects
-                    EntityFactory.configureEntity(spawner.entityConfig, world, newEntity)
+                    world.configureEntity(spawner.entityConfig, newEntity)
                 }
 
                 spawner.numberOfObjectsSpawned += spawner.numberOfObjects

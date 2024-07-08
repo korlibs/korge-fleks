@@ -3,8 +3,6 @@ package korlibs.korge.fleks.utils
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.image.text.*
-import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.systems.*
 import kotlin.jvm.*
 import kotlin.random.Random
 
@@ -13,6 +11,7 @@ fun ClosedFloatingPointRange<Double>.random() = Random.nextDouble(start, endIncl
 fun ClosedFloatingPointRange<Float>.random() = Random.nextDouble(start.toDouble(), endInclusive.toDouble()).toFloat()
 
 fun random(radius: Double) = (-radius..radius).random()
+fun random(radius: Float) = (-radius..radius).random()
 
 /**
  * Increment float value and wrap around at max and min.

@@ -5,6 +5,7 @@ import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.collection.BitArray
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.utils.*
 
 /**
  * Event system which implements a publish-subscribe mechanism to trigger execution of specific createEntity functions.
@@ -28,7 +29,7 @@ class EventSystem : IteratingSystem(
 
         // Run the specific event config function on the entity which is subscribed to this event
         if (subscribe && eventMap[event]) {
-            EntityFactory.configureEntity(eventConfig, world, entity)
+            world.configureEntity(eventConfig, entity)
         }
     }
 }

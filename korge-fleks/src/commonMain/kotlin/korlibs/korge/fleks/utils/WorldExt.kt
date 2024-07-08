@@ -23,11 +23,11 @@ fun World.deleteViaLifeCycle(entity: Entity) {
  * by entityConfig string parameter.
  */
 fun World.createAndConfigureEntity(entityConfig: String) : Entity =
-    EntityFactory.createAndConfigureEntity(entityConfig, this)
+    EntityFactory.createAndConfigure(entityConfig, this)
 
 /**
  * Configure existing [Entity] by applying the [EntityConfig][EntityFactory.EntityConfig] which is specified
  * by entityConfig string parameter.
  */
 fun World.configureEntity(entityConfig: String, entity: Entity) : Entity =
-    EntityFactory.configureEntity(entityConfig, this, entity)
+    EntityFactory.configure(entityConfig, this, entity)
