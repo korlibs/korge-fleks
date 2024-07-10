@@ -2,7 +2,8 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.InputTouchButtonComponent
+import korlibs.korge.fleks.components.*
+import korlibs.math.geom.*
 
 /**
  *
@@ -10,21 +11,59 @@ import korlibs.korge.fleks.components.InputTouchButtonComponent
  */
 class TouchInputSystem : IteratingSystem(
     family {
-        all(InputTouchButtonComponent)
+        all(TouchInputComponent, PositionComponent, TextFieldComponent)
     },
     interval = EachFrame
 ) {
 
+    private var downX: Float = -1f
+    private var downY: Float = -1f
+    private var isDown: Boolean = false
+    private var upX: Float = -1f
+    private var upY: Float = -1f
+    private var isUp: Boolean = false
+
+    private fun checkTouchInput(left: Float, top: Float, right: Float, bottom: Float): Boolean =
+         (downX in left..right) && (downY in top..bottom) &&
+             (upX in left..right) && (upY in top..bottom)
+
+
+    fun onTouchDown(x: Float, y: Float) {
+        downX = x
+        downY = y
+        isDown = true
+    }
+
+    fun onTouchUp(x: Float, y: Float) {
+        upX = x
+        upY = y
+        isUp = true
+    }
 
     override fun onTickEntity(entity: Entity) {
-        val inputTouchButton = entity[InputTouchButtonComponent]
-//        if (inputTouchButton.onDown) {
-//            inputTouchButton.onDown = false
-//            println("down")
-//        }
-//        if (inputTouchButton.onUp) {
-//            inputTouchButton.onUp = false
-//            println("up")
-//        }
+
+        if (isUp) {
+            val inputTouchButton = entity[TouchInputComponent]
+            val positionComponent = entity[PositionComponent]
+            val textFieldComponent = entity[TextFieldComponent]
+
+            inputTouchButton.pressed = checkTouchInput(
+                left = positionComponent.x,
+                top = positionComponent.y,
+                right = positionComponent.x + textFieldComponent.width,
+                bottom = positionComponent.y + textFieldComponent.height
+            )
+
+            println("touch: ${inputTouchButton.pressed}")
+        }
+    }
+
+    override fun onUpdate() {
+        super.onUpdate()
+
+        if (isUp) {
+            isDown = false
+            isUp = false
+        }
     }
 }

@@ -72,7 +72,7 @@ internal val internalModule = SerializersModule {
     polymorphic(Component::class) {
         subclass(EntityLinkComponent::class)
         subclass(InfoComponent::class)
-        subclass(InputTouchButtonComponent::class)
+        subclass(TouchInputComponent::class)
         subclass(LayerComponent::class)
         subclass(LayeredSpriteComponent::class)
         subclass(LayoutComponent::class)
