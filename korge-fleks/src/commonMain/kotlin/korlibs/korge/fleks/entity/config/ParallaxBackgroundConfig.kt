@@ -9,7 +9,7 @@ import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 
 
-data class ParallaxBackground(
+data class ParallaxBackgroundConfig(
     override val name: String,
     
     private val assetName: String,
@@ -21,8 +21,8 @@ data class ParallaxBackground(
     override val configureEntity = fun(world: World, entity: Entity): Entity = with(world) {
         entity.configure {
             it += PositionComponent(
-                x = this@ParallaxBackground.x,
-                y = this@ParallaxBackground.y
+                x = this@ParallaxBackgroundConfig.x,
+                y = this@ParallaxBackgroundConfig.y
             )  // global position for the whole parallax background
             it += MotionComponent(
                 velocityX = -12f  // world units per second

@@ -11,12 +11,12 @@ import korlibs.korge.fleks.tags.*
 
 /**
  * This class contains the config for a specific level map with given [name].
- * The function implementation [configureEntity] creates a new [LevelMap] entity and configures it
+ * The function implementation [configureEntity] creates a new [LevelMapConfig] entity and configures it
  * with the specified config details.
  *
  * This class creates a level map background entity which is used for various backgrounds in the game and intro.
  */
-data class LevelMap(
+data class LevelMapConfig(
     override val name: String,
 
     private val mapType: TileMapType,
@@ -36,12 +36,12 @@ data class LevelMap(
                 TileMapType.TILED -> it += TiledLevelMapComponent(assetName)
             }
             it += PositionComponent(
-                x = this@LevelMap.x,
-                y = this@LevelMap.y
+                x = this@LevelMapConfig.x,
+                y = this@LevelMapConfig.y
             )
             it += SizeComponent()  // Size of level map needs to be set after loading of map is finished
             it += RgbaComponent().apply {
-                alpha = this@LevelMap.alpha
+                alpha = this@LevelMapConfig.alpha
             }
             it += layerTag
         }
