@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.entity.config
 
-import AppConfig
 import com.github.quillraven.fleks.*
 import korlibs.korge.assetmanager.*
 import korlibs.korge.fleks.components.*
@@ -19,6 +18,8 @@ data class LogoEntityConfig(
     override val name: String,
 
     private val assetName: String,
+    private val viewPortWidth: Int = 0,
+    private val viewPortHeight: Int = 0,
     private val centerX: Boolean = false,
     private val centerY: Boolean = false,
     private val offsetX: Float = 0f,
@@ -35,10 +36,10 @@ data class LogoEntityConfig(
 
         entity.configure {
             it += PositionComponent(
-                x = offsetX + (if (centerX) (AppConfig.TARGET_VIRTUAL_WIDTH - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f),
-                y = offsetY + (if (centerY) (AppConfig.TARGET_VIRTUAL_HEIGHT - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
+                x = offsetX + (if (centerX) (viewPortWidth - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f),
+                y = offsetY + (if (centerY) (viewPortHeight - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
             )
-            it += SpriteComponent(
+            it += LayeredSpriteComponent(
                 name = assetName
             )
             it += RgbaComponent().apply {
@@ -47,8 +48,6 @@ data class LogoEntityConfig(
             }
             it += LayerComponent(layerIndex = this@LogoEntityConfig.layerIndex)
             it += layerTag
-
-            // TODO handle logo layers
         }
         return entity
     }

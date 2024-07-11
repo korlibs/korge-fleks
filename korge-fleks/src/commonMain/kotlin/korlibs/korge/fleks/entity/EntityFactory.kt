@@ -30,8 +30,13 @@ object EntityFactory {
 
     private val entityConfigs: MutableMap<String, EntityConfig> = mutableMapOf()
 
+    /**
+     * This function adds an [EntityConfig] to the internal config storage.
+     * If another [EntityConfig] with the same [name][EntityConfig.name] already exists than adding
+     * will be omitted.
+     */
     fun register(entityConfig: EntityConfig) {
-        entityConfigs[entityConfig.name] = entityConfig
+        if (!entityConfigs.containsKey(entityConfig.name)) entityConfigs[entityConfig.name] = entityConfig
     }
 
     fun createAndConfigure(entityConfig: String, world: World) : Entity = configure(entityConfig, world, Entity.NONE)
