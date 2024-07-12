@@ -54,7 +54,7 @@ data class RichTextConfig(
                 alpha = this@RichTextConfig.alpha
             }
             it += layerTag
-            it += RenderLayerTag.DEBUG
+//            it += RenderLayerTag.DEBUG
         }
         return entity
     }
