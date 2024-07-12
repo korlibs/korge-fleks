@@ -79,12 +79,16 @@ class TweenSequenceSystem : IteratingSystem(
 
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
-                    world.entity { it += TweenSequenceComponent(tweens = currentTween.tweens) }
+                    world.entity("SpawnNewTweenSequence") { it += TweenSequenceComponent(tweens = currentTween.tweens) }
                 }
-                is LoopTweens -> {
-                    tweenSequence.loopStart = tweenSequence.index
-
+                is Jump -> {
+                    // Currently we just have a statical branch jump without conditional check
+                    tweenSequence.index += currentTween.distance - 1
                 }
+// TODO check if loop would be possible otherwise delete
+//                is LoopTweens -> {
+//                    tweenSequence.loopStart = tweenSequence.index
+//                }
                 is ParallelTweens -> {
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
@@ -173,7 +177,8 @@ class TweenSequenceSystem : IteratingSystem(
                 when (tween) {
                     is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens!")
                     is LoopTweens -> println("WARNING - TweenSequenceSystem: \"LoopTweens\" not allowed in ParallelTweens!")
-                    else -> println("WARNING - TweenSequenceSystem: Tween function for tween $tween not implemented!")
+                    is Jump -> println("WARNING - TweenSequenceSystem: \"Jump\" not allowed in ParallelTweens!")
+                    else -> println("WARNING - TweenSequenceSystem: Tween function for tween '$tween' not implemented!")
                 }
             }
         }

@@ -20,8 +20,7 @@ data class TweenSequenceComponent(
     var timeProgress: Float = 0f,    // Elapsed time for the object to be animated
     var waitTime: Float = 0f,
     var executed: Boolean = false,
-    var initialized: Boolean = false,
-    var loopStart: Int = 0
+    var initialized: Boolean = false
 ) : CloneableComponent<TweenSequenceComponent>() {
     override fun type(): ComponentType<TweenSequenceComponent> = TweenSequenceComponent
 
@@ -130,6 +129,24 @@ data class TweenSequenceComponent(
                 easing = easing
             )
     }
+
+    @Serializable @SerialName("Jump")
+    data class Jump(
+        var distance: Int,                            // Jump relative distance from current index (minus means jump back)
+        val event: Int? = null,                       // Check for a specific event - if event is 0 than jump otherwise do not jump and tween execution continues with next tween in the list
+
+        override var entity: Entity = Entity.NONE,    // not used
+        override var delay: Float? = null,            // not used
+        override var duration: Float? = null,         // not used
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+    ) : TweenBase {
+        override fun clone(): Jump =
+            this.copy(
+                entity = entity.clone(),
+                easing = easing
+            )
+    }
+
 
     @Serializable @SerialName("DeleteEntity")
     data class DeleteEntity(
