@@ -81,6 +81,10 @@ class TweenSequenceSystem : IteratingSystem(
                 is SpawnNewTweenSequence -> {
                     world.entity { it += TweenSequenceComponent(tweens = currentTween.tweens) }
                 }
+                is LoopTweens -> {
+                    tweenSequence.loopStart = tweenSequence.index
+
+                }
                 is ParallelTweens -> {
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
@@ -167,8 +171,9 @@ class TweenSequenceSystem : IteratingSystem(
             is Wait -> tween.event?.let { event -> createTweenPropertyComponent(EventSubscribe, value = event) }
             else -> {
                 when (tween) {
-                    is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens")
-                    else -> println("WARNING - TweenSequenceSystem: Animate function for tween $tween not implemented!")
+                    is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens!")
+                    is LoopTweens -> println("WARNING - TweenSequenceSystem: \"LoopTweens\" not allowed in ParallelTweens!")
+                    else -> println("WARNING - TweenSequenceSystem: Tween function for tween $tween not implemented!")
                 }
             }
         }

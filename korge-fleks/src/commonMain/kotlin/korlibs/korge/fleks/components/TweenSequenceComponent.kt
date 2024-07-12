@@ -20,7 +20,8 @@ data class TweenSequenceComponent(
     var timeProgress: Float = 0f,    // Elapsed time for the object to be animated
     var waitTime: Float = 0f,
     var executed: Boolean = false,
-    var initialized: Boolean = false
+    var initialized: Boolean = false,
+    var loopStart: Int = 0
 ) : CloneableComponent<TweenSequenceComponent>() {
     override fun type(): ComponentType<TweenSequenceComponent> = TweenSequenceComponent
 
@@ -66,6 +67,28 @@ data class TweenSequenceComponent(
                 easing = easing
                 // Hint: it is not needed to copy "easing" property by creating new one like below:
                 // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
+            )
+        }
+    }
+
+    @Serializable @SerialName("LoopTweens")
+    data class LoopTweens(
+        val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in a loop
+
+        override var entity: Entity = Entity.NONE,    // not used
+        override var delay: Float? = null,
+        override var duration: Float? = null,
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+    ) : TweenBase {
+        override fun clone(): LoopTweens {
+            val copyOfTweens: MutableList<TweenBase> = mutableListOf()
+            // Perform special deep copy of list elements
+            tweens.forEach { element -> copyOfTweens.add(element.clone()) }
+
+            return this.copy(
+                tweens = copyOfTweens,
+                entity = entity.clone(),
+                easing = easing
             )
         }
     }
