@@ -3,6 +3,8 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.utils.*
 import korlibs.math.geom.*
 
 /**
@@ -47,14 +49,16 @@ class TouchInputSystem : IteratingSystem(
             val positionComponent = entity[PositionComponent]
             val textFieldComponent = entity[TextFieldComponent]
 
-            inputTouchButton.pressed = checkTouchInput(
+            val pressed = checkTouchInput(
                 left = positionComponent.x,
                 top = positionComponent.y,
                 right = positionComponent.x + textFieldComponent.width,
                 bottom = positionComponent.y + textFieldComponent.height
             )
-
-            println("touch: ${inputTouchButton.pressed}")
+            if (pressed) {
+                println("TouchInputSystem: Execute '${inputTouchButton.entityConfig}' config on entity '${inputTouchButton.entity.id}'.")
+                world.execute(inputTouchButton.entityConfig, inputTouchButton.entity)
+            }
         }
     }
 

@@ -31,3 +31,10 @@ fun World.createAndConfigureEntity(entityConfig: String) : Entity =
  */
 fun World.configureEntity(entityConfig: String, entity: Entity) : Entity =
     EntityFactory.configure(entityConfig, this, entity)
+
+/**
+ * Execute function which takes an [EntityConfig][EntityFactory.EntityConfig] and an [Entity] to execute the desired
+ * behaviour on the given entity. Basically the same as configureEntity, but defined for better code readability.
+ */
+fun World.execute(entityConfig: String, entity: Entity) : Entity =
+    configureEntity(entityConfig, entity)
