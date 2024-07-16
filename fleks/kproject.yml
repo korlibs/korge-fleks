@@ -1,6 +1,6 @@
 # Get an external source project from GitHub which does not contain a kproject.yml file
 # loading git tag release (or commit) from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::2.6
+src: git::Quillraven/Fleks::/src::2.8
 
 plugins:
   - serialization
