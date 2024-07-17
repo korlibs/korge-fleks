@@ -23,8 +23,11 @@ object EntityFactory {
      */
     interface EntityConfig {
         val name: String
+        // TODO idea to make game object data serializable
+        //val data: Any
+
         val configureEntity: (World, Entity) -> Entity
-        // TODO add possibility for a specific entityConfig at creation of the game object
+        // TODO  - check if this is really needed -  add possibility for a specific entityConfig at creation of the game object
         //val configureEntity: (World, Entity, EntityConfig) -> Entity
     }
 

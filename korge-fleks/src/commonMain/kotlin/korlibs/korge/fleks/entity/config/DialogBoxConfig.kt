@@ -8,6 +8,7 @@ import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
 import korlibs.math.interpolation.*
+import kotlinx.serialization.*
 
 /**
  * Entity config for a dialog box which appears on the dialog layer in front of any game play.
@@ -15,6 +16,10 @@ import korlibs.math.interpolation.*
  */
 data class DialogBoxConfig(
     override val name: String,
+
+// TODO
+//    override val data: Any,
+
     val duration: Float,
 
     // Position and size
@@ -44,6 +49,39 @@ data class DialogBoxConfig(
 ) : EntityConfig {
 
     enum class AvatarPosition { LEFT_TOP, RIGHT_TOP /*, LEFT_BOTTOM, RIGHT_BOTTOM*/ }
+
+    // TODO idea to make game object data serializable
+    // Private local data for game object configuration
+    @Serializable @SerialName("DialogBoxConfig")
+    data class DialogBoxConfig(
+        val duration: Float,
+
+        // Position and size
+        val x: Float = 0f,
+        val y: Float = 0f,
+        val width: Float,
+        val height: Float,
+
+        // Color and alpha channel of text and graphics
+        val tint: RgbaComponent.Rgb = RgbaComponent.Rgb.WHITE,
+        val alpha: Float = 0f,
+
+        // Avatar
+        val avatarMoveX: Float = 10f,
+        val avatarName: String,
+        val avatarPosition: AvatarPosition,
+
+        // Text field
+        val textFieldName: String,
+
+        // Text
+        val text: String,
+        val textFontName: String,
+        val textRangeEnd: Int = 0,  // initial value for drawing the text into the dialog
+// TODO Add serializer
+//        val horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
+//        val verticalAlign: VerticalAlign = VerticalAlign.TOP,
+    )
 
     override val configureEntity = fun(world: World, entity: Entity) : Entity = with(world) {
         val avatarLeftInitialX = x + 10f
