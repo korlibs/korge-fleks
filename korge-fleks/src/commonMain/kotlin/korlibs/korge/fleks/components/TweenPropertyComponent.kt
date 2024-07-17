@@ -40,6 +40,8 @@ data class TweenPropertyComponent (
         PositionX(componentTypeOf<TweenPropertyComponent>()),
         PositionY(componentTypeOf<TweenPropertyComponent>()),
 
+        MotionVelocityX(componentTypeOf<TweenPropertyComponent>()),
+
         RgbaAlpha(componentTypeOf<TweenPropertyComponent>()),
         RgbaTint(componentTypeOf<TweenPropertyComponent>()),
 
@@ -72,6 +74,7 @@ data class TweenPropertyComponent (
         TextFieldTextRangeEnd(componentTypeOf<TweenPropertyComponent>()),
 
         EventPublish(componentTypeOf<TweenPropertyComponent>()),
+        EventReset(componentTypeOf<TweenPropertyComponent>()),
         EventSubscribe(componentTypeOf<TweenPropertyComponent>())
 
     }
@@ -82,6 +85,8 @@ data class TweenPropertyComponent (
         val TweenPositionOffsetYComponent = TweenProperty.PositionOffsetY.type
         val TweenPositionXComponent = TweenProperty.PositionX.type
         val TweenPositionYComponent = TweenProperty.PositionY.type
+
+        val TweenMotionVelocityXComponent = TweenProperty.MotionVelocityX.type
 
         val TweenRgbaAlphaComponent = TweenProperty.RgbaAlpha.type
         val TweenRgbaTintComponent = TweenProperty.RgbaTint.type
@@ -114,6 +119,7 @@ data class TweenPropertyComponent (
         val TweenTextFieldTextRangeEndComponent = TweenProperty.TextFieldTextRangeEnd.type
 
         val TweenEventPublishComponent = TweenProperty.EventPublish.type
+        val TweenEventResetComponent = TweenProperty.EventReset.type
         val TweenEventSubscribeComponent = TweenProperty.EventSubscribe.type
     }
 

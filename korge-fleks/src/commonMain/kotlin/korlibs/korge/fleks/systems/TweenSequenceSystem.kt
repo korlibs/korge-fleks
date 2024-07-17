@@ -108,18 +108,22 @@ class TweenSequenceSystem : IteratingSystem(
                             }
                         } else {
                             // No delay -> run it directly
-                            checkTween(tween, currentTween)
+                            checkTween(entity, tween, currentTween)
                         }
                     }
                 }
                 // In case of "Wait"-Tween "waitTime = duration" was already set above
-                else -> checkTween(currentTween, defaultTweenValues)
+                else -> checkTween(entity, currentTween, defaultTweenValues)
             }
         }
         else tweenSequence.timeProgress += deltaTime
     }
 
-    private fun checkTween(tween: TweenBase, parentTween: ParallelTweens) {
+    /**
+     *
+     * @param baseEntity The entity which owns this TweenSequence animation
+     */
+    private fun checkTween(baseEntity: Entity, tween: TweenBase, parentTween: ParallelTweens) {
         currentTween = tween
         currentParentTween = parentTween
         when (tween) {
@@ -135,6 +139,9 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.y?.let { end -> createTweenPropertyComponent(PositionY, start.y, end - start.y) }
                 tween.offsetX?.let { end -> createTweenPropertyComponent(PositionOffsetX, start.offsetX, end - start.offsetX) }
                 tween.offsetY?.let { end -> createTweenPropertyComponent(PositionOffsetY, start.offsetY, end - start.offsetY) }
+            }
+            is TweenMotion -> tween.entity.getOrWarning(MotionComponent)?.let { start ->
+                tween.velocityX?.let { end -> createTweenPropertyComponent(MotionVelocityX, start.velocityX, end - start.velocityX) }
             }
             is TweenSprite -> tween.entity.getOrWarning(SpriteComponent)?.let { _ ->  // make sure to-be-animated-entity is of type sprite
                 tween.animation?.let { value -> createTweenPropertyComponent(SpriteAnimation, value) }
@@ -172,7 +179,19 @@ class TweenSequenceSystem : IteratingSystem(
             is DeleteEntity -> world.deleteViaLifeCycle(tween.entity)
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.entity)
-            is Wait -> tween.event?.let { event -> createTweenPropertyComponent(EventSubscribe, value = event) }
+            is Wait -> tween.event?.let { event ->
+                // Wait for event, SendEvent and ResetEvent need the current entity which comes in via onTickEntity
+                currentTween.entity = baseEntity
+                createTweenPropertyComponent(EventSubscribe, value = event)
+            }
+            is SendEvent -> {
+                currentTween.entity = baseEntity
+                createTweenPropertyComponent(EventPublish, value = tween.event)
+            }
+            is ResetEvent -> {
+                currentTween.entity = baseEntity
+                createTweenPropertyComponent(EventReset, value = tween.event)
+            }
             else -> {
                 when (tween) {
                     is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens!")

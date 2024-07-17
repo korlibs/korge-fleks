@@ -14,7 +14,9 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenRgba
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenRgbaTintComponent
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenEventPublishComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenEventResetComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenEventSubscribeComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenMotionVelocityXComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundPositionComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStartTriggerComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSoundStopTriggerComponent
@@ -57,6 +59,18 @@ class TweenPositionSystem : IteratingSystem(
         updateProperty(entity, TweenPositionYComponent, positionComponent::y)
         updateProperty(entity, TweenPositionOffsetXComponent, positionComponent::offsetX)
         updateProperty(entity, TweenPositionOffsetYComponent, positionComponent::offsetY)
+    }
+}
+
+class TweenMotionSystem : IteratingSystem(
+    family {
+        all(MotionComponent)
+            .any(TweenMotionVelocityXComponent) },
+    interval = EachFrame
+) {
+    override fun onTickEntity(entity: Entity) {
+        val motionComponent = entity[MotionComponent]
+        updateProperty(entity, TweenMotionVelocityXComponent, motionComponent::velocityX)
     }
 }
 
@@ -159,7 +173,7 @@ class TweenTextFieldSystem : IteratingSystem(
 class TweenEventSystem : IteratingSystem(
     family = family {
         all(TweenSequenceComponent)
-            .any(TweenEventPublishComponent, TweenEventSubscribeComponent) },
+            .any(TweenEventPublishComponent, TweenEventResetComponent, TweenEventSubscribeComponent) },
     interval = EachFrame
 ) {
     // Event bitmap
@@ -177,19 +191,23 @@ class TweenEventSystem : IteratingSystem(
             eventMap.set(event as Int)
             // Reset
             entity.configure { it -= TweenEventPublishComponent }
+        } else if (entity has TweenEventResetComponent) {
+            val (_, _, event) = entity[TweenEventResetComponent]
+            eventMap.clear(event as Int)
+            entity.configure { it -= TweenEventResetComponent }
         }
         if (entity has TweenEventSubscribeComponent) {
             // "entityConfig" is saved as change in TweenPropertyComponent
             // "event" is saved as value in TweenPropertyComponent
-            val (_, entityConfig, event) = entity[TweenEventSubscribeComponent]
+            val (_, _, event) = entity[TweenEventSubscribeComponent]
             // Run the specific event config function on the entity which is subscribed to this event
             if (eventMap[event as Int]) {
                 // TODO move this into EntityConfig configure function
                 // Unblock tween script
                 val tweenSequence = entity[TweenSequenceComponent]
                 tweenSequence.waitTime = 0f
-                // Reset
-                eventMap.clear(event)
+                // Reset event already
+//                eventMap.clear(event)
                 entity.configure { it -= TweenEventSubscribeComponent }
             }
         }
@@ -214,6 +232,7 @@ fun SystemConfiguration.setupTweenEngineSystems() {
     // Then add all tween animation systems - they update properties of components according to TweenPropertyComponents
     add(TweenRgbaSystem())
     add(TweenPositionSystem())
+    add(TweenMotionSystem())
     add(TweenSpawnerSystem())
     add(TweenSpriteSystem())
     add(TweenSwitchLayerVisibilitySystem())

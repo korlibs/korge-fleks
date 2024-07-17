@@ -70,6 +70,7 @@ data class TweenSequenceComponent(
         }
     }
 
+    // TODO not used
     @Serializable @SerialName("LoopTweens")
     data class LoopTweens(
         val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in a loop
@@ -112,6 +113,38 @@ data class TweenSequenceComponent(
                 easing = easing
             )
         }
+    }
+
+    @Serializable @SerialName("SendEvent")
+    data class SendEvent(
+        val event: Int = 0,                           // Set a specific event so that a Wait for event can be unlocked
+
+        override var entity: Entity = Entity.NONE,    // not used
+        override var delay: Float? = null,            // Not used
+        override var duration: Float? = null,         // not used
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+    ) : TweenBase {
+        override fun clone(): SendEvent =
+            this.copy(
+                entity = entity.clone(),
+                easing = easing
+            )
+    }
+
+    @Serializable @SerialName("ResetEvent")
+    data class ResetEvent(
+        val event: Int = 0,                           // Set a specific event so that a Wait for event can be unlocked
+
+        override var entity: Entity = Entity.NONE,    // not used
+        override var delay: Float? = null,            // Not used
+        override var duration: Float? = null,         // not used
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+    ) : TweenBase {
+        override fun clone(): ResetEvent =
+            this.copy(
+                entity = entity.clone(),
+                easing = easing
+            )
     }
 
     @Serializable @SerialName("Wait")
@@ -249,6 +282,23 @@ data class TweenSequenceComponent(
         @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
     ) : TweenBase {
         override fun clone(): TweenPosition =
+            this.copy(
+                entity = entity.clone(),
+                easing = easing
+            )
+    }
+
+
+    @Serializable @SerialName("TweenMotion")
+    data class TweenMotion(
+        var velocityX: Float? = null,
+
+        override var entity: Entity,
+        override var delay: Float? = null,
+        override var duration: Float? = null,
+        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
+    ) : TweenBase {
+        override fun clone(): TweenMotion =
             this.copy(
                 entity = entity.clone(),
                 easing = easing

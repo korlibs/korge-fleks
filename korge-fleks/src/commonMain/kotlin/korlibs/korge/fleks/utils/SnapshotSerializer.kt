@@ -112,6 +112,7 @@ internal val internalModule = SerializersModule {
         subclass(DeleteEntity::class)
         subclass(TweenRgba::class)
         subclass(TweenPosition::class)
+        subclass(TweenMotion::class)
         subclass(TweenSprite::class)
         subclass(TweenSwitchLayerVisibility::class)
         subclass(TweenSpawner::class)
