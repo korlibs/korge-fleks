@@ -78,6 +78,7 @@ class LDtkLevelMapRenderSystem(
             }
         }
 
+        // This is currently hardcoded to World assets - if needed adjust to another asset type like Level or Special
         configureAssetUpdater(AssetType.World) {
             onLdtkLevelMapChanged {
                 // remove old ldtk view and create new one

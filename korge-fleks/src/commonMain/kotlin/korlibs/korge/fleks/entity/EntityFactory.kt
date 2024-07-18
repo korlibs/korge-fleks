@@ -23,13 +23,33 @@ object EntityFactory {
      */
     interface EntityConfig {
         val name: String
-        // TODO idea to make game object data serializable
-        //val data: Any
+        val configureEntity: World.(Entity) -> Entity
+    }
 
-        val configureEntity: (World, Entity) -> Entity
+    class GameObject(
+        val name: String,
+        val config: Any = Any(),
+        val configure: World.(entity: Entity, config: Any) -> Entity
         // TODO  - check if this is really needed -  add possibility for a specific entityConfig at creation of the game object
         //val configureEntity: (World, Entity, EntityConfig) -> Entity
+    ) {
+        init {
+//            register(this)
+        }
     }
+
+    class EntityConfig3(
+        override val name: String,
+        val data: Any = Any(),
+        override val configureEntity: World.(Entity) -> Entity
+        // TODO  - check if this is really needed -  add possibility for a specific entityConfig at creation of the game object
+        //val configureEntity: (World, Entity, EntityConfig) -> Entity
+    ) : EntityConfig {
+        init {
+            register(this)
+        }
+    }
+
 
     private val entityConfigs: MutableMap<String, EntityConfig> = mutableMapOf()
 
