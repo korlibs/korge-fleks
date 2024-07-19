@@ -7,8 +7,10 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
+import kotlinx.serialization.Serializable
 
 
+@Serializable
 data class ParallaxLayerConfig(
     override val name: String,
     
@@ -18,7 +20,7 @@ data class ParallaxLayerConfig(
     private val y: Float = 0f
 ) : EntityConfig {
 
-    override val configureEntity = fun(world: World, entity: Entity): Entity = with(world) {
+    override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             it += PositionComponent(
                 x = this@ParallaxLayerConfig.x,
@@ -32,7 +34,7 @@ data class ParallaxLayerConfig(
             )
             it += layerTag
         }
-        entity
+        return entity
     }
 
     init {

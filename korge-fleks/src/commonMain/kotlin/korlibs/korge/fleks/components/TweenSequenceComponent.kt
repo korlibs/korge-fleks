@@ -53,7 +53,7 @@ data class TweenSequenceComponent(
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): SpawnNewTweenSequence {
             val copyOfTweens: MutableList<TweenBase> = mutableListOf()
@@ -78,7 +78,7 @@ data class TweenSequenceComponent(
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): LoopTweens {
             val copyOfTweens: MutableList<TweenBase> = mutableListOf()
@@ -100,7 +100,7 @@ data class TweenSequenceComponent(
         override var entity: Entity = Entity.NONE,    // not used here
         override var delay: Float? = 0f,              // in seconds
         override var duration: Float? = 0f,           // in seconds
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = Easing.LINEAR  // function to change the properties
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = Easing.LINEAR  // function to change the properties
     ) : TweenBase {
         override fun clone(): ParallelTweens {
             val copyOfTweens: MutableList<TweenBase> = mutableListOf()
@@ -122,7 +122,7 @@ data class TweenSequenceComponent(
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,            // Not used
         override var duration: Float? = null,         // not used
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): SendEvent =
             this.copy(
@@ -138,7 +138,7 @@ data class TweenSequenceComponent(
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,            // Not used
         override var duration: Float? = null,         // not used
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): ResetEvent =
             this.copy(
@@ -154,7 +154,7 @@ data class TweenSequenceComponent(
 
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,            // Not used
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): Wait =
             this.copy(
@@ -171,7 +171,7 @@ data class TweenSequenceComponent(
         override var entity: Entity = Entity.NONE,    // not used
         override var delay: Float? = null,            // not used
         override var duration: Float? = null,         // not used
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): Jump =
             this.copy(
@@ -186,7 +186,7 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,      // not used
         override var duration: Float? = null,   // not used
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): DeleteEntity =
             this.copy(
@@ -204,7 +204,7 @@ data class TweenSequenceComponent(
         override var entity: Entity = Entity.NONE, // when entity is not given (=Entity.NONE) than it will be created
         override var delay: Float? = null,
         override var duration: Float? = 0f,    // not used - 0f for immediately
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): SpawnEntity =
             this.copy(
@@ -220,7 +220,7 @@ data class TweenSequenceComponent(
         override var entity: Entity = Entity.NONE,    // [optional] entity can be provided if needed in the configure-function
         override var delay: Float? = null,            // not used
         override var duration: Float? = null,         // not used
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null  // not used
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
     ) : TweenBase {
         override fun clone(): ExecuteConfigFunction =
             this.copy(
@@ -241,7 +241,7 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null
     ) : TweenBase {
         override fun clone(): TweenTextField =
             this.copy(
@@ -259,7 +259,7 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null
     ) : TweenBase {
         override fun clone(): TweenRgba =
             this.copy(
@@ -279,7 +279,7 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null
     ) : TweenBase {
         override fun clone(): TweenPosition =
             this.copy(
@@ -296,7 +296,7 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null
     ) : TweenBase {
         override fun clone(): TweenMotion =
             this.copy(
@@ -316,7 +316,7 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null
     ) : TweenBase {
         override fun clone(): TweenSprite =
             this.copy(
@@ -334,7 +334,7 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null
     ) : TweenBase {
         override fun clone(): TweenSwitchLayerVisibility =
             this.copy(
@@ -353,7 +353,7 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null
     ) : TweenBase {
         override fun clone(): TweenSpawner =
             this.copy(
@@ -372,7 +372,7 @@ data class TweenSequenceComponent(
         override var entity: Entity,
         override var delay: Float? = null,
         override var duration: Float? = null,
-        @Serializable(with = EasingSerializer::class) override var easing: Easing? = null
+        @Serializable(with = EasingAsString::class) override var easing: Easing? = null
     ) : TweenBase {
         override fun clone(): TweenSound =
             this.copy(

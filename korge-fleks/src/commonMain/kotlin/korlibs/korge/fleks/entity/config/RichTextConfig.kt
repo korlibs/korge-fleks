@@ -6,8 +6,11 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
+import korlibs.korge.fleks.utils.*
+import kotlinx.serialization.Serializable
 
 
+@Serializable
 data class RichTextConfig(
     override val name: String,
 
@@ -29,11 +32,11 @@ data class RichTextConfig(
     private val alpha: Float = 1f,
 
     // Text alignment
-    private val horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
-    private val verticalAlign: VerticalAlign = VerticalAlign.TOP
+    @Serializable(with = HorizontalAlignAsDouble::class) private val horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
+    @Serializable(with = VerticalAlignAsDouble::class) private val verticalAlign: VerticalAlign = VerticalAlign.TOP
 ) : EntityConfig {
 
-    override val configureEntity = fun(world: World, entity: Entity) : Entity = with(world) {
+    override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             it += PositionComponent(
                 x = this@RichTextConfig.x,

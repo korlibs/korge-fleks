@@ -6,12 +6,14 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.random
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
+import kotlinx.serialization.Serializable
 
 
 /**
  * This object prototype can be used to create objects which are moving and spawn a trail.
  *
  */
+@Serializable
 data class MovedSpawnerObject(
     override val name: String,
 
@@ -38,15 +40,15 @@ data class MovedSpawnerObject(
 ) : EntityConfig {
 
     // Configure function which applies the config to the entity's components
-    override val configureEntity = fun(world: World, entity: Entity) = with(world) {
+    override fun World.entityConfigure(entity: Entity) : Entity {
         // PositionComponent might already be set by SpawnerSystem and it already contains the position
 
-        entity.configure { entity ->
+        entity.configure {
 //            entity.getOrAdd(OffsetComponent) { OffsetComponent() }.also {
 //                it.x = spawnerConfig.offsetX
 //                it.y = spawnerConfig.offsetY
 //            }
-            entity.getOrAdd(MotionComponent) { MotionComponent() }.also {
+            it.getOrAdd(MotionComponent) { MotionComponent() }.also {
                 var velocityXX = velocityX
                 var velocityYY = velocityY
                 if (velocityVariationX != 0f) {
@@ -58,7 +60,7 @@ data class MovedSpawnerObject(
                 it.velocityX = velocityXX
                 it.velocityY = velocityYY
             }
-            entity.getOrAdd(SpawnerComponent) { SpawnerComponent() }.also {
+            it.getOrAdd(SpawnerComponent) { SpawnerComponent() }.also {
 
             }
 //            entity.getOrAdd(SpriteComponent) { SpriteComponent() }.also {
@@ -72,7 +74,7 @@ data class MovedSpawnerObject(
 //            entity.getOrAdd(AppearanceComponent) { AppearanceComponent() }
 //            entity.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }
         }
-        entity
+        return entity
 /*
             // Spawner details for spawned objects (spawned objects do also spawn objects itself)
             spawnerNumberOfObjects = 5, // Enable spawning feature for spawned object

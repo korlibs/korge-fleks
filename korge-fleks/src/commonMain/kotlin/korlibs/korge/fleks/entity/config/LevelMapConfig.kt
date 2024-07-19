@@ -7,6 +7,7 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
+import kotlinx.serialization.Serializable
 
 
 /**
@@ -16,6 +17,7 @@ import korlibs.korge.fleks.tags.*
  *
  * This class creates a level map background entity which is used for various backgrounds in the game and intro.
  */
+@Serializable
 data class LevelMapConfig(
     override val name: String,
 
@@ -29,7 +31,7 @@ data class LevelMapConfig(
     private val alpha: Float = 1f,
 ) : EntityConfig {
 
-    override val configureEntity = fun(world: World, entity: Entity) = with(world) {
+    override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             when (mapType) {
                 TileMapType.LDTK -> it += LdtkLevelMapComponent(worldName, levelName)
@@ -45,7 +47,7 @@ data class LevelMapConfig(
             }
             it += layerTag
         }
-        entity
+        return entity
     }
 
     init {

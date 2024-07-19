@@ -5,7 +5,6 @@ import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encoding.*
 
 
 /**
@@ -26,7 +25,7 @@ data class TweenPropertyComponent (
 
     var duration: Float = 0f,                    // in seconds
     var timeProgress: Float = 0f,                // in seconds
-    @Serializable(with = EasingSerializer::class) var easing: Easing = Easing.LINEAR  // Changing function
+    @Serializable(with = EasingAsString::class) var easing: Easing = Easing.LINEAR  // Changing function
 ) : CloneableComponent<TweenPropertyComponent>() {
     override fun type(): ComponentType<TweenPropertyComponent> = property.type
 

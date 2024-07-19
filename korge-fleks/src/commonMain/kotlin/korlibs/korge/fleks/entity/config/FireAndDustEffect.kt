@@ -9,12 +9,14 @@ import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.random
+import kotlinx.serialization.Serializable
 
 
 /**
  * Function to generate effect objects like explosions, shoots, dust, etc.
  *
  */
+@Serializable
 data class FireAndDustEffect(
     override val name: String,
 
@@ -35,9 +37,9 @@ data class FireAndDustEffect(
 ) : EntityConfig {
 
     // Configure function which applies the config to the entity's components
-    override val configureEntity = fun(world: World, entity: Entity) = with(world) {
-        entity.configure { entity ->
-            entity += InfoComponent(name = this@FireAndDustEffect.name)
+    override fun World.entityConfigure(entity: Entity) : Entity {
+        entity.configure {
+            it += InfoComponent(name = this@FireAndDustEffect.name)
 
             var velocityXX = velocityX
             var velocityYY = velocityY
@@ -47,11 +49,11 @@ data class FireAndDustEffect(
             if (velocityVariationY != 0f) {
                 velocityYY += (-velocityVariationY..velocityVariationY).random()
             }
-            entity += MotionComponent(
+            it += MotionComponent(
                 velocityX = velocityXX,
                 velocityY = velocityYY
             )
-            entity += SpriteComponent(
+            it += SpriteComponent(
                 name = assetName,
                 anchorX = offsetX,
                 anchorY = offsetY,
@@ -60,23 +62,23 @@ data class FireAndDustEffect(
                 direction = ImageAnimation.Direction.ONCE_FORWARD,
                 destroyOnAnimationFinished = true
             )
-            entity += RgbaComponent().apply {
+            it += RgbaComponent().apply {
                 alpha = 1f
             }
             if (fadeOutDuration > 0f) {
-                entity.getOrAdd(TweenSequenceComponent) { TweenSequenceComponent() }.apply {
+                it.getOrAdd(TweenSequenceComponent) { TweenSequenceComponent() }.apply {
                     tweens = listOf(
                         // Fade out effect objects
-                        TweenRgba(entity = entity, alpha = 0f, duration = fadeOutDuration),
-                        DeleteEntity(entity = entity)
+                        TweenRgba(entity = it, alpha = 0f, duration = fadeOutDuration),
+                        DeleteEntity(entity = it)
                     )
                 }
             }
-            entity += renderLayerTag
-            if (layerIndex != null) entity += LayerComponent(layerIndex = this@FireAndDustEffect.layerIndex)
+            it += renderLayerTag
+            if (layerIndex != null) it += LayerComponent(layerIndex = this@FireAndDustEffect.layerIndex)
 //            entity += RenderLayerTag.DEBUG
         }
-        entity
+        return entity
     }
 
     init {

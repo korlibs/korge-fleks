@@ -107,6 +107,7 @@ internal val internalModule = SerializersModule {
         subclass(SpawnNewTweenSequence::class)
         subclass(ParallelTweens::class)
         subclass(Wait::class)
+        subclass(Jump::class)
         subclass(SpawnEntity::class)
         subclass(ExecuteConfigFunction::class)
         subclass(DeleteEntity::class)
@@ -231,7 +232,7 @@ object RGBAAsString : KSerializer<RGBA> {
 /**
  * A simple serializer strategy for Korge [Easing] types. It serializes the easing class name as string.
  */
-object EasingSerializer : KSerializer<Easing> {
+object EasingAsString : KSerializer<Easing> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("EasingAsString", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Easing) =
