@@ -6,6 +6,7 @@ import korlibs.image.atlas.*
 import korlibs.image.format.*
 import korlibs.io.file.*
 import kotlinx.serialization.*
+import kotlinx.serialization.EncodeDefault.Mode.NEVER
 
 
 suspend fun VfsFile.readParallaxDataContainer(
@@ -189,11 +190,12 @@ data class ParallaxConfig(
  * Both attached layer types will scroll depending on their position on the parallax plane.
  */
 @Serializable @SerialName("ParallaxPlaneConfig")
-data class ParallaxPlaneConfig(
+data class ParallaxPlaneConfig @OptIn(ExperimentalSerializationApi::class) constructor(
     val offset: Int = 0,
     val name: String,
     val speedFactor: Float = 1f,
-    var parallaxPlaneSpeedFactors: FloatArray = floatArrayOf(),  // create empty list, the real size will come from the texture size
+    // TODO move parallaxPlaneSpeedFactors to static Parallax entity config (which is always re-created after deserialization)
+    @EncodeDefault(NEVER) var parallaxPlaneSpeedFactors: FloatArray = floatArrayOf(),  // create empty list, the real size will come from the texture size
 //    val parallaxPlaneSpeedFactors: FloatArrayList = FloatArrayList(capacity = 0),  // create empty list, the real size will come from the texture size
     val selfSpeed: Float = 0f,
     val attachedLayersFront: ArrayList<ParallaxAttachedLayerConfig>? = null,
