@@ -3,7 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.*
 import korlibs.image.format.*
 import korlibs.image.format.ImageAnimation.Direction.*
-import korlibs.korge.assetmanager.AssetStore
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.utils.*
 import korlibs.time.*
 import kotlinx.serialization.*

@@ -6,7 +6,7 @@ import korlibs.datastructure.iterators.*
 import korlibs.image.font.*
 import korlibs.image.text.*
 import korlibs.korge.annotations.*
-import korlibs.korge.assetmanager.*
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.render.*

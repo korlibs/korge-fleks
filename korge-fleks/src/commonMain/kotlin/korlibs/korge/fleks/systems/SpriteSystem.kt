@@ -3,7 +3,7 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.image.format.ImageAnimation.Direction.*
-import korlibs.korge.assetmanager.*
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.math.*
 import korlibs.time.*

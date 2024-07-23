@@ -4,11 +4,9 @@ import com.github.quillraven.fleks.*
 import korlibs.datastructure.iterators.*
 import korlibs.image.color.*
 import korlibs.image.format.*
-import korlibs.korge.assetmanager.*
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
-import korlibs.korge.parallax.*
-import korlibs.korge.parallax.ParallaxConfig.Mode.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
 import korlibs.math.geom.*
@@ -186,7 +184,7 @@ class ParallaxRenderSystem(
         ctx: RenderContext
     ) {
         when (parallaxMode) {
-            HORIZONTAL_PLANE -> {
+            ParallaxConfig.Mode.HORIZONTAL_PLANE -> {
                 val countH = if (repeat) viewPortSize.width / layer.width else 0
                 val x = if (countH != 0) global.x else global.x + layer.targetX
 
@@ -201,7 +199,7 @@ class ParallaxRenderSystem(
                     )
                 }
             }
-            VERTICAL_PLANE -> {
+            ParallaxConfig.Mode.VERTICAL_PLANE -> {
                 val countV = if (repeat) viewPortSize.height / layer.height else 0
                 val y = if (countV != 0) global.y else global.y + layer.targetY
 
@@ -216,7 +214,7 @@ class ParallaxRenderSystem(
                     )
                 }
             }
-            NO_PLANE -> {}
+            ParallaxConfig.Mode.NO_PLANE -> {}
         }
     }
 

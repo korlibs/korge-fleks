@@ -5,7 +5,7 @@ import korlibs.datastructure.iterators.*
 import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.image.format.ImageAnimation.Direction.*
-import korlibs.korge.assetmanager.*
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 

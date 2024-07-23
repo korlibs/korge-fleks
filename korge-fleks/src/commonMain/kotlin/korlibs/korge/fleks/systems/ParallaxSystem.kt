@@ -4,9 +4,8 @@ import korlibs.korge.fleks.components.ParallaxComponent
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.datastructure.iterators.*
-import korlibs.korge.assetmanager.*
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
-import korlibs.korge.parallax.ParallaxConfig.Mode.*
 
 
 class ParallaxSystem(
@@ -38,13 +37,13 @@ class ParallaxSystem(
             val globalOffset = plane.offset
             val attachTextureOffset =
                 if (plane.attachedLayersRear!![index].attachBottomRight) texture.height else 0
-            if (parallaxMode == HORIZONTAL_PLANE) {
+            if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = texture.targetY - globalOffset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
                 parallaxPlane.attachedLayersRearPositions[index] = (speedFactor * velocityX * worldToPixelRatio) * deltaTime + position
-            } else if (parallaxMode == VERTICAL_PLANE) {
+            } else if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = texture.targetX - globalOffset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
@@ -57,13 +56,13 @@ class ParallaxSystem(
             val plane = parallaxDataContainer.config.parallaxPlane!!
             val parallaxMode = parallaxDataContainer.config.mode
             val offset = plane.offset
-            if (parallaxMode == HORIZONTAL_PLANE) {
+            if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = parallaxDataContainer.parallaxPlane!!.imageDatas[index].defaultAnimation.firstFrame.targetY - offset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax plane line
                 parallaxPlane.linePositions[index] = (speedFactor * velocityX * worldToPixelRatio) * deltaTime + position
-            } else if (parallaxMode == VERTICAL_PLANE) {
+            } else if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = parallaxDataContainer.parallaxPlane!!.imageDatas[index].defaultAnimation.firstFrame.targetX - offset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
@@ -78,13 +77,13 @@ class ParallaxSystem(
             val texture = parallaxDataContainer.attachedLayersFront!!.defaultAnimation.firstFrame.layerData[index]
             val globalOffset = plane.offset
             val attachTextureOffset = if (plane.attachedLayersFront!![index].attachBottomRight) texture.height else 0
-            if (parallaxMode == HORIZONTAL_PLANE) {
+            if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = texture.targetY - globalOffset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
                 parallaxPlane.attachedLayersFrontPositions[index] = (speedFactor * velocityX * worldToPixelRatio) * deltaTime + position
-            } else if (parallaxMode == VERTICAL_PLANE) {
+            } else if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = texture.targetX - globalOffset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]

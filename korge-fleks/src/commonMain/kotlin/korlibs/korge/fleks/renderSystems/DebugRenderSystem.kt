@@ -3,7 +3,7 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import korlibs.datastructure.iterators.*
 import korlibs.image.color.*
-import korlibs.korge.assetmanager.*
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.RenderLayerTag
 import korlibs.korge.render.*

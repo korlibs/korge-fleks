@@ -4,7 +4,7 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.collection.*
 import korlibs.image.format.*
-import korlibs.korge.assetmanager.*
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionXComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionYComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenPositionOffsetXComponent

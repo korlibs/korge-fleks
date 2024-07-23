@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.assetmanager.*
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.ldtk.view.*
@@ -79,7 +79,7 @@ class LDtkLevelMapRenderSystem(
         }
 
         // This is currently hardcoded to World assets - if needed adjust to another asset type like Level or Special
-        configureAssetUpdater(AssetType.World) {
+        configureAssetUpdater(AssetType.WORLD) {
             onLdtkLevelMapChanged {
                 // remove old ldtk view and create new one
                 if (levelMapEntity != Entity.NONE) {
