@@ -110,6 +110,7 @@ class ObjectRenderSystem(
             // Rendering path for text
             else if (entity has TextFieldComponent) {
                 val (text, fontName, textRangeStart, textRangeEnd, width, height, wordWrap,  horizontalAlign, verticalAlign) = entity[TextFieldComponent]
+                val offset: Point = Point(offsetX, offsetY)
 
                 renderCtx2d(ctx) { render ->
                     var n = 0
@@ -130,7 +131,7 @@ class ObjectRenderSystem(
                             it.text,
                             it.font.lazyBitmap,
                             it.size,
-                            it.pos,
+                            it.pos + offset,
                             color = rgba,
                             baseline = true,
                             textRangeStart = textRangeStart - n,
