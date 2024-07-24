@@ -19,7 +19,7 @@ import kotlinx.serialization.*
 data class DialogBoxConfig(
     override val name: String,
 
-    val duration: Float,
+    private val duration: Float,
 
     // Position and size
     private val x: Float = 0f,

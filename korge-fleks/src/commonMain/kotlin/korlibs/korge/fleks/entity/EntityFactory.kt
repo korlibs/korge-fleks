@@ -62,9 +62,11 @@ object EntityFactory {
 
             val entityConfig = entityConfigs[name]
             return if (entityConfig != null) {
+                val entityName = if (entity has InfoComponent) entity[InfoComponent].name else "no_name"
+                println("INFO: Configure entity '${baseEntity.id} ($entityName)' with '${entityConfig.name}' EntityConfig.")
                 entityConfig.run { world.entityConfigure(baseEntity) }
             } else {
-                println("WARNING: Cannot invoke! EntityConfig with name '$entityConfig' not registered in EntityFactory!")
+                println("WARNING: Cannot invoke! EntityConfig with name '$name' not registered in EntityFactory!")
                 entity
             }
         }
