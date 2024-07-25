@@ -5,6 +5,7 @@ import korlibs.datastructure.iterators.*
 import korlibs.image.atlas.*
 import korlibs.image.format.*
 import korlibs.io.file.*
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 import kotlinx.serialization.EncodeDefault.Mode.NEVER
 
@@ -190,17 +191,18 @@ data class ParallaxConfig(
  * Both attached layer types will scroll depending on their position on the parallax plane.
  */
 @Serializable @SerialName("ParallaxPlaneConfig")
-data class ParallaxPlaneConfig @OptIn(ExperimentalSerializationApi::class) constructor(
+data class ParallaxPlaneConfig(
     val offset: Int = 0,
     val name: String,
     val speedFactor: Float = 1f,
-    // TODO move parallaxPlaneSpeedFactors to static Parallax entity config (which is always re-created after deserialization)
-    @EncodeDefault(NEVER) var parallaxPlaneSpeedFactors: FloatArray = floatArrayOf(),  // create empty list, the real size will come from the texture size
-//    val parallaxPlaneSpeedFactors: FloatArrayList = FloatArrayList(capacity = 0),  // create empty list, the real size will come from the texture size
     val selfSpeed: Float = 0f,
     val attachedLayersFront: ArrayList<ParallaxAttachedLayerConfig>? = null,
     val attachedLayersRear: ArrayList<ParallaxAttachedLayerConfig>? = null
-)
+) {
+    // This is computed after loading of parallax image data from Aseprite
+    @Serializable(with = ParallaxSpeedFactors::class)
+    lateinit var parallaxPlaneSpeedFactors: FloatArray
+}
 
 /**
  * This is the configuration for layers which are attached to the parallax plane. These layers are moving depending

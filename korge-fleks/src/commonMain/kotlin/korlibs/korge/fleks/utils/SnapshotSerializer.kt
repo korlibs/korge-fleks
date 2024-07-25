@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.*
+import korlibs.datastructure.*
 import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.image.text.*
@@ -186,6 +187,16 @@ class SnapshotSerializer {
         }
         return json
     }
+}
+
+/**
+ * A special serializer to prohibit serialization of FloatArray in Parallax plane config.
+ * For some reason @Default
+ */
+object ParallaxSpeedFactors : KSerializer<FloatArray> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ParallaxSpeedFactors", PrimitiveKind.INT)
+    override fun serialize(encoder: Encoder, value: FloatArray) = encoder.encodeInt(0)
+    override fun deserialize(decoder: Decoder): FloatArray = floatArrayOf()
 }
 
 /**
