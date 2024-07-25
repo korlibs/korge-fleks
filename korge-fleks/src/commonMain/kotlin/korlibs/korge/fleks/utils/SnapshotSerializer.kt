@@ -191,7 +191,7 @@ class SnapshotSerializer {
 
 /**
  * A special serializer to prohibit serialization of FloatArray in Parallax plane config.
- * For some reason @Default
+ * For some reason @EncodeDefault(NEVER) does not work.
  */
 object ParallaxSpeedFactors : KSerializer<FloatArray> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ParallaxSpeedFactors", PrimitiveKind.INT)
