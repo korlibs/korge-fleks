@@ -7,10 +7,10 @@ import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 
 
-@Serializable
+@Serializable @SerialName("RichText")
 data class RichTextConfig(
     override val name: String,
 

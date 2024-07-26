@@ -15,7 +15,7 @@ import kotlinx.serialization.*
  * Entity config for a dialog box which appears on the dialog layer in front of any game play.
  * Dialog Box is rendered on indexLayer 100 - 102 in foreground on [FG_DIALOGS][RenderLayerTag.FG_DIALOGS] layer.
  */
-@Serializable
+@Serializable @SerialName("DialogBox")
 data class DialogBoxConfig(
     override val name: String,
 

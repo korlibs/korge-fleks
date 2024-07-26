@@ -99,7 +99,7 @@ class ResourceDirWatcherConfiguration(
             assetUpdater.enabled = true
             assetUpdater.toBeEnabled = false
 
-            resourcesVfs[assetConfig.folderName].apply {
+            resourcesVfs[assetConfig.folder].apply {
                 if (stat().isDirectory) {
                     println("Add watcher for '${path}'")
                     watch {
@@ -121,12 +121,12 @@ class ResourceDirWatcherConfiguration(
             // Check filename
             if (file.fullName.contains(config.value.removeSuffix(".fnt")) && !reloading) {
                 reloading = true  // save that reloading is in progress
-                println("Reloading ${assetConfig.folderName}/${config.value} for changes in ${file.fullName} ... ")
+                println("Reloading ${assetConfig.folder}/${config.value} for changes in ${file.fullName} ... ")
 
                 launchImmediately(context = assetReloadContext) {
                     delay(500)
                     val assetName = config.key
-                    assetStore.fonts[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folderName + "/" + config.value].readBitmapFont(atlas = null))
+                    assetStore.fonts[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value].readBitmapFont(atlas = null))
                 }
 
                 delay(100)
@@ -145,11 +145,11 @@ class ResourceDirWatcherConfiguration(
                     val assetName = config.key
                     assetStore.images[assetName] = Pair(assetUpdater.type,
                         if (config.value.layers == null) {
-                            resourcesVfs[assetConfig.folderName + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
+                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
                         } else {
                             val props = ASE.toProps()
                             props.setExtra("layers", config.value.layers)
-                            resourcesVfs[assetConfig.folderName + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
+                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
                         }
                     )
 
@@ -169,7 +169,7 @@ class ResourceDirWatcherConfiguration(
                     // Give aseprite more time to finish writing the files
                     delay(100)
                     val assetName = config.key
-                    assetStore.backgrounds[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folderName + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
+                    assetStore.backgrounds[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
 
                     println("\nTriggering asset change for: $assetName")
                     // Guard period until reloading is activated again - this is used for debouncing watch messages
@@ -190,8 +190,8 @@ class ResourceDirWatcherConfiguration(
                     delay(500)
                     val assetName = config.key
                     when (config.value.type) {
-                        TileMapType.LDTK -> assetStore.ldtkWorld[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folderName + "/" + config.value.fileName].readLDTKWorld(extrude = true))
-                        TileMapType.TILED -> assetStore.tiledMaps[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folderName + "/" + config.value.fileName].readTiledMap())
+                        TileMapType.LDTK -> assetStore.ldtkWorld[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readLDTKWorld(extrude = true))
+                        TileMapType.TILED -> assetStore.tiledMaps[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readTiledMap())
                     }
 
                     println("\nTriggering asset change for: $assetName")

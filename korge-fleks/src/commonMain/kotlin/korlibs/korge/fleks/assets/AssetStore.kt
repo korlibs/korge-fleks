@@ -34,10 +34,10 @@ class AssetStore {
     val specialAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
 
 //    @Volatile
-    internal var commonAssetConfig: AssetModel = AssetModel(type = AssetType.COMMON)
-    internal var currentWorldAssetConfig: AssetModel = AssetModel(type = AssetType.WORLD)
-    internal var currentLevelAssetConfig: AssetModel = AssetModel(type = AssetType.LEVEL)
-    internal var specialAssetConfig: AssetModel = AssetModel(type = AssetType.SPECIAL)
+    internal var commonAssetConfig: AssetModel = AssetModel()
+    internal var currentWorldAssetConfig: AssetModel = AssetModel()
+    internal var currentLevelAssetConfig: AssetModel = AssetModel()
+    internal var specialAssetConfig: AssetModel = AssetModel()
 
     internal var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
     internal var ldtkWorld: MutableMap<String, Pair<AssetType, LDTKWorld>> = mutableMapOf()
@@ -100,33 +100,32 @@ class AssetStore {
         else error("AssetStore: Cannot find font '$name'!")
     }
 
-    suspend fun loadAssets(assetConfig: AssetModel, hotReloading: Boolean) {
-        val type: AssetType = assetConfig.type
+    suspend fun loadAssets(type: AssetType, assetConfig: AssetModel, hotReloading: Boolean) {
         var assetLoaded = false
         val atlas = when (type) {
             AssetType.COMMON -> {
-                prepareCurrentAssets(assetConfig, commonAssetConfig, hotReloading)?.also { config ->
+                prepareCurrentAssets(type, assetConfig, commonAssetConfig, hotReloading)?.also { config ->
                     commonAssetConfig = config
                     assetLoaded = true
                 }
                 commonAtlas
             }
             AssetType.WORLD -> {
-                prepareCurrentAssets(assetConfig, currentWorldAssetConfig, hotReloading)?.also { config ->
+                prepareCurrentAssets(type, assetConfig, currentWorldAssetConfig, hotReloading)?.also { config ->
                     currentWorldAssetConfig = config
                     assetLoaded = true
                 }
                 worldAtlas
             }
             AssetType.LEVEL -> {
-                prepareCurrentAssets(assetConfig, currentLevelAssetConfig, hotReloading)?.also { config ->
+                prepareCurrentAssets(type, assetConfig, currentLevelAssetConfig, hotReloading)?.also { config ->
                     currentLevelAssetConfig = config
                     assetLoaded = true
                 }
                 levelAtlas
             }
             AssetType.SPECIAL -> {
-                prepareCurrentAssets(assetConfig, specialAssetConfig, hotReloading)?.also { config ->
+                prepareCurrentAssets(type, assetConfig, specialAssetConfig, hotReloading)?.also { config ->
                     specialAssetConfig = config
                     assetLoaded = true
                 }
@@ -137,66 +136,72 @@ class AssetStore {
         if (assetLoaded) {
 
             val sw = Stopwatch().start()
-            println("AssetStore: Start loading [${type.name}] resources from '${assetConfig.folderName}'...")
+            println("AssetStore: Start loading [${type.name}] resources from '${assetConfig.folder}'...")
 
             // Update maps of music, images, ...
             assetConfig.tileMaps.forEach { tileMap ->
                 when (tileMap.value.type) {
-                    TileMapType.LDTK -> ldtkWorld[tileMap.key] = Pair(type, resourcesVfs[assetConfig.folderName + "/" + tileMap.value.fileName].readLDTKWorld(extrude = true))
-                    TileMapType.TILED -> tiledMaps[tileMap.key] = Pair(type, resourcesVfs[assetConfig.folderName + "/" + tileMap.value.fileName].readTiledMap(atlas = atlas))
+                    TileMapType.LDTK -> ldtkWorld[tileMap.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + tileMap.value.fileName].readLDTKWorld(extrude = true))
+                    TileMapType.TILED -> tiledMaps[tileMap.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + tileMap.value.fileName].readTiledMap(atlas = atlas))
                 }
             }
 
             assetConfig.sounds.forEach { sound ->
-                val soundFile = resourcesVfs[assetConfig.folderName + "/" + sound.value].readMusic()
+                val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.value].readMusic()
                 val soundChannel = soundFile.play()
 //            val soundChannel = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readSound().play()
                 soundChannel.pause()
                 sounds[sound.key] = Pair(type, soundChannel)
             }
             assetConfig.backgrounds.forEach { background ->
-                backgrounds[background.key] = Pair(type, resourcesVfs[assetConfig.folderName + "/" + background.value.aseName].readParallaxDataContainer(background.value, ASE, atlas = atlas))
+                backgrounds[background.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + background.value.aseName].readParallaxDataContainer(background.value, ASE, atlas = atlas))
             }
             assetConfig.images.forEach { image ->
                 images[image.key] = Pair(
                     type,
                     if (image.value.layers == null) {
-                        resourcesVfs[assetConfig.folderName + "/" + image.value.fileName].readImageDataContainer(ASE.toProps(), atlas = atlas)
+                        resourcesVfs[assetConfig.folder + "/" + image.value.fileName].readImageDataContainer(ASE.toProps(), atlas = atlas)
                     } else {
                         val props = ASE.toProps() // TODO check -- ImageDecodingProps(it.value.fileName, extra = ExtraTypeCreate())
                         props.setExtra("layers", image.value.layers)
-                        resourcesVfs[assetConfig.folderName + "/" + image.value.fileName].readImageDataContainer(props, atlas)
+                        resourcesVfs[assetConfig.folder + "/" + image.value.fileName].readImageDataContainer(props, atlas)
                     }
                 )
             }
             assetConfig.fonts.forEach { font ->
                 // TODO there is a bug with drawing spaces from font when the font is added to an atlas - remove atlas for now
-                fonts[font.key] = Pair(type, resourcesVfs[assetConfig.folderName + "/" + font.value].readBitmapFont())  // readBitmapFont(atlas = atlas))
+                fonts[font.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + font.value].readBitmapFont())  // readBitmapFont(atlas = atlas))
             }
 
             println("Assets: Loaded resources in ${sw.elapsed}")
+
+            if (hotReloading) {
+                configureResourceDirWatcher {
+                    addAssetWatcher(type) {}
+                }
+            }
         }
     }
 
-    private fun prepareCurrentAssets(newAssetConfig: AssetModel, currentAssetConfig: AssetModel, hotReloading: Boolean): AssetModel? =
-        when (currentAssetConfig.folderName) {
+    private fun prepareCurrentAssets(type: AssetType, newAssetConfig: AssetModel, currentAssetConfig: AssetModel, hotReloading: Boolean): AssetModel? =
+        when (currentAssetConfig.folder) {
             "" -> {
                 // Just load new assets
                 newAssetConfig
             }
-            newAssetConfig.folderName -> {
+            newAssetConfig.folder -> {
                 if (hotReloading) {
 //                    removeAssets(newAssetConfig.type)
-                    println("INFO: Reload ${newAssetConfig.type} assets '${newAssetConfig.folderName}'.")
+                    println("INFO: Reload $type assets '${newAssetConfig.folder}'.")
                     newAssetConfig
                 } else {
-                    println("INFO: ${newAssetConfig.type} assets '${newAssetConfig.folderName}' already loaded! No reload is happening!")
+                    println("INFO: $type assets '${newAssetConfig.folder}' already loaded! No reload is happening!")
                     null
                 }
             }
             else -> {
-                println("INFO: Remove old ${newAssetConfig.type} assets and load new ones!")
-                removeAssets(newAssetConfig.type)
+                println("INFO: Remove old $type assets and load new ones!")
+                removeAssets(type)
                 newAssetConfig
             }
         }
