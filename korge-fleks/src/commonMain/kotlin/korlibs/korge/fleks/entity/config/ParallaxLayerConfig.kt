@@ -7,10 +7,10 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 
 
-@Serializable
+@Serializable @SerialName("ParallaxLayerConfig")
 data class ParallaxLayerConfig(
     override val name: String,
     
