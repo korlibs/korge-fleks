@@ -7,7 +7,7 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 
 
 /**
@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
  *
  * This class creates a level map background entity which is used for various backgrounds in the game and intro.
  */
-@Serializable
+@Serializable @SerialName("LevelMapConfig")
 data class LevelMapConfig(
     override val name: String,
 
@@ -38,8 +38,8 @@ data class LevelMapConfig(
                 TileMapType.TILED -> it += TiledLevelMapComponent(assetName)
             }
             it += PositionComponent(
-                x = this@LevelMapConfig.x,
-                y = this@LevelMapConfig.y
+                x = x,
+                y = y
             )
             it += SizeComponent()  // Size of level map needs to be set after loading of map is finished
             it += RgbaComponent().apply {
