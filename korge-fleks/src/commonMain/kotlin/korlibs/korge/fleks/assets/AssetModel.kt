@@ -12,6 +12,7 @@ import kotlinx.serialization.*
 @Serializable @SerialName("AssetModel")
 data class AssetModel(
     val folder: String = "",
+    val hotReloading: Boolean = false,
     val sounds: MutableMap<String, String> = mutableMapOf(),
     val backgrounds: MutableMap<String, ParallaxConfig> = mutableMapOf(),
     val images: MutableMap<String, ImageDataConfig> = mutableMapOf(),

@@ -100,32 +100,32 @@ class AssetStore {
         else error("AssetStore: Cannot find font '$name'!")
     }
 
-    suspend fun loadAssets(type: AssetType, assetConfig: AssetModel, hotReloading: Boolean) {
+    suspend fun loadAssets(type: AssetType, assetConfig: AssetModel) {
         var assetLoaded = false
         val atlas = when (type) {
             AssetType.COMMON -> {
-                prepareCurrentAssets(type, assetConfig, commonAssetConfig, hotReloading)?.also { config ->
+                prepareCurrentAssets(type, assetConfig, commonAssetConfig)?.also { config ->
                     commonAssetConfig = config
                     assetLoaded = true
                 }
                 commonAtlas
             }
             AssetType.WORLD -> {
-                prepareCurrentAssets(type, assetConfig, currentWorldAssetConfig, hotReloading)?.also { config ->
+                prepareCurrentAssets(type, assetConfig, currentWorldAssetConfig)?.also { config ->
                     currentWorldAssetConfig = config
                     assetLoaded = true
                 }
                 worldAtlas
             }
             AssetType.LEVEL -> {
-                prepareCurrentAssets(type, assetConfig, currentLevelAssetConfig, hotReloading)?.also { config ->
+                prepareCurrentAssets(type, assetConfig, currentLevelAssetConfig)?.also { config ->
                     currentLevelAssetConfig = config
                     assetLoaded = true
                 }
                 levelAtlas
             }
             AssetType.SPECIAL -> {
-                prepareCurrentAssets(type, assetConfig, specialAssetConfig, hotReloading)?.also { config ->
+                prepareCurrentAssets(type, assetConfig, specialAssetConfig)?.also { config ->
                     specialAssetConfig = config
                     assetLoaded = true
                 }
@@ -175,7 +175,7 @@ class AssetStore {
 
             println("Assets: Loaded resources in ${sw.elapsed}")
 
-            if (hotReloading) {
+            if (assetConfig.hotReloading) {
                 configureResourceDirWatcher {
                     addAssetWatcher(type) {}
                 }
@@ -183,14 +183,14 @@ class AssetStore {
         }
     }
 
-    private fun prepareCurrentAssets(type: AssetType, newAssetConfig: AssetModel, currentAssetConfig: AssetModel, hotReloading: Boolean): AssetModel? =
+    private fun prepareCurrentAssets(type: AssetType, newAssetConfig: AssetModel, currentAssetConfig: AssetModel): AssetModel? =
         when (currentAssetConfig.folder) {
             "" -> {
                 // Just load new assets
                 newAssetConfig
             }
             newAssetConfig.folder -> {
-                if (hotReloading) {
+                if (newAssetConfig.hotReloading) {
 //                    removeAssets(newAssetConfig.type)
                     println("INFO: Reload $type assets '${newAssetConfig.folder}'.")
                     newAssetConfig

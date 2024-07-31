@@ -5,7 +5,7 @@ import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 
 
 /**
@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
  *
  * Logo can be centered on the screen and additionally an offset can be specified.
  */
-@Serializable
+@Serializable @SerialName("LogoEntityConfig")
 data class LogoEntityConfig(
     override val name: String,
 
