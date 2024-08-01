@@ -29,12 +29,17 @@ data class EntityLinkComponent(
 @Serializable @SerialName("SubEntities")
 data class SubEntitiesComponent(
     var subEntities: List<Entity> = listOf(),
+    var subEntitiesByName: Map<String, Entity> = mapOf(),
     // Configure what to do with the linked entities
     var moveWith: Boolean = false,
     var delete: Boolean = false
 ) : CloneableComponent<SubEntitiesComponent>() {
     override fun type() = SubEntitiesComponent
     companion object : ComponentType<SubEntitiesComponent>()
+
+    fun getSubEntity(name: String) : Entity =
+        if (subEntitiesByName.contains(name)) subEntitiesByName[name]!!
+        else Entity.NONE
 
     // Author's hint: Check if deep copy is needed on any change in the component!
     override fun clone(): SubEntitiesComponent =
