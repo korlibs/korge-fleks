@@ -6,15 +6,15 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.random
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 
 
 /**
  * This object prototype can be used to create objects which are moving and spawn a trail.
  *
  */
-@Serializable
-data class MovedSpawnerObject(
+@Serializable @SerialName("MovedSpawnerObjectConfig")
+data class MovedSpawnerObjectConfig(
     override val name: String,
 
     // SpawnerComponent for creating the fire trail

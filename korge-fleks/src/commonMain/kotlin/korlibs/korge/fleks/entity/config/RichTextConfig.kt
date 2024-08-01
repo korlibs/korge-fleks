@@ -10,7 +10,7 @@ import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 
-@Serializable @SerialName("RichText")
+@Serializable @SerialName("RichTextConfig")
 data class RichTextConfig(
     override val name: String,
 

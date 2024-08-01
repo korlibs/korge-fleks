@@ -9,15 +9,15 @@ import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.random
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 
 
 /**
  * Function to generate effect objects like explosions, shoots, dust, etc.
  *
  */
-@Serializable
-data class FireAndDustEffect(
+@Serializable @SerialName("FireAndDustEffectConfig")
+data class FireAndDustEffectConfig(
     override val name: String,
 
     private val assetName: String,
@@ -39,7 +39,7 @@ data class FireAndDustEffect(
     // Configure function which applies the config to the entity's components
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
-            it += InfoComponent(name = this@FireAndDustEffect.name)
+            it += InfoComponent(name = this@FireAndDustEffectConfig.name)
 
             var velocityXX = velocityX
             var velocityYY = velocityY
@@ -75,7 +75,7 @@ data class FireAndDustEffect(
                 }
             }
             it += renderLayerTag
-            if (layerIndex != null) it += LayerComponent(layerIndex = this@FireAndDustEffect.layerIndex)
+            if (layerIndex != null) it += LayerComponent(layerIndex = this@FireAndDustEffectConfig.layerIndex)
 //            entity += RenderLayerTag.DEBUG
         }
         return entity
