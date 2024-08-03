@@ -9,6 +9,9 @@ import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlin.coroutines.*
 
+const val snapshotFps = 30
+
+//fun <T> mutableListWithCapacityOf(capacity: Int) : MutableList<T> = ArrayList(capacity)
 
 /**
  * This system operates on a world snapshot of Fleks and stores it in an array for (fast) rewind and forward.
@@ -17,14 +20,19 @@ import kotlin.coroutines.*
  * Please make sure you are not deriving any additional components from [Component].
  */
 class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
-    interval = Fixed(step = 1/30.0f)
+    interval = Fixed(step = 1f / snapshotFps.toFloat())
 ) {
 
     private val family: Family = world.family { all(ParallaxComponent) }
     private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
-    private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
+    private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()  // mutableListWithCapacityOf(100000)
     private var rewindSeek: Int = 0
     private var gameRunning: Boolean = true
+
+    // After 30 seconds keep only one snapshot per second
+    private var numberSnapshotsToKeep: Int = 30 * snapshotFps
+    private var snapshotSecondCounter: Int = 0
+    private var snapshotDeletePointer: Int = 0
 
     companion object {
         /**
@@ -63,6 +71,24 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 // Fallback: If needed deep copy of snapshot can be done via serialization and deserialization
 //        val jsonSnapshot = snapshotSerializer.json().encodeToString(world.snapshot())
 //        val snapshotCopy: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(jsonSnapshot)
+
+        // Cleanup old snapshots so that we do not save too much
+        if (recording.size > numberSnapshotsToKeep) {
+            if (snapshotSecondCounter < snapshotFps) {
+                recording.removeAt(snapshotDeletePointer)
+                snapshotSecondCounter++
+            }
+            else {
+                snapshotSecondCounter = 0
+                numberSnapshotsToKeep++
+                snapshotDeletePointer++
+            }
+        }
+
+        // Delete old snapshots which are older than 30 seconds (to free some memory on Android devices)
+//        if (recording.size > 30f * snapshotFps) {
+//            recording.removeFirst()
+//        }
 
         // Store copy of word snapshot
         recording.add(snapshotCopy)
