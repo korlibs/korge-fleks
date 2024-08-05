@@ -170,6 +170,9 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.textRangeStart?.let { end -> createTweenPropertyComponent(TextFieldTextRangeStart, start.textRangeStart, end - start.textRangeStart ) }
                 tween.textRangeEnd?.let { end -> createTweenPropertyComponent(TextFieldTextRangeEnd, start.textRangeEnd, end - start.textRangeEnd ) }
             }
+            is TweenTouchInput -> tween.entity.getOrWarning(TouchInputComponent)?.let {
+                tween.enabled?.let { value -> createTweenPropertyComponent(TouchInputEnable, value) }
+            }
             // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
             is SpawnEntity -> {
                 val spawnedEntity = if (tween.entity == Entity.NONE) world.entity("SpawnEntity: ${tween.entityConfig}") else tween.entity

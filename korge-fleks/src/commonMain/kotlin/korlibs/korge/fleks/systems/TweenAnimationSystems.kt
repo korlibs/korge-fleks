@@ -34,6 +34,7 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenSwit
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextRangeEndComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextRangeStartComponent
+import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTouchInputEnableComponent
 import korlibs.korge.fleks.entity.*
 import kotlin.jvm.JvmName
 import kotlin.reflect.KMutableProperty0
@@ -214,6 +215,17 @@ class TweenEventSystem : IteratingSystem(
     }
 }
 
+class TweenTouchInputSystem : IteratingSystem(
+    family {
+        all(TouchInputComponent)
+            .any(TweenTouchInputEnableComponent) },
+    interval = EachFrame
+) {
+    override fun onTickEntity(entity: Entity) {
+        val touchInputComponent = entity[TouchInputComponent]
+        updateProperty(entity, TweenTouchInputEnableComponent, touchInputComponent::enabled)
+    }
+}
 
 //class AnimateLifeCycleSystem : IteratingSystem(
 //    family { all(LifeCycleComponent).any(TweenLifeCycleHealthCounter) },
@@ -239,6 +251,7 @@ fun SystemConfiguration.setupTweenEngineSystems() {
     add(TweenSoundSystem())
     add(TweenTextFieldSystem())
     add(TweenEventSystem())
+    add(TweenTouchInputSystem())
 }
 
 /**

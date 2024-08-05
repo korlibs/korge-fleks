@@ -74,8 +74,9 @@ data class TweenPropertyComponent (
 
         EventPublish(componentTypeOf<TweenPropertyComponent>()),
         EventReset(componentTypeOf<TweenPropertyComponent>()),
-        EventSubscribe(componentTypeOf<TweenPropertyComponent>())
+        EventSubscribe(componentTypeOf<TweenPropertyComponent>()),
 
+        TouchInputEnable(componentTypeOf<TweenPropertyComponent>())
     }
 
     companion object {
@@ -120,6 +121,8 @@ data class TweenPropertyComponent (
         val TweenEventPublishComponent = TweenProperty.EventPublish.type
         val TweenEventResetComponent = TweenProperty.EventReset.type
         val TweenEventSubscribeComponent = TweenProperty.EventSubscribe.type
+
+        val TweenTouchInputEnableComponent = TweenProperty.TouchInputEnable.type
     }
 
     // Author's hint: Check if deep copy is needed on any change in the component!

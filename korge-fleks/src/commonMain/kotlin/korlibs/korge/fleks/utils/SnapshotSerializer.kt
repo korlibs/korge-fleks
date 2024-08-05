@@ -120,6 +120,7 @@ internal val internalModule = SerializersModule {
         subclass(TweenSpawner::class)
         subclass(TweenSound::class)
         subclass(TweenTextField::class)
+        subclass(TweenTouchInput::class)
     }
 }
 

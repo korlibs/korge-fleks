@@ -11,8 +11,6 @@ import kotlin.coroutines.*
 
 const val snapshotFps = 30
 
-//fun <T> mutableListWithCapacityOf(capacity: Int) : MutableList<T> = ArrayList(capacity)
-
 /**
  * This system operates on a world snapshot of Fleks and stores it in an array for (fast) rewind and forward.
  *
@@ -84,11 +82,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 snapshotDeletePointer++
             }
         }
-
-        // Delete old snapshots which are older than 30 seconds (to free some memory on Android devices)
-//        if (recording.size > 30f * snapshotFps) {
-//            recording.removeFirst()
-//        }
 
         // Store copy of word snapshot
         recording.add(snapshotCopy)
