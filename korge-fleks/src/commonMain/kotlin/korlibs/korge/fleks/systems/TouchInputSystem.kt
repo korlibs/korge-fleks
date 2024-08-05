@@ -41,9 +41,9 @@ class TouchInputSystem : IteratingSystem(
     }
 
     override fun onTickEntity(entity: Entity) {
+        val inputTouchButton = entity[TouchInputComponent]
 
-        if (isUp) {
-            val inputTouchButton = entity[TouchInputComponent]
+        if (inputTouchButton.enabled && isUp) {
             val positionComponent = entity[PositionComponent]
             val sizeComponent = entity[SizeComponent]
 

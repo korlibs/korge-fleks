@@ -29,6 +29,6 @@ class LifeCycleSystem : IteratingSystem(
 
     private fun debugPrint(entity: Entity, type: String) {
         val name: String = entity.getOrNull(InfoComponent)?.name ?: "no name"
-        println("LifeCycleSystem: Remove $type-entity '${entity.id}' ($name)")
+//        println("INFO: LifeCycleSystem: Remove $type-entity '${entity.id}' ($name)")
     }
 }
