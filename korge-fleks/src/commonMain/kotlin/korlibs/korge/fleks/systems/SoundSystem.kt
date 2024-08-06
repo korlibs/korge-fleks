@@ -59,7 +59,7 @@ class SoundSystem : IteratingSystem(
             if (soundEnabled) {
 //                if (soundComponent.isPlaying && soundChannel.paused) soundChannel.resume()
                 if (soundComponent.isPlaying) {
-                    soundChannel.current = 10000.milliseconds
+//                    soundChannel.current = 10000.milliseconds
                     soundChannel.resume()
                     println("SoundSystem: Resume sound '${soundComponent.name}'")
                 }
