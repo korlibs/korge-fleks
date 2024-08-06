@@ -118,7 +118,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         world.systems.forEach { system ->
             when (system) {
                 // Sound system needs special handling, because it has to stop all sounds which are playing
-                is SoundSystem -> system.soundEnabled = gameRunning
+                is SoundSystem -> system.soundEnabled = true  // TODO keep sound playing for now -- gameRunning
                 else -> system.enabled = gameRunning
             }
         }
