@@ -3,6 +3,7 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
 import korlibs.datastructure.iterators.*
+import korlibs.image.bitmap.*
 import korlibs.image.font.*
 import korlibs.image.text.*
 import korlibs.korge.annotations.*
@@ -17,6 +18,9 @@ import korlibs.math.geom.*
 /**
  * Creates a new [ObjectRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver "this".
+ *
+ * HINT: This renderer is preliminary and does not use caching of geometry or vertices. It might be replaced by
+ * renderers from KorGE 6.
  */
 inline fun Container.objectRenderSystem(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ObjectRenderSystem.() -> Unit = {}) =
     ObjectRenderSystem(viewPortSize, world, layerTag).addTo(this, callback)
@@ -140,6 +144,28 @@ class ObjectRenderSystem(
                         )
                         n += it.text.length
                     }
+                }
+            }
+            else if (entity has NinePatchComponent) {
+                val (name, width, height) = entity[NinePatchComponent]
+                val ninePatch = assetStore.getNinePatch(name)
+
+                val numQuads = ninePatch.info.totalSegments
+                val indices = TexturedVertexArray.quadIndices(numQuads)
+                val tva = TexturedVertexArray(numQuads * 4, indices)
+                var index = 0
+                val viewBounds = RectangleInt(0, 0, (width).toInt(), (height).toInt())
+                ninePatch.info.computeScale(viewBounds) { segment, x, y, width, height ->
+                    val bmpSlice = ninePatch.getSegmentBmpSlice(segment)
+                    tva.quad(index++ * 4,
+                        x.toFloat(), y.toFloat(),
+                        width.toFloat(), height.toFloat(),
+                        Matrix.IDENTITY, bmpSlice, renderColorMul
+                    )
+                }
+
+                ctx.useBatcher { batch ->
+                    batch.drawVertices(tva, ctx.getTex(ninePatch.content.bmp), smoothing = false, blendMode)
                 }
             }
         }
