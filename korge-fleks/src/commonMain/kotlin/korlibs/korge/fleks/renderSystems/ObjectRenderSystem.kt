@@ -32,7 +32,7 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, LayerComponent, PositionComponent, RgbaComponent)
-        .any(LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent)
+        .any(LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
@@ -154,13 +154,13 @@ class ObjectRenderSystem(
                 val indices = TexturedVertexArray.quadIndices(numQuads)
                 val tva = TexturedVertexArray(numQuads * 4, indices)
                 var index = 0
-                val viewBounds = RectangleInt(0, 0, (width).toInt(), (height).toInt())
-                ninePatch.info.computeScale(viewBounds) { segment, x, y, width, height ->
+                val viewBounds = RectangleInt(x.toInt(), y.toInt(), width.toInt(), height.toInt())
+                ninePatch.info.computeScale(viewBounds) { segment, xx, yy, ww, hh ->
                     val bmpSlice = ninePatch.getSegmentBmpSlice(segment)
                     tva.quad(index++ * 4,
-                        x.toFloat(), y.toFloat(),
-                        width.toFloat(), height.toFloat(),
-                        Matrix.IDENTITY, bmpSlice, renderColorMul
+                        xx.toFloat(), yy.toFloat(),
+                        ww.toFloat(), hh.toFloat(),
+                        Matrix.IDENTITY, bmpSlice, rgba
                     )
                 }
 

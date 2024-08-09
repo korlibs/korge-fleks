@@ -8,6 +8,8 @@ import kotlinx.serialization.*
 /**
  * Component which is used to implement a publish-subscribe event/message passing system.
  * It is used by [EventSystem].
+ *
+ * Hint: Not yet used in KorGE-Fleks.
  */
 @Serializable @SerialName("Info")
 data class EventComponent(
