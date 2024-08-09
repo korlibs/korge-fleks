@@ -208,6 +208,11 @@ object HorizontalAlignAsDouble : KSerializer<HorizontalAlign> {
     override fun serialize(encoder: Encoder, value: HorizontalAlign) = encoder.encodeDouble(value.ratio)
     override fun deserialize(decoder: Decoder): HorizontalAlign = HorizontalAlign(decoder.decodeDouble())
 }
+object HAlignAsString : KSerializer<HorizontalAlign> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("HAlignAsString", PrimitiveKind.STRING)
+    override fun serialize(encoder: Encoder, value: HorizontalAlign) = encoder.encodeString(value.toString())
+    override fun deserialize(decoder: Decoder): HorizontalAlign = HorizontalAlign(decoder.decodeString())
+}
 
 /**
  * A serializer strategy for Korge [VerticalAlign] type. The alignment ratio will be saved as double.
@@ -216,6 +221,11 @@ object VerticalAlignAsDouble : KSerializer<VerticalAlign> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("VerticalAlignAsDouble", PrimitiveKind.DOUBLE)
     override fun serialize(encoder: Encoder, value: VerticalAlign) = encoder.encodeDouble(value.ratio)
     override fun deserialize(decoder: Decoder): VerticalAlign = VerticalAlign(decoder.decodeDouble())
+}
+object VAlignAsString : KSerializer<VerticalAlign> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("VAlignAsString", PrimitiveKind.STRING)
+    override fun serialize(encoder: Encoder, value: VerticalAlign) = encoder.encodeString(value.toString())
+    override fun deserialize(decoder: Decoder): VerticalAlign = VerticalAlign(decoder.decodeString())
 }
 
 /**
