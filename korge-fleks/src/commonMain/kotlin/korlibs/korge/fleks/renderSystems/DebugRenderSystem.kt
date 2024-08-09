@@ -23,7 +23,11 @@ class DebugRenderSystem(
     world: World,
     private val layerTag: RenderLayerTag
 ) : View() {
-    private val family: Family
+    private val family: Family = world.family {
+        all(layerTag, PositionComponent)
+            .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent)
+    }
+
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
     override fun renderInternal(ctx: RenderContext) {
@@ -63,9 +67,22 @@ class DebugRenderSystem(
                 }
 
                 if (entity has TextFieldComponent) {
-                    // Draw sprite bounds
+                    // Draw text field bounds
                     batch.drawVector(Colors.RED) {
                         val (_, _, _, _, width, height) = entity[TextFieldComponent]
+                        rect(
+                            x = xx,
+                            y = yy,
+                            width = width,
+                            height = height
+                        )
+                    }
+                }
+
+                if (entity has NinePatchComponent) {
+                    // Draw nine patch bounds
+                    batch.drawVector(Colors.RED) {
+                        val (_, width, height) = entity[NinePatchComponent]
                         rect(
                             x = xx,
                             y = yy,
@@ -91,9 +108,5 @@ class DebugRenderSystem(
 
     init {
         name = layerTag.toString()
-        family = world.family {
-            all(layerTag, PositionComponent)
-                .any(PositionComponent, SpriteComponent)
-        }
     }
 }
