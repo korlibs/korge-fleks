@@ -171,8 +171,7 @@ class AssetStore {
                 )
             }
             assetConfig.fonts.forEach { font ->
-                // TODO there is a bug with drawing spaces from font when the font is added to an atlas - remove atlas for now
-                fonts[font.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + font.value].readBitmapFont())  // readBitmapFont(atlas = atlas))
+                fonts[font.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + font.value].readBitmapFont(atlas = atlas))
             }
 
             println("Assets: Loaded resources in ${sw.elapsed}")
