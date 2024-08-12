@@ -111,7 +111,7 @@ class ObjectRenderSystem(
                     }
                 }
             }
-            // Rendering path for text
+            // Rendering path for text (not optimized - no caching)
             else if (entity has TextFieldComponent) {
                 val (text, fontName, textRangeStart, textRangeEnd, width, height, wordWrap,  horizontalAlign, verticalAlign) = entity[TextFieldComponent]
                 val offset: Point = Point(offsetX, offsetY)
@@ -146,6 +146,7 @@ class ObjectRenderSystem(
                     }
                 }
             }
+            // Rendering path for 9-patch graphic (not optimized - no caching)
             else if (entity has NinePatchComponent) {
                 val (name, width, height) = entity[NinePatchComponent]
                 val ninePatch = assetStore.getNinePatch(name)

@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Info")
 data class InfoComponent(
     var name: String = "noName",
+    var ldtkIdentifier: String = "",
     var entityId: Int = -1,
 
     // internal

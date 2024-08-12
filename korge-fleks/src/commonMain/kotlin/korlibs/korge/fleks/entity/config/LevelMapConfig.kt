@@ -22,8 +22,7 @@ data class LevelMapConfig(
     override val name: String,
 
     private val mapType: TileMapType,
-    private val assetName: String = "",  // Used with Tiled based maps
-    private val worldName: String = "",  // Used with LDtk based maps
+    private val assetName: String = "",  // Used with LDtk and Tiled based maps
     private val levelName: String = "",  // Used with LDtk based maps
     private val layerTag: RenderLayerTag,
     private val x: Float = 0f,
@@ -34,7 +33,7 @@ data class LevelMapConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             when (mapType) {
-                TileMapType.LDTK -> it += LdtkLevelMapComponent(worldName, levelName)
+                TileMapType.LDTK -> it += LdtkLevelMapComponent(assetName, levelName)
                 TileMapType.TILED -> it += TiledLevelMapComponent(assetName)
             }
             it += PositionComponent(

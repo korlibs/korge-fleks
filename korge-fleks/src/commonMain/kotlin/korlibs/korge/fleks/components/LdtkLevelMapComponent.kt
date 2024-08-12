@@ -33,8 +33,7 @@ data class LdtkLevelMapComponent(
 
         val assetStore: AssetStore = this.inject(name = "AssetStore")
 
-        val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]
-        val ldtkLevel = assetStore.getLdtkLevel(assetStore.getLdtkWorld(ldtkLevelMapComponent.worldName), ldtkLevelMapComponent.levelName)
+        val ldtkLevel = assetStore.getLdtkLevel(assetStore.getLdtkWorld(worldName), levelName)
         width = ldtkLevel.pxWid.toFloat()
         height = ldtkLevel.pxHei.toFloat()
     }
