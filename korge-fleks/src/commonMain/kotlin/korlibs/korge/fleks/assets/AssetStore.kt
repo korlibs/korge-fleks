@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.assets
 
-import entities.config.common.*
 import korlibs.audio.format.*
 import korlibs.audio.sound.*
 import korlibs.datastructure.*
@@ -15,7 +14,6 @@ import korlibs.korge.ldtk.*
 import korlibs.korge.ldtk.view.*
 import korlibs.time.Stopwatch
 import kotlin.collections.set
-import kotlin.reflect.*
 
 
 /**
@@ -76,20 +74,6 @@ class AssetStore {
     fun getLdtkLevel(ldtkWorld: LDTKWorld, levelName: String) : Level =
         if (ldtkWorld.levelsByName.contains(levelName)) ldtkWorld.levelsByName[levelName]!!.level
         else error("AssetStore: LDtkLevel '$levelName' not found!")
-
-    fun loadEntitiesForLdtkLevel(worldName: String, levelName: String) {
-        // Create all game objects and save their entity config in the EntityFactory
-        val entityLayer = getLdtkLevel(getLdtkWorld(worldName), levelName).layerInstances?.firstOrNull { it.entityInstances.isNotEmpty() }
-        entityLayer?.entityInstances?.forEach {
-            println("INFO: Entity config loaded with ID '${it.defUid}' (${it.identifier})")
-            GameObjectConfig(
-                name = "uid_${it.defUid}",
-                ldtkIdentifier = it.identifier,
-                x = it.px[0].toFloat(),
-                y = it.px[1].toFloat()
-            )
-        }
-    }
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
