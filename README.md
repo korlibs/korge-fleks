@@ -1,6 +1,8 @@
 # KorGE-Fleks
 
+
 This is the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) (ECS) integration for KorGE Game Engine.
+
 KorGE-Fleks consists of a growing set of Entity Component definitions, dedicated Entity Systems and utilities around
 them like AssetStore, Entity-Component serialization, etc. which are reusable or will get better reusable over time.
 Eventually this will grow into a specialized KorGE-based Game Engine for 2D platform games.
@@ -16,11 +18,9 @@ KorGE-Fleks:
 
 ```
 - KorGE:                v5.4.0
-- KorGE-Parallax addon: 00b2659614a39d0daab9023678d016d2b65c80fd (on branch adaptation-of-parallax-view-to-korge-fleks)
-- KorGE-Asset-Manager:  51d4aa031202c8f53280c2b951ddec2ab0aa8ab6 (on branch main)
-- KorGE-LDtk:           c590319a9b9b3811b564a22c20e12cd1e877b528 (on branch main)
-- KorGE-Tiled addon:    v0.0.5
-- Fleks:                2.6
+- KorGE-LDtk addon:     c590319a9b9b3811b564a22c20e12cd1e877b528 (on branch main)
+- KorGE-Tiled addon:    a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce (on branch main)
+- Fleks:                2.8
 ```
 
 # Idea and Motivation
@@ -140,8 +140,8 @@ configurable way.
 # Set up a new Game with KorGE-Fleks
 
 As a clean start the [KorGE-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world) repository can be used.
-It contains the kproject and gradle setup to use Fleks, KorGE and all needed KorGE addons _KorGE-Fleks, KorGE-Parallax,
-KorGE-Asset-Manager, KorGE-LDtk, KorGE-Tiled_ together in a project.
+It contains the kproject and gradle setup to use Fleks, KorGE and all needed KorGE addons _KorGE-Fleks,
+KorGE-LDtk, KorGE-Tiled_ together in a project.
 
 In detail the project setup looks like that:
 
@@ -206,7 +206,7 @@ from Fleks need to be serializable for saving the game state the `serialization`
 ```yaml
 # Get an external source project from GitHub which does not contain a kproject.yml file
 # loading git tag release (or commit) from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::2.6
+src: git::Quillraven/Fleks::/src::2.8
 
 plugins:
     - serialization
@@ -227,39 +227,37 @@ dependencies:
 #  - ../../fleks
 #
     - maven::common::com.soywiz.korlibs.korge2:korge
-    - https://github.com/korlibs/korge-parallax/tree/00b2659614a39d0daab9023678d016d2b65c80fd/korge-parallax
     - https://github.com/korlibs/korge-ldtk/tree/c590319a9b9b3811b564a22c20e12cd1e877b528/korge-ldtk
-    - https://github.com/korlibs/korge-asset-manager/tree/51d4aa031202c8f53280c2b951ddec2ab0aa8ab6/korge-asset-manager
     - https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
-# Use local copy of KorGE addons (this needs to be updated also in kproject.yml config of korge-asset-manager)
-#    - ../../korge-parallax/korge-parallax
+# Use local copy of KorGE addons
 #    - ../../korge-ldtk/korge-ldtk
-#    - ../../korge-asset-manager/korge-asset-manager
 #    - ../../korge-tiled/korge-tiled
 ```
 
-## `korge-parallax/kproject.yml`
+## `korge-ldtk/kproject.yml`
 
-This is the kproject config for KorGE-Parallax sources. It basically contains only the dependency
-of KorGE-Parallax to KorGE.
+This is the kproject config for KorGE-LDtk sources. It basically contains only the dependency
+of KorGE-LDtk to KorGE.
 
 ```yaml
-name: "korge-parallax"
+name: "korge-ldtk"
+plugins:
+    - serialization
 dependencies:
     - "maven::common::com.soywiz.korlibs.korge2:korge"
 ```
 
 There is also a kproject files for the other KorGE-addons. They look basically the same as that one for
-korge-parallax and therefore is omitted here.
+`korge-ldtk` and therefore is omitted here.
 
 When changes are needed in one of the kproject libs above than it is possible to use a local copy of the
-corresponding git repo in the `modules` folder. E.g. for KorGE-Parallax the `src:` line with git details can be
-commented out and the `src:` line with local folder under `../../korge-parallax/korge-parallax` can be
+corresponding git repo in the `modules` folder. E.g. for KorGE-LDtk the `src:` line with git details can be
+commented out and the `src:` line with local folder under `../../korge-ldtk/korge-ldtk` can be
 uncommented.
 
 # Updating KorGE-Fleks to newer versions
 
-KorGE-Fleks depends on specific versions of KorGE, KorGE-Parallax addon, KorGE-Tiled addon and Fleks ECS.
+KorGE-Fleks depends on specific versions of KorGE, KorGE-Ldtk addon, KorGE-Tiled addon and Fleks ECS.
 
 The current versions which are working together can be seen at the top of this readme in section
 "Supported Versions".
@@ -281,26 +279,21 @@ Fleks ECS version needs to be updated in the kproject file under `fleks/kproject
 
 ```yaml
 [...]
-src: git::Quillraven/Fleks::/src::2.6
+src: git::Quillraven/Fleks::/src::2.8
 ```
 
 ## KorGE Addon versions
 
-All versions of additionally used KorGE addons (KorGE-Parallax, KorGE-Tiled, etc.) needs to be updated
+All versions of additionally used KorGE addons (KorGE-LDtk and KorGE-Tiled) needs to be updated
 in KorGE-Fleks kproject file under `korge-fleks/kproject.yml`:
 
 ```yaml
 [...]
 dependencies:
 [...]
-- https://github.com/korlibs/korge-parallax/tree/0.0.3/korge-parallax
-- https://github.com/korlibs/korge-tiled/tree/0.0.2/korge-tiled
+- https://github.com/korlibs/korge-ldtk/tree/x.y.z/korge-ldtk
+- https://github.com/korlibs/korge-tiled/tree/x.y.z/korge-tiled
 ```
-
-Hint: If one of the KorGE-Addons has dependencies to the same Addon which KorGE-Fleks is using make sure that those
-versions are updated in all places. This needs to be taken into account for KorGE-Asset-Manager. It depends on
-KorGE-Parallax  like KorGE-Fleks. Thus make sure to update the dependencies section of `kproject.yml` in
-KorGE-Asset-Manager, too.
 
 # Examples
 
