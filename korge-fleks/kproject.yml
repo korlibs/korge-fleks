@@ -12,26 +12,22 @@ dependencies:
 #  - ../../fleks
 #
   - maven::common::com.soywiz.korlibs.korge2:korge
-  - https://github.com/korlibs/korge-parallax/tree/v0.2.0/korge-parallax
-  - https://github.com/korlibs/korge-asset-manager/tree/cd3370424c2ab6f841dba533316f4eecff208af7/korge-asset-manager
   - https://github.com/korlibs/korge-ldtk/tree/c590319a9b9b3811b564a22c20e12cd1e877b528/korge-ldtk
   - https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
-  # Use local copy of KorGE addons (this needs to be updated also in kproject.yml config of korge-asset-manager)
-#  - ../../korge-parallax/korge-parallax
+  # Use local copy of KorGE addons
 #  - ../../korge-ldtk/korge-ldtk
-#  - ../../korge-asset-manager/korge-asset-manager
 #  - ../../korge-tiled/korge-tiled
 #
 # Using local copy of Korge-addon repos
 #
 # For creating submodules for all involved repositories follow below commands and create
-# needed folders. Example below is for Korge-asset-manager:
+# needed folders. Example below is for Korge-ldtk:
 #
-#     $ git submodule add https://github.com/korlibs/korge-asset-manager.git submodules/korge-asset-manager
+#     $ git submodule add https://github.com/korlibs/korge-ldtk.git submodules/korge-ldtk
 #
-# Don't forget to check out commit SHA for korge-asset-manager repo from
+# Don't forget to check out commit SHA for korge-ldtk repo from
 # "./submodules/korge-fleks/korge-fleks/kproject.yml" in that submodule:
 #
-#     $ cd submodules/korge-asset-manager && git checkout 51d4aa031202c8f53280c2b951ddec2ab0aa8ab6
+#     $ cd submodules/korge-ldtk && git checkout c590319a9b9b3811b564a22c20e12cd1e877b528
 
 targets: [jvm, js, android]
