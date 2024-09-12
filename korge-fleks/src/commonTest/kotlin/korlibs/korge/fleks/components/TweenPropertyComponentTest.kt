@@ -7,42 +7,42 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.TweenProperty.*
 import korlibs.math.interpolation.Easing
 import kotlin.test.*
 
-internal class AnimateComponentTest {
+internal class TweenPropertyComponentTest {
 
     private val expectedWorld = configureWorld {}
     private val recreatedWorld = configureWorld {}
 
     @Test
-    fun testAnimateComponentTypeIntegrity() {
+    fun testTweenPropertyComponentTypeIntegrity() {
         val testVector: List<Pair<TweenProperty, ComponentType<*>>> = listOf(
-//            Pair(SpriteIsPlaying, Companion.TweenSpriteIsPlaying),
-//            Pair(SpriteForwardDirection, Companion.TweenSpriteForwardDirection),
-//            Pair(SpriteLoop, Companion.TweenSpriteLoop),
-//            Pair(SpriteDestroyOnPlayingFinished, Companion.TweenSpriteDestroyOnPlayingFinished),
-//            Pair(SpriteAnimName, Companion.TweenSpriteAnimName),
-            Pair(RgbaAlpha, Companion.TweenRgbaAlphaComponent),
-            Pair(RgbaTint, Companion.TweenRgbaTintComponent),
-//            Pair(AppearanceVisible, Companion.TweenAppearanceVisible),
-//            Pair(SpawnerNumberOfObjects, Companion.TweenSpawnerNumberOfObjects),
-//            Pair(SpawnerInterval, Companion.TweenSpawnerInterval),
-//            Pair(SpawnerTimeVariation, Companion.TweenSpawnerTimeVariation),
-//            Pair(SpawnerPositionVariation, Companion.TweenSpawnerPositionVariation),
-//            Pair(LifeCycleHealthCounter, Companion.TweenLifeCycleHealthCounter),
-            Pair(PositionX, Companion.TweenPositionXComponent),
-            Pair(PositionY, Companion.TweenPositionYComponent),
             Pair(PositionOffsetX, Companion.TweenPositionOffsetXComponent),
             Pair(PositionOffsetY, Companion.TweenPositionOffsetYComponent),
-//            Pair(LayoutCenterX, Companion.TweenLayoutCenterX),
-//            Pair(LayoutCenterY, Companion.TweenLayoutCenterY),
-//            Pair(LayoutOffsetX, Companion.TweenLayoutOffsetX),
-//            Pair(LayoutOffsetY, Companion.TweenLayoutOffsetY),
-//            Pair(SwitchLayerVisibilityOnVariance, Companion.TweenSwitchLayerVisibilityOnVariance),
-//            Pair(SwitchLayerVisibilityOffVariance, Companion.TweenSwitchLayerVisibilityOffVariance),
-//            Pair(SoundStartTrigger, Companion.TweenSoundStartTrigger),
-//            Pair(SoundStopTrigger, Companion.TweenSoundStopTrigger),
-//            Pair(SoundPosition, Companion.TweenSoundPosition),
-//            Pair(SoundVolume, Companion.TweenSoundVolume),
-//            Pair(ConfigureFunction, Companion.ExecuteConfigureFunction)
+            Pair(PositionX, Companion.TweenPositionXComponent),
+            Pair(PositionY, Companion.TweenPositionYComponent),
+            Pair(MotionVelocityX, Companion.TweenMotionVelocityXComponent),
+            Pair(RgbaAlpha, Companion.TweenRgbaAlphaComponent),
+            Pair(RgbaTint, Companion.TweenRgbaTintComponent),
+            Pair(SpawnerInterval, Companion.TweenSpawnerIntervalComponent),
+            Pair(SpawnerNumberOfObjects, Companion.TweenSpawnerNumberOfObjectsComponent),
+            Pair(SpawnerPositionVariation, Companion.TweenSpawnerPositionVariationComponent),
+            Pair(SpawnerTimeVariation, Companion.TweenSpawnerTimeVariationComponent),
+            Pair(SpriteRunning, Companion.TweenSpriteRunningComponent),
+            Pair(SpriteDirection, Companion.TweenSpriteDirectionComponent),
+            Pair(SpriteDestroyOnPlayingFinished, Companion.TweenSpriteDestroyOnPlayingFinishedComponent),
+            Pair(SpriteAnimation, Companion.TweenSpriteAnimationComponent),
+            Pair(SwitchLayerVisibilityOnVariance, Companion.TweenSwitchLayerVisibilityOnVarianceComponent),
+            Pair(SwitchLayerVisibilityOffVariance, Companion.TweenSwitchLayerVisibilityOffVarianceComponent),
+            Pair(SoundStartTrigger, Companion.TweenSoundStartTriggerComponent),
+            Pair(SoundStopTrigger, Companion.TweenSoundStopTriggerComponent),
+            Pair(SoundPosition, Companion.TweenSoundPositionComponent),
+            Pair(SoundVolume, Companion.TweenSoundVolumeComponent),
+            Pair(TextFieldText, Companion.TweenTextFieldTextComponent),
+            Pair(TextFieldTextRangeStart, Companion.TweenTextFieldTextRangeStartComponent),
+            Pair(TextFieldTextRangeEnd, Companion.TweenTextFieldTextRangeEndComponent),
+            Pair(EventPublish, Companion.TweenEventPublishComponent),
+            Pair(EventReset, Companion.TweenEventResetComponent),
+            Pair(EventSubscribe, Companion.TweenEventSubscribeComponent),
+            Pair(TouchInputEnable, Companion.TweenTouchInputEnableComponent),
         )
 
         testVector.forEach { animateType ->

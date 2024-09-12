@@ -9,13 +9,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-internal class AnimationScriptTest {
+internal class TweenSequenceComponentTest {
 
     private val expectedWorld = configureWorld {}
     private val recreatedWorld = configureWorld {}
 
     @Test
-    fun testAnimationScriptSerialization() {
+    fun testTweenSequenceComponentSerialization() {
 
         val testEntityConfig = TestEntityConfig("testEntityConfig")
 
@@ -34,7 +34,6 @@ internal class AnimationScriptTest {
                                 DeleteEntity(entity = Entity(44, 0u)),
                                 TweenRgba(entity = Entity(45, 0u)),
                                 TweenPosition(entity = Entity(46, 0u)),
-                                TweenOffset(entity = Entity(47, 0u)),
                                 TweenSprite(entity = Entity(48, 0u)),
                                 TweenSwitchLayerVisibility(entity = Entity(49, 0u)),
                                 TweenSpawner(entity = Entity(51, 0u)),
@@ -87,7 +86,7 @@ internal class AnimationScriptTest {
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")
         assertEquals(spawnEntity.entity, newSpawnEntity.entity, "Check 'spawnEntity.entity' property to be equal")
-        val spawnedEntity = EntityFactory.createEntity(spawnEntity.entityConfig, recreatedWorld, Entity(4242, 0u))
+        val spawnedEntity = EntityFactory.configure(spawnEntity.entityConfig, recreatedWorld, Entity.NONE)
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
     }
 }

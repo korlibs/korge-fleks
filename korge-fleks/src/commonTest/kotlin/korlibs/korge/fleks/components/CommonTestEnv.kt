@@ -15,8 +15,8 @@ import kotlin.test.assertFalse
 data class TestEntityConfig(
     override val name: String
 ) : EntityConfig {
-    override val configureEntity: (World, Entity) -> Entity = fun(world: World, entity: Entity) : Entity {
-        println("Invoke test - configureTestEntity: world: $world, entity: ${entity.id}")
+    override fun World.entityConfigure(entity: Entity) : Entity {
+        println("Invoke test - configureTestEntity: world: $this, entity: ${entity.id}")
         return Entity(id = 8080, version = 0u)
     }
 

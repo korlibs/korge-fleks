@@ -12,7 +12,7 @@ dependencies:
 #  - ../../fleks
 #
   - maven::common::com.soywiz.korlibs.korge2:korge
-  - https://github.com/korlibs/korge-ldtk/tree/c590319a9b9b3811b564a22c20e12cd1e877b528/korge-ldtk
+  - https://github.com/korlibs/korge-ldtk/tree/a9298851398b4006238e9e14d98e847f751c635e/korge-ldtk
   - https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
   # Use local copy of KorGE addons
 #  - ../../korge-ldtk/korge-ldtk

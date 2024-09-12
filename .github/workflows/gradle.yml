@@ -20,6 +20,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - { name: Set up JDK, uses: actions/setup-java@v3, with: { distribution: "${{ env.JAVA_DISTRIBUTION }}", java-version: "${{ env.JAVA_VERSION }}" } }
-    - { name: Grant execute permission for start script, run: chmod +x runUnitTests.sh }
-    - { name: Build with Gradle, run: ./runUnitTests.sh }
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+          distribution: "${{ env.JAVA_DISTRIBUTION }}"
+          java-version: "${{ env.JAVA_VERSION }}"
+    - name: Run korge-fleks:jvmTest
+      run: ./gradlew :korge-fleks:jvmTest
