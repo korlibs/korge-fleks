@@ -8,6 +8,7 @@ import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
+import korlibs.math.geom.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 
@@ -45,10 +46,6 @@ data class DialogBoxConfig(
     private val textRangeEnd: Int = 0,  // initial value for drawing the text into the dialog
     @Serializable(with = HAlignAsString::class) private val textHAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VAlignAsString::class) private val textVAlign: VerticalAlign = VerticalAlign.TOP,
-
-    // App config
-    private val viewPortWidth: Float,  // Set to AppConfig.TARGET_VIRTUAL_WIDTH
-    private val viewPortHeight: Float  // Set to AppConfig.TARGET_VIRTUAL_HEIGHT
 ) : EntityConfig {
 
     enum class AvatarPosition { LEFT_TOP, RIGHT_TOP /*, LEFT_BOTTOM, RIGHT_BOTTOM*/ }
@@ -56,13 +53,13 @@ data class DialogBoxConfig(
     private val textSize = 13f  // TODO get this from used font (lineHeight)
     private val height: Float = textSize * numberOfLines + 2
 
-    private fun hAlign(h: HorizontalAlign, width: Float) : Float {
+    private fun hAlign(h: HorizontalAlign, width: Float, viewPortWidth: Float) : Float {
         if (h.ratio * viewPortWidth < 10) return 10f
         if (h.ratio * viewPortWidth > viewPortWidth - 10) return viewPortWidth - width - 10
         return (h.ratio * viewPortWidth).toFloat()
     }
 
-    private fun vAlign(v: VerticalAlign, height: Float) : Float {
+    private fun vAlign(v: VerticalAlign, height: Float, viewPortHeight: Float) : Float {
         if (v.ratio * viewPortHeight < 34) return 34f
         if (v.ratio * viewPortHeight > viewPortHeight - 10) return viewPortHeight - height - 10
         return (v.ratio * viewPortHeight).toFloat()
@@ -70,10 +67,14 @@ data class DialogBoxConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
 
+        val viewPortSize =  World.inject<SizeInt>("ViewPort")
+        val viewPortWidth = viewPortSize.width.toFloat()
+        val viewPortHeight = viewPortSize.height.toFloat()
+
         val textBoxWidth = width + 14  // 190 <- 176
         val textBoxHeight = height + 8  // 49 <- 41
-        val textBoxX = hAlign(positionHAlign, textBoxWidth)
-        val textBoxY = vAlign(positionVAlign, textBoxHeight)
+        val textBoxX = hAlign(positionHAlign, textBoxWidth, viewPortWidth)
+        val textBoxY = vAlign(positionVAlign, textBoxHeight, viewPortHeight)
         val textFieldX = textBoxX + 7
         val textFieldY = textBoxY + 4
         val textFieldWidth = width
