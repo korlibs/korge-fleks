@@ -53,7 +53,8 @@ class LDtkLevelMapRenderSystem(
                             level = LDTKLevel(
                                 world = ldtkWorld,
                                 level = ldtkLevel
-                            )
+                            ),
+                            showBackground = layerTag == RenderLayerTag.BG_LEVELMAP
                         )
                         addChild(levelMapView!!)
                         println("Add entity ${entity.id} to '$name'")
