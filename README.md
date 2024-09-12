@@ -18,7 +18,7 @@ KorGE-Fleks:
 
 ```
 - KorGE:                v5.4.0
-- KorGE-LDtk addon:     c590319a9b9b3811b564a22c20e12cd1e877b528 (on branch main)
+- KorGE-LDtk addon:     a9298851398b4006238e9e14d98e847f751c635e (on branch main)
 - KorGE-Tiled addon:    a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce (on branch main)
 - Fleks:                2.8
 ```
@@ -297,7 +297,7 @@ dependencies:
 
 # Examples
 
-* [Example in this repo](https://github.com/korlibs/korge-fleks/tree/main/example)
+* [Korge-fleks-hello-world example](https://github.com/korlibs/korge-fleks-hello-world)
 
   <img width="546" alt="Screenshot 2022-10-26 at 13 54 12" src="https://user-images.githubusercontent.com/570848/198019508-dafdb3a5-02af-49f7-92ec-9f76533c2524.png">
 

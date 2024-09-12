@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.entity.config
 
-import AppConfig
 import com.github.quillraven.fleks.*
 import korlibs.image.text.*
 import korlibs.korge.fleks.components.*
@@ -46,6 +45,10 @@ data class DialogBoxConfig(
     private val textRangeEnd: Int = 0,  // initial value for drawing the text into the dialog
     @Serializable(with = HAlignAsString::class) private val textHAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VAlignAsString::class) private val textVAlign: VerticalAlign = VerticalAlign.TOP,
+
+    // App config
+    private val viewPortWidth: Float,  // Set to AppConfig.TARGET_VIRTUAL_WIDTH
+    private val viewPortHeight: Float  // Set to AppConfig.TARGET_VIRTUAL_HEIGHT
 ) : EntityConfig {
 
     enum class AvatarPosition { LEFT_TOP, RIGHT_TOP /*, LEFT_BOTTOM, RIGHT_BOTTOM*/ }
@@ -54,15 +57,15 @@ data class DialogBoxConfig(
     private val height: Float = textSize * numberOfLines + 2
 
     private fun hAlign(h: HorizontalAlign, width: Float) : Float {
-        if (h.ratio * AppConfig.TARGET_VIRTUAL_WIDTH < 10) return 10f
-        if (h.ratio * AppConfig.TARGET_VIRTUAL_WIDTH > AppConfig.TARGET_VIRTUAL_WIDTH - 10) return AppConfig.TARGET_VIRTUAL_WIDTH - width - 10
-        return (h.ratio * AppConfig.TARGET_VIRTUAL_WIDTH).toFloat()
+        if (h.ratio * viewPortWidth < 10) return 10f
+        if (h.ratio * viewPortWidth > viewPortWidth - 10) return viewPortWidth - width - 10
+        return (h.ratio * viewPortWidth).toFloat()
     }
 
     private fun vAlign(v: VerticalAlign, height: Float) : Float {
-        if (v.ratio * AppConfig.TARGET_VIRTUAL_HEIGHT < 34) return 34f
-        if (v.ratio * AppConfig.TARGET_VIRTUAL_HEIGHT > AppConfig.TARGET_VIRTUAL_HEIGHT - 10) return AppConfig.TARGET_VIRTUAL_HEIGHT - height - 10
-        return (v.ratio * AppConfig.TARGET_VIRTUAL_HEIGHT).toFloat()
+        if (v.ratio * viewPortHeight < 34) return 34f
+        if (v.ratio * viewPortHeight > viewPortHeight - 10) return viewPortHeight - height - 10
+        return (v.ratio * viewPortHeight).toFloat()
     }
 
     override fun World.entityConfigure(entity: Entity) : Entity {
@@ -78,7 +81,7 @@ data class DialogBoxConfig(
 
 
         val avatarLeftInitialX = textBoxX + 10f
-        val avatarRightInitialX = AppConfig.TARGET_VIRTUAL_WIDTH - 20f - 38f
+        val avatarRightInitialX = viewPortWidth - 20f - 38f
         val avatarInitialX = when (avatarPosition) {
             AvatarPosition.LEFT_TOP -> avatarLeftInitialX - avatarMoveX
             AvatarPosition.RIGHT_TOP -> avatarRightInitialX + avatarMoveX
