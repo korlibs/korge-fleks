@@ -6,7 +6,7 @@ plugins {
 }
 
 korge {
-    id = "com.sample.fleks"
+    id = "korge.fleks.testing"
 
 // To enable all targets at once
 
