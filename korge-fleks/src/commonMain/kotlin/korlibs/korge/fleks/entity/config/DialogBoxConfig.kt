@@ -67,7 +67,7 @@ data class DialogBoxConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
 
-        val viewPortSize =  World.inject<SizeInt>("ViewPort")
+        val viewPortSize =  inject<SizeInt>("ViewPortSize")
         val viewPortWidth = viewPortSize.width.toFloat()
         val viewPortHeight = viewPortSize.height.toFloat()
 
