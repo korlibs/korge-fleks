@@ -10,8 +10,8 @@ import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import kotlinx.serialization.*
 
 
-@Serializable @SerialName("ParallaxLayerConfig")
-data class ParallaxLayerConfig(
+@Serializable @SerialName("ParallaxEffectConfig")
+data class ParallaxEffectConfig(
     override val name: String,
     
     private val assetName: String,
@@ -23,8 +23,8 @@ data class ParallaxLayerConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             it += PositionComponent(
-                x = this@ParallaxLayerConfig.x,
-                y = this@ParallaxLayerConfig.y
+                x = this@ParallaxEffectConfig.x,
+                y = this@ParallaxEffectConfig.y
             )  // global position for the whole parallax background
             it += MotionComponent(
                 velocityX = -12f  // world units per second
