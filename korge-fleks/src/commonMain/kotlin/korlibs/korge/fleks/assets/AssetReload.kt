@@ -3,7 +3,7 @@ package korlibs.korge.fleks.assets
 import korlibs.datastructure.*
 import korlibs.image.font.*
 import korlibs.image.format.*
-import korlibs.image.tiles.tiled.*
+//import korlibs.image.tiles.tiled.*  // Uncomment this line if you want to use Tiled maps
 import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
@@ -191,7 +191,8 @@ class ResourceDirWatcherConfiguration(
                     val assetName = config.key
                     when (config.value.type) {
                         TileMapType.LDTK -> assetStore.ldtkWorld[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readLDTKWorld(extrude = true))
-                        TileMapType.TILED -> assetStore.tiledMaps[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readTiledMap())
+//                        TileMapType.TILED -> assetStore.tiledMaps[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readTiledMap())
+                        else -> throw IllegalArgumentException("Unknown tile map type: ${config.value.type}")
                     }
 
                     println("\nTriggering asset change for: $assetName")
