@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.*
-import korlibs.datastructure.*
 import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.image.text.*
@@ -11,7 +10,7 @@ import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
-import korlibs.math.interpolation.Easing
+import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
