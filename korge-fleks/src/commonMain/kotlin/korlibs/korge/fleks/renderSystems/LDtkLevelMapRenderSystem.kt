@@ -96,7 +96,8 @@ class LDtkLevelMapRenderSystem(
                             level = LDTKLevel(
                                 world = ldtkWorld,
                                 level = ldtkLevel
-                            )
+                            ),
+                            showBackground = layerTag == RenderLayerTag.BG_LEVELMAP
                         )
                     }
                     addChild(levelMapView!!)
