@@ -12,10 +12,11 @@ dependencies:
 #  - ../../fleks
 #
   - maven::common::com.soywiz.korlibs.korge2:korge
-#  - https://github.com/korlibs/korge-ldtk/tree/a9298851398b4006238e9e14d98e847f751c635e/korge-ldtk
+  - https://github.com/korlibs/korge-ldtk/tree/b9d3af17cc3cf2937e0b9d6b63c64d3b2a150ce4/korge-ldtk
+# Dropping support for Tiled because of switch to Korge 6
 #  - https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
   # Use local copy of KorGE addons
-  - ../../korge-ldtk/korge-ldtk
+#  - ../../korge-ldtk/korge-ldtk
 #  - ../../korge-tiled/korge-tiled
 #
 # Using local copy of Korge-addon repos

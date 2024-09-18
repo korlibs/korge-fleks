@@ -8,7 +8,6 @@ import korlibs.image.bitmap.*
 import korlibs.image.font.Font
 import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
-// import korlibs.image.tiles.tiled.*  // Uncomment if TiledMap is used
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.ldtk.*
 import korlibs.korge.ldtk.view.*
@@ -39,12 +38,12 @@ class AssetStore {
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
     internal var specialAssetConfig: AssetModel = AssetModel()
 
-//    internal var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
     internal var ldtkWorld: MutableMap<String, Pair<AssetType, LDTKWorld>> = mutableMapOf()
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     internal var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
+    // internal var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
 
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second
@@ -88,10 +87,10 @@ class AssetStore {
         if (backgrounds.contains(name)) backgrounds[name]!!.second
         else error("AssetStore: Parallax background '$name' not found!")
 
-//    fun getTiledMap(name: String) : TiledMap {
-//        return if (tiledMaps.contains(name)) tiledMaps[name]!!.second
-//        else error("AssetStore: TiledMap '$name' not found!")
-//    }
+    //fun getTiledMap(name: String) : TiledMap {
+    //    return if (tiledMaps.contains(name)) tiledMaps[name]!!.second
+    //    else error("AssetStore: TiledMap '$name' not found!")
+    //}
 
     fun getFont(name: String) : Font {
         return if (fonts.contains(name)) fonts[name]!!.second
@@ -140,7 +139,7 @@ class AssetStore {
             assetConfig.tileMaps.forEach { tileMap ->
                 when (tileMap.value.type) {
                     TileMapType.LDTK -> ldtkWorld[tileMap.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + tileMap.value.fileName].readLDTKWorld(extrude = true))
-//                    TileMapType.TILED -> tiledMaps[tileMap.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + tileMap.value.fileName].readTiledMap(atlas = atlas))
+                    // TileMapType.TILED -> tiledMaps[tileMap.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + tileMap.value.fileName].readTiledMap(atlas = atlas))
                     else -> error("Unknown tile map type!")
                 }
             }
@@ -191,7 +190,6 @@ class AssetStore {
             }
             newAssetConfig.folder -> {
                 if (newAssetConfig.hotReloading) {
-//                    removeAssets(newAssetConfig.type)
                     println("INFO: Reload $type assets '${newAssetConfig.folder}'.")
                     newAssetConfig
                 } else {
@@ -210,10 +208,10 @@ class AssetStore {
      * Remove all assets which have a specific given [AssetType].
      */
     private fun removeAssets(type: AssetType) {
-//        tiledMaps.entries.removeAll { it.value.first == type }
         backgrounds.entries.removeAll { it.value.first == type }
         images.entries.removeAll { it.value.first == type }
         fonts.entries.removeAll { it.value.first == type }
         sounds.entries.removeAll { it.value.first == type }
+        // tiledMaps.entries.removeAll { it.value.first == type }
     }
 }
