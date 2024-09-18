@@ -42,11 +42,11 @@ object EntityFactory {
 
     /**
      * This function adds an [EntityConfig] to the internal config storage.
-     * If another [EntityConfig] with the same [name][EntityConfig.name] already exists than adding
-     * will be omitted.
+     * If another [EntityConfig] with the same [name][EntityConfig.name] already exists than
+     * the existing config object will be replaced.
      */
     fun register(entityConfig: EntityConfig) {
-        if (!entityConfigs.containsKey(entityConfig.name)) entityConfigs[entityConfig.name] = entityConfig
+        entityConfigs[entityConfig.name] = entityConfig
     }
 
     /**
