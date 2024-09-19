@@ -17,10 +17,9 @@ This is a list of versions for all needed modules/addons which are known to work
 KorGE-Fleks:
 
 ```
-- KorGE:                v5.4.0
-- KorGE-LDtk addon:     a9298851398b4006238e9e14d98e847f751c635e (on branch main)
-- KorGE-Tiled addon:    a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce (on branch main)
-- Fleks:                2.8
+- KorGE:                v6.0.0-beta4
+- KorGE-LDtk addon:     v1.0.3
+- Fleks:                2.9
 ```
 
 # Idea and Motivation
@@ -140,8 +139,7 @@ configurable way.
 # Set up a new Game with KorGE-Fleks
 
 As a clean start the [KorGE-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world) repository can be used.
-It contains the kproject and gradle setup to use Fleks, KorGE and all needed KorGE addons _KorGE-Fleks,
-KorGE-LDtk, KorGE-Tiled_ together in a project.
+It contains the kproject and gradle setup to use Fleks, KorGE and KorGE addons _KorGE-Fleks and KorGE-LDtk in a project.
 
 In detail the project setup looks like that:
 
@@ -206,7 +204,7 @@ from Fleks need to be serializable for saving the game state the `serialization`
 ```yaml
 # Get an external source project from GitHub which does not contain a kproject.yml file
 # loading git tag release (or commit) from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::2.8
+src: git::Quillraven/Fleks::/src::2.9
 
 plugins:
     - serialization
@@ -227,11 +225,9 @@ dependencies:
 #  - ../../fleks
 #
     - maven::common::com.soywiz.korlibs.korge2:korge
-    - https://github.com/korlibs/korge-ldtk/tree/c590319a9b9b3811b564a22c20e12cd1e877b528/korge-ldtk
-    - https://github.com/korlibs/korge-tiled/tree/a54e3b2cacf24e0a0eb87e2580f69f8c81d083ce/korge-tiled
+    - https://github.com/korlibs/korge-ldtk/tree/v1.0.3/korge-ldtk
 # Use local copy of KorGE addons
 #    - ../../korge-ldtk/korge-ldtk
-#    - ../../korge-tiled/korge-tiled
 ```
 
 ## `korge-ldtk/kproject.yml`
@@ -257,7 +253,7 @@ uncommented.
 
 # Updating KorGE-Fleks to newer versions
 
-KorGE-Fleks depends on specific versions of KorGE, KorGE-Ldtk addon, KorGE-Tiled addon and Fleks ECS.
+KorGE-Fleks depends on specific versions of KorGE, KorGE-Ldtk addon and Fleks ECS.
 
 The current versions which are working together can be seen at the top of this readme in section
 "Supported Versions".
@@ -279,20 +275,19 @@ Fleks ECS version needs to be updated in the kproject file under `fleks/kproject
 
 ```yaml
 [...]
-src: git::Quillraven/Fleks::/src::2.8
+src: git::Quillraven/Fleks::/src::2.x
 ```
 
 ## KorGE Addon versions
 
-All versions of additionally used KorGE addons (KorGE-LDtk and KorGE-Tiled) needs to be updated
+All versions of additionally used KorGE addons (KorGE-LDtk) needs to be updated
 in KorGE-Fleks kproject file under `korge-fleks/kproject.yml`:
 
 ```yaml
 [...]
 dependencies:
 [...]
-- https://github.com/korlibs/korge-ldtk/tree/x.y.z/korge-ldtk
-- https://github.com/korlibs/korge-tiled/tree/x.y.z/korge-tiled
+- https://github.com/korlibs/korge-ldtk/tree/v1.0.x/korge-ldtk
 ```
 
 # Examples
