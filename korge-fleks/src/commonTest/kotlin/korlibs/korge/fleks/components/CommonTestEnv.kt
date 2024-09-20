@@ -1,14 +1,9 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.io.async.*
-import korlibs.io.file.std.*
 import korlibs.korge.fleks.entity.*
-import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.utils.*
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import kotlin.coroutines.*
 import kotlin.test.assertFalse
 
 

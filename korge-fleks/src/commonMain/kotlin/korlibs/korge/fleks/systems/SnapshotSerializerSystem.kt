@@ -23,7 +23,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 
     private val family: Family = world.family { all(ParallaxComponent) }
     private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
-    private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()  // mutableListWithCapacityOf(100000)
+    private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
     private var rewindSeek: Int = 0
     private var gameRunning: Boolean = true
 

@@ -5,7 +5,6 @@ import korlibs.image.text.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.entity.*
-import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.math.geom.*

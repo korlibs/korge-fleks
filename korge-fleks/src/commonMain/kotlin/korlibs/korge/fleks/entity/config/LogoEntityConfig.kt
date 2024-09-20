@@ -5,6 +5,7 @@ import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 
@@ -31,7 +32,7 @@ data class LogoEntityConfig(
     private val layerIndex: Int,
     private val layerTag: RenderLayerTag
 
-) : EntityFactory.EntityConfig {
+) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         val assetStore: AssetStore = inject(name = "AssetStore")

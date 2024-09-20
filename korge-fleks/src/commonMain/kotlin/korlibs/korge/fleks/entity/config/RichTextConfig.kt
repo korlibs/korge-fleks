@@ -4,7 +4,6 @@ import com.github.quillraven.fleks.*
 import korlibs.image.text.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
-import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*

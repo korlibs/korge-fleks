@@ -1,10 +1,9 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.math.interpolation.Easing
 import korlibs.korge.fleks.entity.EntityFactory
-import korlibs.korge.fleks.entity.EntityFactory.EntityConfig
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
+import korlibs.math.interpolation.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
