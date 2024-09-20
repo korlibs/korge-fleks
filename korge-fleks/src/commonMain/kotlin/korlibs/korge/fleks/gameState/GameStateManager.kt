@@ -79,7 +79,10 @@ object GameStateManager {
             // Sanity check - entity needs to have a field 'entityConfig'
             if (entity.fieldInstances.firstOrNull { it.identifier == "entityConfig" } != null) {
 
-                yamlString.append("-   name: ${worldName}_${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
+                // Add scripts with their original name
+                if (entity.tags.firstOrNull { it == "script" } != null) yamlString.append("-   name: ${entity.identifier}\n")
+                // Add other game objects with an unique name as identifier
+                else yamlString.append("-   name: ${worldName}_${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
 
                 // Add position of entity
                 entity.tags.firstOrNull { it == "positionable" }?.let {
@@ -170,14 +173,14 @@ object GameStateManager {
     /**
      * This function is called to start the game. It will load the start script from the current LDtk level and
      * create and configure the very first entity of the game.
+     *
+     * Hint: Make sure that a game object with name "start_script" is present in each LDtk level. It can be of dirrerent
+     * EntityConfig type. The type can be set in LDtk level map editor.
      */
     fun startGame(world: World) {
-
-        val startScript = if (gameStateConfig.firstStart) "world_1_intro_start_script_0"
-            else "{${gameStateConfig.world}_${gameStateConfig.level}_start_script_0"
-
+        val startScript = "start_script"
         if (EntityFactory.contains(startScript)) {
-            println("INFO: Starting '${gameStateConfig.level}' with start script '$startScript'.")
+            println("INFO: Starting '${gameStateConfig.level}' with script: '$startScript'.")
             world.createAndConfigureEntity(startScript)
         }
         else println("Error: Cannot start '${gameStateConfig.level}'! EntityConfig with name '$startScript' does not exist!")
