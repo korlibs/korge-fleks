@@ -54,76 +54,6 @@ abstract class CloneableComponent<T> : Component<T> {
 value class Identifier(val name: String)
 
 /**
- * This polymorphic module config for kotlinx serialization lists all Korge-fleks
- * internal components as subclasses.
- */
-internal val internalModule = SerializersModule {
-    // Register data classes
-    polymorphic(CloneableData::class) {
-        subclass(ParallaxComponent.Layer::class)
-        subclass(ParallaxComponent.Plane::class)
-        subclass(RgbaComponent.Rgb::class)
-        subclass(OffsetByFrameIndexComponent.Point::class)
-        subclass(SpriteLayersComponent.LayerProperties::class)
-        subclass(LayeredSpriteComponent.Layer::class)
-    }
-
-    // Register component classes
-    polymorphic(Component::class) {
-        subclass(EntityLinkComponent::class)
-        subclass(InfoComponent::class)
-        subclass(TouchInputComponent::class)
-        subclass(LayerComponent::class)
-        subclass(LayeredSpriteComponent::class)
-        subclass(LayoutComponent::class)
-        subclass(LdtkLevelMapComponent::class)
-        subclass(LifeCycleComponent::class)
-        subclass(MotionComponent::class)
-        subclass(NoisyMoveComponent::class)
-        subclass(OffsetByFrameIndexComponent::class)
-        subclass(ParallaxComponent::class)
-        subclass(PositionComponent::class)
-        subclass(RgbaComponent::class)
-        subclass(RigidbodyComponent::class)
-        subclass(SizeComponent::class)
-        subclass(SoundComponent::class)
-        subclass(SpawnerComponent::class)
-        subclass(SpriteLayersComponent::class)
-        subclass(SpriteComponent::class)
-        subclass(SubEntitiesComponent::class)
-        subclass(SwitchLayerVisibilityComponent::class)
-        subclass(TextFieldComponent::class)
-        subclass(TiledLevelMapComponent::class)
-        subclass(TweenPropertyComponent::class)
-        subclass(TweenSequenceComponent::class)
-    }
-    // Register tags (components without properties)
-    polymorphic(UniqueId::class) {
-        subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
-    }
-
-    // Data class hierarchy used for AnimationScript component
-    polymorphic(TweenBase::class) {
-        subclass(SpawnNewTweenSequence::class)
-        subclass(ParallelTweens::class)
-        subclass(Wait::class)
-        subclass(Jump::class)
-        subclass(SpawnEntity::class)
-        subclass(ExecuteConfigFunction::class)
-        subclass(DeleteEntity::class)
-        subclass(TweenRgba::class)
-        subclass(TweenPosition::class)
-        subclass(TweenMotion::class)
-        subclass(TweenSprite::class)
-        subclass(TweenSwitchLayerVisibility::class)
-        subclass(TweenSpawner::class)
-        subclass(TweenSound::class)
-        subclass(TweenTextField::class)
-        subclass(TweenTouchInput::class)
-    }
-}
-
-/**
  * The JsonSerializer is used to store the world snapshot to persistent storage.
  * All Korge-fleks internal components are already registered as polymorphic subclass
  * in the internal module.
@@ -171,6 +101,9 @@ class SnapshotSerializer {
         modulesMap.remove(name)
     }
 
+    /**
+     * Get the Json serializer with all registered modules for serializing and deserializing entities of the fleks world.
+     */
     fun json(pretty: Boolean = false) : Json {
         if (dirty) {
             var modules = internalModule
@@ -186,6 +119,76 @@ class SnapshotSerializer {
             dirty = false
         }
         return json
+    }
+
+    /**
+     * This polymorphic module config for kotlinx serialization lists all Korge-fleks
+     * internal components as subclasses.
+     */
+    private val internalModule = SerializersModule {
+        // Register data classes
+        polymorphic(CloneableData::class) {
+            subclass(ParallaxComponent.Layer::class)
+            subclass(ParallaxComponent.Plane::class)
+            subclass(RgbaComponent.Rgb::class)
+            subclass(OffsetByFrameIndexComponent.Point::class)
+            subclass(SpriteLayersComponent.LayerProperties::class)
+            subclass(LayeredSpriteComponent.Layer::class)
+        }
+
+        // Register component classes
+        polymorphic(Component::class) {
+            subclass(EntityLinkComponent::class)
+            subclass(InfoComponent::class)
+            subclass(TouchInputComponent::class)
+            subclass(LayerComponent::class)
+            subclass(LayeredSpriteComponent::class)
+            subclass(LayoutComponent::class)
+            subclass(LdtkLevelMapComponent::class)
+            subclass(LifeCycleComponent::class)
+            subclass(MotionComponent::class)
+            subclass(NoisyMoveComponent::class)
+            subclass(OffsetByFrameIndexComponent::class)
+            subclass(ParallaxComponent::class)
+            subclass(PositionComponent::class)
+            subclass(RgbaComponent::class)
+            subclass(RigidbodyComponent::class)
+            subclass(SizeComponent::class)
+            subclass(SoundComponent::class)
+            subclass(SpawnerComponent::class)
+            subclass(SpriteLayersComponent::class)
+            subclass(SpriteComponent::class)
+            subclass(SubEntitiesComponent::class)
+            subclass(SwitchLayerVisibilityComponent::class)
+            subclass(TextFieldComponent::class)
+            subclass(TiledLevelMapComponent::class)
+            subclass(TweenPropertyComponent::class)
+            subclass(TweenSequenceComponent::class)
+        }
+        // Register tags (components without properties)
+        polymorphic(UniqueId::class) {
+            subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
+        }
+
+        // Data class hierarchy used for AnimationScript component
+        polymorphic(TweenBase::class) {
+            subclass(SpawnNewTweenSequence::class)
+            subclass(ParallelTweens::class)
+            subclass(Wait::class)
+            subclass(Jump::class)
+            subclass(SpawnEntity::class)
+            subclass(ExecuteConfigFunction::class)
+            subclass(DeleteEntity::class)
+            subclass(TweenRgba::class)
+            subclass(TweenPosition::class)
+            subclass(TweenMotion::class)
+            subclass(TweenSprite::class)
+            subclass(TweenSwitchLayerVisibility::class)
+            subclass(TweenSpawner::class)
+            subclass(TweenSound::class)
+            subclass(TweenTextField::class)
+            subclass(TweenTouchInput::class)
+        }
     }
 }
 

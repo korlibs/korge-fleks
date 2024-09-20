@@ -4,7 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
 import korlibs.korge.fleks.components.TweenPropertyComponent.*
 import korlibs.korge.fleks.components.TweenPropertyComponent.TweenProperty.*
-import korlibs.math.interpolation.Easing
+import korlibs.math.interpolation.*
 import kotlin.test.*
 
 internal class TweenPropertyComponentTest {

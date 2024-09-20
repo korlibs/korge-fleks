@@ -11,6 +11,7 @@ dependencies:
 #
 #  - ../../fleks
 #
+  - maven::common::com.charleskorn.kaml:kaml:0.61.0  # 0.59.0 <-- last version supporting kotlin 1.9.x and serialization 1.6.x
   - maven::common::com.soywiz.korlibs.korge2:korge
   - https://github.com/korlibs/korge-ldtk/tree/v1.0.3/korge-ldtk
   # Use local copy of KorGE addons
