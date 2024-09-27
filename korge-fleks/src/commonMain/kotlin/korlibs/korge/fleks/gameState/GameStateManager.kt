@@ -17,7 +17,7 @@ object GameStateManager {
     var assetStore: AssetStore = AssetStore()
     var firstGameStart: Boolean = true
 
-    private lateinit var gameStateConfig: GameStateConfig
+    internal lateinit var gameStateConfig: GameStateConfig
     private val gameStateSerializer = EntityConfigSerializer()
 
     /**
