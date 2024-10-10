@@ -24,7 +24,7 @@ data class LevelMapConfig(
     private val mapType: TileMapType,
     private val assetName: String = "",  // Used with LDtk and Tiled based maps
     private val levelName: String = "",  // Used with LDtk based maps
-    private val layerNamesToExclude: List<String> = listOf(),
+    private val layerNames: List<String>? = null,  // Optional: Show only specific layers
     private val layerTag: RenderLayerTag,
     private val x: Float = 0f,
     private val y: Float = 0f,
@@ -34,7 +34,7 @@ data class LevelMapConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             when (mapType) {
-                TileMapType.LDTK -> it += LdtkLevelMapComponent(assetName, levelName, layerNamesToExclude)
+                TileMapType.LDTK -> it += LdtkLevelMapComponent(assetName, levelName, layerNames)
                 TileMapType.TILED -> it += TiledLevelMapComponent(assetName)
             }
             it += PositionComponent(

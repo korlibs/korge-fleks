@@ -17,10 +17,12 @@ data class LdtkLevelMapComponent(
      */
     var levelName: String = "",
     /**
-     * List of layer names which shall NOT be drawn by the specific render system.
-     * Example: ["Collision", "HelperLayer"]
+     * Optional: List of layer names which shall be drawn by the specific render system.
+     * If not set, all layers will be drawn.
+     *
+     * Example: ["Background", "Playfield"]
      */
-    var layerNamesToExclude: List<String> = listOf(),
+    var layerNames: List<String>? = null,
     var width: Float = 0f,  // Size of the level map
     var height: Float = 0f,
 
