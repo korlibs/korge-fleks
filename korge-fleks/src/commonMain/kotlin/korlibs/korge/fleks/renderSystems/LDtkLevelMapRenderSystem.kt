@@ -56,6 +56,17 @@ class LDtkLevelMapRenderSystem(
                             ),
                             showBackground = layerTag == RenderLayerTag.BG_LEVELMAP
                         )
+
+                        // Enable drawing of specific layers only (if defined)
+                        ldtkLevelMapComponent.layerNames?.let { layerNames ->
+                            // First disable all layers
+                            (levelMapView as LDTKLevelView).layerViews.forEach { layerView -> layerView.visible = false }
+                            // Then enable the specified layers
+                            layerNames.forEach { layerName ->
+                                (levelMapView as LDTKLevelView).layerViewsByName[layerName]?.visible = true
+                            }
+                        }
+
                         addChild(levelMapView!!)
                         println("Add entity ${entity.id} to '$name'")
 
@@ -99,7 +110,18 @@ class LDtkLevelMapRenderSystem(
                             ),
                             showBackground = layerTag == RenderLayerTag.BG_LEVELMAP
                         )
+
+                        // Enable drawing of specific layers only (if defined)
+                        ldtkLevelMapComponent.layerNames?.let { layerNames ->
+                            // First disable all layers
+                            (levelMapView as LDTKLevelView).layerViews.forEach { layerView -> layerView.visible = false }
+                            // Then enable the specified layers
+                            layerNames.forEach { layerName ->
+                                (levelMapView as LDTKLevelView).layerViewsByName[layerName]?.visible = true
+                            }
+                        }
                     }
+
                     addChild(levelMapView!!)
                     println("Recreate View for entity ${levelMapEntity.id} in '$name'")
                 }

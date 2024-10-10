@@ -16,7 +16,13 @@ data class LdtkLevelMapComponent(
      * The unique identifier (level name) of the level from the LDtk world
      */
     var levelName: String = "",
-    var layerName: String? = null,  // TODO enable LDtkLevelView to show only defined layers
+    /**
+     * Optional: List of layer names which shall be drawn by the specific render system.
+     * If not set, all layers will be drawn.
+     *
+     * Example: ["Background", "Playfield"]
+     */
+    var layerNames: List<String>? = null,
     var width: Float = 0f,  // Size of the level map
     var height: Float = 0f,
 
