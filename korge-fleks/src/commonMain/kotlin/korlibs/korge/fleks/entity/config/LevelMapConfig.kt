@@ -25,6 +25,7 @@ data class LevelMapConfig(
     private val assetName: String = "",  // Used with LDtk and Tiled based maps
     private val levelName: String = "",  // Used with LDtk based maps
     private val layerNames: List<String>? = null,  // Optional: Show only specific layers
+    private val levelLayer: String = "",  // The level and layer names "<level>_<layer>" in the LDtk world
     private val layerTag: RenderLayerTag,
     private val x: Float = 0f,
     private val y: Float = 0f,
@@ -34,7 +35,7 @@ data class LevelMapConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             when (mapType) {
-                TileMapType.LDTK -> it += LdtkLevelMapComponent(assetName, levelName, layerNames)
+                TileMapType.LDTK -> it += LdtkLevelMapComponent(assetName, levelName, layerNames, levelLayer)
                 TileMapType.TILED -> it += TiledLevelMapComponent(assetName)
             }
             it += PositionComponent(
@@ -45,6 +46,7 @@ data class LevelMapConfig(
             it += RgbaComponent().apply {
                 alpha = this@LevelMapConfig.alpha
             }
+            it += LayerComponent()
             it += layerTag
         }
         return entity

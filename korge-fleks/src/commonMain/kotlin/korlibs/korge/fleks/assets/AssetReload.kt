@@ -3,10 +3,12 @@ package korlibs.korge.fleks.assets
 import korlibs.datastructure.*
 import korlibs.image.font.*
 import korlibs.image.format.*
+import korlibs.image.tiles.*
 import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.ldtk.view.*
+import korlibs.memory.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.*
 import kotlin.native.concurrent.*
@@ -180,21 +182,28 @@ class ResourceDirWatcherConfiguration(
             }
         }
         assetConfig.tileMaps.forEach { config ->
-            if (file.fullName.contains(config.value.fileName) && !reloading) {
+            if (file.fullName.contains(config.fileName) && !reloading) {
                 reloading = true  // save that reloading is in progress
                 println("Reloading ${file.fullName}... ")
 
                 launchImmediately(context = assetReloadContext) {
                     // Give LDtk more time to finish writing the files
                     delay(500)
-                    val assetName = config.key
-                    when (config.value.type) {
-                        TileMapType.LDTK -> assetStore.ldtkWorld[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readLDTKWorld(extrude = true))
-                        // TileMapType.TILED -> assetStore.tiledMaps[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readTiledMap())
-                        else -> throw IllegalArgumentException("Unknown tile map type: ${config.value.type}")
+
+                    val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + config.fileName].readLDTKWorld(extrude = true)
+
+                    // Reload all levels from ldtk world file
+                    ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+                        ldtkLevel.layerInstances?.forEach { ldtkLayer ->
+                            val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
+
+                            if (tilesetExt != null) {
+                                assetStore.storeTiles(ldtkLayer, tilesetExt, ldtkLevel.identifier, ldtkLayer.identifier, assetUpdater.type)
+                                println("\nTriggering asset change for LDtk level : ${ldtkLevel.identifier}_${ldtkLayer.identifier}")
+                            }
+                        }
                     }
 
-                    println("\nTriggering asset change for: $assetName")
                     // Guard period until reloading is activated again - this is used for debouncing watch messages
                     delay(100)
                     reloading = false

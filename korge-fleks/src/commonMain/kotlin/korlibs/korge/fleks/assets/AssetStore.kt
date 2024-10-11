@@ -8,9 +8,11 @@ import korlibs.image.bitmap.*
 import korlibs.image.font.Font
 import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
+import korlibs.image.tiles.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.ldtk.*
 import korlibs.korge.ldtk.view.*
+import korlibs.memory.*
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -38,12 +40,12 @@ class AssetStore {
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
     internal var specialAssetConfig: AssetModel = AssetModel()
 
-    internal var ldtkWorld: MutableMap<String, Pair<AssetType, LDTKWorld>> = mutableMapOf()
+    internal var ldtkWorlds: MutableMap<String, Pair<AssetType, LDTKWorld>> = mutableMapOf()
+    internal val levelLayerTileMaps: MutableMap<String, Pair<AssetType, TileMapData>> = mutableMapOf()
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     internal var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
-    // internal var tiledMaps: MutableMap<String, Pair<AssetType, TiledMap>> = mutableMapOf()
 
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second
@@ -67,12 +69,16 @@ class AssetStore {
         }
 
     fun getLdtkWorld(name: String) : LDTKWorld =
-        if (ldtkWorld.contains(name)) ldtkWorld[name]!!.second
+        if (ldtkWorlds.contains(name)) ldtkWorlds[name]!!.second
         else error("AssetStore: LDtkWorld '$name' not found!")
 
     fun getLdtkLevel(ldtkWorld: LDTKWorld, levelName: String) : Level =
         if (ldtkWorld.levelsByName.contains(levelName)) ldtkWorld.levelsByName[levelName]!!.level
         else error("AssetStore: LDtkLevel '$levelName' not found!")
+
+    fun getTileMapData(levelLayer: String) : TileMapData =
+        if (levelLayerTileMaps.contains(levelLayer)) levelLayerTileMaps[levelLayer]!!.second
+        else error("AssetStore: TileMap for level-layer '$levelLayer' not found!")
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
@@ -86,11 +92,6 @@ class AssetStore {
     fun getBackground(name: String) : ParallaxDataContainer =
         if (backgrounds.contains(name)) backgrounds[name]!!.second
         else error("AssetStore: Parallax background '$name' not found!")
-
-    //fun getTiledMap(name: String) : TiledMap {
-    //    return if (tiledMaps.contains(name)) tiledMaps[name]!!.second
-    //    else error("AssetStore: TiledMap '$name' not found!")
-    //}
 
     fun getFont(name: String) : Font {
         return if (fonts.contains(name)) fonts[name]!!.second
@@ -137,10 +138,20 @@ class AssetStore {
 
             // Update maps of music, images, ...
             assetConfig.tileMaps.forEach { tileMap ->
-                when (tileMap.value.type) {
-                    TileMapType.LDTK -> ldtkWorld[tileMap.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + tileMap.value.fileName].readLDTKWorld(extrude = true))
-                    // TileMapType.TILED -> tiledMaps[tileMap.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + tileMap.value.fileName].readTiledMap(atlas = atlas))
-                    else -> error("Unknown tile map type!")
+                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + tileMap.fileName].readLDTKWorld(extrude = true)
+
+                // TODO: Hardcoded - will be removed later anyway - needed still for loading entity instances (start script of intro)
+                ldtkWorlds["world_1"] = Pair(type, ldtkWorld)
+
+                // Save TileMapData for each Level and layer combination from LDtk world
+                ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+                    ldtkLevel.layerInstances?.forEach { ldtkLayer ->
+                        val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
+
+                        if (tilesetExt != null) {
+                            storeTiles(ldtkLayer, tilesetExt, ldtkLevel.identifier, ldtkLayer.identifier, type)
+                        }
+                    }
                 }
             }
 
@@ -182,6 +193,39 @@ class AssetStore {
         }
     }
 
+    internal fun storeTiles(ldtkLayer: LayerInstance, tilesetExt: ExtTileset, level: String, layer: String, type: AssetType) {
+        val tileMapData = TileMapData(
+            width = ldtkLayer.cWid,
+            height = ldtkLayer.cHei,
+            tileSet = if(tilesetExt.tileset != null) tilesetExt.tileset!! else TileSet.EMPTY
+        )
+        val gridSize = tilesetExt.def.tileGridSize
+        val tilesetWidth = tilesetExt.def.pxWid
+        val cellsTilesPerRow = tilesetWidth / gridSize
+
+        for (tile in ldtkLayer.autoLayerTiles + ldtkLayer.gridTiles) {
+            val (px, py) = tile.px
+            val x = px / gridSize
+            val y = py / gridSize
+            val (tileX, tileY) = tile.src
+            val dx = px % gridSize
+            val dy = py % gridSize
+            val tx = tileX / gridSize
+            val ty = tileY / gridSize
+            val tileId = ty * cellsTilesPerRow + tx
+            val flipX = tile.f.hasBitSet(0)
+            val flipY = tile.f.hasBitSet(1)
+
+            val stackLevel =
+                if (dy != 0) tileMapData.data.getStackLevel(x, y + 1)
+                else tileMapData.data.getStackLevel(x, y)
+
+            tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
+//            tileMapData.push(x, y, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false))
+        }
+        levelLayerTileMaps["${level}_${layer}"] = Pair(type, tileMapData)
+    }
+
     private fun prepareCurrentAssets(type: AssetType, newAssetConfig: AssetModel, currentAssetConfig: AssetModel): AssetModel? =
         when (currentAssetConfig.folder) {
             "" -> {
@@ -208,10 +252,10 @@ class AssetStore {
      * Remove all assets which have a specific given [AssetType].
      */
     private fun removeAssets(type: AssetType) {
-        backgrounds.entries.removeAll { it.value.first == type }
-        images.entries.removeAll { it.value.first == type }
-        fonts.entries.removeAll { it.value.first == type }
-        sounds.entries.removeAll { it.value.first == type }
-        // tiledMaps.entries.removeAll { it.value.first == type }
+        backgrounds.values.removeAll { it.first == type }
+        images.values.removeAll { it.first == type }
+        fonts.values.removeAll { it.first == type }
+        sounds.values.removeAll { it.first == type }
+        levelLayerTileMaps.values.removeAll { it.first == type }
     }
 }
