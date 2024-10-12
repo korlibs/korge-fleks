@@ -23,6 +23,9 @@ data class LdtkLevelMapComponent(
      * Example: ["Background", "Playfield"]
      */
     var layerNames: List<String>? = null,
+
+    var levelLayer: String = "",  // The level and layer name in the LDtk world
+
     var width: Float = 0f,  // Size of the level map
     var height: Float = 0f,
 

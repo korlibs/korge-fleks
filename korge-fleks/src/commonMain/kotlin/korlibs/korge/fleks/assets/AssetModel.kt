@@ -13,11 +13,11 @@ import kotlinx.serialization.*
 data class AssetModel(
     val folder: String = "",
     val hotReloading: Boolean = false,
-    val sounds: MutableMap<String, String> = mutableMapOf(),
-    val backgrounds: MutableMap<String, ParallaxConfig> = mutableMapOf(),
-    val images: MutableMap<String, ImageDataConfig> = mutableMapOf(),
-    val fonts: MutableMap<String, String> = mutableMapOf(),
-    val tileMaps: MutableMap<String, TileMapConfig> = mutableMapOf(),
+    val sounds: Map<String, String> = mapOf(),
+    val backgrounds: Map<String, ParallaxConfig> = mapOf(),
+    val images: Map<String, ImageDataConfig> = mapOf(),
+    val fonts: Map<String, String> = mapOf(),
+    val tileMaps: List<TileMapConfig> = listOf()
 ) {
     @Serializable @SerialName("ImageDataConfig")
     data class ImageDataConfig(
@@ -28,7 +28,7 @@ data class AssetModel(
     @Serializable @SerialName("TileMapConfig")
     data class TileMapConfig(
         val fileName: String,
-        val type: TileMapType
+        val levels: String? = null
     )
 }
 

@@ -1,131 +1,89 @@
 package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
+import com.github.quillraven.fleks.collection.*
+import korlibs.image.color.*
+import korlibs.korge.annotations.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
-import korlibs.korge.ldtk.view.*
+import korlibs.korge.render.*
 import korlibs.korge.view.*
-import korlibs.korge.view.align.*
 import korlibs.math.geom.*
 
 
-inline fun Container.ldtkLevelMapRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LDtkLevelMapRenderSystem.() -> Unit = {}) =
-    LDtkLevelMapRenderSystem(world, layerTag).addTo(this, callback)
+inline fun Container.ldtkLevelMapRenderSystem(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LDtkLevelMapRenderSystem.() -> Unit = {}) =
+    LDtkLevelMapRenderSystem(viewPortSize, world, layerTag).addTo(this, callback)
 
 /**
  * Here we do not render the actual level map yet.
  * Instead, we add the view object for the level map to the container.
  */
 class LDtkLevelMapRenderSystem(
+    private val viewPortSize: SizeInt,
     world: World,
-    layerTag: RenderLayerTag
-) : Container() {
-    private val family: Family
-    private var levelMapEntity: Entity = Entity.NONE
-    private var levelMapView: View? = null
+    layerTag: RenderLayerTag,
+    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
+) : View() {
+    private val family: Family = world.family { all(layerTag, LayerComponent, PositionComponent, LdtkLevelMapComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
+
+    @OptIn(KorgeExperimental::class)
+    override fun renderInternal(ctx: RenderContext) {
+        // Sort level maps by their layerIndex
+        family.sort(comparator)
+
+        // Iterate over all entities which should be rendered in this view
+        family.forEach { entity ->
+            val (x, y, offsetX, offsetY) = entity[PositionComponent]
+            val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]
+            val levelLayer = ldtkLevelMapComponent.levelLayer
+
+            val rgba = Colors.WHITE  // TODO: use here alpha from ldtk layer
+
+            val tileMap = assetStore.getTileMapData(levelLayer)
+            val tileSet = tileMap.tileSet
+            val tileSetWidth = tileSet.width
+            val tileSetHeight = tileSet.height
+            val offsetScale = tileMap.offsetScale
+
+            val xTiles = viewPortSize.width / tileSetWidth + 1
+            val yTiles = viewPortSize.height / tileSetHeight + 1
+
+            ctx.useBatcher { batch ->
+                for (l in 0 until tileMap.maxLevel) {
+//                    val l = 2
+                    for (tx in 0 until xTiles) {
+                        for (ty in 0 until yTiles) {
+                            val tile = tileMap[tx, ty, l]
+                            val info = tileSet.getInfo(tile.tile)
+                            if (info != null) {
+                                val px = x + (tx * tileSetWidth) + (tile.offsetX * offsetScale)
+                                val py = y + (ty * tileSetHeight) + (tile.offsetY * offsetScale)
+
+                                batch.drawQuad(
+                                    tex = ctx.getTex(info.slice),
+                                    x = px,
+                                    y = py,
+                                    filtering = false,
+                                    colorMul = rgba,
+                                    // TODO: Add possibility to use a custom shader - add ShaderComponent or similar
+                                    program = null
+                                )
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Set size of render view to display size
+    override fun getLocalBoundsInternal(): Rectangle =
+        Rectangle(0, 0, viewPortSize.width, viewPortSize.height)
 
     init {
         name = layerTag.toString()
-        family = world.family { all(layerTag, PositionComponent, LdtkLevelMapComponent, RgbaComponent) }
-
-        addUpdater {
-            // In this updater we add *ONE* level map view to this container
-            // An entity which defines the level map and contains the specific "layerTag" will be used to
-            // create the LevelMapView
-
-            if (family.numEntities > 1) println("WARNING - LDtkLevelMapRenderView: More than one entity for '$layerTag' found!. Only first one will be used!")
-
-            family.firstOrNull()?.let { entity ->
-                with (family) {
-                    // First do initialization steps if needed
-                    if (levelMapEntity != entity) {
-                        levelMapEntity = entity
-                        // Possibly remove old level map view from container
-                        levelMapView?.removeFromParent()
-
-                        // Create new view for the level map and add it to the container
-                        val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]
-                        val ldtkWorld = assetStore.getLdtkWorld(ldtkLevelMapComponent.worldName)
-                        val ldtkLevel = assetStore.getLdtkLevel(ldtkWorld, ldtkLevelMapComponent.levelName)
-                        levelMapView = LDTKLevelView(
-                            level = LDTKLevel(
-                                world = ldtkWorld,
-                                level = ldtkLevel
-                            ),
-                            showBackground = layerTag == RenderLayerTag.BG_LEVELMAP
-                        )
-
-                        // Enable drawing of specific layers only (if defined)
-                        ldtkLevelMapComponent.layerNames?.let { layerNames ->
-                            // First disable all layers
-                            (levelMapView as LDTKLevelView).layerViews.forEach { layerView -> layerView.visible = false }
-                            // Then enable the specified layers
-                            layerNames.forEach { layerName ->
-                                (levelMapView as LDTKLevelView).layerViewsByName[layerName]?.visible = true
-                            }
-                        }
-
-                        addChild(levelMapView!!)
-                        println("Add entity ${entity.id} to '$name'")
-
-                        // Check if we need to center the view
-                        if (entity has LayoutComponent) {
-                            val layout = entity[LayoutComponent]
-                            val positionComponent = entity[PositionComponent]
-                            if (layout.centerX) levelMapView!!.centerXOnStage()
-                            if (layout.centerY) levelMapView!!.centerYOnStage()
-                            positionComponent.x = levelMapView!!.x.toFloat() + layout.offsetX  // view is needed otherwise the Sprite System will not take possible center values from above
-                            positionComponent.y = levelMapView!!.y.toFloat() + layout.offsetY
-                        }
-                    }
-
-                    // Second apply continuously position and color to the view
-                    val (rgba) = entity[RgbaComponent]
-                    val (x, y) = entity[PositionComponent]
-                    levelMapView!!.tint = rgba
-                    levelMapView!!.pos = Point(x, y)
-                }
-            }
-        }
-
-        // This is currently hardcoded to World assets - if needed adjust to another asset type like Level or Special
-        configureAssetUpdater(AssetType.WORLD) {
-            onLdtkLevelMapChanged {
-                // remove old ldtk view and create new one
-                if (levelMapEntity != Entity.NONE) {
-                    // Possibly remove old level map view from container
-                    levelMapView?.removeFromParent()
-
-                    // Create new view for the level map and add it to the container
-                    with(world) {
-                        val ldtkLevelMapComponent = levelMapEntity[LdtkLevelMapComponent]
-                        val ldtkWorld = assetStore.getLdtkWorld(ldtkLevelMapComponent.worldName)
-                        val ldtkLevel = assetStore.getLdtkLevel(ldtkWorld, ldtkLevelMapComponent.levelName)
-                        levelMapView = LDTKLevelView(
-                            level = LDTKLevel(
-                                world = ldtkWorld,
-                                level = ldtkLevel
-                            ),
-                            showBackground = layerTag == RenderLayerTag.BG_LEVELMAP
-                        )
-
-                        // Enable drawing of specific layers only (if defined)
-                        ldtkLevelMapComponent.layerNames?.let { layerNames ->
-                            // First disable all layers
-                            (levelMapView as LDTKLevelView).layerViews.forEach { layerView -> layerView.visible = false }
-                            // Then enable the specified layers
-                            layerNames.forEach { layerName ->
-                                (levelMapView as LDTKLevelView).layerViewsByName[layerName]?.visible = true
-                            }
-                        }
-                    }
-
-                    addChild(levelMapView!!)
-                    println("Recreate View for entity ${levelMapEntity.id} in '$name'")
-                }
-            }
-        }
     }
 }
