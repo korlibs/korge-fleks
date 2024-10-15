@@ -14,7 +14,9 @@ import korlibs.korge.ldtk.*
 import korlibs.korge.ldtk.view.*
 import korlibs.memory.*
 import korlibs.time.Stopwatch
+import korlibs.math.max
 import kotlin.collections.set
+import kotlin.math.max
 
 
 /**
@@ -216,12 +218,15 @@ class AssetStore {
             val flipX = tile.f.hasBitSet(0)
             val flipY = tile.f.hasBitSet(1)
 
-            val stackLevel =
-                if (dy != 0) tileMapData.data.getStackLevel(x, y + 1)
-                else tileMapData.data.getStackLevel(x, y)
+            // Get stack level depending on if the tile overlaps its neighbour cells i.e. the tile has an offset (dx, dy)
+            val stackLevel = when {
+                (dx == 0 && dy == 0) -> tileMapData.data.getStackLevel(x, y)
+                (dx == 0 && dy != 0) -> max(tileMapData.data.getStackLevel(x, y), tileMapData.data.getStackLevel(x, y + 1))
+                (dx != 0 && dy == 0) -> max(tileMapData.data.getStackLevel(x, y), tileMapData.data.getStackLevel(x + 1, y))
+                else -> max(tileMapData.data.getStackLevel(x, y), tileMapData.data.getStackLevel(x, y + 1), tileMapData.data.getStackLevel(x + 1, y), tileMapData.data.getStackLevel(x + 1, y + 1))
+            }
 
             tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
-//            tileMapData.push(x, y, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false))
         }
         levelLayerTileMaps["${level}_${layer}"] = Pair(type, tileMapData)
     }
