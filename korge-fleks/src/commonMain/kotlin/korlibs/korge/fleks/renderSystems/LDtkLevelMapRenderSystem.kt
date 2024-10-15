@@ -2,13 +2,16 @@ package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
+import korlibs.event.*
 import korlibs.image.color.*
 import korlibs.korge.annotations.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
+import korlibs.korge.input.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
+import korlibs.math.*
 import korlibs.math.geom.*
 
 
@@ -27,6 +30,9 @@ class LDtkLevelMapRenderSystem(
 ) : View() {
     private val family: Family = world.family { all(layerTag, LayerComponent, PositionComponent, LdtkLevelMapComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
+
+    // Debugging layer rendering
+    private var renderLayer = 0
 
     @OptIn(KorgeExperimental::class)
     override fun renderInternal(ctx: RenderContext) {
@@ -52,10 +58,13 @@ class LDtkLevelMapRenderSystem(
 
             ctx.useBatcher { batch ->
                 for (l in 0 until tileMap.maxLevel) {
-//                    val l = 2
+                    val level =
+                        if (renderLayer == 0) l
+                        else (renderLayer - 1).clamp(0, l)
+
                     for (tx in 0 until xTiles) {
                         for (ty in 0 until yTiles) {
-                            val tile = tileMap[tx, ty, l]
+                            val tile = tileMap[tx, ty, level]
                             val info = tileSet.getInfo(tile.tile)
                             if (info != null) {
                                 val px = x + (tx * tileSetWidth) + (tile.offsetX * offsetScale)
@@ -85,5 +94,20 @@ class LDtkLevelMapRenderSystem(
 
     init {
         name = layerTag.toString()
+
+        // For debugging layer rendering
+        keys {
+            justDown(Key.N0) { renderLayer = 0 }
+            justDown(Key.N1) { renderLayer = 1 }
+            justDown(Key.N2) { renderLayer = 2 }
+            justDown(Key.N3) { renderLayer = 3 }
+            justDown(Key.N4) { renderLayer = 4 }
+            justDown(Key.N5) { renderLayer = 5 }
+            justDown(Key.N6) { renderLayer = 6 }
+            justDown(Key.N7) { renderLayer = 7 }
+            justDown(Key.N8) { renderLayer = 8 }
+            justDown(Key.N9) { renderLayer = 9 }
+        }
+
     }
 }
