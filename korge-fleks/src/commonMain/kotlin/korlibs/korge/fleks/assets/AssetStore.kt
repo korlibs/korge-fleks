@@ -57,6 +57,9 @@ class AssetStore {
     internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     internal var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
 
+    // TODO: Create data class for storing level data
+    //       grizSize, entities, tileMapData
+
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second
         else error("AssetStore: Sound '$name' not found!")
@@ -153,12 +156,12 @@ class AssetStore {
             // Update maps of music, images, ...
             assetConfig.tileMaps.forEach { tileMap ->
                 val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + tileMap.fileName].readLDTKWorld(extrude = true)
-                val gridSize = ldtkWorld.ldtk.defaultGridSize
                 // Save TileMapData for each Level and layer combination from LDtk world
                 ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
                     val levelName = ldtkLevel.identifier
                     ldtkLevel.layerInstances?.forEach { ldtkLayer ->
                         val layerName = ldtkLayer.identifier
+                        val gridSize = ldtkLayer.gridSize
                         // Check if layer has tile set -> store tile map data
                         val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
                         if (tilesetExt != null) {
@@ -174,10 +177,14 @@ class AssetStore {
                                 // Sanity check - entity needs to have a field 'entityConfig'
                                 if (entity.fieldInstances.firstOrNull { it.identifier == "entityConfig" } != null) {
 
-                                    // Add scripts with their original name
-                                    if (entity.tags.firstOrNull { it == "script" } != null) yamlString.append("name: ${entity.identifier}\n")
-                                    // Add other game objects with a unique name as identifier
-                                    else yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
+                                    if (entity.tags.firstOrNull { it == "script" } != null) {
+                                        // Add scripts without unique count value - they are unique by name because they exist only once
+                                        yamlString.append("name: ${levelName}_${entity.identifier}\n")
+                                    }
+                                    else {
+                                        // Add other game objects with a unique name as identifier
+                                        yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
+                                    }
 
                                     // Add position of entity
                                     entity.tags.firstOrNull { it == "positionable" }?.let {
@@ -193,10 +200,15 @@ class AssetStore {
                                     println("\n$yamlString")
 
                                     try {
+                                        // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
                                         val entityConfig: EntityConfig = configDeserializer.yaml().decodeFromString(yamlString.toString())
+
+                                        // TODO: We need to store only the name of the entity config for later dynamically spawning of entities
+                                        //       We need to store the entity configs in a 2D array depending on its position in the level
+                                        //       Then later we will spawn the entities depending on the position in the level
                                         entityList.add(entityConfig)
 
-                                        println("INFO: Entity config '${entity.identifier}' loaded for '$levelName'")
+                                        println("INFO: Registering entity config '${entity.identifier}' for '$levelName'")
                                     } catch (e: Throwable) {
                                         println("ERROR: Loading entity config - $e")
                                     }

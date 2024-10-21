@@ -63,17 +63,6 @@ object GameStateManager {
     }
 
     /**
-     * Load all entity configs from LDtk level and put them into the EntityFactory.
-     */
-    private fun loadEntityConfigsFromLdtkLevel(levelName: String, layerName: String) {
-        val entityConfigs = assetStore.getEntityConfigs(levelName, layerName)
-        entityConfigs.forEach { entityConfig ->
-            EntityFactory.register(entityConfig)
-            println("INFO: Entity config '${entityConfig.name}' loaded for level '$levelName' and entity layer '$layerName'.")
-        }
-    }
-
-    /**
      * Function for loading word, level and special game config and assets. This function should be called
      * whenever new assets need to be loaded. I.e. also within a level when assets of type 'special' should
      * be loaded/reloaded.
@@ -127,9 +116,6 @@ object GameStateManager {
                 }
 //            } else println("WARNING: Cannot find special game config file '${gameStateConfig.special}/${gameStateConfig.special}/config.yaml'!")
         }
-
-//        loadEntityConfigsFromLdtkLevel(gameStateConfig.world, gameStateConfig.special)  // here entity configs for "intro" are loaded
-//        loadEntityConfigsFromLdtkLevel(gameStateConfig.world, gameStateConfig.level)
     }
 
     /**
@@ -140,7 +126,10 @@ object GameStateManager {
      * EntityConfig type. The type can be set in LDtk level map editor.
      */
     fun startGame(world: World) {
-        val startScript = "start_script"
+        // TODO: Check if save game is available and load it
+
+        // Load start script from level
+        val startScript = "${gameStateConfig.level}_start_script"
         if (EntityFactory.contains(startScript)) {
             println("INFO: Starting '${gameStateConfig.level}' with script: '$startScript'.")
             world.createAndConfigureEntity(startScript)

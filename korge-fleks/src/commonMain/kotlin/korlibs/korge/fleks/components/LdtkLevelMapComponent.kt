@@ -21,6 +21,7 @@ data class LdtkLevelMapComponent(
 
     var levelLayer: String = "",  // The level and layer name in the LDtk world
 
+    // TODO: Move this to AssetStore
     var width: Float = 0f,  // Size of the level map
     var height: Float = 0f,
 
@@ -37,8 +38,9 @@ data class LdtkLevelMapComponent(
 
         val assetStore: AssetStore = this.inject(name = "AssetStore")
         val tileMapData = assetStore.getTileMapData(levelName, layerNames.first())
-        width = tileMapData.data.width.toFloat()
-        height = tileMapData.data.height.toFloat()
+        // TODO: remove hardcoded values - assetStore.getLevelWidth(levelName) : Float
+        width = (tileMapData.data.width * 16).toFloat()
+        height = (tileMapData.data.height * 16).toFloat()
     }
 
     companion object : ComponentType<LdtkLevelMapComponent>()
