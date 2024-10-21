@@ -190,7 +190,7 @@ class AssetStore {
                                         if (field.identifier != "EntityConfig") yamlString.append("${field.identifier}: ${field.value}\n")
                                     }
                                     println("INFO: Game object '${entity.identifier}' loaded for '$levelName'")
-                                    println(yamlString)
+                                    println("\n$yamlString")
 
                                     try {
                                         val entityConfig: EntityConfig = configDeserializer.yaml().decodeFromString(yamlString.toString())
