@@ -9,20 +9,15 @@ import kotlinx.serialization.*
 @Serializable @SerialName("LdtkLevelMap")
 data class LdtkLevelMapComponent(
     /**
-     * The name of the LDtk world in the Asset manager
-     */
-    var worldName: String = "",
-    /**
      * The unique identifier (level name) of the level from the LDtk world
      */
     var levelName: String = "",
     /**
-     * Optional: List of layer names which shall be drawn by the specific render system.
-     * If not set, all layers will be drawn.
+     * List of layer names which shall be drawn by the specific render system.
      *
      * Example: ["Background", "Playfield"]
      */
-    var layerNames: List<String>? = null,
+    var layerNames: List<String> = listOf(),
 
     var levelLayer: String = "",  // The level and layer name in the LDtk world
 
@@ -41,10 +36,9 @@ data class LdtkLevelMapComponent(
         else initialized = true
 
         val assetStore: AssetStore = this.inject(name = "AssetStore")
-
-        val ldtkLevel = assetStore.getLdtkLevel(assetStore.getLdtkWorld(worldName), levelName)
-        width = ldtkLevel.pxWid.toFloat()
-        height = ldtkLevel.pxHei.toFloat()
+        val tileMapData = assetStore.getTileMapData(levelName, layerNames.first())
+        width = tileMapData.data.width.toFloat()
+        height = tileMapData.data.height.toFloat()
     }
 
     companion object : ComponentType<LdtkLevelMapComponent>()

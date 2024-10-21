@@ -18,13 +18,12 @@ object GameStateManager {
     var firstGameStart: Boolean = true
 
     internal lateinit var gameStateConfig: GameStateConfig
-    private val gameStateSerializer = EntityConfigSerializer()
 
     /**
      * Register a new serializers module for the entity config serializer.
      */
     fun register(name: String, module: SerializersModule) {
-        gameStateSerializer.register(name, module)
+        assetStore.configDeserializer.register(name, module)
     }
 
     /**
@@ -39,7 +38,7 @@ object GameStateManager {
 
             val gameStateConfigString = gameStateConfigVfs.readString()
             try {
-                gameStateConfig = gameStateSerializer.yaml().decodeFromString<GameStateConfig>(gameStateConfigString)
+                gameStateConfig = assetStore.configDeserializer.yaml().decodeFromString<GameStateConfig>(gameStateConfigString)
             } catch (e: Throwable) {
                 gameStateConfig = GameStateConfig("", true, "", "", "")
                 println("ERROR: Loading game state config - $e")
@@ -56,7 +55,7 @@ object GameStateManager {
 
             val gameConfigString = vfs.readString()
             try {
-                val commonConfig = gameStateSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                val commonConfig = assetStore.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                 // Enable / disable hot reloading of common assets here
                 assetStore.loadAssets(AssetType.COMMON, assetConfig = commonConfig)
             } catch (e: Throwable) { println("ERROR: Loading common assets - $e") }
@@ -66,48 +65,11 @@ object GameStateManager {
     /**
      * Load all entity configs from LDtk level and put them into the EntityFactory.
      */
-    private fun loadEntityConfigsFromLdtkLevel(worldName: String, levelName: String) {
-        var gameObjectCnt = 0
-
-        val gridSize = assetStore.getLdtkWorld(worldName).ldtk.defaultGridSize
-        val entityLayer = assetStore.getLdtkLevel(assetStore.getLdtkWorld(worldName), levelName).layerInstances?.firstOrNull { it.entityInstances.isNotEmpty() }
-        entityLayer?.entityInstances?.forEach { entity ->
-            println("INFO: Game object '${entity.identifier}' loaded for '$levelName'")
-
-            // Create YAML string of an entity config from LDtk
-            val yamlString = StringBuilder()
-            // Sanity check - entity needs to have a field 'entityConfig'
-            if (entity.fieldInstances.firstOrNull { it.identifier == "entityConfig" } != null) {
-
-                // Add scripts with their original name
-                if (entity.tags.firstOrNull { it == "script" } != null) yamlString.append("-   name: ${entity.identifier}\n")
-                // Add other game objects with an unique name as identifier
-                else yamlString.append("-   name: ${worldName}_${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
-
-                // Add position of entity
-                entity.tags.firstOrNull { it == "positionable" }?.let {
-                    yamlString.append("    x: ${entity.gridPos.x * gridSize}\n")
-                    yamlString.append("    y: ${entity.gridPos.y * gridSize}\n")
-                }
-
-                // Add all other fields of entity
-                entity.fieldInstances.forEach { field ->
-                    if (field.identifier != "EntityConfig") yamlString.append("    ${field.identifier}: ${field.value}\n")
-                }
-                println(yamlString)
-
-            } else println("ERROR: Game object with name '${entity.identifier}' has no field entityConfig")
-
-            try {
-                val entityConfigs: List<EntityConfig> =
-                    gameStateSerializer.yaml().decodeFromString(yamlString.toString())
-                entityConfigs.forEach { entityConfig ->
-                    EntityFactory.register(entityConfig)
-                }
-                println("INFO: Entity config '${entity.identifier}' loaded for '$levelName'")
-            } catch (e: Throwable) {
-                println("ERROR: Loading entity config - $e")
-            }
+    private fun loadEntityConfigsFromLdtkLevel(levelName: String, layerName: String) {
+        val entityConfigs = assetStore.getEntityConfigs(levelName, layerName)
+        entityConfigs.forEach { entityConfig ->
+            EntityFactory.register(entityConfig)
+            println("INFO: Entity config '${entityConfig.name}' loaded for level '$levelName' and entity layer '$layerName'.")
         }
     }
 
@@ -130,7 +92,7 @@ object GameStateManager {
 
             var gameConfigString = worldVfs.readString()
             try {
-                val worldConfig = gameStateSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                val worldConfig = assetStore.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                 // Enable / disable hot reloading of common assets here
                 assetStore.loadAssets(AssetType.WORLD, assetConfig = worldConfig)
             } catch (e: Throwable) {
@@ -143,7 +105,7 @@ object GameStateManager {
 //        if (levelVfs.exists()) {
             gameConfigString = levelVfs.readString()
             try {
-                val worldConfig = gameStateSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                val worldConfig = assetStore.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                 // Enable / disable hot reloading of common assets here
                 assetStore.loadAssets(AssetType.LEVEL, assetConfig = worldConfig)
             } catch (e: Throwable) {
@@ -157,7 +119,7 @@ object GameStateManager {
 //            if (vfs.exists()) {
                 gameConfigString = vfs.readString()
                 try {
-                    val specialConfig = gameStateSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                    val specialConfig = assetStore.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                     // Enable / disable hot reloading of common assets here
                     assetStore.loadAssets(AssetType.SPECIAL, assetConfig = specialConfig)
                 } catch (e: Throwable) {
@@ -166,8 +128,8 @@ object GameStateManager {
 //            } else println("WARNING: Cannot find special game config file '${gameStateConfig.special}/${gameStateConfig.special}/config.yaml'!")
         }
 
-        loadEntityConfigsFromLdtkLevel(gameStateConfig.world, gameStateConfig.special)  // here entity configs for "intro" are loaded
-        loadEntityConfigsFromLdtkLevel(gameStateConfig.world, gameStateConfig.level)
+//        loadEntityConfigsFromLdtkLevel(gameStateConfig.world, gameStateConfig.special)  // here entity configs for "intro" are loaded
+//        loadEntityConfigsFromLdtkLevel(gameStateConfig.world, gameStateConfig.level)
     }
 
     /**

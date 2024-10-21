@@ -10,14 +10,20 @@ import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
 import korlibs.image.tiles.*
 import korlibs.io.file.std.resourcesVfs
+import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.gameState.GameStateManager.assetStore
+import korlibs.korge.fleks.utils.*
 import korlibs.korge.ldtk.*
 import korlibs.korge.ldtk.view.*
 import korlibs.memory.*
 import korlibs.time.Stopwatch
 import korlibs.math.max
+import kotlinx.serialization.*
 import kotlin.collections.set
 import kotlin.math.max
 
+typealias LayerTileMaps = MutableMap<String, TileMapData>
+typealias LayerEntityMaps = MutableMap<String, List<EntityConfig>>
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -36,14 +42,16 @@ class AssetStore {
     val levelAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
     val specialAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
 
-//    @Volatile
+    val configDeserializer = EntityConfigSerializer()
+
+    //    @Volatile
     internal var commonAssetConfig: AssetModel = AssetModel()
     internal var currentWorldAssetConfig: AssetModel = AssetModel()
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
     internal var specialAssetConfig: AssetModel = AssetModel()
 
-    internal var ldtkWorlds: MutableMap<String, Pair<AssetType, LDTKWorld>> = mutableMapOf()
-    internal val levelLayerTileMaps: MutableMap<String, Pair<AssetType, TileMapData>> = mutableMapOf()
+    internal val levelMaps: MutableMap<String, Pair<AssetType, LayerTileMaps>> = mutableMapOf()           // 1st string: Level name, 2nd string: Layer name
+    internal val entityConfigMaps: MutableMap<String, Pair<AssetType, LayerEntityMaps>> = mutableMapOf()  // 1st string: Level name, 2nd string: Layer name
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
@@ -70,17 +78,19 @@ class AssetStore {
             ImageData()
         }
 
-    fun getLdtkWorld(name: String) : LDTKWorld =
-        if (ldtkWorlds.contains(name)) ldtkWorlds[name]!!.second
-        else error("AssetStore: LDtkWorld '$name' not found!")
+    fun getTileMapData(level: String, layer: String) : TileMapData =
+        if (levelMaps.contains(level)) {
+            if (levelMaps[level]!!.second.contains(layer)) levelMaps[level]!!.second[layer]!!
+            else error("AssetStore: TileMap layer '$layer' for level '$level' not found!")
+        }
+        else error("AssetStore: Level map for level '$level' not found!")
 
-    fun getLdtkLevel(ldtkWorld: LDTKWorld, levelName: String) : Level =
-        if (ldtkWorld.levelsByName.contains(levelName)) ldtkWorld.levelsByName[levelName]!!.level
-        else error("AssetStore: LDtkLevel '$levelName' not found!")
-
-    fun getTileMapData(levelLayer: String) : TileMapData =
-        if (levelLayerTileMaps.contains(levelLayer)) levelLayerTileMaps[levelLayer]!!.second
-        else error("AssetStore: TileMap for level-layer '$levelLayer' not found!")
+    fun getEntityConfigs(level: String, layer: String) : List<EntityConfig> =
+        if (entityConfigMaps.contains(level)) {
+            if (entityConfigMaps[level]!!.second.contains(layer)) entityConfigMaps[level]!!.second[layer]!!
+            else error("AssetStore: Entity layer '$layer' for level '$level' not found!")
+        }
+        else error("AssetStore: EntityConfig for level '$level' not found!")
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
@@ -138,20 +148,69 @@ class AssetStore {
             val sw = Stopwatch().start()
             println("AssetStore: Start loading [${type.name}] resources from '${assetConfig.folder}'...")
 
+            var gameObjectCnt = 0
+
             // Update maps of music, images, ...
             assetConfig.tileMaps.forEach { tileMap ->
                 val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + tileMap.fileName].readLDTKWorld(extrude = true)
-
-                // TODO: Hardcoded - will be removed later anyway - needed still for loading entity instances (start script of intro)
-                ldtkWorlds["world_1"] = Pair(type, ldtkWorld)
-
+                val gridSize = ldtkWorld.ldtk.defaultGridSize
                 // Save TileMapData for each Level and layer combination from LDtk world
                 ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+                    val levelName = ldtkLevel.identifier
                     ldtkLevel.layerInstances?.forEach { ldtkLayer ->
+                        val layerName = ldtkLayer.identifier
+                        // Check if layer has tile set -> store tile map data
                         val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
-
                         if (tilesetExt != null) {
-                            storeTiles(ldtkLayer, tilesetExt, ldtkLevel.identifier, ldtkLayer.identifier, type)
+                            storeTiles(ldtkLayer, tilesetExt, levelName, layerName, type)
+                        }
+                        // Check if layer contains entity data -> create EntityConfigs and store them fo
+                        if (ldtkLayer.entityInstances.isNotEmpty()) {
+                            val entityList = mutableListOf<EntityConfig>()
+
+                            ldtkLayer.entityInstances.forEach { entity ->
+                                // Create YAML string of an entity config from LDtk
+                                val yamlString = StringBuilder()
+                                // Sanity check - entity needs to have a field 'entityConfig'
+                                if (entity.fieldInstances.firstOrNull { it.identifier == "entityConfig" } != null) {
+
+                                    // Add scripts with their original name
+                                    if (entity.tags.firstOrNull { it == "script" } != null) yamlString.append("name: ${entity.identifier}\n")
+                                    // Add other game objects with a unique name as identifier
+                                    else yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
+
+                                    // Add position of entity
+                                    entity.tags.firstOrNull { it == "positionable" }?.let {
+                                        yamlString.append("x: ${entity.gridPos.x * gridSize}\n")
+                                        yamlString.append("y: ${entity.gridPos.y * gridSize}\n")
+                                    }
+
+                                    // Add all other fields of entity
+                                    entity.fieldInstances.forEach { field ->
+                                        if (field.identifier != "EntityConfig") yamlString.append("${field.identifier}: ${field.value}\n")
+                                    }
+                                    println("INFO: Game object '${entity.identifier}' loaded for '$levelName'")
+                                    println(yamlString)
+
+                                    try {
+                                        val entityConfig: EntityConfig = configDeserializer.yaml().decodeFromString(yamlString.toString())
+                                        entityList.add(entityConfig)
+
+                                        println("INFO: Entity config '${entity.identifier}' loaded for '$levelName'")
+                                    } catch (e: Throwable) {
+                                        println("ERROR: Loading entity config - $e")
+                                    }
+
+                                } else println("ERROR: Game object with name '${entity.identifier}' has no field entityConfig!")
+                            }
+
+                            // Create new map for Entity layer if it does not exist yet
+                            if (!entityConfigMaps.contains(levelName)) {
+                                val layerEntityMaps: LayerEntityMaps = mutableMapOf()
+                                entityConfigMaps[levelName] = Pair(type, layerEntityMaps)
+                            }
+                            // Finally store entity config for level and entity layer
+                            entityConfigMaps[levelName]!!.second[layerName] = entityList
                         }
                     }
                 }
@@ -243,7 +302,11 @@ class AssetStore {
                 }
             }
         }
-        levelLayerTileMaps["${level}_${layer}"] = Pair(type, tileMapData)
+        // Create new map for level layers and store layer in it
+        val layerTileMaps: LayerTileMaps = mutableMapOf()
+        layerTileMaps[layer] = tileMapData
+        // Add layer map to level Maps
+        levelMaps[level] = Pair(type, layerTileMaps)
     }
 
     private fun prepareCurrentAssets(type: AssetType, newAssetConfig: AssetModel, currentAssetConfig: AssetModel): AssetModel? =
@@ -276,6 +339,6 @@ class AssetStore {
         images.values.removeAll { it.first == type }
         fonts.values.removeAll { it.first == type }
         sounds.values.removeAll { it.first == type }
-        levelLayerTileMaps.values.removeAll { it.first == type }
+        levelMaps.values.removeAll { it.first == type }
     }
 }
