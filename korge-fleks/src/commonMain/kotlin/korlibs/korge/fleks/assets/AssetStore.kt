@@ -10,8 +10,6 @@ import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
 import korlibs.image.tiles.*
 import korlibs.io.file.std.resourcesVfs
-import korlibs.korge.fleks.entity.*
-import korlibs.korge.fleks.gameState.GameStateManager.assetStore
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.ldtk.*
 import korlibs.korge.ldtk.view.*
@@ -22,8 +20,6 @@ import kotlinx.serialization.*
 import kotlin.collections.set
 import kotlin.math.max
 
-typealias LayerTileMaps = MutableMap<String, TileMapData>
-typealias LayerEntityMaps = MutableMap<String, List<EntityConfig>>
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -50,15 +46,21 @@ class AssetStore {
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
     internal var specialAssetConfig: AssetModel = AssetModel()
 
-    internal val levelMaps: MutableMap<String, Pair<AssetType, LayerTileMaps>> = mutableMapOf()           // 1st string: Level name, 2nd string: Layer name
-    internal val entityConfigMaps: MutableMap<String, Pair<AssetType, LayerEntityMaps>> = mutableMapOf()  // 1st string: Level name, 2nd string: Layer name
+    internal val levelDataMaps: MutableMap<String, LevelData> = mutableMapOf()
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     internal var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
 
-    // TODO: Create data class for storing level data
-    //       grizSize, entities, tileMapData
+    // Data class for storing level data like grizSize, width, height, entities, tileMapData
+    data class LevelData(
+        val type: AssetType,
+        val gridSize: Int,
+        val width: Float,
+        val height: Float,
+        val entities: List<String>,
+        val layerTileMaps: MutableMap<String, TileMapData>
+    )
 
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second
@@ -82,18 +84,24 @@ class AssetStore {
         }
 
     fun getTileMapData(level: String, layer: String) : TileMapData =
-        if (levelMaps.contains(level)) {
-            if (levelMaps[level]!!.second.contains(layer)) levelMaps[level]!!.second[layer]!!
+        if (levelDataMaps.contains(level)) {
+            if (levelDataMaps[level]!!.layerTileMaps.contains(layer)) levelDataMaps[level]!!.layerTileMaps[layer]!!
             else error("AssetStore: TileMap layer '$layer' for level '$level' not found!")
         }
         else error("AssetStore: Level map for level '$level' not found!")
 
-    fun getEntityConfigs(level: String, layer: String) : List<EntityConfig> =
-        if (entityConfigMaps.contains(level)) {
-            if (entityConfigMaps[level]!!.second.contains(layer)) entityConfigMaps[level]!!.second[layer]!!
-            else error("AssetStore: Entity layer '$layer' for level '$level' not found!")
+    fun getEntities(level: String) : List<String> =
+        if (levelDataMaps.contains(level)) {
+            levelDataMaps[level]!!.entities
         }
-        else error("AssetStore: EntityConfig for level '$level' not found!")
+        else error("AssetStore: Entities for level '$level' not found!")
+
+    fun getLevelHeight(level: String) : Float =
+        if (levelDataMaps.contains(level)) {
+            levelDataMaps[level]!!.height
+        }
+        else error("AssetStore: Height for level '$level' not found!")
+
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
@@ -162,6 +170,7 @@ class AssetStore {
                     ldtkLevel.layerInstances?.forEach { ldtkLayer ->
                         val layerName = ldtkLayer.identifier
                         val gridSize = ldtkLayer.gridSize
+
                         // Check if layer has tile set -> store tile map data
                         val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
                         if (tilesetExt != null) {
@@ -169,7 +178,7 @@ class AssetStore {
                         }
                         // Check if layer contains entity data -> create EntityConfigs and store them fo
                         if (ldtkLayer.entityInstances.isNotEmpty()) {
-                            val entityList = mutableListOf<EntityConfig>()
+                            val entityNames = mutableListOf<String>()
 
                             ldtkLayer.entityInstances.forEach { entity ->
                                 // Create YAML string of an entity config from LDtk
@@ -206,7 +215,7 @@ class AssetStore {
                                         // TODO: We need to store only the name of the entity config for later dynamically spawning of entities
                                         //       We need to store the entity configs in a 2D array depending on its position in the level
                                         //       Then later we will spawn the entities depending on the position in the level
-                                        entityList.add(entityConfig)
+                                        entityNames.add(entityConfig.name)
 
                                         println("INFO: Registering entity config '${entity.identifier}' for '$levelName'")
                                     } catch (e: Throwable) {
@@ -216,13 +225,19 @@ class AssetStore {
                                 } else println("ERROR: Game object with name '${entity.identifier}' has no field entityConfig!")
                             }
 
-                            // Create new map for Entity layer if it does not exist yet
-                            if (!entityConfigMaps.contains(levelName)) {
-                                val layerEntityMaps: LayerEntityMaps = mutableMapOf()
-                                entityConfigMaps[levelName] = Pair(type, layerEntityMaps)
+                            // Create new level data if it does not exist yet
+                            if (!levelDataMaps.contains(levelName)) {
+                                val levelData = LevelData(
+                                    type = type,
+                                    gridSize = gridSize,
+                                    width = (ldtkLayer.cWid * gridSize).toFloat(),
+                                    height = (ldtkLayer.cHei * gridSize).toFloat(),
+                                    entities = entityNames,
+                                    layerTileMaps = mutableMapOf()
+                                )
+                            } else {
+                                levelDataMaps[levelName]!!.entities
                             }
-                            // Finally store entity config for level and entity layer
-                            entityConfigMaps[levelName]!!.second[layerName] = entityList
                         }
                     }
                 }
@@ -315,10 +330,22 @@ class AssetStore {
             }
         }
         // Create new map for level layers and store layer in it
-        val layerTileMaps: LayerTileMaps = mutableMapOf()
+        val layerTileMaps = mutableMapOf<String, TileMapData>()
         layerTileMaps[layer] = tileMapData
         // Add layer map to level Maps
-        levelMaps[level] = Pair(type, layerTileMaps)
+        if (!levelDataMaps.contains(level)) {
+            val levelData = LevelData(
+                type = type,
+                gridSize = gridSize,
+                width = (ldtkLayer.cWid * gridSize).toFloat(),
+                height = (ldtkLayer.cHei * gridSize).toFloat(),
+                entities = listOf(),
+                layerTileMaps = layerTileMaps
+            )
+            levelDataMaps[level] = levelData
+        } else {
+            levelDataMaps[level]!!.layerTileMaps[layer] = tileMapData
+        }
     }
 
     private fun prepareCurrentAssets(type: AssetType, newAssetConfig: AssetModel, currentAssetConfig: AssetModel): AssetModel? =
@@ -351,6 +378,6 @@ class AssetStore {
         images.values.removeAll { it.first == type }
         fonts.values.removeAll { it.first == type }
         sounds.values.removeAll { it.first == type }
-        levelMaps.values.removeAll { it.first == type }
+        levelDataMaps.values.removeAll { it.type == type }
     }
 }

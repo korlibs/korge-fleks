@@ -110,3 +110,16 @@ fun List<Entity>.clone() : List<Entity> {
     }
     return listCopy
 }
+
+/**
+ * Clone function (deep copy) for [List] of String elements.
+ */
+@JvmName("ListOfStrings")
+fun List<String>.clone() : List<String> {
+    val listCopy = mutableListOf<String>()
+    // Perform deep copy of list elements
+    forEach { string ->
+        listCopy.add(string)
+    }
+    return listCopy
+}
