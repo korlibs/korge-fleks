@@ -33,4 +33,3 @@ data class AssetModel(
 }
 
 enum class AssetType { COMMON, WORLD, LEVEL, SPECIAL }
-enum class TileMapType { LDTK, TILED }

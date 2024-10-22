@@ -34,7 +34,6 @@ class LDtkLevelMapRenderSystem(
     // Debugging layer rendering
     private var renderLayer = 0
 
-    @OptIn(KorgeExperimental::class)
     override fun renderInternal(ctx: RenderContext) {
         // Sort level maps by their layerIndex
         family.sort(comparator)
@@ -42,12 +41,11 @@ class LDtkLevelMapRenderSystem(
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
             val (x, y, offsetX, offsetY) = entity[PositionComponent]
-            val ldtkLevelMapComponent = entity[LdtkLevelMapComponent]
-            val levelLayer = ldtkLevelMapComponent.levelLayer
+            val (levelName, layerNames) = entity[LdtkLevelMapComponent]
 
             val rgba = Colors.WHITE  // TODO: use here alpha from ldtk layer
 
-            val tileMap = assetStore.getTileMapData(levelLayer)
+            val tileMap = assetStore.getTileMapData(levelName, layerNames.first())  // TODO: Render all layers, not only first one
             val tileSet = tileMap.tileSet
             val tileSetWidth = tileSet.width
             val tileSetHeight = tileSet.height

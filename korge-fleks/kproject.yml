@@ -13,7 +13,7 @@ dependencies:
 #
   - maven::common::com.charleskorn.kaml:kaml:0.61.0  # 0.59.0 <-- last version supporting kotlin 1.9.x and serialization 1.6.x
   - maven::common::com.soywiz.korlibs.korge2:korge
-  - https://github.com/korlibs/korge-ldtk/tree/v1.0.3/korge-ldtk
+  - https://github.com/korlibs/korge-ldtk/tree/bc5cbb726f78aa3064357d9babba67fbc5ad7db1/korge-ldtk
   # Use local copy of KorGE addons
 #  - ../../korge-ldtk/korge-ldtk
 #

@@ -21,11 +21,8 @@ import kotlinx.serialization.*
 data class LevelMapConfig(
     override val name: String,
 
-    private val mapType: TileMapType,
-    private val assetName: String = "",  // Used with LDtk and Tiled based maps
-    private val levelName: String = "",  // Used with LDtk based maps
-    private val layerNames: List<String>? = null,  // Optional: Show only specific layers
-    private val levelLayer: String = "",  // The level and layer names "<level>_<layer>" in the LDtk world
+    private val levelName: String,         // Unique name for level within a world
+    private val layerNames: List<String>,  // List of names for layers to show
     private val layerTag: RenderLayerTag,
     private val x: Float = 0f,
     private val y: Float = 0f,
@@ -34,10 +31,7 @@ data class LevelMapConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
-            when (mapType) {
-                TileMapType.LDTK -> it += LdtkLevelMapComponent(assetName, levelName, layerNames, levelLayer)
-                TileMapType.TILED -> it += TiledLevelMapComponent(assetName)
-            }
+            it += LdtkLevelMapComponent(levelName, layerNames)
             it += PositionComponent(
                 x = x,
                 y = y
