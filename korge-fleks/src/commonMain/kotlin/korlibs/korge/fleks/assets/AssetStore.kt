@@ -102,6 +102,11 @@ class AssetStore {
         }
         else error("AssetStore: Height for level '$level' not found!")
 
+    fun getLevelWidth(level: String) : Float =
+        if (levelDataMaps.contains(level)) {
+            levelDataMaps[level]!!.width
+        }
+        else error("AssetStore: Width for level '$level' not found!")
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {

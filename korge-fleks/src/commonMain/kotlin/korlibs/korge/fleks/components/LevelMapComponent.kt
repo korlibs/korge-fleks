@@ -1,30 +1,30 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 
-@Serializable @SerialName("LdtkLevelMap")
-data class LdtkLevelMapComponent(
+@Serializable @SerialName("LevelMap")
+data class LevelMapComponent(
     /**
      * The unique identifier (level name) of the level from the LDtk world
      */
     var levelName: String = "",
     /**
      * List of layer names which shall be drawn by the specific render system.
+     * Render order is specified by order of strings in the list.
      *
-     * Example: ["Background", "Playfield"]
+     * Example: ["Background", "Playfield", "Collisions"]
      */
     var layerNames: List<String> = listOf()
-) : CloneableComponent<LdtkLevelMapComponent>() {
-    override fun type(): ComponentType<LdtkLevelMapComponent> = LdtkLevelMapComponent
-    companion object : ComponentType<LdtkLevelMapComponent>()
+) : CloneableComponent<LevelMapComponent>() {
+    override fun type(): ComponentType<LevelMapComponent> = LevelMapComponent
+    companion object : ComponentType<LevelMapComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    override fun clone(): LdtkLevelMapComponent =
-        LdtkLevelMapComponent(
+    override fun clone(): LevelMapComponent =
+        LevelMapComponent(
             levelName = levelName,
             layerNames = layerNames.clone()
         )
