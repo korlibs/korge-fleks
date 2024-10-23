@@ -2,7 +2,6 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
@@ -31,7 +30,7 @@ data class LevelMapConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
-            it += LdtkLevelMapComponent(levelName, layerNames)
+            it += LevelMapComponent(levelName, layerNames)
             it += PositionComponent(
                 x = x,
                 y = y

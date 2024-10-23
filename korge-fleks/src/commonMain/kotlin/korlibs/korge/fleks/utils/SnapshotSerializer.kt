@@ -144,7 +144,7 @@ class SnapshotSerializer {
             subclass(LayerComponent::class)
             subclass(LayeredSpriteComponent::class)
             subclass(LayoutComponent::class)
-            subclass(LdtkLevelMapComponent::class)
+            subclass(LevelMapComponent::class)
             subclass(LifeCycleComponent::class)
             subclass(MotionComponent::class)
             subclass(NoisyMoveComponent::class)
