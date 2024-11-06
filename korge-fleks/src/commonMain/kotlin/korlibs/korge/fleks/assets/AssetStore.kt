@@ -232,7 +232,7 @@ class AssetStore {
 
                             // Create new level data if it does not exist yet
                             if (!levelDataMaps.contains(levelName)) {
-                                val levelData = LevelData(
+                                levelDataMaps[levelName] = LevelData(
                                     type = type,
                                     gridSize = gridSize,
                                     width = (ldtkLayer.cWid * gridSize).toFloat(),
