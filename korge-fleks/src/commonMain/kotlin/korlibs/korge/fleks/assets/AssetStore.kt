@@ -191,7 +191,7 @@ class AssetStore {
                                 // Sanity check - entity needs to have a field 'entityConfig'
                                 if (entity.fieldInstances.firstOrNull { it.identifier == "entityConfig" } != null) {
 
-                                    if (entity.tags.firstOrNull { it == "script" } != null) {
+                                    if (entity.tags.firstOrNull { it == "unique" } != null) {
                                         // Add scripts without unique count value - they are unique by name because they exist only once
                                         yamlString.append("name: ${levelName}_${entity.identifier}\n")
                                     }
@@ -232,7 +232,7 @@ class AssetStore {
 
                             // Create new level data if it does not exist yet
                             if (!levelDataMaps.contains(levelName)) {
-                                val levelData = LevelData(
+                                levelDataMaps[levelName] = LevelData(
                                     type = type,
                                     gridSize = gridSize,
                                     width = (ldtkLayer.cWid * gridSize).toFloat(),
