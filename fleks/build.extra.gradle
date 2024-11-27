@@ -1,0 +1,12 @@
+// Fixes "java 21 vs 1.8 problem" if kProject is used with targetJvm() and targetAndroid()
+var javaVersion = 21
+
+kotlin {
+    jvmToolchain(javaVersion)
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(javaVersion))
+    }
+}
