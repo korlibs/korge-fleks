@@ -31,6 +31,7 @@ data class LevelMapConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             it += LevelMapComponent(levelName, layerNames)
+            // Position of the camera (view port) for rendering the level map
             it += PositionComponent(
                 x = x,
                 y = y

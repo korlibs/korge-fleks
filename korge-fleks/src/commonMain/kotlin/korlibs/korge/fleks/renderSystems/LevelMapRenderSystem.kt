@@ -14,8 +14,8 @@ import korlibs.math.*
 import korlibs.math.geom.*
 
 
-inline fun Container.levelMapRenderSystem(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LevelMapRenderSystem.() -> Unit = {}) =
-    LevelMapRenderSystem(viewPortSize, world, layerTag).addTo(this, callback)
+inline fun Container.levelMapRenderSystem(viewPortSize: SizeInt, camera: Entity, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LevelMapRenderSystem.() -> Unit = {}) =
+    LevelMapRenderSystem(viewPortSize, camera, world, layerTag).addTo(this, callback)
 
 /**
  * Here we do not render the actual level map yet.
@@ -23,6 +23,7 @@ inline fun Container.levelMapRenderSystem(viewPortSize: SizeInt, world: World, l
  */
 class LevelMapRenderSystem(
     private val viewPortSize: SizeInt,
+    private val camera: Entity,
     world: World,
     layerTag: RenderLayerTag,
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
@@ -39,7 +40,7 @@ class LevelMapRenderSystem(
 
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
-            val (x, y, offsetX, offsetY) = entity[PositionComponent]
+            val (x, y, offsetX, offsetY) = camera[PositionComponent]
             val (levelName, layerNames) = entity[LevelMapComponent]
 
             val rgba = Colors.WHITE  // TODO: use here alpha from ldtk layer
