@@ -54,11 +54,13 @@ class LevelMapRenderSystem(
 
                 // Draw only visible tiles
                 // Start and end need to be calculated from Camera viewport position (x,y) + offset
-                val xStart: Int = -((x + offsetX).toInt() / tileSetWidth) - 1  // x in positive direction;  -1 = start one tile before
+                val xStart: Int = ((x - offsetX).toInt() / tileSetWidth) - 1  // x in positive direction;  -1 = start one tile before
+//                val xStart: Int = -((x + offsetX).toInt() / tileSetWidth) - 1  // x in positive direction;  -1 = start one tile before
                 val xTiles = (viewPortSize.width / tileSetWidth) + 3
                 val xEnd: Int = xStart + xTiles
 
-                val yStart: Int = -((y + offsetY).toInt() / tileSetHeight) - 1  // y in negative direction;  -1 = start one tile before
+                val yStart: Int = ((y - offsetY).toInt() / tileSetHeight) - 1  // y in negative direction;  -1 = start one tile before
+//                val yStart: Int = -((y + offsetY).toInt() / tileSetHeight) - 1  // y in negative direction;  -1 = start one tile before
                 val yTiles = viewPortSize.height / tileSetHeight + 3
                 val yEnd: Int = yStart + yTiles
 
@@ -73,8 +75,8 @@ class LevelMapRenderSystem(
                                 val tile = tileMap[tx, ty, level]
                                 val info = tileSet.getInfo(tile.tile)
                                 if (info != null) {
-                                    val px = x + offsetX + (tx * tileSetWidth) + (tile.offsetX * offsetScale)
-                                    val py = y + offsetY + (ty * tileSetHeight) + (tile.offsetY * offsetScale)
+                                    val px = (tx * tileSetWidth) + (tile.offsetX * offsetScale) - (x - offsetX)
+                                    val py =  (ty * tileSetHeight) + (tile.offsetY * offsetScale) - (y - offsetY)
 
                                     batch.drawQuad(
                                         tex = ctx.getTex(info.slice),
@@ -82,8 +84,7 @@ class LevelMapRenderSystem(
                                         y = py,
                                         filtering = false,
                                         colorMul = rgba,
-                                        // TODO: Add possibility to use a custom shader - add ShaderComponent or similar
-                                        program = null
+                                        program = null // Possibility to use a custom shader - add ShaderComponent or similar
                                     )
 
                                 }

@@ -15,11 +15,12 @@ import korlibs.math.geom.Point
 /**
  * Creates a new [DebugRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver this */
-inline fun Container.debugRenderSystem(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker DebugRenderSystem.() -> Unit = {}) =
-    DebugRenderSystem(viewPortSize, world, layerTag).addTo(this, callback)
+inline fun Container.debugRenderSystem(viewPortSize: SizeInt, camera: Entity, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker DebugRenderSystem.() -> Unit = {}) =
+    DebugRenderSystem(viewPortSize,camera, world, layerTag).addTo(this, callback)
 
 class DebugRenderSystem(
     private val viewPortSize: SizeInt,
+    private val camera: Entity,
     world: World,
     private val layerTag: RenderLayerTag
 ) : View() {
@@ -34,7 +35,13 @@ class DebugRenderSystem(
         // Custom Render Code here
         ctx.useLineBatcher { batch ->
             family.forEach { entity ->
-                val (x, y, offsetX, offsetY) = entity[PositionComponent]
+                val (worldX, worldY, offsetX, offsetY) = entity[PositionComponent]
+
+                // Transform world coordinates to screen coordinates
+                val cameraPosition = camera[PositionComponent]
+                val x = - worldX + cameraPosition.x + (viewPortSize.width * 0.5f)
+                val y = - worldY + cameraPosition.y + (viewPortSize.height * 0.5f)
+
                 val xx: Float = x + offsetX
                 val yy: Float = y + offsetY
 

@@ -22,11 +22,12 @@ import korlibs.math.geom.*
  * HINT: This renderer is preliminary and does not use caching of geometry or vertices. It might be replaced by
  * renderers from KorGE 6.
  */
-inline fun Container.objectRenderSystem(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ObjectRenderSystem.() -> Unit = {}) =
-    ObjectRenderSystem(viewPortSize, world, layerTag).addTo(this, callback)
+inline fun Container.objectRenderSystem(viewPortSize: SizeInt, camera: Entity, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ObjectRenderSystem.() -> Unit = {}) =
+    ObjectRenderSystem(viewPortSize, camera, world, layerTag).addTo(this, callback)
 
 class ObjectRenderSystem(
     private val viewPortSize: SizeInt,
+    private val camera: Entity,
     world: World,
     layerTag: RenderLayerTag,
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
@@ -44,8 +45,17 @@ class ObjectRenderSystem(
 
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
-            val (x, y, offsetX, offsetY) = entity[PositionComponent]
+            val (worldX, worldY, offsetX, offsetY) = entity[PositionComponent]
             val (rgba) = entity[RgbaComponent]
+
+            // Transform world coordinates to screen coordinates
+            val cameraPosition = camera[PositionComponent]
+            val x = - worldX + cameraPosition.x + (viewPortSize.width * 0.5f)
+            val y = - worldY + cameraPosition.y + (viewPortSize.height * 0.5f)
+
+            if (entity[InfoComponent].name == "level_1_player_start") {
+//                println("Player position on screen: ($x, $y)")
+            }
 
             // Rendering path for sprites
             if (entity has SpriteComponent) {
@@ -67,8 +77,7 @@ class ObjectRenderSystem(
                                     y = y + layerData.targetY - anchorY + layerProps.offsetY,
                                     filtering = false,
                                     colorMul = layerProps.rgba,
-                                    // TODO: Add possibility to use a custom shader - add ShaderComponent or similar
-                                    program = null
+                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
                                 )
                             }
                         }
@@ -77,14 +86,15 @@ class ObjectRenderSystem(
                     ctx.useBatcher { batch ->
                         // Iterate over all layers of each sprite for the frame number
                         imageFrame.layerData.fastForEach { layerData ->
+                            val px = x + offsetX + layerData.targetX - anchorX
+                            val py = y + offsetY + layerData.targetY - anchorY
                             batch.drawQuad(
                                 tex = ctx.getTex(layerData.slice),
-                                x = x + offsetX + layerData.targetX - anchorX,
-                                y = y + offsetY + layerData.targetY - anchorY,
+                                x = px,
+                                y = py,
                                 filtering = false,
                                 colorMul = rgba,
-                                // TODO: Add possibility to use a custom shader - add ShaderComponent or similar
-                                program = null
+                                program = null // Possibility to use a custom shader - add ShaderComponent or similar
                             )
                         }
                     }
@@ -105,8 +115,7 @@ class ObjectRenderSystem(
                             y = y + image.targetY - anchorY + layer.position.y + layer.position.offsetY,
                             filtering = false,
                             colorMul = layer.rgba.rgba,
-                            // TODO: Add possibility to use a custom shader - add ShaderComponent or similar
-                            program = null
+                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
                         )
                     }
                 }

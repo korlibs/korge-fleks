@@ -15,7 +15,7 @@ import kotlinx.serialization.modules.*
  */
 object GameStateManager {
     var assetStore: AssetStore = AssetStore()
-    var firstGameStart: Boolean = false
+    var firstGameStart: Boolean = true
 
     internal lateinit var gameStateConfig: GameStateConfig
 
