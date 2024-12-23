@@ -56,15 +56,15 @@ class LevelMapRenderSystem(
 
                 // Draw only visible tiles
                 // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-                val viewPortX: Int = (cameraX + cameraOffsetX).toInt() - viewPortHalfWidth
-                val viewPortY: Int = (cameraY + cameraOffsetY).toInt() - viewPortHalfHeight
+                val viewPortX: Float = cameraX + cameraOffsetX - viewPortHalfWidth
+                val viewPortY: Float = cameraY + cameraOffsetY - viewPortHalfHeight
 
                 // Start and end indexes of viewport area
-                val xStart: Int = viewPortX / tileSetWidth - 1  // x in positive direction;  -1 = start one tile before
+                val xStart: Int = (viewPortX / tileSetWidth).toInt() - 1  // x in positive direction;  -1 = start one tile before
                 val xTiles = (viewPortSize.width / tileSetWidth) + 3
                 val xEnd: Int = xStart + xTiles
 
-                val yStart: Int = viewPortY / tileSetHeight - 1  // y in negative direction;  -1 = start one tile before
+                val yStart: Int = (viewPortY / tileSetHeight).toInt() - 1  // y in negative direction;  -1 = start one tile before
                 val yTiles = viewPortSize.height / tileSetHeight + 3
                 val yEnd: Int = yStart + yTiles
 
