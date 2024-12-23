@@ -5,7 +5,7 @@ import korlibs.datastructure.iterators.*
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.tags.RenderLayerTag
+import korlibs.korge.fleks.tags.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
 import korlibs.math.geom.*
@@ -25,22 +25,34 @@ class DebugRenderSystem(
     private val layerTag: RenderLayerTag
 ) : View() {
     private val family: Family = world.family {
-        all(layerTag, PositionComponent)
+        all(layerTag)
             .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent)
     }
 
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
+    private val viewPortHalfWidth: Int = viewPortSize.width / 2
+    private val viewPortHalfHeight: Int = viewPortSize.height / 2
 
     override fun renderInternal(ctx: RenderContext) {
         // Custom Render Code here
         ctx.useLineBatcher { batch ->
             family.forEach { entity ->
-                val (worldX, worldY, offsetX, offsetY) = entity[PositionComponent]
+                val (entityX, entityY, entityOffsetX, entityOffsetY) = entity[PositionComponent]
+                val x: Float
+                val y: Float
+                val offsetX: Float = entityOffsetX
+                val offsetY: Float = entityOffsetY
 
-                // Transform world coordinates to screen coordinates
-                val cameraPosition = camera[PositionComponent]
-                val x = - worldX + cameraPosition.x + (viewPortSize.width * 0.5f)
-                val y = - worldY + cameraPosition.y + (viewPortSize.height * 0.5f)
+                if (entity has ScreenCoordinatesTag) {
+                    // Take over entity coordinates
+                    x = entityX
+                    y = entityY
+                } else {
+                    // Transform world coordinates to screen coordinates
+                    val cameraPosition = camera[PositionComponent]
+                    x = entityX - cameraPosition.x + viewPortHalfWidth + cameraPosition.offsetX
+                    y = entityY - cameraPosition.y + viewPortHalfHeight + cameraPosition.offsetY
+                }
 
                 val xx: Float = x + offsetX
                 val yy: Float = y + offsetY

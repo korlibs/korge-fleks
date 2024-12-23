@@ -221,7 +221,7 @@ class TweenSequenceSystem : IteratingSystem(
     private inline fun <reified T : Component<*>> Entity.getOrWarning(componentType: ComponentType<T>) : T? {
         if (this has componentType) return get(componentType)
         else {
-            println("WARNING - TweenSequenceSystem: Entity '${this.id}' does not contain component type '${componentType}'!\n" +
+            println("WARNING - TweenSequenceSystem: Entity '${this.id}' (${world.nameOf(this)}) does not contain component type '${componentType}'!\n" +
                 "Entity snapshot: \n${world.snapshotOf(this)}")
             return null
         }

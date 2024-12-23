@@ -9,19 +9,17 @@ import kotlinx.serialization.*
 
 @Serializable @SerialName("CameraConfig")
 data class CameraConfig(
-    override val name: String,
-
-    private val viewPortWidth: Float = 0f,
-    private val viewPortHeight: Float = 0f
+    override val name: String
 ) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
 
         entity.configure {
-            it += PositionComponent(
-                offsetX = viewPortWidth * 0.5f,
-                offsetY = viewPortHeight * 0.5f
-            )
+            // Camera has position within the game world
+            // Offset can be used to "shake" the camera on explosions etc.
+            it += PositionComponent()
+
+            // TODO: Add bounds of level world
         }
         return entity
     }

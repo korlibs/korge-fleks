@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.components.TweenPropertyComponent.*
 import korlibs.math.interpolation.*

@@ -28,14 +28,16 @@ inline fun Container.objectRenderSystem(viewPortSize: SizeInt, camera: Entity, w
 class ObjectRenderSystem(
     private val viewPortSize: SizeInt,
     private val camera: Entity,
-    world: World,
+    private val world: World,
     layerTag: RenderLayerTag,
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
 ) : View() {
-    private val family: Family = world.family { all(layerTag, LayerComponent, PositionComponent, RgbaComponent)
-        .any(LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent)
+    private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
+        .any(PositionComponent, LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
+    private val viewPortHalfWidth: Int = viewPortSize.width / 2
+    private val viewPortHalfHeight: Int = viewPortSize.height / 2
 
 
     @OptIn(KorgeExperimental::class)
@@ -45,16 +47,22 @@ class ObjectRenderSystem(
 
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
-            val (worldX, worldY, offsetX, offsetY) = entity[PositionComponent]
+            val (entityX, entityY, entityOffsetX, entityOffsetY) = entity[PositionComponent]
             val (rgba) = entity[RgbaComponent]
+            val x: Float
+            val y: Float
+            val offsetX: Float = entityOffsetX
+            val offsetY: Float = entityOffsetY
 
-            // Transform world coordinates to screen coordinates
-            val cameraPosition = camera[PositionComponent]
-            val x = - worldX + cameraPosition.x + (viewPortSize.width * 0.5f)
-            val y = - worldY + cameraPosition.y + (viewPortSize.height * 0.5f)
-
-            if (entity[InfoComponent].name == "level_1_player_start") {
-//                println("Player position on screen: ($x, $y)")
+            if (entity has ScreenCoordinatesTag) {
+                // Take over coordinates
+                x = entityX
+                y = entityY
+            } else {
+                // Transform world coordinates to screen coordinates if needed
+                val cameraPosition = camera[PositionComponent]
+                x = entityX - cameraPosition.x + viewPortHalfWidth + cameraPosition.offsetX
+                y = entityY - cameraPosition.y + viewPortHalfHeight + cameraPosition.offsetY
             }
 
             // Rendering path for sprites
