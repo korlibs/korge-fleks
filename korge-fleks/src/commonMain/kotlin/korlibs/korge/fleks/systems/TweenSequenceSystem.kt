@@ -64,6 +64,7 @@ class TweenSequenceSystem : IteratingSystem(
                     // Check if script of tweens has finished
                     if (tweenSequence.index >= tweenSequence.tweens.size) {
                         entity.configure { it -= TweenSequenceComponent }
+                        //println("INFO: TweenSequence ended and removed for entity '${entity.id}' (${world.nameOf(entity)}).")
                         return
                     }
                     // check for initial delay of new tween
