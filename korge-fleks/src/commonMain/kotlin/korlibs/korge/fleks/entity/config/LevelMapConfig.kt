@@ -31,11 +31,9 @@ data class LevelMapConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             it += LevelMapComponent(levelName, layerNames)
-            it += PositionComponent(
-                x = x,
-                y = y
-            )
+            // Level map does not have position - camera position will determine what is shown from the level map
             it += SizeComponent()  // Size of level map needs to be set after loading of map is finished
+            // TODO: Check if SizeComponent is needed because it is static and does not change
             it += RgbaComponent().apply {
                 alpha = this@LevelMapConfig.alpha
             }

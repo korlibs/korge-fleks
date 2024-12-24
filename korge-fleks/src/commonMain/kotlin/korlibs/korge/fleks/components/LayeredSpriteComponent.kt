@@ -1,8 +1,6 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.datastructure.iterators.*
-import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.*

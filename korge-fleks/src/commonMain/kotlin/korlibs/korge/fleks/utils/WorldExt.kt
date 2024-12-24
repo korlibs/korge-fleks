@@ -38,3 +38,8 @@ fun World.configureEntity(entityConfig: String, entity: Entity) : Entity =
  */
 fun World.execute(entityConfig: String, entity: Entity) : Entity =
     configureEntity(entityConfig, entity)
+
+/**
+ * Get name of entity if entity has InfoComponent
+ */
+fun World.nameOf(entity: Entity) : String = if (entity has InfoComponent) entity[InfoComponent].name else "noName"

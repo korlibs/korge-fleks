@@ -92,6 +92,7 @@ data class DialogBoxConfig(
         }
         // Avatar image entity
         val avatar = entity {
+            it += ScreenCoordinatesTag
             it += PositionComponent(x = avatarInitialX, y = textBoxY - 24f)
             it += SpriteComponent(name = avatarName)
             it += RgbaComponent().apply {
@@ -103,6 +104,7 @@ data class DialogBoxConfig(
 //            it += RenderLayerTag.DEBUG
         }
         val textBox = entity {
+            it += ScreenCoordinatesTag
             it += PositionComponent(x = textBoxX, y = textBoxY)
             it += NinePatchComponent(
                 name = textFieldName,
@@ -118,6 +120,7 @@ data class DialogBoxConfig(
 //            it += RenderLayerTag.DEBUG
         }
         val textField = entity {
+            it += ScreenCoordinatesTag
             it += PositionComponent(x = textFieldX, y = textFieldY)
             it += TextFieldComponent(
                 text = text,

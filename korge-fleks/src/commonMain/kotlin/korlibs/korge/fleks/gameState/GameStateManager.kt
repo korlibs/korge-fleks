@@ -119,10 +119,10 @@ object GameStateManager {
     }
 
     /**
-     * This function is called to start the game. It will load the start script from the current LDtk level and
+     * This function is called to start the game. It will load the "start script" from the current LDtk level and
      * create and configure the very first entity of the game.
      *
-     * Hint: Make sure that a game object with name "start_script" is present in each LDtk level. It can be of dirrerent
+     * Hint: Make sure that a game object with name "start_script" is present in each LDtk level. It can be of different
      * EntityConfig type. The type can be set in LDtk level map editor.
      */
     fun startGame(world: World) {

@@ -13,6 +13,14 @@ object EntityByName {
         if (!map.containsKey(name)) map[name] = entity
     }
 
+    fun get(name: String): Entity {
+        return if (!map.containsKey(name)) {
+            throw Error("ERROR: EntityByName: Entity with name '$name' does not exist!")
+        } else map[name]!!
+    }
+
+    fun getOrNull(name: String): Entity? = map[name]
+
     fun traceOnce(name: String) {
         if (map.containsKey(name)) {
             val entityComponents = world.snapshotOf(map[name]!!)

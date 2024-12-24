@@ -75,6 +75,7 @@ class EntityConfigSerializer {
             subclass(LogoEntityConfig::class)
             subclass(LevelMapConfig::class)
             subclass(MovedSpawnerObjectConfig::class)
+            subclass(CameraConfig::class)
         }
     }
 }

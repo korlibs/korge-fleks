@@ -32,12 +32,14 @@ data class FireAndDustEffectConfig(
 
     private val renderLayerTag: RenderLayerTag = RenderLayerTag.MAIN_EFFECTS,
     private val layerIndex: Int? = null,
-    private val fadeOutDuration: Float = 0f
+    private val fadeOutDuration: Float = 0f,
+    private val screenCoordinates: Boolean = false
 ) : EntityConfig {
 
     // Configure function which applies the config to the entity's components
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
+            if (screenCoordinates) it += ScreenCoordinatesTag
             it += InfoComponent(name = this@FireAndDustEffectConfig.name)
 
             var velocityXX = velocityX

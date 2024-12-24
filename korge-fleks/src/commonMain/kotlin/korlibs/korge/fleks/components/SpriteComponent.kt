@@ -42,7 +42,7 @@ data class SpriteComponent(
     var animation: String? = null,                    // Leave null if sprite texture does not have an animation
     var frameIndex: Int = 0,                          // frame number of animation which is currently drawn
     var running: Boolean = false,                     // Switch animation on and off
-    var direction: ImageAnimation.Direction? = null,
+    var direction: ImageAnimation.Direction? = null,  // Default: Get direction from Aseprite file
     var destroyOnAnimationFinished: Boolean = false,  // Delete entity when direction is [ONCE_FORWARD] or [ONCE_REVERSE]
 
     // internal, do not set directly
