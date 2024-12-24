@@ -43,9 +43,8 @@ class LevelMapRenderSystem(
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
             val (cameraX, cameraY, cameraOffsetX, cameraOffsetY) = camera[PositionComponent]
+            val (rgba) = entity[RgbaComponent]
             val (levelName, layerNames) = entity[LevelMapComponent]
-
-            val rgba = Colors.WHITE  // TODO: use here alpha from ldtk layer
 
             layerNames.forEach { layerName ->
                 val tileMap = assetStore.getTileMapData(levelName, layerName)
@@ -60,11 +59,11 @@ class LevelMapRenderSystem(
                 val viewPortY: Float = cameraY + cameraOffsetY - viewPortHalfHeight
 
                 // Start and end indexes of viewport area
-                val xStart: Int = (viewPortX / tileSetWidth).toInt() - 1  // x in positive direction;  -1 = start one tile before
+                val xStart: Int = viewPortX.toInt() / tileSetWidth - 1  // x in positive direction;  -1 = start one tile before
                 val xTiles = (viewPortSize.width / tileSetWidth) + 3
                 val xEnd: Int = xStart + xTiles
 
-                val yStart: Int = (viewPortY / tileSetHeight).toInt() - 1  // y in negative direction;  -1 = start one tile before
+                val yStart: Int = viewPortY.toInt() / tileSetHeight - 1  // y in negative direction;  -1 = start one tile before
                 val yTiles = viewPortSize.height / tileSetHeight + 3
                 val yEnd: Int = yStart + yTiles
 
