@@ -35,7 +35,6 @@ import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenText
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextRangeEndComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTextFieldTextRangeStartComponent
 import korlibs.korge.fleks.components.TweenPropertyComponent.Companion.TweenTouchInputEnableComponent
-import korlibs.korge.fleks.entity.*
 import kotlin.jvm.JvmName
 import kotlin.reflect.KMutableProperty0
 

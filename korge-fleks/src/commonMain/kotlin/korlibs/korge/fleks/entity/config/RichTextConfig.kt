@@ -20,6 +20,7 @@ data class RichTextConfig(
     // Position and size of text field
     private val x: Float = 0f,
     private val y: Float = 0f,
+    private val screenCoordinates: Boolean = false,
     private val width: Float = 0f,  // width and height is used only for alignment of the text
     private val height: Float = 0f,
     private val textRangeEnd: Int = Int.MAX_VALUE,
@@ -37,6 +38,7 @@ data class RichTextConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
+            if (screenCoordinates) it += ScreenCoordinatesTag
             it += PositionComponent(
                 x = this@RichTextConfig.x,
                 y = this@RichTextConfig.y

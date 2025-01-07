@@ -288,7 +288,6 @@ data class TweenSequenceComponent(
             )
     }
 
-
     @Serializable @SerialName("TweenMotion")
     data class TweenMotion(
         var velocityX: Float? = null,
