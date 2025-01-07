@@ -16,7 +16,7 @@ import korlibs.math.geom.Point
  * Creates a new [DebugRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver this */
 inline fun Container.debugRenderSystem(viewPortSize: SizeInt, camera: Entity, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker DebugRenderSystem.() -> Unit = {}) =
-    DebugRenderSystem(viewPortSize,camera, world, layerTag).addTo(this, callback)
+    DebugRenderSystem(viewPortSize, camera, world, layerTag).addTo(this, callback)
 
 class DebugRenderSystem(
     private val viewPortSize: SizeInt,
