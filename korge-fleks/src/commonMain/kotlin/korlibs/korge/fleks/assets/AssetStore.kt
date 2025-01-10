@@ -200,10 +200,15 @@ class AssetStore {
                                         yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
                                     }
 
+                                    // Add position of entity = grid position + pivot point
+                                    val entityPosX: Int = (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
+                                    val entityPosY: Int = (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
+
+
                                     // Add position of entity
                                     entity.tags.firstOrNull { it == "positionable" }?.let {
-                                        yamlString.append("x: ${entity.gridPos.x * gridSize}\n")
-                                        yamlString.append("y: ${entity.gridPos.y * gridSize}\n")
+                                        yamlString.append("x: $entityPosX\n")
+                                        yamlString.append("y: $entityPosY\n")
                                     }
 
                                     // Add all other fields of entity
