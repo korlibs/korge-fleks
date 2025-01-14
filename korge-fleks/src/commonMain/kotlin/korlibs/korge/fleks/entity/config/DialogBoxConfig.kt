@@ -43,6 +43,7 @@ data class DialogBoxConfig(
     private val text: String,
     private val textFontName: String,
     private val textRangeEnd: Int = 0,  // initial value for drawing the text into the dialog
+    private val textWritingFactor: Float = 0.035f,
     @Serializable(with = HAlignAsString::class) private val textHAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VAlignAsString::class) private val textVAlign: VerticalAlign = VerticalAlign.TOP,
 ) : EntityConfig {
@@ -149,7 +150,7 @@ data class DialogBoxConfig(
                             TweenPosition(entity = avatar, x = avatarTweenX, duration = 0.5f, easing = Easing.EASE_OUT_QUAD),
                             TweenRgba(entity = textBox, alpha = 1f, delay = 0.3f, duration = 0.3f, easing = Easing.EASE_OUT_QUAD),
                             // Type write text into the dialog
-                            TweenTextField(entity = textField, textRangeEnd = text.length, delay = 0.3f + 0.8f, duration = text.length * 0.07f)
+                            TweenTextField(entity = textField, textRangeEnd = text.length, delay = 0.3f + 0.8f, duration = text.length * textWritingFactor)
                         )
                     ),
                     Wait(duration = duration),
