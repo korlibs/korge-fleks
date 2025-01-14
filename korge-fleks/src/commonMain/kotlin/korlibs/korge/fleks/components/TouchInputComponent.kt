@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
 data class TouchInputComponent(
     var enabled: Boolean = true,
     var pressed: Boolean = false,
-    var triggerImmediately: Boolean = false,
     var entity: Entity = Entity.NONE,  // If touch was triggered than below EntityConfig will be executed for this Entity
     var entityConfig: String = ""
 ) : CloneableComponent<TouchInputComponent>() {

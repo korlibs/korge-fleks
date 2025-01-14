@@ -6,8 +6,18 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.*
 
 /**
+ * System for handling touch input on entities with [TouchInputComponent].
+ * The system checks if the touch input is within the bounds of the entity and if the entity is enabled.
+ * If the entity is touched and the touch input is released then the [TouchInputComponent.entityConfig] will be executed on the entity.
+ * The [TouchInputComponent.entityConfig] is a string that represents the name of an [EntityConfig] that will be executed on the entity.
+ * The [TouchInputComponent.entity] is the entity that will be affected by the [TouchInputComponent.entityConfig].
  *
- *
+ * @property downX The x coordinate of the touch input when it was pressed
+ * @property downY The y coordinate of the touch input when it was pressed
+ * @property isDown Flag to indicate if display is pressed
+ * @property upX The x coordinate of the touch input when it was released
+ * @property upY The y coordinate of the touch input when it was released
+ * @property isUp Flag to indicate if display is released
  */
 class TouchInputSystem : IteratingSystem(
     family {
