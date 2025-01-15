@@ -64,14 +64,25 @@ class TouchInputSystem : IteratingSystem(
                 bottom = positionComponent.y + sizeComponent.height
             )
 
-            if (!inputTouchButton.pressed && touched) {
-                inputTouchButton.pressed = true
+//            if (!inputTouchButton.pressed && touched) {
+            if (touched) {
+//                inputTouchButton.pressed = true
+                if (inputTouchButton.passPositionToEntity) {
+                    // Pass touch position to entity if needed
+                    inputTouchButton.entity.configure { toBeChangedEntity ->
+                        val position = toBeChangedEntity[PositionComponent]
+                        position.x = upX
+                        position.y = upY
+                    }
+                }
+
                 println("TouchInputSystem: Execute '${inputTouchButton.entityConfig}' config on entity '${inputTouchButton.entity.id}'.")
                 world.execute(inputTouchButton.entityConfig, inputTouchButton.entity)
-            } else if (!touched) {
-                // Reset pressed state again
-                inputTouchButton.pressed = false
             }
+//            else if (!touched) {
+//                // Reset pressed state again
+//                inputTouchButton.pressed = false
+//            }
         }
     }
 
