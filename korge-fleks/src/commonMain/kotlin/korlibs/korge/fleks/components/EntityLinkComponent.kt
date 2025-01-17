@@ -31,8 +31,7 @@ data class SubEntitiesComponent(
     var subEntities: List<Entity> = listOf(),
     var subEntitiesByName: Map<String, Entity> = mapOf(),
     // Configure what to do with the linked entities
-    var moveWith: Boolean = false,
-    var delete: Boolean = false
+    var moveWith: Boolean = false,  // Not used currently!
 ) : CloneableComponent<SubEntitiesComponent>() {
     override fun type() = SubEntitiesComponent
     companion object : ComponentType<SubEntitiesComponent>()

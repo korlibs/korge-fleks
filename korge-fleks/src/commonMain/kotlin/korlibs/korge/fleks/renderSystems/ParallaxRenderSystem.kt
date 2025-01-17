@@ -7,6 +7,7 @@ import korlibs.image.format.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
+import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
 import korlibs.math.geom.*
@@ -15,23 +16,24 @@ import korlibs.math.geom.*
  * Creates a new [ParallaxRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver "this".
  *
- * @param viewPortSize is the virtual width and height of the game display/screen.
  * @param world is the Fleks world where the parallax entities are created.
  * @param layerTag is a special Fleks component which tells the [ParallaxRenderSystem] which entities it has to render.
  * @param callback can be used to configure the [ParallaxRenderSystem] object.
  */
-inline fun Container.parallaxRenderSystem(viewPortSize: SizeInt, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ParallaxRenderSystem.() -> Unit = {}) =
-    ParallaxRenderSystem(viewPortSize, world, layerTag).addTo(this, callback)
+inline fun Container.parallaxRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ParallaxRenderSystem.() -> Unit = {}) =
+    ParallaxRenderSystem(world, layerTag).addTo(this, callback)
 
 class ParallaxRenderSystem(
-    private val viewPortSize: SizeInt,
-    world: World,
+    private val world: World,
     layerTag: RenderLayerTag
 ) : View() {
     private val family: Family = world.family { all(layerTag, PositionComponent, ParallaxComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
     override fun renderInternal(ctx: RenderContext) {
+        val camera: Entity = world.getMainCamera()
+        val cameraViewPort = with(world) { camera[SizeIntComponent] }
+
         // Custom Render Code
         ctx.useBatcher { batch ->
 
@@ -52,6 +54,7 @@ class ParallaxRenderSystem(
                     val localRgba = backgroundLayers[index].rgba.rgba
 
                     drawLayer(
+                        cameraViewPort = cameraViewPort,
                         global = globalPositionComponent,
                         local = backgroundLayers[index].position,
                         config = parallaxDataContainer.config.backgroundLayers!![index],
@@ -70,6 +73,7 @@ class ParallaxRenderSystem(
                     val localRgba = parallaxPlane.rgba.rgba
 
                     drawParallaxPlaneLayer(
+                        cameraViewPort = cameraViewPort,
                         global = globalPositionComponent,
                         local = parallaxPlane.position,
                         localScroll = parallaxPlane.attachedLayersRearPositions[index],
@@ -90,6 +94,7 @@ class ParallaxRenderSystem(
                     val localRgba = parallaxPlane.rgba.rgba
 
                     drawParallaxPlaneLayer(
+                        cameraViewPort = cameraViewPort,
                         global = globalPositionComponent,
                         local = parallaxPlane.position,
                         localScroll = parallaxPlane.linePositions[index],
@@ -109,6 +114,7 @@ class ParallaxRenderSystem(
                     val localRgba = parallaxPlane.rgba.rgba
 
                     drawParallaxPlaneLayer(
+                        cameraViewPort = cameraViewPort,
                         global = globalPositionComponent,
                         local = parallaxPlane.position,
                         localScroll = parallaxPlane.attachedLayersFrontPositions[index],
@@ -126,6 +132,7 @@ class ParallaxRenderSystem(
                     val localRgba = foregroundLayers[index].rgba.rgba
 
                     drawLayer(
+                        cameraViewPort = cameraViewPort,
                         global = globalPositionComponent,
                         local = foregroundLayers[index].position,
                         config = parallaxDataContainer.config.foregroundLayers!![index],
@@ -137,10 +144,14 @@ class ParallaxRenderSystem(
     }
 
     // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle =
-        Rectangle(0, 0, viewPortSize.width, viewPortSize.height)
+    override fun getLocalBoundsInternal(): Rectangle = with (world) {
+        val camera: Entity = getMainCamera()
+        val cameraViewPort = camera[SizeIntComponent]
+        return Rectangle(0, 0, cameraViewPort.width, cameraViewPort.height)
+    }
 
     private fun drawLayer(
+        cameraViewPort: SizeIntComponent,
         global: PositionComponent,
         local: PositionComponent,
         config: ParallaxLayerConfig,
@@ -149,8 +160,8 @@ class ParallaxRenderSystem(
         batch: BatchBuilder2D,
         ctx: RenderContext
     ) {
-        val countH = if (config.repeatX) viewPortSize.width / layer.width else 0
-        val countV = if (config.repeatY) viewPortSize.height / layer.height else 0
+        val countH = if (config.repeatX) cameraViewPort.width / layer.width else 0
+        val countV = if (config.repeatY) cameraViewPort.height / layer.height else 0
 
         val x = if (countH != 0 && config.speedFactor != null) global.x else global.x + layer.targetX
         val y = if (countV != 0 && config.speedFactor != null) global.y else global.y + layer.targetY
@@ -173,6 +184,7 @@ class ParallaxRenderSystem(
     }
 
     private fun drawParallaxPlaneLayer(
+        cameraViewPort: SizeIntComponent,
         global: PositionComponent,
         local: PositionComponent,
         localScroll: Float,
@@ -185,13 +197,13 @@ class ParallaxRenderSystem(
     ) {
         when (parallaxMode) {
             ParallaxConfig.Mode.HORIZONTAL_PLANE -> {
-                val countH = if (repeat) viewPortSize.width / layer.width else 0
+                val countH = if (repeat) cameraViewPort.width / layer.width else 0
                 val x = if (countH != 0) global.x else global.x + layer.targetX
 
                 for(xIndex in -1 - countH until countH + 1) {
                     batch.drawQuad(
                         tex = ctx.getTex(layer.slice),
-                        x = x + xIndex * layer.width + viewPortSize.width * 0.5f + localScroll,
+                        x = x + xIndex * layer.width + cameraViewPort.width * 0.5f + localScroll,
                         y = global.y + layer.targetY + local.offsetY,
                         m = globalMatrix,
                         filtering = false,
@@ -200,14 +212,14 @@ class ParallaxRenderSystem(
                 }
             }
             ParallaxConfig.Mode.VERTICAL_PLANE -> {
-                val countV = if (repeat) viewPortSize.height / layer.height else 0
+                val countV = if (repeat) cameraViewPort.height / layer.height else 0
                 val y = if (countV != 0) global.y else global.y + layer.targetY
 
                 for(yIndex in -1 - countV until countV + 1) {
                     batch.drawQuad(
                         tex = ctx.getTex(layer.slice),
                         x = global.x + layer.targetX + local.offsetX,
-                        y = y + yIndex * layer.height + viewPortSize.height * 0.5f + localScroll,
+                        y = y + yIndex * layer.height + cameraViewPort.height * 0.5f + localScroll,
                         m = globalMatrix,
                         filtering = false,
                         colorMul = rgba

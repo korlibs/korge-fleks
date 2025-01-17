@@ -10,6 +10,7 @@ import korlibs.korge.annotations.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
+import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
 import korlibs.math.geom.*
@@ -22,12 +23,10 @@ import korlibs.math.geom.*
  * HINT: This renderer is preliminary and does not use caching of geometry or vertices. It might be replaced by
  * renderers from KorGE 6.
  */
-inline fun Container.objectRenderSystem(viewPortSize: SizeInt, camera: Entity, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ObjectRenderSystem.() -> Unit = {}) =
-    ObjectRenderSystem(viewPortSize, camera, world, layerTag).addTo(this, callback)
+inline fun Container.objectRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ObjectRenderSystem.() -> Unit = {}) =
+    ObjectRenderSystem(world, layerTag).addTo(this, callback)
 
 class ObjectRenderSystem(
-    private val viewPortSize: SizeInt,
-    private val camera: Entity,
     private val world: World,
     layerTag: RenderLayerTag,
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
@@ -36,33 +35,25 @@ class ObjectRenderSystem(
         .any(PositionComponent, LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
-    private val viewPortHalfWidth: Int = viewPortSize.width / 2
-    private val viewPortHalfHeight: Int = viewPortSize.height / 2
-
 
     @OptIn(KorgeExperimental::class)
     override fun renderInternal(ctx: RenderContext) {
+        val camera: Entity = world.getMainCamera()
+
         // Sort sprite and text entities by their layerIndex
         family.sort(comparator)
 
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
-            val (entityX, entityY, entityOffsetX, entityOffsetY) = entity[PositionComponent]
             val (rgba) = entity[RgbaComponent]
-            val x: Float
-            val y: Float
-            val offsetX: Float = entityOffsetX
-            val offsetY: Float = entityOffsetY
+            val entityPosition = entity[PositionComponent]
 
-            if (entity has ScreenCoordinatesTag) {
-                // Take over coordinates
-                x = entityX
-                y = entityY
+            val position: PositionComponent = if (entity has ScreenCoordinatesTag) {
+                // Take over entity coordinates
+                entityPosition
             } else {
-                // Transform world coordinates to screen coordinates if needed
-                val cameraPosition = camera[PositionComponent]
-                x = entityX - cameraPosition.x + viewPortHalfWidth + cameraPosition.offsetX
-                y = entityY - cameraPosition.y + viewPortHalfHeight + cameraPosition.offsetY
+                // Transform world coordinates to screen coordinates
+                entityPosition.run {  world.convertToScreenCoordinates(camera) }
             }
 
             // Rendering path for sprites
@@ -81,8 +72,8 @@ class ObjectRenderSystem(
 
                                 batch.drawQuad(
                                     tex = ctx.getTex(layerData.slice),
-                                    x = x + layerData.targetX - anchorX + layerProps.offsetX,
-                                    y = y + layerData.targetY - anchorY + layerProps.offsetY,
+                                    x = position.x + layerData.targetX - anchorX + layerProps.offsetX,
+                                    y = position.y + layerData.targetY - anchorY + layerProps.offsetY,
                                     filtering = false,
                                     colorMul = layerProps.rgba,
                                     program = null // Possibility to use a custom shader - add ShaderComponent or similar
@@ -94,8 +85,8 @@ class ObjectRenderSystem(
                     ctx.useBatcher { batch ->
                         // Iterate over all layers of each sprite for the frame number
                         imageFrame.layerData.fastForEach { layerData ->
-                            val px = x + offsetX + layerData.targetX - anchorX
-                            val py = y + offsetY + layerData.targetY - anchorY
+                            val px = position.x + position.offsetX + layerData.targetX - anchorX
+                            val py = position.y + position.offsetY + layerData.targetY - anchorY
                             batch.drawQuad(
                                 tex = ctx.getTex(layerData.slice),
                                 x = px,
@@ -119,8 +110,8 @@ class ObjectRenderSystem(
                         val image = imageFrame.layerData[index]
                         batch.drawQuad(
                             tex = ctx.getTex(image.slice),
-                            x = x + image.targetX - anchorX + layer.position.x + layer.position.offsetX,
-                            y = y + image.targetY - anchorY + layer.position.y + layer.position.offsetY,
+                            x = position.x + image.targetX - anchorX + layer.position.x + layer.position.offsetX,
+                            y = position.y + image.targetY - anchorY + layer.position.y + layer.position.offsetY,
                             filtering = false,
                             colorMul = layer.rgba.rgba,
                             program = null // Possibility to use a custom shader - add ShaderComponent or similar
@@ -131,7 +122,7 @@ class ObjectRenderSystem(
             // Rendering path for text (not optimized - no caching)
             else if (entity has TextFieldComponent) {
                 val (text, fontName, textRangeStart, textRangeEnd, width, height, wordWrap,  horizontalAlign, verticalAlign) = entity[TextFieldComponent]
-                val offset: Point = Point(offsetX, offsetY)
+                val offset: Point = Point(position.offsetX, position.offsetY)
 
                 renderCtx2d(ctx) { render ->
                     var n = 0
@@ -190,8 +181,11 @@ class ObjectRenderSystem(
     }
 
     // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle =
-        Rectangle(0, 0, viewPortSize.width, viewPortSize.height)
+    override fun getLocalBoundsInternal(): Rectangle = with (world) {
+        val camera: Entity = getMainCamera()
+        val cameraViewPort = camera[SizeIntComponent]
+        return Rectangle(0, 0, cameraViewPort.width, cameraViewPort.height)
+    }
 
     init {
         name = layerTag.toString()

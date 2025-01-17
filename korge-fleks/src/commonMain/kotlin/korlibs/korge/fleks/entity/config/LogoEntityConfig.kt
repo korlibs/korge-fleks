@@ -6,7 +6,6 @@ import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
-import korlibs.math.geom.*
 import kotlinx.serialization.*
 
 
@@ -35,12 +34,14 @@ data class LogoEntityConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         val assetStore: AssetStore = inject(name = "AssetStore")
-        val viewPortSize: SizeInt = inject(name = "ViewPortSize")
+
+        val camera: Entity = getMainCamera()
+        val cameraViewPort = camera[SizeIntComponent]
 
         entity.configure {
             it += PositionComponent(
-                x = offsetX + (if (centerX) (viewPortSize.width - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f),
-                y = offsetY + (if (centerY) (viewPortSize.height - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
+                x = offsetX + (if (centerX) (cameraViewPort.width - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f),
+                y = offsetY + (if (centerY) (cameraViewPort.height - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
             )
             it += LayeredSpriteComponent(
                 name = assetName
