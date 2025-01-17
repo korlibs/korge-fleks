@@ -24,6 +24,14 @@ class CameraSystem : IteratingSystem(
         cameraPosition.x += xDiff * 0.05f
         cameraPosition.y += yDiff * 0.05f
 
+        val parallaxFamily = world.family { all(ParallaxComponent, MotionComponent) }
+        parallaxFamily.forEach { parallaxEntity ->
+            val motion = parallaxEntity[MotionComponent]
+
+            // TODO: Check how we can convert pixel in pixel/second
+            motion.velocityX = -(xDiff * 0.05f) * 3f  // world units per second (?)
+        }
+
 
     }
 }
