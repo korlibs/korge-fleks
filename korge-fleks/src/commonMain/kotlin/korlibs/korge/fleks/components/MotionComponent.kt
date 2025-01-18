@@ -7,7 +7,8 @@ import kotlinx.serialization.*
 /**
  * A component to define movement for an entity.
  *
- * @param velocityX pixel/second (?)
+ * @param velocityX in "world units" per delta time
+ * @param velocityY in "world units" per delta time
  */
 @Serializable @SerialName("Motion")
 data class MotionComponent(
