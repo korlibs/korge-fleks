@@ -3,10 +3,10 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
 import korlibs.event.*
-import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
+import korlibs.korge.fleks.utils.*
 import korlibs.korge.input.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
@@ -14,35 +14,37 @@ import korlibs.math.*
 import korlibs.math.geom.*
 
 
-inline fun Container.levelMapRenderSystem(viewPortSize: SizeInt, camera: Entity, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LevelMapRenderSystem.() -> Unit = {}) =
-    LevelMapRenderSystem(viewPortSize, camera, world, layerTag).addTo(this, callback)
+inline fun Container.levelMapRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LevelMapRenderSystem.() -> Unit = {}) =
+    LevelMapRenderSystem(world, layerTag).addTo(this, callback)
 
 /**
  * Here we do not render the actual level map yet.
  * Instead, we add the view object for the level map to the container.
  */
 class LevelMapRenderSystem(
-    private val viewPortSize: SizeInt,
-    private val camera: Entity,
-    world: World,
+    private val world: World,
     layerTag: RenderLayerTag,
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
+
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
-    private val viewPortHalfWidth: Int = viewPortSize.width / 2
-    private val viewPortHalfHeight: Int = viewPortSize.height / 2
 
     // Debugging layer rendering
     private var renderLayer = 0
 
     override fun renderInternal(ctx: RenderContext) {
+        val camera: Entity = world.getMainCamera()
+        val cameraPosition = with(world) { camera[PositionComponent] }
+        val cameraViewPort = with(world) { camera[SizeIntComponent] }
+        val cameraViewPortHalf = with(world) { camera[SizeComponent] }
+
+
         // Sort level maps by their layerIndex
         family.sort(comparator)
 
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
-            val (cameraX, cameraY, cameraOffsetX, cameraOffsetY) = camera[PositionComponent]
             val (rgba) = entity[RgbaComponent]
             val (levelName, layerNames) = entity[LevelMapComponent]
 
@@ -55,16 +57,16 @@ class LevelMapRenderSystem(
 
                 // Draw only visible tiles
                 // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-                val viewPortX: Float = cameraX + cameraOffsetX - viewPortHalfWidth
-                val viewPortY: Float = cameraY + cameraOffsetY - viewPortHalfHeight
+                val viewPortX: Float = cameraPosition.x + cameraPosition.offsetX - cameraViewPortHalf.width
+                val viewPortY: Float = cameraPosition.y + cameraPosition.offsetY - cameraViewPortHalf.height
 
                 // Start and end indexes of viewport area
                 val xStart: Int = viewPortX.toInt() / tileSetWidth - 1  // x in positive direction;  -1 = start one tile before
-                val xTiles = (viewPortSize.width / tileSetWidth) + 3
+                val xTiles = (cameraViewPort.width / tileSetWidth) + 3
                 val xEnd: Int = xStart + xTiles
 
                 val yStart: Int = viewPortY.toInt() / tileSetHeight - 1  // y in negative direction;  -1 = start one tile before
-                val yTiles = viewPortSize.height / tileSetHeight + 3
+                val yTiles = cameraViewPort.height / tileSetHeight + 3
                 val yEnd: Int = yStart + yTiles
 
                 ctx.useBatcher { batch ->
@@ -100,8 +102,11 @@ class LevelMapRenderSystem(
     }
 
     // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle =
-        Rectangle(0, 0, viewPortSize.width, viewPortSize.height)
+    override fun getLocalBoundsInternal(): Rectangle = with (world) {
+        val camera: Entity = getMainCamera()
+        val cameraViewPort = camera[SizeIntComponent]
+        return Rectangle(0, 0, cameraViewPort.width, cameraViewPort.height)
+    }
 
     init {
         name = layerTag.toString()

@@ -6,6 +6,7 @@ import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
+import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
 import korlibs.math.geom.*
@@ -15,47 +16,34 @@ import korlibs.math.geom.Point
 /**
  * Creates a new [DebugRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver this */
-inline fun Container.debugRenderSystem(viewPortSize: SizeInt, camera: Entity, world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker DebugRenderSystem.() -> Unit = {}) =
-    DebugRenderSystem(viewPortSize, camera, world, layerTag).addTo(this, callback)
+inline fun Container.debugRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker DebugRenderSystem.() -> Unit = {}) =
+    DebugRenderSystem(world, layerTag).addTo(this, callback)
 
 class DebugRenderSystem(
-    private val viewPortSize: SizeInt,
-    private val camera: Entity,
-    world: World,
+    private val world: World,
     private val layerTag: RenderLayerTag
 ) : View() {
     private val family: Family = world.family {
         all(layerTag)
             .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent)
     }
-
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
-    private val viewPortHalfWidth: Int = viewPortSize.width / 2
-    private val viewPortHalfHeight: Int = viewPortSize.height / 2
 
     override fun renderInternal(ctx: RenderContext) {
+        val camera: Entity = world.getMainCamera()
+
         // Custom Render Code here
         ctx.useLineBatcher { batch ->
             family.forEach { entity ->
-                val (entityX, entityY, entityOffsetX, entityOffsetY) = entity[PositionComponent]
-                val x: Float
-                val y: Float
-                val offsetX: Float = entityOffsetX
-                val offsetY: Float = entityOffsetY
+                val entityPosition = entity[PositionComponent]
 
-                if (entity has ScreenCoordinatesTag) {
+                val position: PositionComponent = if (entity has ScreenCoordinatesTag) {
                     // Take over entity coordinates
-                    x = entityX
-                    y = entityY
+                    entityPosition
                 } else {
                     // Transform world coordinates to screen coordinates
-                    val cameraPosition = camera[PositionComponent]
-                    x = entityX - cameraPosition.x + viewPortHalfWidth + cameraPosition.offsetX
-                    y = entityY - cameraPosition.y + viewPortHalfHeight + cameraPosition.offsetY
+                    entityPosition.run { world.convertToScreenCoordinates(camera) }
                 }
-
-                val xx: Float = x + offsetX
-                val yy: Float = y + offsetY
 
                 // In case the entity is a sprite than render the overall sprite size and the texture bounding boxes
                 if (entity has SpriteComponent) {
@@ -66,8 +54,8 @@ class DebugRenderSystem(
                     // Draw sprite bounds
                     batch.drawVector(Colors.RED) {
                         rect(
-                            x = xx - anchorX,
-                            y = yy - anchorY,
+                            x = position.x + position.offsetX - anchorX,
+                            y = position.y + position.offsetY - anchorY,
                             width = imageData.width.toFloat(),
                             height = imageData.height.toFloat()
                         )
@@ -76,8 +64,8 @@ class DebugRenderSystem(
                     imageFrame.layerData.fastForEachReverse { layer ->
                         batch.drawVector(Colors.GREEN) {
                             rect(
-                                x = xx + layer.targetX.toFloat() - anchorX,
-                                y = yy + layer.targetY.toFloat() - anchorY,
+                                x = position.x + position.offsetX + layer.targetX.toFloat() - anchorX,
+                                y = position.y + position.offsetY + layer.targetY.toFloat() - anchorY,
                                 width = layer.width.toFloat(),
                                 height = layer.height.toFloat()
                             )
@@ -90,8 +78,8 @@ class DebugRenderSystem(
                     batch.drawVector(Colors.RED) {
                         val (_, _, _, _, width, height) = entity[TextFieldComponent]
                         rect(
-                            x = xx,
-                            y = yy,
+                            x = position.x + position.offsetX,
+                            y = position.y + position.offsetY,
                             width = width,
                             height = height
                         )
@@ -103,8 +91,8 @@ class DebugRenderSystem(
                     batch.drawVector(Colors.RED) {
                         val (_, width, height) = entity[NinePatchComponent]
                         rect(
-                            x = xx,
-                            y = yy,
+                            x = position.x + position.offsetX,
+                            y = position.y + position.offsetY,
                             width = width,
                             height = height
                         )
@@ -113,17 +101,22 @@ class DebugRenderSystem(
 
                 // Draw pivot point (zero-point for game object)
                 batch.drawVector(Colors.YELLOW) {
-                    circle(Point(xx, yy), 2)
-                    line(Point(xx - 3, yy), Point(xx + 3, yy))
-                    line(Point(xx, yy - 3), Point(xx, yy + 3))
+                    val x = position.x + position.offsetX
+                    val y = position.y + position.offsetY
+                    circle(Point(x, y), 2)
+                    line(Point(x - 3, y), Point(x + 3, y))
+                    line(Point(x, y - 3), Point(x, y + 3))
                 }
             }
         }
     }
 
     // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle =
-        Rectangle(0, 0, viewPortSize.width, viewPortSize.height)
+    override fun getLocalBoundsInternal(): Rectangle = with (world) {
+        val camera: Entity = getMainCamera()
+        val cameraViewPort = camera[SizeIntComponent]
+        return Rectangle(0, 0, cameraViewPort.width, cameraViewPort.height)
+    }
 
     init {
         name = layerTag.toString()

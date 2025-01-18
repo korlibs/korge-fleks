@@ -25,7 +25,7 @@ class ParallaxSystem(
         backgroundLayers.fastForEachWithIndex { index, layer ->
             val speedFactor = parallaxDataContainer.config.backgroundLayers!![index].speedFactor
             if (speedFactor != null) {
-                layer.position.x = (speedFactor * velocityX * worldToPixelRatio) * deltaTime + layer.position.x
+                layer.position.x = (speedFactor * velocityX * worldToPixelRatio) * deltaTime + layer.position.x  // f(x) = v * t + x
                 layer.position.y = (speedFactor * velocityY * worldToPixelRatio) * deltaTime + layer.position.y
             }
         }
@@ -94,8 +94,8 @@ class ParallaxSystem(
 
         foregroundLayers.fastForEachWithIndex { index, layer ->
             val speedFactor: Float = parallaxDataContainer.config.foregroundLayers!![index].speedFactor ?: 0f
-            val selfSpeedX = parallaxDataContainer.config.foregroundLayers!![index].selfSpeedX
-            val selfSpeedY = parallaxDataContainer.config.foregroundLayers!![index].selfSpeedY
+            val selfSpeedX = parallaxDataContainer.config.foregroundLayers[index].selfSpeedX
+            val selfSpeedY = parallaxDataContainer.config.foregroundLayers[index].selfSpeedY
             layer.position.x = (speedFactor * velocityX * worldToPixelRatio) * deltaTime + selfSpeedX * deltaTime + layer.position.x
             layer.position.y = (speedFactor * velocityY * worldToPixelRatio) * deltaTime + layer.position.y
         }

@@ -4,12 +4,16 @@ package korlibs.korge.fleks.entity.config
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
-@Serializable @SerialName("CameraConfig")
-data class CameraConfig(
-    override val name: String
+@Serializable @SerialName("MainCameraConfig")
+data class MainCameraConfig(
+    override val name: String,
+
+    private val viewPortWith: Int,
+    private val viewPortHeight: Int
 ) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
@@ -18,8 +22,22 @@ data class CameraConfig(
             // Camera has position within the game world
             // Offset can be used to "shake" the camera on explosions etc.
             it += PositionComponent()
+            // Camera has a size which is the view port of the game
+            it += SizeIntComponent(
+                width = viewPortWith,
+                height = viewPortHeight
+            )
+            // Save half size for middle point of view port in separate component
+            it += SizeComponent(
+                width = viewPortWith * 0.5f,
+                height = viewPortHeight * 0.5f
+            )
 
-            // TODO: Add bounds of level world
+            // Camera has a tag to make it easily accessible for other systems and entity configurations
+            it += MainCameraTag
+
+            // TODO: Add bounds of level world (really here?)
+
         }
         return entity
     }

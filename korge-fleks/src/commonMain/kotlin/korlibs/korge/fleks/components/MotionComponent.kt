@@ -4,6 +4,12 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
+/**
+ * A component to define movement for an entity.
+ *
+ * @param velocityX in "world units" per delta time
+ * @param velocityY in "world units" per delta time
+ */
 @Serializable @SerialName("Motion")
 data class MotionComponent(
     var accelX: Float = 0f,

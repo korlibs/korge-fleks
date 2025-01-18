@@ -7,7 +7,6 @@ import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
-import korlibs.math.geom.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 
@@ -67,9 +66,11 @@ data class DialogBoxConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
 
-        val viewPortSize =  inject<SizeInt>("ViewPortSize")
-        val viewPortWidth = viewPortSize.width.toFloat()
-        val viewPortHeight = viewPortSize.height.toFloat()
+        val camera: Entity = getMainCamera()
+        val cameraViewPort = camera[SizeIntComponent]
+
+        val viewPortWidth = cameraViewPort.width.toFloat()
+        val viewPortHeight = cameraViewPort.height.toFloat()
 
         val textBoxWidth = width + 14  // 190 <- 176
         val textBoxHeight = height + 8  // 49 <- 41

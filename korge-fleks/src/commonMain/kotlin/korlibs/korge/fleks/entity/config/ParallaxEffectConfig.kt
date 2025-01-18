@@ -27,7 +27,7 @@ data class ParallaxEffectConfig(
                 y = this@ParallaxEffectConfig.y
             )  // global position for the whole parallax background
             it += MotionComponent(
-                velocityX = -12f  // world units per second
+                velocityX = -12f  // world units (16 pixels) per second (??? TODO: this needs to be ckecked)
             )
             it += ParallaxComponent(
                 name = assetName

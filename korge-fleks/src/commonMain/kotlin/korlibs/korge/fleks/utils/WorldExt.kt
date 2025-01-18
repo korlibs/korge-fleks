@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.systems.*
+import korlibs.korge.fleks.tags.*
 
 /**
  * Create new [Entity] and add a name to it for easier debugging/tracing.
@@ -33,7 +34,7 @@ fun World.configureEntity(entityConfig: String, entity: Entity) : Entity =
     EntityFactory.configure(entityConfig, this, entity)
 
 /**
- * Execute function which takes an [EntityConfig][EntityFactory.EntityConfig] and an [Entity] to execute the desired
+ * Execute-function which takes an [EntityConfig][EntityFactory.EntityConfig] and an [Entity] to execute the desired
  * behaviour on the given entity. Basically the same as configureEntity, but defined for better code readability.
  */
 fun World.execute(entityConfig: String, entity: Entity) : Entity =
@@ -43,3 +44,11 @@ fun World.execute(entityConfig: String, entity: Entity) : Entity =
  * Get name of entity if entity has InfoComponent
  */
 fun World.nameOf(entity: Entity) : String = if (entity has InfoComponent) entity[InfoComponent].name else "noName"
+
+/**
+ * Get entity for main camera.
+ */
+fun World.getMainCamera(): Entity {
+    val cameraFamily: Family = family { all(MainCameraTag, SizeComponent, SizeIntComponent, PositionComponent) }
+    return cameraFamily.firstOrNull() ?: error("No main camera found in world!")
+}
