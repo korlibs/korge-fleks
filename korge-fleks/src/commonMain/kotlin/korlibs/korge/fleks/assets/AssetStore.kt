@@ -246,7 +246,7 @@ class AssetStore {
                                     layerTileMaps = mutableMapOf()
                                 )
                             } else {
-                                levelDataMaps[levelName]!!.entities
+                                levelDataMaps[levelName] = levelDataMaps[levelName]!!.copy(entities = levelDataMaps[levelName]!!.entities + entityNames)
                             }
                         }
                     }
