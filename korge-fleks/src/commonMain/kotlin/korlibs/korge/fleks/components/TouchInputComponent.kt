@@ -9,10 +9,10 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("TouchInput")
 data class TouchInputComponent(
     var enabled: Boolean = true,
-    var pressed: Boolean = false,
     var entity: Entity = Entity.NONE,  // If touch was triggered than below EntityConfig will be executed for this Entity
     var entityConfig: String = "",
-    var passPositionToEntity: Boolean = false
+    var passPositionToEntity: Boolean = false,
+    var continuousTouch: Boolean = false
 ) : CloneableComponent<TouchInputComponent>() {
     override fun type(): ComponentType<TouchInputComponent> = TouchInputComponent
     companion object : ComponentType<TouchInputComponent>()

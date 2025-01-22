@@ -24,12 +24,12 @@ data class MainCameraConfig(
             it += PositionComponent()
             // Camera has a size which is the view port of the game
             it += SizeIntComponent(
-                width = viewPortWith,
+                width = viewPortWith,  // SizeIntComponent is used to store the view port size as integer values
                 height = viewPortHeight
             )
             // Save half size for middle point of view port in separate component
             it += SizeComponent(
-                width = viewPortWith * 0.5f,
+                width = viewPortWith * 0.5f,  // SizeComponent is used to store offset to middle point of view port
                 height = viewPortHeight * 0.5f
             )
 
