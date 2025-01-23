@@ -130,7 +130,7 @@ class ObjectRenderSystem(
                         text = text,
                         font = assetStore.getFont(fontName)
                     ).place(
-                        bounds = Rectangle(x, y, width, height),
+                        bounds = Rectangle(position.x, position.y, width, height),
                         wordWrap = wordWrap,
                         includePartialLines = false,
                         ellipsis = null,
@@ -163,7 +163,7 @@ class ObjectRenderSystem(
                 val indices = TexturedVertexArray.quadIndices(numQuads)
                 val tva = TexturedVertexArray(numQuads * 4, indices)
                 var index = 0
-                val viewBounds = RectangleInt(x.toInt(), y.toInt(), width.toInt(), height.toInt())
+                val viewBounds = RectangleInt(position.x.toInt(), position.y.toInt(), width.toInt(), height.toInt())
                 ninePatch.info.computeScale(viewBounds) { segment, xx, yy, ww, hh ->
                     val bmpSlice = ninePatch.getSegmentBmpSlice(segment)
                     tva.quad(index++ * 4,
