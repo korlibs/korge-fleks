@@ -20,10 +20,11 @@ import korlibs.korge.fleks.utils.*
  * Internal touch input handling is done via following properties:
  * @property downX The x coordinate of the touch input when it was pressed
  * @property downY The y coordinate of the touch input when it was pressed
- * @property isDown Flag to indicate if display is pressed
+ * @property isJustDown Flag to indicate if display was just pressed (currently not used - no immediate action on touch down)
  * @property upX The x coordinate of the touch input when it was released
  * @property upY The y coordinate of the touch input when it was released
- * @property isUp Flag to indicate if display is released
+ * @property isJustUp Flag to indicate if display touch was just released
+ * @property isTouchActive Flag to indicate if touch input is active (i.e. touch is pressed, mouse button is hold)
  */
 class TouchInputSystem : IteratingSystem(
     family {
@@ -34,10 +35,11 @@ class TouchInputSystem : IteratingSystem(
 
     private var downX: Float = -1f
     private var downY: Float = -1f
-    private var isDown: Boolean = false
+    private var isJustDown: Boolean = false  // -- currently not used - no immediate action on touch down
     private var upX: Float = -1f
     private var upY: Float = -1f
-    private var isUp: Boolean = false
+    private var isJustUp: Boolean = false
+    private var isTouchActive: Boolean = false
 
     /**
      * Check if the touch input is inside the bounds of the entity. Bounds are in screen coordinates.
@@ -52,16 +54,21 @@ class TouchInputSystem : IteratingSystem(
     fun onTouchDown(x: Float, y: Float) {
         downX = x
         downY = y
-        isDown = true
+        // Set also up position to initial down position because it will be used for continuous touch input
+        upX = x
+        upY = y
+//        isJustDown = true  -- currently not used
+        isTouchActive = true
     }
 
     /**
      * Set touch input position when finger is moved on the touch screen resp. when mouse button is hold and mouse is moved.
      */
     fun onTouchMove(x: Float, y: Float) {
-        if (isDown) {
-            downX = x
-            downY = y
+        if (isTouchActive) {
+            // Use up position to store current touch position
+            upX = x
+            upY = y
         }
     }
 
@@ -71,7 +78,7 @@ class TouchInputSystem : IteratingSystem(
     fun onTouchUp(x: Float, y: Float) {
         upX = x
         upY = y
-        isUp = true
+        isJustUp = true
     }
 
     override fun onTickEntity(entity: Entity) {
@@ -80,7 +87,7 @@ class TouchInputSystem : IteratingSystem(
         // Start touch input processing only if touch area is enabled
         if (inputTouch.enabled) {
             // Either touch is released (isUp) or continuous touch is enabled and touch is still down
-            val touched = if (isUp || (isDown && inputTouch.continuousTouch)) {
+            val touched = if (isJustUp) {
                 val positionComponent = entity[PositionComponent]
                 val sizeComponent = entity[SizeComponent]
                 checkTouchInputInsideBounds(
@@ -89,15 +96,16 @@ class TouchInputSystem : IteratingSystem(
                     right = positionComponent.x + sizeComponent.width,
                     bottom = positionComponent.y + sizeComponent.height
                 )
-            } else false
+            } else if (isTouchActive && inputTouch.continuousTouch) true
+            else false
             // If touch input is within the bounds of the touch area then execute the entity config
             if (touched) {
                 if (inputTouch.passPositionToEntity) {
                     // Pass touch position to entity if needed
                     inputTouch.entity.configure { toBeChangedEntity ->
                         val position = toBeChangedEntity[PositionComponent]
-                        position.x = downX
-                        position.y = downY
+                        position.x = upX
+                        position.y = upY
                     }
                 }
                 //println("TouchInputSystem: Execute '${inputTouch.entityConfig}' config on entity '${inputTouch.entity.id}'.")
@@ -109,9 +117,10 @@ class TouchInputSystem : IteratingSystem(
     override fun onUpdate() {
         super.onUpdate()
 
-        if (isUp) {
-            isDown = false
-            isUp = false
+//        isJustDown = false  -- currently not used
+        if (isJustUp) {
+            isTouchActive = false
+            isJustUp = false
         }
     }
 }
