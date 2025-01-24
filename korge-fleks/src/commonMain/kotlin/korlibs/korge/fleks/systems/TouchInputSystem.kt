@@ -20,7 +20,7 @@ import korlibs.korge.fleks.utils.*
  * Internal touch input handling is done via following properties:
  * @property downX The x coordinate of the touch input when it was pressed
  * @property downY The y coordinate of the touch input when it was pressed
- * @property isJustDown Flag to indicate if display was just pressed
+ * @property isJustDown Flag to indicate if display was just pressed (currently not used - no immediate action on touch down)
  * @property upX The x coordinate of the touch input when it was released
  * @property upY The y coordinate of the touch input when it was released
  * @property isJustUp Flag to indicate if display touch was just released
@@ -35,7 +35,7 @@ class TouchInputSystem : IteratingSystem(
 
     private var downX: Float = -1f
     private var downY: Float = -1f
-//    private var isJustDown: Boolean = false  -- currently not used - no immediate action on touch down
+    private var isJustDown: Boolean = false  // -- currently not used - no immediate action on touch down
     private var upX: Float = -1f
     private var upY: Float = -1f
     private var isJustUp: Boolean = false
@@ -54,6 +54,9 @@ class TouchInputSystem : IteratingSystem(
     fun onTouchDown(x: Float, y: Float) {
         downX = x
         downY = y
+        // Set also up position to initial down position because it will be used for continuous touch input
+        upX = x
+        upY = y
 //        isJustDown = true  -- currently not used
         isTouchActive = true
     }
