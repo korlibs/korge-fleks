@@ -13,7 +13,7 @@ import kotlinx.serialization.EncodeDefault.Mode.NEVER
 suspend fun VfsFile.readParallaxDataContainer(
     config: ParallaxConfig,
     format: ImageFormat = ASE,
-    atlas: MutableAtlas<Unit>? = null,
+    atlas: MutableAtlas2<Unit>? = null,
 ): ParallaxDataContainer {
     val props = ImageDecodingProps(this.baseName, extra = ExtraTypeCreate())
     val backgroundLayers = if (config.backgroundLayers != null) {

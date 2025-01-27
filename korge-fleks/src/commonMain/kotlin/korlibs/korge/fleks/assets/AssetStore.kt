@@ -3,12 +3,11 @@ package korlibs.korge.fleks.assets
 import korlibs.audio.format.*
 import korlibs.audio.sound.*
 import korlibs.datastructure.*
-import korlibs.image.atlas.MutableAtlasUnit
 import korlibs.image.bitmap.*
 import korlibs.image.font.Font
-import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
 import korlibs.image.tiles.*
+import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.ldtk.*
@@ -33,14 +32,13 @@ import kotlin.math.max
  * boss. After the boss has been beaten the graphics can be unloaded since they are not needed anymore.
  */
 class AssetStore {
-    val commonAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
-    val worldAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
-    val levelAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
-    val specialAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
+    val commonAtlas: MutableAtlas2Unit = MutableAtlas2Unit(1024, 2048, border = 1)
+    val worldAtlas: MutableAtlas2Unit = MutableAtlas2Unit(1024, 2048, border = 1)
+    val levelAtlas: MutableAtlas2Unit = MutableAtlas2Unit(1024, 2048, border = 1)
+    val specialAtlas: MutableAtlas2Unit = MutableAtlas2Unit(1024, 2048, border = 1)
 
     val configDeserializer = EntityConfigSerializer()
 
-    //    @Volatile
     internal var commonAssetConfig: AssetModel = AssetModel()
     internal var currentWorldAssetConfig: AssetModel = AssetModel()
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
@@ -61,6 +59,15 @@ class AssetStore {
         val entities: List<String>,
         val layerTileMaps: MutableMap<String, TileMapData>
     )
+
+    // for DEBUGGING
+    suspend fun writeAtlasToFile() {
+//        commonAtlas.bitmap.writeTo(resourcesVfs["commonAtlas.png"], formats = PNG)
+//        println("Common: ${commonAtlas.entries}")
+//        worldAtlas.bitmap.writeTo(resourcesVfs["worldAtlas.png"], formats = PNG)
+//        levelAtlas.bitmap.writeTo(resourcesVfs["levelAtlas.png"], formats = PNG)
+//        specialAtlas.bitmap.writeTo(resourcesVfs["specialAtlas.png"], formats = PNG)
+    }
 
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second
