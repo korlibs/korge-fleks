@@ -191,18 +191,7 @@ class ResourceDirWatcherConfiguration(
                     delay(500)
 
                     val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + config.fileName].readLDTKWorld(extrude = true)
-
-                    // Reload all levels from ldtk world file
-                    ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-                        ldtkLevel.layerInstances?.forEach { ldtkLayer ->
-                            val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
-
-                            if (tilesetExt != null) {
-                                assetStore.storeTiles(ldtkLayer, tilesetExt, ldtkLevel.identifier, ldtkLayer.identifier, assetUpdater.type)
-                                println("\nTriggering asset change for LDtk level : ${ldtkLevel.identifier}_${ldtkLayer.identifier}")
-                            }
-                        }
-                    }
+                    assetStore.levelMapAssets.reloadAsset(ldtkWorld, assetUpdater.type)
 
                     // Guard period until reloading is activated again - this is used for debouncing watch messages
                     delay(100)
