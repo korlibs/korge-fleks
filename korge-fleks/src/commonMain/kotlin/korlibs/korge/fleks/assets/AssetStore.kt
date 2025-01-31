@@ -94,6 +94,9 @@ class AssetStore {
         }
         else error("AssetStore: Width for level '$level' not found!")
 
+    fun getWorldHeight() : Float = levelMapAssets.worldData.height.toFloat()
+    fun getWorldWidth(): Float = levelMapAssets.worldData.width.toFloat()
+
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
             val layerData = images[name]!!.second.imageDatas.first().frames.first().first
@@ -153,7 +156,7 @@ class AssetStore {
             // Update maps of music, images, ...
             assetConfig.tileMaps.forEach { tileMap ->
                 val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + tileMap.fileName].readLDTKWorld(extrude = true)
-                levelMapAssets.loadLevelData(ldtkWorld, type)
+                levelMapAssets.loadLevelData(ldtkWorld, type, tileMap.hasParallax)
             }
 
             assetConfig.sounds.forEach { sound ->

@@ -11,7 +11,7 @@ import korlibs.korge.fleks.components.*
 class ParallaxSystem(
     private val worldToPixelRatio: Float
 ) : IteratingSystem(
-    family = family { all(ParallaxComponent) },
+    family = family { all(ParallaxComponent, MotionComponent) },
     interval = EachFrame
 ) {
     private val assetStore: AssetStore = world.inject(name = "AssetStore")

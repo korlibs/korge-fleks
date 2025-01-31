@@ -118,6 +118,15 @@ data class ParallaxComponent(
             it += parallaxPlane.position
             it += parallaxPlane.rgba
         }
+
+        // Get height of the parallax background
+        val parallaxDataContainer = assetStore.getBackground(name)
+        val imageHeight: Float = (parallaxDataContainer.backgroundLayers?.height ?:
+            parallaxDataContainer.foregroundLayers?.height ?:
+            parallaxDataContainer.parallaxPlane?.default?.height ?: throw Error("ParallaxComponent: Parallax image data has no height!")
+            ).toFloat()
+        val parallaxLayerHeight: Float = imageHeight - (parallaxDataContainer.config.parallaxPlane?.offset ?: 0)
+        this.system<CameraSystem>().parallaxHeight = parallaxLayerHeight
     }
 
     /**

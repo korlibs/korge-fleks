@@ -11,17 +11,22 @@ import kotlin.math.*
 
 class LevelMapAssets {
 
+    internal val worldData = WorldData()
+    // TODO: move into WorldData
     internal val levelDataMaps: MutableMap<String, LevelData> = mutableMapOf()
     internal val configDeserializer = EntityConfigSerializer()
 
     private var gameObjectCnt = 0
 
-    fun loadLevelData(ldtkWorld: LDTKWorld, type: AssetType) {
-
-        //ldtkWorld.levels.first().level.
+    fun loadLevelData(ldtkWorld: LDTKWorld, type: AssetType, hasParallax: Boolean) {
+        createWorldDataMap(ldtkWorld, hasParallax)
 
         // Save TileMapData for each Level and layer combination from LDtk world
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+
+            val levelPosX = ldtkLevel.worldX
+            val levelPosY = ldtkLevel.worldY
+
             val levelName = ldtkLevel.identifier
             ldtkLevel.layerInstances?.forEach { ldtkLayer ->
                 val layerName = ldtkLayer.identifier
@@ -51,9 +56,10 @@ class LevelMapAssets {
                                 yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
                             }
 
-                            // Add position of entity = grid position + pivot point
-                            val entityPosX: Int = (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
-                            val entityPosY: Int = (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
+                            // Add position of entity = (level position in the world) + (grid position within the level) + (pivot point)
+                            // TODO: Take level position in world into account
+                            val entityPosX: Int = /*levelPosX +*/ (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
+                            val entityPosY: Int = /*levelPosY +*/ (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
 
 
                             // Add position of entity
@@ -188,6 +194,24 @@ class LevelMapAssets {
             levelDataMaps[level]!!.layerTileMaps[layer] = tileMapData
         }
     }
+
+    private fun createWorldDataMap(ldtkWorld: LDTKWorld, hasParallax: Boolean) {
+
+        if (hasParallax) {
+            // TODO: Get world height and width from WorldGridvania 2D array
+            worldData.width = 1 * ldtkWorld.gridVaniaWidth
+            worldData.height = 1 * ldtkWorld.gridVaniaHeight
+        }
+
+        // TODO: fill WorldData class with levels
+
+    }
+
+    data class WorldData(
+        var width: Int = 0,
+        var height: Int = 0,
+        val levelGridVania: MutableList<List<LevelData>> = mutableListOf()
+    )
 
     // Data class for storing level data like grizSize, width, height, entities, tileMapData
     data class LevelData(

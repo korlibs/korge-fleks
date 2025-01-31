@@ -178,7 +178,6 @@ data class ParallaxConfig(
  * The top part is the upper half of the Aseprite image. The bottom part is the bottom half of the image. This is used
  * to simulate a central vanishing point in the resulting parallax effect.
  *
- * [size] contains the virtual size (height or width) of the parallax plane background.
  * [offset] is the amount of pixels from the top of the image where the upper part of the parallax plane starts.
  * [name] has to be set to the name of the layer in the Aseprite which contains the image for the sliced stripes
  * of the parallax plane.

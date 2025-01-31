@@ -28,7 +28,10 @@ data class AssetModel(
     @Serializable @SerialName("TileMapConfig")
     data class TileMapConfig(
         val fileName: String,
-        val levels: String? = null
+        val levels: String? = null,
+        // Set this to "false" if this tile map is used outside the game world
+        // e.g. in intro without the need to dynamically control the parallax layer)
+        val hasParallax: Boolean = true
     )
 }
 
