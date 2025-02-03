@@ -199,8 +199,8 @@ class LevelMapAssets {
 
         if (hasParallax) {
             // TODO: Get world height and width from WorldGridvania 2D array
-            worldData.width = 1 * ldtkWorld.gridVaniaWidth
-            worldData.height = 1 * ldtkWorld.gridVaniaHeight
+            worldData.width = 1 * (ldtkWorld.ldtk.worldGridWidth ?: 1)  // gridVaniaWidth
+            worldData.height = 1 * (ldtkWorld.ldtk.worldGridHeight ?: 1)  // gridVaniaHeight
         }
 
         // TODO: fill WorldData class with levels
