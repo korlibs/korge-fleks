@@ -160,10 +160,13 @@ class AssetStore {
             }
 
             assetConfig.sounds.forEach { sound ->
-                val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.value].readMusic()
-                val soundChannel = soundFile.decode().toWav().readMusic().play()  // -- convert to WAV
-//                val soundChannel = soundFile.play()
-//            val soundChannel = resourcesVfs[assetConfig.assetFolderName + "/" + sound.value].readSound().play()
+                val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.value] .readSound(  //readMusic(
+                    props = AudioDecodingProps(exactTimings = true),
+                    streaming = true
+                )
+//                val soundChannel = soundFile.decode().toWav().readMusic().play()  // -- convert to WAV
+                val soundChannel = soundFile.play()
+//            val soundChannel2 = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound().play()
 
                 soundChannel.pause()
                 sounds[sound.key] = Pair(type, soundChannel)
