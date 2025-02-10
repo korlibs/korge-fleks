@@ -70,7 +70,12 @@ class LevelMapRenderSystem(
                 val yEnd: Int = yStart + yTiles
 
                 ctx.useBatcher { batch ->
+
+                    // TODO: Render multiple levels when we approach the border between levels in the world
+
+                    // Render one level
                     for (l in 0 until tileMap.maxLevel) {
+                        // level is the "layer" from stacked tiles in ldtk
                         val level =
                             if (renderLayer == 0) l
                             else (renderLayer - 1).clamp(0, l)
