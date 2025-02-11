@@ -53,15 +53,18 @@ class SoundSystem : IteratingSystem(
 
         val soundChannel = assetStore.getSound(soundComponent.name)
 
-        // Sound enabling/disabling triggered from outside
         if (soundEnabled == soundEnabledNext) {
+            // Sound enabling/disabling triggered from outside
+
             soundEnabledNext = !soundEnabled
             if (soundEnabled) {
 //                if (soundComponent.isPlaying && soundChannel.paused) soundChannel.resume()
                 if (soundComponent.isPlaying) {
 //                    soundChannel.current = 10000.milliseconds
+//                    soundChannel.reset()
+                    soundChannel.current = soundComponent.position.milliseconds
                     soundChannel.resume()
-                    println("SoundSystem: Resume sound '${soundComponent.name}'")
+                    println("SoundSystem: Resume sound '${soundComponent.name}' at position '${soundComponent.position}'")
                 }
             } else {
 //                if(!soundChannel.paused) soundChannel.pause()
@@ -86,8 +89,8 @@ class SoundSystem : IteratingSystem(
             }
         }
 
-        // continuously save the play position
-        soundComponent.position = soundChannel.current.milliseconds
+        // continuously save the play position only when game is running - otherwise we overwrite the sound position
+        if (soundEnabled) soundComponent.position = soundChannel.current.milliseconds
 
 //        getOrNull(entity)?.let { channel ->
 //            sound.position = channel.current.milliseconds
