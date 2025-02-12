@@ -50,6 +50,7 @@ class LevelMapRenderSystem(
 
             layerNames.forEach { layerName ->
                 val tileMap = assetStore.getTileMapData(levelName, layerName)
+                val worldData = assetStore.getWorldData(levelName)
                 val tileSet = tileMap.tileSet
                 val tileSetWidth = tileSet.width
                 val tileSetHeight = tileSet.height
@@ -57,8 +58,14 @@ class LevelMapRenderSystem(
 
                 // Draw only visible tiles
                 // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-                val viewPortX: Float = cameraPosition.x + cameraPosition.offsetX - cameraViewPortHalf.width
-                val viewPortY: Float = cameraPosition.y + cameraPosition.offsetY - cameraViewPortHalf.height
+                var viewPortX: Float = cameraPosition.x + cameraPosition.offsetX - cameraViewPortHalf.width
+                var viewPortY: Float = cameraPosition.y + cameraPosition.offsetY - cameraViewPortHalf.height
+
+                // 1. Check if the camera approaches level bounds - do not let the camera scroll out of the world
+                if (viewPortX < 0) viewPortX = 0f
+                if (viewPortY < 0) viewPortY = 0f
+                if (viewPortX > worldData.width - cameraViewPort.width) viewPortX = worldData.width - cameraViewPort.width
+                if (viewPortY > worldData.height - cameraViewPort.height) viewPortY = worldData.height - cameraViewPort.height
 
                 // Start and end indexes of viewport area
                 val xStart: Int = viewPortX.toInt() / tileSetWidth - 1  // x in positive direction;  -1 = start one tile before
@@ -71,7 +78,9 @@ class LevelMapRenderSystem(
 
                 ctx.useBatcher { batch ->
 
-                    // TODO: Render multiple levels when we approach the border between levels in the world
+
+                    // 2. Check which levels the view port of the camera is touching
+
 
                     // Render one level
                     for (l in 0 until tileMap.maxLevel) {

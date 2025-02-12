@@ -18,13 +18,45 @@ class AssetLevelData {
 
     private var gameObjectCnt = 0
 
+    private var gridVaniaWidth: Int = 0
+    private var gridVaniaHeight: Int = 0
+
+    /**
+     * @param hasParallax - This level uses a parallax background, so we need to set the world size accordingly.
+     *  TODO check if we need this also later - do we have only one active world level?
+     */
     fun loadLevelData(ldtkWorld: LDTKWorld, type: AssetType, hasParallax: Boolean) {
-        createWorldDataMap(ldtkWorld, hasParallax)
+        gridVaniaWidth = ldtkWorld.ldtk.worldGridWidth ?: 1  // this is also the size of each sub-level
+        gridVaniaHeight = ldtkWorld.ldtk.worldGridHeight ?: 1
+
+        // Get the highest values for X and Y axis - this will be the size of the grid vania array
+        var maxLevelOffsetX = 0
+        var maxLevelOffsetY = 0
+        ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+            if (maxLevelOffsetX < ldtkLevel.worldX) maxLevelOffsetX = ldtkLevel.worldX
+            if (maxLevelOffsetY < ldtkLevel.worldY) maxLevelOffsetY = ldtkLevel.worldY
+        }
+
+        // Create grid vania array
+        val sizeX: Int = (maxLevelOffsetX / gridVaniaWidth) + 1
+        val sizeY: Int = (maxLevelOffsetY / gridVaniaHeight) + 1
+
+        worldData.width = (maxLevelOffsetX + gridVaniaWidth).toFloat()
+        worldData.height = (maxLevelOffsetY + gridVaniaHeight).toFloat()
+        worldData.levelGridVania = List(sizeX) { List(sizeY) { LevelData() } }
+
+        if (maxLevelOffsetX == 0) println("WARNING: Level width is 0!")
 
         // Save TileMapData for each Level and layer combination from LDtk world
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-            loadLevel(ldtkWorld, ldtkLevel, type)
+            val globalLevelPosX = ldtkLevel.worldX
+            val globalLevelPosY = ldtkLevel.worldY
+            val levelX: Int = globalLevelPosX / gridVaniaWidth
+            val levelY: Int = globalLevelPosY / gridVaniaHeight
+
+            loadLevel(worldData.levelGridVania[levelX][levelY], ldtkWorld, ldtkLevel, type)
         }
+        println("Gridvania size: $sizeX x $sizeY)")
     }
 
     fun reloadAsset(ldtkWorld: LDTKWorld, type: AssetType) {
@@ -34,7 +66,11 @@ class AssetLevelData {
                 val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
 
                 if (tilesetExt != null) {
-                    storeTiles(ldtkLayer, tilesetExt, ldtkLevel.identifier, ldtkLayer.identifier, type)
+                    // Get index of level in the worldData Grid vania array
+                    val levelX: Int = ldtkLevel.worldX / gridVaniaWidth
+                    val levelY: Int = ldtkLevel.worldY / gridVaniaHeight
+
+                    storeTiles(worldData.levelGridVania[levelX][levelY], ldtkLayer, tilesetExt, ldtkLevel.identifier, ldtkLayer.identifier, type)
                     println("\nTriggering asset change for LDtk level : ${ldtkLevel.identifier}_${ldtkLayer.identifier}")
                 }
             }
@@ -45,11 +81,12 @@ class AssetLevelData {
         levelDataMaps.values.removeAll { it.type == type }
     }
 
-    private fun storeTiles(ldtkLayer: LayerInstance, tilesetExt: ExtTileset, level: String, layer: String, type: AssetType) {
+    // TODO: remove "level"
+    private fun storeTiles(levelData: LevelData, ldtkLayer: LayerInstance, tilesetExt: ExtTileset, level: String, layer: String, type: AssetType) {
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,
             height = ldtkLayer.cHei,
-            tileSet = if(tilesetExt.tileset != null) tilesetExt.tileset!! else TileSet.EMPTY
+            tileSet = if (tilesetExt.tileset != null) tilesetExt.tileset!! else TileSet.EMPTY
         )
         val gridSize = tilesetExt.def.tileGridSize
         val tilesetWidth = tilesetExt.def.pxWid
@@ -72,27 +109,86 @@ class AssetLevelData {
             when {
                 (dx == 0 && dy == 0) -> {
                     val stackLevel = tileMapData.data.getStackLevel(x, y)
-                    tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
+                    tileMapData.data.set(
+                        x,
+                        y,
+                        stackLevel,
+                        value = Tile(
+                            tile = tileId,
+                            offsetX = dx,
+                            offsetY = dy,
+                            flipX = flipX,
+                            flipY = flipY,
+                            rotate = false
+                        ).raw
+                    )
                 }
+
                 (dx == 0 && dy != 0) -> {
                     val stackLevel = max(tileMapData.data.getStackLevel(x, y), tileMapData.data.getStackLevel(x, y + 1))
-                    tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
+                    tileMapData.data.set(
+                        x,
+                        y,
+                        stackLevel,
+                        value = Tile(
+                            tile = tileId,
+                            offsetX = dx,
+                            offsetY = dy,
+                            flipX = flipX,
+                            flipY = flipY,
+                            rotate = false
+                        ).raw
+                    )
                     tileMapData.data.set(x, y + 1, stackLevel, value = Tile.ZERO.raw)
                 }
+
                 (dx != 0 && dy == 0) -> {
                     val stackLevel = max(tileMapData.data.getStackLevel(x, y), tileMapData.data.getStackLevel(x + 1, y))
-                    tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
+                    tileMapData.data.set(
+                        x,
+                        y,
+                        stackLevel,
+                        value = Tile(
+                            tile = tileId,
+                            offsetX = dx,
+                            offsetY = dy,
+                            flipX = flipX,
+                            flipY = flipY,
+                            rotate = false
+                        ).raw
+                    )
                     tileMapData.data.set(x + 1, y, stackLevel, value = Tile.ZERO.raw)
                 }
+
                 else -> {
-                    val stackLevel = max(tileMapData.data.getStackLevel(x, y), tileMapData.data.getStackLevel(x, y + 1), tileMapData.data.getStackLevel(x + 1, y), tileMapData.data.getStackLevel(x + 1, y + 1))
-                    tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
+                    val stackLevel = max(
+                        tileMapData.data.getStackLevel(x, y),
+                        tileMapData.data.getStackLevel(x, y + 1),
+                        tileMapData.data.getStackLevel(x + 1, y),
+                        tileMapData.data.getStackLevel(x + 1, y + 1)
+                    )
+                    tileMapData.data.set(
+                        x,
+                        y,
+                        stackLevel,
+                        value = Tile(
+                            tile = tileId,
+                            offsetX = dx,
+                            offsetY = dy,
+                            flipX = flipX,
+                            flipY = flipY,
+                            rotate = false
+                        ).raw
+                    )
                     tileMapData.data.set(x, y + 1, stackLevel, value = Tile.ZERO.raw)
                     tileMapData.data.set(x + 1, y, stackLevel, value = Tile.ZERO.raw)
                     tileMapData.data.set(x + 1, y + 1, stackLevel, value = Tile.ZERO.raw)
                 }
             }
         }
+        levelData.layerTileMaps[layer] = tileMapData
+
+        // TODO: remove below lines
         // Create new map for level layers and store layer in it
         val layerTileMaps = mutableMapOf<String, TileMapData>()
         layerTileMaps[layer] = tileMapData
@@ -103,7 +199,6 @@ class AssetLevelData {
                 gridSize = gridSize,
                 width = (ldtkLayer.cWid * gridSize).toFloat(),
                 height = (ldtkLayer.cHei * gridSize).toFloat(),
-                entities = listOf(),
                 layerTileMaps = layerTileMaps
             )
             levelDataMaps[level] = levelData
@@ -112,33 +207,15 @@ class AssetLevelData {
         }
     }
 
-    private fun createWorldDataMap(ldtkWorld: LDTKWorld, hasParallax: Boolean) {
-
-        if (hasParallax) {
-            // TODO: Get world height and width from WorldGridvania 2D array
-            //       * 2 because level 1 has still double height
-            worldData.width = 2 * (ldtkWorld.ldtk.worldGridWidth ?: 1)  // gridVaniaWidth
-            worldData.height = 2 * (ldtkWorld.ldtk.worldGridHeight ?: 1)  // gridVaniaHeight
-        }
-
-        // TODO: fill WorldData class with levels
-
-    }
-
-    private fun loadLevel(ldtkWorld: LDTKWorld, ldtkLevel: Level, type: AssetType) {
-
-        val levelPosX = ldtkLevel.worldX
-        val levelPosY = ldtkLevel.worldY
-
+    private fun loadLevel(levelData: LevelData, ldtkWorld: LDTKWorld, ldtkLevel: Level, type: AssetType) {
         val levelName = ldtkLevel.identifier
+
         ldtkLevel.layerInstances?.forEach { ldtkLayer ->
             val layerName = ldtkLayer.identifier
             val gridSize = ldtkLayer.gridSize
 
             // Check if layer contains entity data -> create EntityConfigs and store them fo
             if (ldtkLayer.entityInstances.isNotEmpty()) {
-                val entityNames = mutableListOf<String>()
-
                 ldtkLayer.entityInstances.forEach { entity ->
                     // Create YAML string of an entity config from LDtk
                     val yamlString = StringBuilder()
@@ -180,7 +257,7 @@ class AssetLevelData {
                             // TODO: We need to store only the name of the entity config for later dynamically spawning of entities
                             //       We need to store the entity configs in a 2D array depending on its position in the level
                             //       Then later we will spawn the entities depending on the position in the level
-                            entityNames.add(entityConfig.name)
+                            levelData.entities.add(entityConfig.name)
 
                             println("INFO: Registering entity config '${entity.identifier}' for '$levelName'")
                         } catch (e: Throwable) {
@@ -190,16 +267,13 @@ class AssetLevelData {
                     } else println("ERROR: Game object with name '${entity.identifier}' has no field entityConfig!")
                 }
 
+                //
+                levelData.width = (ldtkLayer.cWid * gridSize).toFloat()
+                levelData.height = (ldtkLayer.cHei * gridSize).toFloat()
+
                 // Create new level data if it does not exist yet
                 if (!levelDataMaps.contains(levelName)) {
-                    levelDataMaps[levelName] = LevelData(
-                        type = type,
-                        gridSize = gridSize,
-                        width = (ldtkLayer.cWid * gridSize).toFloat(),
-                        height = (ldtkLayer.cHei * gridSize).toFloat(),
-                        entities = entityNames,
-                        layerTileMaps = mutableMapOf()
-                    )
+                    levelDataMaps[levelName] = levelData
                 } else {
                     levelDataMaps[levelName]!!.entities
                 }
@@ -208,9 +282,8 @@ class AssetLevelData {
             // Check if layer has tile set -> store tile map data
             val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
             if (tilesetExt != null) {
-                storeTiles(ldtkLayer, tilesetExt, levelName, layerName, type)
+                storeTiles(levelData, ldtkLayer, tilesetExt, levelName, layerName, type)
             }
-
         }
     }
 
@@ -221,20 +294,24 @@ class AssetLevelData {
      * @param height - Height of whole level in pixels
      */
     data class WorldData(
-        val tileSize: Int = 16,
+        var tileSize: Int = 16,
 
-        var width: Int = 0,
-        var height: Int = 0,
-        val levelGridVania: MutableList<MutableList<LevelData>> = mutableListOf()
+        var width: Float = 0f,
+        var height: Float = 0f,
+        var levelWidth: Int = 0,  // TODO: Check if we need it outside of this class - level renderer
+        var levelHeight: Int = 0,
+
+        var levelGridVania: List<List<LevelData>> = listOf()
     )
 
     // Data class for storing level data like grizSize, width, height, entities, tileMapData
     data class LevelData(
-        val type: AssetType,  // TODO: Remove
-        val gridSize: Int,  // TODO: Remove
-        val width: Float,
-        val height: Float,
-        val entities: List<String>,
-        val layerTileMaps: MutableMap<String, TileMapData>
+        var type: AssetType = AssetType.COMMON,  // TODO: Remove
+        val gridSize: Int = 16,  // TODO: Remove
+        var width: Float = 0f,
+        var height: Float = 0f,
+
+        val entities: MutableList<String> = mutableListOf(),
+        val layerTileMaps: MutableMap<String, TileMapData> = mutableMapOf()
     )
 }

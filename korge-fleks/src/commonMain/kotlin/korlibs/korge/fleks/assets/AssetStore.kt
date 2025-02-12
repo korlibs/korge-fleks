@@ -94,7 +94,7 @@ class AssetStore {
     fun getWorldHeight() : Float = assetLevelData.worldData.height.toFloat()
     fun getWorldWidth(): Float = assetLevelData.worldData.width.toFloat()
 
-    fun getlevelData(anme: String) : AssetLevelData {}
+    fun getWorldData(name: String) : AssetLevelData.WorldData = assetLevelData.worldData
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
