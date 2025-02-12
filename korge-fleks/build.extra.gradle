@@ -1,4 +1,5 @@
 // Fixes "java 21 vs 1.8 problem" if kProject is used with targetJvm() and targetAndroid()
+/* WORKAROUND for Linux to be able to compile for Android
 var javaVersion = 21
 
 kotlin {
@@ -10,3 +11,4 @@ java {
         languageVersion.set(JavaLanguageVersion.of(javaVersion))
     }
 }
+*/
