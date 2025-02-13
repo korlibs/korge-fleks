@@ -33,10 +33,31 @@ class CameraSystem(
         val camera: Entity = world.getMainCamera()
 
         val cameraPosition = camera[PositionComponent]
+        val viewPortHalf = camera[SizeComponent]
+
+        val lastCameraPosX = cameraPosition.x
+        val lastCameraPosY = cameraPosition.y
+
+        // Calculate the difference between the camera and the entity to follow
         val xDiff = followPosition.x - cameraPosition.x
         val yDiff = followPosition.y - cameraPosition.y
-        cameraPosition.x += xDiff * factor
-        cameraPosition.y += yDiff * factor
+        // Move the camera towards the entity to follow
+        val newCameraPositionX = cameraPosition.x + xDiff * factor
+        val newCameraPositionY = cameraPosition.y + yDiff * factor
+
+        // Keep camera within world bounds
+        cameraPosition.x =
+            if (newCameraPositionX < viewPortHalf.width) viewPortHalf.width
+            else if (newCameraPositionX > worldWidth - viewPortHalf.width) worldWidth - viewPortHalf.width
+            else newCameraPositionX
+        cameraPosition.y =
+            if (newCameraPositionY < viewPortHalf.height) viewPortHalf.height
+            else if (newCameraPositionY > worldHeight - viewPortHalf.height) worldHeight - viewPortHalf.height
+            else newCameraPositionY
+
+        // Move parallax layers if camera moves
+        val cameraDistX = cameraPosition.x - lastCameraPosX
+//        val cameraDistY = cameraPosition.y - newCameraPositionY
 
         val parallaxFamily = world.family { all(ParallaxComponent, MotionComponent) }
         parallaxFamily.forEach { parallaxEntity ->
@@ -45,7 +66,7 @@ class CameraSystem(
             val viewPortHeight = camera[SizeIntComponent].height
 
             // Convert pixel distance of camera movement in the level to velocity for parallax layers
-            val distanceInWorldUnits = (xDiff * factor) * worldToPixelRatioInv  // (distance in pixel) / (world to pixel ratio)
+            val distanceInWorldUnits = cameraDistX * worldToPixelRatioInv  // (distance in pixel) / (world to pixel ratio)
             motion.velocityX = -distanceInWorldUnits / deltaTime  // world units per delta-time
 
             // TODO: Move parallax layer also vertically

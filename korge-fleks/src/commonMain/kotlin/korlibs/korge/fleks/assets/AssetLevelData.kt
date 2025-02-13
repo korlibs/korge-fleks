@@ -40,10 +40,11 @@ class AssetLevelData {
         // Create grid vania array
         val sizeX: Int = (maxLevelOffsetX / gridVaniaWidth) + 1
         val sizeY: Int = (maxLevelOffsetY / gridVaniaHeight) + 1
-
-        worldData.width = (maxLevelOffsetX + gridVaniaWidth).toFloat()
-        worldData.height = (maxLevelOffsetY + gridVaniaHeight).toFloat()
         worldData.levelGridVania = List(sizeX) { List(sizeY) { LevelData() } }
+
+        // Set the size of the world
+        worldData.width = (sizeX * gridVaniaWidth).toFloat()
+        worldData.height = (sizeY * gridVaniaHeight).toFloat()
 
         if (maxLevelOffsetX == 0) println("WARNING: Level width is 0!")
 
