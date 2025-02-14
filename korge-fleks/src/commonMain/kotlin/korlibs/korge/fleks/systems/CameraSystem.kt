@@ -36,7 +36,7 @@ class CameraSystem(
         val viewPortHalf = camera[SizeComponent]
 
         val lastCameraPosX = cameraPosition.x
-        val lastCameraPosY = cameraPosition.y
+        //val lastCameraPosY = cameraPosition.y
 
         // Calculate the difference between the camera and the entity to follow
         val xDiff = followPosition.x - cameraPosition.x
@@ -57,7 +57,7 @@ class CameraSystem(
 
         // Move parallax layers if camera moves
         val cameraDistX = cameraPosition.x - lastCameraPosX
-//        val cameraDistY = cameraPosition.y - newCameraPositionY
+        //val cameraDistY = cameraPosition.y - lastCameraPosY
 
         val parallaxFamily = world.family { all(ParallaxComponent, MotionComponent) }
         parallaxFamily.forEach { parallaxEntity ->
@@ -69,24 +69,17 @@ class CameraSystem(
             val distanceInWorldUnits = cameraDistX * worldToPixelRatioInv  // (distance in pixel) / (world to pixel ratio)
             motion.velocityX = -distanceInWorldUnits / deltaTime  // world units per delta-time
 
-            // TODO: Move parallax layer also vertically
-//            position.y =
+            // Camera position is in world coordinates
+            val ratio = cameraPosition.y / worldHeight   // range: [0...1]
 
-            // We need the camera position in world coordinates
-            val cameraVerticalPosition = cameraPosition.y  // TODO: add the position of the level in the world
-            val worldActiveHeight = worldHeight //- viewPortHeight  ???
-            val ratio = cameraVerticalPosition / worldActiveHeight   // [0...1]
-
+            // TODO: Get vertical parallax offset from parallax config
+            val parallaxOffset = -36f
             // Get the global position of the parallax layer in screen coordinates
-            val parallaxVerticalMax = viewPortHeight - parallaxHeight
-            val parallaxVerticalPosition = ratio * parallaxVerticalMax
+            val parallaxVerticalMax = viewPortHeight - parallaxHeight - parallaxOffset
+            val parallaxVerticalPosition = ratio * parallaxVerticalMax + parallaxOffset
 
             position.y = parallaxVerticalPosition
 //            println("parallax y: $position.y")
-
-            // parallax layer image height: 375
-
-
         }
     }
 }
