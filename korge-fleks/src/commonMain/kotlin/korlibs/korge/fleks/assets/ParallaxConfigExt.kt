@@ -150,6 +150,7 @@ data class ParallaxDataContainer(
  * The [aseName] is the name of the aseprite file which is used for reading the image data.
  * (Currently it is not used. It will be used when reading the config from YAML/JSON file.)
  *
+ * [offset] is the amount of pixels from the top of the image where the upper part of the parallax plane starts.
  * The parallax [mode] has to be one of the following enum values:
  * - [NO_PLANE]
  *   This type is used to set up a parallax background which will scroll repeatedly in X and Y direction. For this
@@ -189,7 +190,6 @@ data class ParallaxConfig(
  * The top part is the upper half of the Aseprite image. The bottom part is the bottom half of the image. This is used
  * to simulate a central vanishing point in the resulting parallax effect.
  *
- * [offset] is the amount of pixels from the top of the image where the upper part of the parallax plane starts.
  * [name] has to be set to the name of the layer in the Aseprite which contains the image for the sliced stripes
  * of the parallax plane.
  * [speedFactor] is the factor for scrolling the parallax plane relative to the game play field (which usually contains the
