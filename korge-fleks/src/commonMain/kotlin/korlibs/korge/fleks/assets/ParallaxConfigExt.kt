@@ -9,7 +9,17 @@ import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 import kotlinx.serialization.EncodeDefault.Mode.NEVER
 
-
+/** This function reads the parallax data from an Aseprite file.
+ * It reads the background, foreground and attached layers as well as the parallax plane from the Aseprite file.
+ *
+ * The [config] object contains the configuration for the parallax effect. It contains the name of the Aseprite file
+ * and the configuration for the layers and the parallax plane.
+ *
+ * The [format] parameter is used to specify the image format of the file. Currently only Aseprite is supported [ASE].
+ *
+ * The [atlas] parameter is used to pack the image data into an atlas. If it is not null the image data will be packed
+ * into the atlas. If it is null the image data will be stored separately.
+ */
 suspend fun VfsFile.readParallaxDataContainer(
     config: ParallaxConfig,
     format: ImageFormat = ASE,
@@ -89,11 +99,11 @@ suspend fun VfsFile.readParallaxDataContainer(
         when (config.mode) {
             ParallaxConfig.Mode.HORIZONTAL_PLANE -> {
                 (backgroundLayers?.height ?: foregroundLayers?.height ?: attachedLayersFront?.height
-                ?: attachedLayersRear?.height ?: 0) - (config.parallaxPlane?.offset ?: 0)
+                ?: attachedLayersRear?.height ?: 0) - config.offset
             }
             ParallaxConfig.Mode.VERTICAL_PLANE -> {
                 (backgroundLayers?.width ?: foregroundLayers?.width ?: attachedLayersFront?.width
-                ?: attachedLayersRear?.height ?: 0) - (config.parallaxPlane?.offset ?: 0)
+                ?: attachedLayersRear?.height ?: 0) - config.offset
             }
             ParallaxConfig.Mode.NO_PLANE -> 0  // not used without parallax plane setup
         }
@@ -161,6 +171,7 @@ data class ParallaxDataContainer(
 @Serializable @SerialName("ParallaxConfig")
 data class ParallaxConfig(
     val aseName: String,
+    val offset: Int = 0,
     val mode: Mode = Mode.HORIZONTAL_PLANE,
     val backgroundLayers: ArrayList<ParallaxLayerConfig>? = null,
     val parallaxPlane: ParallaxPlaneConfig? = null,
@@ -191,7 +202,6 @@ data class ParallaxConfig(
  */
 @Serializable @SerialName("ParallaxPlaneConfig")
 data class ParallaxPlaneConfig(
-    val offset: Int = 0,
     val name: String,
     val speedFactor: Float = 1f,
     val selfSpeed: Float = 0f,
