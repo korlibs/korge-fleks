@@ -50,6 +50,7 @@ class LevelMapRenderSystem(
 
             layerNames.forEach { layerName ->
                 val tileMap = assetStore.getTileMapData(levelName, layerName)
+                val worldData = assetStore.getWorldData(levelName)
                 val tileSet = tileMap.tileSet
                 val tileSetWidth = tileSet.width
                 val tileSetHeight = tileSet.height
@@ -71,7 +72,9 @@ class LevelMapRenderSystem(
 
                 ctx.useBatcher { batch ->
 
-                    // TODO: Render multiple levels when we approach the border between levels in the world
+
+                    // 2. Check which levels the view port of the camera is touching
+                    // TODO
 
                     // Render one level
                     for (l in 0 until tileMap.maxLevel) {

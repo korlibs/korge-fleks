@@ -5,7 +5,6 @@ import korlibs.io.file.std.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.ldtk.*
 import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 
@@ -23,7 +22,7 @@ object GameStateManager {
      * Register a new serializers module for the entity config serializer.
      */
     fun register(name: String, module: SerializersModule) {
-        assetStore.levelMapAssets.configDeserializer.register(name, module)
+        assetStore.assetLevelData.configDeserializer.register(name, module)
     }
 
     /**
@@ -38,7 +37,7 @@ object GameStateManager {
 
             val gameStateConfigString = gameStateConfigVfs.readString()
             try {
-                gameStateConfig = assetStore.levelMapAssets.configDeserializer.yaml().decodeFromString<GameStateConfig>(gameStateConfigString)
+                gameStateConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<GameStateConfig>(gameStateConfigString)
             } catch (e: Throwable) {
                 gameStateConfig = GameStateConfig("", true, "", "", "")
                 println("ERROR: Loading game state config - $e")
@@ -55,7 +54,7 @@ object GameStateManager {
 
             val gameConfigString = vfs.readString()
             try {
-                val commonConfig = assetStore.levelMapAssets.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                val commonConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                 // Enable / disable hot reloading of common assets here
                 assetStore.loadAssets(AssetType.COMMON, assetConfig = commonConfig)
             } catch (e: Throwable) { println("ERROR: Loading common assets - $e") }
@@ -81,7 +80,7 @@ object GameStateManager {
 
             var gameConfigString = worldVfs.readString()
             try {
-                val worldConfig = assetStore.levelMapAssets.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                val worldConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                 // Enable / disable hot reloading of common assets here
                 assetStore.loadAssets(AssetType.WORLD, assetConfig = worldConfig)
             } catch (e: Throwable) {
@@ -94,7 +93,7 @@ object GameStateManager {
 //        if (levelVfs.exists()) {
             gameConfigString = levelVfs.readString()
             try {
-                val worldConfig = assetStore.levelMapAssets.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                val worldConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                 // Enable / disable hot reloading of common assets here
                 assetStore.loadAssets(AssetType.LEVEL, assetConfig = worldConfig)
             } catch (e: Throwable) {
@@ -108,7 +107,7 @@ object GameStateManager {
 //            if (vfs.exists()) {
                 gameConfigString = vfs.readString()
                 try {
-                    val specialConfig = assetStore.levelMapAssets.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                    val specialConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                     // Enable / disable hot reloading of common assets here
                     assetStore.loadAssets(AssetType.SPECIAL, assetConfig = specialConfig)
                 } catch (e: Throwable) {

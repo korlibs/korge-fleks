@@ -3,12 +3,10 @@ package korlibs.korge.fleks.assets
 import korlibs.datastructure.*
 import korlibs.image.font.*
 import korlibs.image.format.*
-import korlibs.image.tiles.*
 import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.ldtk.view.*
-import korlibs.memory.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.*
 import kotlin.native.concurrent.*
@@ -191,7 +189,7 @@ class ResourceDirWatcherConfiguration(
                     delay(500)
 
                     val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + config.fileName].readLDTKWorld(extrude = true)
-                    assetStore.levelMapAssets.reloadAsset(ldtkWorld, assetUpdater.type)
+                    assetStore.assetLevelData.reloadAsset(ldtkWorld, assetUpdater.type)
 
                     // Guard period until reloading is activated again - this is used for debouncing watch messages
                     delay(100)

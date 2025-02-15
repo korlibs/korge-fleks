@@ -23,9 +23,9 @@ data class ParallaxEffectConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             it += PositionComponent(
-                x = this@ParallaxEffectConfig.x,
+                x = this@ParallaxEffectConfig.x,  // global position in screen coordinates
                 y = this@ParallaxEffectConfig.y
-            )  // global position for the whole parallax background
+            )
             it += MotionComponent(
                 velocityX = -12f  // world units (16 pixels) per second (??? TODO: this needs to be ckecked)
             )
