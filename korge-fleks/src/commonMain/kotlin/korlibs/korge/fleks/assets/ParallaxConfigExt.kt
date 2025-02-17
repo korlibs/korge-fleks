@@ -7,7 +7,7 @@ import korlibs.image.format.*
 import korlibs.io.file.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
-import kotlinx.serialization.EncodeDefault.Mode.NEVER
+import korlibs.korge.fleks.renderSystems.ParallaxRenderSystem
 
 /** This function reads the parallax data from an Aseprite file.
  * It reads the background, foreground and attached layers as well as the parallax plane from the Aseprite file.
@@ -129,7 +129,8 @@ suspend fun VfsFile.readParallaxDataContainer(
 }
 
 /**
- * This class contains all data which is needed by the [ParallaxDataView] to display the parallax view on the screen.
+ * This class contains all data which is needed by [ParallaxRenderSystem] to render parallax data from an Aseprite file.
+ *
  * It stores the [ParallaxConfig] and all [ImageData] objects for the background, foreground and attached Layers. The
  * parallax plane is a sliced Aseprite image and therefore consists of a [ImageDataContainer] object.
  *
@@ -147,10 +148,12 @@ data class ParallaxDataContainer(
 )
 /**
  * This is the main parallax configuration.
+ *
  * The [aseName] is the name of the aseprite file which is used for reading the image data.
  * (Currently it is not used. It will be used when reading the config from YAML/JSON file.)
  *
  * [offset] is the amount of pixels from the top of the image where the upper part of the parallax plane starts.
+ *
  * The parallax [mode] has to be one of the following enum values:
  * - [NO_PLANE]
  *   This type is used to set up a parallax background which will scroll repeatedly in X and Y direction. For this
