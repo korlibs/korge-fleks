@@ -18,12 +18,14 @@ class CameraSystem(
     private val worldToPixelRatioInv = 1f / worldToPixelRatio
     private val factor = 0.05f
 
-    private val assetStore: AssetStore = inject("AssetStore")
+    private val assetStore: AssetStore = inject<AssetStore>("AssetStore")
 
     private val worldHeight: Float = assetStore.getWorldHeight()
     private val worldWidth: Float = assetStore.getWorldWidth()
 
+    // These properties need to be set by the onAdd hook function of the ParallaxComponent
     var parallaxHeight: Float = 0f
+    var parallaxOffset: Float = 0f
 
     override fun onTickEntity(entity: Entity) {
 
@@ -65,20 +67,19 @@ class CameraSystem(
             val position = parallaxEntity[PositionComponent]
             val viewPortHeight = camera[SizeIntComponent].height
 
-            // Convert pixel distance of camera movement in the level to velocity for parallax layers
+            // Convert pixel distance of camera movement in the level to horizontal velocity for parallax layers
             val distanceInWorldUnits = cameraDistX * worldToPixelRatioInv  // (distance in pixel) / (world to pixel ratio)
             motion.velocityX = -distanceInWorldUnits / deltaTime  // world units per delta-time
 
+            // Calculate the ratio of the camera position in the world to the world height
             // Camera position is in world coordinates
-            val ratio = cameraPosition.y / worldHeight   // range: [0...1]
+            val ratio = (cameraPosition.y - viewPortHalf.height) / (worldHeight - viewPortHeight)   // range: [0...1]
 
-            // TODO: Get vertical parallax offset from parallax config
-            val parallaxOffset = -36f
             // Get the global position of the parallax layer in screen coordinates
-            val parallaxVerticalMax = viewPortHeight - parallaxHeight - parallaxOffset
-            val parallaxVerticalPosition = ratio * parallaxVerticalMax + parallaxOffset
+            val parallaxVerticalLength = viewPortHeight - parallaxHeight
+            val parallaxVerticalPosition = ratio * parallaxVerticalLength
 
-            position.y = parallaxVerticalPosition
+            position.y = parallaxVerticalPosition - parallaxOffset
 //            println("parallax y: $position.y")
         }
     }

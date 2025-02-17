@@ -7,9 +7,19 @@ import korlibs.image.format.*
 import korlibs.io.file.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
-import kotlinx.serialization.EncodeDefault.Mode.NEVER
+import korlibs.korge.fleks.renderSystems.ParallaxRenderSystem
 
-
+/** This function reads the parallax data from an Aseprite file.
+ * It reads the background, foreground and attached layers as well as the parallax plane from the Aseprite file.
+ *
+ * The [config] object contains the configuration for the parallax effect. It contains the name of the Aseprite file
+ * and the configuration for the layers and the parallax plane.
+ *
+ * The [format] parameter is used to specify the image format of the file. Currently only Aseprite is supported [ASE].
+ *
+ * The [atlas] parameter is used to pack the image data into an atlas. If it is not null the image data will be packed
+ * into the atlas. If it is null the image data will be stored separately.
+ */
 suspend fun VfsFile.readParallaxDataContainer(
     config: ParallaxConfig,
     format: ImageFormat = ASE,
@@ -89,11 +99,11 @@ suspend fun VfsFile.readParallaxDataContainer(
         when (config.mode) {
             ParallaxConfig.Mode.HORIZONTAL_PLANE -> {
                 (backgroundLayers?.height ?: foregroundLayers?.height ?: attachedLayersFront?.height
-                ?: attachedLayersRear?.height ?: 0) - (config.parallaxPlane?.offset ?: 0)
+                ?: attachedLayersRear?.height ?: 0) - config.offset
             }
             ParallaxConfig.Mode.VERTICAL_PLANE -> {
                 (backgroundLayers?.width ?: foregroundLayers?.width ?: attachedLayersFront?.width
-                ?: attachedLayersRear?.height ?: 0) - (config.parallaxPlane?.offset ?: 0)
+                ?: attachedLayersRear?.height ?: 0) - config.offset
             }
             ParallaxConfig.Mode.NO_PLANE -> 0  // not used without parallax plane setup
         }
@@ -119,7 +129,8 @@ suspend fun VfsFile.readParallaxDataContainer(
 }
 
 /**
- * This class contains all data which is needed by the [ParallaxDataView] to display the parallax view on the screen.
+ * This class contains all data which is needed by [ParallaxRenderSystem] to render parallax data from an Aseprite file.
+ *
  * It stores the [ParallaxConfig] and all [ImageData] objects for the background, foreground and attached Layers. The
  * parallax plane is a sliced Aseprite image and therefore consists of a [ImageDataContainer] object.
  *
@@ -137,8 +148,11 @@ data class ParallaxDataContainer(
 )
 /**
  * This is the main parallax configuration.
+ *
  * The [aseName] is the name of the aseprite file which is used for reading the image data.
  * (Currently it is not used. It will be used when reading the config from YAML/JSON file.)
+ *
+ * [offset] is the amount of pixels from the top of the image where the upper part of the parallax plane starts.
  *
  * The parallax [mode] has to be one of the following enum values:
  * - [NO_PLANE]
@@ -161,6 +175,7 @@ data class ParallaxDataContainer(
 @Serializable @SerialName("ParallaxConfig")
 data class ParallaxConfig(
     val aseName: String,
+    val offset: Int = 0,
     val mode: Mode = Mode.HORIZONTAL_PLANE,
     val backgroundLayers: ArrayList<ParallaxLayerConfig>? = null,
     val parallaxPlane: ParallaxPlaneConfig? = null,
@@ -178,7 +193,6 @@ data class ParallaxConfig(
  * The top part is the upper half of the Aseprite image. The bottom part is the bottom half of the image. This is used
  * to simulate a central vanishing point in the resulting parallax effect.
  *
- * [offset] is the amount of pixels from the top of the image where the upper part of the parallax plane starts.
  * [name] has to be set to the name of the layer in the Aseprite which contains the image for the sliced stripes
  * of the parallax plane.
  * [speedFactor] is the factor for scrolling the parallax plane relative to the game play field (which usually contains the
@@ -191,7 +205,6 @@ data class ParallaxConfig(
  */
 @Serializable @SerialName("ParallaxPlaneConfig")
 data class ParallaxPlaneConfig(
-    val offset: Int = 0,
     val name: String,
     val speedFactor: Float = 1f,
     val selfSpeed: Float = 0f,

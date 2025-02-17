@@ -125,8 +125,9 @@ data class ParallaxComponent(
             parallaxDataContainer.foregroundLayers?.height ?:
             parallaxDataContainer.parallaxPlane?.default?.height ?: throw Error("ParallaxComponent: Parallax image data has no height!")
             ).toFloat()
-        val parallaxLayerHeight: Float = imageHeight - (parallaxDataContainer.config.parallaxPlane?.offset ?: 0)
-        this.system<CameraSystem>().parallaxHeight = parallaxLayerHeight
+        val parallaxLayerHeight: Float = imageHeight
+        this.system<CameraSystem>().parallaxHeight = parallaxLayerHeight - parallaxDataContainer.config.offset.toFloat()
+        this.system<CameraSystem>().parallaxOffset = parallaxDataContainer.config.offset.toFloat()
     }
 
     /**

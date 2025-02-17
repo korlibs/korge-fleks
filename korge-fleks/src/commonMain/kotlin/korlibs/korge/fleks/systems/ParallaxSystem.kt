@@ -20,6 +20,7 @@ class ParallaxSystem(
         val (configName, backgroundLayers, parallaxPlane, foregroundLayers) = entity[ParallaxComponent]
         val (_, _, velocityX, velocityY) = entity[MotionComponent]
         val parallaxDataContainer = assetStore.getBackground(configName)
+        val offset = parallaxDataContainer.config.offset
 
         // Update local positions for each layer which is configured to be moving (speedFactor not null or zero)
         backgroundLayers.fastForEachWithIndex { index, layer ->
@@ -34,18 +35,17 @@ class ParallaxSystem(
             val plane = parallaxDataContainer.config.parallaxPlane!!
             val parallaxMode = parallaxDataContainer.config.mode
             val texture = parallaxDataContainer.attachedLayersRear!!.defaultAnimation.firstFrame.layerData[index]
-            val globalOffset = plane.offset
             val attachTextureOffset =
                 if (plane.attachedLayersRear!![index].attachBottomRight) texture.height else 0
             if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
-                val lineIndex = texture.targetY - globalOffset + attachTextureOffset
+                val lineIndex = texture.targetY - offset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
                 parallaxPlane.attachedLayersRearPositions[index] = (speedFactor * velocityX * worldToPixelRatio) * deltaTime + position
             } else if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
-                val lineIndex = texture.targetX - globalOffset + attachTextureOffset
+                val lineIndex = texture.targetX - offset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
                 parallaxPlane.attachedLayersRearPositions[index] = (speedFactor * velocityY * worldToPixelRatio) * deltaTime + position
@@ -55,7 +55,6 @@ class ParallaxSystem(
         parallaxPlane.linePositions.fastForEachWithIndex { index, position ->
             val plane = parallaxDataContainer.config.parallaxPlane!!
             val parallaxMode = parallaxDataContainer.config.mode
-            val offset = plane.offset
             if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = parallaxDataContainer.parallaxPlane!!.imageDatas[index].defaultAnimation.firstFrame.targetY - offset
@@ -75,17 +74,16 @@ class ParallaxSystem(
             val plane = parallaxDataContainer.config.parallaxPlane!!
             val parallaxMode = parallaxDataContainer.config.mode
             val texture = parallaxDataContainer.attachedLayersFront!!.defaultAnimation.firstFrame.layerData[index]
-            val globalOffset = plane.offset
             val attachTextureOffset = if (plane.attachedLayersFront!![index].attachBottomRight) texture.height else 0
             if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
-                val lineIndex = texture.targetY - globalOffset + attachTextureOffset
+                val lineIndex = texture.targetY - offset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
                 parallaxPlane.attachedLayersFrontPositions[index] = (speedFactor * velocityX * worldToPixelRatio) * deltaTime + position
             } else if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
-                val lineIndex = texture.targetX - globalOffset + attachTextureOffset
+                val lineIndex = texture.targetX - offset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
                 parallaxPlane.attachedLayersFrontPositions[index] = (speedFactor * velocityY * worldToPixelRatio) * deltaTime + position
