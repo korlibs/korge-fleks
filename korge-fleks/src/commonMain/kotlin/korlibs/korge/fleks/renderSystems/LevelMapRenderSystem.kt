@@ -39,7 +39,6 @@ class LevelMapRenderSystem(
         val cameraViewPort = with(world) { camera[SizeIntComponent] }
         val cameraViewPortHalf = with(world) { camera[SizeComponent] }
 
-
         // Sort level maps by their layerIndex
         family.sort(comparator)
 
@@ -51,45 +50,47 @@ class LevelMapRenderSystem(
             layerNames.forEach { layerName ->
                 val tileMap = assetStore.getTileMapData(levelName, layerName)
                 val worldData = assetStore.getWorldData(levelName)
+//                val tileMap2 = worldData.getTileMap(layerName)
                 val tileSet = tileMap.tileSet
                 val tileSetWidth = tileSet.width
                 val tileSetHeight = tileSet.height
                 val offsetScale = tileMap.offsetScale
 
                 // Draw only visible tiles
+
                 // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-                val viewPortX: Float = cameraPosition.x + cameraPosition.offsetX - cameraViewPortHalf.width
-                val viewPortY: Float = cameraPosition.y + cameraPosition.offsetY - cameraViewPortHalf.height
+                val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - cameraViewPortHalf.width
+                val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - cameraViewPortHalf.height
 
                 // Start and end indexes of viewport area
-                val xStart: Int = viewPortX.toInt() / tileSetWidth - 1  // x in positive direction;  -1 = start one tile before
+                val xStart: Int = viewPortPosX.toInt() / tileSetWidth - 1  // x in positive direction;  -1 = start one tile before
                 val xTiles = (cameraViewPort.width / tileSetWidth) + 3
                 val xEnd: Int = xStart + xTiles
 
-                val yStart: Int = viewPortY.toInt() / tileSetHeight - 1  // y in negative direction;  -1 = start one tile before
+                val yStart: Int = viewPortPosY.toInt() / tileSetHeight - 1  // y in negative direction;  -1 = start one tile before
                 val yTiles = cameraViewPort.height / tileSetHeight + 3
                 val yEnd: Int = yStart + yTiles
 
                 ctx.useBatcher { batch ->
-
-
-                    // 2. Check which levels the view port of the camera is touching
-                    // TODO
-
-                    // Render one level
+                    // Render tiles with world coordinates - tiles could come from different levels at level edges
+                    // TODO - levels might have different max stack levels!!!
                     for (l in 0 until tileMap.maxLevel) {
                         // level is the "layer" from stacked tiles in ldtk
-                        val level =
+                        val stackLevel =
                             if (renderLayer == 0) l
                             else (renderLayer - 1).clamp(0, l)
 
                         for (tx in xStart until xEnd) {
                             for (ty in yStart until yEnd) {
-                                val tile = tileMap[tx, ty, level]
+                                val tile = tileMap[tx, ty, stackLevel]
+
+                                // TODO Get tile from world data (can be from different levels)
+//                                val tile2 = worldData.tileMap[tx, ty, stackLevel]
+
                                 val info = tileSet.getInfo(tile.tile)
                                 if (info != null) {
-                                    val px = (tx * tileSetWidth) + (tile.offsetX * offsetScale) - viewPortX
-                                    val py =  (ty * tileSetHeight) + (tile.offsetY * offsetScale) - viewPortY
+                                    val px = (tx * tileSetWidth) + (tile.offsetX * offsetScale) - viewPortPosX
+                                    val py =  (ty * tileSetHeight) + (tile.offsetY * offsetScale) - viewPortPosY
 
                                     batch.drawQuad(
                                         tex = ctx.getTex(info.slice),
