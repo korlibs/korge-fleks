@@ -46,21 +46,22 @@ class LevelMapRenderSystem(
         family.forEach { entity ->
             val (rgba) = entity[RgbaComponent]
             val (levelName, layerNames) = entity[LevelMapComponent]
+            val worldData = assetStore.getWorldData(levelName)
+
+            // Calculate viewport position in world coordinates from Camera position (x,y) + offset
+            val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - cameraViewPortHalf.width
+            val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - cameraViewPortHalf.height
 
             layerNames.forEach { layerName ->
                 val tileMap = assetStore.getTileMapData(levelName, layerName)
-                val worldData = assetStore.getWorldData(levelName)
-//                val tileMap2 = worldData.getTileMap(layerName)
+                val tileMap2 = worldData.getLevelMap(layerName)
                 val tileSet = tileMap.tileSet
                 val tileSetWidth = tileSet.width
                 val tileSetHeight = tileSet.height
                 val offsetScale = tileMap.offsetScale
 
-                // Draw only visible tiles
-
-                // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-                val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - cameraViewPortHalf.width
-                val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - cameraViewPortHalf.height
+                // TODO check if we can use different tile sizes for different layers of a level
+                //      if not move below x - y calculation out of forEach loop
 
                 // Start and end indexes of viewport area
                 val xStart: Int = viewPortPosX.toInt() / tileSetWidth - 1  // x in positive direction;  -1 = start one tile before
@@ -70,6 +71,7 @@ class LevelMapRenderSystem(
                 val yStart: Int = viewPortPosY.toInt() / tileSetHeight - 1  // y in negative direction;  -1 = start one tile before
                 val yTiles = cameraViewPort.height / tileSetHeight + 3
                 val yEnd: Int = yStart + yTiles
+//                val maxStackLevel = tileMap2.getMaxStackLevel()
 
                 ctx.useBatcher { batch ->
                     // Render tiles with world coordinates - tiles could come from different levels at level edges

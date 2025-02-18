@@ -89,14 +89,14 @@ class AssetLevelData {
             val layerName = ldtkLayer.identifier
             val gridSize = ldtkLayer.gridSize
 
-            if (!worldData.levelMapsPerLayer.contains(layerName)) {
-                worldData.levelMapsPerLayer[layerName] = LevelMap(
+            if (!worldData.layerlevelMaps.contains(layerName)) {
+                worldData.layerlevelMaps[layerName] = LevelMap(
                     levelGridVania = List(sizeX) { List(sizeY) { LevelData() } }
                 )
             }
 
             // Get level data from worldData
-            val levelData = worldData.levelMapsPerLayer[layerName]!!.levelGridVania[levelX][levelY]
+            val levelData = worldData.layerlevelMaps[layerName]!!.levelGridVania[levelX][levelY]
 
             // Check if layer contains entity data -> create EntityConfigs and store them fo
             if (ldtkLayer.entityInstances.isNotEmpty()) {
@@ -318,13 +318,32 @@ class AssetLevelData {
         var levelHeight: Int = 0,
 
         var levelGridVania: List<List<LevelData>> = listOf(),  // TODO: Remove
-        var levelMapsPerLayer: MutableMap<String, LevelMap> = mutableMapOf()
-        )
+        var layerlevelMaps: MutableMap<String, LevelMap> = mutableMapOf(),
+
+        // Internal values used for rendering
+        var renderPosX: Int = 0,
+        var renderPosY: Int = 0,
+        var renderWidth: Int = 0,
+        var renderHeight: Int = 0
+    ) {
+
+        fun getLevelMap(layerName: String) : LevelMap {
+            if (!layerlevelMaps.contains(layerName)) println("WARNING: Level map for layer '$layerName' does not exist!")
+            return layerlevelMaps[layerName] ?: LevelMap()
+        }
+        fun setRenderRect(x: Int, y: Int, width: Int, height: Int) {
+        }
+    }
 
     data class LevelMap(
         val entities: MutableList<String> = mutableListOf(),  // TODO change to list
         var levelGridVania: List<List<LevelData>> = listOf()
     ) {
+        fun getMaxStackLevel(x: Int, y: Int): Int {
+//            return levelGridVania[0][0].tileMapData!!.data.getMaxStackLevel(x, y)  // TODO
+            return 1
+        }
+
         fun get(x: Int, y: Int, stackLayer: Int): Tile {
             // TODO - getter function might not be enough since stack layer could be different between levels
 
