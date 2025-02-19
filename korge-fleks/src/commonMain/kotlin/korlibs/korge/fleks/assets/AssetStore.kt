@@ -64,14 +64,14 @@ class AssetStore {
             println("WARNING - AssetStore: Image '$name' not found!")
             ImageData()
         }
-
+/*
     fun getTileMapData(level: String, layer: String) : TileMapData =
         if (assetLevelData.levelDataMaps.contains(level)) {
             if (assetLevelData.levelDataMaps[level]!!.layerTileMaps.contains(layer)) assetLevelData.levelDataMaps[level]!!.layerTileMaps[layer]!!
             else error("AssetStore: TileMap layer '$layer' for level '$level' not found!")
         }
         else error("AssetStore: Level map for level '$level' not found!")
-
+*/
     fun getEntities(level: String) : List<String> =
         if (assetLevelData.levelDataMaps.contains(level)) {
             assetLevelData.levelDataMaps[level]!!.entities
@@ -80,13 +80,17 @@ class AssetStore {
 
     fun getLevelHeight(level: String) : Float =
         if (assetLevelData.levelDataMaps.contains(level)) {
-            assetLevelData.levelDataMaps[level]!!.height
+            // TODO
+            100f
+//            assetLevelData.levelDataMaps[level]!!.height
         }
         else error("AssetStore: Height for level '$level' not found!")
 
     fun getLevelWidth(level: String) : Float =
         if (assetLevelData.levelDataMaps.contains(level)) {
-            assetLevelData.levelDataMaps[level]!!.width
+            // TODO
+            100f
+            //assetLevelData.levelDataMaps[level]!!.width
         }
         else error("AssetStore: Width for level '$level' not found!")
 

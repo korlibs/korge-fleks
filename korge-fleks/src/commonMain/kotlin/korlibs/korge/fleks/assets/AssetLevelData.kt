@@ -18,8 +18,7 @@ class AssetLevelData {
 
     private var gameObjectCnt = 0
 
-    private var sizeX: Int = 0
-    private var sizeY: Int = 0
+    // Size of a level within the grid vania array in grid coordinates (index)
     private var gridVaniaWidth: Int = 0
     private var gridVaniaHeight: Int = 0
     /**
@@ -39,12 +38,12 @@ class AssetLevelData {
         }
 
         // Create grid vania array
-        sizeX = (maxLevelOffsetX / gridVaniaWidth) + 1
-        sizeY = (maxLevelOffsetY / gridVaniaHeight) + 1
+        worldData.gridWidth = (maxLevelOffsetX / gridVaniaWidth) + 1
+        worldData.gridHeight = (maxLevelOffsetY / gridVaniaHeight) + 1
 
         // Set the size of the world
-        worldData.width = (sizeX * gridVaniaWidth).toFloat()
-        worldData.height = (sizeY * gridVaniaHeight).toFloat()
+        worldData.width = (worldData.gridWidth * gridVaniaWidth).toFloat()
+        worldData.height = (worldData.gridHeight * gridVaniaHeight).toFloat()
 
         if (maxLevelOffsetX == 0) println("WARNING: Level width is 0!")
 
@@ -55,9 +54,11 @@ class AssetLevelData {
             val levelX: Int = globalLevelPosX / gridVaniaWidth
             val levelY: Int = globalLevelPosY / gridVaniaHeight
 
+            println("Loading level: ${ldtkLevel.identifier} at position: $levelX, $levelY")
+
             loadLevel(worldData, levelX, levelY, ldtkWorld, ldtkLevel, type)
         }
-        println("Gridvania size: $sizeX x $sizeY)")
+        println("Gridvania size: ${worldData.gridWidth} x ${worldData.gridHeight})")
     }
 
     fun reloadAsset(ldtkWorld: LDTKWorld, type: AssetType) {
@@ -71,7 +72,8 @@ class AssetLevelData {
                     val levelX: Int = ldtkLevel.worldX / gridVaniaWidth
                     val levelY: Int = ldtkLevel.worldY / gridVaniaHeight
 
-                    storeTiles(worldData.levelGridVania[levelX][levelY], ldtkLayer, tilesetExt, ldtkLevel.identifier, ldtkLayer.identifier, type)
+                    // TODO
+//                    storeTiles(worldData.levelGridVania[levelX][levelY], ldtkLayer, tilesetExt, ldtkLevel.identifier, ldtkLayer.identifier, type)
                     println("\nTriggering asset change for LDtk level : ${ldtkLevel.identifier}_${ldtkLayer.identifier}")
                 }
             }
@@ -89,9 +91,13 @@ class AssetLevelData {
             val layerName = ldtkLayer.identifier
             val gridSize = ldtkLayer.gridSize
 
+            // TODO - we do not need to create a level map for an entity layer!!!
+
             if (!worldData.layerlevelMaps.contains(layerName)) {
                 worldData.layerlevelMaps[layerName] = LevelMap(
-                    levelGridVania = List(sizeX) { List(sizeY) { LevelData() } }
+                    gridWidth = gridVaniaWidth / gridSize,
+                    gridHeight = gridVaniaHeight / gridSize,
+                    levelGridVania = List(worldData.gridWidth) { List(worldData.gridHeight) { LevelData() } }
                 )
             }
 
@@ -108,7 +114,7 @@ class AssetLevelData {
 
                         if (entity.tags.firstOrNull { it == "unique" } != null) {
                             // Add scripts without unique count value - they are unique by name because they exist only once
-                            yamlString.append("name: ${levelName}_${entity.identifier}\n")
+                            yamlString.append("name: ${entity.identifier}\n")
                         } else {
                             // Add other game objects with a unique name as identifier
                             yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
@@ -154,8 +160,8 @@ class AssetLevelData {
                 }
 
                 //
-                levelData.width = (ldtkLayer.cWid * gridSize).toFloat()
-                levelData.height = (ldtkLayer.cHei * gridSize).toFloat()
+//                levelData.width = (ldtkLayer.cWid * gridSize).toFloat()
+//                levelData.height = (ldtkLayer.cHei * gridSize).toFloat()
 
                 // TODO remove later
                 // Create new level data if it does not exist yet
@@ -280,7 +286,7 @@ class AssetLevelData {
                 }
             }
         }
-        levelData.layerTileMaps[layer] = tileMapData
+//        levelData.layerTileMaps[layer] = tileMapData
         levelData.tileMapData = tileMapData
 
         // TODO: remove below lines
@@ -292,14 +298,14 @@ class AssetLevelData {
             val levelData = LevelData(
                 type = type,
                 gridSize = gridSize,
-                width = (ldtkLayer.cWid * gridSize).toFloat(),
-                height = (ldtkLayer.cHei * gridSize).toFloat(),
-                layerTileMaps = layerTileMaps,
+//                width = (ldtkLayer.cWid * gridSize).toFloat(),
+//                height = (ldtkLayer.cHei * gridSize).toFloat(),
+//                layerTileMaps = layerTileMaps,
                 tileMapData = tileMapData
             )
             levelDataMaps[level] = levelData
-        } else {
-            levelDataMaps[level]!!.layerTileMaps[layer] = tileMapData
+//        } else {
+//            levelDataMaps[level]!!.layerTileMaps[layer] = tileMapData
         }
     }
 
@@ -312,54 +318,110 @@ class AssetLevelData {
     data class WorldData(
         var tileSize: Int = 16,
 
+        // Size of the whole world (in pixels)
         var width: Float = 0f,
         var height: Float = 0f,
-        var levelWidth: Int = 0,  // TODO: Check if we need it outside of this class - level renderer
-        var levelHeight: Int = 0,
+        var gridWidth: Int = 0,
+        var gridHeight: Int = 0,
 
-        var levelGridVania: List<List<LevelData>> = listOf(),  // TODO: Remove
+//        var levelWidth: Int = 0,  // TODO: Check if we need it outside of this class - level renderer
+//        var levelHeight: Int = 0,
+
+//        var levelGridVania: List<List<LevelData>> = listOf(),  // TODO: Remove
         var layerlevelMaps: MutableMap<String, LevelMap> = mutableMapOf(),
 
-        // Internal values used for rendering
-        var renderPosX: Int = 0,
-        var renderPosY: Int = 0,
-        var renderWidth: Int = 0,
-        var renderHeight: Int = 0
     ) {
 
         fun getLevelMap(layerName: String) : LevelMap {
             if (!layerlevelMaps.contains(layerName)) println("WARNING: Level map for layer '$layerName' does not exist!")
-            return layerlevelMaps[layerName] ?: LevelMap()
+            return layerlevelMaps[layerName] ?: LevelMap(1, 1)
         }
-        fun setRenderRect(x: Int, y: Int, width: Int, height: Int) {
-        }
+
+//        fun setRenderRect(x: Int, y: Int, width: Int, height: Int) {
+//        }
     }
 
     data class LevelMap(
+        // Size of a level inside the grid vania array (all levels have the same size)
+        val gridWidth: Int,
+        val gridHeight: Int,
         val entities: MutableList<String> = mutableListOf(),  // TODO change to list
-        var levelGridVania: List<List<LevelData>> = listOf()
+        var levelGridVania: List<List<LevelData>> = listOf(),
+
+        // Internal values used for rendering
+//        var renderWidth: Int = 0,
+//        var renderHeight: Int = 0
     ) {
-        fun getMaxStackLevel(x: Int, y: Int): Int {
-//            return levelGridVania[0][0].tileMapData!!.data.getMaxStackLevel(x, y)  // TODO
-            return 1
+        /**
+         * Get the maximum stack level of all levels within the given view port area
+         *
+         * @param x - vertical index of top-left tile in grid coordinates
+         * @param y - horizontal index of top-left tile in grid coordinates
+         * @param width - vertical amount of tiles in view port in grid coordinates
+         * @param height - horizontal amount of tiles in view port in grid coordinates
+         */
+        fun getMaxStackLevel(x: Int, y: Int, width: Int, height: Int): Int {
+//            renderWidth = width
+//            renderHeight = height
+            // Get stack layer depth of all levels within the given view port area
+            val xx = x / gridWidth
+            val yy = y / gridHeight
+            val xx2 = (x + width) / gridWidth
+            val yy2 = (y + height) / gridHeight
+
+            // Check position of top-left tile
+            var maxStackLevel = levelGridVania[xx][yy].tileMapData?.maxLevel ?: 0
+            // Check position of top-right tile
+            maxStackLevel = max(maxStackLevel, levelGridVania[xx2][yy].tileMapData?.maxLevel ?: 0)
+            // Check position of bottom-left tile
+            maxStackLevel = max(maxStackLevel, levelGridVania[xx][yy2].tileMapData?.maxLevel ?: 0)
+            // Check position of bottom-right tile
+            maxStackLevel = max(maxStackLevel, levelGridVania[xx2][yy2].tileMapData?.maxLevel ?: 0)
+
+//            maxStackLevel = 1
+            return maxStackLevel
         }
 
-        fun get(x: Int, y: Int, stackLayer: Int): Tile {
-            // TODO - getter function might not be enough since stack layer could be different between levels
+        /**
+         * Get the tile at the given position in the virtual world map
+         *
+         * @param x - horizontal index of tile in grid coordinates
+         * @param y - vertical index of tile in grid coordinates
+         * @param stackLevel - stack level of the tile (when tiles are stacked on top of each other)
+         */
+        operator fun get(x: Int, y: Int, stackLevel: Int): Tile {
+            val gridX = x / gridWidth
+            val girdY = y / gridHeight
+            val levelX = x % gridWidth
+            val levelY = y % gridHeight
 
-            return levelGridVania[0][0].tileMapData!![x, y, stackLayer]  // TODO
+            if (gridX < 0 || gridX >= levelGridVania.size || girdY < 0 || girdY >= levelGridVania[0].size) {
+                println("WARNING: Level map for grid vania does not exist!")
+            }
+            if (levelX < 0 || levelX >= gridWidth || levelY < 0 || levelY >= gridHeight) {
+                println("WARNING: Tile position is out of bounds!")
+            }
+
+            if (levelGridVania[gridX][girdY].tileMapData == null) return Tile.ZERO
+            if (stackLevel >= levelGridVania[gridX][girdY].tileMapData!!.maxLevel) return Tile.ZERO
+
+//            println("levelGridVania: $gridX, $girdY, level: $levelX, $levelY, stack: $stackLayer")
+            return levelGridVania[gridX][girdY].tileMapData!![levelX, levelY, stackLevel]
         }
+
+        fun getTileInfo(x: Int, y: Int, tile: Int) : TileSetTileInfo? =
+            levelGridVania[x / gridWidth][y / gridHeight].tileMapData?.tileSet?.getInfo(tile)
     }
 
     // Data class for storing level data like grizSize, width, height, entities, tileMapData
     data class LevelData(
         var type: AssetType = AssetType.COMMON,  // TODO: Remove
         val gridSize: Int = 16,  // TODO: Remove
-        var width: Float = 0f,
-        var height: Float = 0f,
+//        var width: Float = 0f,
+//        var height: Float = 0f,
 
         val entities: MutableList<String> = mutableListOf(),  // TODO remove
-        val layerTileMaps: MutableMap<String, TileMapData> = mutableMapOf(),  // TODO remove
+//        val layerTileMaps: MutableMap<String, TileMapData> = mutableMapOf(),  // TODO remove
         var tileMapData: TileMapData? = null
     )
 }

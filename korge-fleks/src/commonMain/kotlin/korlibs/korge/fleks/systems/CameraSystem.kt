@@ -10,7 +10,7 @@ import korlibs.korge.fleks.utils.*
 
 
 class CameraSystem(
-    worldToPixelRatio: Float
+    private val worldToPixelRatio: Float
 ) : IteratingSystem(
     family = family { all(CameraFollowTag) },
     interval = EachFrame
@@ -48,13 +48,17 @@ class CameraSystem(
         val newCameraPositionY = cameraPosition.y + yDiff * factor
 
         // Keep camera within world bounds
+        val leftBound = viewPortHalf.width + worldToPixelRatio
+        val rightBound = worldWidth - viewPortHalf.width - worldToPixelRatio
+        val topBound = viewPortHalf.height + worldToPixelRatio
+        val bottomBound = worldHeight - viewPortHalf.height - worldToPixelRatio
         cameraPosition.x =
-            if (newCameraPositionX < viewPortHalf.width) viewPortHalf.width
-            else if (newCameraPositionX > worldWidth - viewPortHalf.width) worldWidth - viewPortHalf.width
+            if (newCameraPositionX < leftBound) leftBound
+            else if (newCameraPositionX > rightBound) rightBound
             else newCameraPositionX
         cameraPosition.y =
-            if (newCameraPositionY < viewPortHalf.height) viewPortHalf.height
-            else if (newCameraPositionY > worldHeight - viewPortHalf.height) worldHeight - viewPortHalf.height
+            if (newCameraPositionY < topBound) topBound
+            else if (newCameraPositionY > bottomBound) bottomBound
             else newCameraPositionY
 
         // Move parallax layers if camera moves
