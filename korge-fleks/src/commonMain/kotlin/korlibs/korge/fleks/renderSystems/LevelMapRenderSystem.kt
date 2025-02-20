@@ -66,15 +66,26 @@ class LevelMapRenderSystem(
                 // Start and end indexes of viewport area (in grid coordinates)
                 val xStart: Int = viewPortPosX.toInt() / worldData.tileSize - 1  // x in positive direction;  -1 = start one tile before
                 val xTiles = (cameraViewPort.width / worldData.tileSize) + 3
-                val xEnd: Int = xStart + xTiles
+//                val xEnd: Int = xStart + xTiles
 
                 val yStart: Int = viewPortPosY.toInt() / worldData.tileSize - 1  // y in negative direction;  -1 = start one tile before
                 val yTiles = cameraViewPort.height / worldData.tileSize + 3
-                val yEnd: Int = yStart + yTiles
+//                val yEnd: Int = yStart + yTiles
 
-                val maxStackLevel = levelMap.getMaxStackLevel(xStart, yStart, xTiles, yTiles)
+//                val maxStackLevel = levelMap.getMaxStackLevel(xStart, yStart, xTiles, yTiles)
 
                 ctx.useBatcher { batch ->
+                    levelMap.forEachTile(xStart, yStart, xTiles, yTiles) { slice, px, py ->
+                        batch.drawQuad(
+                            tex = ctx.getTex(slice),
+                            x = px - viewPortPosX,
+                            y = py - viewPortPosY,
+                            filtering = false,
+                            colorMul = rgba,
+                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                        )
+                    }
+/*
                     // Render tiles with world coordinates - tiles could come from different levels at level edges
                     // TODO - levels might have different max stack levels!!!
                     for (l in 0 until maxStackLevel) {  //tileMap.maxLevel) {
@@ -109,6 +120,7 @@ class LevelMapRenderSystem(
                             }
                         }
                     }
+*/
                 }
             }
         }

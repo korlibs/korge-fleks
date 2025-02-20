@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets
 
+import korlibs.image.bitmap.*
 import korlibs.image.tiles.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.ldtk.*
@@ -381,6 +382,47 @@ class AssetLevelData {
 //            maxStackLevel = 1
             return maxStackLevel
         }
+
+        fun forEachTile(x: Int, y: Int, width: Int, height: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+            // Calculate the view port corners (top-left, top-right, bottom-left and bottom-right positions) in gridvania indexes
+            // and check if the corners are in different level maps (tileMapData)
+            val gridX = x / gridWidth
+            val gridY = y / gridHeight
+            val gridX2 = (x + width) / gridWidth
+            val gridY2 = (y + height) / gridHeight
+
+            val xStart = x % gridWidth
+            val yStart = y % gridHeight
+
+            // TODO: Iterate over all levels within the view port area
+
+            levelGridVania[gridX][gridY].tileMapData?.let { tileMap ->
+                val tileSet = tileMap.tileSet
+                val tileWidth = tileSet.width
+                val tileHeight = tileSet.height
+                val offsetScale = tileMap.offsetScale
+
+                for (l in 0 until tileMap.maxLevel) {
+                    for (tx in xStart until xStart + width) {
+                        for (ty in yStart until yStart + height) {
+                            val tile = tileMap[tx, ty, l]
+                            val tileInfo = tileSet.getInfo(tile.tile)
+                            if (tileInfo != null) {
+                                val px = (tx * tileWidth) + tile.offsetX
+                                val py = (ty * tileHeight) + tile.offsetY
+                                renderCall(tileInfo.slice, px.toFloat(), py.toFloat())
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (gridX2 > gridWidth) {
+
+            }
+        }
+
+        private fun
 
         /**
          * Get the tile at the given position in the virtual world map
