@@ -20,8 +20,9 @@ class CameraSystem(
 
     private val assetStore: AssetStore = inject<AssetStore>("AssetStore")
 
-    private val worldHeight: Float = assetStore.getWorldHeight()
-    private val worldWidth: Float = assetStore.getWorldWidth()
+    // TODO how to get current world name?
+    private val worldHeight: Float = assetStore.getWorldData("").height
+    private val worldWidth: Float = assetStore.getWorldData("").width
 
     // These properties need to be set by the onAdd hook function of the ParallaxComponent
     var parallaxHeight: Float = 0f
