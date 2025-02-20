@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets
 
+import korlibs.image.bitmap.*
 import korlibs.image.tiles.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.ldtk.*
@@ -12,78 +13,150 @@ import kotlin.math.*
 class AssetLevelData {
 
     internal val worldData = WorldData()
-    // TODO: move into WorldData
-    internal val levelDataMaps: MutableMap<String, LevelData> = mutableMapOf()
     internal val configDeserializer = EntityConfigSerializer()
 
     private var gameObjectCnt = 0
 
+    // Size of a level within the grid vania array in grid coordinates (index)
     private var gridVaniaWidth: Int = 0
     private var gridVaniaHeight: Int = 0
 
     /**
-     * @param hasParallax - This level uses a parallax background, so we need to set the world size accordingly.
-     *  TODO check if we need this also later - do we have only one active world level?
+     * Load level data from LDtk world file and store it in the worldData object.
+     * The worldData object contains all level data and is used to render the levels.
+     * The level data is stored in a 2D array where each element is a LevelData object.
+     * The LevelData object contains the tile map data and entity data for each level.
+     *
+     * @param ldtkWorld - LDtk world object containing all level data
+     *
+     * @see WorldData
      */
-    fun loadLevelData(ldtkWorld: LDTKWorld, type: AssetType, hasParallax: Boolean) {
+    fun loadLevelData(ldtkWorld: LDTKWorld) {
         gridVaniaWidth = ldtkWorld.ldtk.worldGridWidth ?: 1  // this is also the size of each sub-level
         gridVaniaHeight = ldtkWorld.ldtk.worldGridHeight ?: 1
-
-        // Get the highest values for X and Y axis - this will be the size of the grid vania array
         var maxLevelOffsetX = 0
         var maxLevelOffsetY = 0
+
+        // Get the highest values for X and Y axis - this will be the size of the grid vania array
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
             if (maxLevelOffsetX < ldtkLevel.worldX) maxLevelOffsetX = ldtkLevel.worldX
             if (maxLevelOffsetY < ldtkLevel.worldY) maxLevelOffsetY = ldtkLevel.worldY
         }
 
         // Create grid vania array
-        val sizeX: Int = (maxLevelOffsetX / gridVaniaWidth) + 1
-        val sizeY: Int = (maxLevelOffsetY / gridVaniaHeight) + 1
-        worldData.levelGridVania = List(sizeX) { List(sizeY) { LevelData() } }
+        worldData.gridWidth = (maxLevelOffsetX / gridVaniaWidth) + 1
+        worldData.gridHeight = (maxLevelOffsetY / gridVaniaHeight) + 1
 
         // Set the size of the world
-        worldData.width = (sizeX * gridVaniaWidth).toFloat()
-        worldData.height = (sizeY * gridVaniaHeight).toFloat()
+        worldData.width = (worldData.gridWidth * gridVaniaWidth).toFloat()
+        worldData.height = (worldData.gridHeight * gridVaniaHeight).toFloat()
 
         if (maxLevelOffsetX == 0) println("WARNING: Level width is 0!")
 
         // Save TileMapData for each Level and layer combination from LDtk world
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-            val globalLevelPosX = ldtkLevel.worldX
-            val globalLevelPosY = ldtkLevel.worldY
-            val levelX: Int = globalLevelPosX / gridVaniaWidth
-            val levelY: Int = globalLevelPosY / gridVaniaHeight
-
-            loadLevel(worldData.levelGridVania[levelX][levelY], ldtkWorld, ldtkLevel, type)
+            val levelX: Int = ldtkLevel.worldX / gridVaniaWidth
+            val levelY: Int = ldtkLevel.worldY / gridVaniaHeight
+            loadLevel(worldData, levelX, levelY, ldtkWorld, ldtkLevel)
         }
-        println("Gridvania size: $sizeX x $sizeY)")
+        println("Gridvania size: ${worldData.gridWidth} x ${worldData.gridHeight})")
     }
 
-    fun reloadAsset(ldtkWorld: LDTKWorld, type: AssetType) {
+    fun reloadAsset(ldtkWorld: LDTKWorld) {
         // Reload all levels from ldtk world file
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-            ldtkLevel.layerInstances?.forEach { ldtkLayer ->
-                val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
-
-                if (tilesetExt != null) {
-                    // Get index of level in the worldData Grid vania array
-                    val levelX: Int = ldtkLevel.worldX / gridVaniaWidth
-                    val levelY: Int = ldtkLevel.worldY / gridVaniaHeight
-
-                    storeTiles(worldData.levelGridVania[levelX][levelY], ldtkLayer, tilesetExt, ldtkLevel.identifier, ldtkLayer.identifier, type)
-                    println("\nTriggering asset change for LDtk level : ${ldtkLevel.identifier}_${ldtkLayer.identifier}")
-                }
-            }
+            val levelX: Int = ldtkLevel.worldX / gridVaniaWidth
+            val levelY: Int = ldtkLevel.worldY / gridVaniaHeight
+            loadLevel(worldData, levelX, levelY, ldtkWorld, ldtkLevel)
         }
     }
 
-    fun removeAssets(type: AssetType) {
-        levelDataMaps.values.removeAll { it.type == type }
+    private fun loadLevel(worldData: WorldData, levelX: Int, levelY: Int, ldtkWorld: LDTKWorld, ldtkLevel: Level) {
+        val levelName = ldtkLevel.identifier
+
+        ldtkLevel.layerInstances?.forEach { ldtkLayer ->
+            val layerName = ldtkLayer.identifier
+            val gridSize = ldtkLayer.gridSize
+
+            // TODO - we do not need to create a level map for an entity layer!!!
+
+            if (!worldData.layerlevelMaps.contains(layerName)) {
+                worldData.layerlevelMaps[layerName] = LevelMap(
+                    gridWidth = gridVaniaWidth / gridSize,
+                    gridHeight = gridVaniaHeight / gridSize,
+                    levelGridVania = List(worldData.gridWidth) { List(worldData.gridHeight) { LevelData() } }
+                )
+            }
+
+            // Get level data from worldData
+            val levelData = worldData.layerlevelMaps[layerName]!!.levelGridVania[levelX][levelY]
+
+            // Check if layer contains entity data -> create EntityConfigs and store them fo
+            if (ldtkLayer.entityInstances.isNotEmpty()) {
+                ldtkLayer.entityInstances.forEach { entity ->
+                    // Create YAML string of an entity config from LDtk
+                    val yamlString = StringBuilder()
+                    // Sanity check - entity needs to have a field 'entityConfig'
+                    if (entity.fieldInstances.firstOrNull { it.identifier == "entityConfig" } != null) {
+
+                        if (entity.tags.firstOrNull { it == "unique" } != null) {
+                            // Add scripts without unique count value - they are unique by name because they exist only once
+                            yamlString.append("name: ${entity.identifier}\n")
+                        } else {
+                            // Add other game objects with a unique name as identifier
+                            yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
+                        }
+
+                        // Add position of entity = (level position in the world) + (grid position within the level) + (pivot point)
+                        // TODO: Take level position in world into account
+                        val entityPosX: Int = /*levelPosX +*/
+                            (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
+                        val entityPosY: Int = /*levelPosY +*/
+                            (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
+
+
+                        // Add position of entity
+                        entity.tags.firstOrNull { it == "positionable" }?.let {
+                            yamlString.append("x: $entityPosX\n")
+                            yamlString.append("y: $entityPosY\n")
+                        }
+
+                        // Add all other fields of entity
+                        entity.fieldInstances.forEach { field ->
+                            if (field.identifier != "EntityConfig") yamlString.append("${field.identifier}: ${field.value}\n")
+                        }
+                        println("INFO: Game object '${entity.identifier}' loaded for '$levelName'")
+                        println("\n$yamlString")
+
+                        try {
+                            // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
+                            val entityConfig: EntityConfig =
+                                configDeserializer.yaml().decodeFromString(yamlString.toString())
+
+                            // TODO: We need to store only the name of the entity config for later dynamically spawning of entities
+                            //       We need to store the entity configs in a 2D array depending on its position in the level
+                            //       Then later we will spawn the entities depending on the position in the level
+                            levelData.entities.add(entityConfig.name)
+
+                            println("INFO: Registering entity config '${entity.identifier}' for '$levelName'")
+                        } catch (e: Throwable) {
+                            println("ERROR: Loading entity config - $e")
+                        }
+
+                    } else println("ERROR: Game object with name '${entity.identifier}' has no field entityConfig!")
+                }
+            }
+
+            // Check if layer has tile set -> store tile map data
+            val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
+            if (tilesetExt != null) {
+                storeTiles(levelData, ldtkLayer, tilesetExt)
+            }
+        }
+
     }
 
-    // TODO: remove "level"
-    private fun storeTiles(levelData: LevelData, ldtkLayer: LayerInstance, tilesetExt: ExtTileset, level: String, layer: String, type: AssetType) {
+    private fun storeTiles(levelData: LevelData, ldtkLayer: LayerInstance, tilesetExt: ExtTileset) {
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,
             height = ldtkLayer.cHei,
@@ -187,132 +260,6 @@ class AssetLevelData {
                 }
             }
         }
-        levelData.layerTileMaps[layer] = tileMapData
-
-        // TODO: remove below lines
-        // Create new map for level layers and store layer in it
-        val layerTileMaps = mutableMapOf<String, TileMapData>()
-        layerTileMaps[layer] = tileMapData
-        // Add layer map to level Maps
-        if (!levelDataMaps.contains(level)) {
-            val levelData = LevelData(
-                type = type,
-                gridSize = gridSize,
-                width = (ldtkLayer.cWid * gridSize).toFloat(),
-                height = (ldtkLayer.cHei * gridSize).toFloat(),
-                layerTileMaps = layerTileMaps
-            )
-            levelDataMaps[level] = levelData
-        } else {
-            levelDataMaps[level]!!.layerTileMaps[layer] = tileMapData
-        }
+        levelData.tileMapData = tileMapData
     }
-
-    private fun loadLevel(levelData: LevelData, ldtkWorld: LDTKWorld, ldtkLevel: Level, type: AssetType) {
-        val levelName = ldtkLevel.identifier
-
-        ldtkLevel.layerInstances?.forEach { ldtkLayer ->
-            val layerName = ldtkLayer.identifier
-            val gridSize = ldtkLayer.gridSize
-
-            // Check if layer contains entity data -> create EntityConfigs and store them fo
-            if (ldtkLayer.entityInstances.isNotEmpty()) {
-                ldtkLayer.entityInstances.forEach { entity ->
-                    // Create YAML string of an entity config from LDtk
-                    val yamlString = StringBuilder()
-                    // Sanity check - entity needs to have a field 'entityConfig'
-                    if (entity.fieldInstances.firstOrNull { it.identifier == "entityConfig" } != null) {
-
-                        if (entity.tags.firstOrNull { it == "unique" } != null) {
-                            // Add scripts without unique count value - they are unique by name because they exist only once
-                            yamlString.append("name: ${levelName}_${entity.identifier}\n")
-                        }
-                        else {
-                            // Add other game objects with a unique name as identifier
-                            yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
-                        }
-
-                        // Add position of entity = (level position in the world) + (grid position within the level) + (pivot point)
-                        // TODO: Take level position in world into account
-                        val entityPosX: Int = /*levelPosX +*/ (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
-                        val entityPosY: Int = /*levelPosY +*/ (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
-
-
-                        // Add position of entity
-                        entity.tags.firstOrNull { it == "positionable" }?.let {
-                            yamlString.append("x: $entityPosX\n")
-                            yamlString.append("y: $entityPosY\n")
-                        }
-
-                        // Add all other fields of entity
-                        entity.fieldInstances.forEach { field ->
-                            if (field.identifier != "EntityConfig") yamlString.append("${field.identifier}: ${field.value}\n")
-                        }
-                        println("INFO: Game object '${entity.identifier}' loaded for '$levelName'")
-                        println("\n$yamlString")
-
-                        try {
-                            // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
-                            val entityConfig: EntityConfig = configDeserializer.yaml().decodeFromString(yamlString.toString())
-
-                            // TODO: We need to store only the name of the entity config for later dynamically spawning of entities
-                            //       We need to store the entity configs in a 2D array depending on its position in the level
-                            //       Then later we will spawn the entities depending on the position in the level
-                            levelData.entities.add(entityConfig.name)
-
-                            println("INFO: Registering entity config '${entity.identifier}' for '$levelName'")
-                        } catch (e: Throwable) {
-                            println("ERROR: Loading entity config - $e")
-                        }
-
-                    } else println("ERROR: Game object with name '${entity.identifier}' has no field entityConfig!")
-                }
-
-                //
-                levelData.width = (ldtkLayer.cWid * gridSize).toFloat()
-                levelData.height = (ldtkLayer.cHei * gridSize).toFloat()
-
-                // Create new level data if it does not exist yet
-                if (!levelDataMaps.contains(levelName)) {
-                    levelDataMaps[levelName] = levelData
-                } else {
-                    levelDataMaps[levelName]!!.entities
-                }
-            }
-
-            // Check if layer has tile set -> store tile map data
-            val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
-            if (tilesetExt != null) {
-                storeTiles(levelData, ldtkLayer, tilesetExt, levelName, layerName, type)
-            }
-        }
-    }
-
-    /**
-     *
-     * @param tileSize - Size of a grid cell in pixels (e.g. 16 for 16x16 tile size)
-     * @param width - Width of whole level in pixels
-     * @param height - Height of whole level in pixels
-     */
-    data class WorldData(
-        var tileSize: Int = 16,
-
-        var width: Float = 0f,
-        var height: Float = 0f,
-        var levelWidth: Int = 0,  // TODO: Check if we need it outside of this class - level renderer
-        var levelHeight: Int = 0,
-
-        var levelGridVania: List<List<LevelData>> = listOf()
-    )
-
-    // Data class for storing level data like grizSize, width, height, entities, tileMapData
-    data class LevelData(
-        var type: AssetType = AssetType.COMMON,  // TODO: Remove
-        val gridSize: Int = 16,  // TODO: Remove
-        var width: Float = 0f,
-        var height: Float = 0f,
-
-        val entities: MutableList<String> = mutableListOf(),
-        val layerTileMaps: MutableMap<String, TileMapData> = mutableMapOf()
-    )
 }

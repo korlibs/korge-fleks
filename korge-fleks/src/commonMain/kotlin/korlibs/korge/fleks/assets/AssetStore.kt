@@ -65,36 +65,8 @@ class AssetStore {
             ImageData()
         }
 
-    fun getTileMapData(level: String, layer: String) : TileMapData =
-        if (assetLevelData.levelDataMaps.contains(level)) {
-            if (assetLevelData.levelDataMaps[level]!!.layerTileMaps.contains(layer)) assetLevelData.levelDataMaps[level]!!.layerTileMaps[layer]!!
-            else error("AssetStore: TileMap layer '$layer' for level '$level' not found!")
-        }
-        else error("AssetStore: Level map for level '$level' not found!")
-
-    fun getEntities(level: String) : List<String> =
-        if (assetLevelData.levelDataMaps.contains(level)) {
-            assetLevelData.levelDataMaps[level]!!.entities
-        }
-        else error("AssetStore: Entities for level '$level' not found!")
-
-    fun getLevelHeight(level: String) : Float =
-        if (assetLevelData.levelDataMaps.contains(level)) {
-            assetLevelData.levelDataMaps[level]!!.height
-        }
-        else error("AssetStore: Height for level '$level' not found!")
-
-    fun getLevelWidth(level: String) : Float =
-        if (assetLevelData.levelDataMaps.contains(level)) {
-            assetLevelData.levelDataMaps[level]!!.width
-        }
-        else error("AssetStore: Width for level '$level' not found!")
-
-    // TODO: to be removed
-    fun getWorldHeight() : Float = assetLevelData.worldData.height.toFloat()
-    fun getWorldWidth(): Float = assetLevelData.worldData.width.toFloat()
-
-    fun getWorldData(name: String) : AssetLevelData.WorldData = assetLevelData.worldData
+    // TODO change to array
+    fun getWorldData(name: String) : WorldData = assetLevelData.worldData
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
@@ -155,7 +127,7 @@ class AssetStore {
             // Update maps of music, images, ...
             assetConfig.tileMaps.forEach { tileMap ->
                 val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + tileMap.fileName].readLDTKWorld(extrude = true)
-                assetLevelData.loadLevelData(ldtkWorld, type, tileMap.hasParallax)
+                assetLevelData.loadLevelData(ldtkWorld)
             }
 
             assetConfig.sounds.forEach { sound ->
@@ -229,6 +201,7 @@ class AssetStore {
         images.values.removeAll { it.first == type }
         fonts.values.removeAll { it.first == type }
         sounds.values.removeAll { it.first == type }
-        assetLevelData.removeAssets(type)
+        // TODO enable when level data is array again
+//        assetLevelData.values.removeAll { it.first == type }
     }
 }
