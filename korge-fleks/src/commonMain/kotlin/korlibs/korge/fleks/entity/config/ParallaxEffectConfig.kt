@@ -27,7 +27,7 @@ data class ParallaxEffectConfig(
                 y = this@ParallaxEffectConfig.y
             )
             it += MotionComponent(
-                velocityX = -12f  // world units (16 pixels) per second (??? TODO: this needs to be ckecked)
+                velocityX = -12f  // world units (16 pixels) per second
             )
             it += ParallaxComponent(
                 name = assetName
