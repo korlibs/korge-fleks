@@ -103,13 +103,9 @@ class AssetLevelData {
                             yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
                         }
 
-                        // Add position of entity = (level position in the world) + (grid position within the level) + (pivot point)
-                        // TODO: Take level position in world into account
-                        val entityPosX: Int = /*levelPosX +*/
-                            (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
-                        val entityPosY: Int = /*levelPosY +*/
-                            (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
-
+                        // Add position of entity = (level position in the world) + (position within the level) + (pivot point)
+                        val entityPosX: Int = (gridVaniaWidth * levelX) + (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
+                        val entityPosY: Int = (gridVaniaHeight * levelY) + (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
 
                         // Add position of entity
                         entity.tags.firstOrNull { it == "positionable" }?.let {
