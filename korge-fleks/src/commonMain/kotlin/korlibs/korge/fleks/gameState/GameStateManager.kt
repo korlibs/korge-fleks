@@ -128,11 +128,11 @@ object GameStateManager {
         // TODO: Check if save game is available and load it
 
         // Load start script from level
-        val startScript = "${gameStateConfig.level}_start_script"
+        val startScript = "start_script"
         if (EntityFactory.contains(startScript)) {
-            println("INFO: Starting '${gameStateConfig.level}' with script: '$startScript'.")
+            println("INFO: Starting '${gameStateConfig.world}'")
             world.createAndConfigureEntity(startScript)
         }
-        else println("Error: Cannot start '${gameStateConfig.level}'! EntityConfig with name '$startScript' does not exist!")
+        else println("Error: Cannot start '${gameStateConfig.world}'! EntityConfig with name '$startScript' does not exist!")
     }
 }

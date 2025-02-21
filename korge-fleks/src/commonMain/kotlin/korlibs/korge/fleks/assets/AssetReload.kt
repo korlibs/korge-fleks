@@ -189,7 +189,8 @@ class ResourceDirWatcherConfiguration(
                     delay(500)
 
                     val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + config.fileName].readLDTKWorld(extrude = true)
-                    assetStore.assetLevelData.reloadAsset(ldtkWorld, assetUpdater.type)
+                    println("\nTriggering asset change for LDtk: ${config.fileName}")
+                    assetStore.assetLevelData.reloadAsset(ldtkWorld)
 
                     // Guard period until reloading is activated again - this is used for debouncing watch messages
                     delay(100)
