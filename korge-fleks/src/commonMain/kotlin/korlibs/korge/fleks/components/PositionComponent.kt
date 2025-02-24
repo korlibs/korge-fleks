@@ -27,9 +27,8 @@ data class PositionComponent(
      */
     fun World.convertToWorldCoordinates(camera: Entity) {
         val cameraPosition = camera[PositionComponent]
-        val cameraViewPortHalf = camera[SizeComponent]
-        x += cameraPosition.x - cameraPosition.offsetX - cameraViewPortHalf.width
-        y += cameraPosition.y - cameraPosition.offsetY - cameraViewPortHalf.height
+        x += cameraPosition.x - cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
+        y += cameraPosition.y - cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
     }
 
     /**
@@ -38,18 +37,13 @@ data class PositionComponent(
      */
     fun World.convertToScreenCoordinates(camera: Entity): PositionComponent {
         val cameraPosition = camera[PositionComponent]
-        val cameraViewPortHalf = camera[SizeComponent]
         return PositionComponent(
-            x = x - cameraPosition.x + cameraPosition.offsetX + cameraViewPortHalf.width,
-            y = y - cameraPosition.y + cameraPosition.offsetY + cameraViewPortHalf.height,
+            x = x - cameraPosition.x + cameraPosition.offsetX + AppConfig.VIEW_PORT_WIDTH_HALF,
+            y = y - cameraPosition.y + cameraPosition.offsetY + AppConfig.VIEW_PORT_HEIGHT_HALF,
             offsetX = offsetX,
             offsetY = offsetY
         )
     }
-
-    // TODO: Add convert to screen coordinates function
-
-    // TODO: Check if EntityByName is fed with Camera entity after deserialization of fleks world
 
     // Author's hint: Check if deep copy is needed on any change in the component!
     override fun clone(): PositionComponent = this.copy()

@@ -66,11 +66,8 @@ data class DialogBoxConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
 
-        val camera: Entity = getMainCamera()
-        val cameraViewPort = camera[SizeIntComponent]
-
-        val viewPortWidth = cameraViewPort.width.toFloat()
-        val viewPortHeight = cameraViewPort.height.toFloat()
+        val viewPortWidth = AppConfig.VIEW_PORT_WIDTH.toFloat()
+        val viewPortHeight = AppConfig.VIEW_PORT_HEIGHT.toFloat()
 
         val textBoxWidth = width + 14  // 190 <- 176
         val textBoxHeight = height + 8  // 49 <- 41

@@ -35,13 +35,10 @@ data class LogoEntityConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         val assetStore: AssetStore = inject(name = "AssetStore")
 
-        val camera: Entity = getMainCamera()
-        val cameraViewPort = camera[SizeIntComponent]
-
         entity.configure {
             it += PositionComponent(
-                x = offsetX + (if (centerX) (cameraViewPort.width - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f),
-                y = offsetY + (if (centerY) (cameraViewPort.height - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
+                x = offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f),
+                y = offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
             )
             it += LayeredSpriteComponent(
                 name = assetName

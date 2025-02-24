@@ -182,9 +182,7 @@ class ObjectRenderSystem(
 
     // Set size of render view to display size
     override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        val camera: Entity = getMainCamera()
-        val cameraViewPort = camera[SizeIntComponent]
-        return Rectangle(0, 0, cameraViewPort.width, cameraViewPort.height)
+        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
     }
 
     init {

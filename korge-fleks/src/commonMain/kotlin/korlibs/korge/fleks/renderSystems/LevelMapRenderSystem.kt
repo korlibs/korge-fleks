@@ -40,8 +40,6 @@ class LevelMapRenderSystem(
     override fun renderInternal(ctx: RenderContext) {
         val camera: Entity = world.getMainCamera()
         val cameraPosition = with(world) { camera[PositionComponent] }
-        val cameraViewPort = with(world) { camera[SizeIntComponent] }
-        val cameraViewPortHalf = with(world) { camera[SizeComponent] }
 
         // Sort level maps by their layerIndex
         family.sort(comparator)
@@ -54,18 +52,18 @@ class LevelMapRenderSystem(
             val tileSize = worldData.gridSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-            val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - cameraViewPortHalf.width
-            val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - cameraViewPortHalf.height
+            val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
+            val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
 
             layerNames.forEach { layerName ->
                 val levelMap = worldData.getLevelMap(layerName)
 
                 // Start and end indexes of viewport area (in tile coordinates)
                 val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
-                val xTiles = (cameraViewPort.width / tileSize) + 3
+                val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
 
                 val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
-                val yTiles = cameraViewPort.height / tileSize + 3
+                val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
 
                 ctx.useBatcher { batch ->
                     levelMap.forEachTile(xStart, yStart, xTiles, yTiles, worldData.levelWidth, worldData.levelHeight) { slice, px, py ->
@@ -85,9 +83,7 @@ class LevelMapRenderSystem(
 
     // Set size of render view to display size
     override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        val camera: Entity = getMainCamera()
-        val cameraViewPort = camera[SizeIntComponent]
-        return Rectangle(0, 0, cameraViewPort.width, cameraViewPort.height)
+        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
     }
 
     init {
