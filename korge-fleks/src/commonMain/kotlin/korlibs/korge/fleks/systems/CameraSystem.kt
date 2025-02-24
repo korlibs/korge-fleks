@@ -48,7 +48,7 @@ class CameraSystem(
         val newCameraPositionX = cameraPosition.x + xDiff * factor
         val newCameraPositionY = cameraPosition.y + yDiff * factor
 
-        // Keep camera within world bounds
+        // Keep camera within world bounds (+1 tile in each direction as guard for shaking camera - via camera offset)
         val leftBound = viewPortHalf.width + worldToPixelRatio
         val rightBound = worldWidth - viewPortHalf.width - worldToPixelRatio
         val topBound = viewPortHalf.height + worldToPixelRatio

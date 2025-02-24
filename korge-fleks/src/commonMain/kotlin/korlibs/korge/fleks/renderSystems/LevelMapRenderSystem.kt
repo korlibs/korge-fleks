@@ -51,6 +51,7 @@ class LevelMapRenderSystem(
             val (rgba) = entity[RgbaComponent]
             val (levelName, layerNames) = entity[LevelMapComponent]
             val worldData = assetStore.getWorldData(levelName)
+            val tileSize = worldData.gridSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
             val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - cameraViewPortHalf.width
@@ -60,14 +61,14 @@ class LevelMapRenderSystem(
                 val levelMap = worldData.getLevelMap(layerName)
 
                 // Start and end indexes of viewport area (in tile coordinates)
-                val xStart: Int = viewPortPosX.toInt() / worldData.tileSize - 1  // x in positive direction;  -1 = start one tile before
-                val xTiles = (cameraViewPort.width / worldData.tileSize) + 3
+                val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
+                val xTiles = (cameraViewPort.width / tileSize) + 3
 
-                val yStart: Int = viewPortPosY.toInt() / worldData.tileSize - 1  // y in negative direction;  -1 = start one tile before
-                val yTiles = cameraViewPort.height / worldData.tileSize + 3
+                val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
+                val yTiles = cameraViewPort.height / tileSize + 3
 
                 ctx.useBatcher { batch ->
-                    levelMap.forEachTile(xStart, yStart, xTiles, yTiles) { slice, px, py ->
+                    levelMap.forEachTile(xStart, yStart, xTiles, yTiles, worldData.levelWidth, worldData.levelHeight) { slice, px, py ->
                         batch.drawQuad(
                             tex = ctx.getTex(slice),
                             x = px - viewPortPosX,

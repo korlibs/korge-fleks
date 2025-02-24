@@ -34,5 +34,3 @@ data class AssetModel(
         val hasParallax: Boolean = true
     )
 }
-
-enum class AssetType { COMMON, WORLD, LEVEL, SPECIAL }
