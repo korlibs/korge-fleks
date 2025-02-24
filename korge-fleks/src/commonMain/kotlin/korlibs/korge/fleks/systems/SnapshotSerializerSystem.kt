@@ -32,15 +32,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     private var snapshotSecondCounter: Int = 0
     private var snapshotDeletePointer: Int = 0
 
-    companion object {
-        /**
-         * Setup function for creating the SnapshotSerializerSystem. Here it is possible to
-         * add [SerializersModule] as parameter. This enables to add components, tags and config data
-         * classes outside Korge-fleks.
-         */
-        fun SystemConfiguration.setup(module: SerializersModule) = add(SnapshotSerializerSystem(module))
-    }
-
     override fun onTick() {
         val snapshotCopy = mutableMapOf<Entity, Snapshot>()
 

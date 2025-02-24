@@ -23,19 +23,6 @@ data class MainCameraConfig(
             // Offset can be used to "shake" the camera on explosions etc.
             it += PositionComponent()
 
-            // TODO: Move view port size to injectable object - it is dependent on the target device and game config might be
-            //       moved to another device with different screen size
-            // Camera has a size which is the view port of the game
-            it += SizeIntComponent(
-                width = viewPortWith,  // SizeIntComponent is used to store the view port size as integer values
-                height = viewPortHeight
-            )
-            // Save half size for middle point of view port in separate component
-            it += SizeComponent(
-                width = viewPortWith * 0.5f,  // SizeComponent is used to store offset to middle point of view port
-                height = viewPortHeight * 0.5f
-            )
-
             // Camera has a tag to make it easily accessible for other systems and entity configurations
             it += MainCameraTag
         }

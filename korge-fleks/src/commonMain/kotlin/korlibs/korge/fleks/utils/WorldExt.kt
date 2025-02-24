@@ -49,6 +49,6 @@ fun World.nameOf(entity: Entity) : String = if (entity has InfoComponent) entity
  * Get entity for main camera.
  */
 fun World.getMainCamera(): Entity {
-    val cameraFamily: Family = family { all(MainCameraTag, SizeComponent, SizeIntComponent, PositionComponent) }
+    val cameraFamily: Family = family { all(MainCameraTag, PositionComponent) }
     return cameraFamily.firstOrNull() ?: error("No main camera found in world!")
 }

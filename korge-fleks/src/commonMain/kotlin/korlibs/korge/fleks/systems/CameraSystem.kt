@@ -34,9 +34,7 @@ class CameraSystem(
         val followPosition = entity[PositionComponent]
 
         val camera: Entity = world.getMainCamera()
-
         val cameraPosition = camera[PositionComponent]
-        val viewPortHalf = camera[SizeComponent]
 
         val lastCameraPosX = cameraPosition.x
         //val lastCameraPosY = cameraPosition.y
@@ -49,10 +47,10 @@ class CameraSystem(
         val newCameraPositionY = cameraPosition.y + yDiff * factor
 
         // Keep camera within world bounds (+1 tile in each direction as guard for shaking camera - via camera offset)
-        val leftBound = viewPortHalf.width + worldToPixelRatio
-        val rightBound = worldWidth - viewPortHalf.width - worldToPixelRatio
-        val topBound = viewPortHalf.height + worldToPixelRatio
-        val bottomBound = worldHeight - viewPortHalf.height - worldToPixelRatio
+        val leftBound = AppConfig.VIEW_PORT_WIDTH_HALF + worldToPixelRatio
+        val rightBound = worldWidth - AppConfig.VIEW_PORT_WIDTH_HALF - worldToPixelRatio
+        val topBound = AppConfig.VIEW_PORT_HEIGHT_HALF + worldToPixelRatio
+        val bottomBound = worldHeight - AppConfig.VIEW_PORT_HEIGHT_HALF - worldToPixelRatio
         cameraPosition.x =
             if (newCameraPositionX < leftBound) leftBound
             else if (newCameraPositionX > rightBound) rightBound
@@ -70,7 +68,6 @@ class CameraSystem(
         parallaxFamily.forEach { parallaxEntity ->
             val motion = parallaxEntity[MotionComponent]
             val position = parallaxEntity[PositionComponent]
-            val viewPortHeight = camera[SizeIntComponent].height
 
             // Convert pixel distance of camera movement in the level to horizontal velocity for parallax layers
             val distanceInWorldUnits = cameraDistX * worldToPixelRatioInv  // (distance in pixel) / (world to pixel ratio)
@@ -78,10 +75,10 @@ class CameraSystem(
 
             // Calculate the ratio of the camera position in the world to the world height
             // Camera position is in world coordinates
-            val ratio = (cameraPosition.y - viewPortHalf.height) / (worldHeight - viewPortHeight)   // range: [0...1]
+            val ratio = (cameraPosition.y - AppConfig.VIEW_PORT_HEIGHT_HALF) / (worldHeight - AppConfig.VIEW_PORT_HEIGHT)   // range: [0...1]
 
             // Get the global position of the parallax layer in screen coordinates
-            val parallaxVerticalLength = viewPortHeight - parallaxHeight
+            val parallaxVerticalLength = AppConfig.VIEW_PORT_HEIGHT - parallaxHeight
             val parallaxVerticalPosition = ratio * parallaxVerticalLength
 
             position.y = parallaxVerticalPosition - parallaxOffset
