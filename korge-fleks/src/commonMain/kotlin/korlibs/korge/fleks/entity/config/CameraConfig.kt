@@ -10,10 +10,7 @@ import kotlinx.serialization.*
 
 @Serializable @SerialName("MainCameraConfig")
 data class MainCameraConfig(
-    override val name: String,
-
-    private val viewPortWith: Int,
-    private val viewPortHeight: Int
+    override val name: String
 ) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
