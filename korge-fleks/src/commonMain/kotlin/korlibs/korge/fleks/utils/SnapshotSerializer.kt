@@ -137,7 +137,7 @@ class SnapshotSerializer {
         }
 
         // Register component classes
-        polymorphic(CloneableComponent::class) {
+        polymorphic(Component::class) {
             subclass(EntityLinkComponent::class)
             subclass(InfoComponent::class)
             subclass(LayerComponent::class)
