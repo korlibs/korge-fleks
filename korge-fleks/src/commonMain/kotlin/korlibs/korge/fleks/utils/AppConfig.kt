@@ -4,13 +4,12 @@ package korlibs.korge.fleks.utils
  * This object holds compile time configuration for the game app.
  */
 object AppConfig {
-    // Multiplier for world size to scale the viewport up to full-HD
-    var SCALE: Int = 5
 
     // World to pixel ratio (# of pixels representing 1 meter)
     // = Pixel per unit
     var WORLD_TO_PIXEL_RATIO = 16f
     var WORLD_TO_PIXEL_RATIO_INV = 1f / WORLD_TO_PIXEL_RATIO
+        private set
     var TITLE = "jobe's Legacy"
 
     // Target device physical display pixels, e.g.: 3120 x 1440 -> 624 x 288  (2.166 ratio)
