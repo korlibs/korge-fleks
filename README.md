@@ -1,15 +1,58 @@
 # KorGE-Fleks
 
-
 This is the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) (ECS) integration for KorGE Game Engine.
 
-KorGE-Fleks consists of a growing set of Entity Component definitions, dedicated Entity Systems and utilities around
-them like AssetStore, Entity-Component serialization, etc. which are reusable or will get better reusable over time.
-Eventually this will grow into a specialized KorGE-based Game Engine for 2D platform games.
+KorGE-Fleks is not just a simple wrapper around Fleks ECS but a specialized implementation containing a lot additional
+usefull stuff around an ECS for the KorGE Game Engine. Korge-fleks is dedicated to 2D platform games. It is developed in
+the open with the hope that it will be useful for others, too.
+
+Together with the [korge-fleks-hello-world](https://github.com/korlibs/korge-fleks-hello-world) example it
+can be used as a starting point for a new (2D platformer) game project.
 
 Upstream project for Fleks ECS can be found here: <https://github.com/Quillraven/Fleks>
 
 KorGE-Fleks is maintained by [@jobe-m](https://github.com/jobe-m)
+
+# Features
+
+Korge-fleks offers the following features for building a 2D platform game:
+
+## Game state management
+- Entity Component System (ECS) utilizing Fleks
+- Serialization of Entities and Components
+- Snapshot system for saving and restoring the game state
+- Save and load game state (world snapshot) as JSON string
+
+## Asset management
+- Asset store for loading and managing game assets
+- Hot-reloading of assets
+
+## Game Object configuration
+- Entity configuration objects for easy setup of complex Game Objects
+
+## Rendering systems
+- Game object renderer for sprites, animations, text, 9-patches, etc.
+- Parallax background renderer
+- Level map renderer (LDtk level map format)
+- Fast objects/effects renderer (e.g. explosions)
+- Debug rectangle renderer (texture bounds, collision shapes, etc.)
+
+## Level map management
+- Support for building huge worlds of seamlessly connected levels from LDtk
+
+## Property animation system
+- Tween-Animation system with Easing functions to animate properties of components
+- Tween-Sequence system to create scripted animations (e.g. for intro or cut scenes)
+
+## Sound system
+- Sound system for playing background music and triggering sound effects from entities
+
+
+Planed features:
+
+- Collision detection system for level maps and game objects
+- Pooling of Components
+
 
 # Supported Versions
 
