@@ -180,7 +180,7 @@ class ResourceDirWatcherConfiguration(
             }
         }
         assetConfig.tileMaps.forEach { config ->
-            if (file.fullName.contains(config.fileName) && !reloading) {
+            if (file.fullName.contains(config.value.fileName) && !reloading) {
                 reloading = true  // save that reloading is in progress
                 println("Reloading ${file.fullName}... ")
 
@@ -188,9 +188,9 @@ class ResourceDirWatcherConfiguration(
                     // Give LDtk more time to finish writing the files
                     delay(500)
 
-                    val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + config.fileName].readLDTKWorld(extrude = true)
-                    println("\nTriggering asset change for LDtk: ${config.fileName}")
-                    assetStore.assetLevelData.reloadAsset(ldtkWorld)
+                    val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readLDTKWorld(extrude = true)
+                    println("\nTriggering asset change for LDtk: ${config.value.fileName}")
+                    assetStore.assetLevelData[config.key]?.second?.reloadAsset(ldtkWorld)
 
                     // Guard period until reloading is activated again - this is used for debouncing watch messages
                     delay(100)

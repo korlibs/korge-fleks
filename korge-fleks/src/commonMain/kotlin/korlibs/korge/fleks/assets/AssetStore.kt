@@ -38,7 +38,7 @@ class AssetStore {
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
     internal var specialAssetConfig: AssetModel = AssetModel()
 
-    internal val assetLevelData: AssetLevelData = AssetLevelData()  // TODO: MutableMap<String, Pair<AssetType, LevelMapAsset>> = mutableMapOf()
+    internal val assetLevelData: MutableMap<String, Pair<AssetType, AssetLevelData>> = mutableMapOf()
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
@@ -65,8 +65,9 @@ class AssetStore {
             ImageData()
         }
 
-    // TODO change to array
-    fun getWorldData(name: String) : WorldData = assetLevelData.worldData
+    fun getWorldData(name: String) : WorldData =
+        if (assetLevelData.contains(name)) assetLevelData[name]!!.second.worldData
+        else error("AssetStore: World data '$name' not found!")
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
@@ -126,8 +127,10 @@ class AssetStore {
 
             // Update maps of music, images, ...
             assetConfig.tileMaps.forEach { tileMap ->
-                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + tileMap.fileName].readLDTKWorld(extrude = true)
-                assetLevelData.loadLevelData(ldtkWorld)
+                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + tileMap.value.fileName].readLDTKWorld(extrude = true)
+                val levelData = AssetLevelData()
+                levelData.loadLevelData(ldtkWorld)
+                assetLevelData[tileMap.key] = Pair(type, levelData)
             }
 
             assetConfig.sounds.forEach { sound ->
@@ -201,7 +204,6 @@ class AssetStore {
         images.values.removeAll { it.first == type }
         fonts.values.removeAll { it.first == type }
         sounds.values.removeAll { it.first == type }
-        // TODO enable when level data is array again
-//        assetLevelData.values.removeAll { it.first == type }
+        assetLevelData.values.removeAll { it.first == type }
     }
 }

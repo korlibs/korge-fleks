@@ -7,8 +7,10 @@ import kotlinx.serialization.*
 data class GameStateConfig(
     // Name of game
     val name: String,
-    var firstStart: Boolean,
+    val version: Int = 0,
+    var firstStart: Boolean = true,
     var world: String,
     var level: String,
-    var special: String
+    var special: String,
+    var startScript: String
 )

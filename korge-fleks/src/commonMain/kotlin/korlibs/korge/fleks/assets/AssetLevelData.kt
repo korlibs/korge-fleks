@@ -3,6 +3,7 @@ package korlibs.korge.fleks.assets
 import korlibs.image.tiles.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.assets.WorldData.*
+import korlibs.korge.fleks.gameState.*
 import korlibs.korge.ldtk.*
 import korlibs.korge.ldtk.view.*
 import korlibs.math.*
@@ -15,7 +16,6 @@ import kotlin.math.*
  */
 class AssetLevelData {
     internal val worldData = WorldData()
-    internal val configDeserializer = EntityConfigSerializer()
     private var gameObjectCnt = 0
 
     // Size of a level within the gridvania array in pixels
@@ -123,7 +123,7 @@ class AssetLevelData {
                         try {
                             // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
                             val entityConfig: EntityConfig =
-                                configDeserializer.yaml().decodeFromString(yamlString.toString())
+                                GameStateManager.configSerializer.yaml().decodeFromString(yamlString.toString())
 
                             // We need to store only the name of the entity config for later dynamically spawning of entities
                             entities.add(entityConfig.name)

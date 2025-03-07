@@ -14,21 +14,31 @@ import kotlinx.serialization.modules.*
  */
 object GameStateManager {
     var assetStore: AssetStore = AssetStore()
-    var firstGameStart: Boolean = true
-
-    internal lateinit var gameStateConfig: GameStateConfig
+    var configSerializer: EntityConfigSerializer = EntityConfigSerializer()
 
     /**
      * Register a new serializers module for the entity config serializer.
      */
     fun register(name: String, module: SerializersModule) {
-        assetStore.assetLevelData.configDeserializer.register(name, module)
+        configSerializer.register(name, module)
     }
 
     /**
      * Init function for loading common game config and assets. Call this before any KorGE Scene is active.
      */
-    suspend fun initGameState() {
+    suspend fun initGameState(): GameStateConfig {
+        val vfs = resourcesVfs["common/config.yaml"]
+//        if (vfs.exists()) {
+        // TODO Check why exits() function does not work on Android
+
+        val gameConfigString = vfs.readString()
+        try {
+            val commonConfig = configSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+            // Enable / disable hot reloading of common assets here
+            assetStore.loadAssets(AssetType.COMMON, assetConfig = commonConfig)
+        } catch (e: Throwable) { println("ERROR: Loading common assets - $e") }
+//        } else println("WARNING: Cannot find common entity config file 'common/config.yaml'!")
+
         // Check for game config file
         val gameStateConfigVfs = resourcesVfs["game_config.yaml"]
 
@@ -36,29 +46,15 @@ object GameStateManager {
             // TODO Check why exits() function does not work on Android
 
             val gameStateConfigString = gameStateConfigVfs.readString()
-            try {
-                gameStateConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<GameStateConfig>(gameStateConfigString)
+            return try {
+                 configSerializer.yaml().decodeFromString<GameStateConfig>(gameStateConfigString)
             } catch (e: Throwable) {
-                gameStateConfig = GameStateConfig("", true, "", "", "")
                 println("ERROR: Loading game state config - $e")
+                GameStateConfig("jobesLegacy", 0, true, "world_1", "level_1", "intro", "start_intro")
             }
 //        } else {
-//            gameStateConfig = GameStateConfig("", true, "", "", "")
-//            println("ERROR: Cannot find game state config file 'game_config.yaml'!")
+//            return GameStateConfig("jobesLegacy", 0, true, "", "", "")
 //        }
-        firstGameStart = gameStateConfig.firstStart
-
-        val vfs = resourcesVfs["common/config.yaml"]
-//        if (vfs.exists()) {
-            // TODO Check why exits() function does not work on Android
-
-            val gameConfigString = vfs.readString()
-            try {
-                val commonConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
-                // Enable / disable hot reloading of common assets here
-                assetStore.loadAssets(AssetType.COMMON, assetConfig = commonConfig)
-            } catch (e: Throwable) { println("ERROR: Loading common assets - $e") }
-//        } else println("WARNING: Cannot find common entity config file 'common/config.yaml'!")
     }
 
     /**
@@ -66,7 +62,7 @@ object GameStateManager {
      * whenever new assets need to be loaded. I.e. also within a level when assets of type 'special' should
      * be loaded/reloaded.
      */
-    suspend fun loadAssets() {
+    suspend fun loadAssets(gameStateConfig: GameStateConfig) {
         // Sanity check - world needs to be always present
         if (gameStateConfig.world.isEmpty() || gameStateConfig.level.isEmpty()) {
             println("ERROR: World or level string is empty in game config! Cannot load game data!")
@@ -80,7 +76,7 @@ object GameStateManager {
 
             var gameConfigString = worldVfs.readString()
             try {
-                val worldConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                val worldConfig = configSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                 // Enable / disable hot reloading of common assets here
                 assetStore.loadAssets(AssetType.WORLD, assetConfig = worldConfig)
             } catch (e: Throwable) {
@@ -93,7 +89,7 @@ object GameStateManager {
 //        if (levelVfs.exists()) {
             gameConfigString = levelVfs.readString()
             try {
-                val worldConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                val worldConfig = configSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                 // Enable / disable hot reloading of common assets here
                 assetStore.loadAssets(AssetType.LEVEL, assetConfig = worldConfig)
             } catch (e: Throwable) {
@@ -107,7 +103,7 @@ object GameStateManager {
 //            if (vfs.exists()) {
                 gameConfigString = vfs.readString()
                 try {
-                    val specialConfig = assetStore.assetLevelData.configDeserializer.yaml().decodeFromString<AssetModel>(gameConfigString)
+                    val specialConfig = configSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
                     // Enable / disable hot reloading of common assets here
                     assetStore.loadAssets(AssetType.SPECIAL, assetConfig = specialConfig)
                 } catch (e: Throwable) {
@@ -118,21 +114,25 @@ object GameStateManager {
     }
 
     /**
-     * This function is called to start the game. It will load the "start script" from the current LDtk level and
+     * This function is called to start the game. It will load a specific "start script" from the current LDtk world and
      * create and configure the very first entity of the game.
      *
-     * Hint: Make sure that a game object with name "start_script" is present in each LDtk level. It can be of different
+     * Hint: Make sure that a game object with name start script name is present in each LDtk world. It can be of different
      * EntityConfig type. The type can be set in LDtk level map editor.
      */
-    fun startGame(world: World) {
-        // TODO: Check if save game is available and load it
-
-        // Load start script from level
-        val startScript = "start_script"
-        if (EntityFactory.contains(startScript)) {
-            println("INFO: Starting '${gameStateConfig.world}'")
-            world.createAndConfigureEntity(startScript)
+    fun World.startGame(gameStateConfig: GameStateConfig, loadSnapshot: Boolean = false) {
+        // Check if save game is available and load it
+        if (loadSnapshot) {
+            // Load save game
+            println("INFO: Loading save game")
+        } else {
+            // Start new game - Load start script and create entity
+            if (EntityFactory.contains(gameStateConfig.startScript)) {
+                println("INFO: Start game with asset config '${gameStateConfig.world}_${gameStateConfig.level}_${gameStateConfig.special}' and start script '${gameStateConfig.startScript}'")
+                createAndConfigureEntity(gameStateConfig.startScript)
+            }
+            else println("ERROR: Cannot start game! EntityConfig with name '${gameStateConfig.startScript}' does not exist!")
         }
-        else println("Error: Cannot start '${gameStateConfig.world}'! EntityConfig with name '$startScript' does not exist!")
+
     }
 }
