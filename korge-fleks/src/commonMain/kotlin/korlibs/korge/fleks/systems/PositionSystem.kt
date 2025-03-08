@@ -14,15 +14,11 @@ import korlibs.math.geom.*
 class PositionSystem : IteratingSystem(
     family {
         all(PositionComponent)  // Position component absolutely needed for movement of entity objects
-        .any(MotionComponent, RigidbodyComponent)  // Motion, eigidbody, ect. not necessarily needed for movement
+        .any(MotionComponent, RigidbodyComponent)  // Motion, Rigidbody, ect. not necessarily needed for movement
         .none(ParallaxComponent)
     },
     interval = EachFrame
 ) {
-    // Overall world moving (playfield)
-    val deltaX: Float = -110.0f  // TODO this will come from tiledMap scrolling
-    val deltaY: Float = 0.0f
-
     override fun onTickEntity(entity: Entity) {
         val positionComponent = entity[PositionComponent]
 

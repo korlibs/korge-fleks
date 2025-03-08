@@ -171,6 +171,7 @@ class SnapshotSerializer {
         polymorphic(UniqueId::class) {
             subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
             subclass(ScreenCoordinatesTag::class)
+            subclass(MainCameraTag::class)
         }
 
         // Data class hierarchy used for AnimationScript component
