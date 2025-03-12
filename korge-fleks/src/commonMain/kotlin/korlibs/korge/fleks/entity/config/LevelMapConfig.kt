@@ -2,8 +2,10 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
@@ -26,14 +28,22 @@ data class LevelMapConfig(
     private val x: Float = 0f,
     private val y: Float = 0f,
     private val alpha: Float = 1f,
+    private val enableParallax: Boolean = true
 ) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
+
+        // Set level size in CameraSystem for parallax effect
+        if (enableParallax) {
+            val worldData: WorldData = inject<AssetStore>("AssetStore").getWorldData(levelName)
+            system<CameraSystem>().worldWidth = worldData.width
+            system<CameraSystem>().worldHeight = worldData.height
+        }
+
         entity.configure {
             it += LevelMapComponent(levelName, layerNames)
             // Level map does not have position - camera position will determine what is shown from the level map
-            it += SizeComponent()  // Size of level map needs to be set after loading of map is finished
-            // TODO: Check if SizeComponent is needed because it is static and does not change
+            // Size of level map is static and can be gathered from AssetStore -> AssetLevelData
             it += RgbaComponent().apply {
                 alpha = this@LevelMapConfig.alpha
             }

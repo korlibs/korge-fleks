@@ -3,6 +3,7 @@ package korlibs.korge.fleks.assets
 import korlibs.image.tiles.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.assets.WorldData.*
+import korlibs.korge.fleks.gameState.*
 import korlibs.korge.ldtk.*
 import korlibs.korge.ldtk.view.*
 import korlibs.math.*
@@ -15,7 +16,6 @@ import kotlin.math.*
  */
 class AssetLevelData {
     internal val worldData = WorldData()
-    internal val configDeserializer = EntityConfigSerializer()
     private var gameObjectCnt = 0
 
     // Size of a level within the gridvania array in pixels
@@ -87,6 +87,18 @@ class AssetLevelData {
             val gridSize = ldtkLayer.gridSize
             val entities: MutableList<String> = mutableListOf()
 
+            // TODO: Check if we want layer to be considered for platform collision
+
+            // in ldtkLayer on of below data sets are defined:
+            //   - Entity layer:
+            //       entityInstances - List of entities (game objects) in the layer
+            //   - Highlight layer: gridTiles - List of hand set tiles in the layer
+            //   - Playfield layer:
+            //       autoLayerTiles - List of tiles set by auto-tile rules in the layer
+            //       intGridCSV - List of all values in the IntGrid layer, stored in CSV format and used as collision input
+            //   - Background layer:
+            //       autoLayerTiles - List of tiles set by auto-tile rules in the layer
+
 
             // Check if layer contains entity data -> create EntityConfigs and store them fo
             if (ldtkLayer.entityInstances.isNotEmpty()) {
@@ -123,7 +135,7 @@ class AssetLevelData {
                         try {
                             // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
                             val entityConfig: EntityConfig =
-                                configDeserializer.yaml().decodeFromString(yamlString.toString())
+                                GameStateManager.configSerializer.yaml().decodeFromString(yamlString.toString())
 
                             // We need to store only the name of the entity config for later dynamically spawning of entities
                             entities.add(entityConfig.name)
@@ -185,77 +197,24 @@ class AssetLevelData {
             when {
                 (dx == 0 && dy == 0) -> {
                     val stackLevel = tileMapData.data.getStackLevel(x, y)
-                    tileMapData.data.set(
-                        x,
-                        y,
-                        stackLevel,
-                        value = Tile(
-                            tile = tileId,
-                            offsetX = dx,
-                            offsetY = dy,
-                            flipX = flipX,
-                            flipY = flipY,
-                            rotate = false
-                        ).raw
-                    )
+                    tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
                 }
 
                 (dx == 0 && dy != 0) -> {
                     val stackLevel = max(tileMapData.data.getStackLevel(x, y), tileMapData.data.getStackLevel(x, y + 1))
-                    tileMapData.data.set(
-                        x,
-                        y,
-                        stackLevel,
-                        value = Tile(
-                            tile = tileId,
-                            offsetX = dx,
-                            offsetY = dy,
-                            flipX = flipX,
-                            flipY = flipY,
-                            rotate = false
-                        ).raw
-                    )
+                    tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
                     tileMapData.data.set(x, y + 1, stackLevel, value = Tile.ZERO.raw)
                 }
 
                 (dx != 0 && dy == 0) -> {
                     val stackLevel = max(tileMapData.data.getStackLevel(x, y), tileMapData.data.getStackLevel(x + 1, y))
-                    tileMapData.data.set(
-                        x,
-                        y,
-                        stackLevel,
-                        value = Tile(
-                            tile = tileId,
-                            offsetX = dx,
-                            offsetY = dy,
-                            flipX = flipX,
-                            flipY = flipY,
-                            rotate = false
-                        ).raw
-                    )
+                    tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
                     tileMapData.data.set(x + 1, y, stackLevel, value = Tile.ZERO.raw)
                 }
 
                 else -> {
-                    val stackLevel = max(
-                        tileMapData.data.getStackLevel(x, y),
-                        tileMapData.data.getStackLevel(x, y + 1),
-                        tileMapData.data.getStackLevel(x + 1, y),
-                        tileMapData.data.getStackLevel(x + 1, y + 1)
-                    )
-                    tileMapData.data.set(
-                        x,
-                        y,
-                        stackLevel,
-                        value = Tile(
-                            tile = tileId,
-                            offsetX = dx,
-                            offsetY = dy,
-                            flipX = flipX,
-                            flipY = flipY,
-                            rotate = false
-                        ).raw
-                    )
+                    val stackLevel = max(tileMapData.data.getStackLevel(x, y), tileMapData.data.getStackLevel(x, y + 1), tileMapData.data.getStackLevel(x + 1, y), tileMapData.data.getStackLevel(x + 1, y + 1))
+                    tileMapData.data.set(x, y, stackLevel, value = Tile(tile = tileId, offsetX = dx, offsetY = dy, flipX = flipX, flipY = flipY, rotate = false).raw)
                     tileMapData.data.set(x, y + 1, stackLevel, value = Tile.ZERO.raw)
                     tileMapData.data.set(x + 1, y, stackLevel, value = Tile.ZERO.raw)
                     tileMapData.data.set(x + 1, y + 1, stackLevel, value = Tile.ZERO.raw)

@@ -18,11 +18,9 @@ class CameraSystem(
     private val worldToPixelRatioInv = 1f / worldToPixelRatio
     private val factor = 0.05f
 
-    private val assetStore: AssetStore = inject<AssetStore>("AssetStore")
-
-    // TODO how to get current world name?
-    private val worldHeight: Float = assetStore.getWorldData("").height
-    private val worldWidth: Float = assetStore.getWorldData("").width
+    // These properties need to be set by the entityConfigure function of the level map config
+    var worldHeight: Float = 0f
+    var worldWidth: Float = 0f
 
     // These properties need to be set by the onAdd hook function of the ParallaxComponent
     var parallaxHeight: Float = 0f
