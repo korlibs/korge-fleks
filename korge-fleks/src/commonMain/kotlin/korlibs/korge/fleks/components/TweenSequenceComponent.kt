@@ -23,6 +23,18 @@ data class TweenSequenceComponent(
     var initialized: Boolean = false
 ) : CloneableComponent<TweenSequenceComponent>() {
     override fun type(): ComponentType<TweenSequenceComponent> = TweenSequenceComponent
+    companion object : ComponentType<TweenSequenceComponent>()
+
+    // Author's hint: Check if deep copy is needed on any change in the component!
+    override fun clone(): TweenSequenceComponent {
+        val copyOfTweens: MutableList<TweenBase> = mutableListOf()
+        // Perform special deep copy of list elements
+        tweens.forEach { element -> copyOfTweens.add(element.clone()) }
+
+        return this.copy(
+            tweens = copyOfTweens
+        )
+    }
 
     /**
      * Initialize internal waitTime property with delay value of first tweens if available.
@@ -394,19 +406,6 @@ data class TweenSequenceComponent(
                 entity = entity.clone(),
                 easing = easing
             )
-    }
-
-    companion object : ComponentType<TweenSequenceComponent>()
-
-    // Author's hint: Check if deep copy is needed on any change in the component!
-    override fun clone(): TweenSequenceComponent {
-        val copyOfTweens: MutableList<TweenBase> = mutableListOf()
-        // Perform special deep copy of list elements
-        tweens.forEach { element -> copyOfTweens.add(element.clone()) }
-
-        return this.copy(
-            tweens = copyOfTweens
-        )
     }
 }
 

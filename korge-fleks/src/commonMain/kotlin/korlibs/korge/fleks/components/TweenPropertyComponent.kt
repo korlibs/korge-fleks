@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
  *
  * In case of single switch: This value is set when easing > 0.5
  */
-@Serializable @SerialName("TweenPropertyComponent")
+@Serializable @SerialName("TweenProperty")
 data class TweenPropertyComponent (
     var property: TweenProperty,
 

@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
+
 /**
  * A component to define movement for an entity.
  *

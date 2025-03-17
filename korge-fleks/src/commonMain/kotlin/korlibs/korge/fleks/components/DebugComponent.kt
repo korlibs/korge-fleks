@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 /**
  *
  */
-@Serializable @SerialName("DebugComponent")
+@Serializable @SerialName("Debug")
 data class DebugComponent(
     val name: String = ""
 ) : CloneableComponent<DebugComponent>() {

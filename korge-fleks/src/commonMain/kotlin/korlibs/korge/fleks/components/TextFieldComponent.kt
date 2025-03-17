@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import korlibs.image.text.*
 import korlibs.korge.fleks.utils.*
@@ -10,7 +9,7 @@ import kotlinx.serialization.*
 /**
  * This component contains [text] which can be drawn with [fontName] with the DialogRenderView.
  */
-@Serializable @SerialName("Text")
+@Serializable @SerialName("TextField")
 data class TextFieldComponent(
     var text: String = "",
     var fontName: String = "",

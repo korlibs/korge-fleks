@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  *
  * @param [layerMap] contains offset and rgba properies for specific layers of a sprite texture.
  */
-@Serializable @SerialName("SpecificLayer")
+@Serializable @SerialName("SpriteLayers")
 data class SpriteLayersComponent(
     var layerMap: Map<String, LayerProperties> = mapOf()
 ) : CloneableComponent<SpriteLayersComponent>() {

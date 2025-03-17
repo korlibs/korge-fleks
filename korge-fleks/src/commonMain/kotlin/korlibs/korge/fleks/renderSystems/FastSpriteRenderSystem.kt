@@ -25,7 +25,7 @@ class FastSpriteRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag
 ) : View() {
-    private val family: Family
+    private val family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
     override fun renderInternal(ctx: RenderContext) {
@@ -72,6 +72,5 @@ class FastSpriteRenderSystem(
 
     init {
         name = layerTag.toString()
-        family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent) }
     }
 }

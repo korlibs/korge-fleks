@@ -5,10 +5,11 @@ import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
 /**
- *
+ * This component is used to define a NinePatch texture for an entity.
  */
-@Serializable @SerialName("NinePatchComponent")
+@Serializable @SerialName("NinePatch")
 data class NinePatchComponent(
     val name: String = "",
     val width: Float = 0f,
