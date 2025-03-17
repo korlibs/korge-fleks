@@ -17,6 +17,8 @@ import kotlinx.serialization.Serializable
  * Korge-specific objects shall not be added to any component. They will be stored
  * in Korge specific cache objects and used in systems.
  */
+
+// TODO remove this - we are not supporting Tiled maps
 @Serializable @SerialName("TiledLevelMap")
 data class TiledLevelMapComponent(
     var assetName: String = "",

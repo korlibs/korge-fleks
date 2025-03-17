@@ -11,7 +11,7 @@ import kotlinx.serialization.*
  *
  * Hint: Not yet used in KorGE-Fleks.
  */
-@Serializable @SerialName("Info")
+@Serializable @SerialName("Event")
 data class EventComponent(
     val publish: Boolean = false,
     val subscribe: Boolean = false,

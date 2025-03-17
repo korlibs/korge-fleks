@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
+
 /**
  * This component is used to add a size to a game object.
  */

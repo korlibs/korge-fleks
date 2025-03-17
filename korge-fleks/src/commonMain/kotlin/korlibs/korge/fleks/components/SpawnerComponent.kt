@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
 import korlibs.korge.fleks.utils.*
