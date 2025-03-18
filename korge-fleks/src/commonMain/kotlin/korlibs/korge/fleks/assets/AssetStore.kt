@@ -128,9 +128,7 @@ class AssetStore {
             // Update maps of music, images, ...
             assetConfig.tileMaps.forEach { tileMap ->
                 val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + tileMap.value.fileName].readLDTKWorld(extrude = true)
-                val levelData = AssetLevelData()
-                levelData.loadLevelData(ldtkWorld)
-                assetLevelData[tileMap.key] = Pair(type, levelData)
+                assetLevelData[tileMap.key] = Pair(type, AssetLevelData(ldtkWorld))
             }
 
             assetConfig.sounds.forEach { sound ->
