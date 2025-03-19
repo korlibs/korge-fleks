@@ -8,7 +8,7 @@ import kotlinx.serialization.*
 @Serializable @SerialName("LevelMap")
 data class LevelMapComponent(
     /**
-     * The unique identifier (level name) of the level from the LDtk world
+     * The unique identifier for the level
      */
     var levelName: String = "",
     /**

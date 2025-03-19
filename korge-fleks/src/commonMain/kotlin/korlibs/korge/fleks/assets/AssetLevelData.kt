@@ -14,85 +14,86 @@ import kotlin.math.*
 /**
  * Data class for storing level maps and entities for a game world.
  */
-class AssetLevelData {
-    internal val worldData = WorldData()
+class AssetLevelData(
+    ldtkWorld: LDTKWorld,
+    private val collisionLayerName: String
+) {
+    internal var worldData = WorldData()
     private var gameObjectCnt = 0
-
-    // Size of a level within the gridvania array in pixels
-    private var gridVaniaWidth: Int = 0
-    private var gridVaniaHeight: Int = 0
 
     /**
      * Load level data from LDtk world file and store it in the worldData object.
      * The worldData object contains all level data and is used to render the levels.
      * The level data is stored in a 2D array where each element is a LevelData object.
      * The LevelData object contains the tile map data and entity data for each level.
-     *
-     * @param ldtkWorld - LDtk world object containing all level data
-     *
-     * @see WorldData
      */
-    fun loadLevelData(ldtkWorld: LDTKWorld) {
-        gridVaniaWidth = ldtkWorld.ldtk.worldGridWidth ?: 1  // this is also the size of each sub-level
-        gridVaniaHeight = ldtkWorld.ldtk.worldGridHeight ?: 1
-        var maxLevelOffsetX = 0
-        var maxLevelOffsetY = 0
+    init {
+        val levelWidth = ldtkWorld.ldtk.worldGridWidth ?: 1  // this is also the size of each sub-level
+        val levelHeight = ldtkWorld.ldtk.worldGridHeight ?: 1  // all levels have the same size
+        var worldWidth = 0
+        var worldHeight = 0
 
-        // Get the highest values for X and Y axis - this will be the size of the grid vania array
+        // Get the highest values for X and Y axis - this will be the size of the world
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-            if (maxLevelOffsetX < ldtkLevel.worldX) maxLevelOffsetX = ldtkLevel.worldX
-            if (maxLevelOffsetY < ldtkLevel.worldY) maxLevelOffsetY = ldtkLevel.worldY
+            if (worldWidth < ldtkLevel.worldX) worldWidth = ldtkLevel.worldX
+            if (worldHeight < ldtkLevel.worldY) worldHeight = ldtkLevel.worldY
         }
+        worldWidth += levelWidth
+        worldHeight += levelHeight
 
-        // Create grid vania array
-        val gridWidth = (maxLevelOffsetX / gridVaniaWidth) + 1
-        val gridHeight = (maxLevelOffsetY / gridVaniaHeight) + 1
+        // Calculate the size of the level grid vania array
+        val gridVaniaWidth = (worldWidth / levelWidth) + 1  // +1 for guard needed in world map renderer
+        val gridVaniaHeight = (worldHeight / levelHeight) + 1
 
-        // Set the size of the world
-        worldData.width = (gridWidth * gridVaniaWidth).toFloat()
-        worldData.height = (gridHeight * gridVaniaHeight).toFloat()
-
-        // Set the size of a grid cell in pixels
-        worldData.gridSize = ldtkWorld.ldtk.defaultGridSize
-
-        // Set the size of a level in the grid vania array
-        worldData.levelWidth = gridVaniaWidth / worldData.gridSize
-        worldData.levelHeight = gridVaniaHeight / worldData.gridSize
-
-
-        if (maxLevelOffsetX == 0) println("WARNING: Level width is 0!")
+        worldData = WorldData(
+            // Set the size of the world
+            width = worldWidth.toFloat(),
+            height = worldHeight.toFloat(),
+            // Set the size of a level in the grid vania array in tiles
+            levelGridWidth = levelWidth / ldtkWorld.ldtk.defaultGridSize,
+            levelGridHeight = levelHeight / ldtkWorld.ldtk.defaultGridSize,
+            // Set the size of a grid cell in pixels
+            tileSize = ldtkWorld.ldtk.defaultGridSize,
+            // We store the level data config in a 2D array depending on its gridvania position in the world
+            // Then later we will spawn the entities depending on the level which the player is currently in
+            levelGridVania = List(gridVaniaWidth) { List(gridVaniaHeight) { LevelMap() } }
+        )
 
         // Save TileMapData for each Level and layer combination from LDtk world
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-            val levelX: Int = ldtkLevel.worldX / gridVaniaWidth
-            val levelY: Int = ldtkLevel.worldY / gridVaniaHeight
-            loadLevel(worldData, levelX, levelY, ldtkWorld, ldtkLevel)
+            loadLevel(ldtkWorld, ldtkLevel)
         }
-        println("Gridvania size: ${gridWidth} x ${gridHeight})")
+        println("Gridvania size: ${gridVaniaWidth} x ${gridVaniaHeight})")
     }
 
     fun reloadAsset(ldtkWorld: LDTKWorld) {
         // Reload all levels from ldtk world file
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-            val levelX: Int = ldtkLevel.worldX / gridVaniaWidth
-            val levelY: Int = ldtkLevel.worldY / gridVaniaHeight
-            loadLevel(worldData, levelX, levelY, ldtkWorld, ldtkLevel)
+            loadLevel(ldtkWorld, ldtkLevel)
         }
     }
 
-    private fun loadLevel(worldData: WorldData, levelX: Int, levelY: Int, ldtkWorld: LDTKWorld, ldtkLevel: Level) {
+    private fun loadLevel(ldtkWorld: LDTKWorld, ldtkLevel: Level) {
+        val levelX: Int = ldtkLevel.worldX / (worldData.levelGridWidth * worldData.tileSize)
+        val levelY: Int = ldtkLevel.worldY / (worldData.levelGridHeight * worldData.tileSize)
+
+        val entities: MutableList<String> = mutableListOf()
+        val tileMapData: MutableMap<String, TileMapData> = mutableMapOf()
+        var collisionMap: IntArray? = null
+
         val levelName = ldtkLevel.identifier
         ldtkLevel.layerInstances?.forEach { ldtkLayer ->
             val layerName = ldtkLayer.identifier
-            val gridSize = ldtkLayer.gridSize
-            val entities: MutableList<String> = mutableListOf()
+            val levelWidth = worldData.levelGridWidth * worldData.tileSize
+            val levelHeight = worldData.levelGridHeight * worldData.tileSize
+            val gridSize = worldData.tileSize
 
             // TODO: Check if we want layer to be considered for platform collision
 
-            // in ldtkLayer on of below data sets are defined:
+            // in ldtkLayer one of below data sets are defined:
             //   - Entity layer:
-            //       entityInstances - List of entities (game objects) in the layer
-            //   - Highlight layer: gridTiles - List of hand set tiles in the layer
+            //       entityInstances - List of entities (game objects) in the level
+            //   - Highlight layer: gridTiles - List of manually placed tiles in the level
             //   - Playfield layer:
             //       autoLayerTiles - List of tiles set by auto-tile rules in the layer
             //       intGridCSV - List of all values in the IntGrid layer, stored in CSV format and used as collision input
@@ -116,8 +117,8 @@ class AssetLevelData {
                         }
 
                         // Add position of entity = (level position in the world) + (position within the level) + (pivot point)
-                        val entityPosX: Int = (gridVaniaWidth * levelX) + (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
-                        val entityPosY: Int = (gridVaniaHeight * levelY) + (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
+                        val entityPosX: Int = (levelWidth * levelX) + (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
+                        val entityPosY: Int = (levelHeight * levelY) + (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
 
                         // Add position of entity
                         entity.tags.firstOrNull { it == "positionable" }?.let {
@@ -148,29 +149,23 @@ class AssetLevelData {
                 }
             }
 
-            if (!worldData.layerlevelMaps.contains(layerName)) {
-                // We store the entity configs in a 2D array depending on its gridvania position in the world
-                // Then later we will spawn the entities depending on the level which the player is currently in
-                val gridWidth = (worldData.width.toInt() / gridVaniaWidth) + 1  // +1 for guard needed in world map renderer
-                val gridHeight = (worldData.height.toInt() / gridVaniaHeight) + 1
-                worldData.layerlevelMaps[layerName] = LevelMap(levelGridVania = List(gridWidth) { List(gridHeight) { LevelData() } })
-            }
-
-            val levelData = worldData.layerlevelMaps[layerName]!!.levelGridVania[levelX][levelY]
-
-            if (entities.isNotEmpty()) {
-                // Layer has entities -> store entity data - no tile data
-                levelData.entities = entities
-            } else if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
+            // Store tiles into tileMapData for each layer
+            if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
                 // Layer has tile set -> store tile map data - no entity data
-                storeTiles(levelData, ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!)
-            } else {
-                println("WARNING: Layer '$layerName' of level '$levelName' has no tile set or entities!")
+                tileMapData[layerName] = storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!)
             }
+
+            // Store collision data for Playfield layer
+            if (layerName == collisionLayerName) collisionMap = ldtkLayer.intGridCSV
         }
+
+        val levelData = worldData.levelGridVania[levelX][levelY]
+        levelData.entities = entities.ifEmpty { null }
+        levelData.tileMapData = tileMapData
+        levelData.collisionMap = collisionMap
     }
 
-    private fun storeTiles(levelData: LevelData, ldtkLayer: LayerInstance, tilesetExt: ExtTileset) {
+    private fun storeTiles(ldtkLayer: LayerInstance, tilesetExt: ExtTileset) : TileMapData {
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,
             height = ldtkLayer.cHei,
@@ -221,6 +216,6 @@ class AssetLevelData {
                 }
             }
         }
-        levelData.tileMapData = tileMapData
+        return tileMapData
     }
 }

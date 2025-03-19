@@ -11,88 +11,118 @@ import korlibs.image.tiles.*
  */
 data class WorldData(
     // Size of all gridvania levels in the world (in pixels / world coordinates)
-    var width: Float = 0f,
-    var height: Float = 0f,
+    val width: Float = 0f,
+    val height: Float = 0f,
     // Size of a level inside the grid vania array in tiles (all levels have the same size)
-    var levelWidth: Int = 0,
-    var levelHeight: Int = 0,
-    // Size of a grid cell in pixels (e.g. 16 for 16x16 tile size)
-    var gridSize: Int = 1,
-    var layerlevelMaps: MutableMap<String, LevelMap> = mutableMapOf(),
+    val levelGridWidth: Int = 0,
+    val levelGridHeight: Int = 0,
+    // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
+    val tileSize: Int = 1,
+    // Level maps
+    val levelGridVania: List<List<LevelMap>> = listOf()
 ) {
 
-    fun getLevelMap(layerName: String): LevelMap {
-        if (!layerlevelMaps.contains(layerName)) println("WARNING: Level map for layer '$layerName' does not exist!")
-        return layerlevelMaps[layerName] ?: LevelMap()
-    }
-
     data class LevelMap(
-        val levelGridVania: List<List<LevelData>> = listOf()
-    ) {
-        /**
-         * Iterate over all tiles within the given view port area and call the renderCall function for each tile.
-         *
-         * @param x - horizontal position of top-left corner of view port in tiles
-         * @param y - vertical position of top-left corner of view port in tiles
-         * @param width - width of view port in tiles
-         * @param height - height of view port in tiles
-         * @param levelWidth - width of a level in tiles
-         * @param levelHeight - height of a level in tiles
-         */
-        fun forEachTile(x: Int, y: Int, width: Int, height: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
-            // Calculate the view port corners (top-left, top-right, bottom-left and bottom-right positions) in gridvania indexes
-            // and check if the corners are in different level maps (tileMapData)
-            val gridX = x / levelWidth
-            val gridY = y / levelHeight
-            val gridX2 = (x + width) / levelWidth
-            val gridY2 = (y + height) / levelHeight
+        var entities: List<String>? = null,
+        var tileMapData: Map<String, TileMapData> = mapOf(),
+        var collisionMap: IntArray? = null
+    )
 
-            val xStart = x % levelWidth
-            val yStart = y % levelHeight
-
-            // Check if the view port area overlaps multiple levels
-            if (gridX == gridX2) {
-                // We have only one level in horizontal direction
-                if (gridY == gridY2) {
-                    // We have only one level in vertical direction
-                    processTiles(gridX, gridY, xStart, yStart, xStart + width, yStart + height, levelWidth, levelHeight, renderCall)
-                } else {
-                    // We have vertically two levels
-                    processTiles(gridX, gridY, xStart, yStart, xStart + width, levelHeight, levelWidth, levelHeight, renderCall)
-                    processTiles(gridX, gridY2, xStart, 0, xStart + width, (yStart + height) % levelHeight, levelWidth, levelHeight, renderCall)
-                }
+    /**
+     * Iterate over all tiles within the given view port area and call the renderCall function for each tile.
+     *
+     * @param x - horizontal position of top-left corner of view port in tiles
+     * @param y - vertical position of top-left corner of view port in tiles
+     * @param width - width of view port in tiles
+     * @param height - height of view port in tiles
+     */
+    fun forEachTile(layer: String, x: Int, y: Int, width: Int, height: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+        // Calculate the view port corners (top-left, top-right, bottom-left and bottom-right positions) in gridvania indexes
+        // and check if the corners are in different level maps (tileMapData)
+        val gridX = x / levelGridWidth
+        val gridY = y / levelGridHeight
+        val gridX2 = (x + width) / levelGridWidth
+        val gridY2 = (y + height) / levelGridHeight
+        val xStart = x % levelGridWidth
+        val yStart = y % levelGridHeight
+        // Check if the view port area overlaps multiple levels
+        if (gridX == gridX2) {
+            // We have only one level in horizontal direction
+            if (gridY == gridY2) {
+                // We have only one level in vertical direction
+                processTiles(layer, gridX, gridY, xStart, yStart, xStart + width, yStart + height, levelGridWidth, levelGridHeight, renderCall)
             } else {
-                // We have horizontal two levels
-                if (gridY == gridY2) {
-                    // We have only one level in vertical direction
-                    processTiles(gridX, gridY, xStart, yStart, levelWidth, yStart + height, levelWidth, levelHeight, renderCall)
-                    processTiles(gridX2, gridY, 0, yStart, (xStart + width) % levelWidth, yStart + height, levelWidth, levelHeight, renderCall)
-                } else {
-                    // We have vertical two levels
-                    processTiles(gridX, gridY, xStart, yStart, levelWidth, levelHeight, levelWidth, levelHeight, renderCall)
-                    processTiles(gridX2, gridY, 0, yStart, (xStart + width) % levelWidth, levelHeight, levelWidth, levelHeight, renderCall)
-                    processTiles(gridX, gridY2, xStart, 0, levelWidth, (yStart + height) % levelHeight, levelWidth, levelHeight, renderCall)
-                    processTiles(gridX2, gridY2, 0, 0, (xStart + width) % levelWidth, (yStart + height) % levelHeight, levelWidth, levelHeight, renderCall)
-                }
+                // We have vertically two levels
+                processTiles(layer, gridX, gridY, xStart, yStart, xStart + width, levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                processTiles(layer, gridX, gridY2, xStart, 0, xStart + width, (yStart + height) % levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+            }
+        } else {
+            // We have horizontal two levels
+            if (gridY == gridY2) {
+                // We have only one level in vertical direction
+                processTiles(layer, gridX, gridY, xStart, yStart, levelGridWidth, yStart + height, levelGridWidth, levelGridHeight, renderCall)
+                processTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelGridWidth, yStart + height, levelGridWidth, levelGridHeight, renderCall)
+            } else {
+                // We have vertical two levels
+                processTiles(layer, gridX, gridY, xStart, yStart, levelGridWidth, levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                processTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelGridWidth, levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                processTiles(layer, gridX, gridY2, xStart, 0, levelGridWidth, (yStart + height) % levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                processTiles(layer, gridX2, gridY2, 0, 0, (xStart + width) % levelGridWidth, (yStart + height) % levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
             }
         }
+    }
 
-        private fun processTiles(gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
-            levelGridVania[gridX][gridY].tileMapData?.let { tileMap ->
-                val tileSet = tileMap.tileSet
-                val tileWidth = tileSet.width
-                val tileHeight = tileSet.height
+    fun forEachCollisionTile(x: Int, y: Int, width: Int, height: Int, renderCall: (Int, Float, Float) -> Unit) {
+        // Calculate the view port corners (top-left, top-right, bottom-left and bottom-right positions) in gridvania indexes
+        // and check if the corners are in different level maps (tileMapData)
+        val gridX = x / levelGridWidth
+        val gridY = y / levelGridHeight
+        val gridX2 = (x + width) / levelGridWidth
+        val gridY2 = (y + height) / levelGridHeight
+        val xStart = x % levelGridWidth
+        val yStart = y % levelGridHeight
+        // Check if the view port area overlaps multiple levels
+        if (gridX == gridX2) {
+            // We have only one level in horizontal direction
+            if (gridY == gridY2) {
+                // We have only one level in vertical direction
+                processCollisionTiles(gridX, gridY, xStart, yStart, xStart + width, yStart + height, levelGridWidth, levelGridHeight, renderCall)
+            } else {
+                // We have vertically two levels
+                processCollisionTiles(gridX, gridY, xStart, yStart, xStart + width, levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                processCollisionTiles(gridX, gridY2, xStart, 0, xStart + width, (yStart + height) % levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+            }
+        } else {
+            // We have horizontal two levels
+            if (gridY == gridY2) {
+                // We have only one level in vertical direction
+                processCollisionTiles(gridX, gridY, xStart, yStart, levelGridWidth, yStart + height, levelGridWidth, levelGridHeight, renderCall)
+                processCollisionTiles(gridX2, gridY, 0, yStart, (xStart + width) % levelGridWidth, yStart + height, levelGridWidth, levelGridHeight, renderCall)
+            } else {
+                // We have vertical two levels
+                processCollisionTiles(gridX, gridY, xStart, yStart, levelGridWidth, levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                processCollisionTiles(gridX2, gridY, 0, yStart, (xStart + width) % levelGridWidth, levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                processCollisionTiles(gridX, gridY2, xStart, 0, levelGridWidth, (yStart + height) % levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                processCollisionTiles(gridX2, gridY2, 0, 0, (xStart + width) % levelGridWidth, (yStart + height) % levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+            }
+        }
+    }
 
-                for (l in 0 until tileMap.maxLevel) {
-                    for (tx in xStart until xEnd) {
-                        for (ty in yStart until yEnd) {
-                            val tile = tileMap[tx, ty, l]
-                            val tileInfo = tileSet.getInfo(tile.tile)
-                            if (tileInfo != null) {
-                                val px = (tx * tileWidth) + tile.offsetX + (gridX * levelWidth * tileWidth)
-                                val py = (ty * tileHeight) + tile.offsetY + (gridY * levelHeight * tileHeight)
-                                renderCall(tileInfo.slice, px.toFloat(), py.toFloat())
-                            }
+    private fun processTiles(layer: String, gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+        levelGridVania[gridX][gridY].tileMapData[layer]?.let { tileMap ->
+            val tileSet = tileMap.tileSet
+            val tileWidth = tileSet.width
+            val tileHeight = tileSet.height
+
+            for (l in 0 until tileMap.maxLevel) {
+                for (tx in xStart until xEnd) {
+                    for (ty in yStart until yEnd) {
+                        val tile = tileMap[tx, ty, l]
+                        val tileInfo = tileSet.getInfo(tile.tile)
+                        if (tileInfo != null) {
+                            val px = (tx * tileWidth) + tile.offsetX + (gridX * levelWidth * tileWidth)
+                            val py = (ty * tileHeight) + tile.offsetY + (gridY * levelHeight * tileHeight)
+                            renderCall(tileInfo.slice, px.toFloat(), py.toFloat())
                         }
                     }
                 }
@@ -100,11 +130,18 @@ data class WorldData(
         }
     }
 
-    /**
-     * Data class for storing level data like entities and tileMapData
-     */
-    data class LevelData(
-        var entities: List<String> = listOf(),
-        var tileMapData: TileMapData? = null
-    )
+    private fun processCollisionTiles(gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (Int, Float, Float) -> Unit) {
+        levelGridVania[gridX][gridY].collisionMap?.let { collisionMap ->
+            for (tx in xStart until xEnd) {
+                for (ty in yStart until yEnd) {
+                    val tile = collisionMap[tx + ty * levelWidth]
+                    if (tile != 0) {
+                        val px = tx * tileSize + (gridX * levelWidth * tileSize)
+                        val py = ty * tileSize + (gridY * levelHeight * tileSize)
+                        renderCall(tile, px.toFloat(), py.toFloat())
+                    }
+                }
+            }
+        }
+    }
 }

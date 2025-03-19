@@ -2,15 +2,12 @@ package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
-import korlibs.event.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.input.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
-import korlibs.math.*
 import korlibs.math.geom.*
 
 
@@ -49,24 +46,22 @@ class LevelMapRenderSystem(
             val (rgba) = entity[RgbaComponent]
             val (levelName, layerNames) = entity[LevelMapComponent]
             val worldData = assetStore.getWorldData(levelName)
-            val tileSize = worldData.gridSize
+            val tileSize = worldData.tileSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
             val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
             val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
 
+            // Start and end indexes of viewport area (in tile coordinates)
+            val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
+            val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
+
+            val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
+            val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
+
             layerNames.forEach { layerName ->
-                val levelMap = worldData.getLevelMap(layerName)
-
-                // Start and end indexes of viewport area (in tile coordinates)
-                val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
-                val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
-
-                val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
-                val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
-
                 ctx.useBatcher { batch ->
-                    levelMap.forEachTile(xStart, yStart, xTiles, yTiles, worldData.levelWidth, worldData.levelHeight) { slice, px, py ->
+                    worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
                         batch.drawQuad(
                             tex = ctx.getTex(slice),
                             x = px - viewPortPosX,
