@@ -14,7 +14,10 @@ import kotlin.math.*
 /**
  * Data class for storing level maps and entities for a game world.
  */
-class AssetLevelData(ldtkWorld: LDTKWorld) {
+class AssetLevelData(
+    ldtkWorld: LDTKWorld,
+    private val collisionLayerName: String
+) {
     internal var worldData = WorldData()
     private var gameObjectCnt = 0
 
@@ -153,7 +156,7 @@ class AssetLevelData(ldtkWorld: LDTKWorld) {
             }
 
             // Store collision data for Playfield layer
-            if (layerName == "Playfield") collisionMap = ldtkLayer.intGridCSV
+            if (layerName == collisionLayerName) collisionMap = ldtkLayer.intGridCSV
         }
 
         val levelData = worldData.levelGridVania[levelX][levelY]

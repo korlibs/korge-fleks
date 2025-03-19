@@ -52,14 +52,14 @@ class LevelMapRenderSystem(
             val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
             val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
 
+            // Start and end indexes of viewport area (in tile coordinates)
+            val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
+            val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
+
+            val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
+            val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
+
             layerNames.forEach { layerName ->
-                // Start and end indexes of viewport area (in tile coordinates)
-                val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
-                val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
-
-                val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
-                val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
-
                 ctx.useBatcher { batch ->
                     worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
                         batch.drawQuad(
