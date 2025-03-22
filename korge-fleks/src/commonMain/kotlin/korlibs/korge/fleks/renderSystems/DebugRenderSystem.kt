@@ -131,42 +131,12 @@ class DebugRenderSystem(
 
                     // Draw collision tiles
                     worldData.forEachCollisionTile(xStart, yStart, xTiles, yTiles) { collisionTile, px, py ->
-                        batch.drawVector(Colors.YELLOWGREEN) {
-                            rect(px - viewPortPosX, py - viewPortPosY, tileSize.toFloat(), tileSize.toFloat())
+                        if (collisionTile == 1) {
+                            batch.drawVector(Colors.RED) {
+                                rect(px - viewPortPosX, py - viewPortPosY, tileSize.toFloat(), tileSize.toFloat())
+                            }
                         }
                     }
-//                    val collisionTile = worldData.getCollisionTile(xStart + 3, yStart + 3)
-//
-//                    batch.drawVector(Colors.YELLOW) {
-//                        rect(x, y, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
-//                        circle(Point(x, y), 2)
-//                        line(Point(x - 3, y), Point(x + 3, y))
-//                        line(Point(x, y - 3), Point(x, y + 3))
-//                    }
-
-
-
-                    /*
-
-
-
-            layerNames.forEach { layerName ->
-
-                ctx.useBatcher { batch ->
-                    worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
-                        batch.drawQuad(
-                            tex = ctx.getTex(slice),
-                            x = px - viewPortPosX,
-                            y = py - viewPortPosY,
-                            filtering = false,
-                            colorMul = rgba,
-                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                        )
-                    }
-                }
-            }
-
-                     */
                 }
             }
         }

@@ -169,9 +169,10 @@ class SnapshotSerializer {
         }
         // Register tags (components without properties)
         polymorphic(UniqueId::class) {
+            subclass(CameraFollowTag::class)
+            subclass(MainCameraTag::class)
             subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
             subclass(ScreenCoordinatesTag::class)
-            subclass(MainCameraTag::class)
         }
 
         // Data class hierarchy used for AnimationScript component
