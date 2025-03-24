@@ -131,7 +131,7 @@ class SnapshotSerializer {
             subclass(ParallaxComponent.Layer::class)
             subclass(ParallaxComponent.Plane::class)
             subclass(RgbaComponent.Rgb::class)
-            subclass(OffsetByFrameIndexComponent.Point::class)
+            subclass(Point::class)
             subclass(SpriteLayersComponent.LayerProperties::class)
             subclass(LayeredSpriteComponent.Layer::class)
         }

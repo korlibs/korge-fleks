@@ -15,16 +15,6 @@ data class OffsetByFrameIndexComponent(
     var entity: Entity = Entity.NONE,
     var mapOfOffsetLists: Map<String, List<Point>> = emptyMap()
 ) : CloneableComponent<OffsetByFrameIndexComponent>() {
-
-    @Serializable @SerialName("Point")
-    data class Point(
-        var x: Float = 0f,
-        var y: Float = 0f
-    ) : CloneableData<Point> {
-
-        override fun clone(): Point = this.copy()
-    }
-
     override fun type(): ComponentType<OffsetByFrameIndexComponent> = OffsetByFrameIndexComponent
     companion object : ComponentType<OffsetByFrameIndexComponent>()
 

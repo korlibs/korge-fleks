@@ -36,6 +36,7 @@ class DebugRenderSystem(
         ctx.useLineBatcher { batch ->
             family.forEach { entity ->
 
+
                 if (entity has PositionComponent) {
                     val entityPosition = entity[PositionComponent]
 
@@ -62,17 +63,17 @@ class DebugRenderSystem(
                                 height = imageData.height.toFloat()
                             )
                         }
-                        // Draw texture bounds for each layer
-                        imageFrame.layerData.fastForEachReverse { layer ->
-                            batch.drawVector(Colors.GREEN) {
-                                rect(
-                                    x = position.x + position.offsetX + layer.targetX.toFloat() - anchorX,
-                                    y = position.y + position.offsetY + layer.targetY.toFloat() - anchorY,
-                                    width = layer.width.toFloat(),
-                                    height = layer.height.toFloat()
-                                )
-                            }
-                        }
+//                        // Draw texture bounds for each layer
+//                        imageFrame.layerData.fastForEachReverse { layer ->
+//                            batch.drawVector(Colors.GREEN) {
+//                                rect(
+//                                    x = position.x + position.offsetX + layer.targetX.toFloat() - anchorX,
+//                                    y = position.y + position.offsetY + layer.targetY.toFloat() - anchorY,
+//                                    width = layer.width.toFloat(),
+//                                    height = layer.height.toFloat()
+//                                )
+//                            }
+//                        }
                     }
 
                     if (entity has TextFieldComponent) {
@@ -97,6 +98,19 @@ class DebugRenderSystem(
                                 y = position.y + position.offsetY,
                                 width = width,
                                 height = height
+                            )
+                        }
+                    }
+
+                    if (entity has CollisionComponent) {
+                        val (anchorX, anchorY, colWidth, colHeight) = assetStore.getCollisionData(entity[CollisionComponent].configName)
+                        // Draw collision bounds
+                        batch.drawVector(Colors.LIGHTBLUE) {
+                            rect(
+                                x = position.x + position.offsetX - anchorX.toFloat(),
+                                y = position.y + position.offsetY - anchorY.toFloat(),
+                                width = colWidth.toFloat(),
+                                height = colHeight.toFloat()
                             )
                         }
                     }

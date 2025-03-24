@@ -10,7 +10,8 @@ import korlibs.korge.annotations.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.tags.*
-import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.getMainCamera
+import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.render.*
 import korlibs.korge.view.*
 import korlibs.math.geom.*
@@ -122,7 +123,7 @@ class ObjectRenderSystem(
             // Rendering path for text (not optimized - no caching)
             else if (entity has TextFieldComponent) {
                 val (text, fontName, textRangeStart, textRangeEnd, width, height, wordWrap,  horizontalAlign, verticalAlign) = entity[TextFieldComponent]
-                val offset: Point = Point(position.offsetX, position.offsetY)
+                val offset = Point(position.offsetX, position.offsetY)
 
                 renderCtx2d(ctx) { render ->
                     var n = 0
