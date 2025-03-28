@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -13,7 +14,7 @@ data class TouchInputComponent(
     var entityConfig: String = "",
     var passPositionToEntity: Boolean = false,
     var continuousTouch: Boolean = false
-) : CloneableComponent<TouchInputComponent>() {
+) : PoolableComponent1<TouchInputComponent>() {
     override fun type(): ComponentType<TouchInputComponent> = TouchInputComponent
     companion object : ComponentType<TouchInputComponent>()
 

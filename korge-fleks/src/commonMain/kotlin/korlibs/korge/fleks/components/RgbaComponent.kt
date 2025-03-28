@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.io.lang.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import korlibs.util.*
 import kotlinx.serialization.*
 import kotlin.math.*
@@ -12,7 +13,7 @@ import kotlin.math.*
 data class RgbaComponent(
 //    @Serializable(with = RGBAAsString::class)  -- deserialization does not work with it???
     @Serializable(with = RGBAAsInt::class) var rgba: RGBA = Colors.WHITE,
-) : CloneableComponent<RgbaComponent>() {
+) : PoolableComponent1<RgbaComponent>() {
 
     var alpha: Float = rgba.af
         get() = rgba.af

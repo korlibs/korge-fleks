@@ -5,6 +5,7 @@ import korlibs.image.format.*
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 /**
@@ -34,7 +35,7 @@ data class LayeredSpriteComponent(
     // internally used for rendering and tween animation of layer position and rgba (alpha channel)
     var layerList: List<Layer> = listOf(),
     var layerMap: Map<String, Layer> = mapOf()
-): CloneableComponent<LayeredSpriteComponent>() {
+): PoolableComponent1<LayeredSpriteComponent>() {
 
     @Serializable @SerialName("LayeredSprite.Layer")
     data class Layer(

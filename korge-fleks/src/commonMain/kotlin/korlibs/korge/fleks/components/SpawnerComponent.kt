@@ -2,7 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
-import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -20,7 +20,7 @@ data class SpawnerComponent(
     // internal state
     var nextSpawnIn: Int = 0,
     var numberOfObjectsSpawned: Int = 0
-) : CloneableComponent<SpawnerComponent>() {
+) : PoolableComponent1<SpawnerComponent>() {
     override fun type(): ComponentType<SpawnerComponent> = SpawnerComponent
     companion object : ComponentType<SpawnerComponent>()
 

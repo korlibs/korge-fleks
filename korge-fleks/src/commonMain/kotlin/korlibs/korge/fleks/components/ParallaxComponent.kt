@@ -5,6 +5,7 @@ import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.renderSystems.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -26,7 +27,7 @@ data class ParallaxComponent(
 
     // internal
     var initialized: Boolean = false
-) : CloneableComponent<ParallaxComponent>() {
+) : PoolableComponent1<ParallaxComponent>() {
 
     @Serializable @SerialName("Parallax.Layer")
     data class Layer(

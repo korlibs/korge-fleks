@@ -9,15 +9,15 @@ import kotlinx.serialization.Serializable
 /**
  *
  */
-@Serializable @SerialName("Debug")
-data class DebugComponent(
-    val name: String = ""
-) : PoolableComponent1<DebugComponent>() {
-    override fun type() = DebugComponent
+@Serializable @SerialName("CoolDown")
+data class CoolDownComponent(
+    val value: Float,
+) : PoolableComponent1<CoolDownComponent>() {
+    override fun type() = CoolDownComponent
 
-    companion object : ComponentType<DebugComponent>()
+    companion object : ComponentType<CoolDownComponent>()
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    override fun clone(): DebugComponent =
+    override fun clone(): CoolDownComponent =
         this.copy()
 }

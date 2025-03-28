@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 
@@ -14,7 +15,7 @@ import kotlinx.serialization.*
 data class OffsetByFrameIndexComponent(
     var entity: Entity = Entity.NONE,
     var mapOfOffsetLists: Map<String, List<Point>> = emptyMap()
-) : CloneableComponent<OffsetByFrameIndexComponent>() {
+) : PoolableComponent1<OffsetByFrameIndexComponent>() {
     override fun type(): ComponentType<OffsetByFrameIndexComponent> = OffsetByFrameIndexComponent
     companion object : ComponentType<OffsetByFrameIndexComponent>()
 

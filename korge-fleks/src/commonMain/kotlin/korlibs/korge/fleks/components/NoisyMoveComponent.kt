@@ -3,6 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.components.TweenPropertyComponent.*
+import korlibs.korge.fleks.utils.componentPool.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 
@@ -37,7 +38,7 @@ data class NoisyMoveComponent(
 
     // internal
     var initialized: Boolean = false
-) : CloneableComponent<NoisyMoveComponent>() {
+) : PoolableComponent1<NoisyMoveComponent>() {
     override fun type() = NoisyMoveComponent
 
     override fun World.onAdd(entity: Entity) {

@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -14,7 +15,7 @@ data class InfoComponent(
 
     // internal
     var initialized: Boolean = false
-) : CloneableComponent<InfoComponent>() {
+) : PoolableComponent1<InfoComponent>() {
     override fun type(): ComponentType<InfoComponent> = InfoComponent
 
     override fun World.onAdd(entity: Entity) {

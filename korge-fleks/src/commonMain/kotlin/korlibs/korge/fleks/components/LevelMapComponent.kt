@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 
@@ -18,7 +19,7 @@ data class LevelMapComponent(
      * Example: ["Background", "Playfield", "Collisions"]
      */
     var layerNames: List<String> = listOf()
-) : CloneableComponent<LevelMapComponent>() {
+) : PoolableComponent1<LevelMapComponent>() {
     override fun type(): ComponentType<LevelMapComponent> = LevelMapComponent
     companion object : ComponentType<LevelMapComponent>()
 

@@ -3,6 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.renderSystems.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -17,7 +18,7 @@ data class PositionComponent(
     var y: Float = 0f,
     var offsetX: Float = 0f,
     var offsetY: Float = 0f
-) : CloneableComponent<PositionComponent>() {
+) : PoolableComponent1<PositionComponent>() {
     override fun type(): ComponentType<PositionComponent> = PositionComponent
     companion object : ComponentType<PositionComponent>()
 

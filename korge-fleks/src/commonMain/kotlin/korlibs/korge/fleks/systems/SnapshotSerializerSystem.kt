@@ -5,6 +5,7 @@ import korlibs.io.async.*
 import korlibs.io.file.std.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlin.coroutines.*
@@ -14,7 +15,7 @@ const val snapshotFps = 30
 /**
  * This system operates on a world snapshot of Fleks and stores it in an array for (fast) rewind and forward.
  *
- * Hint: The world snapshot recording will only work on components which are derived from [CloneableComponent].
+ * Hint: The world snapshot recording will only work on components which are derived from [PoolableComponent1].
  * Please make sure you are not deriving any additional components from [Component].
  */
 class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
@@ -28,7 +29,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     private var gameRunning: Boolean = true
 
     // After 30 seconds keep only one snapshot per second
-    private var numberSnapshotsToKeep: Int = 30 * snapshotFps
+    private var numberSnapshotsToKeep: Int = 3 * snapshotFps
     private var snapshotSecondCounter: Int = 0
     private var snapshotDeletePointer: Int = 0
 
@@ -45,7 +46,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 //       will NOT operate on the components which were copied into the snapshot, instead they will
                 //       operate with components of entities in the current world! This is not what we want!
                 when (component) {
-                    is CloneableComponent<*> -> componentsCopy.add(component.clone())
+                    is PoolableComponent1<*> -> componentsCopy.add(component.clone())
+                    is PoolableComponent<*> -> componentsCopy.add(component.run { world.clone() })
                     else -> {
                         println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from CloneableComponent<T>!")
                     }
@@ -116,7 +118,26 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         }
         // When game is resuming than delete all recordings which are beyond the new play position
         if (gameRunning) {
-            while (rewindSeek < recording.size) { recording.removeLast() }
+            while (rewindSeek < recording.size) {
+                recording.removeLast().forEach { (entity, snapshot) ->
+                    snapshot.components.forEach { component ->
+                        // Reset all components to their default values
+                        when (component) {
+                            is PoolableComponent<*> -> {
+                                runCatching {
+                                    val pool = world.inject<Pool<*>>("PoolCmp${component.type().id}")
+                                    @Suppress("UNCHECKED_CAST")
+                                    pool.free(component)
+
+                                    println("Freeing component '${this@PoolableComponent.type().id}' from entity $entity")
+                                }
+                            }
+                            else -> println("WARNING: Component '$component' will not be reset in SnapshotSerializerSystem! The component needs to derive from CloneableComponent<T>!")
+                        }
+                    }
+                    entity.removeAllTags()
+                }
+            }
             postProcessing()
         }
     }

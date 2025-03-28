@@ -1,8 +1,8 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.utils.Point
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  * This component is used to store collision information of a game object.
  */
 @Serializable @SerialName("Collision")
-data class CollisionComponent(
+data class Collision(
     var configName: String = "",
 
     var right: Boolean = false,
@@ -27,17 +27,30 @@ data class CollisionComponent(
     var justHit: Boolean = false,
     var isHit: Boolean = false,
     var hitPosition: Point = Point.ZERO
-) : CloneableComponent<CollisionComponent>() {
-    override fun type() = CollisionComponent
+) : PoolableComponent<Collision>() {
 
-    companion object : ComponentType<CollisionComponent>()
+    override fun type(): ComponentType<Collision> = CollisionComponent
+
+    companion object {
+        val CollisionComponent = componentTypeOf<Collision>()
+
+        fun InjectableConfiguration.addCollisionComponentPool(preAllocate: Int = 0) {
+            addPool(CollisionComponent, preAllocate) { Collision() }
+        }
+    }
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    override fun clone(): CollisionComponent =
-        this.copy()
+    override fun World.clone(): Collision =
+        getPoolable(CollisionComponent).apply {
+            configName = this@Collision.configName
 
-    // TODO: Not yet used - take into use with poolable components
-    fun reset() {
+            // TODO
+
+            hitPosition = this@Collision.hitPosition.clone()
+        }
+
+    override fun reset() {
+        // TODO: Cleanup properties which does not need a reset
         right = false
         left = false
         isCollidingAbove = false

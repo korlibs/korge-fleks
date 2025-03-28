@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 
@@ -14,7 +15,7 @@ data class EntityLinkComponent(
     // Configure what to do with the linked entity
     var moveWith: Boolean = true
 
-) : CloneableComponent<EntityLinkComponent>() {
+) : PoolableComponent1<EntityLinkComponent>() {
     override fun type() = EntityLinkComponent
     companion object : ComponentType<EntityLinkComponent>()
 
@@ -32,7 +33,7 @@ data class SubEntitiesComponent(
     var subEntitiesByName: Map<String, Entity> = mapOf(),
     // Configure what to do with the linked entities
     var moveWith: Boolean = false,  // Not used currently!
-) : CloneableComponent<SubEntitiesComponent>() {
+) : PoolableComponent1<SubEntitiesComponent>() {
     override fun type() = SubEntitiesComponent
     companion object : ComponentType<SubEntitiesComponent>()
 

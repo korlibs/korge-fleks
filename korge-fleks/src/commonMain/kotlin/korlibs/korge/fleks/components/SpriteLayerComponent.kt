@@ -3,6 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.ComponentType
 import korlibs.image.color.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -14,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("SpriteLayers")
 data class SpriteLayersComponent(
     var layerMap: Map<String, LayerProperties> = mapOf()
-) : CloneableComponent<SpriteLayersComponent>() {
+) : PoolableComponent1<SpriteLayersComponent>() {
 
     @Serializable @SerialName("LayerVisibility")
     data class LayerProperties(

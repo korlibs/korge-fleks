@@ -3,6 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.ComponentType
 import korlibs.image.text.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 
@@ -23,7 +24,7 @@ data class TextFieldComponent(
     var wordWrap: Boolean = true,
     @Serializable(with = HorizontalAlignAsDouble::class) var horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VerticalAlignAsDouble::class) var verticalAlign: VerticalAlign = VerticalAlign.TOP
-) : CloneableComponent<TextFieldComponent>() {
+) : PoolableComponent1<TextFieldComponent>() {
     override fun type(): ComponentType<TextFieldComponent> = TextFieldComponent
     companion object : ComponentType<TextFieldComponent>()
 

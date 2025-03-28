@@ -34,15 +34,6 @@ interface CloneableData<out T> {
 }
 
 /**
- * All components which shall be recorded (serialized) in SnapshotSerializerSystem needs to be derived from
- * [CloneableComponent].
- * The clone function needs to be implemented to perform a deep copy of all properties of the component.
- */
-abstract class CloneableComponent<T> : Component<T> {
-    abstract fun clone(): Component<T>
-}
-
-/**
  * Class for serializing identifier objects for entity configs and functions in components.
  *
  * These identifiers are used to access a specific entity configuration from the [AssetStore].
@@ -138,6 +129,7 @@ class SnapshotSerializer {
 
         // Register component classes
         polymorphic(Component::class) {
+            subclass(Collision::class)
             subclass(DebugComponent::class)
             subclass(EntityLinkComponent::class)
             subclass(InfoComponent::class)

@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.image.format.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.components.RgbaComponent.Rgb
+import korlibs.korge.fleks.utils.componentPool.*
 import korlibs.math.interpolation.Easing
 import kotlinx.serialization.*
 
@@ -21,7 +22,7 @@ data class TweenSequenceComponent(
     var waitTime: Float = 0f,
     var executed: Boolean = false,
     var initialized: Boolean = false
-) : CloneableComponent<TweenSequenceComponent>() {
+) : PoolableComponent1<TweenSequenceComponent>() {
     override fun type(): ComponentType<TweenSequenceComponent> = TweenSequenceComponent
     companion object : ComponentType<TweenSequenceComponent>()
 

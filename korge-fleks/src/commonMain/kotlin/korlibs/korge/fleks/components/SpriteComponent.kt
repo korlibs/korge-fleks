@@ -5,6 +5,7 @@ import korlibs.image.format.*
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import korlibs.time.*
 import kotlinx.serialization.*
 
@@ -49,7 +50,7 @@ data class SpriteComponent(
     var increment: Int = -2,                          // out of [-1, 0, 1]; will be added to frameIndex each new frame
     var nextFrameIn: Float = 0f,                      // time in seconds until next frame of animation shall be shown
     var initialized: Boolean = false
-) : CloneableComponent<SpriteComponent>() {
+) : PoolableComponent1<SpriteComponent>() {
     override fun type(): ComponentType<SpriteComponent> = SpriteComponent
 
     // Set frameIndex for starting animation

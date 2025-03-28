@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 
@@ -17,7 +17,7 @@ data class MotionComponent(
     var accelY: Float = 0f,
     var velocityX: Float = 0f,
     var velocityY: Float = 0f
-) : CloneableComponent<MotionComponent>() {
+) : PoolableComponent1<MotionComponent>() {
     override fun type(): ComponentType<MotionComponent> = MotionComponent
     companion object : ComponentType<MotionComponent>()
 

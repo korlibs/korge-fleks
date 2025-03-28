@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 
@@ -17,7 +18,7 @@ data class EventComponent(
     val subscribe: Boolean = false,
     val event: Int = 0,
     val eventConfig: String = ""
-) : CloneableComponent<EventComponent>() {
+) : PoolableComponent1<EventComponent>() {
     override fun type(): ComponentType<EventComponent> = EventComponent
     companion object : ComponentType<EventComponent>()
 

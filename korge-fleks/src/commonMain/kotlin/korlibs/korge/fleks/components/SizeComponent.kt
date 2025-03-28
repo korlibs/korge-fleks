@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 
@@ -12,7 +12,7 @@ import kotlinx.serialization.*
 data class SizeComponent(
     var width: Float = 0f,
     var height: Float = 0f,
-) : CloneableComponent<SizeComponent>() {
+) : PoolableComponent1<SizeComponent>() {
     override fun type(): ComponentType<SizeComponent> = SizeComponent
     companion object : ComponentType<SizeComponent>()
 
@@ -27,7 +27,7 @@ data class SizeComponent(
 data class SizeIntComponent(
     var width: Int = 0,
     var height: Int = 0,
-) : CloneableComponent<SizeIntComponent>() {
+) : PoolableComponent1<SizeIntComponent>() {
     override fun type(): ComponentType<SizeIntComponent> = SizeIntComponent
     companion object : ComponentType<SizeIntComponent>()
 

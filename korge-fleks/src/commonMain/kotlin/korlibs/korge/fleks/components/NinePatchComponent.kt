@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -14,7 +14,7 @@ data class NinePatchComponent(
     val name: String = "",
     val width: Float = 0f,
     val height: Float = 0f
-) : CloneableComponent<NinePatchComponent>() {
+) : PoolableComponent1<NinePatchComponent>() {
     override fun type() = NinePatchComponent
 
     companion object : ComponentType<NinePatchComponent>()
