@@ -131,7 +131,7 @@ class SnapshotSerializer {
             subclass(ParallaxComponent.Layer::class)
             subclass(ParallaxComponent.Plane::class)
             subclass(RgbaComponent.Rgb::class)
-            subclass(OffsetByFrameIndexComponent.Point::class)
+            subclass(Point::class)
             subclass(SpriteLayersComponent.LayerProperties::class)
             subclass(LayeredSpriteComponent.Layer::class)
         }
@@ -169,9 +169,10 @@ class SnapshotSerializer {
         }
         // Register tags (components without properties)
         polymorphic(UniqueId::class) {
+            subclass(CameraFollowTag::class)
+            subclass(MainCameraTag::class)
             subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
             subclass(ScreenCoordinatesTag::class)
-            subclass(MainCameraTag::class)
         }
 
         // Data class hierarchy used for AnimationScript component

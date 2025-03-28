@@ -44,6 +44,19 @@ class AssetStore {
     internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     internal var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
 
+    data class CollisionData(
+        val x: Int,
+        val y: Int,
+        val width: Int,
+        val height: Int
+    )
+
+    // TODO
+    fun getCollisionData(configName: String) : CollisionData =
+        CollisionData(
+            8, 29, 17, 29
+        )
+
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second
         else error("AssetStore: Sound '$name' not found!")
