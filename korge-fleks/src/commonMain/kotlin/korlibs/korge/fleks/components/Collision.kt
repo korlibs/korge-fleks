@@ -27,12 +27,16 @@ data class Collision(
     var justHit: Boolean = false,
     var isHit: Boolean = false,
     var hitPosition: Point = Point.ZERO
+
+//    override val poolType: PoolType<Collision> = CollisionComponentPool
 ) : PoolableComponent<Collision>() {
 
-    override fun type(): ComponentType<Collision> = CollisionComponent
+    override fun type(): ComponentType<Collision> = Collision
+//    override fun type(): ComponentType<Collision> = CollisionComponent  // or use this variant
 
-    companion object {
+    companion object : ComponentType<Collision>() {
         val CollisionComponent = componentTypeOf<Collision>()
+//        val CollisionComponentPool = poolTypeOf<Collision>("Collision")
 
         fun InjectableConfiguration.addCollisionComponentPool(preAllocate: Int = 0) {
             addPool(CollisionComponent, preAllocate) { Collision() }
@@ -43,11 +47,16 @@ data class Collision(
     override fun World.clone(): Collision =
         getPoolable(CollisionComponent).apply {
             configName = this@Collision.configName
-
             // TODO
 
             hitPosition = this@Collision.hitPosition.clone()
         }
+
+//   // Author's hint: Check if deep copy is needed on any change in the component!
+//    override fun clone(): Collision =
+//        this.copy(
+//            hitPosition = this@Collision.hitPosition.clone()
+//        )
 
     override fun reset() {
         // TODO: Cleanup properties which does not need a reset

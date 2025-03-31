@@ -115,6 +115,9 @@ class SnapshotSerializer {
     /**
      * This polymorphic module config for kotlinx serialization lists all Korge-fleks
      * internal components as subclasses.
+     *
+     * Hint: As base class for polymorphic serialization the [Component<T>] interface is used.
+     *       There must not be any other derived interface from that base interface. Use abstract class instead.
      */
     private val internalModule = SerializersModule {
         // Register data classes

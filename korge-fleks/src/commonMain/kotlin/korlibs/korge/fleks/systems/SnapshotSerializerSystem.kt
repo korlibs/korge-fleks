@@ -26,7 +26,9 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
     private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
     private var rewindSeek: Int = 0
-    private var gameRunning: Boolean = true
+    private var recordingCleanup = false
+
+    var gameRunning: Boolean = true
 
     // After 30 seconds keep only one snapshot per second
     private var numberSnapshotsToKeep: Int = 3 * snapshotFps
@@ -106,8 +108,9 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     }
 
     fun triggerPause() {
-        gameRunning = !gameRunning
+        if (!gameRunning) recordingCleanup = true
 
+        gameRunning = !gameRunning
         world.systems.forEach { system ->
             when (system) {
                 // Sound system needs special handling, because it has to stop all sounds which are playing
@@ -117,27 +120,21 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             }
         }
         // When game is resuming than delete all recordings which are beyond the new play position
-        if (gameRunning) {
-            while (rewindSeek < recording.size) {
-                recording.removeLast().forEach { (entity, snapshot) ->
-                    snapshot.components.forEach { component ->
-                        // Reset all components to their default values
-                        when (component) {
-                            is PoolableComponent<*> -> {
-                                runCatching {
-                                    val pool = world.inject<Pool<*>>("PoolCmp${component.type().id}")
-                                    @Suppress("UNCHECKED_CAST")
-                                    pool.free(component)
+        if (recordingCleanup) {
+            recordingCleanup = false
+            while (rewindSeek < recording.size) { recording.removeLast() }
 
-                                    println("Freeing component '${this@PoolableComponent.type().id}' from entity $entity")
-                                }
-                            }
-                            else -> println("WARNING: Component '$component' will not be reset in SnapshotSerializerSystem! The component needs to derive from CloneableComponent<T>!")
-                        }
-                    }
-                    entity.removeAllTags()
-                }
-            }
+            // TODO - use special pool for freeing components
+
+//            while (rewindSeek < recording.size) {
+//                recording.removeLast().let { snapshot ->
+//                    world.loadSnapshot(snapshot)
+//                    // gameRunning must be false!!!
+//                    world.removeAll(clearRecycled = true)
+//                }
+//            }
+            // After removing all snapshots, we can set gameRunning to true again
+            //            gameRunning = !gameRunning
             postProcessing()
         }
     }
