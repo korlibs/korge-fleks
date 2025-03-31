@@ -22,11 +22,13 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     interval = Fixed(step = 1f / snapshotFps.toFloat())
 ) {
 
-    private val family: Family = world.family { all(ParallaxComponent) }
+    // entity families needed for post-processing
+    private val familyParallax: Family = world.family { all(ParallaxComponent) }
+    private val familyLayeredSprite: Family = world.family { all(LayeredSpriteComponent) }
+
     private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
     private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
     private var rewindSeek: Int = 0
-    private var recordingCleanup = false
 
     var gameRunning: Boolean = true
 
@@ -108,8 +110,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     }
 
     fun triggerPause() {
-        if (!gameRunning) recordingCleanup = true
-
         gameRunning = !gameRunning
         world.systems.forEach { system ->
             when (system) {
@@ -120,21 +120,18 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             }
         }
         // When game is resuming than delete all recordings which are beyond the new play position
-        if (recordingCleanup) {
-            recordingCleanup = false
-            while (rewindSeek < recording.size) { recording.removeLast() }
-
-            // TODO - use special pool for freeing components
-
-//            while (rewindSeek < recording.size) {
-//                recording.removeLast().let { snapshot ->
-//                    world.loadSnapshot(snapshot)
-//                    // gameRunning must be false!!!
-//                    world.removeAll(clearRecycled = true)
-//                }
-//            }
-            // After removing all snapshots, we can set gameRunning to true again
-            //            gameRunning = !gameRunning
+        if (gameRunning) {
+            // We need to free the used components in old snapshots which are not needed anymore
+            // That has to be done by the fleks world removing entities
+            while (rewindSeek < recording.size) {
+                recording.removeLast().let { snapshot ->
+                    world.loadSnapshot(snapshot)
+                    // Do not clean up the last snapshots - it will stay loaded in the fleks world
+                    if (rewindSeek != recording.size) world.removeAll(clearRecycled = true)
+                    // gameRunning is true here - components are freed from world
+                }
+            }
+            // Do final post-processing
             postProcessing()
         }
     }
@@ -146,6 +143,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             else rewindSeek--
             if (rewindSeek < 0) rewindSeek = 0
             world.loadSnapshot(recording[rewindSeek])
+            // Hint: gameRunning is false, so that no components are freed from previous world then new world snapshot is loaded
         }
     }
 
@@ -156,6 +154,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             else rewindSeek++
             if (rewindSeek > recording.size - 1) rewindSeek = recording.size - 1
             world.loadSnapshot(recording[rewindSeek])
+            // Hint: gameRunning is false, so that no components are freed from previous world then new world snapshot is loaded
         }
     }
 
@@ -164,12 +163,12 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
      */
     private fun postProcessing() {
         // Do some post-processing
-        family.forEach { entity ->
+        familyParallax.forEach { entity ->
             // Update ParallaxComponents
             val parallaxComponent = entity[ParallaxComponent]
             parallaxComponent.run { world.updateLayerEntities() }
         }
-        world.family { all(LayeredSpriteComponent) }.forEach { entity ->
+        familyLayeredSprite.forEach { entity ->
             val layeredSpriteComponent = entity[LayeredSpriteComponent]
             layeredSpriteComponent.run { world.updateLayerEntities() }
         }

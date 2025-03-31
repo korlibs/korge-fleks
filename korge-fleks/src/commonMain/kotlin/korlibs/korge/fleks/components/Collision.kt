@@ -8,9 +8,12 @@ import kotlinx.serialization.Serializable
 
 /**
  * This component is used to store collision information of a game object.
+ *
+ * Author's hint: When adding new properties to the component, make sure to initialize them in the
+ *                [reset] function and copy them in the [clone] function.
  */
 @Serializable @SerialName("Collision")
-data class Collision(
+class Collision private constructor(
     var configName: String = "",
 
     var right: Boolean = false,
@@ -27,36 +30,38 @@ data class Collision(
     var justHit: Boolean = false,
     var isHit: Boolean = false,
     var hitPosition: Point = Point.ZERO
-
-//    override val poolType: PoolType<Collision> = CollisionComponentPool
 ) : PoolableComponent<Collision>() {
-
-    override fun type(): ComponentType<Collision> = Collision
-//    override fun type(): ComponentType<Collision> = CollisionComponent  // or use this variant
+    override fun type(): ComponentType<Collision> = CollisionComponent
 
     companion object : ComponentType<Collision>() {
         val CollisionComponent = componentTypeOf<Collision>()
-//        val CollisionComponentPool = poolTypeOf<Collision>("Collision")
+
+        fun World.collisionComponent(config: Collision.() -> Unit ): Collision =
+            getPoolable(CollisionComponent).apply { config() }
 
         fun InjectableConfiguration.addCollisionComponentPool(preAllocate: Int = 0) {
             addPool(CollisionComponent, preAllocate) { Collision() }
         }
     }
 
-    // Author's hint: Check if deep copy is needed on any change in the component!
     override fun World.clone(): Collision =
         getPoolable(CollisionComponent).apply {
-            configName = this@Collision.configName
-            // TODO
-
+            this.configName = this@Collision.configName
+            right = this@Collision.right
+            left = this@Collision.left
+            isCollidingAbove = this@Collision.isCollidingAbove
+            isGrounded = this@Collision.isGrounded
+            becameGroundedThisFrame = this@Collision.becameGroundedThisFrame
+            wasGroundedLastFrame = this@Collision.wasGroundedLastFrame
+            movingDownSlope = this@Collision.movingDownSlope
+            slopeAngle = this@Collision.slopeAngle
+            isFalling = this@Collision.isFalling
+            collisionWithStaticObject = this@Collision.collisionWithStaticObject
+            jumpVelocity = this@Collision.jumpVelocity
+            justHit = this@Collision.justHit
+            isHit = this@Collision.isHit
             hitPosition = this@Collision.hitPosition.clone()
         }
-
-//   // Author's hint: Check if deep copy is needed on any change in the component!
-//    override fun clone(): Collision =
-//        this.copy(
-//            hitPosition = this@Collision.hitPosition.clone()
-//        )
 
     override fun reset() {
         // TODO: Cleanup properties which does not need a reset
