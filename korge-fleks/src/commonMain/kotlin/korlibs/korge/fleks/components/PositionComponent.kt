@@ -18,7 +18,7 @@ data class PositionComponent(
     var y: Float = 0f,
     var offsetX: Float = 0f,
     var offsetY: Float = 0f
-) : PoolableComponent1<PositionComponent>() {
+) : CloneableComponent<PositionComponent>() {
     override fun type(): ComponentType<PositionComponent> = PositionComponent
     companion object : ComponentType<PositionComponent>()
 

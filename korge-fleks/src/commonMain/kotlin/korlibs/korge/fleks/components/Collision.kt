@@ -1,10 +1,11 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.Point
 import korlibs.korge.fleks.utils.componentPool.*
+import korlibs.korge.fleks.utils.poolableData.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
 
 /**
  * This component is used to store collision information of a game object.
@@ -14,7 +15,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Collision")
 class Collision private constructor(
-    var configName: String = "",
+    var configName: PoolableString = PoolableString.EMPTY,
 
     var right: Boolean = false,
     var left: Boolean = false,
@@ -31,12 +32,12 @@ class Collision private constructor(
     var isHit: Boolean = false,
     var hitPosition: Point = Point.ZERO
 ) : PoolableComponent<Collision>() {
-    override fun type(): ComponentType<Collision> = CollisionComponent
 
-    companion object : ComponentType<Collision>() {
+    override fun type() = CollisionComponent
+    companion object {
         val CollisionComponent = componentTypeOf<Collision>()
 
-        fun World.collisionComponent(config: Collision.() -> Unit ): Collision =
+        fun World.CollisionComponent(config: Collision.() -> Unit ): Collision =
             getPoolable(CollisionComponent).apply { config() }
 
         fun InjectableConfiguration.addCollisionComponentPool(preAllocate: Int = 0) {
@@ -60,11 +61,11 @@ class Collision private constructor(
             jumpVelocity = this@Collision.jumpVelocity
             justHit = this@Collision.justHit
             isHit = this@Collision.isHit
-            hitPosition = this@Collision.hitPosition.clone()
+            hitPosition.clone(this@Collision.hitPosition)
         }
 
     override fun reset() {
-        // TODO: Cleanup properties which does not need a reset
+        // TODO: Cleanup properties which does not need a reset because they will be overwritten anyway at the beginning of the frame cycle
         right = false
         left = false
         isCollidingAbove = false
@@ -78,6 +79,8 @@ class Collision private constructor(
         jumpVelocity = 0f
         justHit = false
         isHit = false
-        hitPosition = Point.ZERO
+        // Deep init of hit position - reuse object
+        hitPosition.x = 0f
+        hitPosition.y = 0f
     }
 }

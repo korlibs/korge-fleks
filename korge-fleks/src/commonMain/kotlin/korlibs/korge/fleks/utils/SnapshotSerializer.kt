@@ -10,6 +10,7 @@ import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
+import korlibs.korge.fleks.utils.poolableData.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -24,11 +25,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.*
 import kotlin.jvm.JvmInline
 
-
-/**
- * All data classes (not deriving from Fleks Component<...>) which are used within components need to be serializable by
- * deriving from this interface.
- */
+// TODO: Remove and take PoolableData into use
 interface CloneableData<out T> {
     fun clone(): T
 }
@@ -121,11 +118,15 @@ class SnapshotSerializer {
      */
     private val internalModule = SerializersModule {
         // Register data classes
+        polymorphic(PoolableData::class) {
+            subclass(Point::class)
+        }
+
+        // TODO: Move to PoolableData::class section
         polymorphic(CloneableData::class) {
             subclass(ParallaxComponent.Layer::class)
             subclass(ParallaxComponent.Plane::class)
             subclass(RgbaComponent.Rgb::class)
-            subclass(Point::class)
             subclass(SpriteLayersComponent.LayerProperties::class)
             subclass(LayeredSpriteComponent.Layer::class)
         }
@@ -139,7 +140,7 @@ class SnapshotSerializer {
             subclass(LayerComponent::class)
             subclass(LayeredSpriteComponent::class)
             subclass(LayoutComponent::class)
-            subclass(LevelMapComponent::class)
+            subclass(LevelMap::class)
             subclass(LifeCycleComponent::class)
             subclass(MotionComponent::class)
             subclass(NinePatchComponent::class)

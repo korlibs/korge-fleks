@@ -35,7 +35,7 @@ data class LayeredSpriteComponent(
     // internally used for rendering and tween animation of layer position and rgba (alpha channel)
     var layerList: List<Layer> = listOf(),
     var layerMap: Map<String, Layer> = mapOf()
-): PoolableComponent1<LayeredSpriteComponent>() {
+): CloneableComponent<LayeredSpriteComponent>() {
 
     @Serializable @SerialName("LayeredSprite.Layer")
     data class Layer(

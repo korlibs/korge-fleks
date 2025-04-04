@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Debug")
 data class DebugComponent(
     val name: String = ""
-) : PoolableComponent1<DebugComponent>() {
+) : CloneableComponent<DebugComponent>() {
     override fun type() = DebugComponent
 
     companion object : ComponentType<DebugComponent>()

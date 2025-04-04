@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("SpriteLayers")
 data class SpriteLayersComponent(
     var layerMap: Map<String, LayerProperties> = mapOf()
-) : PoolableComponent1<SpriteLayersComponent>() {
+) : CloneableComponent<SpriteLayersComponent>() {
 
     @Serializable @SerialName("LayerVisibility")
     data class LayerProperties(

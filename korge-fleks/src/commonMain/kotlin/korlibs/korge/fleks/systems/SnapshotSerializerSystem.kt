@@ -15,7 +15,7 @@ const val snapshotFps = 30
 /**
  * This system operates on a world snapshot of Fleks and stores it in an array for (fast) rewind and forward.
  *
- * Hint: The world snapshot recording will only work on components which are derived from [PoolableComponent1].
+ * Hint: The world snapshot recording will only work on components which are derived from [CloneableComponent].
  * Please make sure you are not deriving any additional components from [Component].
  */
 class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
@@ -50,7 +50,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 //       will NOT operate on the components which were copied into the snapshot, instead they will
                 //       operate with components of entities in the current world! This is not what we want!
                 when (component) {
-                    is PoolableComponent1<*> -> componentsCopy.add(component.clone())
+                    is CloneableComponent<*> -> componentsCopy.add(component.clone())
                     is PoolableComponent<*> -> componentsCopy.add(component.run { world.clone() })
                     else -> {
                         println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from CloneableComponent<T>!")

@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("LifeCycle")
 data class LifeCycleComponent(
     var healthCounter: Int = 100
-) : PoolableComponent1<LifeCycleComponent>() {
+) : CloneableComponent<LifeCycleComponent>() {
     override fun type(): ComponentType<LifeCycleComponent> = LifeCycleComponent
     companion object : ComponentType<LifeCycleComponent>()
 

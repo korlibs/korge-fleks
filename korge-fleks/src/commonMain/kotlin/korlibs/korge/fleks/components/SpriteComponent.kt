@@ -50,7 +50,7 @@ data class SpriteComponent(
     var increment: Int = -2,                          // out of [-1, 0, 1]; will be added to frameIndex each new frame
     var nextFrameIn: Float = 0f,                      // time in seconds until next frame of animation shall be shown
     var initialized: Boolean = false
-) : PoolableComponent1<SpriteComponent>() {
+) : CloneableComponent<SpriteComponent>() {
     override fun type(): ComponentType<SpriteComponent> = SpriteComponent
 
     // Set frameIndex for starting animation

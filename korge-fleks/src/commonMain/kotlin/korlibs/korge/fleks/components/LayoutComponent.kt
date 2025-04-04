@@ -16,7 +16,7 @@ data class LayoutComponent(
     var centerY: Boolean = false,
     var offsetX: Float = 0f,
     var offsetY: Float = 0f
-) : PoolableComponent1<LayoutComponent>() {
+) : CloneableComponent<LayoutComponent>() {
     override fun type(): ComponentType<LayoutComponent> = LayoutComponent
     companion object : ComponentType<LayoutComponent>()
 

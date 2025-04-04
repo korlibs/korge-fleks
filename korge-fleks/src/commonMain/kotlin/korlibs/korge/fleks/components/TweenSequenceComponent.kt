@@ -22,7 +22,7 @@ data class TweenSequenceComponent(
     var waitTime: Float = 0f,
     var executed: Boolean = false,
     var initialized: Boolean = false
-) : PoolableComponent1<TweenSequenceComponent>() {
+) : CloneableComponent<TweenSequenceComponent>() {
     override fun type(): ComponentType<TweenSequenceComponent> = TweenSequenceComponent
     companion object : ComponentType<TweenSequenceComponent>()
 

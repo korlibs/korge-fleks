@@ -1,11 +1,11 @@
 package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
-import korlibs.datastructure.iterators.*
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
+import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -104,7 +104,7 @@ class DebugRenderSystem(
                     }
 
                     if (entity has CollisionComponent) {
-                        val (anchorX, anchorY, colWidth, colHeight) = assetStore.getCollisionData(entity[CollisionComponent].configName)
+                        val (anchorX, anchorY, colWidth, colHeight) = assetStore.getCollisionData(entity[CollisionComponent].configName.toString())
                         // Draw collision bounds
                         batch.drawVector(Colors.LIGHTBLUE) {
                             rect(
@@ -128,7 +128,7 @@ class DebugRenderSystem(
 
                 if (entity has LevelMapComponent) {
                     val (levelName) = entity[LevelMapComponent]
-                    val worldData = assetStore.getWorldData(levelName)
+                    val worldData = assetStore.getWorldData(levelName.toString())
                     val tileSize = worldData.tileSize
 
                     val cameraPosition = with(world) { camera[PositionComponent] }

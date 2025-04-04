@@ -38,7 +38,7 @@ data class NoisyMoveComponent(
 
     // internal
     var initialized: Boolean = false
-) : PoolableComponent1<NoisyMoveComponent>() {
+) : CloneableComponent<NoisyMoveComponent>() {
     override fun type() = NoisyMoveComponent
 
     override fun World.onAdd(entity: Entity) {

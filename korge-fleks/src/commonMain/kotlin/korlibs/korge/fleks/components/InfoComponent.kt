@@ -15,7 +15,7 @@ data class InfoComponent(
 
     // internal
     var initialized: Boolean = false
-) : PoolableComponent1<InfoComponent>() {
+) : CloneableComponent<InfoComponent>() {
     override fun type(): ComponentType<InfoComponent> = InfoComponent
 
     override fun World.onAdd(entity: Entity) {

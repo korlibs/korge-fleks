@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("CoolDown")
 data class CoolDownComponent(
     val value: Float,
-) : PoolableComponent1<CoolDownComponent>() {
+) : CloneableComponent<CoolDownComponent>() {
     override fun type() = CoolDownComponent
 
     companion object : ComponentType<CoolDownComponent>()

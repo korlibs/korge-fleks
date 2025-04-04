@@ -17,7 +17,7 @@ data class MotionComponent(
     var accelY: Float = 0f,
     var velocityX: Float = 0f,
     var velocityY: Float = 0f
-) : PoolableComponent1<MotionComponent>() {
+) : CloneableComponent<MotionComponent>() {
     override fun type(): ComponentType<MotionComponent> = MotionComponent
     companion object : ComponentType<MotionComponent>()
 

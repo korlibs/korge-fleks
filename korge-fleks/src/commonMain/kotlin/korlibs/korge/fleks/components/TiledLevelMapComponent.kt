@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("TiledLevelMap")
 data class TiledLevelMapComponent(
     var assetName: String = "",
-) : PoolableComponent1<TiledLevelMapComponent>() {
+) : CloneableComponent<TiledLevelMapComponent>() {
     override fun type(): ComponentType<TiledLevelMapComponent> = TiledLevelMapComponent
     companion object : ComponentType<TiledLevelMapComponent>()
 

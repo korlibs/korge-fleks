@@ -27,7 +27,7 @@ data class ParallaxComponent(
 
     // internal
     var initialized: Boolean = false
-) : PoolableComponent1<ParallaxComponent>() {
+) : CloneableComponent<ParallaxComponent>() {
 
     @Serializable @SerialName("Parallax.Layer")
     data class Layer(

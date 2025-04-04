@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -45,7 +46,7 @@ class LevelMapRenderSystem(
         family.forEach { entity ->
             val (rgba) = entity[RgbaComponent]
             val (levelName, layerNames) = entity[LevelMapComponent]
-            val worldData = assetStore.getWorldData(levelName)
+            val worldData = assetStore.getWorldData(levelName.toString())
             val tileSize = worldData.tileSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
@@ -61,7 +62,7 @@ class LevelMapRenderSystem(
 
             layerNames.forEach { layerName ->
                 ctx.useBatcher { batch ->
-                    worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
+                    worldData.forEachTile(layerName.toString(), xStart, yStart, xTiles, yTiles) { slice, px, py ->
                         batch.drawQuad(
                             tex = ctx.getTex(slice),
                             x = px - viewPortPosX,

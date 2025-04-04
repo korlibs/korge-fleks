@@ -18,7 +18,7 @@ data class EventComponent(
     val subscribe: Boolean = false,
     val event: Int = 0,
     val eventConfig: String = ""
-) : PoolableComponent1<EventComponent>() {
+) : CloneableComponent<EventComponent>() {
     override fun type(): ComponentType<EventComponent> = EventComponent
     companion object : ComponentType<EventComponent>()
 

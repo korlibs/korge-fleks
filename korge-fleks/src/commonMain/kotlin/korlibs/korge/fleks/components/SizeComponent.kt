@@ -12,7 +12,7 @@ import kotlinx.serialization.*
 data class SizeComponent(
     var width: Float = 0f,
     var height: Float = 0f,
-) : PoolableComponent1<SizeComponent>() {
+) : CloneableComponent<SizeComponent>() {
     override fun type(): ComponentType<SizeComponent> = SizeComponent
     companion object : ComponentType<SizeComponent>()
 
@@ -27,7 +27,7 @@ data class SizeComponent(
 data class SizeIntComponent(
     var width: Int = 0,
     var height: Int = 0,
-) : PoolableComponent1<SizeIntComponent>() {
+) : CloneableComponent<SizeIntComponent>() {
     override fun type(): ComponentType<SizeIntComponent> = SizeIntComponent
     companion object : ComponentType<SizeIntComponent>()
 

@@ -14,7 +14,7 @@ data class NinePatchComponent(
     val name: String = "",
     val width: Float = 0f,
     val height: Float = 0f
-) : PoolableComponent1<NinePatchComponent>() {
+) : CloneableComponent<NinePatchComponent>() {
     override fun type() = NinePatchComponent
 
     companion object : ComponentType<NinePatchComponent>()

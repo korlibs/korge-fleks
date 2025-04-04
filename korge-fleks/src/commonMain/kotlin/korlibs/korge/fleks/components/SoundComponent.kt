@@ -25,7 +25,7 @@ data class SoundComponent(
     var volume: Double = 1.0,
     var isPlaying: Boolean = false,
     var loop: Boolean = false  // TODO not yet implemented
-) : PoolableComponent1<SoundComponent>() {
+) : CloneableComponent<SoundComponent>() {
     override fun type(): ComponentType<SoundComponent> = SoundComponent
     companion object : ComponentType<SoundComponent>()
 

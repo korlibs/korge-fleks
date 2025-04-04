@@ -14,7 +14,7 @@ import kotlinx.serialization.*
 @Serializable @SerialName("Layer")
 data class LayerComponent(
     val layerIndex: Int = 0
-) : PoolableComponent1<LayerComponent>() {
+) : CloneableComponent<LayerComponent>() {
     override fun type(): ComponentType<LayerComponent> = LayerComponent
     companion object : ComponentType<LayerComponent>()
 
