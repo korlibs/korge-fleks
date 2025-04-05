@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("LevelMap")
 data class LevelMap private constructor(
     var levelName: PoolableString = PoolableString.EMPTY,
-    val layerNames: MutableList<PoolableString> = mutableListOf(),
+    val layerNames: MutableList<PoolableString> = MutableList(16) { PoolableString.EMPTY }
 ) : PoolableComponent<LevelMap>() {
     override fun type() = LevelMapComponent
 
@@ -43,28 +43,10 @@ data class LevelMap private constructor(
 
     override fun reset() {
         // level name will be set on initialization of the component
-
-        // TODO: Check why this does not work
-//        layerNames.clear()  // Make list empty for reuse - Strings are owned by the StringPool
+        layerNames.clear()  // Make list empty for reuse - PoolableStrings are owned by the StringPool
     }
 }
 
 fun MutableList<PoolableString>.clone(other: MutableList<PoolableString>) {
     this.addAll(other)
 }
-
-/*
-@Serializable @SerialName("LevelMap")
-data class LevelMapComponent(
-) : CloneableComponent<LevelMapComponent>() {
-    override fun type(): ComponentType<LevelMapComponent> = LevelMapComponent
-    companion object : ComponentType<LevelMapComponent>()
-
-    // Author's hint: Check if deep copy is needed on any change in the component!
-    override fun clone(): LevelMapComponent =
-        LevelMapComponent(
-            levelName = levelName,
-            layerNames = layerNames.clone()
-        )
-}
-*/

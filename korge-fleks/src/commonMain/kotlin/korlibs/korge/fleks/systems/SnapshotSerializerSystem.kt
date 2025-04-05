@@ -33,7 +33,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     var gameRunning: Boolean = true
 
     // After 30 seconds keep only one snapshot per second
-    private var numberSnapshotsToKeep: Int = 3 * snapshotFps
+    private var numberSnapshotsToKeep: Int = 30 * snapshotFps
     private var snapshotSecondCounter: Int = 0
     private var snapshotDeletePointer: Int = 0
 
@@ -70,6 +70,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         // Cleanup old snapshots so that we do not save too much
         if (recording.size > numberSnapshotsToKeep) {
             if (snapshotSecondCounter < snapshotFps) {
+                // TODO: Components needs to be freed from the world here
+                //       Try to do this with another world
                 recording.removeAt(snapshotDeletePointer)
                 snapshotSecondCounter++
             }
@@ -124,11 +126,16 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             // We need to free the used components in old snapshots which are not needed anymore
             // That has to be done by the fleks world removing entities
             while (rewindSeek < recording.size) {
+                val lastRecording = rewindSeek == recording.size - 1
+
                 recording.removeLast().let { snapshot ->
+                    // Set gameRunning to "false" in order to avoid freeing components in the world when loading the snapshot below
+                    gameRunning = false
                     world.loadSnapshot(snapshot)
+                    // Set gameRunning to "true" again to free components in the world below
+                    gameRunning = true
                     // Do not clean up the last snapshots - it will stay loaded in the fleks world
-                    if (rewindSeek != recording.size) world.removeAll(clearRecycled = true)
-                    // gameRunning is true here - components are freed from world
+                    if (!lastRecording) world.removeAll(clearRecycled = true)
                 }
             }
             // Do final post-processing
