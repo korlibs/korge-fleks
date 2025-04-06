@@ -16,6 +16,8 @@ object GameStateManager {
     var assetStore: AssetStore = AssetStore()
     var configSerializer: EntityConfigSerializer = EntityConfigSerializer()
 
+    var gameRunning: Boolean = true
+
     /**
      * Register a new serializers module for the entity config serializer.
      */

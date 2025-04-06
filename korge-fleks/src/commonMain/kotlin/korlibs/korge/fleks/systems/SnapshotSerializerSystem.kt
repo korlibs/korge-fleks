@@ -4,11 +4,15 @@ import com.github.quillraven.fleks.*
 import korlibs.io.async.*
 import korlibs.io.file.std.*
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
+import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
+import korlibs.korge.fleks.gameState.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlin.coroutines.*
+import kotlin.math.*
 
 const val snapshotFps = 30
 
@@ -29,13 +33,24 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
     private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
     private var rewindSeek: Int = 0
+    private var snapshotLoaded: Boolean = false
 
-    var gameRunning: Boolean = true
+    private val gameState = world.inject<GameStateManager>("GameStateManager")
+//    var gameRunning: Boolean = true
 
     // After 30 seconds keep only one snapshot per second
-    private var numberSnapshotsToKeep: Int = 30 * snapshotFps
+    private var numberSnapshotsToKeep: Int = 3 * snapshotFps
     private var snapshotSecondCounter: Int = 0
     private var snapshotDeletePointer: Int = 0
+
+    private val snapshotWorld = configureWorld {
+        injectables {
+            add("GameStateManager", world.inject("GameStateManager"))
+            // Add all Component pools from gameWorld to the snapshot world
+            add("PoolCmp${CollisionComponent.id}", world.getPool(CollisionComponent))
+            add("PoolCmp${LevelMapComponent.id}", world.getPool(LevelMapComponent))
+        }
+    }
 
     override fun onTick() {
         val snapshotCopy = mutableMapOf<Entity, Snapshot>()
@@ -46,9 +61,9 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             val tagsCopy = mutableListOf<UniqueId<*>>()
 
             value.components.forEach { component ->
-                // Hint: Cloning of components is done WITHOUT any world functions or features involved because world functions
-                //       will NOT operate on the components which were copied into the snapshot, instead they will
-                //       operate with components of entities in the current world! This is not what we want!
+                // Hint: Cloning of components is done WITHOUT any world functions or features involved like onAdd
+                //       function of components. Otherwise, world functions would be called on the current original
+                //       world and not on the snapshot world! This is not what we want!
                 when (component) {
                     is CloneableComponent<*> -> componentsCopy.add(component.clone())
                     is PoolableComponent<*> -> componentsCopy.add(component.run { world.clone() })
@@ -70,9 +85,12 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         // Cleanup old snapshots so that we do not save too much
         if (recording.size > numberSnapshotsToKeep) {
             if (snapshotSecondCounter < snapshotFps) {
-                // TODO: Components needs to be freed from the world here
-                //       Try to do this with another world
-                recording.removeAt(snapshotDeletePointer)
+                // Components needs to be freed - this is done in the snapshot world to not interfere with the current world
+                recording.removeAt(snapshotDeletePointer).let { snapshot ->
+                    // gameRunning is currently "true" in order to free components in the world below
+                    snapshotWorld.loadSnapshot(snapshot)
+                    snapshotWorld.removeAll(clearRecycled = true)
+                }
                 snapshotSecondCounter++
             }
             else {
@@ -94,6 +112,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 val worldSnapshot = vfs.readString()
                 val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(worldSnapshot)
                 world.loadSnapshot(snapshot)
+                snapshotLoaded = true
                 println("snapshot loaded!")
 
                 postProcessing()
@@ -112,61 +131,67 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     }
 
     fun triggerPause() {
-        gameRunning = !gameRunning
+        gameState.gameRunning = !gameState.gameRunning
         world.systems.forEach { system ->
             when (system) {
                 // Sound system needs special handling, because it has to stop all sounds which are playing
 //                is SoundSystem -> system.soundEnabled = true  // TODO keep sound playing for now -- gameRunning
-                is SoundSystem -> system.soundEnabled = gameRunning
-                else -> system.enabled = gameRunning
+                is SoundSystem -> system.soundEnabled = gameState.gameRunning
+                else -> system.enabled = gameState.gameRunning
             }
         }
         // When game is resuming than delete all recordings which are beyond the new play position
-        if (gameRunning) {
+        if (gameState.gameRunning) {
             // We need to free the used components in old snapshots which are not needed anymore
-            // That has to be done by the fleks world removing entities
-            while (rewindSeek < recording.size) {
-                val lastRecording = rewindSeek == recording.size - 1
-
+            // That will be done by a separate fleks world (snapshotWorld)
+            // Do not free the last snapshot, because it is loaded in the current world
+            while (rewindSeek < recording.size - 1) {
                 recording.removeLast().let { snapshot ->
-                    // Set gameRunning to "false" in order to avoid freeing components in the world when loading the snapshot below
-                    gameRunning = false
-                    world.loadSnapshot(snapshot)
-                    // Set gameRunning to "true" again to free components in the world below
-                    gameRunning = true
-                    // Do not clean up the last snapshots - it will stay loaded in the fleks world
-                    if (!lastRecording) world.removeAll(clearRecycled = true)
+                    // gameRunning is "true" in order to free components in the world below
+                    snapshotWorld.loadSnapshot(snapshot)
+                    snapshotWorld.removeAll(clearRecycled = true)
                 }
             }
-            // Do final post-processing
-            postProcessing()
+            // Do final post-processing if a snapshot was loaded (either by rewind/forward or loadGameState)
+            if (snapshotLoaded) {
+                postProcessing()
+                snapshotLoaded = false
+            }
+            // Reset
+            snapshotSecondCounter = 0
+            // TODO check how to calculate correct values for both below - otherwise snapshots from wrong place
+            //      in the recording will be deleted
+            numberSnapshotsToKeep = max(recording.size - 1, 3 * snapshotFps)  // this is not correct!!!
+            snapshotDeletePointer = numberSnapshotsToKeep
         }
     }
 
     fun rewind(fast: Boolean = false) {
-        if (gameRunning) triggerPause()
-        if (!gameRunning) {
+        if (gameState.gameRunning) triggerPause()
+        if (!gameState.gameRunning) {
             if (fast) rewindSeek -= 4
             else rewindSeek--
             if (rewindSeek < 0) rewindSeek = 0
             world.loadSnapshot(recording[rewindSeek])
+            snapshotLoaded = true
             // Hint: gameRunning is false, so that no components are freed from previous world then new world snapshot is loaded
         }
     }
 
     fun forward(fast: Boolean = false) {
-        if (gameRunning) triggerPause()
-        if (!gameRunning) {
+        if (gameState.gameRunning) triggerPause()
+        if (!gameState.gameRunning) {
             if (fast) rewindSeek += 4
             else rewindSeek++
             if (rewindSeek > recording.size - 1) rewindSeek = recording.size - 1
             world.loadSnapshot(recording[rewindSeek])
+            snapshotLoaded = true
             // Hint: gameRunning is false, so that no components are freed from previous world then new world snapshot is loaded
         }
     }
 
     /**
-     *
+     * Post-processing of the world snapshot after loading it.
      */
     private fun postProcessing() {
         // Do some post-processing

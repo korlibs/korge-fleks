@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.utils.componentPool
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.gameState.*
 import korlibs.korge.fleks.systems.*
 
 
@@ -23,8 +24,8 @@ abstract class PoolableComponent<T> : Component<T> {
 
     override fun World.onRemove(entity: Entity) {
         // Do not free the component if the game is not running - i.e. during the snapshot rewind / forward feature
-        val system = system<SnapshotSerializerSystem>()
-        if (system.gameRunning) {
+        val gameState = inject<GameStateManager>("GameStateManager")
+        if (gameState.gameRunning) {
             runCatching {
                 val pool = inject<Pool<T>>("PoolCmp${type().id}")
                 @Suppress("UNCHECKED_CAST")
@@ -76,4 +77,12 @@ fun <T> World.getPoolable(componentType: ComponentType<T>): T {
         error("Attempting to allocate to pool 'PoolCmp${componentType.id}' without adding it to injectables! Ensure to call 'addPool' for your component type '${componentType::class.simpleName}'.")
     }
     return pool.alloc()
+}
+
+fun <T> World.getPool(componentType: ComponentType<T>): Pool<T> {
+    return try {
+        this.inject<Pool<T>>("PoolCmp${componentType.id}")
+    } catch (e: FleksNoSuchInjectableException) {
+        error("Pool 'PoolCmp${componentType.id}' for componentType '${componentType::class.simpleName}' not found.")
+    }
 }
