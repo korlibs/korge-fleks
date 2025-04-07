@@ -12,7 +12,6 @@ import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlin.coroutines.*
-import kotlin.math.*
 
 const val snapshotFps = 30
 
@@ -31,17 +30,12 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     private val familyLayeredSprite: Family = world.family { all(LayeredSpriteComponent) }
 
     private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
-    private val recording: MutableList<Map<Entity, Snapshot>> = mutableListOf()
+    private val recordings: MutableList<Recording> = mutableListOf()
+    private var recNumber: Int = 0  // Overall number of recordings - incremented by 1 for each recording
     private var rewindSeek: Int = 0
     private var snapshotLoaded: Boolean = false
 
     private val gameState = world.inject<GameStateManager>("GameStateManager")
-//    var gameRunning: Boolean = true
-
-    // After 30 seconds keep only one snapshot per second
-    private var numberSnapshotsToKeep: Int = 3 * snapshotFps
-    private var snapshotSecondCounter: Int = 0
-    private var snapshotDeletePointer: Int = 0
 
     private val snapshotWorld = configureWorld {
         injectables {
@@ -51,6 +45,11 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             add("PoolCmp${LevelMapComponent.id}", world.getPool(LevelMapComponent))
         }
     }
+
+    data class Recording(
+        val recNumber: Int,
+        val snapshot: Map<Entity, Snapshot>
+    )
 
     override fun onTick() {
         val snapshotCopy = mutableMapOf<Entity, Snapshot>()
@@ -82,27 +81,19 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 //        val jsonSnapshot = snapshotSerializer.json().encodeToString(world.snapshot())
 //        val snapshotCopy: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(jsonSnapshot)
 
-        // Cleanup old snapshots so that we do not save too much
-        if (recording.size > numberSnapshotsToKeep) {
-            if (snapshotSecondCounter < snapshotFps) {
-                // Components needs to be freed - this is done in the snapshot world to not interfere with the current world
-                recording.removeAt(snapshotDeletePointer).let { snapshot ->
-                    // gameRunning is currently "true" in order to free components in the world below
-                    snapshotWorld.loadSnapshot(snapshot)
-                    snapshotWorld.removeAll(clearRecycled = true)
-                }
-                snapshotSecondCounter++
-            }
-            else {
-                snapshotSecondCounter = 0
-                numberSnapshotsToKeep++
-                snapshotDeletePointer++
+        // Cleanup old snapshots so that we do not use too much of memory resources
+        recordingCleanup(recNumber) { pos ->
+            recordings.removeAt(pos).let { rec ->
+                // gameRunning is "true" in order to free components in the world below
+                snapshotWorld.loadSnapshot(rec.snapshot)
+                snapshotWorld.removeAll(clearRecycled = true)
             }
         }
 
         // Store copy of word snapshot
-        recording.add(snapshotCopy)
-        rewindSeek = recording.size - 1
+        val rec = Recording(recNumber++, snapshotCopy)
+        recordings.add(rec)
+        rewindSeek = recordings.size - 1
     }
 
     fun loadGameState(world: World, coroutineContext: CoroutineContext) {
@@ -145,10 +136,10 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             // We need to free the used components in old snapshots which are not needed anymore
             // That will be done by a separate fleks world (snapshotWorld)
             // Do not free the last snapshot, because it is loaded in the current world
-            while (rewindSeek < recording.size - 1) {
-                recording.removeLast().let { snapshot ->
+            while (rewindSeek < recordings.size - 1) {
+                recordings.removeLast().let { rec ->
                     // gameRunning is "true" in order to free components in the world below
-                    snapshotWorld.loadSnapshot(snapshot)
+                    snapshotWorld.loadSnapshot(rec.snapshot)
                     snapshotWorld.removeAll(clearRecycled = true)
                 }
             }
@@ -157,12 +148,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 postProcessing()
                 snapshotLoaded = false
             }
-            // Reset
-            snapshotSecondCounter = 0
-            // TODO check how to calculate correct values for both below - otherwise snapshots from wrong place
-            //      in the recording will be deleted
-            numberSnapshotsToKeep = max(recording.size - 1, 3 * snapshotFps)  // this is not correct!!!
-            snapshotDeletePointer = numberSnapshotsToKeep
+            // Set recording number to the next recording
+            recNumber = recordings.last().recNumber + 1
         }
     }
 
@@ -172,7 +159,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             if (fast) rewindSeek -= 4
             else rewindSeek--
             if (rewindSeek < 0) rewindSeek = 0
-            world.loadSnapshot(recording[rewindSeek])
+            world.loadSnapshot(recordings[rewindSeek].snapshot)
             snapshotLoaded = true
             // Hint: gameRunning is false, so that no components are freed from previous world then new world snapshot is loaded
         }
@@ -183,8 +170,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         if (!gameState.gameRunning) {
             if (fast) rewindSeek += 4
             else rewindSeek++
-            if (rewindSeek > recording.size - 1) rewindSeek = recording.size - 1
-            world.loadSnapshot(recording[rewindSeek])
+            if (rewindSeek > recordings.size - 1) rewindSeek = recordings.size - 1
+            world.loadSnapshot(recordings[rewindSeek].snapshot)
             snapshotLoaded = true
             // Hint: gameRunning is false, so that no components are freed from previous world then new world snapshot is loaded
         }
@@ -206,5 +193,24 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         }
 
         // TODO Add possibility to invoke post processing for externally added components
+    }
+
+    /**
+     * This function will trigger [call] with the index of the recording which should be deleted.
+     * The cleanup strategy is to keep only one snapshot per second after a certain time.
+     */
+    private fun recordingCleanup(currentRecNumber: Int, call: (Int) -> Unit) {
+        // After xx seconds keep only one snapshot per second
+        val startTimeForCleanup: Int = 3 * snapshotFps  // 30 seconds
+
+        val numberOfRecordings = recordings.size
+        if (numberOfRecordings > startTimeForCleanup) {
+            val recIndex = numberOfRecordings - startTimeForCleanup
+            val rec = recordings[recIndex]
+            if (rec.recNumber % 32 != 0) {
+//                println("Cleanup rec number: ${rec.recNumber} - index '$recIndex' from overall recordings: $numberOfRecordings")
+                call.invoke(recIndex)
+            }
+        }
     }
 }
