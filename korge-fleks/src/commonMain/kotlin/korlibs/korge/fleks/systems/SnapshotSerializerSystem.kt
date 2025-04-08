@@ -32,6 +32,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
     private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
     private val recordings: MutableList<Recording> = mutableListOf()
     private var recNumber: Int = 0  // Overall number of recordings - incremented by 1 for each recording
+
     private var rewindSeek: Int = 0
     private var snapshotLoaded: Boolean = false
 
@@ -82,7 +83,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 //        val snapshotCopy: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(jsonSnapshot)
 
         // Cleanup old snapshots so that we do not use too much of memory resources
-        recordingCleanup(recNumber) { pos ->
+        recordingCleanup { pos ->
             recordings.removeAt(pos).let { rec ->
                 // gameRunning is "true" in order to free components in the world below
                 snapshotWorld.loadSnapshot(rec.snapshot)
@@ -199,18 +200,100 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
      * This function will trigger [call] with the index of the recording which should be deleted.
      * The cleanup strategy is to keep only one snapshot per second after a certain time.
      */
-    private fun recordingCleanup(currentRecNumber: Int, call: (Int) -> Unit) {
-        // After xx seconds keep only one snapshot per second
-        val startTimeForCleanup: Int = 3 * snapshotFps  // 30 seconds
+    private fun recordingCleanup(call: (Int) -> Unit) {
+        // After 30 seconds start to clean up recordings
+        val startTimeForCleanup: Int = 30 * snapshotFps
 
         val numberOfRecordings = recordings.size
         if (numberOfRecordings > startTimeForCleanup) {
             val recIndex = numberOfRecordings - startTimeForCleanup
             val rec = recordings[recIndex]
-            if (rec.recNumber % 32 != 0) {
-//                println("Cleanup rec number: ${rec.recNumber} - index '$recIndex' from overall recordings: $numberOfRecordings")
-                call.invoke(recIndex)
+            if (rec.recNumber % snapshotFps != 0) {  // Do not delete first recording of each second
+                call(recIndex)
             }
+        }
+    }
+
+    /*
+     * +------- Time modulo window (14 seconds)
+     * |    +-- Indices of recordings in the modulo window (32 recordings)
+     * v    v
+     *     00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+     * 0                                                                                                 0
+     * 1                                                    1                                           xx
+     * 2                            2                      xx                       2                   xx
+     * 3                3          xx           3          xx           3          xx           3       xx
+     * 4          4    xx     4    xx     4    xx     4    xx     4    xx     4    xx     4    xx     4 xx
+     * 5       5 xx    xx    xx    xx    xx    xx    xx    xx    xx    xx    xx    xx    xx    xx    xx xx
+     * 6      xx xx    xx    xx    xx    xx    xx    xx    xx  6 xx    xx    xx    xx    xx    xx    xx xx
+     * 7      xx xx    xx    xx    xx  7 xx    xx    xx    xx xx xx    xx    xx    xx  7 xx    xx    xx xx
+     * 8      xx xx    xx  8 xx    xx xx xx    xx  8 xx    xx xx xx    xx  8 xx    xx xx xx    xx  8 xx xx
+     * 9      xx xx  9 xx xx xx    xx xx xx    xx xx xx    xx xx xx    xx xx xx    xx xx xx    xx xx xx xx
+     * 10     xx xx xx xx xx xx    xx xx xx    xx xx xx    xx xx xx 10 xx xx xx    xx xx xx    xx xx xx xx
+     * 11     xx xx xx xx xx xx    xx xx xx 11 xx xx xx    xx xx xx xx xx xx xx    xx xx xx 11 xx xx xx xx
+     * 12     xx xx xx xx xx xx 12 xx xx xx xx xx xx xx    xx xx xx xx xx xx xx 12 xx xx xx xx xx xx xx xx
+     * 13 [ ] xx xx xx xx xx xx xx xx xx xx xx xx xx xx 13 xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx
+     *
+     * recNumber modulo(32) == 0 -> those recordings will be kept
+     */
+    private val deleteTimes: Array<Set<Int>> = Array(14) { pos ->
+        when (pos) {
+            0 -> setOf(31)
+            1 -> setOf(16)
+            2 -> setOf(8, 24)
+            3 -> setOf(4, 12, 20, 28)
+            4 -> setOf(2, 6, 10, 14, 18, 22, 26, 30)
+            5 -> setOf(1)
+            6 -> setOf(17)
+            7 -> setOf(9, 25)
+            8 -> setOf(5, 13, 21, 29)
+            9 -> setOf(3)
+            10 -> setOf(19)
+            11 -> setOf(11, 27)
+            12 -> setOf(7, 23)
+            13 -> setOf(15)
+            else -> setOf()  // This should never happen
+        }
+    }
+
+    /*
+     * Another way to delete recordings
+     */
+    private val deleteTimes2: Array<Int> = Array(32) { pos ->
+        when (pos) {
+            0  -> 31
+            1  -> 16
+            2  -> 8
+            3  -> 24
+            4  -> 4
+            5  -> 12
+            6  -> 20
+            7  -> 28
+            8  -> 2
+            9  -> 6
+            10 -> 10
+            11 -> 14
+            12 -> 18
+            13 -> 22
+            14 -> 26
+            15 -> 30
+            16 -> 1
+            17 -> 17
+            18 -> 9
+            19 -> 25
+            20 -> 5
+            21 -> 13
+            22 -> 21
+            23 -> 29
+            24 -> 3
+            25 -> 19
+            26 -> 11
+            27 -> 27
+            28 -> 7
+            29 -> 23
+            30 -> 15
+            31 -> 0  // Keep this recording
+            else -> 0  // This should never happen
         }
     }
 }

@@ -30,8 +30,7 @@ abstract class PoolableComponent<T> : Component<T> {
                 val pool = inject<Pool<T>>("PoolCmp${type().id}")
                 @Suppress("UNCHECKED_CAST")
                 pool.free(this@PoolableComponent as T)
-
-                println("Freeing component '${this@PoolableComponent.type().id}' from entity $entity")
+                //println("Freeing component '${this@PoolableComponent.type().id}' from entity $entity")
             }
         }
     }
