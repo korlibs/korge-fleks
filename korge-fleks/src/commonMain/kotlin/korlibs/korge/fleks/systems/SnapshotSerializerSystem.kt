@@ -84,11 +84,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 
         // Cleanup old snapshots so that we do not use too much of memory resources
         recordingCleanup { pos ->
-            recordings.removeAt(pos).let { rec ->
-                // gameRunning is "true" in order to free components in the world below
-                snapshotWorld.loadSnapshot(rec.snapshot)
-                snapshotWorld.removeAll(clearRecycled = true)
-            }
+            freeComponents(recordings.removeAt(pos))
         }
 
         // Store copy of word snapshot
@@ -138,11 +134,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             // That will be done by a separate fleks world (snapshotWorld)
             // Do not free the last snapshot, because it is loaded in the current world
             while (rewindSeek < recordings.size - 1) {
-                recordings.removeLast().let { rec ->
-                    // gameRunning is "true" in order to free components in the world below
-                    snapshotWorld.loadSnapshot(rec.snapshot)
-                    snapshotWorld.removeAll(clearRecycled = true)
-                }
+                freeComponents(recordings.removeLast())
             }
             // Do final post-processing if a snapshot was loaded (either by rewind/forward or loadGameState)
             if (snapshotLoaded) {
@@ -178,6 +170,18 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         }
     }
 
+    private fun freeComponents(recording: Recording) {
+        recording.snapshot.forEach { (_, snapshot) ->
+            // Free all components from snapshot
+            snapshot.components.forEach { component ->
+                when (component) {
+                    is PoolableComponent<*> -> component.run { world.free() }
+                    else -> {}
+                }
+            }
+        }
+    }
+
     /**
      * Post-processing of the world snapshot after loading it.
      */
@@ -202,7 +206,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
      */
     private fun recordingCleanup(call: (Int) -> Unit) {
         // After 30 seconds start to clean up recordings
-        val startTimeForCleanup: Int = 30 * snapshotFps
+        val startTimeForCleanup: Int = 3 * snapshotFps
 
         val numberOfRecordings = recordings.size
         if (numberOfRecordings > startTimeForCleanup) {

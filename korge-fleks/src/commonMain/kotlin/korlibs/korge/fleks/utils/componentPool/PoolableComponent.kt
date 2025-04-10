@@ -2,7 +2,6 @@ package korlibs.korge.fleks.utils.componentPool
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.gameState.*
-import korlibs.korge.fleks.systems.*
 
 
 // TODO: remove
@@ -22,17 +21,20 @@ abstract class PoolableComponent<T> : Component<T> {
     abstract fun reset()  // feature of poolable
     abstract fun World.clone(): Component<T>  // feature of making snapshots on the fly
 
+    fun World.free() {  // feature of poolable
+        runCatching {
+            val pool = inject<Pool<T>>("PoolCmp${type().id}")
+            @Suppress("UNCHECKED_CAST")
+            pool.free(this@PoolableComponent as T)
+            println("Freeing component '${this@PoolableComponent::class.simpleName}'")
+        }
+    }
+
     override fun World.onRemove(entity: Entity) {
         // Do not free the component if the game is not running - i.e. during the snapshot rewind / forward feature
         val gameState = inject<GameStateManager>("GameStateManager")
-        if (gameState.gameRunning) {
-            runCatching {
-                val pool = inject<Pool<T>>("PoolCmp${type().id}")
-                @Suppress("UNCHECKED_CAST")
-                pool.free(this@PoolableComponent as T)
-                //println("Freeing component '${this@PoolableComponent.type().id}' from entity $entity")
-            }
-        }
+        if (gameState.gameRunning) free()
+        println("Freeing component '${this@PoolableComponent.type().id}' from entity $entity")
     }
 }
 

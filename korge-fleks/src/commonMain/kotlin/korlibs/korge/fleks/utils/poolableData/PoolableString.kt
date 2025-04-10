@@ -17,8 +17,8 @@ value class PoolableString private constructor(
 ) {
     companion object {
         val EMPTY = PoolableString("")
-//        operator fun invoke(name: String): PoolableString =
-//            StringPool[name]
+        operator fun invoke(name: String): PoolableString =
+            StringPool[name]
 
         /**
          * A pool of strings to avoid creating new string instances when they are already in use.
