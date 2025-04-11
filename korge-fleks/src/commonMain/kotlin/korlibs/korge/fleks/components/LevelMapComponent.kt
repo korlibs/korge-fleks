@@ -46,7 +46,3 @@ data class LevelMap private constructor(
         layerNames.clear()  // Make list empty for reuse - PoolableStrings are owned by the StringPool
     }
 }
-
-fun MutableList<PoolableString>.clone(other: MutableList<PoolableString>) {
-    this.addAll(other)
-}

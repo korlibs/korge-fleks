@@ -34,7 +34,6 @@ value class PoolableString private constructor(
     }
 
     override fun toString(): String = name
-
 }
 
 fun String.toPoolableString(): PoolableString = StringPool[this]
@@ -45,4 +44,8 @@ fun MutableList<PoolableString>.fromStringList(list: List<String>) {
 
 fun MutableList<PoolableString>.fromStrings(vararg strings: String) {
     strings.forEach { string -> this.add(StringPool[string]) }
+}
+
+fun MutableList<PoolableString>.clone(other: MutableList<PoolableString>) {
+    this.addAll(other)
 }

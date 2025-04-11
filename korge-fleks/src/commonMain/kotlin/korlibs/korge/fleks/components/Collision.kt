@@ -16,7 +16,6 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Collision")
 class Collision private constructor(
     var configName: PoolableString = PoolableString.EMPTY,
-
     var right: Boolean = false,
     var left: Boolean = false,
     var isCollidingAbove: Boolean = false,
@@ -30,7 +29,7 @@ class Collision private constructor(
     var jumpVelocity: Float = 0f,
     var justHit: Boolean = false,
     var isHit: Boolean = false,
-    var hitPosition: Point = Point.ZERO
+    val hitPosition: Point = Point.ZERO
 ) : PoolableComponent<Collision>() {
 
     override fun type() = CollisionComponent
@@ -47,7 +46,7 @@ class Collision private constructor(
 
     override fun World.clone(): Collision =
         getPoolable(CollisionComponent).apply {
-            this.configName = this@Collision.configName
+            configName = this@Collision.configName
             right = this@Collision.right
             left = this@Collision.left
             isCollidingAbove = this@Collision.isCollidingAbove

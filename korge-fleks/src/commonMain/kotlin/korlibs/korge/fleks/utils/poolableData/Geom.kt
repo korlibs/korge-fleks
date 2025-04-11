@@ -22,10 +22,15 @@ data class PointOld (
 class Point private constructor(
     var x: Float = 0f,
     var y: Float = 0f
-) : PoolableData<Point> {
+) : PoolableData<Point>() {
     override fun clone(from: Point) {
         this.x = from.x
         this.y = from.y
+    }
+
+    fun set(other: Point) {
+        this.x = other.x
+        this.y = other.y
     }
 
     companion object {
