@@ -38,7 +38,7 @@ data class LevelMap private constructor(
     override fun World.clone(): LevelMap =
         getPoolable(LevelMapComponent).apply {
             levelName = this@LevelMap.levelName
-            layerNames.clone(this@LevelMap.layerNames)
+            layerNames.init(this@LevelMap.layerNames)
         }
 
     override fun reset() {

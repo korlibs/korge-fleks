@@ -20,6 +20,7 @@ abstract class CloneableComponent<T> : Component<T> {
 abstract class PoolableComponent<T> : Component<T> {
     abstract fun reset()  // feature of poolable
     abstract fun World.clone(): Component<T>  // feature of making snapshots on the fly
+// TODO    abstract fun init(from: T)  // feature for poolable data inside of poolable components
 
     fun World.free() {  // feature of poolable
         runCatching {

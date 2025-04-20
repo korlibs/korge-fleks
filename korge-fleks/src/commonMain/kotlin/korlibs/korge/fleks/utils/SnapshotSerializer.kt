@@ -117,11 +117,6 @@ class SnapshotSerializer {
      *       There must not be any other derived interface from that base interface. Use abstract class instead.
      */
     private val internalModule = SerializersModule {
-        // Register data classes
-        polymorphic(PoolableData::class) {
-            subclass(Point::class)
-        }
-
         // TODO: Move to PoolableData::class section
         polymorphic(CloneableData::class) {
             subclass(ParallaxComponent.Layer::class)
@@ -133,6 +128,7 @@ class SnapshotSerializer {
 
         // Register component classes
         polymorphic(Component::class) {
+            // Used as components
             subclass(Collision::class)
             subclass(DebugComponent::class)
             subclass(EntityLinkComponent::class)
@@ -162,6 +158,8 @@ class SnapshotSerializer {
             subclass(TouchInputComponent::class)
             subclass(TweenPropertyComponent::class)
             subclass(TweenSequenceComponent::class)
+            // Used as data inside components
+            subclass(Point::class)
         }
         // Register tags (components without properties)
         polymorphic(UniqueId::class) {

@@ -46,6 +46,6 @@ fun MutableList<PoolableString>.fromStrings(vararg strings: String) {
     strings.forEach { string -> this.add(StringPool[string]) }
 }
 
-fun MutableList<PoolableString>.clone(other: MutableList<PoolableString>) {
+fun MutableList<PoolableString>.init(other: MutableList<PoolableString>) {
     this.addAll(other)
 }

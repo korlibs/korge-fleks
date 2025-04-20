@@ -29,7 +29,7 @@ class Collision private constructor(
     var jumpVelocity: Float = 0f,
     var justHit: Boolean = false,
     var isHit: Boolean = false,
-    val hitPosition: Point = Point.ZERO
+    val hitPosition: Point = Point.value()
 ) : PoolableComponent<Collision>() {
 
     override fun type() = CollisionComponent
@@ -60,7 +60,7 @@ class Collision private constructor(
             jumpVelocity = this@Collision.jumpVelocity
             justHit = this@Collision.justHit
             isHit = this@Collision.isHit
-            hitPosition.clone(this@Collision.hitPosition)
+            hitPosition.init(this@Collision.hitPosition)
         }
 
     override fun reset() {
@@ -79,7 +79,6 @@ class Collision private constructor(
         justHit = false
         isHit = false
         // Deep init of hit position - reuse object
-        hitPosition.x = 0f
-        hitPosition.y = 0f
+        hitPosition.reset()
     }
 }

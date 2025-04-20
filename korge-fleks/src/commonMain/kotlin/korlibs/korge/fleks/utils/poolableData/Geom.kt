@@ -1,11 +1,13 @@
 package korlibs.korge.fleks.utils.poolableData
 
+import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 
 // TODO: remove later and use Point instead
-@Serializable @SerialName("Point")
+@Serializable @SerialName("PointOld")
 data class PointOld (
     var x: Float = 0f,
     var y: Float = 0f
@@ -16,34 +18,34 @@ data class PointOld (
 }
 
 /**
- * A simple 2D point with x and y coordinates which is cloneable and serializable.
+ * A simple 2D point with x, y coordinates which is poolable and serializable.
  */
 @Serializable @SerialName("Point")
 class Point private constructor(
     var x: Float = 0f,
     var y: Float = 0f
-) : PoolableData<Point>() {
-    override fun clone(from: Point) {
-        this.x = from.x
-        this.y = from.y
-    }
-
-    fun set(other: Point) {
-        this.x = other.x
-        this.y = other.y
-    }
-
+) : PoolableComponent<Point>() {
+    override fun type() = PointData
     companion object {
-        // TODO: get from PointPool
-        val ZERO = Point()
+        val PointData = componentTypeOf<Point>()
 
-        fun point(): Point {
-            // TODO: get from PointPool
-            return Point()
+        // Use this function to create a new Point instance as val inside another component.
+        fun value(): Point = Point()
+
+        fun InjectableConfiguration.addPointDataPool(preAllocate: Int = 0) {
+            addPool(PointData, preAllocate) { Point() }
         }
     }
 
-    override fun free() {
-        // TODO: return to PointPool
+    override fun reset() {
+        x = 0f
+        y = 0f
+    }
+
+    override fun World.clone(): Component<Point> = getPoolable(PointData).apply { init(from = this@Point) }
+
+    fun init(from: Point) {
+        x = from.x
+        y = from.y
     }
 }
