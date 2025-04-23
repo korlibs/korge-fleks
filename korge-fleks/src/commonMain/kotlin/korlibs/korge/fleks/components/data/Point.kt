@@ -1,8 +1,7 @@
-package korlibs.korge.fleks.utils.poolableData
+package korlibs.korge.fleks.components.data
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 
@@ -24,7 +23,8 @@ data class PointOld (
 class Point private constructor(
     var x: Float = 0f,
     var y: Float = 0f
-) : PoolableComponent<Point>() {
+) : Poolable<Point>() {
+
     override fun type() = PointData
     companion object {
         val PointData = componentTypeOf<Point>()

@@ -8,9 +8,9 @@ import korlibs.io.lang.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
-import korlibs.korge.fleks.utils.poolableData.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind

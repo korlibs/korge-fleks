@@ -1,8 +1,8 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.componentPool.*
-import korlibs.korge.fleks.utils.poolableData.*
+import korlibs.korge.fleks.components.data.*
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Collision")
 class Collision private constructor(
-    var configName: PoolableString = PoolableString.EMPTY,
+    var configName: String = "",
     var right: Boolean = false,
     var left: Boolean = false,
     var isCollidingAbove: Boolean = false,
@@ -30,7 +30,7 @@ class Collision private constructor(
     var justHit: Boolean = false,
     var isHit: Boolean = false,
     val hitPosition: Point = Point.value()
-) : PoolableComponent<Collision>() {
+) : Poolable<Collision>() {
 
     override fun type() = CollisionComponent
     companion object {
@@ -60,7 +60,7 @@ class Collision private constructor(
             jumpVelocity = this@Collision.jumpVelocity
             justHit = this@Collision.justHit
             isHit = this@Collision.isHit
-            hitPosition.init(this@Collision.hitPosition)
+            hitPosition.init(from = this@Collision.hitPosition)
         }
 
     override fun reset() {

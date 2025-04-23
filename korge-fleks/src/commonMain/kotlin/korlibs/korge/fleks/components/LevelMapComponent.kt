@@ -1,8 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.componentPool.*
-import korlibs.korge.fleks.utils.poolableData.*
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,10 +17,10 @@ import kotlinx.serialization.Serializable
  *                [reset] function and copy them in the [clone] function.
  */
 @Serializable @SerialName("LevelMap")
-data class LevelMap private constructor(
-    var levelName: PoolableString = PoolableString.EMPTY,
-    val layerNames: MutableList<PoolableString> = MutableList(16) { PoolableString.EMPTY }
-) : PoolableComponent<LevelMap>() {
+class LevelMap private constructor(
+    var levelName: String = "",
+    val layerNames: MutableList<String> = MutableList(16) { "" }
+) : Poolable<LevelMap>() {
     override fun type() = LevelMapComponent
 
     companion object {
@@ -38,11 +37,11 @@ data class LevelMap private constructor(
     override fun World.clone(): LevelMap =
         getPoolable(LevelMapComponent).apply {
             levelName = this@LevelMap.levelName
-            layerNames.init(this@LevelMap.layerNames)
+            layerNames.init(from = this@LevelMap.layerNames)
         }
 
     override fun reset() {
         // level name will be set on initialization of the component
-        layerNames.clear()  // Make list empty for reuse - PoolableStrings are owned by the StringPool
+        layerNames.clear()  // Make list empty for reuse
     }
 }

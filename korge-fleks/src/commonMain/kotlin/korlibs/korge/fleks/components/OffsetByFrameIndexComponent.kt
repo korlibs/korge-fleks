@@ -1,9 +1,8 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.components.data.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.utils.componentPool.*
-import korlibs.korge.fleks.utils.poolableData.*
 import kotlinx.serialization.*
 
 

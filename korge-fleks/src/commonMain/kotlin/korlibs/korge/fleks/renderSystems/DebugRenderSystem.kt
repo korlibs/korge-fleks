@@ -127,8 +127,8 @@ class DebugRenderSystem(
                 }
 
                 if (entity has LevelMapComponent) {
-                    val (levelName) = entity[LevelMapComponent]
-                    val worldData = assetStore.getWorldData(levelName.toString())
+                    val levelName = entity[LevelMapComponent].levelName
+                    val worldData = assetStore.getWorldData(levelName)
                     val tileSize = worldData.tileSize
 
                     val cameraPosition = with(world) { camera[PositionComponent] }

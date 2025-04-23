@@ -45,8 +45,8 @@ class LevelMapRenderSystem(
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
             val (rgba) = entity[RgbaComponent]
-            val (levelName, layerNames) = entity[LevelMapComponent]
-            val worldData = assetStore.getWorldData(levelName.toString())
+            val levelMap = entity[LevelMapComponent]
+            val worldData = assetStore.getWorldData(levelMap.levelName)
             val tileSize = worldData.tileSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
@@ -60,9 +60,9 @@ class LevelMapRenderSystem(
             val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
             val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
 
-            layerNames.forEach { layerName ->
+            levelMap.layerNames.forEach { layerName ->
                 ctx.useBatcher { batch ->
-                    worldData.forEachTile(layerName.toString(), xStart, yStart, xTiles, yTiles) { slice, px, py ->
+                    worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
                         batch.drawQuad(
                             tex = ctx.getTex(slice),
                             x = px - viewPortPosX,

@@ -123,3 +123,8 @@ fun List<String>.clone() : List<String> {
     }
     return listCopy
 }
+
+fun MutableList<String>.init(from: List<String>) {
+    this.clear()
+    this.addAll(from)
+}

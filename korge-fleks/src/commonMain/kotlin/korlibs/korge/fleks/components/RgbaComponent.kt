@@ -4,7 +4,6 @@ import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.io.lang.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.utils.componentPool.*
 import korlibs.util.*
 import kotlinx.serialization.*
 import kotlin.math.*

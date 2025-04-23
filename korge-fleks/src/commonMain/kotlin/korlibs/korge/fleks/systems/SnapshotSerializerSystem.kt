@@ -4,11 +4,8 @@ import com.github.quillraven.fleks.*
 import korlibs.io.async.*
 import korlibs.io.file.std.*
 import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
-import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.gameState.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlin.coroutines.*
@@ -38,15 +35,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 
     private val gameState = world.inject<GameStateManager>("GameStateManager")
 
-    private val snapshotWorld = configureWorld {
-        injectables {
-            add("GameStateManager", world.inject("GameStateManager"))
-            // Add all Component pools from gameWorld to the snapshot world
-            add("PoolCmp${CollisionComponent.id}", world.getPool(CollisionComponent))
-            add("PoolCmp${LevelMapComponent.id}", world.getPool(LevelMapComponent))
-        }
-    }
-
     data class Recording(
         val recNumber: Int,
         val snapshot: Map<Entity, Snapshot>
@@ -66,7 +54,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 //       world and not on the snapshot world! This is not what we want!
                 when (component) {
                     is CloneableComponent<*> -> componentsCopy.add(component.clone())
-                    is PoolableComponent<*> -> componentsCopy.add(component.run { world.clone() })
+                    is Poolable<*> -> componentsCopy.add(component.run { world.clone() })
                     else -> {
                         println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from CloneableComponent<T>!")
                     }
@@ -83,12 +71,11 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
 //        val snapshotCopy: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(jsonSnapshot)
 
         // Cleanup old snapshots so that we do not use too much of memory resources
-        recordingCleanup { pos ->
-            freeComponents(recordings.removeAt(pos))
-        }
+        recordingCleanup { pos -> freeComponents(recordings.removeAt(pos)) }
 
         // Store copy of word snapshot
-        val rec = Recording(recNumber++, snapshotCopy)
+        val rec = Recording(recNumber, snapshotCopy)
+        recNumber++
         recordings.add(rec)
         rewindSeek = recordings.size - 1
     }
@@ -131,7 +118,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         // When game is resuming than delete all recordings which are beyond the new play position
         if (gameState.gameRunning) {
             // We need to free the used components in old snapshots which are not needed anymore
-            // That will be done by a separate fleks world (snapshotWorld)
             // Do not free the last snapshot, because it is loaded in the current world
             while (rewindSeek < recordings.size - 1) {
                 freeComponents(recordings.removeLast())
@@ -175,7 +161,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             // Free all components from snapshot
             snapshot.components.forEach { component ->
                 when (component) {
-                    is PoolableComponent<*> -> component.run { world.free() }
+                    is Poolable<*> -> component.run { world.free() }
                     else -> {}
                 }
             }
@@ -196,8 +182,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             val layeredSpriteComponent = entity[LayeredSpriteComponent]
             layeredSpriteComponent.run { world.updateLayerEntities() }
         }
-
-        // TODO Add possibility to invoke post processing for externally added components
     }
 
     /**
@@ -217,6 +201,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             }
         }
     }
+
+    // Below is currently not used
 
     /*
      * +------- Time modulo window (14 seconds)

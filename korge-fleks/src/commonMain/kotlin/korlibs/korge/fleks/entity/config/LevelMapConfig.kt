@@ -9,7 +9,6 @@ import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.utils.poolableData.*
 import kotlinx.serialization.*
 
 
@@ -44,8 +43,8 @@ data class LevelMapConfig(
 
         entity.configure {
             it += LevelMapComponent {
-                levelName = this@LevelMapConfig.levelName.toPoolableString()
-                layerNames.fromStringList(this@LevelMapConfig.layerNames)
+                levelName = this@LevelMapConfig.levelName
+                layerNames.init(from = this@LevelMapConfig.layerNames)
             }
             // Level map does not have position - camera position will determine what is shown from the level map
             // Size of level map is static and can be gathered from AssetStore -> AssetLevelData

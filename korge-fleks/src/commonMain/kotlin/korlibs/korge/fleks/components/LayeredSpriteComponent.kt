@@ -5,7 +5,6 @@ import korlibs.image.format.*
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.*
 
 /**

@@ -3,7 +3,6 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.ComponentType
 import korlibs.image.color.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

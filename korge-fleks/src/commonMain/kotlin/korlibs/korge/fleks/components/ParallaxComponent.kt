@@ -5,7 +5,6 @@ import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.renderSystems.*
-import korlibs.korge.fleks.utils.componentPool.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
