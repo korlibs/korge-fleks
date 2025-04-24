@@ -20,6 +20,7 @@ import kotlinx.serialization.Serializable
 class LevelMap private constructor(
     var levelName: String = "",
     val layerNames: MutableList<String> = MutableList(16) { "" }
+    //val num: Int = -1  -- used for debugging usage of Poolable
 ) : Poolable<LevelMap>() {
     override fun type() = LevelMapComponent
 
@@ -27,10 +28,10 @@ class LevelMap private constructor(
         val LevelMapComponent = componentTypeOf<LevelMap>()
 
         fun World.LevelMapComponent(config: LevelMap.() -> Unit ): LevelMap =
-            getPoolable(LevelMapComponent).apply { config() }
+            getPoolable(LevelMapComponent).apply { config() /*; println("Created: LevelMap '$num'")*/ }
 
         fun InjectableConfiguration.addLevelMapComponentPool(preAllocate: Int = 0) {
-            addPool(LevelMapComponent, preAllocate) { LevelMap() }
+            addPool(LevelMapComponent, preAllocate) { LevelMap(/* num = it */) }
         }
     }
 
@@ -38,10 +39,12 @@ class LevelMap private constructor(
         getPoolable(LevelMapComponent).apply {
             levelName = this@LevelMap.levelName
             layerNames.init(from = this@LevelMap.layerNames)
+            //println("Cloned: LevelMap '$num' from '${this@LevelMap.num}'")
         }
 
     override fun reset() {
         // level name will be set on initialization of the component
         layerNames.clear()  // Make list empty for reuse
+        //println("Reset: LevelMap '$num'")
     }
 }

@@ -32,7 +32,6 @@ abstract class Poolable<T> : Component<T> {
             val pool = inject<Pool<T>>("PoolCmp${type().id}")
             @Suppress("UNCHECKED_CAST")
             pool.free(this@Poolable as T)
-            println("Freeing component '${this@Poolable::class.simpleName}'")
         }
     }
 
@@ -43,7 +42,6 @@ abstract class Poolable<T> : Component<T> {
         // Do not free the component if the game is not running - i.e. during the snapshot rewind / forward feature
         val gameState = inject<GameStateManager>("GameStateManager")
         if (gameState.gameRunning) free()
-        println("Freeing component '${this@Poolable.type().id}' from entity $entity")
     }
 }
 

@@ -56,7 +56,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                     is CloneableComponent<*> -> componentsCopy.add(component.clone())
                     is Poolable<*> -> componentsCopy.add(component.run { world.clone() })
                     else -> {
-                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from CloneableComponent<T>!")
+                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from Poolable<T>!")
                     }
                 }
             }
@@ -74,9 +74,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         recordingCleanup { pos -> freeComponents(recordings.removeAt(pos)) }
 
         // Store copy of word snapshot
-        val rec = Recording(recNumber, snapshotCopy)
+        recordings.add(Recording(recNumber, snapshotCopy))
         recNumber++
-        recordings.add(rec)
         rewindSeek = recordings.size - 1
     }
 
@@ -87,11 +86,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 val worldSnapshot = vfs.readString()
                 val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(worldSnapshot)
                 world.loadSnapshot(snapshot)
-                snapshotLoaded = true
                 println("snapshot loaded!")
-
                 postProcessing()
-
             } else println("WARNING: Cannot find snapshot file. Snapshot was not loaded!")
         }
     }
@@ -122,10 +118,12 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             while (rewindSeek < recordings.size - 1) {
                 freeComponents(recordings.removeLast())
             }
-            // Do final post-processing if a snapshot was loaded (either by rewind/forward or loadGameState)
+            // Do final post-processing if a snapshot was loaded (by rewind or forward)
             if (snapshotLoaded) {
                 postProcessing()
                 snapshotLoaded = false
+                // remove current snapshot from the list of recordings - otherwise it would be freed later, but it is still in used
+                recordings.removeLast()
             }
             // Set recording number to the next recording
             recNumber = recordings.last().recNumber + 1
@@ -193,7 +191,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         val startTimeForCleanup: Int = 3 * snapshotFps
 
         val numberOfRecordings = recordings.size
-        if (numberOfRecordings > startTimeForCleanup) {
+        if (numberOfRecordings > startTimeForCleanup) {  // Keep very first recording
             val recIndex = numberOfRecordings - startTimeForCleanup
             val rec = recordings[recIndex]
             if (rec.recNumber % snapshotFps != 0) {  // Do not delete first recording of each second

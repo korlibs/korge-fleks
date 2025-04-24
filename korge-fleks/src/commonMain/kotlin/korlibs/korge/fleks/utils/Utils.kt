@@ -125,6 +125,5 @@ fun List<String>.clone() : List<String> {
 }
 
 fun MutableList<String>.init(from: List<String>) {
-    this.clear()
     this.addAll(from)
 }
