@@ -14,7 +14,7 @@ data class EntityLinkComponent(
     // Configure what to do with the linked entity
     var moveWith: Boolean = true
 
-) : CloneableComponent<EntityLinkComponent>() {
+) : Poolable<EntityLinkComponent>() {
     override fun type() = EntityLinkComponent
     companion object : ComponentType<EntityLinkComponent>()
 
@@ -32,7 +32,7 @@ data class SubEntitiesComponent(
     var subEntitiesByName: Map<String, Entity> = mapOf(),
     // Configure what to do with the linked entities
     var moveWith: Boolean = false,  // Not used currently!
-) : CloneableComponent<SubEntitiesComponent>() {
+) : Poolable<SubEntitiesComponent>() {
     override fun type() = SubEntitiesComponent
     companion object : ComponentType<SubEntitiesComponent>()
 

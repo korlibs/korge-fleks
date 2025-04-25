@@ -15,7 +15,7 @@ import kotlinx.serialization.*
 data class OffsetByFrameIndexComponent(
     var entity: Entity = Entity.NONE,
     var mapOfOffsetLists: Map<String, List<PointOld>> = mutableMapOf()
-) : CloneableComponent<OffsetByFrameIndexComponent>() {
+) : Poolable<OffsetByFrameIndexComponent>() {
     override fun type(): ComponentType<OffsetByFrameIndexComponent> = OffsetByFrameIndexComponent
     companion object : ComponentType<OffsetByFrameIndexComponent>()
 

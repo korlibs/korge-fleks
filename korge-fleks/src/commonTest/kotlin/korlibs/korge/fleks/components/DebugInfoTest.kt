@@ -12,7 +12,7 @@ internal class DebugInfoTest {
     @Test
     fun testDebugInfoSerialization() {
 
-        val info = InfoComponent(
+        val info = Info(
             name = "DebugTest",
             entityId = 42
         )
@@ -24,7 +24,7 @@ internal class DebugInfoTest {
         CommonTestEnv.serializeDeserialize(expectedWorld, recreatedWorld)
 
         // get the component from entity with the same id from the new created world
-        val newInfo = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][InfoComponent] }
+        val newInfo = with (recreatedWorld) { recreatedWorld.asEntityBag()[entity.id][Info] }
 
         assertEquals(info.name, newInfo.name, "Check 'name' property to be equal")
         assertEquals(info.entityId, newInfo.entityId, "Check 'entityId' property to be equal")

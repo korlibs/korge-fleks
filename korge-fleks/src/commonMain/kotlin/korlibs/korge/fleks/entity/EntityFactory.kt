@@ -47,7 +47,7 @@ object EntityFactory {
         with (world) {
             // Make sure we have entity with InfoComponent for better traceability
             val baseEntity = if (entity == Entity.NONE) entity(name)
-            else entity.apply { configure { it += InfoComponent(name) } }
+            else entity.apply { configure { it += Info(name) } }
 
             val entityConfig = entityConfigs[name]
             return if (entityConfig != null) {

@@ -2,7 +2,7 @@ package korlibs.korge.fleks.components
 
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.CloneableComponent
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Debug")
 data class DebugComponent(
     val name: String = ""
-) : CloneableComponent<DebugComponent>() {
+) : Poolable<DebugComponent>() {
     override fun type() = DebugComponent
 
     companion object : ComponentType<DebugComponent>()

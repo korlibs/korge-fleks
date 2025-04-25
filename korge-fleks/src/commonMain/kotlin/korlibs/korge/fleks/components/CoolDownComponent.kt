@@ -2,7 +2,7 @@ package korlibs.korge.fleks.components
 
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.CloneableComponent
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,14 +10,17 @@ import kotlinx.serialization.Serializable
  *
  */
 @Serializable @SerialName("CoolDown")
-data class CoolDownComponent(
+data class CoolDown(
     val value: Float,
-) : CloneableComponent<CoolDownComponent>() {
+) : Poolable<CoolDown>() {
     override fun type() = CoolDownComponent
 
-    companion object : ComponentType<CoolDownComponent>()
+
+    companion object {
+        val CoolDownComponent = componentTypeOf<CoolDown>()
+    }
 
     // Author's hint: Check if deep copy is needed on any change in the component!
-    override fun clone(): CoolDownComponent =
+    override fun World.clone(): CoolDown =
         this.copy()
 }

@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.CloneableComponent
+import korlibs.korge.fleks.utils.Poolable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -16,7 +16,7 @@ data class LayoutComponent(
     var centerY: Boolean = false,
     var offsetX: Float = 0f,
     var offsetY: Float = 0f
-) : CloneableComponent<LayoutComponent>() {
+) : Poolable<LayoutComponent>() {
     override fun type(): ComponentType<LayoutComponent> = LayoutComponent
     companion object : ComponentType<LayoutComponent>()
 

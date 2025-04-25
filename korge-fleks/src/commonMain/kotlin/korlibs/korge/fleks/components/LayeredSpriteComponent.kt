@@ -34,7 +34,7 @@ data class LayeredSpriteComponent(
     // internally used for rendering and tween animation of layer position and rgba (alpha channel)
     var layerList: List<Layer> = listOf(),
     var layerMap: Map<String, Layer> = mapOf()
-): CloneableComponent<LayeredSpriteComponent>() {
+): Poolable<LayeredSpriteComponent>() {
 
     @Serializable @SerialName("LayeredSprite.Layer")
     data class Layer(
@@ -45,7 +45,7 @@ data class LayeredSpriteComponent(
          */
         val position: PositionComponent = PositionComponent(),
         val rgba: RgbaComponent = RgbaComponent()
-    ) : CloneableData<Layer> {
+    ) : Poolable<Layer> {
 
         // Perform deep copy with special handling for entity, position and rgba.
         override fun clone(): Layer =

@@ -40,7 +40,7 @@ data class FireAndDustEffectConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             if (screenCoordinates) it += ScreenCoordinatesTag
-            it += InfoComponent(name = this@FireAndDustEffectConfig.name)
+            it += Info(name = this@FireAndDustEffectConfig.name)
 
             var velocityXX = velocityX
             var velocityYY = velocityY

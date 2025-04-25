@@ -26,7 +26,7 @@ data class TweenPropertyComponent (
     var duration: Float = 0f,                    // in seconds
     var timeProgress: Float = 0f,                // in seconds
     @Serializable(with = EasingAsString::class) var easing: Easing = Easing.LINEAR  // Changing function
-) : CloneableComponent<TweenPropertyComponent>() {
+) : Poolable<TweenPropertyComponent>() {
     override fun type(): ComponentType<TweenPropertyComponent> = property.type
 
     /**

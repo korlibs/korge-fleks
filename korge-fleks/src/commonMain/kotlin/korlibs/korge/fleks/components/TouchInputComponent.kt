@@ -13,7 +13,7 @@ data class TouchInputComponent(
     var entityConfig: String = "",
     var passPositionToEntity: Boolean = false,
     var continuousTouch: Boolean = false
-) : CloneableComponent<TouchInputComponent>() {
+) : Poolable<TouchInputComponent>() {
     override fun type(): ComponentType<TouchInputComponent> = TouchInputComponent
     companion object : ComponentType<TouchInputComponent>()
 

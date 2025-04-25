@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.CloneableComponent
+import korlibs.korge.fleks.utils.Poolable
 import kotlinx.serialization.*
 
 
@@ -14,7 +14,7 @@ import kotlinx.serialization.*
 @Serializable @SerialName("Layer")
 data class LayerComponent(
     val index: Int = 0
-) : CloneableComponent<LayerComponent>() {
+) : Poolable<LayerComponent>() {
     override fun type(): ComponentType<LayerComponent> = LayerComponent
     companion object : ComponentType<LayerComponent>()
 

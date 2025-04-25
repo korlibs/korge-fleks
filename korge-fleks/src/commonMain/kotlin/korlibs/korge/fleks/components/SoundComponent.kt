@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.ComponentType
-import korlibs.korge.fleks.utils.CloneableComponent
+import korlibs.korge.fleks.utils.Poolable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -25,7 +25,7 @@ data class SoundComponent(
     var volume: Double = 1.0,
     var isPlaying: Boolean = false,
     var loop: Boolean = false  // TODO not yet implemented
-) : CloneableComponent<SoundComponent>() {
+) : Poolable<SoundComponent>() {
     override fun type(): ComponentType<SoundComponent> = SoundComponent
     companion object : ComponentType<SoundComponent>()
 

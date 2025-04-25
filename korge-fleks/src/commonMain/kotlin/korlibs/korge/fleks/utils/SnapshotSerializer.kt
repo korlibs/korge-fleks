@@ -25,10 +25,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.*
 import kotlin.jvm.JvmInline
 
-// TODO: Remove and take PoolableData into use
-interface CloneableData<out T> {
-    fun clone(): T
-}
 
 /**
  * Class for serializing identifier objects for entity configs and functions in components.
@@ -117,22 +113,13 @@ class SnapshotSerializer {
      *       There must not be any other derived interface from that base interface. Use abstract class instead.
      */
     private val internalModule = SerializersModule {
-        // TODO: Move to PoolableData::class section
-        polymorphic(CloneableData::class) {
-            subclass(ParallaxComponent.Layer::class)
-            subclass(ParallaxComponent.Plane::class)
-            subclass(RgbaComponent.Rgb::class)
-            subclass(SpriteLayersComponent.LayerProperties::class)
-            subclass(LayeredSpriteComponent.Layer::class)
-        }
-
-        // Register component classes
+        // Register component and data classes
         polymorphic(Component::class) {
             // Used as components
             subclass(Collision::class)
             subclass(DebugComponent::class)
             subclass(EntityLinkComponent::class)
-            subclass(InfoComponent::class)
+            subclass(Info::class)
             subclass(LayerComponent::class)
             subclass(LayeredSpriteComponent::class)
             subclass(LayoutComponent::class)
@@ -160,6 +147,12 @@ class SnapshotSerializer {
             subclass(TweenSequenceComponent::class)
             // Used as data inside components
             subclass(Point::class)
+            subclass(ParallaxComponent.Layer::class)
+            subclass(ParallaxComponent.Plane::class)
+            subclass(RgbaComponent.Rgb::class)
+            subclass(SpriteLayersComponent.LayerProperties::class)
+            subclass(LayeredSpriteComponent.Layer::class)
+
         }
         // Register tags (components without properties)
         polymorphic(UniqueId::class) {

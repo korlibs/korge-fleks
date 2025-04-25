@@ -23,7 +23,7 @@ data class TextFieldComponent(
     var wordWrap: Boolean = true,
     @Serializable(with = HorizontalAlignAsDouble::class) var horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VerticalAlignAsDouble::class) var verticalAlign: VerticalAlign = VerticalAlign.TOP
-) : CloneableComponent<TextFieldComponent>() {
+) : Poolable<TextFieldComponent>() {
     override fun type(): ComponentType<TextFieldComponent> = TextFieldComponent
     companion object : ComponentType<TextFieldComponent>()
 

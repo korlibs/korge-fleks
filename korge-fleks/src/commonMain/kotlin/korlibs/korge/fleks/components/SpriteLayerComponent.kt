@@ -14,14 +14,14 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("SpriteLayers")
 data class SpriteLayersComponent(
     var layerMap: Map<String, LayerProperties> = mapOf()
-) : CloneableComponent<SpriteLayersComponent>() {
+) : Poolable<SpriteLayersComponent>() {
 
     @Serializable @SerialName("LayerVisibility")
     data class LayerProperties(
         var offsetX: Float = 0f,
         var offsetY: Float = 0f,
         @Serializable(with = RGBAAsInt::class) var rgba: RGBA = Colors.WHITE
-    ) : CloneableData<LayerProperties> {
+    ) : Poolable<LayerProperties> {
         // true (alpha > 0) - false (alpha == 0)
         var visibility: Boolean = rgba.a != 0
             get() = rgba.a != 0

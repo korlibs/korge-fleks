@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.CloneableComponent
+import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("TiledLevelMap")
 data class TiledLevelMapComponent(
     var assetName: String = "",
-) : CloneableComponent<TiledLevelMapComponent>() {
+) : Poolable<TiledLevelMapComponent>() {
     override fun type(): ComponentType<TiledLevelMapComponent> = TiledLevelMapComponent
     companion object : ComponentType<TiledLevelMapComponent>()
 
