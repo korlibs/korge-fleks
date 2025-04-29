@@ -117,41 +117,41 @@ class SnapshotSerializer {
         polymorphic(Component::class) {
             // Used as components
             subclass(Collision::class)
-            subclass(DebugComponent::class)
-            subclass(EntityLinkComponent::class)
+            subclass(Debug::class)
+            subclass(EntityRef::class)
             subclass(Info::class)
-            subclass(LayerComponent::class)
-            subclass(LayeredSpriteComponent::class)
-            subclass(LayoutComponent::class)
+            subclass(Layer::class)
+            subclass(LayeredSprite::class)
+            subclass(Layout::class)
             subclass(LevelMap::class)
-            subclass(LifeCycleComponent::class)
-            subclass(MotionComponent::class)
-            subclass(NinePatchComponent::class)
-            subclass(NoisyMoveComponent::class)
-            subclass(OffsetByFrameIndexComponent::class)
-            subclass(ParallaxComponent::class)
-            subclass(PositionComponent::class)
-            subclass(RgbaComponent::class)
-            subclass(RigidbodyComponent::class)
-            subclass(SizeComponent::class)
-            subclass(SoundComponent::class)
-            subclass(SpawnerComponent::class)
-            subclass(SpriteComponent::class)
-            subclass(SpriteLayersComponent::class)
-            subclass(SubEntitiesComponent::class)
-            subclass(SwitchLayerVisibilityComponent::class)
-            subclass(TextFieldComponent::class)
-            subclass(TiledLevelMapComponent::class)
-            subclass(TouchInputComponent::class)
-            subclass(TweenPropertyComponent::class)
-            subclass(TweenSequenceComponent::class)
+            subclass(LifeCycle::class)
+            subclass(Motion::class)
+            subclass(NinePatch::class)
+            subclass(NoisyMove::class)
+            subclass(OffsetByFrameIndex::class)
+            subclass(Parallax::class)
+            subclass(Position::class)
+            subclass(Rgba::class)
+            subclass(Rigidbody::class)
+            subclass(Size::class)
+            subclass(Sound::class)
+            subclass(Spawner::class)
+            subclass(Sprite::class)
+            subclass(SpriteLayers::class)
+            subclass(SubEntities::class)
+            subclass(SwitchLayerVisibility::class)
+            subclass(TextField::class)
+            subclass(TiledLevelMap::class)
+            subclass(TouchInput::class)
+            subclass(TweenProperty::class)
+            subclass(TweenSequence::class)
             // Used as data inside components
             subclass(Point::class)
-            subclass(ParallaxComponent.Layer::class)
-            subclass(ParallaxComponent.Plane::class)
-            subclass(RgbaComponent.Rgb::class)
-            subclass(SpriteLayersComponent.LayerProperties::class)
-            subclass(LayeredSpriteComponent.Layer::class)
+            subclass(Parallax.Layer::class)
+            subclass(Parallax.Plane::class)
+            subclass(Rgba.Rgb::class)
+            subclass(SpriteLayers.LayerProperties::class)
+            subclass(LayeredSprite.Layer::class)
 
         }
         // Register tags (components without properties)
@@ -273,7 +273,7 @@ object AnyAsString : KSerializer<Any> {
         when (value) {
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("String", value.toString()))
             is Double -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Double", value.toString()))
-            is RgbaComponent.Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Rgb", value.toString()))
+            is Rgba.Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Rgb", value.toString()))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
     }
@@ -283,7 +283,7 @@ object AnyAsString : KSerializer<Any> {
         return when (containerForAny.type) {
             "String" -> containerForAny.value
             "Double" -> containerForAny.value.toDouble()
-            "Rgb" -> RgbaComponent.Rgb.fromString(containerForAny.value)
+            "Rgb" -> Rgba.Rgb.fromString(containerForAny.value)
             else -> throw SerializationException("AnySerializer: No rule to deserialize type '${containerForAny.type}'!")
         }
     }
@@ -306,7 +306,7 @@ object AnySerializer : KSerializer<Any> {
         val int: Int? = null,
         val string: String? = null,
         val boolean: Boolean? = null,
-        val rgb: RgbaComponent.Rgb? = null,
+        val rgb: Rgba.Rgb? = null,
         val direction: ImageAnimation.Direction? = null
     )
 
@@ -317,7 +317,7 @@ object AnySerializer : KSerializer<Any> {
             is Int -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(int = value))
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(string = value))
             is Boolean -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(boolean = value))
-            is RgbaComponent.Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
+            is Rgba.Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
             is ImageAnimation.Direction -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(direction = value))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }

@@ -10,8 +10,8 @@ import kotlinx.serialization.Serializable
 /**
  * This component is used to store collision information of a game object.
  *
- * Author's hint: When adding new properties to the component, make sure to initialize them in the
- *                [reset] function and copy them in the [clone] function.
+ * Author's hint: When adding new properties to the component, make sure to reset them in the
+ *                [cleanupComponent] function and initialize them in the [clone] function.
  */
 @Serializable @SerialName("Collision")
 class Collision private constructor(
@@ -63,7 +63,7 @@ class Collision private constructor(
             hitPosition.init(from = this@Collision.hitPosition)
         }
 
-    override fun reset() {
+    override fun World.cleanupComponent(entity: Entity) {
         // TODO: Cleanup properties which does not need a reset because they will be overwritten anyway at the beginning of the frame cycle
         right = false
         left = false

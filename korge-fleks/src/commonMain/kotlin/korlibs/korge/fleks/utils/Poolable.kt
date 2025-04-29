@@ -12,11 +12,22 @@ import korlibs.korge.fleks.gameState.*
  * The reset function is called when the component is going to be reused for a new entity.
  * The clone function needs to be implemented to perform a deep copy of all properties of the component for
  * the serialization of the game state.
+ *
+ * Note:
+ *   - The initComponent and cleanupComponent functions are called as normal life-cycle functions of the component.
+ *     They are not called when the snapshot rewind/forward feature is used because the components are already
+ *     initialized when loaded (ie. deserialized) from a snapshot.
+ *   - The initPrefabs and cleanupPrefabs functions are called always when the component is added to or removed from a world.
+ *     Also during the snapshot rewind/forward feature.
  */
 abstract class Poolable<T> : Component<T> {
     abstract fun World.clone(): Component<T>  // feature of making snapshots on the fly
-    abstract fun World.init(entity: Entity)
-    open fun World.cleanup(entity: Entity) = Unit
+
+    open fun World.initComponent(entity: Entity) = Unit
+    open fun World.cleanupComponent(entity: Entity) = Unit
+
+    open fun World.initPrefabs(entity: Entity) = Unit
+    open fun World.cleanupPrefabs(entity: Entity) = Unit
 
     /**
      * This function needs to be called if the component is not used anymore and should be freed.
@@ -35,18 +46,22 @@ abstract class Poolable<T> : Component<T> {
         // Only run init function on components when the game is running and not when we load snapshots
         val gameState = inject<GameStateManager>("GameStateManager")
         if (gameState.gameRunning) {
-            init(entity)
+            initComponent(entity)
         }
+        // Call init prefabs always
+        initPrefabs(entity)
     }
     /**
      * Function that is called when the component is removed from an entity.
      */
     override fun World.onRemove(entity: Entity) {
+        // Call cleanup prefabs always
+        cleanupPrefabs(entity)
         // Do not free the component if the game is not running - i.e. during the snapshot rewind / forward feature
         val gameState = inject<GameStateManager>("GameStateManager")
         if (gameState.gameRunning) {
             // Call cleanup function to reset the component when requested by fleks world by calling onRemove
-            cleanup(entity)
+            cleanupComponent(entity)
             free()
         }
     }

@@ -5,17 +5,6 @@ import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 
-// TODO: remove later and use Point instead
-@Serializable @SerialName("PointOld")
-data class PointOld (
-    var x: Float = 0f,
-    var y: Float = 0f
-) : CloneableData<PointOld> {
-
-    // Perform deep copy with special handling for entity, position and rgba.
-    override fun clone(): PointOld = this.copy()
-}
-
 /**
  * A simple 2D point with x, y coordinates which is poolable and serializable.
  */
@@ -37,7 +26,7 @@ class Point private constructor(
         }
     }
 
-    override fun reset() {
+    override fun World.cleanupComponent(entity: Entity) {
         x = 0f
         y = 0f
     }

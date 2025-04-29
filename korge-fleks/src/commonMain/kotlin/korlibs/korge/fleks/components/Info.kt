@@ -6,7 +6,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-
+/**
+ * This component is used to add a name to an entity. Useful for making a save-game snapshot readable.
+ *
+ * Author's hint: When adding new properties to the component, make sure to reset them in the
+ *                [cleanupComponent] function and initialize them in the [clone] function.
+ */
 @Serializable @SerialName("Info")
 class Info private constructor(
     //val num: Int = 0,
@@ -14,7 +19,7 @@ class Info private constructor(
     var entityId: Int = -1,
 
     // internal
-    var initialized: Boolean = false
+//    var initialized: Boolean = false  -- TODO: remove this if really not needed anymore
 ) : Poolable<Info>() {
     override fun type(): ComponentType<Info> = InfoComponent
 
@@ -33,20 +38,20 @@ class Info private constructor(
         getPoolable(InfoComponent).apply {
             name = this@Info.name
             entityId = this@Info.entityId
-            initialized = this@Info.initialized
+//            initialized = this@Info.initialized
             //println("Cloned: LevelMap '$num' from '${this@LevelMap.num}'")
         }
 
-    override fun World.init(entity: Entity) {
+    override fun World.initPrefabs(entity: Entity) {
         // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
-        if (initialized) return
-        else initialized = true
+//        if (initialized) return
+//        else initialized = true
 
         entityId = entity.id
         EntityByName.add(name, entity)
     }
 
-    override fun World.cleanup(entity: Entity) {
+    override fun World.cleanupPrefabs(entity: Entity) {
         EntityByName.remove(name)
     }
 }

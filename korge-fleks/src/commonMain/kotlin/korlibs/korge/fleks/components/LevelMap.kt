@@ -6,15 +6,15 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * This component is used to ...
+ * This component is used to store the level name and the layer names of a game object.
  *
  * @param levelName The unique identifier for the level.
  * @param layerNames List of layer names which shall be drawn by the specific render system.
  *                   Render order is specified by order of strings in the list.
  *                   Example: ["Background", "Playfield", "Collisions"]
  *
- * Author's hint: When adding new properties to the component, make sure to initialize them in the
- *                [reset] function and copy them in the [clone] function.
+ * Author's hint: When adding new properties to the component, make sure to reset them in the
+ *                [cleanupComponent] function and initialize them in the [clone] function.
  */
 @Serializable @SerialName("LevelMap")
 class LevelMap private constructor(
@@ -42,7 +42,7 @@ class LevelMap private constructor(
             //println("Cloned: LevelMap '$num' from '${this@LevelMap.num}'")
         }
 
-    override fun reset() {
+    override fun World.cleanupComponent(entity: Entity) {
         // level name will be set on initialization of the component
         layerNames.clear()  // Make list empty for reuse
         //println("Reset: LevelMap '$num'")
