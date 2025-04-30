@@ -32,6 +32,7 @@ class AssetUpdaterConfiguration(
     internal val ldtkLevelMapCallback: MutableList<() -> Unit> = mutableListOf(),
  ) {
 
+    // To be used in View code from Korge objects
     fun onImageChanged(callback: () -> Unit) { imageChangedCallback += callback }
     fun onFontChanged(callback: () -> Unit) { fontChangedCallback += callback }
     fun onBackgroundChanged(callback: () -> Unit) { backgroundCallback += callback }
@@ -180,25 +181,37 @@ class ResourceDirWatcherConfiguration(
             }
         }
         assetConfig.tileMaps.forEach { config ->
+            // Check if LDTK json file was modified
             if (file.fullName.contains(config.value.fileName) && !reloading) {
-                reloading = true  // save that reloading is in progress
-                println("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    // Give LDtk more time to finish writing the files
-                    delay(500)
-
-                    val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readLDTKWorld(extrude = true)
-                    println("\nTriggering asset change for LDtk: ${config.value.fileName}")
-                    assetStore.assetLevelData[config.key]?.second?.reloadAsset(ldtkWorld)
-
-                    // Guard period until reloading is activated again - this is used for debouncing watch messages
-                    delay(100)
-                    reloading = false
-                    println("Finished")
-                    assetUpdater.ldtkLevelMapCallback.forEach { it.invoke() }
+                reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
+            }
+            // Check if any tileset was modified
+            assetStore.assetLevelData[config.key]?.second?.ldtkWorld?.ldtk?.defs?.tilesets?.forEach { tileset ->
+                tileset.relPath?.let {
+                    if (file.fullName.contains(it) && !reloading) {
+                        reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
+                    }
                 }
             }
+        }
+    }
+
+    private fun reloadLdtkWorld(assetStore: AssetStore, fileName: String, levelName: String, assetUpdater: AssetUpdaterConfiguration, assetConfig: AssetModel, assetReloadContext: CoroutineContext) {
+        reloading = true  // save that reloading is in progress
+        print("Reloading ${assetConfig.folder + "/" + fileName}... ")
+        launchImmediately(context = assetReloadContext) {
+            // Give LDtk more time to finish writing the files
+            delay(500)
+
+            val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + fileName].readLDTKWorld(extrude = true)
+            //println("\nTriggering asset change for LDtk: $fileName")
+            assetStore.assetLevelData[levelName]?.second?.reloadAsset(ldtkWorld)
+
+            // Guard period until reloading is activated again - this is used for debouncing watch messages
+            delay(100)
+            reloading = false
+            println("Finished")
+            assetUpdater.ldtkLevelMapCallback.forEach { it.invoke() }
         }
     }
 

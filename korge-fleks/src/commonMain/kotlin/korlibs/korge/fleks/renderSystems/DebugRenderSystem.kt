@@ -151,6 +151,11 @@ class DebugRenderSystem(
                                 rect(px - viewPortPosX, py - viewPortPosY, tileSize.toFloat(), tileSize.toFloat())
                             }
                         }
+                        if (collisionTile == 4) {
+                            batch.drawVector(Colors.YELLOW) {
+                                rect(px - viewPortPosX, py - viewPortPosY, tileSize.toFloat(), tileSize.toFloat())
+                            }
+                        }
                     }
                 }
             }

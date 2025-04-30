@@ -15,7 +15,7 @@ import kotlin.math.*
  * Data class for storing level maps and entities for a game world.
  */
 class AssetLevelData(
-    ldtkWorld: LDTKWorld,
+    val ldtkWorld: LDTKWorld,  // TODO: Get tileset names out and store separately for hot-reloading
     private val collisionLayerName: String
 ) {
     internal var worldData = WorldData()
