@@ -44,25 +44,18 @@ class EntityRef private constructor(
     }
 }
 
-val subEntities: MutableList<Entity> = mutableListOf(),
-val subEntitiesByName: MutableMap<String, Entity> = mutableMapOf(),
-// Configure what to do with the linked entities
-var moveWith: Boolean = false,  // Not used currently!
-
-import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 
 /**
- * This component is used to ...
+ * This component is used to link one entity to multiple other entities.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanupComponent] function and initialize them in the [clone] function.
  */
 @Serializable @SerialName("EntityRefs")
 class EntityRefs private constructor(
-    var answer: Int = 42
+    val entities: MutableList<Entity> = mutableListOf(),
+    // Configure what to do with the linked entities
+    var moveWith: Boolean = true
 ) : Poolable<EntityRefs>() {
     override fun type() = EntityRefsComponent
 
@@ -79,37 +72,28 @@ class EntityRefs private constructor(
 
     override fun World.clone(): EntityRefs =
         getPoolable(EntityRefsComponent).apply {
-            answer = this@EntityRefs.answer
+            entities.init(from = this@EntityRefs.entities)
+            moveWith = this@EntityRefs.moveWith
         }
 
-    override fun World.initComponent(entity: Entity) {
-    }
-
     override fun World.cleanupComponent(entity: Entity) {
-        answer = 42
-    }
-
-    override fun World.initPrefabs(entity: Entity) {
-    }
-
-    override fun World.cleanupPrefabs(entity: Entity) {
+        entities.clear()
+        moveWith = true
     }
 }
 
-import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 
 /**
- * This component is used to ...
+ * This component is used to link one entity to multiple other entities by name.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanupComponent] function and initialize them in the [clone] function.
  */
 @Serializable @SerialName("EntityRefsByName")
 class EntityRefsByName private constructor(
-    var answer: Int = 42
+    val entitiesByName: MutableMap<String, Entity> = mutableMapOf(),
+    // Configure what to do with the linked entities
+    var moveWith: Boolean = false
 ) : Poolable<EntityRefsByName>() {
     override fun type() = EntityRefsByNameComponent
 
@@ -126,20 +110,12 @@ class EntityRefsByName private constructor(
 
     override fun World.clone(): EntityRefsByName =
         getPoolable(EntityRefsByNameComponent).apply {
-            answer = this@EntityRefsByName.answer
+            entitiesByName.init(from = this@EntityRefsByName.entitiesByName)
+            moveWith = this@EntityRefsByName.moveWith
         }
 
-    override fun World.initComponent(entity: Entity) {
-    }
-
     override fun World.cleanupComponent(entity: Entity) {
-        answer = 42
-    }
-
-    override fun World.initPrefabs(entity: Entity) {
-    }
-
-    override fun World.cleanupPrefabs(entity: Entity) {
+        entitiesByName.clear()
+        moveWith = true
     }
 }
-

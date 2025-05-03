@@ -26,15 +26,15 @@ class Point private constructor(
         }
     }
 
-    override fun World.cleanupComponent(entity: Entity) {
-        x = 0f
-        y = 0f
-    }
-
     override fun World.clone(): Component<Point> = getPoolable(PointData).apply { init(from = this@Point) }
 
     fun init(from: Point) {
         x = from.x
         y = from.y
+    }
+
+    fun cleanup() {
+        x = 0f
+        y = 0f
     }
 }

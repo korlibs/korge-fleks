@@ -79,6 +79,6 @@ class Collision private constructor(
         justHit = false
         isHit = false
         // Deep init of hit position - reuse object
-        hitPosition.reset()
+        hitPosition.cleanup()
     }
 }

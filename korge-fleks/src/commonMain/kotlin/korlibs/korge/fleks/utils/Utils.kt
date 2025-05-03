@@ -85,45 +85,33 @@ fun VerticalAlign.clone() : VerticalAlign = VerticalAlign(this.ratio)
  */
 fun RGBA.cloneRgba() : RGBA = RGBA(this.value)
 
-/**
- * Clone function (deep copy) for [List] of [CloneableData] elements.
- */
-@JvmName("ListOfCloneableData")
-fun<T> List<CloneableData<T>>.clone() : List<T> {
-    val listCopy = mutableListOf<T>()
-    // Perform deep copy of list elements
-    forEach { element ->
-        listCopy.add(element.clone())
-    }
-    return listCopy
-}
 
 /**
- * Clone function (deep copy) for [List] of [Entity] elements.
+ * Init function (deep copy) for [MutableList] of String elements.
  */
-@JvmName("ListOfEntities")
-fun List<Entity>.clone() : List<Entity> {
-    val listCopy = mutableListOf<Entity>()
-    // Perform deep copy of list elements
-    forEach { entity ->
-        listCopy.add(entity.clone())
-    }
-    return listCopy
-}
-
-/**
- * Clone function (deep copy) for [List] of String elements.
- */
-@JvmName("ListOfStrings")
-fun List<String>.clone() : List<String> {
-    val listCopy = mutableListOf<String>()
-    // Perform deep copy of list elements
-    forEach { string ->
-        listCopy.add(string)
-    }
-    return listCopy
-}
-
 fun MutableList<String>.init(from: List<String>) {
     this.addAll(from)
+}
+
+/**
+ * Init function (deep copy) for [MutableList] of [Entity] elements.
+ * This works because Entities are static data classes which will not be "reused" with other
+ * id and version.
+ */
+fun MutableList<Entity>.init(from: List<Entity>) {
+    this.addAll(from)
+}
+
+/**
+ * Init function (deep copy) for [MutableList] of [Poolable] elements.
+ * Elements are taken from their respective pools by cloning them in the scope of the world where the pool was added.
+ */
+fun <T> MutableList<Poolable<T>>.init(world: World, from: List<Poolable<T>>) {
+    from.forEach { item ->
+        this.add(item.run { world.clone() } )
+    }
+}
+
+fun MutableMap<String, Entity>.init(from: Map<String, Entity>) {
+    this.putAll(from)
 }

@@ -4,9 +4,11 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.Collision.Companion.addCollisionComponentPool
 import korlibs.korge.fleks.components.CoolDown.Companion.addCoolDownComponentPool
 import korlibs.korge.fleks.components.EntityRef.Companion.addEntityRefComponentPool
+import korlibs.korge.fleks.components.EntityRefs.Companion.addEntityRefsComponentPool
+import korlibs.korge.fleks.components.EntityRefsByName.Companion.addEntityRefsByNameComponentPool
+import korlibs.korge.fleks.components.Event.Companion.addEventComponentPool
 import korlibs.korge.fleks.components.Info.Companion.addInfoComponentPool
 import korlibs.korge.fleks.components.LevelMap.Companion.addLevelMapComponentPool
-import korlibs.korge.fleks.components.SubEntities.Companion.addSubEntitiesComponentPool
 import korlibs.korge.fleks.components.data.EntityVar.Companion.addEntityVarDataPool
 import korlibs.korge.fleks.components.data.Point.Companion.addPointDataPool
 
@@ -17,11 +19,12 @@ fun InjectableConfiguration.addKorgeFleksComponentPools(preAllocate: Int = 0) {
     addCollisionComponentPool(preAllocate)
     addCoolDownComponentPool(preAllocate)
     addEntityRefComponentPool(preAllocate)
-
+    addEntityRefsComponentPool(preAllocate)
+    addEntityRefsByNameComponentPool(preAllocate)
+    addEventComponentPool(preAllocate)
     addInfoComponentPool(preAllocate)
     addLevelMapComponentPool(preAllocate)
 
-    addSubEntitiesComponentPool(preAllocate)
 }
 
 /**

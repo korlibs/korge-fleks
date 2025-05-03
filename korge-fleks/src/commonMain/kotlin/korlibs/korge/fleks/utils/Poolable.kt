@@ -21,7 +21,7 @@ import korlibs.korge.fleks.gameState.*
  *     Also during the snapshot rewind/forward feature.
  */
 abstract class Poolable<T> : Component<T> {
-    abstract fun World.clone(): Component<T>  // feature of making snapshots on the fly
+    abstract fun World.clone(): Poolable<T>  // feature of making snapshots on the fly
 
     open fun World.initComponent(entity: Entity) = Unit
     open fun World.cleanupComponent(entity: Entity) = Unit
