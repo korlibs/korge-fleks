@@ -26,7 +26,7 @@ class Point private constructor(
         }
     }
 
-    override fun World.clone(): Component<Point> = getPoolable(PointData).apply { init(from = this@Point) }
+    override fun World.clone(): Point = getPoolable(PointData).apply { init(from = this@Point) }
 
     fun init(from: Point) {
         x = from.x

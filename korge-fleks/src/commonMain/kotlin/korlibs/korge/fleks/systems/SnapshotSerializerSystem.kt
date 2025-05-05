@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.io.async.*
 import korlibs.io.file.std.*
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
 import korlibs.korge.fleks.gameState.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
