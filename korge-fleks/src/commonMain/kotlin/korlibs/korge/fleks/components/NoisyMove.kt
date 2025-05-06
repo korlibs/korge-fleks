@@ -1,12 +1,6 @@
 package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.components.TweenPropertyComponent.*
-import korlibs.math.interpolation.*
-import kotlinx.serialization.*
-
-
+/*
 // TODO check if we can implement this as Tween animation for a specific property (x or y)
 
 /**
@@ -74,3 +68,4 @@ data class NoisyMoveComponent(
     // Author's hint: Check if deep copy is needed on any change in the component!
     override fun clone(): NoisyMoveComponent = this.copy()
 }
+*/

@@ -5,6 +5,7 @@ import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
 /**
  * This component is used to store the level name and the layer names of a game object.
  *

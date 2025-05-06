@@ -185,6 +185,7 @@ class LayeredSprite private constructor(
     }
 }
 
+/*
 @Serializable @SerialName("$FLEKS_COMPONENT$")
 class $FLEKS_COMPONENT$ private constructor(
 var answer: Int = 42
@@ -239,3 +240,4 @@ var answer: Int = 42
     override fun World.cleanupPrefabs(entity: Entity) {
     }
 }
+*/
