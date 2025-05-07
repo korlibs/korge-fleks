@@ -12,7 +12,7 @@ import kotlinx.serialization.*
 
 /**
  * Entity config for a dialog box which appears on the dialog layer in front of any game play.
- * Dialog Box is rendered on indexLayer 100 - 102 in foreground on [FG_DIALOGS][RenderLayerTag.FG_DIALOGS] layer.
+ * Dialog Box is rendered on indexLayer 100 - 102 in foreground on [FG_DIALOGS][RenderLayerTag.FG_OBJECT_DIALOGS] layer.
  */
 @Serializable @SerialName("DialogBoxConfig")
 data class DialogBoxConfig(
@@ -98,8 +98,8 @@ data class DialogBoxConfig(
                 tint = this@DialogBoxConfig.tint
                 alpha = this@DialogBoxConfig.alpha
             }
-            it += RenderLayerTag.FG_DIALOGS
-            it += LayerComponent(layerIndex = 102)
+            it += RenderLayerTag.FG_OBJECT_DIALOGS
+            it += LayerComponent(index = 102)
 //            it += RenderLayerTag.DEBUG
         }
         val textBox = entity {
@@ -114,8 +114,8 @@ data class DialogBoxConfig(
                 tint = this@DialogBoxConfig.tint
                 alpha = this@DialogBoxConfig.alpha
             }
-            it += RenderLayerTag.FG_DIALOGS
-            it += LayerComponent(layerIndex = 100)
+            it += RenderLayerTag.FG_OBJECT_DIALOGS
+            it += LayerComponent(index = 100)
 //            it += RenderLayerTag.DEBUG
         }
         val textField = entity {
@@ -130,12 +130,12 @@ data class DialogBoxConfig(
                 horizontalAlign = textHAlign,
                 verticalAlign = textVAlign
             )
-            it += LayerComponent(layerIndex = 101)
+            it += LayerComponent(index = 101)
             it += RgbaComponent().apply {
                 tint = this@DialogBoxConfig.tint
                 alpha = 1f
             }
-            it += RenderLayerTag.FG_DIALOGS
+            it += RenderLayerTag.FG_OBJECT_DIALOGS
 //            it += RenderLayerTag.DEBUG
         }
         entity.configure {

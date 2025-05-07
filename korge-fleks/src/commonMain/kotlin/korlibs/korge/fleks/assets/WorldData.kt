@@ -19,10 +19,10 @@ data class WorldData(
     // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
     val tileSize: Int = 1,
     // Level maps
-    val levelGridVania: List<List<LevelMap>> = listOf()
+    val levelGridVania: List<List<Chunk>> = listOf()
 ) {
 
-    data class LevelMap(
+    data class Chunk(
         var entities: List<String>? = null,
         var tileMapData: Map<String, TileMapData> = mapOf(),
         var collisionMap: IntArray? = null

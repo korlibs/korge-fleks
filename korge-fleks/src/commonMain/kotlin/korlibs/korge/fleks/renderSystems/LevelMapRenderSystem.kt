@@ -29,7 +29,7 @@ inline fun Container.levelMapRenderSystem(world: World, layerTag: RenderLayerTag
 class LevelMapRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag,
-    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
+    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
 
