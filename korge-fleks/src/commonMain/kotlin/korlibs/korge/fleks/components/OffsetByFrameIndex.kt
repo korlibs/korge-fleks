@@ -18,7 +18,8 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("OffsetByFrameIndex")
 class OffsetByFrameIndex private constructor(
     var entity: Entity = Entity.NONE,
-    val mapOfOffsetLists: MutableMap<String, List<Point>> = mutableMapOf()
+    // TODO: Use a mutableMap of "components with a mutableList of points" instead of a map-to-list-of-points
+    var mapOfOffsetLists: Map<String, List<Point>> = mapOf()
 ) : Poolable<OffsetByFrameIndex>() {
     override fun type() = OffsetByFrameIndexComponent
 
@@ -46,13 +47,14 @@ class OffsetByFrameIndex private constructor(
     // Init an existing component instance with data from another component
     fun init(from: OffsetByFrameIndex) {
         entity = from.entity
-        mapOfOffsetLists.init(from = from.mapOfOffsetLists)
+        mapOfOffsetLists = from.mapOfOffsetLists
     }
 
     // Cleanup the component instance manually
     fun cleanup() {
         entity = Entity.NONE
-        mapOfOffsetLists.cleanup()
+        // Lists of Points are static and will be freed to the pool in cleanupComponent function when entity is destroyed
+        mapOfOffsetLists = mapOf()
     }
 
     // Initialize the component automatically when it is added to an entity
@@ -61,7 +63,14 @@ class OffsetByFrameIndex private constructor(
 
     // Cleanup the component automatically when it is removed from an entity
     override fun World.cleanupComponent(entity: Entity) {
-        cleanup()
+        this@OffsetByFrameIndex.entity = Entity.NONE
+        // Put all points back to the pool
+        mapOfOffsetLists.forEach { (_, list) ->
+            list.forEach { point ->
+                point.run { this@cleanupComponent.free() }
+            }
+        }
+        mapOfOffsetLists = mapOf()
     }
 
     // Initialize an external prefab when the component is added to an entity
@@ -71,22 +80,4 @@ class OffsetByFrameIndex private constructor(
     // Cleanup/Reset an external prefab when the component is removed from an entity
     override fun World.cleanupPrefabs(entity: Entity) {
     }
-}
-
-/**
- */
-@Serializable @SerialName("OffsetByFrameIndex")
-data class OffsetByFrameIndexComponent(
-) : Poolable<OffsetByFrameIndexComponent>() {
-    override fun type(): ComponentType<OffsetByFrameIndexComponent> = OffsetByFrameIndexComponent
-    companion object : ComponentType<OffsetByFrameIndexComponent>()
-
-
-    // Author's hint: Check if deep copy is needed on any change in the component!
-    override fun clone(): OffsetByFrameIndexComponent =
-        this.copy(
-            // Perform deep copy of Entity and map
-            entity = entity.clone(),
-            mapOfOffsetLists = mapOfOffsetLists.clone()
-        )
 }

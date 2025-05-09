@@ -2,6 +2,8 @@ package korlibs.korge.fleks.components.data
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.staticRgbaComponent
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,8 +19,8 @@ class TextureRef private constructor(
     /**
      * Local position of layer relative to the top-left point of the parallax entity (global PositionComponent).
      */
-    val position: Position = Position.value(),
-    val rgba: Rgba = Rgba.value()
+    val position: Position = staticPositionComponent(),
+    val rgba: Rgba = staticRgbaComponent()
 ) : Poolable<TextureRef>() {
     override fun type() = TextureRefData
 
@@ -39,22 +41,20 @@ class TextureRef private constructor(
     }
 
     override fun World.clone(): TextureRef =
-        getPoolable(TextureRefData).apply {
-            name = this@TextureRef.name
-        }
-
-    fun cleanup() {
-        name = ""
-        entity = Entity.NONE
-        position.cleanup()
-        rgba.cleanup()
-    }
+        getPoolable(TextureRefData).apply { init(from = this@TextureRef) }
 
     fun init(from: TextureRef) {
         name = from.name
         entity = from.entity
         position.init(from.position)
         rgba.init(from.rgba)
+    }
+
+    fun cleanup() {
+        name = ""
+        entity = Entity.NONE
+        position.cleanup()
+        rgba.cleanup()
     }
 }
 

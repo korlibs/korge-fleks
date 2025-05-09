@@ -30,7 +30,7 @@ class Position private constructor(
             getPoolable(PositionComponent).apply { config() }
 
         // Use this function to create a new instance as val inside a component
-        fun value(): Position = Position()
+        fun staticPositionComponent(): Position = Position()
 
         fun InjectableConfiguration.addPositionComponentPool(preAllocate: Int = 0) {
             addPool(PositionComponent, preAllocate) { Position() }

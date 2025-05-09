@@ -14,6 +14,8 @@ import korlibs.korge.fleks.components.LevelMap.Companion.addLevelMapComponentPoo
 import korlibs.korge.fleks.components.LifeCycle.Companion.addLifeCycleComponentPool
 import korlibs.korge.fleks.components.Motion.Companion.addMotionComponentPool
 import korlibs.korge.fleks.components.NinePatchSprite.Companion.addNinePatchSpriteComponentPool
+import korlibs.korge.fleks.components.OffsetByFrameIndex.Companion.addOffsetByFrameIndexComponentPool
+import korlibs.korge.fleks.components.Parallax.Companion.addParallaxComponentPool
 import korlibs.korge.fleks.components.Position.Companion.addPositionComponentPool
 import korlibs.korge.fleks.components.data.EntityVar.Companion.addEntityVarDataPool
 import korlibs.korge.fleks.components.data.Point.Companion.addPointDataPool
@@ -36,6 +38,8 @@ fun InjectableConfiguration.addKorgeFleksComponentPools(preAllocate: Int = 0) {
     addLifeCycleComponentPool(preAllocate)
     addMotionComponentPool(preAllocate)
     addNinePatchSpriteComponentPool(preAllocate)
+    addOffsetByFrameIndexComponentPool(preAllocate)
+    addParallaxComponentPool(preAllocate)
 
     addPositionComponentPool(preAllocate)
 

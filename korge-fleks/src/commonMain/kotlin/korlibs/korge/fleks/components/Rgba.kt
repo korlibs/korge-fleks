@@ -3,7 +3,6 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
-import korlibs.korge.fleks.components.data.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -27,7 +26,7 @@ class Rgba private constructor(
         fun World.RgbaComponent(config: Rgba.() -> Unit ): Rgba =
             getPoolable(RgbaComponent).apply { config() }
 
-        fun value(): Rgba = Rgba()
+        fun staticRgbaComponent(): Rgba = Rgba()
 
         fun InjectableConfiguration.addRgbaComponentPool(preAllocate: Int = 0) {
             addPool(RgbaComponent, preAllocate) { Rgba() }
