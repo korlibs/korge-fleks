@@ -38,6 +38,35 @@ class TextureRef private constructor(
         fun InjectableConfiguration.addTextureRefDataPool(preAllocate: Int = 0) {
             addPool(TextureRefData, preAllocate) { TextureRef() }
         }
+
+        // Init and cleanup functions for collections of TextureRef
+        fun MutableList<TextureRef>.init(world: World, from: List<TextureRef>) {
+            from.forEach { item ->
+                this.add(item.run { world.clone() } )
+            }
+        }
+
+        fun MutableList<TextureRef>.cleanup(world: World) {
+            this.forEach { item ->
+                item.cleanup()
+                item.run { world.free() }
+            }
+            this.clear()
+        }
+
+        fun MutableMap<String, TextureRef>.init(world: World, from: Map<String, TextureRef>) {
+            from.forEach { (key, item) ->
+                this[key] = item.run { world.clone() }
+            }
+        }
+
+        fun MutableMap<String, TextureRef>.cleanup(world: World) {
+            this.forEach { (_, item) ->
+                item.cleanup()
+                item.run { world.free() }
+            }
+            this.clear()
+        }
     }
 
     override fun World.clone(): TextureRef =
@@ -56,32 +85,4 @@ class TextureRef private constructor(
         position.cleanup()
         rgba.cleanup()
     }
-}
-
-fun MutableList<TextureRef>.init(world: World, from: List<TextureRef>) {
-    from.forEach { item ->
-        this.add(item.run { world.clone() } )
-    }
-}
-
-fun MutableList<TextureRef>.cleanup(world: World) {
-    this.forEach { item ->
-        item.cleanup()
-        item.run { world.free() }
-    }
-    this.clear()
-}
-
-fun MutableMap<String, TextureRef>.init(world: World, from: Map<String, TextureRef>) {
-    from.forEach { (key, item) ->
-        this[key] = item.run { world.clone() }
-    }
-}
-
-fun MutableMap<String, TextureRef>.cleanup(world: World) {
-    this.forEach { (_, item) ->
-        item.cleanup()
-        item.run { world.free() }
-    }
-    this.clear()
 }

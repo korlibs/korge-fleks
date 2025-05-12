@@ -35,9 +35,6 @@ class Parallax private constructor(
     val backgroundLayers: MutableList<Layer> = mutableListOf(),
     val parallaxPlane: Plane = staticPlaneComponent(),
     val foregroundLayers: MutableList<Layer> = mutableListOf()
-
-    // internal TODO not needed - remove
-//    var initialized: Boolean = false
 ) : Poolable<Parallax>() {
     override fun type() = ParallaxComponent
 
@@ -112,9 +109,9 @@ class Parallax private constructor(
             )
         }
 
-        parallaxPlane.attachedLayersRearPositions = MutableList(numberAttachedRearLayers) { 0f }
-        parallaxPlane.linePositions = MutableList(numberParallaxPlaneLines) { 0f }
-        parallaxPlane.attachedLayersFrontPositions = MutableList(numberAttachedFrontLayers) { 0f }
+        parallaxPlane.attachedLayersRearPositions = List(numberAttachedRearLayers) { 0f }
+        parallaxPlane.linePositions = List(numberParallaxPlaneLines) { 0f }
+        parallaxPlane.attachedLayersFrontPositions = List(numberAttachedFrontLayers) { 0f }
         parallaxPlane.entity = this.entity("Parallax plane of entity '${entity.id}'") {
             it += parallaxPlane.position
             it += parallaxPlane.rgba
@@ -260,9 +257,9 @@ class Parallax private constructor(
         val position: Position = staticPositionComponent(),
         val rgba: Rgba = staticRgbaComponent(),
         // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
-        var linePositions: MutableList<Float> = mutableListOf(),
-        var attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
-        var attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
+        var linePositions: List<Float> = mutableListOf(),
+        var attachedLayersRearPositions: List<Float> = mutableListOf(),
+        var attachedLayersFrontPositions: List<Float> = mutableListOf()
     ) : Poolable<Plane>() {
         override fun type() = PlaneComponent
 

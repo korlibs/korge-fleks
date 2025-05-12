@@ -1,14 +1,13 @@
 package korlibs.korge.fleks.components.data
 
+/*
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-/**
- * TODO: We should not use this because we cannot call entity[SomeComponent] with it in systems
- */
+TODO: We should not use this because we cannot call entity[SomeComponent] with it in systems
 @Serializable @SerialName("EntityVar")
 class EntityVar private constructor(
     var id: Int = -1,
@@ -69,3 +68,4 @@ fun <T> MutableMap<String, EntityVar>.cleanup(pool: Pool<T>) {
         pool.free(this.remove(this.keys.first()) as T)
     }
 }
+*/

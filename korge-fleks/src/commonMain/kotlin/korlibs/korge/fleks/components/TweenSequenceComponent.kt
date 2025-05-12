@@ -1,50 +1,91 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.image.format.*
+import korlibs.korge.fleks.components.TweenSequence.TweenBase
+import korlibs.korge.fleks.components.data.TextureRef.Companion.cleanup
+import korlibs.korge.fleks.components.data.TextureRef.Companion.init
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.components.RgbaComponent.Rgb
-import korlibs.math.interpolation.Easing
-import kotlinx.serialization.*
+import korlibs.math.interpolation.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+
+fun List<TweenBase>.cleanup() {
+    forEach { tween ->
+        tween.free()
+    }
+}
 
 /**
  * This component holds all needed details to animate properties of components of entities.
+ *
+ * Author's hint: When adding new properties to the component, make sure to reset them in the
+ *                [cleanupComponent] function and initialize them in the [clone] function.
  */
 @Serializable @SerialName("TweenSequence")
-data class TweenSequenceComponent(
+class TweenSequence private constructor(
     var tweens: List<TweenBase> = listOf(),
 
     // Internal runtime data
     var index: Int = 0,              // This points to the animation step which is currently in progress
     var timeProgress: Float = 0f,    // Elapsed time for the object to be animated
     var waitTime: Float = 0f,
-    var executed: Boolean = false,
-    var initialized: Boolean = false
-) : Poolable<TweenSequenceComponent>() {
-    override fun type(): ComponentType<TweenSequenceComponent> = TweenSequenceComponent
-    companion object : ComponentType<TweenSequenceComponent>()
-
-    // Author's hint: Check if deep copy is needed on any change in the component!
-    override fun clone(): TweenSequenceComponent {
-        val copyOfTweens: MutableList<TweenBase> = mutableListOf()
-        // Perform special deep copy of list elements
-        tweens.forEach { element -> copyOfTweens.add(element.clone()) }
-
-        return this.copy(
-            tweens = copyOfTweens
-        )
+    var executed: Boolean = false
+) : Poolable<TweenSequence>() {
+    // Init an existing component data instance with data from another component
+    // This is used for component instances when they are part (val property) of another component
+    fun init(from: TweenSequence) {
+        tweens = from.tweens  // List is static and elements do not change
+        index = from.index
+        timeProgress = from.timeProgress
+        waitTime = from.waitTime
+        executed = from.executed
     }
 
-    /**
-     * Initialize internal waitTime property with delay value of first tweens if available.
-     */
-    override fun World.onAdd(entity: Entity) {
-        // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
-        if (initialized) return
-        else initialized = true
+    // Cleanup the component data instance manually
+    // This is used for component instances when they are part (val property) of another component
+    fun cleanup() {
+        // We own the static list of tweens - Thus, we need to put them back to the pool
+        tweens.cleanup()
+        tweens = listOf()
+        index = 0
+        timeProgress = 0f
+        waitTime = 0f
+        executed = false
+    }
 
+    override fun type() = TweenSequenceComponent
+
+    companion object {
+        val TweenSequenceComponent = componentTypeOf<TweenSequence>()
+
+        // Use this function to create a new instance of component data as val inside another component
+        fun staticTweenSequenceComponent(config: TweenSequence.() -> Unit ): TweenSequence =
+            TweenSequence().apply(config)
+
+        // Use this function to get a new instance of a component from the pool and add it to an entity
+        fun World.TweenSequenceComponent(config: TweenSequence.() -> Unit ): TweenSequence =
+            getPoolable(TweenSequenceComponent).apply(config)
+
+        // Call this function in the fleks world configuration to create the component pool
+        fun InjectableConfiguration.addTweenSequenceComponentPool(preAllocate: Int = 0) {
+            addPool(TweenSequenceComponent, preAllocate) { TweenSequence() }
+        }
+    }
+
+    // Clone a new instance of the component from the pool
+    override fun World.clone(): TweenSequence =
+        getPoolable(TweenSequenceComponent).apply { init(from = this@TweenSequence ) }
+
+    // Initialize the component automatically when it is added to an entity
+    override fun World.initComponent(entity: Entity) {
+        // Initialize internal waitTime property with delay value of first tween if available.
         if (tweens.isNotEmpty()) waitTime = tweens[index].delay ?: 0f
+    }
+
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
+    override fun World.cleanupComponent(entity: Entity) {
+        cleanup()
     }
 
     interface TweenBase {
@@ -52,58 +93,15 @@ data class TweenSequenceComponent(
         var delay: Float?
         var duration: Float?
         var easing: Easing?
-        fun clone(): TweenBase
+        fun free()
     }
+}
 
-    /**
-     * Animation Component data classes based on TweenBase
-     */
-    @Serializable @SerialName("SpawnNewTweenSequence")
-    data class SpawnNewTweenSequence(
-        val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in sequence
 
-        override var entity: Entity = Entity.NONE,    // not used
-        override var delay: Float? = null,
-        override var duration: Float? = null,
-        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
-    ) : TweenBase {
-        override fun clone(): SpawnNewTweenSequence {
-            val copyOfTweens: MutableList<TweenBase> = mutableListOf()
-            // Perform special deep copy of list elements
-            tweens.forEach { element -> copyOfTweens.add(element.clone()) }
 
-            return this.copy(
-                tweens = copyOfTweens,
-                entity = entity.clone(),
-                easing = easing
-                // Hint: it is not needed to copy "easing" property by creating new one like below:
-                // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
-            )
-        }
-    }
 
-    // TODO not used
-    @Serializable @SerialName("LoopTweens")
-    data class LoopTweens(
-        val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in a loop
 
-        override var entity: Entity = Entity.NONE,    // not used
-        override var delay: Float? = null,
-        override var duration: Float? = null,
-        @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
-    ) : TweenBase {
-        override fun clone(): LoopTweens {
-            val copyOfTweens: MutableList<TweenBase> = mutableListOf()
-            // Perform special deep copy of list elements
-            tweens.forEach { element -> copyOfTweens.add(element.clone()) }
 
-            return this.copy(
-                tweens = copyOfTweens,
-                entity = entity.clone(),
-                easing = easing
-            )
-        }
-    }
 
     @Serializable @SerialName("ParallelTweens")
     data class ParallelTweens(
@@ -407,5 +405,4 @@ data class TweenSequenceComponent(
                 easing = easing
             )
     }
-}
 

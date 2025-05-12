@@ -13,13 +13,25 @@ import korlibs.korge.fleks.components.LayeredSprite.Companion.addLayeredSpriteCo
 import korlibs.korge.fleks.components.LevelMap.Companion.addLevelMapComponentPool
 import korlibs.korge.fleks.components.LifeCycle.Companion.addLifeCycleComponentPool
 import korlibs.korge.fleks.components.Motion.Companion.addMotionComponentPool
-import korlibs.korge.fleks.components.NinePatchSprite.Companion.addNinePatchSpriteComponentPool
+import korlibs.korge.fleks.components.NinePatch.Companion.addNinePatchComponentPool
 import korlibs.korge.fleks.components.OffsetByFrameIndex.Companion.addOffsetByFrameIndexComponentPool
 import korlibs.korge.fleks.components.Parallax.Companion.addParallaxComponentPool
 import korlibs.korge.fleks.components.Position.Companion.addPositionComponentPool
-import korlibs.korge.fleks.components.data.EntityVar.Companion.addEntityVarDataPool
+import korlibs.korge.fleks.components.Rgba.Companion.addRgbaComponentPool
+import korlibs.korge.fleks.components.Rigidbody.Companion.addRigidbodyComponentPool
+import korlibs.korge.fleks.components.Size.Companion.addSizeComponentPool
+import korlibs.korge.fleks.components.SizeInt.Companion.addSizeIntComponentPool
+import korlibs.korge.fleks.components.Sound.Companion.addSoundComponentPool
+import korlibs.korge.fleks.components.Spawner.Companion.addSpawnerComponentPool
+import korlibs.korge.fleks.components.Sprite.Companion.addSpriteComponentPool
+import korlibs.korge.fleks.components.SpriteLayers.Companion.addSpriteLayersComponentPool
+import korlibs.korge.fleks.components.SwitchLayerVisibility.Companion.addSwitchLayerVisibilityComponentPool
+import korlibs.korge.fleks.components.TextField.Companion.addTextFieldComponentPool
+import korlibs.korge.fleks.components.TouchInput.Companion.addTouchInputComponentPool
+import korlibs.korge.fleks.components.TweenProperty.Companion.addTweenPropertyComponentPools
 import korlibs.korge.fleks.components.data.Point.Companion.addPointDataPool
 import korlibs.korge.fleks.components.data.Rgb.Companion.addRgbDataPool
+import korlibs.korge.fleks.components.data.SpriteLayer.Companion.addSpriteLayerDataPool
 import korlibs.korge.fleks.components.data.TextureRef.Companion.addTextureRefDataPool
 
 /**
@@ -35,24 +47,33 @@ fun InjectableConfiguration.addKorgeFleksComponentPools(preAllocate: Int = 0) {
     addInfoComponentPool(preAllocate)
     addLayerComponentPool(preAllocate)
     addLayeredSpriteComponentPool(preAllocate)
+    addLevelMapComponentPool(preAllocate)
     addLifeCycleComponentPool(preAllocate)
     addMotionComponentPool(preAllocate)
-    addNinePatchSpriteComponentPool(preAllocate)
+    addNinePatchComponentPool(preAllocate)
     addOffsetByFrameIndexComponentPool(preAllocate)
     addParallaxComponentPool(preAllocate)
-
     addPositionComponentPool(preAllocate)
-
-    addLevelMapComponentPool(preAllocate)
-
+    addRgbaComponentPool(preAllocate)
+    addRigidbodyComponentPool(preAllocate)
+    addSizeComponentPool(preAllocate)
+    addSizeIntComponentPool(preAllocate)
+    addSoundComponentPool(preAllocate)
+    addSpawnerComponentPool(preAllocate)
+    addSpriteComponentPool(preAllocate)
+    addSpriteLayersComponentPool(preAllocate)
+    addSwitchLayerVisibilityComponentPool(preAllocate)
+    addTextFieldComponentPool(preAllocate)
+    addTouchInputComponentPool(preAllocate)
+    addTweenPropertyComponentPools(preAllocate)
 }
 
 /**
  * Add here all data pools which are used in the game.
  */
 fun InjectableConfiguration.addKorgeFleksDataPools(preAllocate: Int = 0) {
-    addEntityVarDataPool(preAllocate)
     addPointDataPool(preAllocate)
     addRgbDataPool(preAllocate)
+    addSpriteLayerDataPool(preAllocate)
     addTextureRefDataPool(preAllocate)
 }

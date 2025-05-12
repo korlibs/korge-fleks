@@ -2,11 +2,17 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.image.format.*
-import korlibs.image.format.ImageAnimation.Direction.*
-import korlibs.korge.fleks.assets.AssetStore
+import korlibs.image.format.ImageAnimation.Direction
+import korlibs.image.format.ImageAnimation.Direction.FORWARD
+import korlibs.image.format.ImageAnimation.Direction.REVERSE
+import korlibs.image.format.ImageAnimation.Direction.PING_PONG
+import korlibs.image.format.ImageAnimation.Direction.ONCE_FORWARD
+import korlibs.image.format.ImageAnimation.Direction.ONCE_REVERSE
+import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.utils.*
 import korlibs.time.*
-import kotlinx.serialization.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 
 /**
@@ -32,9 +38,12 @@ import kotlinx.serialization.*
  *        [ONCE_REVERSE].
  *
  * Other parameters should not be set directly. They are used internally by [SpriteSystem].
+ *
+ * Author's hint: When adding new properties to the component, make sure to reset them in the
+ *                [cleanupComponent] function and initialize them in the [clone] function.
  */
 @Serializable @SerialName("Sprite")
-data class SpriteComponent(
+class Sprite private constructor(
     var name: String = "",
     var anchorX: Float = 0f,                          // x,y position of the pivot point within the sprite
     var anchorY: Float = 0f,
@@ -42,15 +51,84 @@ data class SpriteComponent(
     var animation: String? = null,                    // Leave null if sprite texture does not have an animation
     var frameIndex: Int = 0,                          // frame number of animation which is currently drawn
     var running: Boolean = false,                     // Switch animation on and off
-    var direction: ImageAnimation.Direction? = null,  // Default: Get direction from Aseprite file
+    var direction: Direction? = null,  // Default: Get direction from Aseprite file
     var destroyOnAnimationFinished: Boolean = false,  // Delete entity when direction is [ONCE_FORWARD] or [ONCE_REVERSE]
 
     // internal, do not set directly
     var increment: Int = -2,                          // out of [-1, 0, 1]; will be added to frameIndex each new frame
-    var nextFrameIn: Float = 0f,                      // time in seconds until next frame of animation shall be shown
-    var initialized: Boolean = false
-) : Poolable<SpriteComponent>() {
-    override fun type(): ComponentType<SpriteComponent> = SpriteComponent
+    var nextFrameIn: Float = 0f                       // time in seconds until next frame of animation shall be shown
+) : Poolable<Sprite>() {
+    // Init an existing component data instance with data from another component
+    // This is used for component instances when they are part (val property) of another component
+    fun init(from: Sprite) {
+        name = from.name
+        anchorX = from.anchorX
+        anchorY = from.anchorY
+        animation = from.animation
+        frameIndex = from.frameIndex
+        running = from.running
+        direction = from.direction  // normal ordinary enum - no deep copy needed
+        destroyOnAnimationFinished = from.destroyOnAnimationFinished
+        increment = from.increment
+        nextFrameIn = from.nextFrameIn
+    }
+
+    // Cleanup the component data instance manually
+    // This is used for component instances when they are part (val property) of another component
+    fun cleanup() {
+        name = ""
+        anchorX = 0f
+        anchorY = 0f
+        animation = null
+        frameIndex = 0
+        running = false
+        direction = null
+        destroyOnAnimationFinished = false
+        increment = -2
+        nextFrameIn = 0f
+    }
+
+    override fun type() = SpriteComponent
+
+    companion object {
+        val SpriteComponent = componentTypeOf<Sprite>()
+
+        // Use this function to create a new instance of component data as val inside another component
+        fun staticSpriteComponent(config: Sprite.() -> Unit ): Sprite =
+            Sprite().apply(config)
+
+        // Use this function to get a new instance of a component from the pool and add it to an entity
+        fun World.SpriteComponent(config: Sprite.() -> Unit ): Sprite =
+        getPoolable(SpriteComponent).apply(config)
+
+        // Call this function in the fleks world configuration to create the component pool
+        fun InjectableConfiguration.addSpriteComponentPool(preAllocate: Int = 0) {
+            addPool(SpriteComponent, preAllocate) { Sprite() }
+        }
+    }
+
+    // Clone a new instance of the component from the pool
+    override fun World.clone(): Sprite =
+    getPoolable(SpriteComponent).apply { init(from = this@Sprite ) }
+
+    // Initialize the component automatically when it is added to an entity
+    override fun World.initComponent(entity: Entity) {
+        // Initialize animation properties with data from [AssetStore].
+        val assetStore: AssetStore = this.inject(name = "AssetStore")
+
+        // Set direction from Aseprite if not specified in the component
+        if (direction == null) {
+            direction = assetStore.getAnimationDirection(name, animation)
+        }
+        setFrameIndex(assetStore)
+        setNextFrameIn(assetStore)
+        setIncrement()
+
+        //println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
+    }
+
+    // Cleanup/Reset the component automatically when it is removed from an entity
+    override fun World.cleanupComponent(entity: Entity) { cleanup() }
 
     // Set frameIndex for starting animation
     fun setFrameIndex(assetStore: AssetStore) {
@@ -75,34 +153,6 @@ data class SpriteComponent(
         }
     }
 
-    /**
-     * Initialize animation properties with data from [AssetStore].
-     */
-    override fun World.onAdd(entity: Entity) {
-        // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
-        if (initialized) return
-        else initialized = true
-
-        val assetStore: AssetStore = this.inject(name = "AssetStore")
-
-        // Set direction from Aseprite if not specified in the component
-        if (direction == null) {
-            direction = assetStore.getAnimationDirection(name, animation)
-        }
-        setFrameIndex(assetStore)
-        setNextFrameIn(assetStore)
-        setIncrement()
-
-//        println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
-    }
-
-    companion object : ComponentType<SpriteComponent>()
-
-    // Author's hint: Check if deep copy is needed on any change in the component!
-    override fun clone(): SpriteComponent =
-        this.copy(
-            direction = direction  // normal ordinary enum - no deep copy needed
-        )
 }
 
 fun AssetStore.getImageAnimation(name: String, animation: String? = null) : ImageAnimation {

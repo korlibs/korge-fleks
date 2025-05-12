@@ -13,36 +13,36 @@ import kotlinx.serialization.Serializable
  *                [cleanupComponent] function and initialize them in the [clone] function.
  */
 @Serializable @SerialName("NinePatchSprite")
-class NinePatchSprite private constructor(
+class NinePatch private constructor(
     var name: String = "",
     var width: Float = 0f,
     var height: Float = 0f
-) : Poolable<NinePatchSprite>() {
-    override fun type() = NinePatchSpriteComponent
+) : Poolable<NinePatch>() {
+    override fun type() = NinePatchComponent
 
     companion object {
-        val NinePatchSpriteComponent = componentTypeOf<NinePatchSprite>()
+        val NinePatchComponent = componentTypeOf<NinePatch>()
 
         // Use this function to create a new instance as val inside another component
-        fun staticNinePatchSpriteComponent(config: NinePatchSprite.() -> Unit ): NinePatchSprite =
-            NinePatchSprite().apply(config)
+        fun staticNinePatchSpriteComponent(config: NinePatch.() -> Unit ): NinePatch =
+            NinePatch().apply(config)
 
         // Use this function to get a new instance from the pool
-        fun World.NinePatchSpriteComponent(config: NinePatchSprite.() -> Unit ): NinePatchSprite =
-        getPoolable(NinePatchSpriteComponent).apply(config)
+        fun World.NinePatchComponent(config: NinePatch.() -> Unit ): NinePatch =
+        getPoolable(NinePatchComponent).apply(config)
 
         // Call this function in the fleks world configuration to create the component pool
-        fun InjectableConfiguration.addNinePatchSpriteComponentPool(preAllocate: Int = 0) {
-            addPool(NinePatchSpriteComponent, preAllocate) { NinePatchSprite() }
+        fun InjectableConfiguration.addNinePatchComponentPool(preAllocate: Int = 0) {
+            addPool(NinePatchComponent, preAllocate) { NinePatch() }
         }
     }
 
     // Clone a new instance of the component from the pool
-    override fun World.clone(): NinePatchSprite =
-    getPoolable(NinePatchSpriteComponent).apply { init(from = this@NinePatchSprite ) }
+    override fun World.clone(): NinePatch =
+    getPoolable(NinePatchComponent).apply { init(from = this@NinePatch ) }
 
     // Init an existing component instance with data from another component
-    fun init(from: NinePatchSprite) {
+    fun init(from: NinePatch) {
         name = from.name
         width = from.width
         height = from.height

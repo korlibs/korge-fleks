@@ -38,15 +38,7 @@ class Position private constructor(
     }
 
     override fun World.clone(): Position =
-        getPoolable(PositionComponent).apply {
-            x = this@Position.x
-            y = this@Position.y
-            offsetX = this@Position.offsetX
-            offsetY = this@Position.offsetY
-        }
-
-    override fun World.initComponent(entity: Entity) {
-    }
+        getPoolable(PositionComponent).apply { init(from = this@Position) }
 
     fun init(from: Position) {
         x = from.x
@@ -62,12 +54,6 @@ class Position private constructor(
         y = 0f
         offsetX = 0f
         offsetY = 0f
-    }
-
-    override fun World.initPrefabs(entity: Entity) {
-    }
-
-    override fun World.cleanupPrefabs(entity: Entity) {
     }
 
     /**

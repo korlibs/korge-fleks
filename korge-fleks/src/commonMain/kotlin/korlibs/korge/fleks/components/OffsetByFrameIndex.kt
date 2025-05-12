@@ -57,10 +57,6 @@ class OffsetByFrameIndex private constructor(
         mapOfOffsetLists = mapOf()
     }
 
-    // Initialize the component automatically when it is added to an entity
-    override fun World.initComponent(entity: Entity) {
-    }
-
     // Cleanup the component automatically when it is removed from an entity
     override fun World.cleanupComponent(entity: Entity) {
         this@OffsetByFrameIndex.entity = Entity.NONE
@@ -71,13 +67,5 @@ class OffsetByFrameIndex private constructor(
             }
         }
         mapOfOffsetLists = mapOf()
-    }
-
-    // Initialize an external prefab when the component is added to an entity
-    override fun World.initPrefabs(entity: Entity) {
-    }
-
-    // Cleanup/Reset an external prefab when the component is removed from an entity
-    override fun World.cleanupPrefabs(entity: Entity) {
     }
 }

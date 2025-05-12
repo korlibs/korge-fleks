@@ -12,6 +12,8 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.data.*
 import korlibs.korge.fleks.components.data.TextureRef.Companion.TextureRefData
+import korlibs.korge.fleks.components.data.TextureRef.Companion.cleanup
+import korlibs.korge.fleks.components.data.TextureRef.Companion.init
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
