@@ -10,12 +10,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-fun List<TweenBase>.cleanup() {
-    forEach { tween ->
-        tween.free()
-    }
-}
-
 /**
  * This component holds all needed details to animate properties of components of entities.
  *
@@ -70,6 +64,12 @@ class TweenSequence private constructor(
         // Call this function in the fleks world configuration to create the component pool
         fun InjectableConfiguration.addTweenSequenceComponentPool(preAllocate: Int = 0) {
             addPool(TweenSequenceComponent, preAllocate) { TweenSequence() }
+        }
+
+        fun List<TweenBase>.cleanup() {
+            forEach { tween ->
+                tween.free()
+            }
         }
     }
 

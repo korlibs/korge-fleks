@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 /**
  * This component enables rendering objects in layers.
  *
- * @param [layerIndex] defines the order in which objects like textures or shapes will be drawn.
+ * @param [index] defines the order in which objects like textures or shapes will be drawn.
  * Higher numbers mean that the object will be rendered on top of other objects with smaller number.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Layer")
 class Layer private constructor(
-    var layerIndex: Int = 0
+    var index: Int = 0
 ) : Poolable<Layer>() {
     override fun type() = LayerComponent
 
@@ -34,10 +34,10 @@ class Layer private constructor(
 
     override fun World.clone(): Layer =
         getPoolable(LayerComponent).apply {
-            layerIndex = this@Layer.layerIndex
+            index = this@Layer.index
         }
 
     override fun World.cleanupComponent(entity: Entity) {
-        layerIndex = 0
+        index = 0
     }
 }

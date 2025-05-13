@@ -63,6 +63,14 @@ class SpawnNewTweenSequence private constructor(
 }
 
 /*
+import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.components.TweenSequence.TweenBase
+import korlibs.korge.fleks.utils.*
+import korlibs.math.interpolation.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+
 @Serializable @SerialName("$DATA$")
 class $DATA$ private constructor(
     var value: ...
