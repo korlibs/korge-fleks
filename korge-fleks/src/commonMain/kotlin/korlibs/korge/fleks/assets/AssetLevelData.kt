@@ -132,6 +132,8 @@ class AssetLevelData(
                         }
                         println("INFO: Game object '${entity.identifier}' loaded for '$chunkName'")
                         println("\n$yamlString")
+                        println("entity pos x: ${(levelWidth * levelX) + (entity.gridPos.x * gridSize)}")
+                        println("entity pos y: ${(levelWidth * levelX) + (entity.gridPos.y * gridSize)}")
 
                         try {
                             // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
@@ -163,7 +165,7 @@ class AssetLevelData(
         }
 
         val levelData = worldData.levelGridVania[levelX][levelY]
-        levelData.entities = entities.ifEmpty { null }
+        levelData.entityConfigNames = entities.ifEmpty { null }
         levelData.tileMapData = tileMapData
         levelData.collisionMap = collisionMap
     }
