@@ -104,8 +104,11 @@ class TweenProperty private constructor(
             TweenProperty().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun World.TweenPropertyComponent(config: TweenProperty.() -> Unit ): TweenProperty =
+        fun World.TweenPropertyComponent(componentType: ComponentType<TweenProperty>, config: TweenProperty.() -> Unit ): TweenProperty =
             // All component types share the same pool - so just use the first component type to get it
+            getPoolable(componentType).apply(config)
+        // TODO: Check if we should use generic function above or specific one below (need to be created for each component type)
+        fun World.TweenPositionOffsetXComponent(config: TweenProperty.() -> Unit ): TweenProperty =
             getPoolable(TweenPositionOffsetXComponent).apply(config)
 
         // Call this function in the fleks world configuration to create the component pool

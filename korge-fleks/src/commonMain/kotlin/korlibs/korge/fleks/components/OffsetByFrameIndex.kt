@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("OffsetByFrameIndex")
 class OffsetByFrameIndex private constructor(
     var entity: Entity = Entity.NONE,
-    // TODO: Use a mutableMap of "components with a mutableList of points" instead of a map-to-list-of-points
+    // Map of list of points is static - therefore use references to the map when creating copies of the component in init function
     var mapOfOffsetLists: Map<String, List<Point>> = mapOf()
 ) : Poolable<OffsetByFrameIndex>() {
     override fun type() = OffsetByFrameIndexComponent
@@ -63,6 +63,8 @@ class OffsetByFrameIndex private constructor(
         // Put all points back to the pool
         mapOfOffsetLists.forEach { (_, list) ->
             list.forEach { point ->
+                // TODO: Check if we should put cleanup (reset) function into pool again
+                point.cleanup()
                 point.run { this@cleanupComponent.free() }
             }
         }

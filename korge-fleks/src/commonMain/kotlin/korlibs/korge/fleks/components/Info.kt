@@ -43,10 +43,6 @@ class Info private constructor(
         }
 
     override fun World.initPrefabs(entity: Entity) {
-        // Make sure that initialization is skipped on world snapshot loading (deserialization of save game)
-//        if (initialized) return
-//        else initialized = true
-
         entityId = entity.id
         EntityByName.add(name, entity)
     }
