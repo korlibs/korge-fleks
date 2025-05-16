@@ -116,14 +116,16 @@ class AssetLevelData(
                             yamlString.append("name: ${chunkName}_${entity.identifier}_${gameObjectCnt++}\n")
                         }
 
-                        // Add position of entity = (level position in the world) + (position within the level) + (pivot point)
-                        val entityPosX: Int = (levelWidth * levelX) + (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
-                        val entityPosY: Int = (levelHeight * levelY) + (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
+                        // Add position of entity = (chunk position in the level) + (position within the chunk) + (pivot point)
+                        val entityPosX: Int = (levelWidth * levelX) + entity.pixelPos.x
+                        val entityPosY: Int = (levelHeight * levelY) + entity.pixelPos.y
 
                         // Add position of entity
                         entity.tags.firstOrNull { it == "positionable" }?.let {
                             yamlString.append("x: $entityPosX\n")
                             yamlString.append("y: $entityPosY\n")
+                            yamlString.append("anchorX: ${entity.pivotAnchor.sx * entity.width}\n")
+                            yamlString.append("anchorY: ${entity.pivotAnchor.sy * entity.height}\n")
                         }
 
                         // Add all other fields of entity
@@ -132,8 +134,8 @@ class AssetLevelData(
                         }
                         println("INFO: Game object '${entity.identifier}' loaded for '$chunkName'")
                         println("\n$yamlString")
-                        println("entity pos x: ${(levelWidth * levelX) + (entity.gridPos.x * gridSize)}")
-                        println("entity pos y: ${(levelWidth * levelX) + (entity.gridPos.y * gridSize)}")
+                        println("entity grid pos x: ${(levelWidth * levelX) + (entity.gridPos.x * gridSize)}")
+                        println("entity grid pos y: ${(levelWidth * levelX) + (entity.gridPos.y * gridSize)}")
 
                         try {
                             // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
