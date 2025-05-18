@@ -147,7 +147,7 @@ class AssetStore {
             }
 
             assetConfig.sounds.forEach { sound ->
-                val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.value] .readSound(  //readMusic(
+                val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound(  //readMusic(
                     props = AudioDecodingProps(exactTimings = true),
                     streaming = true
                 )

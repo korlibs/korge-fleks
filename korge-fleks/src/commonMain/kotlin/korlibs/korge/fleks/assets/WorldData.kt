@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets
 
+import com.github.quillraven.fleks.Entity
 import korlibs.image.bitmap.*
 import korlibs.image.tiles.*
 
@@ -19,14 +20,29 @@ data class WorldData(
     // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
     val tileSize: Int = 1,
     // Level maps
-    val levelGridVania: List<List<LevelMap>> = listOf()
+    val levelGridVania: List<List<Chunk>> = listOf()
 ) {
 
-    data class LevelMap(
-        var entities: List<String>? = null,
+    data class Chunk(
+        var entitiesSpawned: Boolean = false,
+        var entityConfigNames: List<String>? = null,
         var tileMapData: Map<String, TileMapData> = mapOf(),
         var collisionMap: IntArray? = null
     )
+
+    // TODO
+    fun forEachEntityInChunk(viewPortMiddlePosX: Int, viewPortMiddlePosY: Int, callback: (String) -> Unit) {
+        val gridX = viewPortMiddlePosX / levelGridWidth
+        val gridY = viewPortMiddlePosY / levelGridHeight
+        val levelChunk = levelGridVania[gridX][gridY]
+
+        if (!levelChunk.entitiesSpawned) {
+            levelChunk.entitiesSpawned = true
+            levelGridVania[gridX][gridY].entityConfigNames?.forEach { entityConfigName ->
+                callback(entityConfigName)
+            }
+        }
+    }
 
     /**
      * Iterate over all tiles within the given view port area and call the renderCall function for each tile.

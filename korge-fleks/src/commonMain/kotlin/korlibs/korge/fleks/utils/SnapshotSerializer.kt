@@ -8,6 +8,7 @@ import korlibs.io.lang.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
 import korlibs.math.interpolation.*
@@ -24,22 +25,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.*
 import kotlin.jvm.JvmInline
 
-
-/**
- * All data classes (not deriving from Fleks Component<...>) which are used within components need to be serializable by
- * deriving from this interface.
- */
+// TODO: Remove and take PoolableData into use
 interface CloneableData<out T> {
     fun clone(): T
-}
-
-/**
- * All components which shall be recorded (serialized) in SnapshotSerializerSystem needs to be derived from
- * [CloneableComponent].
- * The clone function needs to be implemented to perform a deep copy of all properties of the component.
- */
-abstract class CloneableComponent<T> : Component<T> {
-    abstract fun clone(): Component<T>
 }
 
 /**
@@ -124,27 +112,31 @@ class SnapshotSerializer {
     /**
      * This polymorphic module config for kotlinx serialization lists all Korge-fleks
      * internal components as subclasses.
+     *
+     * Hint: As base class for polymorphic serialization the [Component<T>] interface is used.
+     *       There must not be any other derived interface from that base interface. Use abstract class instead.
      */
     private val internalModule = SerializersModule {
-        // Register data classes
+        // TODO: Move to PoolableData::class section
         polymorphic(CloneableData::class) {
             subclass(ParallaxComponent.Layer::class)
             subclass(ParallaxComponent.Plane::class)
             subclass(RgbaComponent.Rgb::class)
-            subclass(Point::class)
             subclass(SpriteLayersComponent.LayerProperties::class)
             subclass(LayeredSpriteComponent.Layer::class)
         }
 
         // Register component classes
         polymorphic(Component::class) {
+            // Used as components
+            subclass(Collision::class)
             subclass(DebugComponent::class)
             subclass(EntityLinkComponent::class)
             subclass(InfoComponent::class)
             subclass(LayerComponent::class)
             subclass(LayeredSpriteComponent::class)
             subclass(LayoutComponent::class)
-            subclass(LevelMapComponent::class)
+            subclass(LevelMap::class)
             subclass(LifeCycleComponent::class)
             subclass(MotionComponent::class)
             subclass(NinePatchComponent::class)
@@ -166,6 +158,8 @@ class SnapshotSerializer {
             subclass(TouchInputComponent::class)
             subclass(TweenPropertyComponent::class)
             subclass(TweenSequenceComponent::class)
+            // Used as data inside components
+            subclass(Point::class)
         }
         // Register tags (components without properties)
         polymorphic(UniqueId::class) {

@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.CloneableComponent
 import kotlinx.serialization.*
 
 

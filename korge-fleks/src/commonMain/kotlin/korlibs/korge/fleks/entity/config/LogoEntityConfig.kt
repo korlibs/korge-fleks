@@ -47,7 +47,7 @@ data class LogoEntityConfig(
                 tint = this@LogoEntityConfig.tint
                 alpha = this@LogoEntityConfig.alpha
             }
-            it += LayerComponent(layerIndex = this@LogoEntityConfig.layerIndex)
+            it += LayerComponent(index = this@LogoEntityConfig.layerIndex)
             it += layerTag
             // Add life cycle component because we have list of layer entities which needs to be cleaned up by LifeCycleSystem on deletion
             it += LifeCycleComponent()

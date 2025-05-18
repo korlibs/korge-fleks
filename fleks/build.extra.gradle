@@ -1,6 +1,7 @@
-// Fixes "java 21 vs 1.8 problem" if kProject is used with targetJvm() and targetAndroid()
-/* WORKAROUND for Linux to be able to compile for Android
-var javaVersion = 21
+// Fixes on WINDOWS:
+// Execution failed for task ':fleks:compileReleaseKotlinAndroid'.
+// > Inconsistent JVM-target compatibility detected for tasks 'compileReleaseJavaWithJavac' (1.8) and 'compileReleaseKotlinAndroid' (21).
+var javaVersion = 22
 
 kotlin {
     jvmToolchain(javaVersion)
@@ -11,4 +12,3 @@ java {
         languageVersion.set(JavaLanguageVersion.of(javaVersion))
     }
 }
-*/

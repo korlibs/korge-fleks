@@ -15,7 +15,7 @@ import kotlin.math.*
  * Data class for storing level maps and entities for a game world.
  */
 class AssetLevelData(
-    ldtkWorld: LDTKWorld,
+    val ldtkWorld: LDTKWorld,  // TODO: Get tileset names out and store separately for hot-reloading
     private val collisionLayerName: String
 ) {
     internal var worldData = WorldData()
@@ -56,7 +56,7 @@ class AssetLevelData(
             tileSize = ldtkWorld.ldtk.defaultGridSize,
             // We store the level data config in a 2D array depending on its gridvania position in the world
             // Then later we will spawn the entities depending on the level which the player is currently in
-            levelGridVania = List(gridVaniaWidth) { List(gridVaniaHeight) { LevelMap() } }
+            levelGridVania = List(gridVaniaWidth) { List(gridVaniaHeight) { Chunk() } }
         )
 
         // Save TileMapData for each Level and layer combination from LDtk world
@@ -81,7 +81,7 @@ class AssetLevelData(
         val tileMapData: MutableMap<String, TileMapData> = mutableMapOf()
         var collisionMap: IntArray? = null
 
-        val levelName = ldtkLevel.identifier
+        val chunkName = ldtkLevel.identifier
         ldtkLevel.layerInstances?.forEach { ldtkLayer ->
             val layerName = ldtkLayer.identifier
             val levelWidth = worldData.levelGridWidth * worldData.tileSize
@@ -113,25 +113,29 @@ class AssetLevelData(
                             yamlString.append("name: ${entity.identifier}\n")
                         } else {
                             // Add other game objects with a unique name as identifier
-                            yamlString.append("name: ${levelName}_${entity.identifier}_${gameObjectCnt++}\n")
+                            yamlString.append("name: ${chunkName}_${entity.identifier}_${gameObjectCnt++}\n")
                         }
 
-                        // Add position of entity = (level position in the world) + (position within the level) + (pivot point)
-                        val entityPosX: Int = (levelWidth * levelX) + (entity.gridPos.x * gridSize) + (entity.pivot[0] * gridSize).toInt()
-                        val entityPosY: Int = (levelHeight * levelY) + (entity.gridPos.y * gridSize) + (entity.pivot[1] * gridSize).toInt()
+                        // Add position of entity = (chunk position in the level) + (position within the chunk) + (pivot point)
+                        val entityPosX: Int = (levelWidth * levelX) + entity.pixelPos.x
+                        val entityPosY: Int = (levelHeight * levelY) + entity.pixelPos.y
 
                         // Add position of entity
                         entity.tags.firstOrNull { it == "positionable" }?.let {
                             yamlString.append("x: $entityPosX\n")
                             yamlString.append("y: $entityPosY\n")
+                            yamlString.append("anchorX: ${entity.pivotAnchor.sx * entity.width}\n")
+                            yamlString.append("anchorY: ${entity.pivotAnchor.sy * entity.height}\n")
                         }
 
                         // Add all other fields of entity
                         entity.fieldInstances.forEach { field ->
                             if (field.identifier != "EntityConfig") yamlString.append("${field.identifier}: ${field.value}\n")
                         }
-                        //println("INFO: Game object '${entity.identifier}' loaded for '$levelName'")
-                        //println("\n$yamlString")
+                        println("INFO: Game object '${entity.identifier}' loaded for '$chunkName'")
+                        println("\n$yamlString")
+                        println("entity grid pos x: ${(levelWidth * levelX) + (entity.gridPos.x * gridSize)}")
+                        println("entity grid pos y: ${(levelWidth * levelX) + (entity.gridPos.y * gridSize)}")
 
                         try {
                             // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
@@ -139,7 +143,10 @@ class AssetLevelData(
                                 GameStateManager.configSerializer.yaml().decodeFromString(yamlString.toString())
 
                             // We need to store only the name of the entity config for later dynamically spawning of entities
-                            entities.add(entityConfig.name)
+                            if (entity.tags.firstOrNull { it == "unique" } == null) {
+                                // Do not add unique entities to the list of entities - they are spawn separately
+                                entities.add(entityConfig.name)
+                            }
                             //println("INFO: Registering entity config '${entity.identifier}' for '$levelName'")
                         } catch (e: Throwable) {
                             println("ERROR: Loading entity config - $e")
@@ -160,7 +167,7 @@ class AssetLevelData(
         }
 
         val levelData = worldData.levelGridVania[levelX][levelY]
-        levelData.entities = entities.ifEmpty { null }
+        levelData.entityConfigNames = entities.ifEmpty { null }
         levelData.tileMapData = tileMapData
         levelData.collisionMap = collisionMap
     }

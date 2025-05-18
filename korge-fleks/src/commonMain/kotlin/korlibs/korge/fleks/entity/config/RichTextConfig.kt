@@ -52,7 +52,7 @@ data class RichTextConfig(
                 horizontalAlign = this@RichTextConfig.horizontalAlign,
                 verticalAlign = this@RichTextConfig.verticalAlign
             )
-            it += LayerComponent(layerIndex = this@RichTextConfig.layerIndex)
+            it += LayerComponent(index = this@RichTextConfig.layerIndex)
             it += RgbaComponent().apply {
                 tint = this@RichTextConfig.tint
                 alpha = this@RichTextConfig.alpha

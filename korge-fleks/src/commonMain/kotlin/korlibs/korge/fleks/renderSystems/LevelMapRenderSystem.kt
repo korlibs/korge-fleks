@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -28,7 +29,7 @@ inline fun Container.levelMapRenderSystem(world: World, layerTag: RenderLayerTag
 class LevelMapRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag,
-    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
+    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
 
@@ -44,8 +45,8 @@ class LevelMapRenderSystem(
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
             val (rgba) = entity[RgbaComponent]
-            val (levelName, layerNames) = entity[LevelMapComponent]
-            val worldData = assetStore.getWorldData(levelName)
+            val levelMap = entity[LevelMapComponent]
+            val worldData = assetStore.getWorldData(levelMap.levelName)
             val tileSize = worldData.tileSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
@@ -59,7 +60,7 @@ class LevelMapRenderSystem(
             val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
             val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
 
-            layerNames.forEach { layerName ->
+            levelMap.layerNames.forEach { layerName ->
                 ctx.useBatcher { batch ->
                     worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
                         batch.drawQuad(

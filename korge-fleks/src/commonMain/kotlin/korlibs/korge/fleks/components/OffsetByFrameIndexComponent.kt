@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.components.data.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
@@ -13,10 +14,22 @@ import kotlinx.serialization.*
 @Serializable @SerialName("OffsetByFrameIndex")
 data class OffsetByFrameIndexComponent(
     var entity: Entity = Entity.NONE,
-    var mapOfOffsetLists: Map<String, List<Point>> = emptyMap()
+    var mapOfOffsetLists: Map<String, List<PointOld>> = mutableMapOf()
 ) : CloneableComponent<OffsetByFrameIndexComponent>() {
     override fun type(): ComponentType<OffsetByFrameIndexComponent> = OffsetByFrameIndexComponent
     companion object : ComponentType<OffsetByFrameIndexComponent>()
+
+//    TODO: For later use
+//    companion object {
+//        val OffsetByFrameIndexComponent = componentTypeOf<OffsetByFrameIndexComponent>()
+//
+//        fun World.OffsetByFrameIndexComponent(config: OffsetByFrameIndexComponent.() -> Unit ): OffsetByFrameIndexComponent =
+//            getPoolable(OffsetByFrameIndexComponent).apply { config() }
+//
+//        fun InjectableConfiguration.addOffsetByFrameIndexComponentPool(preAllocate: Int = 0) {
+//            addPool(OffsetByFrameIndexComponent, preAllocate) { OffsetByFrameIndexComponent() }
+//        }
+//    }
 
     // Author's hint: Check if deep copy is needed on any change in the component!
     override fun clone(): OffsetByFrameIndexComponent =
