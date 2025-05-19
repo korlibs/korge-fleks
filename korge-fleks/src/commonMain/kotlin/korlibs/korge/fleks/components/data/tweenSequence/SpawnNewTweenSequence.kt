@@ -13,6 +13,8 @@ import kotlinx.serialization.Serializable
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanupComponent] function and initialize them in the [clone] function.
+ *
+ * TODO: Make sure that list of tweens is deep copied into new TweenSequence component in TweenSequenceSystem
  */
 @Serializable @SerialName("SpawnNewTweenSequence")
 class SpawnNewTweenSequence private constructor(

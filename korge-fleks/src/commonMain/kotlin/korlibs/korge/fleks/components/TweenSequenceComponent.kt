@@ -103,27 +103,7 @@ class TweenSequence private constructor(
 
 
 
-    @Serializable @SerialName("ParallelTweens")
-    data class ParallelTweens(
-        val tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in parallel
 
-        override var entity: Entity = Entity.NONE,    // not used here
-        override var delay: Float? = 0f,              // in seconds
-        override var duration: Float? = 0f,           // in seconds
-        @Serializable(with = EasingAsString::class) override var easing: Easing? = Easing.LINEAR  // function to change the properties
-    ) : TweenBase {
-        override fun clone(): ParallelTweens {
-            val copyOfTweens: MutableList<TweenBase> = mutableListOf()
-            // Perform special deep copy of list elements
-            tweens.forEach { element -> copyOfTweens.add(element.clone()) }
-
-            return this.copy(
-                tweens = copyOfTweens,
-                entity = entity.clone(),
-                easing = easing
-            )
-        }
-    }
 
     @Serializable @SerialName("SendEvent")
     data class SendEvent(
