@@ -115,3 +115,7 @@ fun <T> MutableList<Poolable<T>>.init(world: World, from: List<Poolable<T>>) {
 fun MutableMap<String, Entity>.init(from: Map<String, Entity>) {
     this.putAll(from)
 }
+
+fun MutableList<String>.init(from: List<String>) {
+    this.addAll(from)
+}

@@ -90,6 +90,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 // Because we have deserialized a snapshot, we need to run post-processing on all components
                 // which need to be partly initialized again.
                 postProcessing()
+
             } else println("WARNING: Cannot find snapshot file. Snapshot was not loaded!")
         }
     }

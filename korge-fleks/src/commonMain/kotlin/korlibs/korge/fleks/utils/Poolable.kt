@@ -125,7 +125,7 @@ fun <T> World.getPool(componentType: ComponentType<T>): Pool<T> {
  * Structure containing a set of reusable objects.
  *
  * The method [alloc] retrieves from the pool or allocates a new object, while the [free] method
- * pushes back one element to the pool. Entities will be reset/cleanup before freeing.
+ * pushes back one element to the pool. Entities needs to be reset/cleanup before freeing manually.
  */
 class Pool<T> internal constructor() {
     private var gen: ((Int) -> T)? = null

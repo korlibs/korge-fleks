@@ -23,10 +23,25 @@ data class WorldData(
 ) {
 
     data class Chunk(
-        var entities: List<String>? = null,
+        var entitiesSpawned: Boolean = false,
+        var entityConfigNames: List<String>? = null,
         var tileMapData: Map<String, TileMapData> = mapOf(),
         var collisionMap: IntArray? = null
     )
+
+    // TODO
+    fun forEachEntityInChunk(viewPortMiddlePosX: Int, viewPortMiddlePosY: Int, callback: (String) -> Unit) {
+        val gridX = viewPortMiddlePosX / levelGridWidth
+        val gridY = viewPortMiddlePosY / levelGridHeight
+        val levelChunk = levelGridVania[gridX][gridY]
+
+        if (!levelChunk.entitiesSpawned) {
+            levelChunk.entitiesSpawned = true
+            levelGridVania[gridX][gridY].entityConfigNames?.forEach { entityConfigName ->
+                callback(entityConfigName)
+            }
+        }
+    }
 
     /**
      * Iterate over all tiles within the given view port area and call the renderCall function for each tile.
