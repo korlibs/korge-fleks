@@ -8,44 +8,36 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-@Serializable @SerialName("ParallelTweens")
-class ParallelTweens private constructor(
-    var tweens: List<TweenBase> = listOf(),       // tween objects which contain entity and its properties to be animated in parallel
-
-    override var entity: Entity = Entity.NONE,    // not used
-    override var delay: Float? = null,
-    override var duration: Float? = null,
+@Serializable @SerialName("DeleteEntity")
+class DeleteEntity private constructor(
+    override var entity: Entity = Entity.NONE,
+    override var delay: Float? = null,     // not used
+    override var duration: Float? = null,  // not used
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
 ) : TweenBase {
     // Init an existing tween data instance with data from another tween
-    fun init(from: ParallelTweens) {
-        tweens = from.tweens  // List is static and elements do not change
-        delay = from.delay
-        duration = from.duration
+    fun init(from: DeleteEntity) {
+        entity = from.entity
         // Hint: it is not needed to copy "easing" property by creating new one like below:
         // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
     }
 
     // Cleanup the tween data instance manually
     override fun free() {
-        // Do not put items back to the pool - we do not own them - TweenSequence is returning them to pool when
-        // component is removed from the entity
-        tweens = listOf()
-        delay = null
-        duration = null
+        entity = Entity.NONE
 
         pool.free(this)
     }
 
     companion object {
         // Use this function to create a new instance of tween data as val inside a component (TODO: check if needed)
-        fun staticParallelTweens(config: ParallelTweens.() -> Unit ): ParallelTweens =
-            ParallelTweens().apply(config)
+        fun staticDeleteEntity(config: DeleteEntity.() -> Unit ): DeleteEntity =
+            DeleteEntity().apply(config)
 
         // Use this function to get a new instance of a tween from the pool and add it to a TweenSequence component
-        fun ParallelTweens(config: ParallelTweens.() -> Unit ): ParallelTweens =
+        fun DeleteEntity(config: DeleteEntity.() -> Unit ): DeleteEntity =
             pool.alloc().apply(config)
 
-        private val pool = Pool(preallocate = 0) { ParallelTweens() }
+        private val pool = Pool(preallocate = 0) { DeleteEntity() }
     }
 }
