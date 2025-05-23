@@ -56,7 +56,9 @@ class AssetLevelData(
             tileSize = ldtkWorld.ldtk.defaultGridSize,
             // We store the level data config in a 2D array depending on its gridvania position in the world
             // Then later we will spawn the entities depending on the level which the player is currently in
-            levelGridVania = List(gridVaniaWidth) { List(gridVaniaHeight) { Chunk() } }
+            levelGridVania = List(gridVaniaWidth) { List(gridVaniaHeight) { Chunk() } },
+            gridVaniaWidth = gridVaniaWidth,
+            gridVaniaHeight = gridVaniaHeight
         )
 
         // Save TileMapData for each Level and layer combination from LDtk world
