@@ -5,11 +5,6 @@ import korlibs.datastructure.*
 import korlibs.korge.fleks.gameState.*
 
 
-// TODO: remove
-abstract class CloneableComponent<T> : Component<T> {
-    abstract fun clone(): Component<T>
-}
-
 /**
  * All components needs to be derived from [Poolable] to be able to be reused from a Component pool and
  * to be recorded in the SnapshotSerializerSystem.
@@ -17,10 +12,22 @@ abstract class CloneableComponent<T> : Component<T> {
  * The reset function is called when the component is going to be reused for a new entity.
  * The clone function needs to be implemented to perform a deep copy of all properties of the component for
  * the serialization of the game state.
+ *
+ * Note:
+ *   - The initComponent and cleanupComponent functions are called as normal life-cycle functions of the component.
+ *     They are not called when the snapshot rewind/forward feature is used because the components are already
+ *     initialized when loaded (ie. deserialized) from a snapshot.
+ *   - The initPrefabs and cleanupPrefabs functions are called always when the component is added to or removed from a world.
+ *     Also during the snapshot rewind/forward feature.
  */
 abstract class Poolable<T> : Component<T> {
-    abstract fun reset()  // feature of poolable
-    abstract fun World.clone(): Component<T>  // feature of making snapshots on the fly
+    abstract fun World.clone(): Poolable<T>  // feature of making snapshots on the fly
+
+    open fun World.initComponent(entity: Entity) = Unit
+    open fun World.cleanupComponent(entity: Entity) = Unit
+
+    open fun World.initPrefabs(entity: Entity) = Unit
+    open fun World.cleanupPrefabs(entity: Entity) = Unit
 
     /**
      * This function needs to be called if the component is not used anymore and should be freed.
@@ -35,13 +42,28 @@ abstract class Poolable<T> : Component<T> {
         }
     }
 
+    override fun World.onAdd(entity: Entity) {
+        // Only run init function on components when the game is running and not when we load snapshots
+        val gameState = inject<GameStateManager>("GameStateManager")
+        if (gameState.gameRunning) {
+            initComponent(entity)
+        }
+        // Call init prefabs always
+        initPrefabs(entity)
+    }
     /**
      * Function that is called when the component is removed from an entity.
      */
     override fun World.onRemove(entity: Entity) {
+        // Call cleanup prefabs always
+        cleanupPrefabs(entity)
         // Do not free the component if the game is not running - i.e. during the snapshot rewind / forward feature
         val gameState = inject<GameStateManager>("GameStateManager")
-        if (gameState.gameRunning) free()
+        if (gameState.gameRunning) {
+            // Call cleanup function to reset the component when requested by fleks world by calling onRemove
+            cleanupComponent(entity)
+            free()
+        }
     }
 }
 
@@ -60,7 +82,11 @@ fun <T : Poolable<T>> InjectableConfiguration.addPool(
     preallocate: Int = 0,
     gen: (Int) -> T
 ) {
-    val pool = Pool(reset = { it.reset() }, preallocate, gen)
+    val pool = Pool(preallocate, gen)
+    add("PoolCmp${componentType.id}", pool)
+}
+
+fun <T : Poolable<T>> InjectableConfiguration.addPool(componentType: ComponentType<T>, pool: Pool<T>) {
     add("PoolCmp${componentType.id}", pool)
 }
 
@@ -99,12 +125,10 @@ fun <T> World.getPool(componentType: ComponentType<T>): Pool<T> {
  * Structure containing a set of reusable objects.
  *
  * The method [alloc] retrieves from the pool or allocates a new object, while the [free] method
- * pushes back one element to the pool and resets it to reuse it.
+ * pushes back one element to the pool. Entities needs to be reset/cleanup before freeing manually.
  */
 class Pool<T> internal constructor() {
-    private var reset: (T) -> Unit = {}
     private var gen: ((Int) -> T)? = null
-
     private val items = Stack<T>()
     private var lastId = 0
 
@@ -124,27 +148,17 @@ class Pool<T> internal constructor() {
      * @param preallocate the number of objects to preallocate
      * @param gen the object generate function to create a new object when needed
      */
-    constructor(reset: (T) -> Unit = {}, preallocate: Int = 0, gen: (Int) -> T) : this() {
-        setup(reset, preallocate, gen)
+    constructor(preallocate: Int = 0, gen: (Int) -> T) : this() {
+        setup( preallocate, gen)
     }
-
-    /**
-     * Structure containing a set of reusable objects.
-     *
-     * @param preallocate the number of objects to preallocate
-     * @param gen the object generate function to create a new object when needed
-     */
-    constructor(preallocate: Int = 0, gen: (Int) -> T) : this({}, preallocate, gen)
 
     /**
      * Setup structure containing a set of reusable objects.
      *
-     * @param reset the function that reset an existing object to its initial state
      * @param preallocate the number of objects to preallocate
      * @param gen the object generate function to create a new object when needed
      */
-    fun setup(reset: (T) -> Unit = {}, preallocate: Int, gen: (Int) -> T) {
-        this.reset = reset
+    private fun setup(preallocate: Int, gen: (Int) -> T) {
         this.gen = gen
         preAlloc(preallocate, gen)
     }
@@ -161,7 +175,6 @@ class Pool<T> internal constructor() {
     }
 
     fun free(element: T) {
-        reset(element)
         items.push(element)
     }
 

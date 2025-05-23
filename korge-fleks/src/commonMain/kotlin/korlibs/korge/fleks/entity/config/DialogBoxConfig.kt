@@ -2,8 +2,20 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
 import korlibs.image.text.*
-import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.TweenSequenceComponent.*
+import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
+import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
+import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
+import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
+import korlibs.korge.fleks.components.data.Rgb
+import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity.Companion.deleteEntity
+import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens.Companion.parallelTweens
+import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition.Companion.tweenPosition
+import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba.Companion.tweenRgba
+import korlibs.korge.fleks.components.data.tweenSequence.TweenTextField.Companion.tweenTextField
+import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -27,7 +39,7 @@ data class DialogBoxConfig(
     private val numberOfLines: Int,  // TODO get this from placed text
 
     // Color and alpha channel of text and graphics
-    private val tint: RgbaComponent.Rgb = RgbaComponent.Rgb.WHITE,
+    private val tint: Rgb = Rgb.WHITE,
     private val alpha: Float = 0f,
 
     // Avatar
@@ -92,82 +104,85 @@ data class DialogBoxConfig(
         // Avatar image entity
         val avatar = entity {
             it += ScreenCoordinatesTag
-            it += PositionComponent(x = avatarInitialX, y = textBoxY - 24f)
-            it += SpriteComponent(name = avatarName)
-            it += RgbaComponent().apply {
-                tint = this@DialogBoxConfig.tint
+            it += PositionComponent {
+                x = avatarInitialX
+                y = textBoxY - 24f
+            }
+            it += SpriteComponent { name = avatarName }
+            it += RgbaComponent {
+                setTint(this@DialogBoxConfig.tint)
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
-            it += LayerComponent(index = 102)
+            it += LayerComponent { index = 102 }
 //            it += RenderLayerTag.DEBUG
         }
         val textBox = entity {
             it += ScreenCoordinatesTag
-            it += PositionComponent(x = textBoxX, y = textBoxY)
-            it += NinePatchComponent(
-                name = textFieldName,
-                width = textBoxWidth,
+            it += PositionComponent {
+                x = textBoxX
+                y = textBoxY
+            }
+            it += NinePatchComponent {
+                name = textFieldName
+                width = textBoxWidth
                 height = textBoxHeight
-            )
-            it += RgbaComponent().apply {
-                tint = this@DialogBoxConfig.tint
+            }
+            it += RgbaComponent {
+                setTint(this@DialogBoxConfig.tint)
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
-            it += LayerComponent(index = 100)
+            it += LayerComponent { index = 100 }
 //            it += RenderLayerTag.DEBUG
         }
         val textField = entity {
             it += ScreenCoordinatesTag
-            it += PositionComponent(x = textFieldX, y = textFieldY)
-            it += TextFieldComponent(
-                text = text,
-                fontName = textFontName,
-                textRangeEnd = textRangeEnd,
-                width = textFieldWidth,
-                height = textFieldHeight,
-                horizontalAlign = textHAlign,
+            it += PositionComponent {
+                x = textFieldX
+                y = textFieldY
+            }
+            it += TextFieldComponent {
+                text = text
+                fontName = textFontName
+                textRangeEnd = textRangeEnd
+                width = textFieldWidth
+                height = textFieldHeight
+                horizontalAlign = textHAlign
                 verticalAlign = textVAlign
-            )
-            it += LayerComponent(index = 101)
-            it += RgbaComponent().apply {
-                tint = this@DialogBoxConfig.tint
+            }
+            it += LayerComponent { index = 101 }
+            it += RgbaComponent {
+                setTint(this@DialogBoxConfig.tint)
                 alpha = 1f
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
 //            it += RenderLayerTag.DEBUG
         }
         entity.configure {
-            it += TweenSequenceComponent(
-                tweens = listOf(
-                    ParallelTweens(
-                        tweens = listOf(
-                            // Fade in of Dialog with avatar
-                            TweenRgba(entity = avatar, alpha = 1f, duration = 0.5f, easing = Easing.EASE_OUT_QUAD),
-                            TweenPosition(entity = avatar, x = avatarTweenX, duration = 0.5f, easing = Easing.EASE_OUT_QUAD),
-                            TweenRgba(entity = textBox, alpha = 1f, delay = 0.3f, duration = 0.3f, easing = Easing.EASE_OUT_QUAD),
-                            // Type write text into the dialog
-                            TweenTextField(entity = textField, textRangeEnd = text.length, delay = 0.3f + 0.8f, duration = text.length * textWritingFactor)
-                        )
-                    ),
-                    Wait(duration = duration),
-                    ParallelTweens(
-                        duration = 1f,
-                        tweens = listOf(
-                            // Fade out of Dialog with avatar
-                            TweenRgba(entity = avatar, alpha = 0f, duration = 0.5f, easing = Easing.EASE_IN_QUAD),
-                            TweenPosition(entity = avatar, x = avatarInitialX, duration = 0.5f, easing = Easing.EASE_IN_QUAD),
-                            TweenRgba(entity = textBox, alpha = 0f, duration = 0.3f, easing = Easing.EASE_IN_QUAD),
-                            TweenRgba(entity = textField, alpha = 0f, duration = 0.3f, easing = Easing.EASE_IN_QUAD)
-                        )
-                    ),
-                    DeleteEntity(entity = avatar),
-                    DeleteEntity(entity = textBox),
-                    DeleteEntity(entity = textField),
-                    DeleteEntity(entity = it)
-                )
-            )
+            it += TweenSequenceComponent {
+                parallelTweens {
+                    // Fade in of Dialog with avatar
+                    tweenRgba { target = avatar; alpha = 1f; duration = 0.5f; easing = Easing.EASE_OUT_QUAD }
+                    tweenPosition { target = avatar; x = avatarTweenX; duration = 0.5f; easing = Easing.EASE_OUT_QUAD }
+                    tweenRgba { target = textBox; alpha = 1f; delay = 0.3f; duration = 0.3f; easing = Easing.EASE_OUT_QUAD }
+                    // Type write text into the dialog
+                    tweenTextField { target = textField; textRangeEnd = this@DialogBoxConfig.text.length; delay = 0.3f + 0.8f; duration = this@DialogBoxConfig.text.length * textWritingFactor }
+                }
+                wait { duration = this@DialogBoxConfig.duration }
+                parallelTweens {
+                    duration = 1f
+                    // Fade out of Dialog with avatar
+                    tweenRgba { target = avatar; alpha = 0f; duration = 0.5f; easing = Easing.EASE_IN_QUAD }
+                    tweenPosition { target = avatar; x = avatarInitialX; duration = 0.5f; easing = Easing.EASE_IN_QUAD }
+                    tweenRgba { target = textBox; alpha = 0f; duration = 0.3f; easing = Easing.EASE_IN_QUAD }
+                    tweenRgba { target = textField; alpha = 0f; duration = 0.3f; easing = Easing.EASE_IN_QUAD }
+                }
+                deleteEntity { target = avatar }
+                deleteEntity { target = textBox }
+                deleteEntity { target = textField }
+                deleteEntity { target = it }
+            }
         }
         return entity
     }

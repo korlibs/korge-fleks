@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.assets
 
-import com.github.quillraven.fleks.Entity
 import korlibs.image.bitmap.*
 import korlibs.image.tiles.*
 

@@ -1,9 +1,10 @@
 package korlibs.korge.fleks.entity.config
 
-import korlibs.korge.fleks.components.ParallaxComponent
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
+import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.utils.*
@@ -22,16 +23,16 @@ data class ParallaxEffectConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
-            it += PositionComponent(
-                x = this@ParallaxEffectConfig.x,  // global position in screen coordinates
+            it += PositionComponent {
+                x = this@ParallaxEffectConfig.x  // global position in screen coordinates
                 y = this@ParallaxEffectConfig.y
-            )
-            it += MotionComponent(
+            }
+            it += MotionComponent {
                 velocityX = -12f  // world units (16 pixels) per second
-            )
-            it += ParallaxComponent(
+            }
+            it += ParallaxComponent {
                 name = assetName
-            )
+            }
             it += layerTag
         }
         return entity
