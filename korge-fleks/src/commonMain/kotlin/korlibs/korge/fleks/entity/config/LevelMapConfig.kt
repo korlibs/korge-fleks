@@ -33,10 +33,10 @@ data class LevelMapConfig(
 ) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
+        val worldData: WorldData = inject<AssetStore>("AssetStore").getWorldData(levelName)
 
         // Set level size in CameraSystem for parallax effect
         if (enableParallax) {
-            val worldData: WorldData = inject<AssetStore>("AssetStore").getWorldData(levelName)
             system<CameraSystem>().worldWidth = worldData.width
             system<CameraSystem>().worldHeight = worldData.height
         }
@@ -45,6 +45,7 @@ data class LevelMapConfig(
             it += LevelMapComponent {
                 levelName = this@LevelMapConfig.levelName
                 layerNames.init(from = this@LevelMapConfig.layerNames)
+                levelChunks = ChunkArray2(width = worldData.gridVaniaWidth, height = worldData.gridVaniaHeight)
             }
             // Level map does not have position - camera position will determine what is shown from the level map
             // Size of level map is static and can be gathered from AssetStore -> AssetLevelData

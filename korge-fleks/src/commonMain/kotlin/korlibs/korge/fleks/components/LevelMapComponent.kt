@@ -1,9 +1,11 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.assets.ChunkArray2
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
 
 /**
  * This component is used to ...
@@ -19,8 +21,9 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("LevelMap")
 class LevelMap private constructor(
     var levelName: String = "",
-    val layerNames: MutableList<String> = MutableList(16) { "" }
-    //val num: Int = -1  -- used for debugging usage of Poolable
+    val layerNames: MutableList<String> = mutableListOf(),
+
+    var levelChunks: ChunkArray2 = ChunkArray2.empty
 ) : Poolable<LevelMap>() {
     override fun type() = LevelMapComponent
 
@@ -39,12 +42,14 @@ class LevelMap private constructor(
         getPoolable(LevelMapComponent).apply {
             levelName = this@LevelMap.levelName
             layerNames.init(from = this@LevelMap.layerNames)
+            levelChunks = this@LevelMap.levelChunks.clone()
             //println("Cloned: LevelMap '$num' from '${this@LevelMap.num}'")
         }
 
     override fun reset() {
         // level name will be set on initialization of the component
         layerNames.clear()  // Make list empty for reuse
+        levelChunks = ChunkArray2.empty
         //println("Reset: LevelMap '$num'")
     }
 }
