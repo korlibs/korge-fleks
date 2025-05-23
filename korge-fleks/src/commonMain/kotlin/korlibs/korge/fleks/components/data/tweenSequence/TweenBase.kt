@@ -3,6 +3,7 @@ package korlibs.korge.fleks.components.data.tweenSequence
 import com.github.quillraven.fleks.Entity
 import korlibs.math.interpolation.Easing
 
+
 /**
  * All Tweens must implement this interface.
  */
