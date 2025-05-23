@@ -31,6 +31,10 @@ class EntityRefs private constructor(
         }
     }
 
+    fun addAll(vararg newEntities: Entity) {
+        entities.addAll(newEntities)
+    }
+
     override fun World.clone(): EntityRefs =
         getPoolable(EntityRefsComponent).apply {
             entities.init(from = this@EntityRefs.entities)
