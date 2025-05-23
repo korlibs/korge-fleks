@@ -5,9 +5,14 @@ import korlibs.datastructure.IArray2.Companion.forEachPosRect
 import korlibs.datastructure.indexOr
 import korlibs.math.geom.PointInt
 import korlibs.math.geom.RectangleInt
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
+
+/**
+ * This class contains the run-time config for a specific level chunk.
+ */
+@Serializable @SerialName("ChunkConfig")
 data class ChunkConfig(
     var entitiesSpawned: Boolean = false,
     // var entities ...
