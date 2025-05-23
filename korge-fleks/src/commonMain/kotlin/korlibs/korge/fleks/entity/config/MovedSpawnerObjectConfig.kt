@@ -1,8 +1,8 @@
 package korlibs.korge.fleks.entity.config
 
-import com.github.quillraven.fleks.Entity
-import com.github.quillraven.fleks.World
-import korlibs.korge.fleks.components.*
+import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
+import korlibs.korge.fleks.components.Spawner.Companion.SpawnerComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
@@ -47,7 +47,7 @@ data class MovedSpawnerObjectConfig(
 //                it.x = spawnerConfig.offsetX
 //                it.y = spawnerConfig.offsetY
 //            }
-            it.getOrAdd(MotionComponent) { MotionComponent() }.also {
+            it.getOrAdd(MotionComponent) { MotionComponent {} }.also { motion ->
                 var velocityXX = velocityX
                 var velocityYY = velocityY
                 if (velocityVariationX != 0f) {
@@ -56,10 +56,10 @@ data class MovedSpawnerObjectConfig(
                 if (velocityVariationY != 0f) {
                     velocityYY += (-velocityVariationY..velocityVariationY).random()
                 }
-                it.velocityX = velocityXX
-                it.velocityY = velocityYY
+                motion.velocityX = velocityXX
+                motion.velocityY = velocityYY
             }
-            it.getOrAdd(SpawnerComponent) { SpawnerComponent() }.also {
+            it.getOrAdd(SpawnerComponent) { SpawnerComponent {} }.also {
 
             }
 //            entity.getOrAdd(SpriteComponent) { SpriteComponent() }.also {
