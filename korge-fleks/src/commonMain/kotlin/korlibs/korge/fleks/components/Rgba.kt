@@ -3,6 +3,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
+import korlibs.korge.fleks.components.data.Rgb
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -57,13 +58,13 @@ class Rgba private constructor(
             field = value
         }
 
-// TODO: Check if we need this
-//    var tint: Rgb = Rgb(rgba.r, rgba.g, rgba.b)
+// TODO: Cleanup
+//    val tint: Rgb
 //        get() = Rgb(rgba.r, rgba.g, rgba.b)
-//        set(value) {
-//            rgba = rgba.withRGB(value.r, value.g, value.b)
-//            field = value
-//        }
+
+    fun setTint(value: Rgb) {
+            rgba = rgba.withRGB(value.r, value.g, value.b)
+        }
 
     override fun toString(): String = "RgbaComponent(rgba=${rgba.hexString})"
 }

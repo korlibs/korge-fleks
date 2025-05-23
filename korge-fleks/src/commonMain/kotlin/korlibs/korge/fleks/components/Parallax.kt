@@ -191,6 +191,7 @@ class Parallax private constructor(
         }
     }
 
+    // TODO: Change both below to data objects - not component anymore
     // Layer data object used inside ParallaxComponent
     @Serializable @SerialName("Parallax.Layer")
     class Layer private constructor(

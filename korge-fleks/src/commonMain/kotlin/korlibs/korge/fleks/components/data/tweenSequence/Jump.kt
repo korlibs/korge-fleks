@@ -2,7 +2,6 @@ package korlibs.korge.fleks.components.data.tweenSequence
 
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.TweenSequence.TweenBase
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.SerialName
@@ -14,7 +13,7 @@ class Jump private constructor(
     var distance: Int = 0,                        // Jump relative distance from current index (minus means jump back)
     var event: Int? = null,                       // Check for a specific event - if event is 0 than jump otherwise do not jump and tween execution continues with next tween in the list
 
-    override var entity: Entity = Entity.NONE,    // not used
+    override var target: Entity = Entity.NONE,    // not used
     override var delay: Float? = null,            // not used
     override var duration: Float? = null,         // not used
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
@@ -23,7 +22,7 @@ class Jump private constructor(
     fun init(from: Jump) {
         distance = from.distance
         event = from.event
-        entity = from.entity
+        target = from.target
         delay = from.delay
         duration = from.duration
         easing = from.easing
@@ -35,7 +34,7 @@ class Jump private constructor(
     override fun free() {
         distance = 0
         event = null
-        entity = Entity.NONE
+        target = Entity.NONE
         delay = null
         duration = null
         easing = null
@@ -44,13 +43,10 @@ class Jump private constructor(
     }
 
     companion object {
-        // Use this function to create a new instance of tween data as val inside a component (TODO: check if needed)
-        fun staticJump(config: Jump.() -> Unit ): Jump =
-            Jump().apply(config)
-
-        // Use this function to get a new instance of a tween from the pool and add it to a TweenSequence component
-        fun Jump(config: Jump.() -> Unit ): Jump =
-            pool.alloc().apply(config)
+        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
+        fun TweenListBase.jump(config: Jump.() -> Unit) {
+            tweens.add(pool.alloc().apply(config))
+        }
 
         private val pool = Pool(preallocate = 0) { Jump() }
     }

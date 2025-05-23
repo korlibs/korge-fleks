@@ -34,28 +34,30 @@ internal fun interpolateBoolean(ratio: Double, l: Boolean, r: Boolean): Boolean 
 /**
  * Clone function for a Map object with [CloneableData] values.
  */
-@JvmName("MapOfCloneableData")
-fun<K, T> Map<K, CloneableData<T>>.clone() : Map<K, T> {
-    val mapCopy = mutableMapOf<K, T>()
-    forEach { (key, value) ->
-        // Perform deep copy of map value elements
-        mapCopy[key] = value.clone()
-    }
-    return mapCopy
-}
+// TODO: Cleanup
+//@JvmName("MapOfCloneableData")
+//fun<K, T> Map<K, CloneableData<T>>.clone() : Map<K, T> {
+//    val mapCopy = mutableMapOf<K, T>()
+//    forEach { (key, value) ->
+//        // Perform deep copy of map value elements
+//        mapCopy[key] = value.clone()
+//    }
+//    return mapCopy
+//}
 
 /**
  * Clone function for a Map object with List values.
  */
-@JvmName("MapOfListCloneableData")
-fun<K, T> Map<K, List<CloneableData<T>>>.clone() : Map<K, List<T>> {
-    val mapCopy = mutableMapOf<K, List<T>>()
-    forEach { (key, value) ->
-        // Perform deep copy of map value elements
-        mapCopy[key] = value.clone()
-    }
-    return mapCopy
-}
+// TODO: Cleanup
+//@JvmName("MapOfListCloneableData")
+//fun<K, T> Map<K, List<CloneableData<T>>>.clone() : Map<K, List<T>> {
+//    val mapCopy = mutableMapOf<K, List<T>>()
+//    forEach { (key, value) ->
+//        // Perform deep copy of map value elements
+//        mapCopy[key] = value.clone()
+//    }
+//    return mapCopy
+//}
 
 /**
  * Clone function for a Map object with [Entity] values.
@@ -114,8 +116,4 @@ fun <T> MutableList<Poolable<T>>.init(world: World, from: List<Poolable<T>>) {
 
 fun MutableMap<String, Entity>.init(from: Map<String, Entity>) {
     this.putAll(from)
-}
-
-fun MutableList<String>.init(from: List<String>) {
-    this.addAll(from)
 }

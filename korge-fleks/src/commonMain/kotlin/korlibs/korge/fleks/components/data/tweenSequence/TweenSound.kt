@@ -2,7 +2,6 @@ package korlibs.korge.fleks.components.data.tweenSequence
 
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.TweenSequence.TweenBase
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.SerialName
@@ -16,7 +15,7 @@ class TweenSound private constructor(
     var position: Float? = null,
     var volume: Float? = null,
 
-    override var entity: Entity = Entity.NONE,
+    override var target: Entity = Entity.NONE,
     override var delay: Float? = null,
     override var duration: Float? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null
@@ -27,7 +26,7 @@ class TweenSound private constructor(
         stopTrigger = from.stopTrigger
         position = from.position
         volume = from.volume
-        entity = from.entity
+        target = from.target
         delay = from.delay
         duration = from.duration
         easing = from.easing
@@ -41,7 +40,7 @@ class TweenSound private constructor(
         stopTrigger = null
         position = null
         volume = null
-        entity = Entity.NONE
+        target = Entity.NONE
         delay = null
         duration = null
         easing = null
@@ -50,9 +49,10 @@ class TweenSound private constructor(
     }
 
     companion object {
-        // Use this function to get a new instance of a tween from the pool and add it to a TweenSequence component
-        fun TweenSound(config: TweenSound.() -> Unit ): TweenSound =
-            pool.alloc().apply(config)
+        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
+        fun TweenListBase.tweenSound(config: TweenSound.() -> Unit) {
+            tweens.add(pool.alloc().apply(config))
+        }
 
         private val pool = Pool(preallocate = 0) { TweenSound() }
     }

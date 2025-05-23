@@ -2,7 +2,6 @@ package korlibs.korge.fleks.components.data.tweenSequence
 
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.TweenSequence.TweenBase
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.SerialName
@@ -15,7 +14,7 @@ class SpawnEntity private constructor(
     var x: Float = 0f,                  // position where entity will be spawned
     var y: Float = 0f,
 
-    override var entity: Entity = Entity.NONE, // when entity is not given (= Entity.NONE) than it will be created
+    override var target: Entity = Entity.NONE, // when entity is not given (= Entity.NONE) than it will be created
     override var delay: Float? = null,
     override var duration: Float? = 0f,    // not used - 0f for immediately
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
@@ -25,7 +24,7 @@ class SpawnEntity private constructor(
         entityConfig = from.entityConfig
         x = from.x
         y = from.y
-        entity = from.entity
+        target = from.target
         delay = from.delay
         duration = from.duration
         easing = from.easing
@@ -38,7 +37,7 @@ class SpawnEntity private constructor(
         entityConfig = ""
         x = 0f
         y = 0f
-        entity = Entity.NONE
+        target = Entity.NONE
         delay = null
         duration = null
         easing = null
@@ -47,9 +46,10 @@ class SpawnEntity private constructor(
     }
 
     companion object {
-        // Use this function to get a new instance of a tween from the pool and add it to a TweenSequence component
-        fun SpawnEntity(config: SpawnEntity.() -> Unit ): SpawnEntity =
-            pool.alloc().apply(config)
+        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
+        fun TweenListBase.spawnEntity (config: SpawnEntity.() -> Unit) {
+            tweens.add(pool.alloc().apply(config))
+        }
 
         private val pool = Pool(preallocate = 0) { SpawnEntity() }
     }

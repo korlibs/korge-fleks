@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("LevelMap")
 class LevelMap private constructor(
     var levelName: String = "",
-    val layerNames: MutableList<String> = MutableList(16) { "" }
+    val layerNames: MutableList<String> = mutableListOf()
     //val num: Int = -1  -- used for debugging usage of Poolable
 ) : Poolable<LevelMap>() {
     override fun type() = LevelMapComponent

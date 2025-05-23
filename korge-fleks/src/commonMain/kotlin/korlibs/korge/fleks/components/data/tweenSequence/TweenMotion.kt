@@ -2,7 +2,6 @@ package korlibs.korge.fleks.components.data.tweenSequence
 
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.TweenSequence.TweenBase
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.SerialName
@@ -13,7 +12,7 @@ import kotlinx.serialization.Serializable
 class TweenMotion private constructor(
     var velocityX: Float? = null,
 
-    override var entity: Entity = Entity.NONE,
+    override var target: Entity = Entity.NONE,
     override var delay: Float? = null,
     override var duration: Float? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null
@@ -21,7 +20,7 @@ class TweenMotion private constructor(
     // Init an existing tween data instance with data from another tween
     fun init(from: TweenMotion) {
         velocityX = from.velocityX
-        entity = from.entity
+        target = from.target
         delay = from.delay
         duration = from.duration
         easing = from.easing
@@ -32,7 +31,7 @@ class TweenMotion private constructor(
     // Cleanup the tween data instance manually
     override fun free() {
         velocityX = null
-        entity = Entity.NONE
+        target = Entity.NONE
         delay = null
         duration = null
         easing = null
@@ -41,9 +40,10 @@ class TweenMotion private constructor(
     }
 
     companion object {
-        // Use this function to get a new instance of a tween from the pool and add it to a TweenSequence component
-        fun TweenMotion(config: TweenMotion.() -> Unit ): TweenMotion =
-            pool.alloc().apply(config)
+        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
+        fun TweenListBase.tweenMotion(config: TweenMotion.() -> Unit) {
+            tweens.add(pool.alloc().apply(config))
+        }
 
         private val pool = Pool(preallocate = 0) { TweenMotion() }
     }
