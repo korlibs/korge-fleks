@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.assets
 
 import korlibs.datastructure.Array2
+import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.*
 import korlibs.image.tiles.*
 
@@ -28,7 +29,7 @@ data class WorldData(
     data class Chunk(
         var entityConfigNames: List<String>? = null,
         var tileMapData: Map<String, TileMapData> = mapOf(),
-        var collisionMap: IntArray? = null
+        var collisionMap: IntArray2? = null
     )
 
     /**
@@ -159,7 +160,7 @@ data class WorldData(
         levelGridVania[gridX, gridY].collisionMap?.let { collisionMap ->
             for (tx in xStart until xEnd) {
                 for (ty in yStart until yEnd) {
-                    val tile = collisionMap[tx + ty * levelWidth]
+                    val tile = collisionMap[tx, ty]
                     if (tile != 0) {
                         val px = tx * tileSize + (gridX * levelWidth * tileSize)
                         val py = ty * tileSize + (gridY * levelHeight * tileSize)

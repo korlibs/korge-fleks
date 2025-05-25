@@ -7,8 +7,8 @@ import korlibs.korge.fleks.utils.*
 import korlibs.math.geom.*
 
 /**
- *
- *
+ * This system is used to move the debug entity (POV-Drone) towards a specific position (touch input,
+ * mouse input) on the screen.
  */
 class DebugSystem: IteratingSystem(
     family { all(DebugComponent, PositionComponent) },
