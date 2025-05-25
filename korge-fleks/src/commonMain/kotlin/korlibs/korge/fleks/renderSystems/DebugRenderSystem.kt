@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
+import korlibs.datastructure.iterators.fastForEachReverse
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
@@ -56,28 +57,32 @@ class DebugRenderSystem(
                         val imageData = assetStore.getImageData(name)
 
                         // Draw sprite bounds
-                        batch.drawVector(Colors.RED) {
-                            rect(
-                                x = position.x + position.offsetX - anchorX,
-                                y = position.y + position.offsetY - anchorY,
-                                width = imageData.width.toFloat(),
-                                height = imageData.height.toFloat()
-                            )
+                        if (entity has DebugInfoTag.SPRITE_BOUNDS) {
+                            batch.drawVector(Colors.RED) {
+                                rect(
+                                    x = position.x + position.offsetX - anchorX,
+                                    y = position.y + position.offsetY - anchorY,
+                                    width = imageData.width.toFloat(),
+                                    height = imageData.height.toFloat()
+                                )
+                            }
                         }
-//                        // Draw texture bounds for each layer
-//                        imageFrame.layerData.fastForEachReverse { layer ->
-//                            batch.drawVector(Colors.GREEN) {
-//                                rect(
-//                                    x = position.x + position.offsetX + layer.targetX.toFloat() - anchorX,
-//                                    y = position.y + position.offsetY + layer.targetY.toFloat() - anchorY,
-//                                    width = layer.width.toFloat(),
-//                                    height = layer.height.toFloat()
-//                                )
-//                            }
-//                        }
+                        // Draw texture bounds for each layer
+                        if (entity has DebugInfoTag.SPRITE_TEXTURE_BOUNDS) {
+                            imageFrame.layerData.fastForEachReverse { layer ->
+                                batch.drawVector(Colors.GREEN) {
+                                    rect(
+                                        x = position.x + position.offsetX + layer.targetX.toFloat() - anchorX,
+                                        y = position.y + position.offsetY + layer.targetY.toFloat() - anchorY,
+                                        width = layer.width.toFloat(),
+                                        height = layer.height.toFloat()
+                                    )
+                                }
+                            }
+                        }
                     }
 
-                    if (entity has TextFieldComponent) {
+                    if (entity has TextFieldComponent && entity has DebugInfoTag.TEXT_FIELD_BOUNDS) {
                         // Draw text field bounds
                         batch.drawVector(Colors.RED) {
                             val (_, _, _, _, width, height) = entity[TextFieldComponent]
@@ -90,7 +95,7 @@ class DebugRenderSystem(
                         }
                     }
 
-                    if (entity has NinePatchComponent) {
+                    if (entity has NinePatchComponent && entity has DebugInfoTag.NINE_PATCH_BOUNDS) {
                         // Draw nine patch bounds
                         batch.drawVector(Colors.RED) {
                             val (_, width, height) = entity[NinePatchComponent]
@@ -103,7 +108,7 @@ class DebugRenderSystem(
                         }
                     }
 
-                    if (entity has CollisionComponent) {
+                    if (entity has CollisionComponent && entity has DebugInfoTag.SPRITE_COLLISION_BOUNDS) {
                         val (anchorX, anchorY, colWidth, colHeight) = assetStore.getCollisionData(entity[CollisionComponent].configName.toString())
                         // Draw collision bounds
                         batch.drawVector(Colors.LIGHTBLUE) {
@@ -117,16 +122,18 @@ class DebugRenderSystem(
                     }
 
                     // Draw pivot point (zero-point for game object)
-                    batch.drawVector(Colors.YELLOW) {
-                        val x = position.x + position.offsetX
-                        val y = position.y + position.offsetY
-                        circle(Point(x, y), 2)
-                        line(Point(x - 3, y), Point(x + 3, y))
-                        line(Point(x, y - 3), Point(x, y + 3))
+                    if (entity has DebugInfoTag.POSITION) {
+                        batch.drawVector(Colors.YELLOW) {
+                            val x = position.x + position.offsetX
+                            val y = position.y + position.offsetY
+                            circle(Point(x, y), 2)
+                            line(Point(x - 3, y), Point(x + 3, y))
+                            line(Point(x, y - 3), Point(x, y + 3))
+                        }
                     }
                 }
 
-                if (entity has LevelMapComponent) {
+                if (entity has LevelMapComponent && entity has DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS) {
                     val levelName = entity[LevelMapComponent].levelName
                     val worldData = assetStore.getWorldData(levelName)
                     val tileSize = worldData.tileSize

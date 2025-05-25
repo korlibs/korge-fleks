@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.assets
 
-import com.github.quillraven.fleks.Entity
+import korlibs.datastructure.Array2
+import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.*
 import korlibs.image.tiles.*
 
@@ -20,26 +21,35 @@ data class WorldData(
     // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
     val tileSize: Int = 1,
     // Level maps
-    val levelGridVania: List<List<Chunk>> = listOf()
+    val levelGridVania: Array2<Chunk>,
+    val gridVaniaWidth: Int = 0,
+    val gridVaniaHeight: Int = 0
 ) {
 
     data class Chunk(
-        var entitiesSpawned: Boolean = false,
         var entityConfigNames: List<String>? = null,
         var tileMapData: Map<String, TileMapData> = mapOf(),
-        var collisionMap: IntArray? = null
+        var collisionMap: IntArray2? = null
     )
 
-    // TODO
-    fun forEachEntityInChunk(viewPortMiddlePosX: Int, viewPortMiddlePosY: Int, callback: (String) -> Unit) {
-        val gridX = viewPortMiddlePosX / levelGridWidth
-        val gridY = viewPortMiddlePosY / levelGridHeight
-        val levelChunk = levelGridVania[gridX][gridY]
+    /**
+     * Iterate over all entities within the chunk, where the camera is currently located, and all
+     * adjacent chunks. Call the callback function for each entity config.
+     */
+    fun forEachEntityInChunk(viewPortMiddlePosX: Int, viewPortMiddlePosY: Int, levelChunkConfig: ChunkArray2, callback: (String) -> Unit) {
+        // Calculate the grid position of the view port middle position
+        val gridX: Int = viewPortMiddlePosX / levelGridWidth
+        val gridY: Int = viewPortMiddlePosY / levelGridHeight
 
-        if (!levelChunk.entitiesSpawned) {
-            levelChunk.entitiesSpawned = true
-            levelGridVania[gridX][gridY].entityConfigNames?.forEach { entityConfigName ->
-                callback(entityConfigName)
+        for( x in gridX - 1..gridX + 1) {
+            for (y in gridY - 1..gridY + 1) {
+                // Check if the chunk is already spawned
+                if (levelGridVania.inside(x, y) && !levelChunkConfig[x, y].entitiesSpawned) {
+                    levelChunkConfig[x, y].entitiesSpawned = true
+                    levelGridVania[x, y].entityConfigNames?.forEach { entityConfigName ->
+                        callback(entityConfigName)
+                    }
+                }
             }
         }
     }
@@ -125,7 +135,7 @@ data class WorldData(
     }
 
     private fun processTiles(layer: String, gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
-        levelGridVania[gridX][gridY].tileMapData[layer]?.let { tileMap ->
+        levelGridVania[gridX, gridY].tileMapData[layer]?.let { tileMap ->
             val tileSet = tileMap.tileSet
             val tileWidth = tileSet.width
             val tileHeight = tileSet.height
@@ -147,10 +157,10 @@ data class WorldData(
     }
 
     private fun processCollisionTiles(gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (Int, Float, Float) -> Unit) {
-        levelGridVania[gridX][gridY].collisionMap?.let { collisionMap ->
+        levelGridVania[gridX, gridY].collisionMap?.let { collisionMap ->
             for (tx in xStart until xEnd) {
                 for (ty in yStart until yEnd) {
-                    val tile = collisionMap[tx + ty * levelWidth]
+                    val tile = collisionMap[tx, ty]
                     if (tile != 0) {
                         val px = tx * tileSize + (gridX * levelWidth * tileSize)
                         val py = ty * tileSize + (gridY * levelHeight * tileSize)

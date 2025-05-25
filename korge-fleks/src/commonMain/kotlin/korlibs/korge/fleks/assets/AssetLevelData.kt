@@ -1,5 +1,7 @@
 package korlibs.korge.fleks.assets
 
+import korlibs.datastructure.Array2
+import korlibs.datastructure.IntArray2
 import korlibs.image.tiles.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.assets.WorldData.*
@@ -18,7 +20,7 @@ class AssetLevelData(
     val ldtkWorld: LDTKWorld,  // TODO: Get tileset names out and store separately for hot-reloading
     private val collisionLayerName: String
 ) {
-    internal var worldData = WorldData()
+    internal var worldData: WorldData
     private var gameObjectCnt = 0
 
     /**
@@ -49,14 +51,16 @@ class AssetLevelData(
             // Set the size of the world
             width = worldWidth.toFloat(),
             height = worldHeight.toFloat(),
-            // Set the size of a level in the grid vania array in tiles
+            // Set the size of a level chunk in the grid vania array in tiles
             levelGridWidth = levelWidth / ldtkWorld.ldtk.defaultGridSize,
             levelGridHeight = levelHeight / ldtkWorld.ldtk.defaultGridSize,
-            // Set the size of a grid cell in pixels
+            // Set the size of a grid cell (tile) in pixels
             tileSize = ldtkWorld.ldtk.defaultGridSize,
             // We store the level data config in a 2D array depending on its gridvania position in the world
             // Then later we will spawn the entities depending on the level which the player is currently in
-            levelGridVania = List(gridVaniaWidth) { List(gridVaniaHeight) { Chunk() } }
+            levelGridVania = Array2(gridVaniaWidth, gridVaniaHeight) { Chunk() },
+            gridVaniaWidth = gridVaniaWidth,
+            gridVaniaHeight = gridVaniaHeight
         )
 
         // Save TileMapData for each Level and layer combination from LDtk world
@@ -166,10 +170,11 @@ class AssetLevelData(
             if (layerName == collisionLayerName) collisionMap = ldtkLayer.intGridCSV
         }
 
-        val levelData = worldData.levelGridVania[levelX][levelY]
+        val levelData = worldData.levelGridVania[levelX, levelY]
         levelData.entityConfigNames = entities.ifEmpty { null }
         levelData.tileMapData = tileMapData
-        levelData.collisionMap = collisionMap
+        levelData.collisionMap =
+            if (collisionMap != null) IntArray2(worldData.levelGridWidth, worldData.levelGridWidth, collisionMap) else null
     }
 
     private fun storeTiles(ldtkLayer: LayerInstance, tilesetExt: ExtTileset) : TileMapData {
