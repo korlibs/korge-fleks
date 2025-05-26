@@ -26,7 +26,7 @@ class Collision private constructor(
     var slopeAngle: Float = 0f,
     var isFalling: Boolean = false,
     var collisionWithStaticObject: Boolean = false,  // used currently e.g. by shoot objects
-    var jumpVelocity: Float = 0f,
+    var jumpVelocity: Float = 0f,  // TODO: check with MotionComponent
     var justHit: Boolean = false,
     var isHit: Boolean = false,
     val hitPosition: Point = Point.value()

@@ -32,7 +32,9 @@ class LevelChunkSystem(
         if (levelFamily.isNotEmpty) {
             val levelEntity = levelFamily.first()
             // Check where we are in the level gridvania
-            val levelName = levelEntity[LevelMapComponent].levelName
+            val levelMapComponent = levelEntity[LevelMapComponent]
+            val levelName = levelMapComponent.levelName
+            val levelChunks = levelMapComponent.levelChunks
             val worldData = assetStore.getWorldData(levelName)
             val tileSize = worldData.tileSize
 
@@ -44,12 +46,9 @@ class LevelChunkSystem(
             val viewPortMiddlePosY: Int = viewPortPosY.toInt() / tileSize  // y in negative direction
 
 
-            worldData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY) { entityConfig ->
+            worldData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, levelChunks) { entityConfig ->
                 createAndConfigureEntity(entityConfig)
             }
-
-            // chunk x: 1056 + 21 = 1077
-            // y: 1056 + 644 = 1700
         }
     }
 }
