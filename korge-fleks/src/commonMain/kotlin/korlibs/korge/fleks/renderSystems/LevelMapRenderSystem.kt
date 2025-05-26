@@ -3,8 +3,10 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -44,7 +46,7 @@ class LevelMapRenderSystem(
 
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
-            val (rgba) = entity[RgbaComponent]
+            val rgba = entity[RgbaComponent].rgba
             val levelMap = entity[LevelMapComponent]
             val worldData = assetStore.getWorldData(levelMap.levelName)
             val tileSize = worldData.tileSize

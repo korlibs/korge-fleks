@@ -43,7 +43,8 @@ data class WorldData(
 
         for( x in gridX - 1..gridX + 1) {
             for (y in gridY - 1..gridY + 1) {
-                // Check if the chunk is already spawned
+                // Check if the index for the chunk is inside gridvania array
+                // and if chunk was already spawned
                 if (levelGridVania.inside(x, y) && !levelChunkConfig[x, y].entitiesSpawned) {
                     levelChunkConfig[x, y].entitiesSpawned = true
                     levelGridVania[x, y].entityConfigNames?.forEach { entityConfigName ->

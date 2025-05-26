@@ -3,7 +3,8 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import korlibs.io.async.*
 import korlibs.io.file.std.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
+import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.gameState.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
@@ -53,7 +54,6 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 //       function of components. Otherwise, world functions would be called on the current original
                 //       world and not on the snapshot world! This is not what we want!
                 when (component) {
-                    is CloneableComponent<*> -> componentsCopy.add(component.clone())
                     is Poolable<*> -> componentsCopy.add(component.run { world.clone() })
                     else -> {
                         println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from Poolable<T>!")
@@ -87,7 +87,10 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(worldSnapshot)
                 world.loadSnapshot(snapshot)
                 println("snapshot loaded!")
+                // Because we have deserialized a snapshot, we need to run post-processing on all components
+                // which need to be partly initialized again.
                 postProcessing()
+
             } else println("WARNING: Cannot find snapshot file. Snapshot was not loaded!")
         }
     }
@@ -120,7 +123,10 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             }
             // Do final post-processing if a snapshot was loaded (by rewind or forward)
             if (snapshotLoaded) {
-                postProcessing()
+
+                // TODO: Check - We do not need to run postProcessing() here, because the snapshot which was loaded
+                // was not deserialized from JSON, but loaded from the recordings list
+                //postProcessing()
                 snapshotLoaded = false
                 // remove current snapshot from the list of recordings - otherwise it would be freed later, but it is still in used
                 recordings.removeLast()
