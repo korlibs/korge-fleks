@@ -3,7 +3,7 @@ package korlibs.korge.fleks.entity.config
 import com.github.quillraven.fleks.*
 import korlibs.image.text.*
 import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
-import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.data.Rgb
@@ -43,7 +43,7 @@ data class RichTextConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             if (screenCoordinates) it += ScreenCoordinatesTag
-            it += PositionComponent {
+            it += positionComponent {
                 x = this@RichTextConfig.x
                 y = this@RichTextConfig.y
             }

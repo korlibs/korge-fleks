@@ -2,11 +2,10 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
 import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
-import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.data.Rgb
 import korlibs.korge.fleks.entity.*
@@ -42,7 +41,7 @@ data class LogoEntityConfig(
         val assetStore: AssetStore = inject(name = "AssetStore")
 
         entity.configure {
-            it += PositionComponent {
+            it += positionComponent {
                 x = this@LogoEntityConfig.offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f)
                 y = this@LogoEntityConfig.offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
             }

@@ -2,7 +2,10 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.EntityRefs.Companion.EntityRefsComponent
+import korlibs.korge.fleks.components.Info.Companion.InfoComponent
+import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
+import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 
 class LifeCycleSystem : IteratingSystem(
     family { all(LifeCycleComponent) },
@@ -13,7 +16,7 @@ class LifeCycleSystem : IteratingSystem(
 
         if (lifeCycle.healthCounter <= 0) {
             // Delete first all sub-entities
-            entity.getOrNull(SubEntitiesComponent)?.subEntities?.forEach {
+            entity.getOrNull(EntityRefsComponent)?.entities?.forEach {
                 world -= it
                 debugPrint(it, "sub")
             }
@@ -28,7 +31,7 @@ class LifeCycleSystem : IteratingSystem(
     }
 
     private fun debugPrint(entity: Entity, type: String) {
-        val name: String = entity.getOrNull(Info)?.name ?: "no name"
+        val name: String = entity.getOrNull(InfoComponent)?.name ?: "no name"
 //        println("INFO: LifeCycleSystem: Remove $type-entity '${entity.id}' ($name)")
     }
 }

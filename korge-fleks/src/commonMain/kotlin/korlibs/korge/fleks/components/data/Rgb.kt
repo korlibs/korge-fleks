@@ -22,7 +22,7 @@ class Rgb private constructor(
     override fun type() = RgbData
 
     companion object {
-        val RgbData= componentTypeOf<Rgb>()
+        val RgbData = componentTypeOf<Rgb>()
 
         // Use this function to create a new instance as val inside a component
         fun value(): Rgb = Rgb()

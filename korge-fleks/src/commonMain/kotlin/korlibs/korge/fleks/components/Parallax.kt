@@ -10,7 +10,6 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Rgba.Companion.staticRgbaComponent
-import korlibs.korge.fleks.components.data.*
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
@@ -109,9 +108,9 @@ class Parallax private constructor(
             )
         }
 
-        parallaxPlane.attachedLayersRearPositions = List(numberAttachedRearLayers) { 0f }
-        parallaxPlane.linePositions = List(numberParallaxPlaneLines) { 0f }
-        parallaxPlane.attachedLayersFrontPositions = List(numberAttachedFrontLayers) { 0f }
+        parallaxPlane.attachedLayersRearPositions = MutableList(numberAttachedRearLayers) { 0f }
+        parallaxPlane.linePositions = MutableList(numberParallaxPlaneLines) { 0f }
+        parallaxPlane.attachedLayersFrontPositions = MutableList(numberAttachedFrontLayers) { 0f }
         parallaxPlane.entity = this.entity("Parallax plane of entity '${entity.id}'") {
             it += parallaxPlane.position
             it += parallaxPlane.rgba
@@ -258,9 +257,9 @@ class Parallax private constructor(
         val position: Position = staticPositionComponent(),
         val rgba: Rgba = staticRgbaComponent(),
         // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
-        var linePositions: List<Float> = mutableListOf(),
-        var attachedLayersRearPositions: List<Float> = mutableListOf(),
-        var attachedLayersFrontPositions: List<Float> = mutableListOf()
+        var linePositions: MutableList<Float> = mutableListOf(),
+        var attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
+        var attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
     ) : Poolable<Plane>() {
         override fun type() = PlaneComponent
 
@@ -291,6 +290,8 @@ class Parallax private constructor(
             position.init(from.position)
             rgba.init(from.rgba)
             // lists are static and do not change so copy reference
+            // TODO: NO!! - make a deep copy of lists
+//            linePositions.init(from = from.linePositions)
             linePositions = from.linePositions
             attachedLayersRearPositions = from.attachedLayersRearPositions
             attachedLayersFrontPositions = from.attachedLayersFrontPositions

@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
+import korlibs.datastructure.iterators.fastForEachReverse
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
@@ -46,6 +47,7 @@ class DebugRenderSystem(
                 if (entity has PositionComponent) {
                     val position = entity[PositionComponent]
 
+                    // TODO: Check if this works...
                     if (entity hasNo ScreenCoordinatesTag) {
                         // Transform world coordinates to screen coordinates
                         position.run { world.convertToScreenCoordinates(camera) }

@@ -51,19 +51,32 @@ class Rgba private constructor(
         rgba = Colors.WHITE
     }
 
+    var red: Float = rgba.rf
+        get() = rgba.rf
+        set(value) {
+            rgba = rgba.withRf(value)
+            field = value
+        }
+
+    var green: Float = rgba.gf
+        get() = rgba.gf
+        set(value) {
+            rgba = rgba.withGf(value)
+            field = value
+        }
+
+    var blue: Float = rgba.bf
+        get() = rgba.bf
+        set(value) {
+            rgba = rgba.withBf(value)
+            field = value
+        }
+
     var alpha: Float = rgba.af
         get() = rgba.af
         set(value) {
             rgba = rgba.withAf(value)
             field = value
-        }
-
-// TODO: Cleanup
-//    val tint: Rgb
-//        get() = Rgb(rgba.r, rgba.g, rgba.b)
-
-    fun setTint(value: Rgb) {
-            rgba = rgba.withRGB(value.r, value.g, value.b)
         }
 
     override fun toString(): String = "RgbaComponent(rgba=${rgba.hexString})"

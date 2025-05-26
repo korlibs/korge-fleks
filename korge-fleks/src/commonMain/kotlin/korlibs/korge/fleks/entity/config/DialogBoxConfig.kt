@@ -4,7 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.image.text.*
 import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
 import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
-import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
@@ -104,7 +104,7 @@ data class DialogBoxConfig(
         // Avatar image entity
         val avatar = entity {
             it += ScreenCoordinatesTag
-            it += PositionComponent {
+            it += positionComponent {
                 x = avatarInitialX
                 y = textBoxY - 24f
             }
@@ -119,7 +119,7 @@ data class DialogBoxConfig(
         }
         val textBox = entity {
             it += ScreenCoordinatesTag
-            it += PositionComponent {
+            it += positionComponent {
                 x = textBoxX
                 y = textBoxY
             }
@@ -138,7 +138,7 @@ data class DialogBoxConfig(
         }
         val textField = entity {
             it += ScreenCoordinatesTag
-            it += PositionComponent {
+            it += positionComponent {
                 x = textFieldX
                 y = textFieldY
             }

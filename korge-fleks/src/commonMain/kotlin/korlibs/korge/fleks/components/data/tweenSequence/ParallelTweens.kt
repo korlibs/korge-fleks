@@ -49,6 +49,9 @@ class ParallelTweens private constructor(
             tweens.add(pool.alloc().apply(config))
         }
 
+        // Use this function to create a new instance of this data class as static value property
+        fun staticParallelTweens(): ParallelTweens = ParallelTweens()
+
         private val pool = Pool(preallocate = 0) { ParallelTweens() }
     }
 }

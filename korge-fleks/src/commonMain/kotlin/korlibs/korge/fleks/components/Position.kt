@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.data.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,10 +25,10 @@ class Position private constructor(
     companion object {
         val PositionComponent = componentTypeOf<Position>()
 
-        fun World.PositionComponent(config: Position.() -> Unit ): Position =
+        fun World.positionComponent(config: Position.() -> Unit ): Position =
             getPoolable(PositionComponent).apply { config() }
 
-        // Use this function to create a new instance as val inside a component
+        // Use this function to create a new instance as static property (val)
         fun staticPositionComponent(): Position = Position()
 
         fun InjectableConfiguration.addPositionComponentPool(preAllocate: Int = 0) {
