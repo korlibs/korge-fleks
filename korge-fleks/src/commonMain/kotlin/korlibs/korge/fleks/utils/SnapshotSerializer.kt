@@ -164,6 +164,7 @@ class SnapshotSerializer {
         // Register tags (components without properties)
         polymorphic(UniqueId::class) {
             subclass(CameraFollowTag::class)
+            subclass(DebugInfoTag::class, PolymorphicEnumSerializer(DebugInfoTag.serializer()))
             subclass(MainCameraTag::class)
             subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
             subclass(ScreenCoordinatesTag::class)
