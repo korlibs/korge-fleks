@@ -15,8 +15,11 @@ import kotlinx.serialization.*
 data class MotionComponent(
     var accelX: Float = 0f,
     var accelY: Float = 0f,
+
     var velocityX: Float = 0f,
-    var velocityY: Float = 0f
+    var velocityY: Float = 0f,
+    var frictionX: Float = 0.82f,
+    var frictionY: Float = 0.82f
 ) : CloneableComponent<MotionComponent>() {
     override fun type(): ComponentType<MotionComponent> = MotionComponent
     companion object : ComponentType<MotionComponent>()
