@@ -25,6 +25,8 @@ data class WorldData(
     val gridVaniaWidth: Int = 0,
     val gridVaniaHeight: Int = 0
 ) {
+    private val levelMidPointX: Int = levelGridWidth / 2
+    private val levelMidPointY: Int = levelGridHeight / 2
 
     data class Chunk(
         var entityConfigNames: List<String>? = null,
@@ -41,8 +43,48 @@ data class WorldData(
         val gridX: Int = viewPortMiddlePosX / levelGridWidth
         val gridY: Int = viewPortMiddlePosY / levelGridHeight
 
-        for( x in gridX - 1..gridX + 1) {
-            for (y in gridY - 1..gridY + 1) {
+        // Check in which quadrant of the grid the view port is located
+        // and iterate over the adjacent chunks (2x2 grid)
+        val localViewPortPosX: Int = viewPortMiddlePosX % levelGridWidth
+        val localViewPortPosY: Int = viewPortMiddlePosY % levelGridHeight
+
+        var startGridX: Int
+        var startGridY: Int
+        var endGridX: Int
+        var endGridY: Int
+
+        if (localViewPortPosX < levelMidPointX) {
+            if (localViewPortPosY < levelMidPointY) {
+                // Top-left quadrant
+                startGridX = gridX - 1
+                endGridX = gridX
+                startGridY = gridY - 1
+                endGridY = gridY
+            } else {
+                // Bottom-left quadrant
+                startGridX = gridX - 1
+                endGridX = gridX
+                startGridY = gridY
+                endGridY = gridY + 1
+            }
+        } else {
+            if (localViewPortPosY < levelMidPointY) {
+                // Top-right quadrant
+                startGridX = gridX
+                endGridX = gridX + 1
+                startGridY = gridY - 1
+                endGridY = gridY
+            } else {
+                // Bottom-right quadrant
+                startGridX = gridX
+                endGridX = gridX + 1
+                startGridY = gridY
+                endGridY = gridY + 1
+            }
+        }
+
+        for( x in startGridX .. endGridX) {
+            for (y in startGridY .. endGridY) {
                 // Check if the chunk is already spawned
                 if (levelGridVania.inside(x, y) && !levelChunkConfig[x, y].entitiesSpawned) {
                     levelChunkConfig[x, y].entitiesSpawned = true
