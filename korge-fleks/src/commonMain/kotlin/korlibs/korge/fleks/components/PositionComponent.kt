@@ -131,6 +131,6 @@ class Grid private constructor(
     var lastPx: Float = 0f
     var lastPy: Float = 0f
 
-    val attachX get() = (cx + xr) * AppConfig.GRID_CELL_SIZE
-    val attachY get() = (cy + yr - zr) * AppConfig.GRID_CELL_SIZE
+    val attachX get() = (cx + xr) * AppConfig.gridCellSize
+    val attachY get() = (cy + yr - zr) * AppConfig.gridCellSize
 }

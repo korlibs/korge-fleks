@@ -9,9 +9,7 @@ class PlatformerCollisionResolver {
 
 class SimpleCollisionResolver(val gridWidth: Int, val gridHeight: Int) : CollisionResolver() {
 
-    override fun resolveXCollision(
-        gridComponent: Grid, motionComponent: MotionComponent, collision: CollisionChecker, dir: Int
-    ) {
+    override fun resolveXCollision(gridComponent: Grid, motionComponent: MotionComponent, collision: CollisionChecker, dir: Int) {
         if (dir == -1) {
             gridComponent.cx = 0
             gridComponent.xr = 0.3f
@@ -24,9 +22,7 @@ class SimpleCollisionResolver(val gridWidth: Int, val gridHeight: Int) : Collisi
 
     // TODO: Implement CollisionChecker with "old" raycast system
 
-    override fun resolveYCollision(
-        gridComponent: Grid, motionComponent: MotionComponent, collision: CollisionChecker, dir: Int
-    ) {
+    override fun resolveYCollision(gridComponent: Grid, motionComponent: MotionComponent, collision: CollisionChecker, dir: Int) {
         if (dir == -1) {
             gridComponent.cy = 0
             gridComponent.yr = 0.3f

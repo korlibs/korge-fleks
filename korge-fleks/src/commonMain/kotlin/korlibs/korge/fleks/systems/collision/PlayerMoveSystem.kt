@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.systems
+package korlibs.korge.fleks.systems.collision
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.Fixed

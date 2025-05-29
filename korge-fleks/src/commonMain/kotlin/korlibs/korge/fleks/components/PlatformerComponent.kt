@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Platformer")
 class Platformer private constructor(
-    var onGround: Boolean = true
+    var onGround: Boolean = false
 ) : Poolable<Platformer>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -25,7 +25,7 @@ class Platformer private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     override fun reset() {
-        onGround = true
+        onGround = false
     }
 
     override fun type() = PlatformerComponent

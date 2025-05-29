@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.systems
+package korlibs.korge.fleks.systems.collision
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.Fixed
@@ -6,7 +6,6 @@ import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.components.MotionComponent
 import korlibs.korge.fleks.components.PlayerInput.Companion.PlayerInputComponent
-
 
 class PlayerInputSystem() : IteratingSystem(
     family = World.family { all(PlayerInputComponent, MotionComponent) },
