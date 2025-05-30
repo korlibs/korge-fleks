@@ -47,14 +47,14 @@ class AssetStore {
     data class CollisionData(
         val x: Int,
         val y: Int,
-        val width: Int,
-        val height: Int
+        val width: Float,
+        val height: Float
     )
 
     // TODO
-    fun getCollisionData(configName: String) : CollisionData =
+    fun getCollisionData(name: String) : CollisionData =
         CollisionData(
-            8, 29, 17, 29
+            8, 29, 17f, 29f
         )
 
     fun getSound(name: String) : SoundChannel =

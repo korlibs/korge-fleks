@@ -46,7 +46,7 @@ data class LevelMapConfig(
                 levelName = this@LevelMapConfig.levelName
                 layerNames.init(from = this@LevelMapConfig.layerNames)
                 levelChunks = ChunkArray2(width = worldData.gridVaniaWidth, height = worldData.gridVaniaHeight)
-            }
+             }
             // Level map does not have position - camera position will determine what is shown from the level map
             // Size of level map is static and can be gathered from AssetStore -> AssetLevelData
             it += RgbaComponent().apply {

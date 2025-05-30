@@ -18,8 +18,10 @@ data class MotionComponent(
 
     var velocityX: Float = 0f,
     var velocityY: Float = 0f,
+    var velocityZ: Float = 0f,
     var frictionX: Float = 0.82f,
-    var frictionY: Float = 0.82f
+    var frictionY: Float = 0.82f,
+    var frictionZ: Float = 0f
 ) : CloneableComponent<MotionComponent>() {
     override fun type(): ComponentType<MotionComponent> = MotionComponent
     companion object : ComponentType<MotionComponent>()

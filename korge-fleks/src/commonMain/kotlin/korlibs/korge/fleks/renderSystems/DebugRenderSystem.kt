@@ -6,13 +6,14 @@ import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
+import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
+import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
-import korlibs.math.geom.*
-import korlibs.math.geom.Point
+import korlibs.math.geom.Rectangle
 
 
 /**
@@ -27,7 +28,7 @@ class DebugRenderSystem(
 ) : View() {
     private val family: Family = world.family {
         all(layerTag)
-            .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent)
+            .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
@@ -109,7 +110,7 @@ class DebugRenderSystem(
                     }
 
                     if (entity has CollisionComponent && entity has DebugInfoTag.SPRITE_COLLISION_BOUNDS) {
-                        val (anchorX, anchorY, colWidth, colHeight) = assetStore.getCollisionData(entity[CollisionComponent].configName)
+                        val (anchorX, anchorY, colWidth, colHeight) = assetStore.getCollisionData(entity[CollisionComponent].name)
                         // Draw collision bounds
                         batch.drawVector(Colors.LIGHTBLUE) {
                             rect(
@@ -126,12 +127,32 @@ class DebugRenderSystem(
                         batch.drawVector(Colors.YELLOW) {
                             val x = position.x + position.offsetX
                             val y = position.y + position.offsetY
-                            circle(Point(x, y), 2)
-                            line(Point(x - 3, y), Point(x + 3, y))
-                            line(Point(x, y - 3), Point(x, y + 3))
+                            circle(korlibs.math.geom.Point(x, y), 2)
+                            line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
+                            line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
                         }
                     }
                 }
+
+                // Draw grid position
+                if(entity has GridComponent && entity has DebugInfoTag.GRID_POSITION) {
+                    val gridComponent = entity[GridComponent]
+
+                    val gridToPosition = if (entity has ScreenCoordinatesTag) {
+                        Point.value().apply { x = gridComponent.x; y = gridComponent.y }
+                    } else {
+                        entity[GridComponent].run { world.convertToScreenCoordinates(camera) }
+                    }
+
+                    batch.drawVector(Colors.YELLOWGREEN) {
+                        val x = gridToPosition.x
+                        val y = gridToPosition.y
+                        circle(korlibs.math.geom.Point(x, y), 2)
+                        line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
+                        line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
+                    }
+                }
+
 
                 if (entity has LevelMapComponent && entity has DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS) {
                     val levelName = entity[LevelMapComponent].levelName

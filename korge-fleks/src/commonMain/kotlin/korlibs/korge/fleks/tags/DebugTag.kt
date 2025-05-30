@@ -13,6 +13,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("DebugInfo")
 enum class DebugInfoTag : EntityTags by entityTagOf() {
     POSITION,
+    GRID_POSITION,
 
     SPRITE_BOUNDS,
     SPRITE_TEXTURE_BOUNDS,

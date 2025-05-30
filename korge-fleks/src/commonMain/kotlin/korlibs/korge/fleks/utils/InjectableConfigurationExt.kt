@@ -2,8 +2,12 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.Collision.Companion.addCollisionComponentPool
+import korlibs.korge.fleks.components.Gravity.Companion.addGravityComponentPool
+import korlibs.korge.fleks.components.Grid.Companion.addGridComponentPool
 import korlibs.korge.fleks.components.LevelMap.Companion.addLevelMapComponentPool
-import korlibs.korge.fleks.components.Platformer.Companion.addPlatformerComponentPool
+import korlibs.korge.fleks.components.PlatformerCollision.Companion.addPlatformerComponentPool
+import korlibs.korge.fleks.components.PlayerInput.Companion.addPlayerInputComponentPool
+import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.addGridCollisionResultComponentPools
 import korlibs.korge.fleks.components.data.Point.Companion.addPointDataPool
 
 /**
@@ -11,8 +15,12 @@ import korlibs.korge.fleks.components.data.Point.Companion.addPointDataPool
  */
 fun InjectableConfiguration.addKorgeFleksComponentPools(preAllocate: Int = 0) {
     addCollisionComponentPool(preAllocate)
+    addGravityComponentPool(preAllocate)
+    addGridCollisionResultComponentPools(preAllocate)
+    addGridComponentPool(preAllocate)
     addLevelMapComponentPool(preAllocate)
     addPlatformerComponentPool(preAllocate)
+    addPlayerInputComponentPool(preAllocate)
 }
 
 /**

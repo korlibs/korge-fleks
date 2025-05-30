@@ -8,6 +8,7 @@ import korlibs.io.lang.*
 import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.collision.GridCollisionResult
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
@@ -158,6 +159,9 @@ class SnapshotSerializer {
             subclass(TouchInputComponent::class)
             subclass(TweenPropertyComponent::class)
             subclass(TweenSequenceComponent::class)
+            subclass(GridCollisionResult::class)
+            subclass(Gravity::class)
+            subclass(Grid::class)
             // Used as data inside components
             subclass(Point::class)
         }
