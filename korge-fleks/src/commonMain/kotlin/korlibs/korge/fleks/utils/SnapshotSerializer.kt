@@ -162,6 +162,7 @@ class SnapshotSerializer {
             subclass(GridCollisionResult::class)
             subclass(Gravity::class)
             subclass(Grid::class)
+            subclass(PlayerInput::class)
             // Used as data inside components
             subclass(Point::class)
         }

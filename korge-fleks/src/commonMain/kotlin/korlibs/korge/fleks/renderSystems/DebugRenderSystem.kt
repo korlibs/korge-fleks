@@ -144,7 +144,7 @@ class DebugRenderSystem(
                         entity[GridComponent].run { world.convertToScreenCoordinates(camera) }
                     }
 
-                    batch.drawVector(Colors.YELLOWGREEN) {
+                    batch.drawVector(Colors.YELLOW) {
                         val x = gridToPosition.x
                         val y = gridToPosition.y
                         circle(korlibs.math.geom.Point(x, y), 2)

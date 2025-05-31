@@ -31,7 +31,7 @@ class PlayerInputSystem() : IteratingSystem(
             playerInputComponent.xMoveStrength = 1f
         }
         if (isPressedKeyW) {
-            motionComponent.velocityY = 0.5f
+            motionComponent.velocityY = -0.5f
         }
     }
 }

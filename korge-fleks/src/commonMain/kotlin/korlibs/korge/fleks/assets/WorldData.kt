@@ -34,6 +34,38 @@ data class WorldData(
         var collisionMap: IntArray2? = null
     )
 
+    init {
+        // Sanity check for levelGridVania dimensions
+        levelGridVania.forEach { chunk ->
+            require(
+                chunk.collisionMap == null ||
+                chunk.collisionMap?.width == levelGridWidth && chunk.collisionMap?.height == levelGridHeight
+            ) {
+                "Collision map dimensions must match level grid dimensions!"
+            }
+        }
+    }
+
+    /**
+     * Check collision at cell position
+     */
+    fun hasCollision(cx: Int, cy: Int): Boolean {
+        // Get the chunk coordinates in the levelGridvainia array
+        val gridCx = cx / levelGridWidth
+        val gridCy = cy / levelGridHeight
+        return if (levelGridVania.inside(gridCx, gridCy)) {
+            // Get the local coordinates within the chunk
+            val localCx = cx % levelGridWidth
+            val localCy = cy % levelGridHeight
+            // Check if the collision map exists and if the tile is not empty
+            levelGridVania[gridCx, gridCy].collisionMap?.let { collisionMap ->
+                // Local coordinates are within the bounds of the collision map because we used modulo
+                // with levelGridWidth and levelGridHeight
+                collisionMap[localCx, localCy] != 0
+            } ?: false  // No collision map exists for this chunk --> no collision
+        } else true  // Outside levelGridVania bounds
+    }
+
     /**
      * Iterate over all entities within the chunk, where the camera is currently located, and all
      * adjacent chunks. Call the callback function for each entity config.
@@ -99,20 +131,20 @@ data class WorldData(
     /**
      * Iterate over all tiles within the given view port area and call the renderCall function for each tile.
      *
-     * @param x - horizontal position of top-left corner of view port in tiles
-     * @param y - vertical position of top-left corner of view port in tiles
+     * @param cx - horizontal position of top-left corner of view port in cell coordinates (tiles)
+     * @param cy - vertical position of top-left corner of view port in cell coordinates (tiles)
      * @param width - width of view port in tiles
      * @param height - height of view port in tiles
      */
-    fun forEachTile(layer: String, x: Int, y: Int, width: Int, height: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+    fun forEachTile(layer: String, cx: Int, cy: Int, width: Int, height: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
         // Calculate the view port corners (top-left, top-right, bottom-left and bottom-right positions) in gridvania indexes
         // and check if the corners are in different level maps (tileMapData)
-        val gridX = x / levelGridWidth
-        val gridY = y / levelGridHeight
-        val gridX2 = (x + width) / levelGridWidth
-        val gridY2 = (y + height) / levelGridHeight
-        val xStart = x % levelGridWidth
-        val yStart = y % levelGridHeight
+        val gridX = cx / levelGridWidth
+        val gridY = cy / levelGridHeight
+        val gridX2 = (cx + width) / levelGridWidth
+        val gridY2 = (cy + height) / levelGridHeight
+        val xStart = cx % levelGridWidth
+        val yStart = cy % levelGridHeight
         // Check if the view port area overlaps multiple levels
         if (gridX == gridX2) {
             // We have only one level in horizontal direction
