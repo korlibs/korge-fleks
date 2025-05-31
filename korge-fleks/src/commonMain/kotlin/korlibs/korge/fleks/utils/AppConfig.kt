@@ -47,5 +47,12 @@ object AppConfig {
 
     var deltaPerFrame = 1.0
 
-    var GRID_CELL_SIZE = 16f
+    // Config used by collison system
+    var gridCellSize = 16f
+
+    /**
+     * Any movement greater than this value will increase the number of steps checked between movement.
+     * The more steps will break down the movement into smaller pieces to avoid skipping grid collissions.
+     */
+    var maxGridMovementPercent: Float = 0.33f
 }

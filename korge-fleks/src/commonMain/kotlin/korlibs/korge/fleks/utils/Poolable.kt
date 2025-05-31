@@ -64,6 +64,10 @@ fun <T : Poolable<T>> InjectableConfiguration.addPool(
     add("PoolCmp${componentType.id}", pool)
 }
 
+fun <T : Poolable<T>> InjectableConfiguration.addPool(componentType: ComponentType<T>, pool: Pool<T>) {
+    add("PoolCmp${componentType.id}", pool)
+}
+
 /**
  * Allocates a new component of type [T] from the specific injected pool.
  *

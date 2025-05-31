@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Collision")
 class Collision private constructor(
-    var configName: String = "",
+    var name: String = "",
     var right: Boolean = false,
     var left: Boolean = false,
     var isCollidingAbove: Boolean = false,
@@ -46,7 +46,7 @@ class Collision private constructor(
 
     override fun World.clone(): Collision =
         getPoolable(CollisionComponent).apply {
-            configName = this@Collision.configName
+            name = this@Collision.name
             right = this@Collision.right
             left = this@Collision.left
             isCollidingAbove = this@Collision.isCollidingAbove

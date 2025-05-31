@@ -1,10 +1,17 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.ChunkArray2
+import korlibs.korge.fleks.assets.WorldData
+import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
+import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
+import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
+import korlibs.korge.fleks.logic.collision.resolver.SimpleCollisionResolver
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 
 /**
@@ -26,6 +33,13 @@ class LevelMap private constructor(
     var levelChunks: ChunkArray2 = ChunkArray2.empty
 ) : Poolable<LevelMap>() {
     override fun type() = LevelMapComponent
+
+    @Transient
+    lateinit var levelData: WorldData
+    @Transient
+    lateinit var collisionChecker: CollisionChecker
+    @Transient
+    lateinit var collisionResolver: CollisionResolver
 
     companion object {
         val LevelMapComponent = componentTypeOf<LevelMap>()
@@ -51,5 +65,12 @@ class LevelMap private constructor(
         layerNames.clear()  // Make list empty for reuse
         levelChunks = ChunkArray2.empty
         //println("Reset: LevelMap '$num'")
+    }
+
+    override fun World.onAdd(entity: Entity) {
+        val assetStore = inject<AssetStore>("AssetStore")
+        levelData = assetStore.getWorldData(levelName)
+        collisionChecker = PlatformerCollisionChecker(levelData)
+        collisionResolver = SimpleCollisionResolver(16, 16)
     }
 }

@@ -95,13 +95,13 @@ class Gravity private constructor(
 //    override fun World.cleanupPrefabs(entity: Entity) {
 //    }
 
-//    fun calculateDeltaXGravity(): Float {
-//        return if (enableGravityX) {
-//            gravityMultiplier * gravityX
-//        } else {
-//            0f
-//        }
-//    }
+    fun calculateDeltaXGravity(): Float {
+        return if (enableGravityX) {
+            gravityMultiplier * gravityX
+        } else {
+            0f
+        }
+    }
 
     fun calculateDeltaYGravity(): Float {
         return if (enableGravityY) {
@@ -111,11 +111,11 @@ class Gravity private constructor(
         }
     }
 
-//    fun calculateDeltaZGravity(): Float {
-//        return if (enableGravityZ) {
-//            gravityMultiplier * gravityZ
-//        } else {
-//            0f
-//        }
-//    }
+    fun calculateDeltaZGravity(): Float {
+        return if (enableGravityZ) {
+            gravityMultiplier * gravityZ
+        } else {
+            0f
+        }
+    }
 }
