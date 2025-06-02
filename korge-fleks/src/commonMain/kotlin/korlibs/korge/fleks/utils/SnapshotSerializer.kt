@@ -11,6 +11,8 @@ import korlibs.korge.fleks.components.Debug
 import korlibs.korge.fleks.components.EntityRef
 import korlibs.korge.fleks.components.EntityRefs
 import korlibs.korge.fleks.components.EntityRefsByName
+import korlibs.korge.fleks.components.Gravity
+import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Info
 import korlibs.korge.fleks.components.Layer
 import korlibs.korge.fleks.components.LayeredSprite
@@ -20,6 +22,8 @@ import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.NinePatch
 import korlibs.korge.fleks.components.OffsetByFrameIndex
 import korlibs.korge.fleks.components.Parallax
+import korlibs.korge.fleks.components.Platformer
+import korlibs.korge.fleks.components.PlayerInput
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Rgba
 import korlibs.korge.fleks.components.Rigidbody
@@ -169,15 +173,20 @@ class SnapshotSerializer {
             subclass(EntityRef::class)
             subclass(EntityRefs::class)
             subclass(EntityRefsByName::class)
+            subclass(Gravity::class)
+            subclass(Grid::class)
             subclass(Info::class)
             subclass(Layer::class)
             subclass(LayeredSprite::class)
+            subclass(LevelMap::class)
             subclass(LevelMap::class)
             subclass(LifeCycle::class)
             subclass(Motion::class)
             subclass(NinePatch::class)
             subclass(OffsetByFrameIndex::class)
             subclass(Parallax::class)
+            subclass(Platformer::class)
+            subclass(PlayerInput::class)
             subclass(Position::class)
             subclass(Rgba::class)
             subclass(Rigidbody::class)
@@ -188,7 +197,6 @@ class SnapshotSerializer {
             subclass(SpriteLayers::class)
             subclass(SwitchLayerVisibility::class)
             subclass(TextField::class)
-            subclass(LevelMap::class)
             subclass(TouchInput::class)
             subclass(TweenProperty::class)
             subclass(TweenSequence::class)

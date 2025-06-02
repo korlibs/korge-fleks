@@ -25,6 +25,26 @@ class Motion private constructor(
     var frictionX: Float = 0.82f,
     var frictionY: Float = 0.82f
 ) : Poolable<Motion>() {
+    // Init an existing component instance with data from another component
+    fun init(from: Motion) {
+        accelX = from.accelX
+        accelY = from.accelY
+        velocityX = from.velocityX
+        velocityY = from.velocityY
+        frictionX = from.frictionX
+        frictionY = from.frictionY
+    }
+
+    // Cleanup the component instance manually
+    fun cleanup() {
+        accelX = 0f
+        accelY = 0f
+        velocityX = 0f
+        velocityY = 0f
+        frictionX = 0.82f
+        frictionY = 0.82f
+    }
+
     override fun type() = MotionComponent
 
     companion object {
@@ -47,22 +67,6 @@ class Motion private constructor(
     // Create a new instance of the component from the pool
     override fun World.clone(): Motion =
     getPoolable(MotionComponent).apply { init(from = this@Motion ) }
-
-    // Init an existing component instance with data from another component
-    fun init(from: Motion) {
-        accelX = from.accelX
-        accelY = from.accelY
-        velocityX = from.velocityX
-        velocityY = from.velocityY
-    }
-
-    // Cleanup the component instance manually
-    fun cleanup() {
-        accelX = 0f
-        accelY = 0f
-        velocityX = 0f
-        velocityY = 0f
-    }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

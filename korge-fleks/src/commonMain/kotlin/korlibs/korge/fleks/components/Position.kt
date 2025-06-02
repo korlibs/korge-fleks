@@ -20,13 +20,27 @@ class Position private constructor(
     var offsetX: Float = 0f,
     var offsetY: Float = 0f
 ) : Poolable<Position>() {
+    fun init(from: Position) {
+        x = from.x
+        y = from.y
+        offsetX = from.offsetX
+        offsetY = from.offsetY
+    }
+
+    fun cleanup() {
+        x = 0f
+        y = 0f
+        offsetX = 0f
+        offsetY = 0f
+    }
+
     override fun type() = PositionComponent
 
     companion object {
         val PositionComponent = componentTypeOf<Position>()
 
         fun World.positionComponent(config: Position.() -> Unit ): Position =
-            getPoolable(PositionComponent).apply { config() }
+            getPoolable(PositionComponent).apply(config)
 
         // Use this function to create a new instance as static property (val)
         fun staticPositionComponent(): Position = Position()
@@ -39,21 +53,7 @@ class Position private constructor(
     override fun World.clone(): Position =
         getPoolable(PositionComponent).apply { init(from = this@Position) }
 
-    fun init(from: Position) {
-        x = from.x
-        y = from.y
-        offsetX = from.offsetX
-        offsetY = from.offsetY
-    }
-
     override fun World.cleanupComponent(entity: Entity) { cleanup() }
-
-    fun cleanup() {
-        x = 0f
-        y = 0f
-        offsetX = 0f
-        offsetY = 0f
-    }
 
     /**
      * Convert the position of the entity to world coordinates.

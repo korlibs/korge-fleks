@@ -84,23 +84,23 @@ class Parallax private constructor(
         val numberForegroundLayers = assetStore.getBackground(name).config.foregroundLayers?.size ?: 0
 
         // Initialize all layer lists on component creation
-        repeat(numberBackgroundLayers) {
+        repeat(numberBackgroundLayers) { index ->
             // Create new entities for controlling position and color of each layer e.g. by the TweenEngineSystem
             // We share here the component objects from ParallaxComponent
             backgroundLayers.add(
                 staticLayerComponent {
                     // Create new entity and add existing components from the parallax layer data object
-                    this.entity = this@initComponent.entity("Parallax BG layer of entity '${entity.id}'") {
+                    this.entity = this@initComponent.entity("Parallax BG layer '$index' of entity '${entity.id}'") {
                         it += position
                         it += rgba
                     }
                 }
             )
         }
-        repeat(numberForegroundLayers) {
+        repeat(numberForegroundLayers) { index ->
             foregroundLayers.add(
                 staticLayerComponent {
-                    this.entity = this@initComponent.entity("Parallax FG layer of entity '${entity.id}'") {
+                    this.entity = this@initComponent.entity("Parallax FG layer '$index' of entity '${entity.id}'") {
                         it += position
                         it += rgba
                     }
