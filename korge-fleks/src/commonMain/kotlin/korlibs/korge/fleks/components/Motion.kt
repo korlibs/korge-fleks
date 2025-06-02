@@ -19,8 +19,11 @@ import kotlinx.serialization.Serializable
 class Motion private constructor(
     var accelX: Float = 0f,
     var accelY: Float = 0f,
+
     var velocityX: Float = 0f,
-    var velocityY: Float = 0f
+    var velocityY: Float = 0f,
+    var frictionX: Float = 0.82f,
+    var frictionY: Float = 0.82f
 ) : Poolable<Motion>() {
     override fun type() = MotionComponent
 

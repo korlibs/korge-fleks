@@ -16,6 +16,7 @@ import korlibs.korge.fleks.components.Motion.Companion.addMotionComponentPool
 import korlibs.korge.fleks.components.NinePatch.Companion.addNinePatchComponentPool
 import korlibs.korge.fleks.components.OffsetByFrameIndex.Companion.addOffsetByFrameIndexComponentPool
 import korlibs.korge.fleks.components.Parallax.Companion.addParallaxComponentPool
+import korlibs.korge.fleks.components.Platformer.Companion.addPlatformerComponentPool
 import korlibs.korge.fleks.components.Position.Companion.addPositionComponentPool
 import korlibs.korge.fleks.components.Rgba.Companion.addRgbaComponentPool
 import korlibs.korge.fleks.components.Rigidbody.Companion.addRigidbodyComponentPool
@@ -66,6 +67,7 @@ fun InjectableConfiguration.addKorgeFleksComponentPools(preAllocate: Int = 0) {
     addTextFieldComponentPool(preAllocate)
     addTouchInputComponentPool(preAllocate)
     addTweenPropertyComponentPools(preAllocate)
+    addPlatformerComponentPool(preAllocate)
 }
 
 /**

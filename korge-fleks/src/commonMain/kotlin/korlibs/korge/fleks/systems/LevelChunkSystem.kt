@@ -49,6 +49,8 @@ class LevelChunkSystem(
             worldData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, levelChunks) { entityConfig ->
                 createAndConfigureEntity(entityConfig)
             }
+
+            // TODO: Deactivate entities which are too far away from the camera
         }
     }
 }

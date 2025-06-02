@@ -46,4 +46,6 @@ object AppConfig {
     var watchForAssetChanges = true
 
     var deltaPerFrame = 1.0
+
+    var GRID_CELL_SIZE = 16f
 }
