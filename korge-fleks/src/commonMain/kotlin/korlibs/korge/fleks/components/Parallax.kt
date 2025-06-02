@@ -57,8 +57,7 @@ class Parallax private constructor(
     }
 
     // Clone a new instance of the component from the pool
-    override fun World.clone(): Parallax =
-    getPoolable(ParallaxComponent).apply {
+    override fun World.clone(): Parallax = getPoolable(ParallaxComponent).apply {
         name = this@Parallax.name
         backgroundLayers.init(world = this@clone, from = this@Parallax.backgroundLayers)
         parallaxPlane.init(from = this@Parallax.parallaxPlane)
@@ -108,32 +107,21 @@ class Parallax private constructor(
             )
         }
 
-        parallaxPlane.attachedLayersRearPositions = MutableList(numberAttachedRearLayers) { 0f }
-        parallaxPlane.linePositions = MutableList(numberParallaxPlaneLines) { 0f }
-        parallaxPlane.attachedLayersFrontPositions = MutableList(numberAttachedFrontLayers) { 0f }
+        repeat(numberAttachedRearLayers) { parallaxPlane.attachedLayersRearPositions.add(0f) }
+        repeat(numberParallaxPlaneLines) { parallaxPlane.linePositions.add(0f) }
+        repeat(numberAttachedFrontLayers) { parallaxPlane.attachedLayersFrontPositions.add(0f) }
+
         parallaxPlane.entity = this.entity("Parallax plane of entity '${entity.id}'") {
             it += parallaxPlane.position
             it += parallaxPlane.rgba
         }
-
-        // Get height of the parallax background
-        val parallaxDataContainer = assetStore.getBackground(name)
-        val imageHeight: Float = (parallaxDataContainer.backgroundLayers?.height
-            ?: parallaxDataContainer.foregroundLayers?.height
-            ?: parallaxDataContainer.parallaxPlane?.default?.height
-            ?: throw Error("ParallaxComponent: Parallax image data has no height!")).toFloat()
-        val parallaxLayerHeight: Float = imageHeight
-
-        // Set parallax height and offset in the camera system
-        system<CameraSystem>().parallaxHeight = parallaxLayerHeight - parallaxDataContainer.config.offset.toFloat()
-        system<CameraSystem>().parallaxOffset = parallaxDataContainer.config.offset.toFloat()
     }
 
     // Cleanup/Reset the component automatically when it is removed from an entity
     override fun World.cleanupComponent(entity: Entity) {
         name = ""
         backgroundLayers.cleanup(world = this)
-        parallaxPlane.cleanup()
+        parallaxPlane.cleanup()  // static property - no need to free
         foregroundLayers.cleanup(world = this)
     }
 
@@ -148,6 +136,17 @@ class Parallax private constructor(
 
     // Initialize an external prefab when the component is added to an entity
     override fun World.initPrefabs(entity: Entity) {
+        val assetStore: AssetStore = inject(name = "AssetStore")
+        // Get height of the parallax background
+        val parallaxDataContainer = assetStore.getBackground(name)
+        val imageHeight: Float = (parallaxDataContainer.backgroundLayers?.height
+            ?: parallaxDataContainer.foregroundLayers?.height
+            ?: parallaxDataContainer.parallaxPlane?.default?.height
+            ?: throw Error("ParallaxComponent: Parallax image data has no height!")).toFloat()
+        val parallaxLayerHeight: Float = imageHeight
+        // Set parallax height and offset in the camera system
+        system<CameraSystem>().parallaxHeight = parallaxLayerHeight - parallaxDataContainer.config.offset.toFloat()
+        system<CameraSystem>().parallaxOffset = parallaxDataContainer.config.offset.toFloat()
     }
 
     // Cleanup/Reset an external prefab when the component is removed from an entity
@@ -201,6 +200,19 @@ class Parallax private constructor(
         val position: Position = staticPositionComponent(),
         val rgba: Rgba = staticRgbaComponent()
     ) : Poolable<Layer>() {
+
+        fun init(from: Layer) {
+            entity = from.entity
+            position.init(from.position)
+            rgba.init(from.rgba)
+        }
+
+        fun cleanup() {
+            entity = Entity.NONE
+            position.cleanup()
+            rgba.cleanup()
+        }
+
         override fun type() = LayerComponent
 
         companion object {
@@ -221,24 +233,7 @@ class Parallax private constructor(
         }
 
         // Clone a new instance of the component from the pool
-        override fun World.clone(): Layer =
-            getPoolable(LayerComponent).apply { init(from = this@Layer ) }
-
-        // Init an existing component data instance with data from another component
-        // This is used for component instances when they are part (val property) of another component
-        fun init(from: Layer) {
-            entity = from.entity
-            position.init(from.position)
-            rgba.init(from.rgba)
-        }
-
-        // Cleanup the component data instance manually
-        // This is used for component instances when they are part (val property) of another component
-        fun cleanup() {
-            entity = Entity.NONE
-            position.cleanup()
-            rgba.cleanup()
-        }
+        override fun World.clone(): Layer = getPoolable(LayerComponent).apply { init(from = this@Layer ) }
 
         // Cleanup/Reset the component automatically when it is removed from an entity
         override fun World.cleanupComponent(entity: Entity) {
@@ -257,10 +252,32 @@ class Parallax private constructor(
         val position: Position = staticPositionComponent(),
         val rgba: Rgba = staticRgbaComponent(),
         // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
-        var linePositions: MutableList<Float> = mutableListOf(),
-        var attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
-        var attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
+        val linePositions: MutableList<Float> = mutableListOf(),
+        // Below lists are static and can be cloned by reference
+        val attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
+        val attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
     ) : Poolable<Plane>() {
+
+        fun init(from: Plane) {
+            entity = from.entity
+            position.init(from.position)
+            rgba.init(from.rgba)
+            // Make deep copy of the line and layer positions - they are changing
+            linePositions.addAll(from.linePositions)
+            attachedLayersRearPositions.addAll(from.attachedLayersRearPositions)
+            attachedLayersFrontPositions.addAll(from.attachedLayersFrontPositions)
+        }
+
+        fun cleanup() {
+            entity = Entity.NONE
+            position.cleanup()
+            rgba.cleanup()
+            // Remove floats from lists
+            linePositions.clear()
+            attachedLayersRearPositions.clear()
+            attachedLayersFrontPositions.clear()
+        }
+
         override fun type() = PlaneComponent
 
         companion object {
@@ -280,34 +297,7 @@ class Parallax private constructor(
         }
 
         // Clone a new instance of the component from the pool
-        override fun World.clone(): Plane =
-        getPoolable(PlaneComponent).apply { init(from = this@Plane ) }
-
-        // Init an existing component data instance with data from another component
-        // This is used for component instances when they are part (val property) of another component
-        fun init(from: Plane) {
-            entity = from.entity
-            position.init(from.position)
-            rgba.init(from.rgba)
-            // lists are static and do not change so copy reference
-            // TODO: NO!! - make a deep copy of lists
-//            linePositions.init(from = from.linePositions)
-            linePositions = from.linePositions
-            attachedLayersRearPositions = from.attachedLayersRearPositions
-            attachedLayersFrontPositions = from.attachedLayersFrontPositions
-        }
-
-        // Cleanup the component data instance manually
-        // This is used for component instances when they are part (val property) of another component
-        fun cleanup() {
-            entity = Entity.NONE
-            position.cleanup()
-            rgba.cleanup()
-            // lists contain only reference to the data and do not need to be cleaned up
-            linePositions = mutableListOf()
-            attachedLayersRearPositions = mutableListOf()
-            attachedLayersFrontPositions = mutableListOf()
-        }
+        override fun World.clone(): Plane = getPoolable(PlaneComponent).apply { init(from = this@Plane ) }
 
         // Cleanup/Reset the component automatically when it is removed from an entity (and return it to the pool)
         override fun World.cleanupComponent(entity: Entity) {
