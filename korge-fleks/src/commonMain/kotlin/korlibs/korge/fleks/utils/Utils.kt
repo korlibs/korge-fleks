@@ -46,33 +46,6 @@ internal fun interpolateBoolean(ratio: Double, l: Boolean, r: Boolean): Boolean 
 //}
 
 /**
- * Clone function for a Map object with List values.
- */
-// TODO: Cleanup
-//@JvmName("MapOfListCloneableData")
-//fun<K, T> Map<K, List<CloneableData<T>>>.clone() : Map<K, List<T>> {
-//    val mapCopy = mutableMapOf<K, List<T>>()
-//    forEach { (key, value) ->
-//        // Perform deep copy of map value elements
-//        mapCopy[key] = value.clone()
-//    }
-//    return mapCopy
-//}
-
-/**
- * Clone function for a Map object with [Entity] values.
- */
-@JvmName("MapOfEnities")
-fun<T> Map<T, Entity>.clone() : Map<T, Entity> {
-    val mapCopy = mutableMapOf<T, Entity>()
-    forEach { (key, value) ->
-        // Perform deep copy of map value elements
-        mapCopy[key] = value.clone()
-    }
-    return mapCopy
-}
-
-/**
  * Clone function (deep copy) for [HorizontalAlign] enum objects.
  */
 fun HorizontalAlign.clone() : HorizontalAlign = HorizontalAlign(this.ratio)
@@ -91,6 +64,7 @@ fun RGBA.cloneRgba() : RGBA = RGBA(this.value)
 /**
  * Init function (deep copy) for [MutableList] of String elements.
  */
+@JvmName("MutableListOfStringInit")
 fun MutableList<String>.init(from: List<String>) {
     this.addAll(from)
 }
@@ -100,6 +74,7 @@ fun MutableList<String>.init(from: List<String>) {
  * This works because Entities are static data classes which will not be "reused" with other
  * id and version.
  */
+@JvmName("MutableListOfEntityInit")
 fun MutableList<Entity>.init(from: List<Entity>) {
     this.addAll(from)
 }

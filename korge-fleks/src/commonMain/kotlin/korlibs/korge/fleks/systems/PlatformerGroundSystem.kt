@@ -4,7 +4,7 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
-import korlibs.korge.fleks.components.MotionComponent
+import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Platformer.Companion.PlatformerComponent
 import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.checker.GroundChecker

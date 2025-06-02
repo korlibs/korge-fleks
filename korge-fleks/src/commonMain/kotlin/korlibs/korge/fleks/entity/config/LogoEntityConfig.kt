@@ -49,7 +49,7 @@ data class LogoEntityConfig(
                 name = assetName
             }
             it += RgbaComponent {
-                setTint(this@LogoEntityConfig.tint)
+                rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = this@LogoEntityConfig.alpha
             }
             it += LayerComponent { index = this@LogoEntityConfig.layerIndex }

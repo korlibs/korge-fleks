@@ -110,7 +110,7 @@ data class DialogBoxConfig(
             }
             it += SpriteComponent { name = avatarName }
             it += RgbaComponent {
-                setTint(this@DialogBoxConfig.tint)
+                rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
@@ -129,7 +129,7 @@ data class DialogBoxConfig(
                 height = textBoxHeight
             }
             it += RgbaComponent {
-                setTint(this@DialogBoxConfig.tint)
+                rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
@@ -153,7 +153,7 @@ data class DialogBoxConfig(
             }
             it += LayerComponent { index = 101 }
             it += RgbaComponent {
-                setTint(this@DialogBoxConfig.tint)
+                rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = 1f
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS

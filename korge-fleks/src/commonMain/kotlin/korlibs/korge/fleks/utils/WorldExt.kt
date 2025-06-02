@@ -1,8 +1,9 @@
 package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.Info.Companion.InfoComponent
+import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.tags.*
@@ -17,7 +18,7 @@ fun World.entity(aName: String, configuration: EntityCreateContext.(Entity) -> U
  * Delete function for [Entity] which let the [LifeCycleSystem] delete and cleanup all sub-entities, too.
  */
 fun World.deleteViaLifeCycle(entity: Entity) {
-    entity.configure { it.getOrAdd(LifeCycleComponent) { LifeCycleComponent() }.apply { healthCounter = 0 } }
+    entity.configure { it.getOrAdd(LifeCycleComponent) { LifeCycleComponent {} }.apply { healthCounter = 0 } }
 }
 
 /**

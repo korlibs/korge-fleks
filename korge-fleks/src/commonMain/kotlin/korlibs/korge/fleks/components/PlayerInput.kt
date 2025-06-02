@@ -20,7 +20,7 @@ class PlayerInput private constructor(
 ) : Poolable<PlayerInput>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
-    fun World.init(from: PlayerInput) {
+    fun init(from: PlayerInput) {
         speed = from.speed
         xMoveStrength = from.xMoveStrength
         yMoveStrength = from.yMoveStrength
@@ -28,8 +28,7 @@ class PlayerInput private constructor(
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
-    override fun reset() {
-//    fun World.cleanup() {
+    fun cleanup() {
         speed = 0.03f
         xMoveStrength = 0f
         yMoveStrength = 0f
@@ -58,20 +57,20 @@ class PlayerInput private constructor(
     override fun World.clone(): PlayerInput =
         getPoolable(PlayerInputComponent).apply { init(from = this@PlayerInput ) }
 
-//    // Initialize the component automatically when it is added to an entity
-//    override fun World.initComponent(entity: Entity) {
-//    }
-//
-//    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
-//    override fun World.cleanupComponent(entity: Entity) {
-//        cleanup()
-//    }
-//
-//    // Initialize an external prefab when the component is added to an entity
-//    override fun World.initPrefabs(entity: Entity) {
-//    }
-//
-//    // Cleanup/Reset an external prefab when the component is removed from an entity
-//    override fun World.cleanupPrefabs(entity: Entity) {
-//    }
+    // Initialize the component automatically when it is added to an entity
+    override fun World.initComponent(entity: Entity) {
+    }
+
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
+    override fun World.cleanupComponent(entity: Entity) {
+        cleanup()
+    }
+
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
+
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
 }

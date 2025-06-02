@@ -38,8 +38,7 @@ class Gravity private constructor(
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
-//    fun cleanup() {
-    override fun reset() {
+    fun cleanup() {
         gravityX = 0f
         gravityY = 0f
         gravityZ = 0f
@@ -47,12 +46,6 @@ class Gravity private constructor(
         enableGravityX = true
         enableGravityY = true
         enableGravityZ = true
-    }
-
-    fun enableAll(enable: Boolean) {
-        enableGravityX = enable
-        enableGravityY = enable
-        enableGravityZ = enable
     }
 
     override fun type() = GravityComponent
@@ -78,30 +71,30 @@ class Gravity private constructor(
     override fun World.clone(): Gravity =
         getPoolable(GravityComponent).apply { init(from = this@Gravity ) }
 
-//    // Initialize the component automatically when it is added to an entity
-//    override fun World.initComponent(entity: Entity) {
-//    }
-//
-//    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
-//    override fun World.cleanupComponent(entity: Entity) {
-//        cleanup()
-//    }
-//
-//    // Initialize an external prefab when the component is added to an entity
-//    override fun World.initPrefabs(entity: Entity) {
-//    }
-//
-//    // Cleanup/Reset an external prefab when the component is removed from an entity
-//    override fun World.cleanupPrefabs(entity: Entity) {
-//    }
+    // Initialize the component automatically when it is added to an entity
+    override fun World.initComponent(entity: Entity) {
+    }
 
-//    fun calculateDeltaXGravity(): Float {
-//        return if (enableGravityX) {
-//            gravityMultiplier * gravityX
-//        } else {
-//            0f
-//        }
-//    }
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
+    override fun World.cleanupComponent(entity: Entity) {
+        cleanup()
+    }
+
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
+
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    fun calculateDeltaXGravity(): Float {
+        return if (enableGravityX) {
+            gravityMultiplier * gravityX
+        } else {
+            0f
+        }
+    }
 
     fun calculateDeltaYGravity(): Float {
         return if (enableGravityY) {
@@ -111,11 +104,17 @@ class Gravity private constructor(
         }
     }
 
-//    fun calculateDeltaZGravity(): Float {
-//        return if (enableGravityZ) {
-//            gravityMultiplier * gravityZ
-//        } else {
-//            0f
-//        }
-//    }
+    fun calculateDeltaZGravity(): Float {
+        return if (enableGravityZ) {
+            gravityMultiplier * gravityZ
+        } else {
+            0f
+        }
+    }
+
+    fun enableAll(enable: Boolean) {
+        enableGravityX = enable
+        enableGravityY = enable
+        enableGravityZ = enable
+    }
 }

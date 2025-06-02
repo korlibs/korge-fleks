@@ -60,7 +60,7 @@ data class RichTextConfig(
                 index = this@RichTextConfig.layerIndex
             }
             it += RgbaComponent {
-                setTint(this@RichTextConfig.tint)
+                rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = this@RichTextConfig.alpha
             }
             it += layerTag

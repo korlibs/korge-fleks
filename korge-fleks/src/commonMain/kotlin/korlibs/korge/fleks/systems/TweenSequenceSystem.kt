@@ -12,11 +12,12 @@ import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionX
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionY
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionOffsetX
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionOffsetY
-//import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.
 import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
+import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity
 import korlibs.korge.fleks.components.data.tweenSequence.Jump
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens.Companion.staticParallelTweens
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity
 import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
 import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
 import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition
@@ -192,12 +193,12 @@ class TweenSequenceSystem : IteratingSystem(
 //                tween.enabled?.let { value -> createTweenPropertyComponent(TouchInputEnable, value) }
 //            }
 //            // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
-//            is SpawnEntity -> {
-//                val spawnedEntity = if (tween.entity == Entity.NONE) world.entity("SpawnEntity: ${tween.entityConfig}") else tween.entity
-//                EntityFactory.configure(tween.entityConfig, world, spawnedEntity)
-//            }
-//            // Directly deletes the given entity from the tween
-//            is DeleteEntity -> world.deleteViaLifeCycle(tween.entity)
+            is SpawnEntity -> {
+                val spawnedEntity = if (tween.target == Entity.NONE) world.entity("SpawnEntity: ${tween.entityConfig}") else tween.target
+                EntityFactory.configure(tween.entityConfig, world, spawnedEntity)
+            }
+            // Directly deletes the given entity from the tween
+            is DeleteEntity -> world.deleteViaLifeCycle(tween.target)
 //            // Runs the config-function on the given entity from the tween
 //            is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.entity)
 //            is Wait -> tween.event?.let { event ->

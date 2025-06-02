@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.logic.collision.resolver
 
 import korlibs.korge.fleks.components.Grid
-import korlibs.korge.fleks.components.MotionComponent
+import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 
 /**
@@ -11,14 +11,14 @@ abstract class CollisionResolver {
 
     open fun resolveXCollision(
         gridComponent: Grid,
-        motionComponent: MotionComponent,
+        motionComponent: Motion,
         collision: CollisionChecker,
         dir: Int
     ) = Unit
 
     open fun resolveYCollision(
         gridComponent: Grid,
-        motionComponent: MotionComponent,
+        motionComponent: Motion,
         collision: CollisionChecker,
         dir: Int
     ) = Unit
