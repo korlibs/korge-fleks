@@ -18,7 +18,7 @@ class SpriteLayer private constructor(
     var offsetX: Float = 0f,
     var offsetY: Float = 0f,
     @Serializable(with = RGBAAsInt::class) var rgba: RGBA = Colors.WHITE
-) : Poolable<SpriteLayer>() {
+) : PoolableComponents<SpriteLayer>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: SpriteLayer) {

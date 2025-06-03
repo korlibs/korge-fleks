@@ -28,7 +28,7 @@ class Sound private constructor(
     var volume: Double = 1.0,
     var isPlaying: Boolean = false,
     var loop: Boolean = false  // TODO not yet implemented
-) : Poolable<Sound>() {
+) : PoolableComponents<Sound>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Sound) {

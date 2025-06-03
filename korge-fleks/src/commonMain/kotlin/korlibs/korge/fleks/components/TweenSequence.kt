@@ -24,7 +24,7 @@ class TweenSequence private constructor(
     var timeProgress: Float = 0f,    // Elapsed time for the object to be animated
     var waitTime: Float = 0f,
     var executed: Boolean = false
-) : Poolable<TweenSequence>(), TweenListBase {
+) : PoolableComponents<TweenSequence>(), TweenListBase {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: TweenSequence) {

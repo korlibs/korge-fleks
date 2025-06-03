@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Layer")
 class Layer private constructor(
     var index: Int = 0
-) : Poolable<Layer>() {
+) : PoolableComponents<Layer>() {
     override fun type() = LayerComponent
 
     companion object {

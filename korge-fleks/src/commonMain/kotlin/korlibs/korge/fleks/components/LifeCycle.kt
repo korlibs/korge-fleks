@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("LifeCycle")
 class LifeCycle private constructor(
     var healthCounter: Int = 100
-) : Poolable<LifeCycle>() {
+) : PoolableComponents<LifeCycle>() {
     override fun type() = LifeCycleComponent
 
     companion object {

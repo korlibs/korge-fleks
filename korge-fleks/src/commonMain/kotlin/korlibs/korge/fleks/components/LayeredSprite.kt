@@ -47,7 +47,7 @@ class LayeredSprite private constructor(
     // internally used for rendering and tween animation of texture layer position and rgba (alpha channel)
     val layerList: MutableList<TextureRef> = mutableListOf(),
     val layerMap: MutableMap<String, TextureRef> = mutableMapOf()
-) : Poolable<LayeredSprite>() {
+) : PoolableComponents<LayeredSprite>() {
     override fun type() = LayeredSpriteComponent
 
     companion object {

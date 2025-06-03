@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Debug")
 class Debug private constructor(
     var name: String = ""
-) : Poolable<Debug>() {
+) : PoolableComponents<Debug>() {
     override fun type() = DebugComponent
 
     companion object {

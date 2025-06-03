@@ -3,7 +3,6 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
-import korlibs.korge.fleks.components.data.Rgb
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -18,7 +17,7 @@ import kotlinx.serialization.Serializable
 class Rgba private constructor(
 //    @Serializable(with = RGBAAsString::class)  -- deserialization does not work with string???
     @Serializable(with = RGBAAsInt::class) var rgba: RGBA = Colors.WHITE
-) : Poolable<Rgba>() {
+) : PoolableComponents<Rgba>() {
     override fun type() = RgbaComponent
 
     companion object {

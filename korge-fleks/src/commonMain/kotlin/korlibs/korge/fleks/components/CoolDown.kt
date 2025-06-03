@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("CoolDown")
 class CoolDown private constructor(
     var value: Float = 0f
-) : Poolable<CoolDown>() {
+) : PoolableComponents<CoolDown>() {
     override fun type() = CoolDownComponent
 
     companion object {

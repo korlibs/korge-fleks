@@ -20,7 +20,7 @@ class OffsetByFrameIndex private constructor(
     var entity: Entity = Entity.NONE,
     // Map of list of points is static - therefore use references to the map when creating copies of the component in init function
     var mapOfOffsetLists: Map<String, List<Point>> = mapOf()
-) : Poolable<OffsetByFrameIndex>() {
+) : PoolableComponents<OffsetByFrameIndex>() {
     override fun type() = OffsetByFrameIndexComponent
 
     companion object {

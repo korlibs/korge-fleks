@@ -21,7 +21,7 @@ class TextureRef private constructor(
      */
     val position: Position = staticPositionComponent(),
     val rgba: Rgba = staticRgbaComponent()
-) : Poolable<TextureRef>() {
+) : PoolableComponents<TextureRef>() {
     override fun type() = TextureRefData
 
     companion object {

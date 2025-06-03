@@ -203,12 +203,18 @@ class SnapshotSerializer {
             // Used as data inside components
             subclass(Point::class)
             subclass(Parallax.Layer::class)
-            subclass(Parallax.Plane::class)
             subclass(Rgb::class)
             subclass(SpriteLayer::class)
             subclass(TextureRef::class)
 
         }
+
+        // TODO: merge with TweenBase below to Poolable
+        //       rename Poolable<T> to PoolableComponent<T>
+        polymorphic(Poolable::class) {
+            subclass(Parallax.Plane::class)
+        }
+
         // Register tags (components without properties)
         polymorphic(UniqueId::class) {
             subclass(CameraFollowTag::class)

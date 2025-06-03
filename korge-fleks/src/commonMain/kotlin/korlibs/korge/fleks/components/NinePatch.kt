@@ -17,7 +17,7 @@ class NinePatch private constructor(
     var name: String = "",
     var width: Float = 0f,
     var height: Float = 0f
-) : Poolable<NinePatch>() {
+) : PoolableComponents<NinePatch>() {
     override fun type() = NinePatchComponent
 
     companion object {

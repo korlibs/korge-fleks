@@ -17,7 +17,7 @@ class Rigidbody private constructor(
     var mass: Float = 0f,      // mass to calculate inertia of the object
     var damping: Float = 0f,   // e.g. air resistance of the object when falling
     var friction: Float = 0f,  // e.g. friction of the object when it moves over surfaces
-) : Poolable<Rigidbody>() {
+) : PoolableComponents<Rigidbody>() {
     override fun type() = RigidbodyComponent
 
     companion object {

@@ -57,7 +57,7 @@ class Sprite private constructor(
     // internal, do not set directly
     var increment: Int = -2,                          // out of [-1, 0, 1]; will be added to frameIndex each new frame
     var nextFrameIn: Float = 0f                       // time in seconds until next frame of animation shall be shown
-) : Poolable<Sprite>() {
+) : PoolableComponents<Sprite>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Sprite) {

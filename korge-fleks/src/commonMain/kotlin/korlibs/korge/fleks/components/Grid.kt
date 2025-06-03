@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Grid")
 class Grid private constructor(
-) : Poolable<Grid>() {
+) : PoolableComponents<Grid>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Grid) {

@@ -23,7 +23,7 @@ class Gravity private constructor(
     var enableGravityX: Boolean = false,
     var enableGravityY: Boolean = true,
     var enableGravityZ: Boolean = false
-) : Poolable<Gravity>() {
+) : PoolableComponents<Gravity>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Gravity) {

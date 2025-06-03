@@ -4,8 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Parallax.Layer.Companion.addLayerComponentPool
 import korlibs.korge.fleks.components.Parallax.Layer.Companion.staticLayerComponent
-import korlibs.korge.fleks.components.Parallax.Plane.Companion.addPlaneComponentPool
-import korlibs.korge.fleks.components.Parallax.Plane.Companion.staticPlaneComponent
+import korlibs.korge.fleks.components.Parallax.Plane.Companion.staticPlane
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
@@ -32,9 +31,9 @@ class Parallax private constructor(
     // Do not set below properties directly - they will be set by the onAdd hook function
     // List of layers
     val backgroundLayers: MutableList<Layer> = mutableListOf(),
-    val parallaxPlane: Plane = staticPlaneComponent(),
+    val parallaxPlane: Plane = staticPlane(),
     val foregroundLayers: MutableList<Layer> = mutableListOf()
-) : Poolable<Parallax>() {
+) : PoolableComponents<Parallax>() {
     override fun type() = ParallaxComponent
 
     companion object {
@@ -52,7 +51,6 @@ class Parallax private constructor(
         fun InjectableConfiguration.addParallaxComponentPool(preAllocate: Int = 0) {
             addPool(ParallaxComponent, preAllocate) { Parallax() }
             addLayerComponentPool(preAllocate)
-            addPlaneComponentPool(preAllocate)
         }
     }
 
@@ -199,7 +197,7 @@ class Parallax private constructor(
          */
         val position: Position = staticPositionComponent(),
         val rgba: Rgba = staticRgbaComponent()
-    ) : Poolable<Layer>() {
+    ) : PoolableComponents<Layer>() {
 
         fun init(from: Layer) {
             entity = from.entity
@@ -256,9 +254,10 @@ class Parallax private constructor(
         // Below lists are static and can be cloned by reference
         val attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
         val attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
-    ) : Poolable<Plane>() {
+    ) : Poolable<Plane> {
 
-        fun init(from: Plane) {
+        override fun init(from: Plane) {
+            // Copy all properties from the original Plane object
             entity = from.entity
             position.init(from.position)
             rgba.init(from.rgba)
@@ -268,40 +267,28 @@ class Parallax private constructor(
             attachedLayersFrontPositions.addAll(from.attachedLayersFrontPositions)
         }
 
-        fun cleanup() {
+        override fun cleanup() {
             entity = Entity.NONE
             position.cleanup()
             rgba.cleanup()
-            // Remove floats from lists
             linePositions.clear()
             attachedLayersRearPositions.clear()
             attachedLayersFrontPositions.clear()
         }
 
-        override fun type() = PlaneComponent
-
-        companion object {
-            val PlaneComponent = componentTypeOf<Plane>()
-
-            // Use this function to create a new instance of component data as val inside another component
-            fun staticPlaneComponent(): Plane = Plane()
-
-            // Use this function to get a new instance of a component from the pool and add it to an entity
-            fun World.PlaneComponent(config: Plane.() -> Unit ): Plane =
-            getPoolable(PlaneComponent).apply(config)
-
-            // Call this function in the fleks world configuration to create the component pool
-            fun InjectableConfiguration.addPlaneComponentPool(preAllocate: Int = 0) {
-                addPool(PlaneComponent, preAllocate) { Plane() }
-            }
+        override fun free() {
+            TODO("Check if needed - Free Plane component from pool")
+            cleanup()
+            pool.free(this)
         }
 
-        // Clone a new instance of the component from the pool
-        override fun World.clone(): Plane = getPoolable(PlaneComponent).apply { init(from = this@Plane ) }
+        companion object {
+            fun staticPlane(): Plane = Plane()
 
-        // Cleanup/Reset the component automatically when it is removed from an entity (and return it to the pool)
-        override fun World.cleanupComponent(entity: Entity) {
-            cleanup()
+            // Use this function to get a new instance of a component from the pool and add it to an entity
+            fun plane(config: Plane.() -> Unit ): Plane = pool.alloc().apply(config)
+
+            private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Plane() }
         }
     }
 }

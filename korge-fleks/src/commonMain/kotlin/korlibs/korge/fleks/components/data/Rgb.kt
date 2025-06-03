@@ -18,7 +18,7 @@ class Rgb private constructor(
     var r: Int = 0xff,
     var g: Int = 0xff,
     var b: Int = 0xff
-) : Poolable<Rgb>() {
+) : PoolableComponents<Rgb>() {
     override fun type() = RgbData
 
     companion object {

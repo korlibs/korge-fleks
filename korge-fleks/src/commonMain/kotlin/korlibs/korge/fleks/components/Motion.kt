@@ -24,7 +24,7 @@ class Motion private constructor(
     var velocityY: Float = 0f,
     var frictionX: Float = 0.82f,
     var frictionY: Float = 0.82f
-) : Poolable<Motion>() {
+) : PoolableComponents<Motion>() {
     // Init an existing component instance with data from another component
     fun init(from: Motion) {
         accelX = from.accelX

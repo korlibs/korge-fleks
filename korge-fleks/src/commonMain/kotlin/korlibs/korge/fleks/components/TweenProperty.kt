@@ -29,7 +29,7 @@ class TweenProperty private constructor(
     var duration: Float = 0f,                    // in seconds
     var timeProgress: Float = 0f,                // in seconds
     @Serializable(with = EasingAsString::class) var easing: Easing = Easing.LINEAR  // Changing function
-) : Poolable<TweenProperty>() {
+) : PoolableComponents<TweenProperty>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: TweenProperty) {

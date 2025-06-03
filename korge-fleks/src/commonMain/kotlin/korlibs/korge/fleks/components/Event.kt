@@ -21,7 +21,7 @@ class Event private constructor(
     var subscribe: Boolean = false,
     var event: Int = 0,
     var eventConfig: String = ""
-) : Poolable<Event>() {
+) : PoolableComponents<Event>() {
     override fun type() = EventComponent
 
     companion object {

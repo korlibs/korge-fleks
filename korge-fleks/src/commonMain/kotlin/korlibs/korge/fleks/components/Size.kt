@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 class Size private constructor(
     var width: Float = 0f,
     var height: Float = 0f,
-) : Poolable<Size>() {
+) : PoolableComponents<Size>() {
     override fun type() = SizeComponent
 
     companion object {
@@ -70,7 +70,7 @@ class Size private constructor(
 class SizeInt private constructor(
     var width: Int = 0,
     var height: Int = 0,
-) : Poolable<SizeInt>() {
+) : PoolableComponents<SizeInt>() {
     override fun type() = SizeIntComponent
 
     companion object {

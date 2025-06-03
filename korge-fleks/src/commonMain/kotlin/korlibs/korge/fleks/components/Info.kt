@@ -20,7 +20,7 @@ class Info private constructor(
 
     // internal
 //    var initialized: Boolean = false  -- TODO: remove this if really not needed anymore
-) : Poolable<Info>() {
+) : PoolableComponents<Info>() {
     override fun type(): ComponentType<Info> = InfoComponent
 
     companion object {

@@ -27,7 +27,7 @@ class TextField private constructor(
     var wordWrap: Boolean = true,
     @Serializable(with = HorizontalAlignAsDouble::class) var horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VerticalAlignAsDouble::class) var verticalAlign: VerticalAlign = VerticalAlign.TOP
-) : Poolable<TextField>() {
+) : PoolableComponents<TextField>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: TextField) {

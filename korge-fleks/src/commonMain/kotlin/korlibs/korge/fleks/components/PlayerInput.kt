@@ -17,7 +17,7 @@ class PlayerInput private constructor(
     var speed: Float = 0.03f,
     var xMoveStrength: Float = 0f,
     var yMoveStrength: Float = 0f
-) : Poolable<PlayerInput>() {
+) : PoolableComponents<PlayerInput>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: PlayerInput) {

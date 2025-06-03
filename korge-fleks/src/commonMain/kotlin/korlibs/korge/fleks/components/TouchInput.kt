@@ -19,7 +19,7 @@ class TouchInput private constructor(
     var entityConfig: String = "",
     var passPositionToEntity: Boolean = false,
     var continuousTouch: Boolean = false
-) : Poolable<TouchInput>() {
+) : PoolableComponents<TouchInput>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: TouchInput) {

@@ -12,7 +12,7 @@ import kotlinx.serialization.*
 class Point private constructor(
     var x: Float = 0f,
     var y: Float = 0f
-) : Poolable<Point>() {
+) : PoolableComponents<Point>() {
     fun init(from: Point) {
         x = from.x
         y = from.y

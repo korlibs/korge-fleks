@@ -24,7 +24,7 @@ class LevelMap private constructor(
     val layerNames: MutableList<String> = mutableListOf(),
 
     var levelChunks: ChunkArray2 = ChunkArray2.empty
-) : Poolable<LevelMap>() {
+) : PoolableComponents<LevelMap>() {
     override fun type() = LevelMapComponent
 
     companion object {

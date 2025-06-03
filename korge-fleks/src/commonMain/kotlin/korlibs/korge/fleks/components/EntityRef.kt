@@ -17,7 +17,7 @@ class EntityRef private constructor(
     var entity: Entity = Entity.NONE,
     // Configure what to do with the linked entity
     var moveWith: Boolean = true
-) : Poolable<EntityRef>() {
+) : PoolableComponents<EntityRef>() {
     override fun type() = EntityRefComponent
 
     companion object {

@@ -17,7 +17,7 @@ class EntityRefs private constructor(
     val entities: MutableList<Entity> = mutableListOf(),
     // Configure what to do with the linked entities
     var moveWith: Boolean = true
-) : Poolable<EntityRefs>() {
+) : PoolableComponents<EntityRefs>() {
     override fun type() = EntityRefsComponent
 
     companion object {

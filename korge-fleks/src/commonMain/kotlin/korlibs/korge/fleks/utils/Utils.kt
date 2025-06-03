@@ -80,10 +80,10 @@ fun MutableList<Entity>.init(from: List<Entity>) {
 }
 
 /**
- * Init function (deep copy) for [MutableList] of [Poolable] elements.
+ * Init function (deep copy) for [MutableList] of [PoolableComponents] elements.
  * Elements are taken from their respective pools by cloning them in the scope of the world where the pool was added.
  */
-fun <T> MutableList<Poolable<T>>.init(world: World, from: List<Poolable<T>>) {
+fun <T> MutableList<PoolableComponents<T>>.init(world: World, from: List<PoolableComponents<T>>) {
     from.forEach { item ->
         this.add(item.run { world.clone() } )
     }

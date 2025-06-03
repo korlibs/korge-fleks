@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("SpriteLayers")
 class SpriteLayers private constructor(
     val layerMap: MutableMap<String, SpriteLayer> = mutableMapOf()
-) : Poolable<SpriteLayers>() {
+) : PoolableComponents<SpriteLayers>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun World.init(from: SpriteLayers) {

@@ -24,7 +24,7 @@ class Spawner private constructor(
     // internal state
     var nextSpawnIn: Int = 0,
     var numberOfObjectsSpawned: Int = 0
-) : Poolable<Spawner>() {
+) : PoolableComponents<Spawner>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Spawner) {

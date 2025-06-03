@@ -30,7 +30,7 @@ class Collision private constructor(
     var justHit: Boolean = false,
     var isHit: Boolean = false,
     val hitPosition: Point = Point.value()
-) : Poolable<Collision>() {
+) : PoolableComponents<Collision>() {
 
     override fun type() = CollisionComponent
     companion object {

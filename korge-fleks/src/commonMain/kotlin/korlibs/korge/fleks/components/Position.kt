@@ -19,7 +19,7 @@ class Position private constructor(
     var y: Float = 0f,
     var offsetX: Float = 0f,
     var offsetY: Float = 0f
-) : Poolable<Position>() {
+) : PoolableComponents<Position>() {
     fun init(from: Position) {
         x = from.x
         y = from.y

@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Platformer")
 class Platformer private constructor(
     var onGround: Boolean = true
-) : Poolable<Platformer>() {
+) : PoolableComponents<Platformer>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Platformer) {
