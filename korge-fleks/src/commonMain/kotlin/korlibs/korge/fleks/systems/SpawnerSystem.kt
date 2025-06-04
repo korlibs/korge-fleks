@@ -59,7 +59,7 @@ class SpawnerSystem : IteratingSystem(
                     }
                     // Directly set position
                     newEntity.configure {
-                        it += world.positionComponent {
+                        it += positionComponent {
                             this.x = xx
                             this.y = yy
                         }

@@ -4,15 +4,15 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.tweenPropertyComponent
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPropertyComponent
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.RgbaAlpha
-import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.RgbaTint
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionX
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionY
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionOffsetX
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionOffsetY
 import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
+import korlibs.korge.fleks.components.TweenSequence.Companion.tweenSequenceComponent
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity
 import korlibs.korge.fleks.components.data.tweenSequence.Jump
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens
@@ -95,7 +95,7 @@ class TweenSequenceSystem : IteratingSystem(
 
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
-                    world.entity("SpawnNewTweenSequence") { it += world.TweenSequenceComponent { tweens = currentTween.tweens } }
+                    world.entity("SpawnNewTweenSequence") { it += tweenSequenceComponent { tweens = currentTween.tweens } }
                 }
                 is Jump -> {
                     // Currently we just have a statical branch jump without conditional check
@@ -110,7 +110,7 @@ class TweenSequenceSystem : IteratingSystem(
                         if (tween.delay != null && tween.delay!! > 0f) {
                             // Tween has its own delay -> spawn a new TweenSequence for it
                             world.entity("ParallelTween: ${tween::class.simpleName} for entity '${tween.target.id}'") {
-                                it += world.TweenSequenceComponent {
+                                it += tweenSequenceComponent {
 
                                     // TODO: Copy reference to tweens from parent TweenSequenceComponent
 //                                    tweens = listOf(
@@ -228,7 +228,7 @@ class TweenSequenceSystem : IteratingSystem(
     private fun createTweenPropertyComponent(componentProperty: TweenPropertyType, value: Any, change: Any = Unit) {
         currentTween.target.configure { animatedEntity ->
             animatedEntity.getOrAdd(componentProperty.type) {
-                world.TweenPropertyComponent(componentType = componentProperty.type) {
+                tweenPropertyComponent {
                     this.change = change
                     this.value = value
                     this.duration = currentTween.duration ?: currentParentTween.duration ?: 0f

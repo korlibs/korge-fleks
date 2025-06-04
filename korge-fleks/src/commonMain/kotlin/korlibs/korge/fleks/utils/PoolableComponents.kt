@@ -67,6 +67,52 @@ abstract class PoolableComponents<T> : Component<T> {
     }
 }
 
+abstract class PoolableComponent<T> : Component<T> {
+    open fun World.initComponent(entity: Entity) = Unit
+    open fun World.cleanupComponent(entity: Entity) = Unit
+
+    open fun World.initPrefabs(entity: Entity) = Unit
+    open fun World.cleanupPrefabs(entity: Entity) = Unit
+
+    /**
+     * This function clones the component from the pool and initializes it to contain
+     * the same data/properties as the original component. This feature is used to make snapshots on the fly.
+     */
+    abstract fun clone(): PoolableComponent<T>
+
+    /**
+     * The free function needs to be called if the component is not used anymore and should be freed.
+     * Normally, this is done in the onRemove function of the component. But SnapshotSerializerSystem will call
+     * this function directly to free the component when cleanup old snapshots.
+     */
+    abstract fun free()
+
+    override fun World.onAdd(entity: Entity) {
+        // Only run init function on components when the game is running and not when we load snapshots
+        val gameState = inject<GameStateManager>("GameStateManager")
+        if (gameState.gameRunning) {
+            initComponent(entity)
+        }
+        // Call init prefabs always
+        initPrefabs(entity)
+    }
+    /**
+     * Function that is called when the component is removed from an entity.
+     */
+    override fun World.onRemove(entity: Entity) {
+        // Call cleanup prefabs always
+        cleanupPrefabs(entity)
+        // Do not free the component if the game is not running - i.e. during the snapshot rewind / forward feature
+        val gameState = inject<GameStateManager>("GameStateManager")
+        if (gameState.gameRunning) {
+            // Call cleanup function to reset the component when requested by fleks world by calling onRemove
+            cleanupComponent(entity)
+            println("Freeing component")
+            free()
+        }
+    }
+}
+
 /**
  * Creates a new pool for the specified [PoolableComponents].
  *

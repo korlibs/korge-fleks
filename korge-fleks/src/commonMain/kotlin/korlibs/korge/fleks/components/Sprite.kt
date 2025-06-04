@@ -1,16 +1,13 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.image.format.*
+import korlibs.image.format.ImageAnimation
 import korlibs.image.format.ImageAnimation.Direction
-import korlibs.image.format.ImageAnimation.Direction.FORWARD
-import korlibs.image.format.ImageAnimation.Direction.REVERSE
-import korlibs.image.format.ImageAnimation.Direction.PING_PONG
-import korlibs.image.format.ImageAnimation.Direction.ONCE_FORWARD
-import korlibs.image.format.ImageAnimation.Direction.ONCE_REVERSE
-import korlibs.korge.fleks.assets.*
+import korlibs.image.format.ImageAnimation.Direction.*
+import korlibs.image.format.ImageFrame
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.utils.*
-import korlibs.time.*
+import korlibs.time.seconds
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -40,7 +37,7 @@ import kotlinx.serialization.Serializable
  * Other parameters should not be set directly. They are used internally by [SpriteSystem].
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("Sprite")
 class Sprite private constructor(
@@ -57,7 +54,7 @@ class Sprite private constructor(
     // internal, do not set directly
     var increment: Int = -2,                          // out of [-1, 0, 1]; will be added to frameIndex each new frame
     var nextFrameIn: Float = 0f                       // time in seconds until next frame of animation shall be shown
-) : PoolableComponents<Sprite>() {
+) : PoolableComponent<Sprite>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Sprite) {
@@ -95,21 +92,17 @@ class Sprite private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticSpriteComponent(config: Sprite.() -> Unit ): Sprite =
-            Sprite().apply(config)
+        Sprite().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun World.SpriteComponent(config: Sprite.() -> Unit ): Sprite =
-        getPoolable(SpriteComponent).apply(config)
+        fun spriteComponent(config: Sprite.() -> Unit ): Sprite =
+        pool.alloc().apply(config)
 
-        // Call this function in the fleks world configuration to create the component pool
-        fun InjectableConfiguration.addSpriteComponentPool(preAllocate: Int = 0) {
-            addPool(SpriteComponent, preAllocate) { Sprite() }
-        }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Sprite() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun World.clone(): Sprite =
-    getPoolable(SpriteComponent).apply { init(from = this@Sprite ) }
+    override fun clone(): Sprite = spriteComponent { init(from = this@Sprite ) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
@@ -127,8 +120,24 @@ class Sprite private constructor(
         //println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
     }
 
-    // Cleanup/Reset the component automatically when it is removed from an entity
-    override fun World.cleanupComponent(entity: Entity) { cleanup() }
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
+    override fun World.cleanupComponent(entity: Entity) {
+        cleanup()
+    }
+
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
+
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
+    }
 
     // Set frameIndex for starting animation
     fun setFrameIndex(assetStore: AssetStore) {
@@ -152,7 +161,6 @@ class Sprite private constructor(
             null -> error("SpriteAnimationFamily: direction shall not be null!")
         }
     }
-
 }
 
 fun AssetStore.getImageAnimation(name: String, animation: String? = null) : ImageAnimation {

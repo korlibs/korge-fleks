@@ -55,6 +55,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 //       world and not on the snapshot world! This is not what we want!
                 when (component) {
                     is PoolableComponents<*> -> componentsCopy.add(component.run { world.clone() })
+                    is PoolableComponent<*> -> componentsCopy.add(component.clone())
                     else -> {
                         println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from Poolable<T>!")
                     }
@@ -166,6 +167,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
             snapshot.components.forEach { component ->
                 when (component) {
                     is PoolableComponents<*> -> component.run { world.free() }
+                    is PoolableComponent<*> -> component.free()
                     else -> {}
                 }
             }

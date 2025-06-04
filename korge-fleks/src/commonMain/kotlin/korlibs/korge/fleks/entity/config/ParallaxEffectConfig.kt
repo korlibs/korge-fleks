@@ -2,8 +2,8 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
-import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
+import korlibs.korge.fleks.components.Motion.Companion.motionComponent
+import korlibs.korge.fleks.components.Parallax.Companion.parallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.entity.*
@@ -27,10 +27,10 @@ data class ParallaxEffectConfig(
                 x = this@ParallaxEffectConfig.x  // global position in screen coordinates
                 y = this@ParallaxEffectConfig.y
             }
-            it += MotionComponent {
+            it += motionComponent {
                 velocityX = -12f  // world units (16 pixels) per second
             }
-            it += ParallaxComponent {
+            it += parallaxComponent {
                 name = assetName
             }
             it += layerTag

@@ -2,10 +2,10 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
 import korlibs.image.text.*
-import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
+import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
-import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
-import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
+import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
+import korlibs.korge.fleks.components.TextField.Companion.textFieldComponent
 import korlibs.korge.fleks.components.data.Rgb
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
@@ -47,7 +47,7 @@ data class RichTextConfig(
                 x = this@RichTextConfig.x
                 y = this@RichTextConfig.y
             }
-            it += TextFieldComponent {
+            it += textFieldComponent {
                 text = this@RichTextConfig.text
                 fontName = this@RichTextConfig.fontName
                 textRangeEnd = this@RichTextConfig.textRangeEnd
@@ -56,10 +56,10 @@ data class RichTextConfig(
                 horizontalAlign = this@RichTextConfig.horizontalAlign
                 verticalAlign = this@RichTextConfig.verticalAlign
             }
-            it += LayerComponent {
+            it += layerComponent {
                 index = this@RichTextConfig.layerIndex
             }
-            it += RgbaComponent {
+            it += rgbaComponent {
                 rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = this@RichTextConfig.alpha
             }

@@ -37,7 +37,7 @@ class DebugRenderSystem(
             .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
-    private val position: Position = staticPositionComponent()
+    private val position: Position = staticPositionComponent {}
 
 
     override fun renderInternal(ctx: RenderContext) {

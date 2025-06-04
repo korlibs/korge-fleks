@@ -10,14 +10,14 @@ import kotlinx.serialization.Serializable
  * This component is used to ...
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("PlayerInput")
 class PlayerInput private constructor(
     var speed: Float = 0.03f,
     var xMoveStrength: Float = 0f,
     var yMoveStrength: Float = 0f
-) : PoolableComponents<PlayerInput>() {
+) : PoolableComponent<PlayerInput>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: PlayerInput) {
@@ -41,21 +41,17 @@ class PlayerInput private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticPlayerInputComponent(config: PlayerInput.() -> Unit ): PlayerInput =
-            PlayerInput().apply(config)
+        PlayerInput().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun World.PlayerInputComponent(config: PlayerInput.() -> Unit ): PlayerInput =
-            getPoolable(PlayerInputComponent).apply(config)
+        fun playerInputComponent(config: PlayerInput.() -> Unit ): PlayerInput =
+        pool.alloc().apply(config)
 
-        // Call this function in the fleks world configuration to create the component pool
-        fun InjectableConfiguration.addPlayerInputComponentPool(preAllocate: Int = 0) {
-            addPool(PlayerInputComponent, preAllocate) { PlayerInput() }
-        }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { PlayerInput() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun World.clone(): PlayerInput =
-        getPoolable(PlayerInputComponent).apply { init(from = this@PlayerInput ) }
+    override fun clone(): PlayerInput = playerInputComponent { init(from = this@PlayerInput ) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
@@ -72,5 +68,11 @@ class PlayerInput private constructor(
 
     // Cleanup/Reset an external prefab when the component is removed from an entity
     override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
     }
 }

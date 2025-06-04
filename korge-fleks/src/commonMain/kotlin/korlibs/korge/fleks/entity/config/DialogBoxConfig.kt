@@ -2,13 +2,13 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
 import korlibs.image.text.*
-import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
-import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
+import korlibs.korge.fleks.components.Layer.Companion.layerComponent
+import korlibs.korge.fleks.components.NinePatch.Companion.ninePatchComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
-import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
-import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
-import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
-import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
+import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
+import korlibs.korge.fleks.components.TextField.Companion.textFieldComponent
+import korlibs.korge.fleks.components.TweenSequence.Companion.tweenSequenceComponent
 import korlibs.korge.fleks.components.data.Rgb
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity.Companion.deleteEntity
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens.Companion.parallelTweens
@@ -108,13 +108,13 @@ data class DialogBoxConfig(
                 x = avatarInitialX
                 y = textBoxY - 24f
             }
-            it += SpriteComponent { name = avatarName }
-            it += RgbaComponent {
+            it += spriteComponent { name = avatarName }
+            it += rgbaComponent {
                 rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
-            it += LayerComponent { index = 102 }
+            it += layerComponent { index = 102 }
 //            it += RenderLayerTag.DEBUG
         }
         val textBox = entity {
@@ -123,17 +123,17 @@ data class DialogBoxConfig(
                 x = textBoxX
                 y = textBoxY
             }
-            it += NinePatchComponent {
+            it += ninePatchComponent {
                 name = textFieldName
                 width = textBoxWidth
                 height = textBoxHeight
             }
-            it += RgbaComponent {
+            it += rgbaComponent {
                 rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
-            it += LayerComponent { index = 100 }
+            it += layerComponent { index = 100 }
 //            it += RenderLayerTag.DEBUG
         }
         val textField = entity {
@@ -142,7 +142,7 @@ data class DialogBoxConfig(
                 x = textFieldX
                 y = textFieldY
             }
-            it += TextFieldComponent {
+            it += textFieldComponent {
                 text = text
                 fontName = textFontName
                 textRangeEnd = textRangeEnd
@@ -151,8 +151,8 @@ data class DialogBoxConfig(
                 horizontalAlign = textHAlign
                 verticalAlign = textVAlign
             }
-            it += LayerComponent { index = 101 }
-            it += RgbaComponent {
+            it += layerComponent { index = 101 }
+            it += rgbaComponent {
                 rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = 1f
             }
@@ -160,7 +160,7 @@ data class DialogBoxConfig(
 //            it += RenderLayerTag.DEBUG
         }
         entity.configure {
-            it += TweenSequenceComponent {
+            it += tweenSequenceComponent {
                 parallelTweens {
                     // Fade in of Dialog with avatar
                     tweenRgba { target = avatar; alpha = 1f; duration = 0.5f; easing = Easing.EASE_OUT_QUAD }

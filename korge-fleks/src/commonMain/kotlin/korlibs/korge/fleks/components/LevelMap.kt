@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
  *                   Example: ["Background", "Playfield", "Collisions"]
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("LevelMap")
 class LevelMap private constructor(
@@ -24,32 +24,63 @@ class LevelMap private constructor(
     val layerNames: MutableList<String> = mutableListOf(),
 
     var levelChunks: ChunkArray2 = ChunkArray2.empty
-) : PoolableComponents<LevelMap>() {
+) : PoolableComponent<LevelMap>() {
+    // Init an existing component data instance with data from another component
+    // This is used for component instances when they are part (val property) of another component
+    fun init(from: LevelMap) {
+        levelName = from.levelName
+        layerNames.addAll(from.layerNames)
+        // TODO: Refactor levelChunks data class to support poolable
+        levelChunks = from.levelChunks.clone()
+    }
+
+    // Cleanup the component data instance manually
+    // This is used for component instances when they are part (val property) of another component
+    fun cleanup() {
+        // level name will be set on initialization of the component
+        layerNames.clear()  // Make list empty for reuse
+        levelChunks = ChunkArray2.empty
+    }
+
     override fun type() = LevelMapComponent
 
     companion object {
         val LevelMapComponent = componentTypeOf<LevelMap>()
 
-        fun World.LevelMapComponent(config: LevelMap.() -> Unit ): LevelMap =
-            getPoolable(LevelMapComponent).apply { config() /*; println("Created: LevelMap '$num'")*/ }
+        // Use this function to create a new instance of component data as val inside another component
+        fun staticLevelMapComponent(config: LevelMap.() -> Unit ): LevelMap =
+        LevelMap().apply(config)
 
-        fun InjectableConfiguration.addLevelMapComponentPool(preAllocate: Int = 0) {
-            addPool(LevelMapComponent, preAllocate) { LevelMap(/* num = it */) }
-        }
+        // Use this function to get a new instance of a component from the pool and add it to an entity
+        fun levelMapComponent(config: LevelMap.() -> Unit ): LevelMap =
+        pool.alloc().apply(config)
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { LevelMap() }
     }
 
-    override fun World.clone(): LevelMap =
-        getPoolable(LevelMapComponent).apply {
-            levelName = this@LevelMap.levelName
-            layerNames.init(from = this@LevelMap.layerNames)
-            levelChunks = this@LevelMap.levelChunks.clone()
-            //println("Cloned: LevelMap '$num' from '${this@LevelMap.num}'")
-        }
+    // Clone a new instance of the component from the pool
+    override fun clone(): LevelMap = levelMapComponent { init(from = this@LevelMap ) }
 
+    // Initialize the component automatically when it is added to an entity
+    override fun World.initComponent(entity: Entity) {
+    }
+
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
-        // level name will be set on initialization of the component
-        layerNames.clear()  // Make list empty for reuse
-        levelChunks = ChunkArray2.empty
-        //println("Reset: LevelMap '$num'")
+        cleanup()
+    }
+
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
+
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
     }
 }

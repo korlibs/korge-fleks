@@ -2,12 +2,12 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
 import korlibs.image.format.*
-import korlibs.korge.fleks.components.Info.Companion.InfoComponent
-import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
-import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
-import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
-import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
-import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
+import korlibs.korge.fleks.components.Info.Companion.infoComponent
+import korlibs.korge.fleks.components.Layer.Companion.layerComponent
+import korlibs.korge.fleks.components.Motion.Companion.motionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
+import korlibs.korge.fleks.components.TweenSequence.Companion.tweenSequenceComponent
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity.Companion.deleteEntity
 import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba.Companion.tweenRgba
 import korlibs.korge.fleks.entity.*
@@ -45,8 +45,8 @@ data class FireAndDustEffectConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             if (screenCoordinates) it += ScreenCoordinatesTag
-            it += InfoComponent { name = this@FireAndDustEffectConfig.name }
-            it += MotionComponent {
+            it += infoComponent { name = this@FireAndDustEffectConfig.name }
+            it += motionComponent {
                 velocityX =
                     if (velocityVariationX != 0f) this@FireAndDustEffectConfig.velocityX + (-velocityVariationX..velocityVariationX).random()
                     else this@FireAndDustEffectConfig.velocityX
@@ -54,7 +54,7 @@ data class FireAndDustEffectConfig(
                     if (velocityVariationY != 0f) this@FireAndDustEffectConfig.velocityY + (-velocityVariationY..velocityVariationY).random()
                     else this@FireAndDustEffectConfig.velocityY
             }
-            it += SpriteComponent {
+            it += spriteComponent {
                 name = assetName
                 anchorX = offsetX
                 anchorY = offsetY
@@ -63,16 +63,16 @@ data class FireAndDustEffectConfig(
                 direction = ImageAnimation.Direction.ONCE_FORWARD
                 destroyOnAnimationFinished = true
             }
-            it += RgbaComponent { alpha = 1f }
+            it += rgbaComponent { alpha = 1f }
             if (fadeOutDuration > 0f) {
-                it += TweenSequenceComponent {
+                it += tweenSequenceComponent {
                     // Fade out effect objects
                     tweenRgba { target = it; alpha = 0f; duration = fadeOutDuration }
                     deleteEntity { target = it }
                 }
             }
             it += renderLayerTag
-            if (layerIndex != null) it += LayerComponent { index = this@FireAndDustEffectConfig.layerIndex }
+            if (layerIndex != null) it += layerComponent { index = this@FireAndDustEffectConfig.layerIndex }
 //            entity += RenderLayerTag.DEBUG
         }
         return entity

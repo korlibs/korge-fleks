@@ -46,7 +46,7 @@ class ObjectRenderSystem(
         .any(PositionComponent, LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
-    private val position: Position = staticPositionComponent()
+    private val position: Position = staticPositionComponent {}
 
     @OptIn(KorgeExperimental::class)
     override fun renderInternal(ctx: RenderContext) {

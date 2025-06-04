@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  * This component holds all needed details to animate properties of components of entities.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("TweenSequence")
 class TweenSequence private constructor(
@@ -24,7 +24,7 @@ class TweenSequence private constructor(
     var timeProgress: Float = 0f,    // Elapsed time for the object to be animated
     var waitTime: Float = 0f,
     var executed: Boolean = false
-) : PoolableComponents<TweenSequence>(), TweenListBase {
+) : PoolableComponent<TweenSequence>(), TweenListBase {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: TweenSequence) {
@@ -50,7 +50,7 @@ class TweenSequence private constructor(
     }
 
     // Usually not needed to be called directly - cleanup will be called by component life cycle of Korge-fleks
-    override fun freeRecursive() { cleanup() }
+    override fun freeRecursive() { }
 
     override fun type() = TweenSequenceComponent
 
@@ -62,18 +62,14 @@ class TweenSequence private constructor(
             TweenSequence().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun World.TweenSequenceComponent(config: TweenSequence.() -> Unit ): TweenSequence =
-            getPoolable(TweenSequenceComponent).apply(config)
+        fun tweenSequenceComponent(config: TweenSequence.() -> Unit ): TweenSequence =
+            pool.alloc().apply(config)
 
-        // Call this function in the fleks world configuration to create the component pool
-        fun InjectableConfiguration.addTweenSequenceComponentPool(preAllocate: Int = 0) {
-            addPool(TweenSequenceComponent, preAllocate) { TweenSequence() }
-        }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { TweenSequence() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun World.clone(): TweenSequence =
-        getPoolable(TweenSequenceComponent).apply { init(from = this@TweenSequence ) }
+    override fun clone(): TweenSequence = tweenSequenceComponent { init(from = this@TweenSequence ) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
@@ -84,5 +80,19 @@ class TweenSequence private constructor(
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
         cleanup()
+    }
+
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
+
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
     }
 }

@@ -32,7 +32,7 @@ class FastSpriteRenderSystem(
 ) : View() {
     private val family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
-    private val position: Position = staticPositionComponent()
+    private val position: Position = staticPositionComponent {}
 
     override fun renderInternal(ctx: RenderContext) {
         val camera: Entity = world.getMainCamera()

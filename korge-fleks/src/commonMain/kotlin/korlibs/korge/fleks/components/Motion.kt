@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  * @param velocityY in "world units" per delta time
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("Motion")
 class Motion private constructor(
@@ -24,8 +24,9 @@ class Motion private constructor(
     var velocityY: Float = 0f,
     var frictionX: Float = 0.82f,
     var frictionY: Float = 0.82f
-) : PoolableComponents<Motion>() {
-    // Init an existing component instance with data from another component
+) : PoolableComponent<Motion>() {
+    // Init an existing component data instance with data from another component
+    // This is used for component instances when they are part (val property) of another component
     fun init(from: Motion) {
         accelX = from.accelX
         accelY = from.accelY
@@ -35,7 +36,8 @@ class Motion private constructor(
         frictionY = from.frictionY
     }
 
-    // Cleanup the component instance manually
+    // Cleanup the component data instance manually
+    // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
         accelX = 0f
         accelY = 0f
@@ -50,30 +52,40 @@ class Motion private constructor(
     companion object {
         val MotionComponent = componentTypeOf<Motion>()
 
-        // Use this function to create a new instance as val inside another component
+        // Use this function to create a new instance of component data as val inside another component
         fun staticMotionComponent(config: Motion.() -> Unit ): Motion =
-            Motion().apply(config)
+        Motion().apply(config)
 
-        // Use this function to get a new instance from the pool
-        fun World.MotionComponent(config: Motion.() -> Unit ): Motion =
-        getPoolable(MotionComponent).apply(config)
+        // Use this function to get a new instance of a component from the pool and add it to an entity
+        fun motionComponent(config: Motion.() -> Unit ): Motion =
+        pool.alloc().apply(config)
 
-        // Call this function in the fleks world configuration to create the component pool
-        fun InjectableConfiguration.addMotionComponentPool(preAllocate: Int = 0) {
-            addPool(MotionComponent, preAllocate) { Motion() }
-        }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Motion() }
     }
 
-    // Create a new instance of the component from the pool
-    override fun World.clone(): Motion =
-    getPoolable(MotionComponent).apply { init(from = this@Motion ) }
+    // Clone a new instance of the component from the pool
+    override fun clone(): Motion = motionComponent { init(from = this@Motion ) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
     }
 
-    // Cleanup the component automatically when it is removed from an entity
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
         cleanup()
+    }
+
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
+
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
     }
 }

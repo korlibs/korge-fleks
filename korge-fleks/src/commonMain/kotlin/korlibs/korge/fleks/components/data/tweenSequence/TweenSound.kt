@@ -19,7 +19,7 @@ class TweenSound private constructor(
     override var delay: Float? = null,
     override var duration: Float? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null
-) : TweenBase {
+) : TweenBase /*, Poolable<TweenSound>*/ {
     // Init an existing tween data instance with data from another tween
     fun init(from: TweenSound) {
         startTrigger = from.startTrigger

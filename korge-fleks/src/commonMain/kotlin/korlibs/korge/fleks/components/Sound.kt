@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
  * TODO: Remove Sound component from entity when it has finished playing
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("Sound")
 class Sound private constructor(
@@ -28,7 +28,7 @@ class Sound private constructor(
     var volume: Double = 1.0,
     var isPlaying: Boolean = false,
     var loop: Boolean = false  // TODO not yet implemented
-) : PoolableComponents<Sound>() {
+) : PoolableComponent<Sound>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Sound) {
@@ -60,39 +60,38 @@ class Sound private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticSoundComponent(config: Sound.() -> Unit ): Sound =
-            Sound().apply(config)
+        Sound().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun World.SoundComponent(config: Sound.() -> Unit ): Sound =
-        getPoolable(SoundComponent).apply(config)
+        fun soundComponent(config: Sound.() -> Unit ): Sound =
+        pool.alloc().apply(config)
 
-        // Call this function in the fleks world configuration to create the component pool
-        fun InjectableConfiguration.addSoundComponentPool(preAllocate: Int = 0) {
-            addPool(SoundComponent, preAllocate) { Sound() }
-        }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Sound() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun World.clone(): Sound =
-    getPoolable(SoundComponent).apply { init(from = this@Sound ) }
+    override fun clone(): Sound = soundComponent { init(from = this@Sound ) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
-        // TODO - check if needed
     }
 
-    // Cleanup/Reset the component automatically when it is removed from an entity
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
         cleanup()
     }
 
     // Initialize an external prefab when the component is added to an entity
     override fun World.initPrefabs(entity: Entity) {
-        // TODO - check if needed
     }
 
     // Cleanup/Reset an external prefab when the component is removed from an entity
     override fun World.cleanupPrefabs(entity: Entity) {
-        // TODO - check if needed
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
     }
 }

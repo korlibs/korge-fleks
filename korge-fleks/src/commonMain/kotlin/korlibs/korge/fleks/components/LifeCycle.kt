@@ -10,35 +10,63 @@ import kotlinx.serialization.Serializable
  * This component is used to add health to a game object.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("LifeCycle")
 class LifeCycle private constructor(
     var healthCounter: Int = 100
-) : PoolableComponents<LifeCycle>() {
+) : PoolableComponent<LifeCycle>() {
+    // Init an existing component data instance with data from another component
+    // This is used for component instances when they are part (val property) of another component
+    fun init(from: LifeCycle) {
+        healthCounter = from.healthCounter
+    }
+
+    // Cleanup the component data instance manually
+    // This is used for component instances when they are part (val property) of another component
+    fun cleanup() {
+        healthCounter = 100
+    }
+
     override fun type() = LifeCycleComponent
 
     companion object {
         val LifeCycleComponent = componentTypeOf<LifeCycle>()
 
-        // Use this function to get a new instance from the pool
-        fun World.LifeCycleComponent(config: LifeCycle.() -> Unit ): LifeCycle =
-        getPoolable(LifeCycleComponent).apply(config)
+        // Use this function to create a new instance of component data as val inside another component
+        fun staticLifeCycleComponent(config: LifeCycle.() -> Unit ): LifeCycle =
+        LifeCycle().apply(config)
 
-        // Call this function in the fleks world configuration to create the component pool
-        fun InjectableConfiguration.addLifeCycleComponentPool(preAllocate: Int = 0) {
-            addPool(LifeCycleComponent, preAllocate) { LifeCycle() }
-        }
+        // Use this function to get a new instance of a component from the pool and add it to an entity
+        fun lifeCycleComponent(config: LifeCycle.() -> Unit ): LifeCycle =
+        pool.alloc().apply(config)
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { LifeCycle() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun World.clone(): LifeCycle =
-    getPoolable(LifeCycleComponent).apply {
-        healthCounter = this@LifeCycle.healthCounter
+    override fun clone(): LifeCycle = lifeCycleComponent { init(from = this@LifeCycle ) }
+
+    // Initialize the component automatically when it is added to an entity
+    override fun World.initComponent(entity: Entity) {
     }
 
-    // Cleanup the component automatically when it is removed from an entity
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
-        healthCounter = 100
+        cleanup()
+    }
+
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
+
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
     }
 }

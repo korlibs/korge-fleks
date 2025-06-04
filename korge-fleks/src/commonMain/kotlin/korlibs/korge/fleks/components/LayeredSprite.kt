@@ -1,20 +1,17 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.image.format.ImageAnimation.Direction.FORWARD
-import korlibs.image.format.ImageAnimation.Direction.REVERSE
-import korlibs.image.format.ImageAnimation.Direction.PING_PONG
-import korlibs.image.format.ImageAnimation.Direction.ONCE_FORWARD
-import korlibs.image.format.ImageAnimation.Direction.ONCE_REVERSE
 import korlibs.image.format.ImageAnimation.Direction
-import korlibs.korge.fleks.assets.*
+import korlibs.image.format.ImageAnimation.Direction.*
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
-import korlibs.korge.fleks.components.data.*
-import korlibs.korge.fleks.components.data.TextureRef.Companion.TextureRefData
-import korlibs.korge.fleks.components.data.TextureRef.Companion.cleanup
+import korlibs.korge.fleks.components.data.TextureRef
+import korlibs.korge.fleks.components.data.TextureRef.Companion.free
 import korlibs.korge.fleks.components.data.TextureRef.Companion.init
+import korlibs.korge.fleks.components.data.TextureRef.Companion.textureRef
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.entity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -26,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param layerList is used to render all layers in a specific order.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("LayeredSprite")
 class LayeredSprite private constructor(
@@ -47,47 +44,74 @@ class LayeredSprite private constructor(
     // internally used for rendering and tween animation of texture layer position and rgba (alpha channel)
     val layerList: MutableList<TextureRef> = mutableListOf(),
     val layerMap: MutableMap<String, TextureRef> = mutableMapOf()
-) : PoolableComponents<LayeredSprite>() {
+) : PoolableComponent<LayeredSprite>() {
+    // Init an existing component data instance with data from another component
+    // This is used for component instances when they are part (val property) of another component
+    fun init(from: LayeredSprite) {
+        name = from.name
+        anchorX = from.anchorX
+        anchorY = from.anchorY
+        animation = from.animation
+        frameIndex = from.frameIndex
+        running = from.running
+        direction = from.direction
+        destroyOnAnimationFinished = from.destroyOnAnimationFinished
+
+        // internal
+        increment = from.increment
+        nextFrameIn = from.nextFrameIn
+
+        // Perform deep copy of all texture layer objects in the list
+        layerList.init(from.layerList)
+        // Map layers from list by name into the map (do not copy but use references to the same objects)
+        layerList.forEach { layer ->
+            layerMap[layer.name] = layer
+        }
+    }
+
+    // Cleanup the component data instance manually
+    // This is used for component instances when they are part (val property) of another component
+    fun cleanup() {
+        name = ""
+        anchorX = 0f
+        anchorY = 0f
+        animation = null
+        frameIndex = 0
+        running = false
+        direction = null
+        destroyOnAnimationFinished = false
+
+        increment = -2
+        nextFrameIn = 0f
+
+        // Put back all layers TextureRef objects to the pool
+        layerList.free()
+        // We only need to clear the map since the objects were already put back to the pool by above list cleanup
+        layerMap.clear()
+    }
+
     override fun type() = LayeredSpriteComponent
 
     companion object {
         val LayeredSpriteComponent = componentTypeOf<LayeredSprite>()
 
-        fun World.LayeredSpriteComponent(config: LayeredSprite.() -> Unit ): LayeredSprite =
-            getPoolable(LayeredSpriteComponent).apply { config() }
+        // Use this function to create a new instance of component data as val inside another component
+        fun staticLayeredSpriteComponent(config: LayeredSprite.() -> Unit ): LayeredSprite =
+        LayeredSprite().apply(config)
 
-        fun InjectableConfiguration.addLayeredSpriteComponentPool(preAllocate: Int = 0) {
-            addPool(LayeredSpriteComponent, preAllocate) { LayeredSprite() }
-        }
+        // Use this function to get a new instance of a component from the pool and add it to an entity
+        fun layeredSpriteComponent(config: LayeredSprite.() -> Unit ): LayeredSprite =
+        pool.alloc().apply(config)
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { LayeredSprite() }
     }
 
-    override fun World.clone(): LayeredSprite =
-        getPoolable(LayeredSpriteComponent).apply {
-            name = this@LayeredSprite.name
-            anchorX = this@LayeredSprite.anchorX
-            anchorY = this@LayeredSprite.anchorY
-            animation = this@LayeredSprite.animation
-            frameIndex = this@LayeredSprite.frameIndex
-            running = this@LayeredSprite.running
-            direction = this@LayeredSprite.direction
-            destroyOnAnimationFinished = this@LayeredSprite.destroyOnAnimationFinished
+    // Clone a new instance of the component from the pool
+    override fun clone(): LayeredSprite = layeredSpriteComponent { init(from = this@LayeredSprite ) }
 
-            // internal
-            increment = this@LayeredSprite.increment
-            nextFrameIn = this@LayeredSprite.nextFrameIn
-
-            // Perform deep copy of all texture layer objects in the list
-            layerList.init(world = this@clone, from = this@LayeredSprite.layerList)
-            // Map layers from list by name into the map (do not copy but use references to the same objects)
-            layerList.forEach { layer ->
-                layerMap[layer.name] = layer
-            }
-        }
-
-    /**
-     * Initialize animation properties with data from [AssetStore].
-     */
+    // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
+        // Initialize animation properties with data from [AssetStore].
         val assetStore: AssetStore = this.inject(name = "AssetStore")
 
         // Set direction from Aseprite if not specified in the component
@@ -101,10 +125,8 @@ class LayeredSprite private constructor(
         // populate map and list of all layers of the sprite textures
         assetStore.getImageAnimation(name, animation).firstFrame.layerData.forEach { data ->
             if (data.layer.name != null) {
-                val layer = this.run {
-                    // Get a new instance from the TextureRefData pool
-                    TextureRefData { name = data.layer.name!! }
-                }
+                // Get a new instance from the TextureRefData pool
+                val layer = textureRef { name = data.layer.name!! }
                 // Store reference to same layer data object in list and map
                 layerMap[data.layer.name!!] = layer
                 layerList.add(layer)
@@ -123,23 +145,23 @@ class LayeredSprite private constructor(
         //println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
     }
 
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
-        name = ""
-        anchorX = 0f
-        anchorY = 0f
-        animation = null
-        frameIndex = 0
-        running = false
-        direction = null
-        destroyOnAnimationFinished = false
+        cleanup()
+    }
 
-        increment = -2
-        nextFrameIn = 0f
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
 
-        // Put back all layers TextureRef objects to the pool
-        layerList.cleanup(world = this)
-        // We only need to clear the map since the objects were already put back to the pool by above list cleanup
-        layerMap.clear()
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
     }
 
     // Set frameIndex for starting animation
@@ -170,6 +192,8 @@ class LayeredSprite private constructor(
      * go through each layer entity and copy the Position and RgbaComponent from the layer lists.
      */
     fun World.updateLayerEntities() {
+        // Cleanup the layerMap to put the TextureRef object back to the pool
+        layerMap.free()
         // Overwrite existing components with those from the layer config list
         layerList.forEach { layer ->
             layer.entity.configure {
@@ -180,8 +204,6 @@ class LayeredSprite private constructor(
                 it += layer.position
                 it += layer.rgba
             }
-            // Cleanup the layerMap to put the TextureRef object back to the pool
-            layerMap.cleanup(world = this)
             layerMap[layer.name] = layer
         }
     }

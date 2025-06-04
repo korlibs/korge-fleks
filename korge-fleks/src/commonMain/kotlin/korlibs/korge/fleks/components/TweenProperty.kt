@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
  * In case of single switch: This value is set when easing > 0.5
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("TweenProperty")
 class TweenProperty private constructor(
@@ -29,7 +29,7 @@ class TweenProperty private constructor(
     var duration: Float = 0f,                    // in seconds
     var timeProgress: Float = 0f,                // in seconds
     @Serializable(with = EasingAsString::class) var easing: Easing = Easing.LINEAR  // Changing function
-) : PoolableComponents<TweenProperty>() {
+) : PoolableComponent<TweenProperty>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: TweenProperty) {
@@ -55,6 +55,7 @@ class TweenProperty private constructor(
     override fun type(): ComponentType<TweenProperty> = property.type
 
     companion object {
+//        val TweenPropertyComponent = componentTypeOf<TweenProperty>()
         // TODO update unit test for this mapping from enum to here
         val TweenPositionOffsetXComponent = TweenPropertyType.PositionOffsetX.type
         val TweenPositionOffsetYComponent = TweenPropertyType.PositionOffsetY.type
@@ -104,58 +105,45 @@ class TweenProperty private constructor(
             TweenProperty().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun World.TweenPropertyComponent(componentType: ComponentType<TweenProperty>, config: TweenProperty.() -> Unit ): TweenProperty =
-            // All component types share the same pool - so just use the first component type to get it
-            getPoolable(componentType).apply(config)
-        // TODO: Check if we should use generic function above or specific one below (need to be created for each component type)
-        fun World.TweenPositionOffsetXComponent(config: TweenProperty.() -> Unit ): TweenProperty =
-            getPoolable(TweenPositionOffsetXComponent).apply(config)
+        fun tweenPropertyComponent(config: TweenProperty.() -> Unit ): TweenProperty =
+            pool.alloc().apply(config)
 
-        // Call this function in the fleks world configuration to create the component pool
-        fun InjectableConfiguration.addTweenPropertyComponentPools(preAllocate: Int = 0) {
-            // Add only one common pool for all TweenProperty components - they share the same data
-            val pool = Pool(preAllocate) { TweenProperty() }
-            addPool(TweenPositionOffsetXComponent, pool)
-            addPool(TweenPositionOffsetYComponent, pool)
-            addPool(TweenPositionXComponent, pool)
-            addPool(TweenPositionYComponent, pool)
-            addPool(TweenMotionVelocityXComponent, pool)
-            addPool(TweenRgbaAlphaComponent, pool)
-            addPool(TweenRgbaTintComponent, pool)
-            addPool(TweenSpawnerIntervalComponent, pool)
-            addPool(TweenSpawnerNumberOfObjectsComponent, pool)
-            addPool(TweenSpawnerPositionVariationComponent, pool)
-            addPool(TweenSpawnerTimeVariationComponent, pool)
-            addPool(TweenSpriteAnimationComponent, pool)
-            addPool(TweenSpriteDirectionComponent, pool)
-            addPool(TweenSpriteDestroyOnPlayingFinishedComponent, pool)
-            addPool(TweenSpriteRunningComponent, pool)
-//            addPool(TweenLifeCycleHealthCounter, pool)
-            addPool(TweenSwitchLayerVisibilityOnVarianceComponent, pool)
-            addPool(TweenSwitchLayerVisibilityOffVarianceComponent, pool)
-            addPool(TweenSoundStartTriggerComponent, pool)
-            addPool(TweenSoundStopTriggerComponent, pool)
-            addPool(TweenSoundPositionComponent, pool)
-            addPool(TweenSoundVolumeComponent, pool)
-//            addPool(TweenNoisyMoveX, pool)
-//            addPool(TweenNoisyMoveY, pool)
-            addPool(TweenTextFieldTextComponent, pool)
-            addPool(TweenTextFieldTextRangeStartComponent, pool)
-            addPool(TweenTextFieldTextRangeEndComponent, pool)
-            addPool(TweenEventPublishComponent, pool)
-            addPool(TweenEventResetComponent, pool)
-            addPool(TweenEventSubscribeComponent, pool)
-            addPool(TweenTouchInputEnableComponent, pool)
-        }
+//        fun tweenPropertyComponent(componentType: ComponentType<TweenProperty>, config: TweenProperty.() -> Unit ): TweenProperty =
+//            // All component types share the same pool - so just use the first component type to get it
+//            getPoolable(componentType).apply(config)
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { TweenProperty() }
+
+        // TODO: Check if we should use generic function above or specific one below (need to be created for each component type)
+        fun tweenPositionOffsetXComponent(config: TweenProperty.() -> Unit ): TweenProperty =
+            pool.alloc().apply(config)
     }
 
     // Clone a new instance of the component from the pool
-    override fun World.clone(): TweenProperty =
-        // All component types share the same pool - so just use the first component type to get it
-        getPoolable(TweenPositionOffsetXComponent).apply { init(from = this@TweenProperty ) }
+    override fun clone(): TweenProperty = tweenPropertyComponent { init(from = this@TweenProperty ) }
+
+    // Initialize the component automatically when it is added to an entity
+    override fun World.initComponent(entity: Entity) {
+    }
 
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
-    override fun World.cleanupComponent(entity: Entity) { cleanup() }
+    override fun World.cleanupComponent(entity: Entity) {
+        cleanup()
+    }
+
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
+
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
+    }
 
     /**
      * All final [TweenProperty] names are organized in this enum. This is done to easily serialize the

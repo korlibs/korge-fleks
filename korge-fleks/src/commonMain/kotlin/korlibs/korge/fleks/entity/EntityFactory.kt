@@ -2,8 +2,7 @@ package korlibs.korge.fleks.entity
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.Info.Companion.InfoComponent
+import korlibs.korge.fleks.components.Info.Companion.infoComponent
 import korlibs.korge.fleks.utils.*
 
 
@@ -48,7 +47,7 @@ object EntityFactory {
         with (world) {
             // Make sure we have entity with InfoComponent for better traceability
             val baseEntity = if (entity == Entity.NONE) entity(name)
-            else entity.apply { configure { it += InfoComponent { this.name = name } } }
+            else entity.apply { configure { it += infoComponent { this.name = name } } }
 
             val entityConfig = entityConfigs[name]
             return if (entityConfig != null) {
