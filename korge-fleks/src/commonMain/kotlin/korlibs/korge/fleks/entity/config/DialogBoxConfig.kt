@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
+import korlibs.image.color.Colors
 import korlibs.image.text.*
 import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.NinePatch.Companion.ninePatchComponent
@@ -9,7 +10,6 @@ import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
 import korlibs.korge.fleks.components.TextField.Companion.textFieldComponent
 import korlibs.korge.fleks.components.TweenSequence.Companion.tweenSequenceComponent
-import korlibs.korge.fleks.components.data.Rgb
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity.Companion.deleteEntity
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens.Companion.parallelTweens
 import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition.Companion.tweenPosition
@@ -39,7 +39,7 @@ data class DialogBoxConfig(
     private val numberOfLines: Int,  // TODO get this from placed text
 
     // Color and alpha channel of text and graphics
-    private val tint: Rgb = Rgb.WHITE,
+    private val tint: Int = Colors.WHITE.value,
     private val alpha: Float = 0f,
 
     // Avatar
@@ -110,7 +110,7 @@ data class DialogBoxConfig(
             }
             it += spriteComponent { name = avatarName }
             it += rgbaComponent {
-                rgba.withRGB(tint.r, tint.g, tint.b)
+                rgba.withRGB(tint)
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
@@ -129,7 +129,7 @@ data class DialogBoxConfig(
                 height = textBoxHeight
             }
             it += rgbaComponent {
-                rgba.withRGB(tint.r, tint.g, tint.b)
+                rgba.withRGB(tint)
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
@@ -153,7 +153,7 @@ data class DialogBoxConfig(
             }
             it += layerComponent { index = 101 }
             it += rgbaComponent {
-                rgba.withRGB(tint.r, tint.g, tint.b)
+                rgba.withRGB(tint)
                 alpha = 1f
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS

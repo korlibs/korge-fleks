@@ -2,9 +2,13 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.ChunkArray2
+import korlibs.korge.fleks.assets.WorldData
+import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
+import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 
 /**

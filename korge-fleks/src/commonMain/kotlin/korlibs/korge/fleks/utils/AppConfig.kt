@@ -47,7 +47,15 @@ object AppConfig {
 
     var deltaPerFrame = 1.0
 
+    // Config used by collison system
     var GRID_CELL_SIZE = 16f
 
+    /**
+     * Any movement greater than this value will increase the number of steps checked between movement.
+     * The more steps will break down the movement into smaller pieces to avoid skipping grid collissions.
+     */
+    var maxGridMovementPercent: Float = 0.33f
+
+    // Used for component and data object pool
     const val POOL_PREALLOCATE = 1024
 }
