@@ -5,7 +5,7 @@ import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IntervalSystem
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
-import korlibs.korge.fleks.components.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.tags.RenderLayerTag.MAIN_LEVELMAP
 import korlibs.korge.fleks.utils.createAndConfigureEntity
 import korlibs.korge.fleks.utils.getMainCamera

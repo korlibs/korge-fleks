@@ -6,7 +6,7 @@ import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
-import korlibs.korge.fleks.components.MotionComponent
+import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
 import kotlin.math.abs

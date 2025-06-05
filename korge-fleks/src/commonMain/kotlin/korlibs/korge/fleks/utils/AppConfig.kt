@@ -48,4 +48,6 @@ object AppConfig {
     var deltaPerFrame = 1.0
 
     var GRID_CELL_SIZE = 16f
+
+    const val POOL_PREALLOCATE = 1024
 }

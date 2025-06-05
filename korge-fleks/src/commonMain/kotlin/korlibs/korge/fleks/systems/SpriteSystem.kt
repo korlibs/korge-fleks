@@ -4,7 +4,8 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
+import korlibs.korge.fleks.components.getImageAnimation
 import korlibs.math.*
 import korlibs.time.*
 

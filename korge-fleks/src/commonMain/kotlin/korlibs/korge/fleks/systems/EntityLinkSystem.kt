@@ -1,24 +1,26 @@
 package korlibs.korge.fleks.systems
 
-import korlibs.korge.fleks.components.EntityLinkComponent
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.EntityRef.Companion.EntityRefComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 
 
 class EntityLinkSystem  : IteratingSystem(
-    family = family { all(EntityLinkComponent).any(EntityLinkComponent, PositionComponent) },
+    family = family { all(EntityRefComponent).any(EntityRefComponent, PositionComponent) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
-        val (linkedEntity, moveWith) = entity[EntityLinkComponent]
+        val entityLink = entity[EntityRefComponent]
+        val entityRefComponent = entity[EntityRefComponent]
 
-        if (moveWith) {
-            if (entity has PositionComponent && linkedEntity has PositionComponent) {
+        if (entityRefComponent.moveWith) {
+            if (entity has PositionComponent && entityRefComponent.entity has PositionComponent) {
                 val positionComponent = entity[PositionComponent]
-                val (x, y) = linkedEntity[PositionComponent]
-                positionComponent.x = x
-                positionComponent.y = y
+                // TODO: Check how we solve this by just using Entity class
+                val linkedPositionComponent = entityLink.entity[PositionComponent]
+                positionComponent.x = linkedPositionComponent.x
+                positionComponent.y = linkedPositionComponent.y
             }
         }
     }

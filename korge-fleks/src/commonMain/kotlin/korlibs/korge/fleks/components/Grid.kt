@@ -1,0 +1,111 @@
+package korlibs.korge.fleks.components
+
+import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.utils.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+
+/**
+ * This component is used to ...
+ *
+ * Author's hint: When adding new properties to the component, make sure to reset them in the
+ *                [cleanup] function and initialize them in the [init] function.
+ */
+@Serializable @SerialName("Grid")
+class Grid private constructor(
+) : PoolableComponent<Grid>() {
+    // Init an existing component data instance with data from another component
+    // This is used for component instances when they are part (val property) of another component
+    fun init(from: Grid) {
+//        TODO()
+    }
+
+    // Cleanup the component data instance manually
+    // This is used for component instances when they are part (val property) of another component
+    fun cleanup() {
+//        TODO()
+    }
+
+    override fun type() = GridComponent
+
+    companion object {
+        val GridComponent = componentTypeOf<Grid>()
+
+        // Use this function to create a new instance of component data as val inside another component
+        fun staticGridComponent(config: Grid.() -> Unit ): Grid =
+        Grid().apply(config)
+
+        // Use this function to get a new instance of a component from the pool and add it to an entity
+        fun gridComponent(config: Grid.() -> Unit ): Grid =
+        pool.alloc().apply(config)
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Grid() }
+    }
+
+    // Clone a new instance of the component from the pool
+    override fun clone(): Grid = gridComponent { init(from = this@Grid ) }
+
+    // Initialize the component automatically when it is added to an entity
+    override fun World.initComponent(entity: Entity) {
+    }
+
+    // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
+    override fun World.cleanupComponent(entity: Entity) {
+        cleanup()
+    }
+
+    // Initialize an external prefab when the component is added to an entity
+    override fun World.initPrefabs(entity: Entity) {
+    }
+
+    // Cleanup/Reset an external prefab when the component is removed from an entity
+    override fun World.cleanupPrefabs(entity: Entity) {
+    }
+
+    // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
+    override fun free() {
+        cleanup()
+        pool.free(this)
+    }
+
+// tODO: dirty flag is used for view port boundary check - is entity within the view port?
+
+    var cx: Int = 0
+        set(value) {
+            if (field == value) return
+            field = value
+//            dirty = true
+        }
+    var cy: Int = 0
+        set(value) {
+            if (field == value) return
+            field = value
+//            dirty = true
+        }
+    var xr: Float = 0.5f
+        set(value) {
+            if (field == value) return
+            field = value
+//            dirty = true
+        }
+    var yr: Float = 0f
+        set(value) {
+            if (field == value) return
+            field = value
+//            dirty = true
+        }
+    // Z ordering index for the entity in the grid -- not used
+    var zr: Float = 0f
+        set(value) {
+            if (field == value) return
+            field = value
+//            dirty = true
+        }
+
+    var lastPx: Float = 0f
+    var lastPy: Float = 0f
+
+    val attachX get() = (cx + xr) * AppConfig.GRID_CELL_SIZE
+    val attachY get() = (cy + yr - zr) * AppConfig.GRID_CELL_SIZE
+}

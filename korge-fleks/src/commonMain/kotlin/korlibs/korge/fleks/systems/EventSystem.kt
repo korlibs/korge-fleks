@@ -3,8 +3,7 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.collection.BitArray
-import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.components.Event.Companion.EventComponent
 import korlibs.korge.fleks.utils.*
 
 /**
@@ -20,16 +19,16 @@ class EventSystem : IteratingSystem(
     private val eventMap: BitArray = BitArray()
 
     override fun onTickEntity(entity: Entity) {
-        val (publish, subscribe, event, eventConfig) = entity[EventComponent]
+        val eventComponent = entity[EventComponent]
 
         // Set event if the entity is publishing it
-        if (publish) {
-            eventMap.set(event)
+        if (eventComponent.publish) {
+            eventMap.set(eventComponent.event)
         }
 
         // Run the specific event config function on the entity which is subscribed to this event
-        if (subscribe && eventMap[event]) {
-            world.configureEntity(eventConfig, entity)
+        if (eventComponent.subscribe && eventMap[eventComponent.event]) {
+            world.configureEntity(eventComponent.eventConfig, entity)
         }
     }
 }

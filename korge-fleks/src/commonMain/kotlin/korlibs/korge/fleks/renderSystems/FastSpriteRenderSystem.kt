@@ -2,7 +2,12 @@ package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Position
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
+import korlibs.korge.fleks.components.getImageFrame
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -27,6 +32,7 @@ class FastSpriteRenderSystem(
 ) : View() {
     private val family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
+    private val position: Position = staticPositionComponent {}
 
     override fun renderInternal(ctx: RenderContext) {
         val camera: Entity = world.getMainCamera()
@@ -38,25 +44,33 @@ class FastSpriteRenderSystem(
             family.forEach { entity ->
                 val entityPosition = entity[PositionComponent]
 
-                val position: PositionComponent = if (entity has ScreenCoordinatesTag) {
-                    // Take over entity coordinates
-                    entityPosition
-                } else {
+//                val position = if (entity has ScreenCoordinatesTag) {
+//                    // Take over entity coordinates
+//                    entityPosition
+//                } else {
+//                    // Transform world coordinates to screen coordinates
+//                    entityPosition.run {  world.convertToScreenCoordinates(camera) }
+//                }
+
+                // Take over entity position
+                position.init(entityPosition)
+
+                if (entity hasNo ScreenCoordinatesTag) {
                     // Transform world coordinates to screen coordinates
-                    entityPosition.run {  world.convertToScreenCoordinates(camera) }
+                    position.run { world.convertToScreenCoordinates(camera) }
                 }
 
-                val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
-                val (rgba) = entity[RgbaComponent]
-                val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
+                val spriteComponent = entity[SpriteComponent]
+                val rgba = entity[RgbaComponent].rgba
+                val imageFrame = assetStore.getImageFrame(spriteComponent.name, spriteComponent.animation, spriteComponent.frameIndex)
 
                 // Just take the first layer of an Aseprite image file
                 val texture = imageFrame.first ?: return@forEach
 
                 batch.drawQuad(
                     tex = ctx.getTex(texture.slice),
-                    x = position.x + texture.targetX - anchorX,
-                    y = position.y + texture.targetY - anchorY,
+                    x = position.x + texture.targetX - spriteComponent.anchorX,
+                    y = position.y + texture.targetY - spriteComponent.anchorY,
                     filtering = false,
                     colorMul = rgba,
                     program = null

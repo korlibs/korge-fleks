@@ -2,7 +2,7 @@ package korlibs.korge.fleks.entity.config
 
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -18,7 +18,7 @@ data class MainCameraConfig(
         entity.configure {
             // Camera has position within the game world
             // Offset can be used to "shake" the camera on explosions etc.
-            it += PositionComponent()
+            it += positionComponent {}
 
             // Camera has a tag to make it easily accessible for other systems and entity configurations
             it += MainCameraTag

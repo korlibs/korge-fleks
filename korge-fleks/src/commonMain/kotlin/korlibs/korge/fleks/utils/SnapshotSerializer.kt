@@ -5,10 +5,62 @@ import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.image.text.*
 import korlibs.io.lang.*
-import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.TweenSequenceComponent.*
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.Collision
+import korlibs.korge.fleks.components.Debug
+import korlibs.korge.fleks.components.EntityRef
+import korlibs.korge.fleks.components.EntityRefs
+import korlibs.korge.fleks.components.EntityRefsByName
+import korlibs.korge.fleks.components.Gravity
+import korlibs.korge.fleks.components.Grid
+import korlibs.korge.fleks.components.Info
+import korlibs.korge.fleks.components.Layer
+import korlibs.korge.fleks.components.LayeredSprite
+import korlibs.korge.fleks.components.LevelMap
+import korlibs.korge.fleks.components.LifeCycle
+import korlibs.korge.fleks.components.Motion
+import korlibs.korge.fleks.components.NinePatch
+import korlibs.korge.fleks.components.OffsetByFrameIndex
+import korlibs.korge.fleks.components.Parallax
+import korlibs.korge.fleks.components.Platformer
+import korlibs.korge.fleks.components.PlayerInput
+import korlibs.korge.fleks.components.Position
+import korlibs.korge.fleks.components.Rgba
+import korlibs.korge.fleks.components.Rigidbody
+import korlibs.korge.fleks.components.Size
+import korlibs.korge.fleks.components.Sound
+import korlibs.korge.fleks.components.Spawner
+import korlibs.korge.fleks.components.Sprite
+import korlibs.korge.fleks.components.SpriteLayers
+import korlibs.korge.fleks.components.SwitchLayerVisibility
+import korlibs.korge.fleks.components.TextField
+import korlibs.korge.fleks.components.TouchInput
+import korlibs.korge.fleks.components.TweenProperty
+import korlibs.korge.fleks.components.TweenSequence
 import korlibs.korge.fleks.components.data.Point
+import korlibs.korge.fleks.components.data.Rgb
+import korlibs.korge.fleks.components.data.SpriteLayer
+import korlibs.korge.fleks.components.data.TextureRef
+import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity
+import korlibs.korge.fleks.components.data.tweenSequence.ExecuteConfigFunction
+import korlibs.korge.fleks.components.data.tweenSequence.Jump
+import korlibs.korge.fleks.components.data.tweenSequence.LoopTweens
+import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens
+import korlibs.korge.fleks.components.data.tweenSequence.ResetEvent
+import korlibs.korge.fleks.components.data.tweenSequence.SendEvent
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
+import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
+import korlibs.korge.fleks.components.data.tweenSequence.TweenMotion
+import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition
+import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSound
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSpawner
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchLayerVisibility
+import korlibs.korge.fleks.components.data.tweenSequence.TweenTextField
+import korlibs.korge.fleks.components.data.tweenSequence.TweenTouchInput
+import korlibs.korge.fleks.components.data.tweenSequence.Wait
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
 import korlibs.math.interpolation.*
@@ -25,10 +77,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.*
 import kotlin.jvm.JvmInline
 
-// TODO: Remove and take PoolableData into use
-interface CloneableData<out T> {
-    fun clone(): T
-}
 
 /**
  * Class for serializing identifier objects for entity configs and functions in components.
@@ -117,50 +165,55 @@ class SnapshotSerializer {
      *       There must not be any other derived interface from that base interface. Use abstract class instead.
      */
     private val internalModule = SerializersModule {
-        // TODO: Move to PoolableData::class section
-        polymorphic(CloneableData::class) {
-            subclass(ParallaxComponent.Layer::class)
-            subclass(ParallaxComponent.Plane::class)
-            subclass(RgbaComponent.Rgb::class)
-            subclass(SpriteLayersComponent.LayerProperties::class)
-            subclass(LayeredSpriteComponent.Layer::class)
-        }
-
-        // Register component classes
+        // Register component and data classes
         polymorphic(Component::class) {
             // Used as components
             subclass(Collision::class)
-            subclass(DebugComponent::class)
-            subclass(EntityLinkComponent::class)
-            subclass(InfoComponent::class)
-            subclass(LayerComponent::class)
-            subclass(LayeredSpriteComponent::class)
-            subclass(LayoutComponent::class)
+            subclass(Debug::class)
+            subclass(EntityRef::class)
+            subclass(EntityRefs::class)
+            subclass(EntityRefsByName::class)
+            subclass(Gravity::class)
+            subclass(Grid::class)
+            subclass(Info::class)
+            subclass(Layer::class)
+            subclass(LayeredSprite::class)
             subclass(LevelMap::class)
-            subclass(LifeCycleComponent::class)
-            subclass(MotionComponent::class)
-            subclass(NinePatchComponent::class)
-            subclass(NoisyMoveComponent::class)
-            subclass(OffsetByFrameIndexComponent::class)
-            subclass(ParallaxComponent::class)
-            subclass(PositionComponent::class)
-            subclass(RgbaComponent::class)
-            subclass(RigidbodyComponent::class)
-            subclass(SizeComponent::class)
-            subclass(SoundComponent::class)
-            subclass(SpawnerComponent::class)
-            subclass(SpriteComponent::class)
-            subclass(SpriteLayersComponent::class)
-            subclass(SubEntitiesComponent::class)
-            subclass(SwitchLayerVisibilityComponent::class)
-            subclass(TextFieldComponent::class)
-            subclass(TiledLevelMapComponent::class)
-            subclass(TouchInputComponent::class)
-            subclass(TweenPropertyComponent::class)
-            subclass(TweenSequenceComponent::class)
+            subclass(LevelMap::class)
+            subclass(LifeCycle::class)
+            subclass(Motion::class)
+            subclass(NinePatch::class)
+            subclass(OffsetByFrameIndex::class)
+            subclass(Parallax::class)
+            subclass(Platformer::class)
+            subclass(PlayerInput::class)
+            subclass(Position::class)
+            subclass(Rgba::class)
+            subclass(Rigidbody::class)
+            subclass(Size::class)
+            subclass(Sound::class)
+            subclass(Spawner::class)
+            subclass(Sprite::class)
+            subclass(SpriteLayers::class)
+            subclass(SwitchLayerVisibility::class)
+            subclass(TextField::class)
+            subclass(TouchInput::class)
+            subclass(TweenProperty::class)
+            subclass(TweenSequence::class)
             // Used as data inside components
             subclass(Point::class)
+            subclass(Rgb::class)
         }
+
+        // TODO: merge with TweenBase below to Poolable
+        //       rename Poolable<T> to PoolableComponent<T>
+        polymorphic(Poolable::class) {
+            subclass(SpriteLayer::class)
+            subclass(TextureRef::class)
+            subclass(Parallax.Layer::class)
+            subclass(Parallax.Plane::class)
+        }
+
         // Register tags (components without properties)
         polymorphic(UniqueId::class) {
             subclass(CameraFollowTag::class)
@@ -172,22 +225,25 @@ class SnapshotSerializer {
 
         // Data class hierarchy used for AnimationScript component
         polymorphic(TweenBase::class) {
-            subclass(SpawnNewTweenSequence::class)
-            subclass(ParallelTweens::class)
-            subclass(Wait::class)
-            subclass(Jump::class)
-            subclass(SpawnEntity::class)
-            subclass(ExecuteConfigFunction::class)
             subclass(DeleteEntity::class)
-            subclass(TweenRgba::class)
-            subclass(TweenPosition::class)
+            subclass(ExecuteConfigFunction::class)
+            subclass(Jump::class)
+            subclass(LoopTweens::class)
+            subclass(ParallelTweens::class)
+            subclass(ResetEvent::class)
+            subclass(SendEvent::class)
+            subclass(SpawnEntity::class)
+            subclass(SpawnNewTweenSequence::class)
             subclass(TweenMotion::class)
+            subclass(TweenPosition::class)
+            subclass(TweenRgba::class)
+            subclass(TweenSound::class)
+            subclass(TweenSpawner::class)
             subclass(TweenSprite::class)
             subclass(TweenSwitchLayerVisibility::class)
-            subclass(TweenSpawner::class)
-            subclass(TweenSound::class)
             subclass(TweenTextField::class)
             subclass(TweenTouchInput::class)
+            subclass(Wait::class)
         }
     }
 }
@@ -281,7 +337,7 @@ object AnyAsString : KSerializer<Any> {
         when (value) {
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("String", value.toString()))
             is Double -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Double", value.toString()))
-            is RgbaComponent.Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Rgb", value.toString()))
+            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Rgb", value.toString()))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
     }
@@ -291,7 +347,7 @@ object AnyAsString : KSerializer<Any> {
         return when (containerForAny.type) {
             "String" -> containerForAny.value
             "Double" -> containerForAny.value.toDouble()
-            "Rgb" -> RgbaComponent.Rgb.fromString(containerForAny.value)
+            "Rgb" -> Rgb.fromString(containerForAny.value)
             else -> throw SerializationException("AnySerializer: No rule to deserialize type '${containerForAny.type}'!")
         }
     }
@@ -314,7 +370,7 @@ object AnySerializer : KSerializer<Any> {
         val int: Int? = null,
         val string: String? = null,
         val boolean: Boolean? = null,
-        val rgb: RgbaComponent.Rgb? = null,
+        val rgb: Rgb? = null,
         val direction: ImageAnimation.Direction? = null
     )
 
@@ -325,7 +381,7 @@ object AnySerializer : KSerializer<Any> {
             is Int -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(int = value))
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(string = value))
             is Boolean -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(boolean = value))
-            is RgbaComponent.Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
+            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
             is ImageAnimation.Direction -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(direction = value))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
