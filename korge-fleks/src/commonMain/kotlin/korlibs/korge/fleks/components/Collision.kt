@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.data.Point
+import korlibs.korge.fleks.components.data.Point.Companion.staticPoint
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -29,7 +30,7 @@ class Collision private constructor(
     var jumpVelocity: Float = 0f,  // TODO: check with MotionComponent
     var justHit: Boolean = false,
     var isHit: Boolean = false,
-    val hitPosition: Point = Point.value()
+    val hitPosition: Point = staticPoint {}
 ) : PoolableComponent<Collision>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component

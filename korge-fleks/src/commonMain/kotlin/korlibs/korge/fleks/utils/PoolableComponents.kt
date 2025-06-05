@@ -6,7 +6,7 @@ import korlibs.korge.fleks.gameState.*
 
 
 /**
- * All components needs to be derived from [PoolableComponents] to be able to be reused from a Component pool and
+ * All components needs to be derived from [PoolableComponent] to be able to be reused from a Component pool and
  * to be recorded in the SnapshotSerializerSystem.
  *
  * The reset function is called when the component is going to be reused for a new entity.

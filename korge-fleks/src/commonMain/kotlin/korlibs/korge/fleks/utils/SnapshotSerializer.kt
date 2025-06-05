@@ -199,9 +199,6 @@ class SnapshotSerializer {
             subclass(TouchInput::class)
             subclass(TweenProperty::class)
             subclass(TweenSequence::class)
-            // Used as data inside components
-            subclass(Point::class)
-            subclass(Rgb::class)
         }
 
         // TODO: merge with TweenBase below to Poolable
@@ -211,6 +208,8 @@ class SnapshotSerializer {
             subclass(TextureRef::class)
             subclass(Parallax.Layer::class)
             subclass(Parallax.Plane::class)
+            subclass(Point::class)
+            subclass(Rgb::class)
         }
 
         // Register tags (components without properties)
@@ -346,7 +345,7 @@ object AnyAsString : KSerializer<Any> {
         return when (containerForAny.type) {
             "String" -> containerForAny.value
             "Double" -> containerForAny.value.toDouble()
-            "Rgb" -> Rgb.fromString(containerForAny.value)
+// TODO            "Rgb" -> Rgb.fromString(containerForAny.value)
             else -> throw SerializationException("AnySerializer: No rule to deserialize type '${containerForAny.type}'!")
         }
     }

@@ -11,13 +11,14 @@ import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
-import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.GridCollisionYComponent
-import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.GridCollisionZComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionXComponent
+import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionYComponent
+import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionZComponent
 import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
 import korlibs.korge.fleks.logic.collision.resolver.SimpleCollisionResolver
+import korlibs.korge.fleks.prefab.LevelPrefab
 import korlibs.korge.fleks.tags.RenderLayerTag.MAIN_LEVELMAP
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.math.isAlmostEquals
@@ -33,8 +34,8 @@ class GridMoveSystem(
     private val entityFamily = World.family { all(MotionComponent, GridComponent).any(GridComponent, CollisionComponent) }
 
     val assetStore = world.inject<AssetStore>("AssetStore")
-    var levelData: WorldData = assetStore.getWorldData(levelName)
-    var collisionChecker: CollisionChecker = PlatformerCollisionChecker(levelData)
+//    var levelData: WorldData = assetStore.getWorldData(name)
+    var collisionChecker: CollisionChecker = PlatformerCollisionChecker(LevelPrefab.levelData)
     var collisionResolver: CollisionResolver = SimpleCollisionResolver(16, 16)
 
     override fun onTick() {
@@ -75,7 +76,7 @@ class GridMoveSystem(
 
                         if (collisionData != null) {
                             if (motionComponent.velocityX != 0f) {
-                                levelMapComponent.collisionChecker.preXCheck(
+                                collisionChecker.preXCheck(
                                     gridComponent.cx,
                                     gridComponent.cy,
                                     gridComponent.xr,
@@ -84,10 +85,10 @@ class GridMoveSystem(
                                     motionComponent.velocityY,
                                     collisionData.width,
                                     collisionData.height,
-                                    AppConfig.gridCellSize
+                                    AppConfig.GRID_CELL_SIZE
                                 )
                                 // Check if collision happens within a grid cell
-                                val result = levelMapComponent.collisionChecker.checkXCollision(
+                                val result = collisionChecker.checkXCollision(
                                     gridComponent.cx,
                                     gridComponent.cy,
                                     gridComponent.xr,
@@ -96,12 +97,12 @@ class GridMoveSystem(
                                     motionComponent.velocityY,
                                     collisionData.width,
                                     collisionData.height,
-                                    AppConfig.gridCellSize
+                                    AppConfig.GRID_CELL_SIZE
                                 )
                                 if (result != 0) {
-                                    levelMapComponent.collisionResolver.resolveXCollision(gridComponent, motionComponent, levelMapComponent.collisionChecker, result)
+                                    collisionResolver.resolveXCollision(gridComponent, motionComponent, collisionChecker, result)
                                     entity.configure {
-                                        it += world.gridCollisionXComponent {
+                                        it += gridCollisionXComponent {
                                             dir = result
                                         }
                                     }
@@ -124,7 +125,7 @@ class GridMoveSystem(
 
                         if (collisionData != null) {
                             if (motionComponent.velocityY != 0f) {
-                                levelMapComponent.collisionChecker.preYCheck(
+                                collisionChecker.preYCheck(
                                     gridComponent.cx,
                                     gridComponent.cy,
                                     gridComponent.xr,
@@ -133,9 +134,9 @@ class GridMoveSystem(
                                     motionComponent.velocityY,
                                     collisionData.width,
                                     collisionData.height,
-                                    AppConfig.gridCellSize
+                                    AppConfig.GRID_CELL_SIZE
                                 )
-                                val result = levelMapComponent.collisionChecker.checkYCollision(
+                                val result = collisionChecker.checkYCollision(
                                     gridComponent.cx,
                                     gridComponent.cy,
                                     gridComponent.xr,
@@ -144,12 +145,12 @@ class GridMoveSystem(
                                     motionComponent.velocityY,
                                     collisionData.width,
                                     collisionData.height,
-                                    AppConfig.gridCellSize
+                                    AppConfig.GRID_CELL_SIZE
                                 )
                                 if (result != 0) {
-                                    levelMapComponent.collisionResolver.resolveYCollision(gridComponent, motionComponent, levelMapComponent.collisionChecker, result)
+                                    collisionResolver.resolveYCollision(gridComponent, motionComponent, collisionChecker, result)
                                     entity.configure {
-                                        it += world.GridCollisionYComponent {
+                                        it += gridCollisionYComponent {
                                             dir = result
                                         }
                                     }
@@ -189,7 +190,7 @@ class GridMoveSystem(
                     gridComponent.zr = 0f
                     motionComponent.velocityZ = 0f
                     entity.configure {
-                        it += world.GridCollisionZComponent {
+                        it += gridCollisionZComponent {
                             dir = 0
                         }
                     }

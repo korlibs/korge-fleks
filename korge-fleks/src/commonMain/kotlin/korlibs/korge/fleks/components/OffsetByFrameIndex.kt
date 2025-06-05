@@ -66,7 +66,7 @@ class OffsetByFrameIndex private constructor(
         mapOfOffsetLists.forEach { (_, list) ->
             list.forEach { point ->
                 point.cleanup()
-                point.run { this@cleanupComponent.free() }
+                point.free()
             }
         }
         mapOfOffsetLists = mapOf()

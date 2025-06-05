@@ -3,9 +3,9 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IntervalSystem
-import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.prefab.LevelPrefab
 import korlibs.korge.fleks.tags.RenderLayerTag.MAIN_LEVELMAP
 import korlibs.korge.fleks.utils.createAndConfigureEntity
 import korlibs.korge.fleks.utils.getMainCamera
@@ -33,7 +33,7 @@ class LevelChunkSystem(
             // Check where we are in the level gridvania
             val levelMapComponent = levelEntity[LevelMapComponent]
             val levelChunks = levelMapComponent.levelChunks
-            val tileSize = levelMapComponent.levelData.tileSize
+            val tileSize = LevelPrefab.levelData.tileSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
             val viewPortPosX: Float = cameraPosition.x  // - AppConfig.VIEW_PORT_WIDTH_HALF
@@ -43,7 +43,7 @@ class LevelChunkSystem(
             val viewPortMiddlePosY: Int = viewPortPosY.toInt() / tileSize  // y in negative direction
 
 
-            levelMapComponent.levelData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, levelChunks) { entityConfig ->
+            LevelPrefab.levelData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, levelChunks) { entityConfig ->
                 createAndConfigureEntity(entityConfig)
             }
 

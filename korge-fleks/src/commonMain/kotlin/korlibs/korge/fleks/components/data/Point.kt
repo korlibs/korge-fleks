@@ -1,8 +1,11 @@
 package korlibs.korge.fleks.components.data
 
-import com.github.quillraven.fleks.*
+import com.github.quillraven.fleks.Entity
+import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.utils.*
-import kotlinx.serialization.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 
 /**
@@ -12,28 +15,48 @@ import kotlinx.serialization.*
 class Point private constructor(
     var x: Float = 0f,
     var y: Float = 0f
-) : PoolableComponents<Point>() {
-    fun init(from: Point) {
+) : Poolable<Point> {
+    // Init an existing data instance with data from another one
+    override fun init(from: Point) {
         x = from.x
         y = from.y
     }
 
-    fun cleanup() {
+    // Cleanup data instance manually
+    // This is used for data instances when they are part (val property) of a component
+    override fun cleanup() {
         x = 0f
         y = 0f
     }
 
-    override fun type() = PointData
-    companion object {
-        val PointData = componentTypeOf<Point>()
+    // Clone a new data instance from the pool
+    override fun clone(): Point = point { init(from = this@Point ) }
 
-        // Use this function to create a new Point instance as val inside another component.
-        fun value(): Point = Point()
-
-        fun InjectableConfiguration.addPointDataPool(preAllocate: Int = 0) {
-            addPool(PointData, preAllocate) { Point() }
-        }
+    // Cleanup the tween data instance manually
+    override fun free() {
+        cleanup()
+        pool.free(this)
     }
 
-    override fun World.clone(): Point = getPoolable(PointData).apply { init(from = this@Point) }
+    companion object {
+        // Use this function to create a new instance of data as val inside a component
+        fun staticPoint(config: Point.() -> Unit ): Point =
+            Point().apply(config)
+
+        // Use this function to get a new instance of a component from the pool and add it to an entity
+        fun point(config: Point.() -> Unit ): Point =
+            pool.alloc().apply(config)
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Point() }
+    }
+
+    /**
+     * Convert the position to screen coordinates.
+     * This is useful to convert the position of an entity to screen coordinates for rendering.
+     */
+    fun World.convertToScreenCoordinates(camera: Entity) {
+        val cameraPosition = camera[PositionComponent]
+        x = x  - cameraPosition.x + cameraPosition.offsetX + AppConfig.VIEW_PORT_WIDTH_HALF
+        y = y - cameraPosition.y + cameraPosition.offsetY + AppConfig.VIEW_PORT_HEIGHT_HALF
+    }
 }

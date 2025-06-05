@@ -15,7 +15,7 @@ import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.getImageFrame
-import korlibs.korge.fleks.components.data.Point
+import korlibs.korge.fleks.components.data.Point.Companion.staticPoint
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -145,10 +145,9 @@ class DebugRenderSystem(
                 if(entity has GridComponent && entity has DebugInfoTag.GRID_POSITION) {
                     val gridComponent = entity[GridComponent]
 
-                    val gridToPosition = if (entity has ScreenCoordinatesTag) {
-                        Point.value().apply { x = gridComponent.x; y = gridComponent.y }
-                    } else {
-                        entity[GridComponent].run { world.convertToScreenCoordinates(camera) }
+                    val gridToPosition = staticPoint { x = gridComponent.x; y = gridComponent.y }
+                    if (entity hasNo ScreenCoordinatesTag) {
+                        gridToPosition.run { world.convertToScreenCoordinates(camera) }
                     }
 
                     batch.drawVector(Colors.YELLOW) {

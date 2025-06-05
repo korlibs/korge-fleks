@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
+import korlibs.image.color.Colors
 import korlibs.image.text.*
 import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
@@ -32,7 +33,7 @@ data class RichTextConfig(
     private val layerIndex: Int = 1,
 
     // Color and alpha channel of text graphics
-    private val tint: Rgb = Rgb.WHITE,
+    private val tint: Int = Colors.WHITE.value,
     private val alpha: Float = 1f,
 
     // Text alignment
@@ -60,7 +61,7 @@ data class RichTextConfig(
                 index = this@RichTextConfig.layerIndex
             }
             it += rgbaComponent {
-                rgba.withRGB(tint.r, tint.g, tint.b)
+                rgba.withRGB(tint)
                 alpha = this@RichTextConfig.alpha
             }
             it += layerTag
