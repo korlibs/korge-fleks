@@ -3,8 +3,9 @@ package korlibs.korge.fleks.entity.config
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
+import korlibs.korge.fleks.components.Layer.Companion.layerComponent
+import korlibs.korge.fleks.components.LevelMap.Companion.levelMapComponent
+import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.tags.*
@@ -42,17 +43,17 @@ data class LevelMapConfig(
         }
 
         entity.configure {
-            it += LevelMapComponent {
+            it += levelMapComponent {
                 levelName = this@LevelMapConfig.levelName
                 layerNames.init(from = this@LevelMapConfig.layerNames)
                 levelChunks = ChunkArray2(width = worldData.gridVaniaWidth, height = worldData.gridVaniaHeight)
              }
             // Level map does not have position - camera position will determine what is shown from the level map
             // Size of level map is static and can be gathered from AssetStore -> AssetLevelData
-            it += RgbaComponent().apply {
+            it += rgbaComponent {
                 alpha = this@LevelMapConfig.alpha
             }
-            it += LayerComponent()
+            it += layerComponent {}
             it += layerTag
         }
         return entity

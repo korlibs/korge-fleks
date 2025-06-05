@@ -2,7 +2,11 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
 import korlibs.image.text.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Layer.Companion.layerComponent
+import korlibs.korge.fleks.components.Position.Companion.positionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
+import korlibs.korge.fleks.components.TextField.Companion.textFieldComponent
+import korlibs.korge.fleks.components.data.Rgb
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -28,7 +32,7 @@ data class RichTextConfig(
     private val layerIndex: Int = 1,
 
     // Color and alpha channel of text graphics
-    private val tint: RgbaComponent.Rgb = RgbaComponent.Rgb.WHITE,
+    private val tint: Rgb = Rgb.WHITE,
     private val alpha: Float = 1f,
 
     // Text alignment
@@ -39,22 +43,24 @@ data class RichTextConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             if (screenCoordinates) it += ScreenCoordinatesTag
-            it += PositionComponent(
-                x = this@RichTextConfig.x,
+            it += positionComponent {
+                x = this@RichTextConfig.x
                 y = this@RichTextConfig.y
-            )
-            it += TextFieldComponent(
-                text = this@RichTextConfig.text,
-                fontName = this@RichTextConfig.fontName,
-                textRangeEnd = this@RichTextConfig.textRangeEnd,
-                width = this@RichTextConfig.width,
-                height = this@RichTextConfig.height,
-                horizontalAlign = this@RichTextConfig.horizontalAlign,
+            }
+            it += textFieldComponent {
+                text = this@RichTextConfig.text
+                fontName = this@RichTextConfig.fontName
+                textRangeEnd = this@RichTextConfig.textRangeEnd
+                width = this@RichTextConfig.width
+                height = this@RichTextConfig.height
+                horizontalAlign = this@RichTextConfig.horizontalAlign
                 verticalAlign = this@RichTextConfig.verticalAlign
-            )
-            it += LayerComponent(index = this@RichTextConfig.layerIndex)
-            it += RgbaComponent().apply {
-                tint = this@RichTextConfig.tint
+            }
+            it += layerComponent {
+                index = this@RichTextConfig.layerIndex
+            }
+            it += rgbaComponent {
+                rgba.withRGB(tint.r, tint.g, tint.b)
                 alpha = this@RichTextConfig.alpha
             }
             it += layerTag

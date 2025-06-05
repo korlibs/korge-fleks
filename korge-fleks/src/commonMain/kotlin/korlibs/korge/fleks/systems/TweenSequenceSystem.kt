@@ -2,11 +2,26 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.*
-import korlibs.korge.fleks.components.TweenPropertyComponent.TweenProperty
-import korlibs.korge.fleks.components.TweenPropertyComponent.TweenProperty.*
-import korlibs.korge.fleks.components.TweenSequenceComponent.*
-import korlibs.korge.fleks.components.RgbaComponent.Rgb
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.tweenPropertyComponent
+import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType
+import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.RgbaAlpha
+import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionX
+import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionY
+import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionOffsetX
+import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.PositionOffsetY
+import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
+import korlibs.korge.fleks.components.TweenSequence.Companion.tweenSequenceComponent
+import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity
+import korlibs.korge.fleks.components.data.tweenSequence.Jump
+import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens
+import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens.Companion.staticParallelTweens
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
+import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
+import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition
+import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.Easing
@@ -22,7 +37,7 @@ class TweenSequenceSystem : IteratingSystem(
     // Internally used variables in createAnimateComponent function
     private lateinit var currentTween: TweenBase
     private lateinit var currentParentTween: ParallelTweens
-    private val defaultTweenValues = ParallelTweens() // <-- gives default values for delay, duration and easing
+    private val defaultTweenValues: ParallelTweens = staticParallelTweens() // <-- gives default values for delay, duration and easing
 
     /**
      * When the system is called it checks for the [TweenSequenceComponent] component if the waitTime is over.
@@ -80,7 +95,7 @@ class TweenSequenceSystem : IteratingSystem(
 
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
-                    world.entity("SpawnNewTweenSequence") { it += TweenSequenceComponent(tweens = currentTween.tweens) }
+                    world.entity("SpawnNewTweenSequence") { it += tweenSequenceComponent { tweens = currentTween.tweens } }
                 }
                 is Jump -> {
                     // Currently we just have a statical branch jump without conditional check
@@ -94,18 +109,20 @@ class TweenSequenceSystem : IteratingSystem(
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
                             // Tween has its own delay -> spawn a new TweenSequence for it
-                            world.entity("ParallelTween: ${tween::class.simpleName} for entity '${tween.entity.id}'") {
-                                it += TweenSequenceComponent(
-                                    tweens = listOf(
-                                        // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
-                                        tween.also { tween ->
-                                            if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
-                                            if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
-                                        },
-                                        // After finish the tween delete the entity again - it is not needed anymore
-                                        DeleteEntity(entity = it)
-                                    )
-                                )
+                            world.entity("ParallelTween: ${tween::class.simpleName} for entity '${tween.target.id}'") {
+                                it += tweenSequenceComponent {
+
+                                    // TODO: Copy reference to tweens from parent TweenSequenceComponent
+//                                    tweens = listOf(
+//                                        // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
+//                                        tween.also { tween ->
+//                                            if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
+//                                            if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
+//                                        },
+//                                        // After finish the tween delete the entity again - it is not needed anymore
+//                                        DeleteEntity(entity = it)
+//                                    )
+                                }
                             }
                         } else {
                             // No delay -> run it directly
@@ -128,93 +145,96 @@ class TweenSequenceSystem : IteratingSystem(
         currentTween = tween
         currentParentTween = parentTween
         when (tween) {
-            is TweenRgba -> tween.entity.getOrWarning(RgbaComponent)?.let { start ->
+            is TweenRgba -> tween.target.getOrWarning(RgbaComponent)?.let { start ->
                 tween.alpha?.let { end -> createTweenPropertyComponent(RgbaAlpha, value = start.alpha, change = end - start.alpha) }
-                tween.tint?.let { end ->  createTweenPropertyComponent(RgbaTint, start.tint,
-                    Rgb(r = end.r - (start.tint.r), g = end.g - (start.tint.g), b = end.b - (start.tint.b))
-                ) }
+                // TODO: fix this
+//                tween.tint?.let { end ->  createTweenPropertyComponent(RgbaTint, start.tint,
+//                    Rgb(r = end.r - (start.tint.r), g = end.g - (start.tint.g), b = end.b - (start.tint.b))
+//                ) }
                 tween.visible?.let { visible -> createTweenPropertyComponent(RgbaAlpha, value = if (visible) 1f else 0f, change = 0f) }
             }
-            is TweenPosition -> tween.entity.getOrWarning(PositionComponent)?.let { start ->
+            is TweenPosition -> tween.target.getOrWarning(PositionComponent)?.let { start ->
                 tween.x?.let { end -> createTweenPropertyComponent(PositionX, start.x, end - start.x) }
                 tween.y?.let { end -> createTweenPropertyComponent(PositionY, start.y, end - start.y) }
                 tween.offsetX?.let { end -> createTweenPropertyComponent(PositionOffsetX, start.offsetX, end - start.offsetX) }
                 tween.offsetY?.let { end -> createTweenPropertyComponent(PositionOffsetY, start.offsetY, end - start.offsetY) }
             }
-            is TweenMotion -> tween.entity.getOrWarning(MotionComponent)?.let { start ->
-                tween.velocityX?.let { end -> createTweenPropertyComponent(MotionVelocityX, start.velocityX, end - start.velocityX) }
-            }
-            is TweenSprite -> tween.entity.getOrWarning(SpriteComponent)?.let { _ ->  // make sure to-be-animated-entity is of type sprite
-                tween.animation?.let { value -> createTweenPropertyComponent(SpriteAnimation, value) }
-                tween.running?.let { value -> createTweenPropertyComponent(SpriteRunning, value) }
-                tween.direction?.let { value -> createTweenPropertyComponent(SpriteDirection, value) }
-                tween.destroyOnPlayingFinished?.let { value -> createTweenPropertyComponent(SpriteDestroyOnPlayingFinished, value) }
-            }
-            is TweenSwitchLayerVisibility -> tween.entity.getOrWarning(SwitchLayerVisibilityComponent)?.let { start ->
-                tween.offVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOffVariance, value = start.offVariance, change = end - start.offVariance) }
-                tween.onVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOnVariance, start.onVariance, end - start.onVariance) }
-            }
-            is TweenSpawner -> tween.entity.getOrWarning(SpawnerComponent)?.let { start ->
-                tween.numberOfObjects?.let { end -> createTweenPropertyComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }
-                tween.interval?.let { end -> createTweenPropertyComponent(SpawnerInterval, start.interval, end - start.interval) }
-                tween.timeVariation?.let { end -> createTweenPropertyComponent(SpawnerTimeVariation, start.timeVariation, end - start.timeVariation) }
-                tween.positionVariation?.let { end -> createTweenPropertyComponent(SpawnerPositionVariation, start.positionVariation, end - start.positionVariation) }
-            }
-            is TweenSound -> tween.entity.getOrWarning(SoundComponent)?.let{ start ->
-                tween.startTrigger?.let { value -> createTweenPropertyComponent(SoundStartTrigger, value) }
-                tween.stopTrigger?.let { value -> createTweenPropertyComponent(SoundStopTrigger, value) }
-                tween.position?.let { end -> createTweenPropertyComponent(SoundPosition, start.position, end - start.position) }
-                tween.volume?.let { end -> createTweenPropertyComponent(SoundVolume, start.volume, end - start.volume) }
-            }
-            is TweenTextField -> tween.entity.getOrWarning(TextFieldComponent)?.let { start ->
-                tween.text?.let { value -> createTweenPropertyComponent(TextFieldText, value) }
-                tween.textRangeStart?.let { end -> createTweenPropertyComponent(TextFieldTextRangeStart, start.textRangeStart, end - start.textRangeStart ) }
-                tween.textRangeEnd?.let { end -> createTweenPropertyComponent(TextFieldTextRangeEnd, start.textRangeEnd, end - start.textRangeEnd ) }
-            }
-            is TweenTouchInput -> tween.entity.getOrWarning(TouchInputComponent)?.let {
-                tween.enabled?.let { value -> createTweenPropertyComponent(TouchInputEnable, value) }
-            }
-            // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
+//            is TweenMotion -> tween.entity.getOrWarning(MotionComponent)?.let { start ->
+//                tween.velocityX?.let { end -> createTweenPropertyComponent(MotionVelocityX, start.velocityX, end - start.velocityX) }
+//            }
+//            is TweenSprite -> tween.entity.getOrWarning(SpriteComponent)?.let { _ ->  // make sure to-be-animated-entity is of type sprite
+//                tween.animation?.let { value -> createTweenPropertyComponent(SpriteAnimation, value) }
+//                tween.running?.let { value -> createTweenPropertyComponent(SpriteRunning, value) }
+//                tween.direction?.let { value -> createTweenPropertyComponent(SpriteDirection, value) }
+//                tween.destroyOnPlayingFinished?.let { value -> createTweenPropertyComponent(SpriteDestroyOnPlayingFinished, value) }
+//            }
+//            is TweenSwitchLayerVisibility -> tween.entity.getOrWarning(SwitchLayerVisibilityComponent)?.let { start ->
+//                tween.offVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOffVariance, value = start.offVariance, change = end - start.offVariance) }
+//                tween.onVariance?.let { end -> createTweenPropertyComponent(SwitchLayerVisibilityOnVariance, start.onVariance, end - start.onVariance) }
+//            }
+//            is TweenSpawner -> tween.entity.getOrWarning(SpawnerComponent)?.let { start ->
+//                tween.numberOfObjects?.let { end -> createTweenPropertyComponent(SpawnerNumberOfObjects, start.numberOfObjects, end - start.numberOfObjects) }
+//                tween.interval?.let { end -> createTweenPropertyComponent(SpawnerInterval, start.interval, end - start.interval) }
+//                tween.timeVariation?.let { end -> createTweenPropertyComponent(SpawnerTimeVariation, start.timeVariation, end - start.timeVariation) }
+//                tween.positionVariation?.let { end -> createTweenPropertyComponent(SpawnerPositionVariation, start.positionVariation, end - start.positionVariation) }
+//            }
+//            is TweenSound -> tween.entity.getOrWarning(SoundComponent)?.let{ start ->
+//                tween.startTrigger?.let { value -> createTweenPropertyComponent(SoundStartTrigger, value) }
+//                tween.stopTrigger?.let { value -> createTweenPropertyComponent(SoundStopTrigger, value) }
+//                tween.position?.let { end -> createTweenPropertyComponent(SoundPosition, start.position, end - start.position) }
+//                tween.volume?.let { end -> createTweenPropertyComponent(SoundVolume, start.volume, end - start.volume) }
+//            }
+//            is TweenTextField -> tween.entity.getOrWarning(TextFieldComponent)?.let { start ->
+//                tween.text?.let { value -> createTweenPropertyComponent(TextFieldText, value) }
+//                tween.textRangeStart?.let { end -> createTweenPropertyComponent(TextFieldTextRangeStart, start.textRangeStart, end - start.textRangeStart ) }
+//                tween.textRangeEnd?.let { end -> createTweenPropertyComponent(TextFieldTextRangeEnd, start.textRangeEnd, end - start.textRangeEnd ) }
+//            }
+//            is TweenTouchInput -> tween.entity.getOrWarning(TouchInputComponent)?.let {
+//                tween.enabled?.let { value -> createTweenPropertyComponent(TouchInputEnable, value) }
+//            }
+//            // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
             is SpawnEntity -> {
-                val spawnedEntity = if (tween.entity == Entity.NONE) world.entity("SpawnEntity: ${tween.entityConfig}") else tween.entity
+                val spawnedEntity = if (tween.target == Entity.NONE) world.entity("SpawnEntity: ${tween.entityConfig}") else tween.target
                 EntityFactory.configure(tween.entityConfig, world, spawnedEntity)
             }
             // Directly deletes the given entity from the tween
-            is DeleteEntity -> world.deleteViaLifeCycle(tween.entity)
-            // Runs the config-function on the given entity from the tween
-            is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.entity)
-            is Wait -> tween.event?.let { event ->
-                // Wait for event, SendEvent and ResetEvent need the current entity which comes in via onTickEntity
-                currentTween.entity = baseEntity
-                createTweenPropertyComponent(EventSubscribe, value = event)
-            }
-            is SendEvent -> {
-                currentTween.entity = baseEntity
-                createTweenPropertyComponent(EventPublish, value = tween.event)
-            }
-            is ResetEvent -> {
-                currentTween.entity = baseEntity
-                createTweenPropertyComponent(EventReset, value = tween.event)
-            }
-            else -> {
-                when (tween) {
-                    is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens!")
-                    is LoopTweens -> println("WARNING - TweenSequenceSystem: \"LoopTweens\" not allowed in ParallelTweens!")
-                    is Jump -> println("WARNING - TweenSequenceSystem: \"Jump\" not allowed in ParallelTweens!")
-                    else -> println("WARNING - TweenSequenceSystem: Tween function for tween '$tween' not implemented!")
-                }
-            }
+            is DeleteEntity -> world.deleteViaLifeCycle(tween.target)
+//            // Runs the config-function on the given entity from the tween
+//            is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.entity)
+//            is Wait -> tween.event?.let { event ->
+//                // Wait for event, SendEvent and ResetEvent need the current entity which comes in via onTickEntity
+//                currentTween.entity = baseEntity
+//                createTweenPropertyComponent(EventSubscribe, value = event)
+//            }
+//            is SendEvent -> {
+//                currentTween.entity = baseEntity
+//                createTweenPropertyComponent(EventPublish, value = tween.event)
+//            }
+//            is ResetEvent -> {
+//                currentTween.entity = baseEntity
+//                createTweenPropertyComponent(EventReset, value = tween.event)
+//            }
+//            else -> {
+//                when (tween) {
+//                    is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens!")
+//                    is LoopTweens -> println("WARNING - TweenSequenceSystem: \"LoopTweens\" not allowed in ParallelTweens!")
+//                    is Jump -> println("WARNING - TweenSequenceSystem: \"Jump\" not allowed in ParallelTweens!")
+//                    else -> println("WARNING - TweenSequenceSystem: Tween function for tween '$tween' not implemented!")
+//                }
+//            }
         }
     }
 
-    private fun createTweenPropertyComponent(componentProperty: TweenProperty, value: Any, change: Any = Unit) {
-        currentTween.entity.configure { animatedEntity ->
-            animatedEntity.getOrAdd(componentProperty.type) { TweenPropertyComponent(componentProperty) }.also {
-                it.change = change
-                it.value = value
-                it.duration = currentTween.duration ?: currentParentTween.duration ?: 0f
-                it.timeProgress = 0f
-                it.easing = currentTween.easing ?: currentParentTween.easing ?: Easing.LINEAR
+    private fun createTweenPropertyComponent(componentProperty: TweenPropertyType, value: Any, change: Any = Unit) {
+        currentTween.target.configure { animatedEntity ->
+            animatedEntity.getOrAdd(componentProperty.type) {
+                tweenPropertyComponent {
+                    this.change = change
+                    this.value = value
+                    this.duration = currentTween.duration ?: currentParentTween.duration ?: 0f
+                    this.timeProgress = 0f
+                    this.easing = currentTween.easing ?: currentParentTween.easing ?: Easing.LINEAR
+                }
             }
         }
     }

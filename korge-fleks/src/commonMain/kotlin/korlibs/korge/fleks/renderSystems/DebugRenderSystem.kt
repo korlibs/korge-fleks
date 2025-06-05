@@ -4,10 +4,17 @@ import com.github.quillraven.fleks.*
 import korlibs.datastructure.iterators.fastForEachReverse
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
+import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
+import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
+import korlibs.korge.fleks.components.Position
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
+import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
+import korlibs.korge.fleks.components.getImageFrame
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -31,6 +38,8 @@ class DebugRenderSystem(
             .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
+    private val position: Position = staticPositionComponent {}
+
 
     override fun renderInternal(ctx: RenderContext) {
         val camera: Entity = world.getMainCamera()
@@ -41,28 +50,26 @@ class DebugRenderSystem(
 
 
                 if (entity has PositionComponent) {
-                    val entityPosition = entity[PositionComponent]
+                    // Take over entity position
+                    position.init(entity[PositionComponent])
 
-                    val position: PositionComponent = if (entity has ScreenCoordinatesTag) {
-                        // Take over entity coordinates
-                        entityPosition
-                    } else {
+                    if (entity hasNo ScreenCoordinatesTag) {
                         // Transform world coordinates to screen coordinates
-                        entityPosition.run { world.convertToScreenCoordinates(camera) }
+                        position.run { world.convertToScreenCoordinates(camera) }
                     }
 
                     // In case the entity is a sprite than render the overall sprite size and the texture bounding boxes
                     if (entity has SpriteComponent) {
-                        val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
-                        val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
-                        val imageData = assetStore.getImageData(name)
+                        val spriteComponent = entity[SpriteComponent]
+                        val imageFrame = assetStore.getImageFrame(spriteComponent.name, spriteComponent.animation, spriteComponent.frameIndex)
+                        val imageData = assetStore.getImageData(spriteComponent.name)
 
                         // Draw sprite bounds
                         if (entity has DebugInfoTag.SPRITE_BOUNDS) {
                             batch.drawVector(Colors.RED) {
                                 rect(
-                                    x = position.x + position.offsetX - anchorX,
-                                    y = position.y + position.offsetY - anchorY,
+                                    x = position.x + position.offsetX - spriteComponent.anchorX,
+                                    y = position.y + position.offsetY - spriteComponent.anchorY,
                                     width = imageData.width.toFloat(),
                                     height = imageData.height.toFloat()
                                 )
@@ -73,8 +80,8 @@ class DebugRenderSystem(
                             imageFrame.layerData.fastForEachReverse { layer ->
                                 batch.drawVector(Colors.GREEN) {
                                     rect(
-                                        x = position.x + position.offsetX + layer.targetX.toFloat() - anchorX,
-                                        y = position.y + position.offsetY + layer.targetY.toFloat() - anchorY,
+                                        x = position.x + position.offsetX + layer.targetX.toFloat() - spriteComponent.anchorX,
+                                        y = position.y + position.offsetY + layer.targetY.toFloat() - spriteComponent.anchorY,
                                         width = layer.width.toFloat(),
                                         height = layer.height.toFloat()
                                     )
@@ -86,12 +93,12 @@ class DebugRenderSystem(
                     if (entity has TextFieldComponent && entity has DebugInfoTag.TEXT_FIELD_BOUNDS) {
                         // Draw text field bounds
                         batch.drawVector(Colors.RED) {
-                            val (_, _, _, _, width, height) = entity[TextFieldComponent]
+                            val textFieldComponent = entity[TextFieldComponent]
                             rect(
                                 x = position.x + position.offsetX,
                                 y = position.y + position.offsetY,
-                                width = width,
-                                height = height
+                                width = textFieldComponent.width,
+                                height = textFieldComponent.height
                             )
                         }
                     }
@@ -99,12 +106,12 @@ class DebugRenderSystem(
                     if (entity has NinePatchComponent && entity has DebugInfoTag.NINE_PATCH_BOUNDS) {
                         // Draw nine patch bounds
                         batch.drawVector(Colors.RED) {
-                            val (_, width, height) = entity[NinePatchComponent]
+                            val ninePatchComponent = entity[NinePatchComponent]
                             rect(
                                 x = position.x + position.offsetX,
                                 y = position.y + position.offsetY,
-                                width = width,
-                                height = height
+                                width = ninePatchComponent.width,
+                                height = ninePatchComponent.height
                             )
                         }
                     }

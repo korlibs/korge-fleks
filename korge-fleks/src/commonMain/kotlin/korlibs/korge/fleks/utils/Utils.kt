@@ -34,41 +34,16 @@ internal fun interpolateBoolean(ratio: Double, l: Boolean, r: Boolean): Boolean 
 /**
  * Clone function for a Map object with [CloneableData] values.
  */
-@JvmName("MapOfCloneableData")
-fun<K, T> Map<K, CloneableData<T>>.clone() : Map<K, T> {
-    val mapCopy = mutableMapOf<K, T>()
-    forEach { (key, value) ->
-        // Perform deep copy of map value elements
-        mapCopy[key] = value.clone()
-    }
-    return mapCopy
-}
-
-/**
- * Clone function for a Map object with List values.
- */
-@JvmName("MapOfListCloneableData")
-fun<K, T> Map<K, List<CloneableData<T>>>.clone() : Map<K, List<T>> {
-    val mapCopy = mutableMapOf<K, List<T>>()
-    forEach { (key, value) ->
-        // Perform deep copy of map value elements
-        mapCopy[key] = value.clone()
-    }
-    return mapCopy
-}
-
-/**
- * Clone function for a Map object with [Entity] values.
- */
-@JvmName("MapOfEnities")
-fun<T> Map<T, Entity>.clone() : Map<T, Entity> {
-    val mapCopy = mutableMapOf<T, Entity>()
-    forEach { (key, value) ->
-        // Perform deep copy of map value elements
-        mapCopy[key] = value.clone()
-    }
-    return mapCopy
-}
+// TODO: Cleanup
+//@JvmName("MapOfCloneableData")
+//fun<K, T> Map<K, CloneableData<T>>.clone() : Map<K, T> {
+//    val mapCopy = mutableMapOf<K, T>()
+//    forEach { (key, value) ->
+//        // Perform deep copy of map value elements
+//        mapCopy[key] = value.clone()
+//    }
+//    return mapCopy
+//}
 
 /**
  * Clone function (deep copy) for [HorizontalAlign] enum objects.
@@ -85,45 +60,36 @@ fun VerticalAlign.clone() : VerticalAlign = VerticalAlign(this.ratio)
  */
 fun RGBA.cloneRgba() : RGBA = RGBA(this.value)
 
-/**
- * Clone function (deep copy) for [List] of [CloneableData] elements.
- */
-@JvmName("ListOfCloneableData")
-fun<T> List<CloneableData<T>>.clone() : List<T> {
-    val listCopy = mutableListOf<T>()
-    // Perform deep copy of list elements
-    forEach { element ->
-        listCopy.add(element.clone())
-    }
-    return listCopy
-}
 
 /**
- * Clone function (deep copy) for [List] of [Entity] elements.
+ * Init function (deep copy) for [MutableList] of String elements.
  */
-@JvmName("ListOfEntities")
-fun List<Entity>.clone() : List<Entity> {
-    val listCopy = mutableListOf<Entity>()
-    // Perform deep copy of list elements
-    forEach { entity ->
-        listCopy.add(entity.clone())
-    }
-    return listCopy
-}
-
-/**
- * Clone function (deep copy) for [List] of String elements.
- */
-@JvmName("ListOfStrings")
-fun List<String>.clone() : List<String> {
-    val listCopy = mutableListOf<String>()
-    // Perform deep copy of list elements
-    forEach { string ->
-        listCopy.add(string)
-    }
-    return listCopy
-}
-
+@JvmName("MutableListOfStringInit")
 fun MutableList<String>.init(from: List<String>) {
     this.addAll(from)
+}
+
+/**
+ * Init function (deep copy) for [MutableList] of [Entity] elements.
+ * This works because Entities are static data classes which will not be "reused" with other
+ * id and version.
+ */
+@JvmName("MutableListOfEntityInit")
+fun MutableList<Entity>.init(from: List<Entity>) {
+    this.addAll(from)
+}
+
+/**
+ * Init function (deep copy) for [MutableList] of [PoolableComponent] elements.
+ * Elements are taken from their respective pools by cloning them in the scope of the world where the pool was added.
+ */
+//fun <T> MutableList<Poolable<T>>.init(world: World, from: List<PoolableComponent<T>>) {
+//    from.forEach { item ->
+//        this.add(item.clone())
+//    }
+//}
+
+
+fun MutableMap<String, Entity>.init(from: Map<String, Entity>) {
+    this.putAll(from)
 }

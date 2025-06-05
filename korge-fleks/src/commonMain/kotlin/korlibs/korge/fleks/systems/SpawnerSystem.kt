@@ -2,8 +2,12 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import korlibs.korge.fleks.components.OffsetByFrameIndex.Companion.OffsetByFrameIndexComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.positionComponent
+import korlibs.korge.fleks.components.Spawner.Companion.SpawnerComponent
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.components.*
 
 
 /**
@@ -47,7 +51,7 @@ class SpawnerSystem : IteratingSystem(
                     var xx = x
                     var yy = y
                     val newEntity =
-                        if (spawner.newEntity == Entity.NONE) world.entity {}  // create new entity
+                        if (spawner.newEntity == Entity.NONE) world.entity("spawned_$i") {}  // create new entity
                         else spawner.newEntity  // use given entity
                     if (spawner.positionVariation != 0f) {
                         xx += (-spawner.positionVariation..spawner.positionVariation).random()
@@ -55,7 +59,10 @@ class SpawnerSystem : IteratingSystem(
                     }
                     // Directly set position
                     newEntity.configure {
-                        it += PositionComponent(x = xx, y = yy)
+                        it += positionComponent {
+                            this.x = xx
+                            this.y = yy
+                        }
                     }
 
 // DEBUGGING

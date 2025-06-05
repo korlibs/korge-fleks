@@ -8,14 +8,13 @@ object EntityByName {
     private val map = mutableMapOf<String, Entity>()
 
     fun add(name: String, entity: Entity) {
-//        if (map.containsKey(name)) println("EntityByName: Warning! Entity with name '$name' already exists! Old entity will be overwritten.")
-        // Do not overwrite already created objects with same name (e.g. created objects by spawner)
-        if (!map.containsKey(name)) map[name] = entity
+        if (map.containsKey(name)) println("WARNING: EntityByName - Entity with name '$name' already exists! Old entity will be overwritten.")
+        map[name] = entity
     }
 
     fun get(name: String): Entity {
         return if (!map.containsKey(name)) {
-            throw Error("ERROR: EntityByName: Entity with name '$name' does not exist!")
+            throw Error("ERROR: EntityByName - Entity with name '$name' does not exist!")
         } else map[name]!!
     }
 
@@ -37,7 +36,6 @@ object EntityByName {
         }
     }
 
-
     fun getComponents(name: String): Snapshot? = with(world) {
         return if (!map.containsKey(name)) {
             println("EntityByName: Entity with name '$name' does not exist! Cannot show it!")
@@ -48,8 +46,7 @@ object EntityByName {
     fun contains(name: String): Boolean = map.containsKey(name)
 
     fun remove(name: String) {
-//        if (!map.containsKey(name)) println("EntityByName: Entity with name '$name' does not exist!")
-//        else map.remove(name)
+        if (!map.containsKey(name)) println("WARNING: EntityByName - Entity with name '$name' does not exist!")
         map.remove(name)
     }
 }

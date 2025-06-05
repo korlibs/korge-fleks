@@ -9,7 +9,7 @@ import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
-import korlibs.korge.fleks.components.MotionComponent
+import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.GridCollisionYComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.GridCollisionZComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionXComponent

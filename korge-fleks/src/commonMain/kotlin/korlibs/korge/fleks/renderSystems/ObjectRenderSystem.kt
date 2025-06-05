@@ -8,7 +8,17 @@ import korlibs.image.font.*
 import korlibs.image.text.*
 import korlibs.korge.annotations.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
+import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
+import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
+import korlibs.korge.fleks.components.Position
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
+import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
+import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
+import korlibs.korge.fleks.components.getImageFrame
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.getMainCamera
 import korlibs.korge.fleks.utils.AppConfig
@@ -36,6 +46,7 @@ class ObjectRenderSystem(
         .any(PositionComponent, LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
+    private val position: Position = staticPositionComponent {}
 
     @OptIn(KorgeExperimental::class)
     override fun renderInternal(ctx: RenderContext) {
@@ -46,24 +57,24 @@ class ObjectRenderSystem(
 
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
-            val (rgba) = entity[RgbaComponent]
+            val rgba = entity[RgbaComponent].rgba
             val entityPosition = entity[PositionComponent]
 
-            val position: PositionComponent = if (entity has ScreenCoordinatesTag) {
-                // Take over entity coordinates
-                entityPosition
-            } else {
+            // Take over entity position
+            position.init(entityPosition)
+
+            if (entity hasNo ScreenCoordinatesTag) {
                 // Transform world coordinates to screen coordinates
-                entityPosition.run {  world.convertToScreenCoordinates(camera) }
+                position.run { world.convertToScreenCoordinates(camera) }
             }
 
             // Rendering path for sprites
             if (entity has SpriteComponent) {
-                val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
-                val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
+                val spriteComponent = entity[SpriteComponent]
+                val imageFrame = assetStore.getImageFrame(spriteComponent.name, spriteComponent.animation, spriteComponent.frameIndex)
 
                 if (entity has SpriteLayersComponent) {
-                    val (layerMap) = entity[SpriteLayersComponent]
+                    val layerMap = entity[SpriteLayersComponent].layerMap
                     ctx.useBatcher { batch ->
                         // Iterate over all layers of each sprite for the frame number
                         imageFrame.layerData.fastForEach { layerData ->
@@ -73,8 +84,8 @@ class ObjectRenderSystem(
 
                                 batch.drawQuad(
                                     tex = ctx.getTex(layerData.slice),
-                                    x = position.x + layerData.targetX - anchorX + layerProps.offsetX,
-                                    y = position.y + layerData.targetY - anchorY + layerProps.offsetY,
+                                    x = position.x + layerData.targetX - spriteComponent.anchorX + layerProps.offsetX,
+                                    y = position.y + layerData.targetY - spriteComponent.anchorY + layerProps.offsetY,
                                     filtering = false,
                                     colorMul = layerProps.rgba,
                                     program = null // Possibility to use a custom shader - add ShaderComponent or similar
@@ -86,8 +97,8 @@ class ObjectRenderSystem(
                     ctx.useBatcher { batch ->
                         // Iterate over all layers of each sprite for the frame number
                         imageFrame.layerData.fastForEach { layerData ->
-                            val px = position.x + position.offsetX + layerData.targetX - anchorX
-                            val py = position.y + position.offsetY + layerData.targetY - anchorY
+                            val px = position.x + position.offsetX + layerData.targetX - spriteComponent.anchorX
+                            val py = position.y + position.offsetY + layerData.targetY - spriteComponent.anchorY
                             batch.drawQuad(
                                 tex = ctx.getTex(layerData.slice),
                                 x = px,
@@ -101,18 +112,18 @@ class ObjectRenderSystem(
                 }
             }
             else if (entity has LayeredSpriteComponent) {
-                val (name, anchorX, anchorY, animation, frameIndex, _, _, _, _, _, _, layerList) = entity[LayeredSpriteComponent]
-                val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
+                val layeredSpriteComponent = entity[LayeredSpriteComponent]
+                val imageFrame = assetStore.getImageFrame(layeredSpriteComponent.name, layeredSpriteComponent.animation, layeredSpriteComponent.frameIndex)
 
                 ctx.useBatcher { batch ->
                     // Iterate over all layers of each sprite for the frame number
-                    layerList.fastForEachWithIndex { index, layer ->
+                    layeredSpriteComponent.layerList.fastForEachWithIndex { index, layer ->
                         // Get image data for specific layer from asset store
                         val image = imageFrame.layerData[index]
                         batch.drawQuad(
                             tex = ctx.getTex(image.slice),
-                            x = position.x + image.targetX - anchorX + layer.position.x + layer.position.offsetX,
-                            y = position.y + image.targetY - anchorY + layer.position.y + layer.position.offsetY,
+                            x = position.x + image.targetX - layeredSpriteComponent.anchorX + layer.position.x + layer.position.offsetX,
+                            y = position.y + image.targetY - layeredSpriteComponent.anchorY + layer.position.y + layer.position.offsetY,
                             filtering = false,
                             colorMul = layer.rgba.rgba,
                             program = null // Possibility to use a custom shader - add ShaderComponent or similar
@@ -122,22 +133,22 @@ class ObjectRenderSystem(
             }
             // Rendering path for text (not optimized - no caching)
             else if (entity has TextFieldComponent) {
-                val (text, fontName, textRangeStart, textRangeEnd, width, height, wordWrap,  horizontalAlign, verticalAlign) = entity[TextFieldComponent]
+                val textFieldComponent = entity[TextFieldComponent]
                 val offset = Point(position.offsetX, position.offsetY)
 
                 renderCtx2d(ctx) { render ->
                     var n = 0
                     RichTextData(
-                        text = text,
-                        font = assetStore.getFont(fontName)
+                        text = textFieldComponent.text,
+                        font = assetStore.getFont(textFieldComponent.fontName)
                     ).place(
                         bounds = Rectangle(position.x, position.y, width, height),
-                        wordWrap = wordWrap,
+                        wordWrap = textFieldComponent.wordWrap,
                         includePartialLines = false,
                         ellipsis = null,
                         fill = null,
                         stroke = null,
-                        align = TextAlignment(horizontalAlign, verticalAlign),
+                        align = TextAlignment(textFieldComponent.horizontalAlign, textFieldComponent.verticalAlign),
                         includeFirstLineAlways = true
                     ).fastForEach {
                         render.drawText(
@@ -147,8 +158,8 @@ class ObjectRenderSystem(
                             it.pos + offset,
                             color = rgba,
                             baseline = true,
-                            textRangeStart = textRangeStart - n,
-                            textRangeEnd = textRangeEnd - n,
+                            textRangeStart = textFieldComponent.textRangeStart - n,
+                            textRangeEnd = textFieldComponent.textRangeEnd - n,
                             filtering = false,
                         )
                         n += it.text.length
@@ -157,14 +168,14 @@ class ObjectRenderSystem(
             }
             // Rendering path for 9-patch graphic (not optimized - no caching)
             else if (entity has NinePatchComponent) {
-                val (name, width, height) = entity[NinePatchComponent]
-                val ninePatch = assetStore.getNinePatch(name)
+                val ninePatchComponent = entity[NinePatchComponent]
+                val ninePatch = assetStore.getNinePatch(ninePatchComponent.name)
 
                 val numQuads = ninePatch.info.totalSegments
                 val indices = TexturedVertexArray.quadIndices(numQuads)
                 val tva = TexturedVertexArray(numQuads * 4, indices)
                 var index = 0
-                val viewBounds = RectangleInt(position.x.toInt(), position.y.toInt(), width.toInt(), height.toInt())
+                val viewBounds = RectangleInt(position.x.toInt(), position.y.toInt(), ninePatchComponent.width.toInt(), ninePatchComponent.height.toInt())
                 ninePatch.info.computeScale(viewBounds) { segment, xx, yy, ww, hh ->
                     val bmpSlice = ninePatch.getSegmentBmpSlice(segment)
                     tva.quad(index++ * 4,

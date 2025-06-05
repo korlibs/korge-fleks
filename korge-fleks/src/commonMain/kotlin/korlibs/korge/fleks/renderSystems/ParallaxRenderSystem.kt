@@ -5,7 +5,9 @@ import korlibs.datastructure.iterators.*
 import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
+import korlibs.korge.fleks.components.Position
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -37,8 +39,8 @@ class ParallaxRenderSystem(
             // Iterate over all entities which should be rendered in this view
             family.forEach { entity ->
                 val globalPositionComponent = entity[PositionComponent]
-                val (configName, backgroundLayers, parallaxPlane, foregroundLayers) = entity[ParallaxComponent]
-                val parallaxDataContainer = assetStore.getBackground(configName)
+                val parallaxComponent = entity[ParallaxComponent]
+                val parallaxDataContainer = assetStore.getBackground(parallaxComponent.name)
 
                 // Iterate over all parallax layers
                 val parallaxMode = parallaxDataContainer.config.mode
@@ -46,13 +48,13 @@ class ParallaxRenderSystem(
                 // Draw all background parallax layers
                 parallaxDataContainer.backgroundLayers?.defaultAnimation?.firstFrame?.layerData?.fastForEachWithIndex { index, layer ->
                     // Check local position and wrap around the texture size
-                    backgroundLayers[index].position.x = wrap(backgroundLayers[index].position.x, max = layer.width)
-                    backgroundLayers[index].position.y = wrap(backgroundLayers[index].position.y, max = layer.height)
-                    val localRgba = backgroundLayers[index].rgba.rgba
+                    parallaxComponent.backgroundLayers[index].position.x = wrap(parallaxComponent.backgroundLayers[index].position.x, max = layer.width)
+                    parallaxComponent.backgroundLayers[index].position.y = wrap(parallaxComponent.backgroundLayers[index].position.y, max = layer.height)
+                    val localRgba = parallaxComponent.backgroundLayers[index].rgba.rgba
 
                     drawLayer(
                         global = globalPositionComponent,
-                        local = backgroundLayers[index].position,
+                        local = parallaxComponent.backgroundLayers[index].position,
                         config = parallaxDataContainer.config.backgroundLayers!![index],
                         layer, localRgba, batch, ctx
                     )
@@ -65,13 +67,13 @@ class ParallaxRenderSystem(
                     else layer.height  // if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE)
 
                     // Check local position and wrap around the texture size
-                    if (layerConfig.repeat) parallaxPlane.attachedLayersRearPositions[index] = wrap(parallaxPlane.attachedLayersRearPositions[index], max = layerSize)
-                    val localRgba = parallaxPlane.rgba.rgba
+                    if (layerConfig.repeat) parallaxComponent.parallaxPlane.attachedLayersRearPositions[index] = wrap(parallaxComponent.parallaxPlane.attachedLayersRearPositions[index], max = layerSize)
+                    val localRgba = parallaxComponent.parallaxPlane.rgba.rgba
 
                     drawParallaxPlaneLayer(
                         global = globalPositionComponent,
-                        local = parallaxPlane.position,
-                        localScroll = parallaxPlane.attachedLayersRearPositions[index],
+                        local = parallaxComponent.parallaxPlane.position,
+                        localScroll = parallaxComponent.parallaxPlane.attachedLayersRearPositions[index],
                         parallaxMode = parallaxMode,
                         repeat = layerConfig.repeat,
                         layer, localRgba, batch, ctx
@@ -85,13 +87,13 @@ class ParallaxRenderSystem(
                     val layerSize = if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) layer.width
                     else layer.height  // if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE)
 
-                    parallaxPlane.linePositions[index] = wrap(parallaxPlane.linePositions[index], max = layerSize)
-                    val localRgba = parallaxPlane.rgba.rgba
+                    parallaxComponent.parallaxPlane.linePositions[index] = wrap(parallaxComponent.parallaxPlane.linePositions[index], max = layerSize)
+                    val localRgba = parallaxComponent.parallaxPlane.rgba.rgba
 
                     drawParallaxPlaneLayer(
                         global = globalPositionComponent,
-                        local = parallaxPlane.position,
-                        localScroll = parallaxPlane.linePositions[index],
+                        local = parallaxComponent.parallaxPlane.position,
+                        localScroll = parallaxComponent.parallaxPlane.linePositions[index],
                         parallaxMode = parallaxMode,
                         repeat = true, layer, localRgba, batch, ctx
                     )
@@ -104,13 +106,13 @@ class ParallaxRenderSystem(
                     else layer.height  // if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE)
 
                     // Check local position and wrap around the texture size
-                    if (layerConfig.repeat) parallaxPlane.attachedLayersFrontPositions[index] = wrap(parallaxPlane.attachedLayersFrontPositions[index], max = layerSize)
-                    val localRgba = parallaxPlane.rgba.rgba
+                    if (layerConfig.repeat) parallaxComponent.parallaxPlane.attachedLayersFrontPositions[index] = wrap(parallaxComponent.parallaxPlane.attachedLayersFrontPositions[index], max = layerSize)
+                    val localRgba = parallaxComponent.parallaxPlane.rgba.rgba
 
                     drawParallaxPlaneLayer(
                         global = globalPositionComponent,
-                        local = parallaxPlane.position,
-                        localScroll = parallaxPlane.attachedLayersFrontPositions[index],
+                        local = parallaxComponent.parallaxPlane.position,
+                        localScroll = parallaxComponent.parallaxPlane.attachedLayersFrontPositions[index],
                         parallaxMode = parallaxMode,
                         repeat = layerConfig.repeat,
                         layer, localRgba, batch, ctx
@@ -120,13 +122,13 @@ class ParallaxRenderSystem(
                 // Draw all foreground parallax layers
                 parallaxDataContainer.foregroundLayers?.defaultAnimation?.firstFrame?.layerData?.fastForEachWithIndex { index, layer ->
                     // Check local position and wrap around the texture size
-                    foregroundLayers[index].position.x = wrap(foregroundLayers[index].position.x, max = layer.width)
-                    foregroundLayers[index].position.y = wrap(foregroundLayers[index].position.y, max = layer.height)
-                    val localRgba = foregroundLayers[index].rgba.rgba
+                    parallaxComponent.foregroundLayers[index].position.x = wrap(parallaxComponent.foregroundLayers[index].position.x, max = layer.width)
+                    parallaxComponent.foregroundLayers[index].position.y = wrap(parallaxComponent.foregroundLayers[index].position.y, max = layer.height)
+                    val localRgba = parallaxComponent.foregroundLayers[index].rgba.rgba
 
                     drawLayer(
                         global = globalPositionComponent,
-                        local = foregroundLayers[index].position,
+                        local = parallaxComponent.foregroundLayers[index].position,
                         config = parallaxDataContainer.config.foregroundLayers!![index],
                         layer, localRgba, batch, ctx
                     )
@@ -141,8 +143,8 @@ class ParallaxRenderSystem(
     }
 
     private fun drawLayer(
-        global: PositionComponent,
-        local: PositionComponent,
+        global: Position,
+        local: Position,
         config: ParallaxLayerConfig,
         layer: ImageFrameLayer,
         rgba: RGBA,
@@ -173,8 +175,8 @@ class ParallaxRenderSystem(
     }
 
     private fun drawParallaxPlaneLayer(
-        global: PositionComponent,
-        local: PositionComponent,
+        global: Position,
+        local: Position,
         localScroll: Float,
         parallaxMode: ParallaxConfig.Mode,
         repeat: Boolean,
