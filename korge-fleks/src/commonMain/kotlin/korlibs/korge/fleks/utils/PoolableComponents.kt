@@ -89,8 +89,7 @@ abstract class PoolableComponent<T> : Component<T> {
 
     override fun World.onAdd(entity: Entity) {
         // Only run init function on components when the game is running and not when we load snapshots
-        val gameState = inject<GameStateManager>("GameStateManager")
-        if (gameState.gameRunning) {
+        if (GameStateManager.gameRunning) {
             initComponent(entity)
         }
         // Call init prefabs always
@@ -103,8 +102,7 @@ abstract class PoolableComponent<T> : Component<T> {
         // Call cleanup prefabs always
         cleanupPrefabs(entity)
         // Do not free the component if the game is not running - i.e. during the snapshot rewind / forward feature
-        val gameState = inject<GameStateManager>("GameStateManager")
-        if (gameState.gameRunning) {
+        if (GameStateManager.gameRunning) {
             // Call cleanup function to reset the component when requested by fleks world by calling onRemove
             cleanupComponent(entity)
             println("Freeing component")

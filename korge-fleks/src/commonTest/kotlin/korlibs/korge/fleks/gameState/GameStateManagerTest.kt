@@ -2,7 +2,6 @@ package korlibs.korge.fleks.gameState
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.gameState.GameStateManager.startGame
 import kotlinx.serialization.modules.SerializersModule
 import kotlin.test.*
 

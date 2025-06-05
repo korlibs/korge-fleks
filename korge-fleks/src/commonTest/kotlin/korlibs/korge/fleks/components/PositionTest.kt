@@ -1,6 +1,8 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.configureWorld
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -13,10 +15,10 @@ internal class PositionTest {
     @Test
     fun testPositionSerialization() {
 
-        val compUnderTest = PositionComponent(
-            x = 5.2f,
-            y = 42.1f,
-        )
+        val compUnderTest = positionComponent {
+            x = 5.2f
+            y = 42.1f
+        }
 
         val entity = expectedWorld.entity {
             it += compUnderTest
