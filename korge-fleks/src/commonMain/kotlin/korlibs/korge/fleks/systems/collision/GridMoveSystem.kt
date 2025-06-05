@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IntervalSystem
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.WorldData
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Grid
@@ -13,6 +14,10 @@ import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.GridCollisionYComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.GridCollisionZComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionXComponent
+import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
+import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
+import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
+import korlibs.korge.fleks.logic.collision.resolver.SimpleCollisionResolver
 import korlibs.korge.fleks.tags.RenderLayerTag.MAIN_LEVELMAP
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.math.isAlmostEquals
@@ -26,6 +31,11 @@ class GridMoveSystem(
 ) {
     private val levelFamily = world.family { all(MAIN_LEVELMAP, LevelMapComponent) }
     private val entityFamily = World.family { all(MotionComponent, GridComponent).any(GridComponent, CollisionComponent) }
+
+    val assetStore = world.inject<AssetStore>("AssetStore")
+    var levelData: WorldData = assetStore.getWorldData(levelName)
+    var collisionChecker: CollisionChecker = PlatformerCollisionChecker(levelData)
+    var collisionResolver: CollisionResolver = SimpleCollisionResolver(16, 16)
 
     override fun onTick() {
         // Run this system only if there is a level map in the world
