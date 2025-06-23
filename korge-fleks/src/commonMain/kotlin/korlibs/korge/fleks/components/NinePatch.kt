@@ -41,13 +41,13 @@ class NinePatch private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticNinePatchComponent(config: NinePatch.() -> Unit ): NinePatch =
-        NinePatch().apply(config)
+            NinePatch().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun ninePatchComponent(config: NinePatch.() -> Unit ): NinePatch =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { NinePatch() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "NinePatch") { NinePatch() }
     }
 
     // Clone a new instance of the component from the pool

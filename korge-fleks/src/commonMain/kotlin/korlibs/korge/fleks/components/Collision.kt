@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.data.Point
+import korlibs.korge.fleks.components.data.Point.Companion.staticPoint
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -15,7 +16,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Collision")
 class Collision private constructor(
-    var configName: String = "",
+    var name: String = "",
     var right: Boolean = false,
     var left: Boolean = false,
     var isCollidingAbove: Boolean = false,
@@ -29,12 +30,12 @@ class Collision private constructor(
     var jumpVelocity: Float = 0f,  // TODO: check with MotionComponent
     var justHit: Boolean = false,
     var isHit: Boolean = false,
-    val hitPosition: Point = Point.value()
+    val hitPosition: Point = staticPoint {}
 ) : PoolableComponent<Collision>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Collision) {
-        configName = from.configName
+        name = from.name
         right = from.right
         left = from.left
         isCollidingAbove = from.isCollidingAbove
@@ -79,13 +80,13 @@ class Collision private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticCollisionComponent(config: Collision.() -> Unit ): Collision =
-        Collision().apply(config)
+            Collision().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun collisionComponent(config: Collision.() -> Unit ): Collision =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Collision() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Collision") { Collision() }
     }
 
     // Clone a new instance of the component from the pool

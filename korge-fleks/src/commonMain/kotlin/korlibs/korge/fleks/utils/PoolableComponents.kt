@@ -5,21 +5,7 @@ import korlibs.datastructure.*
 import korlibs.korge.fleks.gameState.*
 
 
-/**
- * All components needs to be derived from [PoolableComponents] to be able to be reused from a Component pool and
- * to be recorded in the SnapshotSerializerSystem.
- *
- * The reset function is called when the component is going to be reused for a new entity.
- * The clone function needs to be implemented to perform a deep copy of all properties of the component for
- * the serialization of the game state.
- *
- * Note:
- *   - The initComponent and cleanupComponent functions are called as normal life-cycle functions of the component.
- *     They are not called when the snapshot rewind/forward feature is used because the components are already
- *     initialized when loaded (ie. deserialized) from a snapshot.
- *   - The initPrefabs and cleanupPrefabs functions are called always when the component is added to or removed from a world.
- *     Also during the snapshot rewind/forward feature.
- */
+// TODO: remove this class
 abstract class PoolableComponents<T> : Component<T> {
     abstract fun World.clone(): PoolableComponents<T>  // feature of making snapshots on the fly
 
@@ -67,6 +53,22 @@ abstract class PoolableComponents<T> : Component<T> {
     }
 }
 
+
+/**
+ * All components needs to be derived from [PoolableComponents] to be able to be reused from a Component pool and
+ * to be recorded in the SnapshotSerializerSystem.
+ *
+ * The reset function is called when the component is going to be reused for a new entity.
+ * The clone function needs to be implemented to perform a deep copy of all properties of the component for
+ * the serialization of the game state.
+ *
+ * Note:
+ *   - The initComponent and cleanupComponent functions are called as normal life-cycle functions of the component.
+ *     They are not called when the snapshot rewind/forward feature is used because the components are already
+ *     initialized when loaded (ie. deserialized) from a snapshot.
+ *   - The initPrefabs and cleanupPrefabs functions are called always when the component is added to or removed from a world.
+ *     Also during the snapshot rewind/forward feature.
+ */
 abstract class PoolableComponent<T> : Component<T> {
     open fun World.initComponent(entity: Entity) = Unit
     open fun World.cleanupComponent(entity: Entity) = Unit
@@ -171,7 +173,8 @@ fun <T> World.getPool(componentType: ComponentType<T>): Pool<T> {
  * The method [alloc] retrieves from the pool or allocates a new object, while the [free] method
  * pushes back one element to the pool. Entities needs to be reset/cleanup before freeing manually.
  */
-class Pool<T> internal constructor() {
+class Pool<T> internal constructor(poolName: String) {
+    private val name: String = poolName
     private var gen: ((Int) -> T)? = null
     private val items = Stack<T>()
     private var lastId = 0
@@ -192,7 +195,7 @@ class Pool<T> internal constructor() {
      * @param preallocate the number of objects to preallocate
      * @param gen the object generate function to create a new object when needed
      */
-    constructor(preallocate: Int = 0, gen: (Int) -> T) : this() {
+    constructor(preallocate: Int = 0, name: String, gen: (Int) -> T) : this(name) {
         setup( preallocate, gen)
     }
 

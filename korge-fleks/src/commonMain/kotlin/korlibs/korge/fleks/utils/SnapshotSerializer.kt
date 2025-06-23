@@ -201,7 +201,6 @@ class SnapshotSerializer {
             subclass(TweenProperty::class)
             subclass(TweenSequence::class)
             // Used as data inside components
-            subclass(Point::class)
             subclass(Rgb::class)
         }
 
@@ -212,6 +211,7 @@ class SnapshotSerializer {
             subclass(TextureRef::class)
             subclass(Parallax.Layer::class)
             subclass(Parallax.Plane::class)
+            subclass(Point::class)
         }
 
         // Register tags (components without properties)

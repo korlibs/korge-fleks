@@ -45,6 +45,6 @@ class ResetEvent private constructor(
             tweens.add(pool.alloc().apply(config))
         }
 
-        private val pool = Pool(preallocate = 0) { ResetEvent() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "ResetEvent") { ResetEvent() }
     }
 }

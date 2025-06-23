@@ -65,7 +65,7 @@ class TweenSequence private constructor(
         fun tweenSequenceComponent(config: TweenSequence.() -> Unit ): TweenSequence =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { TweenSequence() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenSequence") { TweenSequence() }
     }
 
     // Clone a new instance of the component from the pool

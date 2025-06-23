@@ -67,7 +67,7 @@ class Parallax private constructor(
         fun parallaxComponent(config: Parallax.() -> Unit ): Parallax =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Parallax() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Parallax") { Parallax() }
     }
 
     // Clone a new instance of the component from the pool
@@ -232,7 +232,7 @@ class Parallax private constructor(
             fun layer(config: Layer.() -> Unit ): Layer =
                 pool.alloc().apply(config)
 
-            private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Layer() }
+            private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Layer") { Layer() }
 
             fun MutableList<Layer>.init(from: List<Layer>) {
                 from.forEach { item ->
@@ -289,7 +289,6 @@ class Parallax private constructor(
         }
 
         override fun free() {
-            TODO("Check if needed - Free Plane component from pool")
             cleanup()
             pool.free(this)
         }
@@ -302,10 +301,7 @@ class Parallax private constructor(
             // Use this function to get a new instance of a component from the pool and add it to an entity
             fun plane(config: Plane.() -> Unit ): Plane = pool.alloc().apply(config)
 
-            private val pool = Pool(AppConfig.POOL_PREALLOCATE) {
-//                println("Plane created: $it")
-                Plane()
-            }
+            private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Plane") { Plane() }
         }
     }
 }

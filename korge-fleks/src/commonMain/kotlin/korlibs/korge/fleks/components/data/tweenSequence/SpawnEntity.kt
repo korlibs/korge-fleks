@@ -51,6 +51,6 @@ class SpawnEntity private constructor(
             tweens.add(pool.alloc().apply(config))
         }
 
-        private val pool = Pool(preallocate = 0) { SpawnEntity() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SpawnEntity") { SpawnEntity() }
     }
 }

@@ -49,7 +49,7 @@ class SpriteLayer private constructor(
         fun spriteLayer(config: SpriteLayer.() -> Unit ): SpriteLayer =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { SpriteLayer() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SpriteLayer") { SpriteLayer() }
 
         // Init and cleanup functions for collections of SpriteLayer
         fun MutableMap<String, SpriteLayer>.init(from: Map<String, SpriteLayer>) {

@@ -34,6 +34,6 @@ class DeleteEntity private constructor(
             tweens.add(pool.alloc().apply(config))
         }
 
-        private val pool = Pool(preallocate = 0) { DeleteEntity() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "DeleteEntity") { DeleteEntity() }
     }
 }

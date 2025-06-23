@@ -41,13 +41,13 @@ class Info private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticInfoComponent(config: Info.() -> Unit ): Info =
-        Info().apply { config() /*; println("Static created: Info")*/ }
+            Info().apply { config() /*; println("Static created: Info")*/ }
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun infoComponent(config: Info.() -> Unit ): Info =
-        pool.alloc().apply { config() /*; println("Created: Info '$num'")*/ }
+            pool.alloc().apply { config() /*; println("Created: Info '$num'")*/ }
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Info(/* num = it */) }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Info") { Info(/* num = it */) }
     }
 
     // Clone a new instance of the component from the pool

@@ -1,39 +1,49 @@
 package korlibs.korge.fleks.components.data
 
-import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
-import kotlinx.serialization.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 
 /**
- * A simple 2D point with x, y coordinates which is poolable and serializable.
- */
+ * This class is used as simple 2D point with x, y coordinates. It is poolable and serializable.
+*/
 @Serializable @SerialName("Point")
 class Point private constructor(
     var x: Float = 0f,
     var y: Float = 0f
-) : PoolableComponents<Point>() {
-    fun init(from: Point) {
+) : Poolable<Point> {
+    // Init an existing data instance with data from another one
+    override fun init(from: Point) {
         x = from.x
         y = from.y
     }
 
-    fun cleanup() {
+    // Cleanup data instance manually
+    // This is used for data instances when they are a value property of a component
+    override fun cleanup() {
         x = 0f
         y = 0f
     }
 
-    override fun type() = PointData
-    companion object {
-        val PointData = componentTypeOf<Point>()
+    // Clone a new data instance from the pool
+    override fun clone(): Point = point { init(from = this@Point ) }
 
-        // Use this function to create a new Point instance as val inside another component.
-        fun value(): Point = Point()
-
-        fun InjectableConfiguration.addPointDataPool(preAllocate: Int = 0) {
-            addPool(PointData, preAllocate) { Point() }
-        }
+    // Cleanup the tween data instance manually
+    override fun free() {
+        cleanup()
+        pool.free(this)
     }
 
-    override fun World.clone(): Point = getPoolable(PointData).apply { init(from = this@Point) }
+    companion object {
+        // Use this function to create a new instance of data as value property inside a component
+        fun staticPoint(config: Point.() -> Unit ): Point =
+            Point().apply(config)
+
+        // Use this function to get a new instance of the data object from the pool
+        fun point(config: Point.() -> Unit ): Point =
+            pool.alloc().apply(config)
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Point") { Point() }
+    }
 }
