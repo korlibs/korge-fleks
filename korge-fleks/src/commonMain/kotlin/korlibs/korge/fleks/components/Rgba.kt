@@ -95,6 +95,12 @@ class Rgba private constructor(
             field = value
         }
 
+    var rgb: Int
+        get() = rgba.rgb
+        set(value) {
+            rgba = rgba.withRGB(value)
+        }
+
     var alpha: Float = rgba.af
         get() = rgba.af
         set(value) {

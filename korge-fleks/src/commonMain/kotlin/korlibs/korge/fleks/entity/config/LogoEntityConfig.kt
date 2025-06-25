@@ -1,13 +1,13 @@
 package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
+import korlibs.image.color.Colors
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.LayeredSprite.Companion.layeredSpriteComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.lifeCycleComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
-import korlibs.korge.fleks.components.data.Rgb
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -30,7 +30,7 @@ data class LogoEntityConfig(
     private val centerY: Boolean = false,
     private val offsetX: Float = 0f,
     private val offsetY: Float = 0f,
-    private val tint: Rgb = Rgb.WHITE,
+    private val tint: Int = Colors.WHITE.rgb,
     private val alpha: Float = 1f,
     private val layerIndex: Int,
     private val layerTag: RenderLayerTag
@@ -49,7 +49,7 @@ data class LogoEntityConfig(
                 name = assetName
             }
             it += rgbaComponent {
-                rgba.withRGB(tint.r, tint.g, tint.b)
+                rgb = tint
                 alpha = this@LogoEntityConfig.alpha
             }
             it += layerComponent { index = this@LogoEntityConfig.layerIndex }
