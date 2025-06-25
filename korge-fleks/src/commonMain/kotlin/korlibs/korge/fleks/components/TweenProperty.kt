@@ -112,7 +112,7 @@ class TweenProperty private constructor(
 //            // All component types share the same pool - so just use the first component type to get it
 //            getPoolable(componentType).apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { TweenProperty() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenProperty") { TweenProperty() }
 
         // TODO: Check if we should use generic function above or specific one below (need to be created for each component type)
         fun tweenPositionOffsetXComponent(config: TweenProperty.() -> Unit ): TweenProperty =

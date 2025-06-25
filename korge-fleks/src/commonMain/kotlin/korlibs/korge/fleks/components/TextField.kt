@@ -65,13 +65,13 @@ class TextField private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticTextFieldComponent(config: TextField.() -> Unit ): TextField =
-        TextField().apply(config)
+            TextField().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun textFieldComponent(config: TextField.() -> Unit ): TextField =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { TextField() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TextField") { TextField() }
     }
 
     // Clone a new instance of the component from the pool

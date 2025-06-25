@@ -97,13 +97,13 @@ class LayeredSprite private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticLayeredSpriteComponent(config: LayeredSprite.() -> Unit ): LayeredSprite =
-        LayeredSprite().apply(config)
+            LayeredSprite().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun layeredSpriteComponent(config: LayeredSprite.() -> Unit ): LayeredSprite =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { LayeredSprite() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "LayeredSprite") { LayeredSprite() }
     }
 
     // Clone a new instance of the component from the pool

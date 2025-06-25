@@ -35,13 +35,13 @@ class LifeCycle private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticLifeCycleComponent(config: LifeCycle.() -> Unit ): LifeCycle =
-        LifeCycle().apply(config)
+            LifeCycle().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun lifeCycleComponent(config: LifeCycle.() -> Unit ): LifeCycle =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { LifeCycle() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "LifeCycle") { LifeCycle() }
     }
 
     // Clone a new instance of the component from the pool

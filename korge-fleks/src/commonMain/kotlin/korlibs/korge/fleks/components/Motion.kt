@@ -54,13 +54,13 @@ class Motion private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticMotionComponent(config: Motion.() -> Unit ): Motion =
-        Motion().apply(config)
+            Motion().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun motionComponent(config: Motion.() -> Unit ): Motion =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Motion() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Motion") { Motion() }
     }
 
     // Clone a new instance of the component from the pool

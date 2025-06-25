@@ -43,13 +43,13 @@ class OffsetByFrameIndex private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticOffsetByFrameIndexComponent(config: OffsetByFrameIndex.() -> Unit ): OffsetByFrameIndex =
-        OffsetByFrameIndex().apply(config)
+            OffsetByFrameIndex().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun offsetByFrameIndexComponent(config: OffsetByFrameIndex.() -> Unit ): OffsetByFrameIndex =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { OffsetByFrameIndex() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "OffsetByFrameIndex") { OffsetByFrameIndex() }
     }
 
     // Clone a new instance of the component from the pool
@@ -65,8 +65,7 @@ class OffsetByFrameIndex private constructor(
         // Put all points back to the pool
         mapOfOffsetLists.forEach { (_, list) ->
             list.forEach { point ->
-                point.cleanup()
-                point.run { this@cleanupComponent.free() }
+                point.free()
             }
         }
         mapOfOffsetLists = mapOf()

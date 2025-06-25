@@ -55,13 +55,13 @@ class Gravity private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticGravityComponent(config: Gravity.() -> Unit ): Gravity =
-        Gravity().apply(config)
+            Gravity().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun gravityComponent(config: Gravity.() -> Unit ): Gravity =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Gravity() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Gravity") { Gravity() }
     }
 
     // Clone a new instance of the component from the pool

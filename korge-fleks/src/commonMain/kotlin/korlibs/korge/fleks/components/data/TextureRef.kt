@@ -55,7 +55,7 @@ class TextureRef private constructor(
         fun textureRef(config: TextureRef.() -> Unit ): TextureRef =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { TextureRef() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TextureRef") { TextureRef() }
 
         // Init and cleanup functions for collections of TextureRef
         fun MutableList<TextureRef>.init(from: List<TextureRef>) {

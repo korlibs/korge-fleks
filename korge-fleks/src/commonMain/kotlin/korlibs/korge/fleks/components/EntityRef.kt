@@ -39,13 +39,13 @@ class EntityRef private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticEntityRefComponent(config: EntityRef.() -> Unit ): EntityRef =
-        EntityRef().apply(config)
+            EntityRef().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun entityRefComponent(config: EntityRef.() -> Unit ): EntityRef =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { EntityRef() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "EntityRef") { EntityRef() }
     }
 
     // Clone a new instance of the component from the pool
