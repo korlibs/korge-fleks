@@ -89,7 +89,30 @@ fun MutableList<Entity>.init(from: List<Entity>) {
 //    }
 //}
 
-
+/**
+ * Init function (deep copy) for [MutableMap] of String keys and [Entity] values.
+ */
 fun MutableMap<String, Entity>.init(from: Map<String, Entity>) {
     this.putAll(from)
+}
+
+/**
+ * Free all entities in the list and clear the list.
+ * This will remove all entities from the world and clear the list.
+ */
+fun MutableList<Entity>.freeAndClear(world: World) {
+    this.forEach { entity ->
+        world -= entity
+    }
+    this.clear()
+}
+
+/**
+ * Free all entities in the list.
+ * This will remove all entities from the world but not clear the list.
+ */
+fun MutableList<Entity>.free(world: World) {
+    this.forEach { entity ->
+        world -= entity
+    }
 }
