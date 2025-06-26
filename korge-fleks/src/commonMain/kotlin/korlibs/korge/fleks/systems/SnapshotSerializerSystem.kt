@@ -54,7 +54,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 //       function of components. Otherwise, world functions would be called on the current original
                 //       world and not on the snapshot world! This is not what we want!
                 if (component !is PoolableComponent<*>) { error("Component '$component' must be derive from PoolableComponent<T>!") }
-                (component as PoolableComponent<*>).clone()
+                componentsCopy.add((component as PoolableComponent<*>).clone())
             }
             value.tags.forEach { tag -> tagsCopy.add(tag) }
 

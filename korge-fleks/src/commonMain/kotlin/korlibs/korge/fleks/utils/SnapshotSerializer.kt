@@ -204,11 +204,11 @@ class SnapshotSerializer {
         polymorphic(Poolable::class) {
             subclass(SpriteLayer::class)
             subclass(TextureRef::class)
-            subclass(Parallax.Layer::class)
-            subclass(Parallax.Plane::class)
             subclass(Point::class)
+        }
 
-            // Data classes used in TweenSequence
+        // Register Tween data classes used in TweenSequence
+        polymorphic(TweenBase::class) {
             subclass(DeleteEntity::class)
             subclass(ExecuteConfigFunction::class)
             subclass(Jump::class)

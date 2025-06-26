@@ -2,19 +2,27 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.Parallax.Plane.Companion.staticPlane
-import korlibs.korge.fleks.components.Parallax.Layer.Companion.init
-import korlibs.korge.fleks.components.Parallax.Layer.Companion.freeAndClear
-import korlibs.korge.fleks.components.Parallax.Layer.Companion.layer
-import korlibs.korge.fleks.components.Position.Companion.PositionComponent
-import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
-import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
-import korlibs.korge.fleks.components.Rgba.Companion.staticRgbaComponent
+import korlibs.korge.fleks.components.Position.Companion.positionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.utils.entity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
+
+//fun MutableList<DataBase>.init(from: List<DataBase>) {
+//    from.forEach { item ->
+//        this.add((item as Poolable<*>).clone() as DataBase)
+//    }
+//}
+//
+//fun MutableList<DataBase>.freeAndClear() {
+//    this.forEach { item ->
+//        (item as Poolable<*>).free()
+//    }
+//    this.clear()
+//}
 
 
 /**
@@ -30,28 +38,41 @@ import kotlinx.serialization.Serializable
 class Parallax private constructor(
     var name: String = "",
 
-    // Do not set below properties directly - they will be set by the onAdd hook function
-    // List of layers
-    val backgroundLayers: MutableList<Layer> = mutableListOf(),
-    val parallaxPlane: Plane = staticPlane {},
-    val foregroundLayers: MutableList<Layer> = mutableListOf()
+    // Do not set below properties directly - they will be set by the initComponent hook function
+    // List of layer entities
+    val bgLayerEntities: MutableList<Entity> = mutableListOf(),
+    var parallaxPlaneEntity: Entity = Entity.NONE,
+    val fgLayerEntities: MutableList<Entity> = mutableListOf(),
+    // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
+    val linePositions: MutableList<Float> = mutableListOf(),
+    // Below lists are static and can be cloned by reference
+    val attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
+    val attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
 ) : PoolableComponent<Parallax>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Parallax) {
         name = from.name
-        backgroundLayers.init(from.backgroundLayers)
-        parallaxPlane.init(from.parallaxPlane)
-        foregroundLayers.init(from.foregroundLayers)
+        bgLayerEntities.init(from.bgLayerEntities)
+        parallaxPlaneEntity = from.parallaxPlaneEntity
+        fgLayerEntities.init(from.fgLayerEntities)
+        // Make deep copy of the line and layer positions - they are changing
+        linePositions.addAll(from.linePositions)
+        attachedLayersRearPositions.addAll(from.attachedLayersRearPositions)
+        attachedLayersFrontPositions.addAll(from.attachedLayersFrontPositions)
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
         name = ""
-        backgroundLayers.freeAndClear()
-        parallaxPlane.cleanup()  // static property - no need to free
-        foregroundLayers.freeAndClear()
+        // Entities are freed in the cleanupComponent function because of world scope
+        bgLayerEntities.clear()
+        parallaxPlaneEntity = Entity.NONE
+        fgLayerEntities.clear()
+        linePositions.clear()
+        attachedLayersRearPositions.clear()
+        attachedLayersFrontPositions.clear()
     }
 
     override fun type() = ParallaxComponent
@@ -89,36 +110,29 @@ class Parallax private constructor(
         // Initialize all layer lists on component creation
         repeat(numberBackgroundLayers) { index ->
             // Create new entities for controlling position and color of each layer e.g. by the TweenEngineSystem
-            // We share here the component objects from ParallaxComponent
-            backgroundLayers.add(
-                layer {
-                    // Create new entity and add existing components from the parallax layer data object
-                    this.entity = world.entity("Parallax BG layer '$index' of entity '${entity.id}'") {
-                        // Add already existing components from the layer object
-                        it += position
-                        it += rgba
-                    }
+            bgLayerEntities.add(
+                world.entity("Parallax BG layer '$index' of entity '${entity.id}'") {
+                    it += positionComponent {}
+                    it += rgbaComponent {}
                 }
             )
         }
         repeat(numberForegroundLayers) { index ->
-            foregroundLayers.add(
-                layer {
-                    this.entity = world.entity("Parallax FG layer '$index' of entity '${entity.id}'") {
-                        it += position
-                        it += rgba
-                    }
+            fgLayerEntities.add(
+                world.entity("Parallax FG layer '$index' of entity '${entity.id}'") {
+                    it += positionComponent {}
+                    it += rgbaComponent {}
                 }
             )
         }
 
-        repeat(numberAttachedRearLayers) { parallaxPlane.attachedLayersRearPositions.add(0f) }
-        repeat(numberParallaxPlaneLines) { parallaxPlane.linePositions.add(0f) }
-        repeat(numberAttachedFrontLayers) { parallaxPlane.attachedLayersFrontPositions.add(0f) }
+        repeat(numberAttachedRearLayers) { attachedLayersRearPositions.add(0f) }
+        repeat(numberParallaxPlaneLines) { linePositions.add(0f) }
+        repeat(numberAttachedFrontLayers) { attachedLayersFrontPositions.add(0f) }
 
-        parallaxPlane.entity = this.entity("Parallax plane of entity '${entity.id}'") {
-            it += parallaxPlane.position
-            it += parallaxPlane.rgba
+        parallaxPlaneEntity = world.entity("Parallax plane of entity '${entity.id}'") {
+            it += positionComponent {}
+            it += rgbaComponent {}
         }
 
         // Initialize an external prefab when the component is added to an entity
@@ -136,6 +150,10 @@ class Parallax private constructor(
 
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
+        // Remove all layer entities
+        bgLayerEntities.free(this)
+        fgLayerEntities.free(this)
+        // Lists will be cleared in the cleanup function
         cleanup()
     }
 
@@ -158,151 +176,79 @@ class Parallax private constructor(
      * go through each layer entity and copy the Position and RgbaComponent from the ParallaxComponent lists.
      */
     fun World.updateLayerEntities() {
-        // Overwrite existing components with those from the parallax layer config
-        backgroundLayers.forEach { layer ->
-            layer.entity.configure {
-                // Remove existing components - this triggers cleanup and freeing to component pool
-                it -= PositionComponent
-                it -= RgbaComponent
-                // Add existing components from the layer object - they need to be a reference to the same component objects
-                it += layer.position
-                it += layer.rgba
-            }
-        }
-        foregroundLayers.forEach { layer ->
-            layer.entity.configure {
-                // Remove existing components - this triggers cleanup and freeing to component pool
-                it -= PositionComponent
-                it -= RgbaComponent
-                // Add existing components from the layer object - they need to be a reference to the same component objects
-                it += layer.position
-                it += layer.rgba
-            }
-        }
-        parallaxPlane.entity.configure {
-            // Remove existing components - this triggers cleanup and freeing to component pool
-            it -= PositionComponent
-            it -= RgbaComponent
-            // Add existing components from the layer object - they need to be a reference to the same component objects
-            it += parallaxPlane.position
-            it += parallaxPlane.rgba
-        }
+// TODO
+//        // Overwrite existing components with those from the parallax layer config
+//        backgroundLayers.forEach { layer ->
+//            layer.entity.configure {
+//                // Remove existing components - this triggers cleanup and freeing to component pool
+//                it -= PositionComponent
+//                it -= RgbaComponent
+//                // Add existing components from the layer object - they need to be a reference to the same component objects
+//                it += layer.position
+//                it += layer.rgba
+//            }
+//        }
+//        foregroundLayers.forEach { layer ->
+//            layer.entity.configure {
+//                // Remove existing components - this triggers cleanup and freeing to component pool
+//                it -= PositionComponent
+//                it -= RgbaComponent
+//                // Add existing components from the layer object - they need to be a reference to the same component objects
+//                it += layer.position
+//                it += layer.rgba
+//            }
+//        }
+//        parallaxPlane.entity.configure {
+//            // Remove existing components - this triggers cleanup and freeing to component pool
+//            it -= PositionComponent
+//            it -= RgbaComponent
+//            // Add existing components from the layer object - they need to be a reference to the same component objects
+//            it += parallaxPlane.position
+//            it += parallaxPlane.rgba
+//        }
     }
 
-    // Layer data object used inside ParallaxComponent
-    @Serializable @SerialName("Layer")
-    class Layer private constructor(
-        var entity: Entity = Entity.NONE,  // Link to entity for tween animation
-        /**
-         * Local position of layer relative to the top-left point of the parallax entity (global PositionComponent).
-         */
-        val position: Position = staticPositionComponent {},
-        val rgba: Rgba = staticRgbaComponent {}
-    ) : Poolable<Layer> {
-        // Init an existing data instance with data from another one
-        override fun init(from: Layer) {
-            entity = from.entity
-            position.init(from.position)
-            rgba.init(from.rgba)
-        }
-
-        // Cleanup data instance manually
-        // This is used for data instances when they are part (val property) of a component
-        override fun cleanup() {
-            entity = Entity.NONE
-            position.cleanup()
-            rgba.cleanup()
-        }
-
-        // Clone a new data instance from the pool
-        override fun clone(): Layer = layer { init(from = this@Layer ) }
-
-        // Cleanup the tween data instance manually
-        override fun free() {
-            cleanup()
-            pool.free(this)
-        }
-
-        companion object {
-            // Use this function to create a new instance of data as val inside a component
-            fun staticLayer(config: Layer.() -> Unit ): Layer =
-                Layer().apply(config)
-
-            // Use this function to get a new instance of a component from the pool and add it to an entity
-            fun layer(config: Layer.() -> Unit ): Layer =
-                pool.alloc().apply(config)
-
-            private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Layer") { Layer() }
-
-            fun MutableList<Layer>.init(from: List<Layer>) {
-                from.forEach { item ->
-                    this.add(item.clone())
-                }
-            }
-
-            // Cleanup and put Layer data object back to the pool
-            fun MutableList<Layer>.freeAndClear() {
-                this.forEach { item ->
-                    item.free()
-                }
-                this.clear()
-            }
-        }
-    }
-
-    // Plane data object used inside ParallaxComponent
-    @Serializable @SerialName("Parallax.Plane")
-    class Plane private constructor(
-        var entity: Entity = Entity.NONE,  // Link to entity for tween animation
-        /**
-         * Local position of parallax plane relative to the top-left point of the parallax entity (global PositionComponent).
-         * Here we use position.offsetX or position.offsetY perpendicular to below *Positions depending on ParallaxMode.
-         */
-        val position: Position = staticPositionComponent {},
-        val rgba: Rgba = staticRgbaComponent {},
-        // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
-        val linePositions: MutableList<Float> = mutableListOf(),
-        // Below lists are static and can be cloned by reference
-        val attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
-        val attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
-    ) : Poolable<Plane> {
-
-        override fun init(from: Plane) {
-            // Copy all properties from the original Plane object
-            entity = from.entity
-            position.init(from.position)
-            rgba.init(from.rgba)
-            // Make deep copy of the line and layer positions - they are changing
-            linePositions.addAll(from.linePositions)
-            attachedLayersRearPositions.addAll(from.attachedLayersRearPositions)
-            attachedLayersFrontPositions.addAll(from.attachedLayersFrontPositions)
-        }
-
-        override fun cleanup() {
-            entity = Entity.NONE
-            position.cleanup()
-            rgba.cleanup()
-            linePositions.clear()
-            attachedLayersRearPositions.clear()
-            attachedLayersFrontPositions.clear()
-        }
-
-        override fun free() {
-            cleanup()
-            pool.free(this)
-        }
-
-        override fun clone(): Plane = pool.alloc()
-
-        companion object {
-            fun staticPlane(config: Plane.() -> Unit ): Plane =
-                Plane().apply(config)
-
-            // Use this function to get a new instance of a component from the pool and add it to an entity
-            fun plane(config: Plane.() -> Unit ): Plane =
-                pool.alloc().apply(config)
-
-            private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Plane") { Plane() }
-        }
-    }
+//    // Plane data object used inside ParallaxComponent
+//    @Serializable @SerialName("Parallax.Plane")
+//    class Plane private constructor(
+//        var entity: Entity = Entity.NONE,  // Link to entity for tween animation
+//        /**
+//         * Local position of parallax plane relative to the top-left point of the parallax entity (global PositionComponent).
+//         * Here we use position.offsetX or position.offsetY perpendicular to below *Positions depending on ParallaxMode.
+//         */
+//        val position: Position = staticPositionComponent {},
+//        val rgba: Rgba = staticRgbaComponent {},
+//    ) : Poolable<Plane> {
+//
+//        override fun init(from: Plane) {
+//            // Copy all properties from the original Plane object
+//            entity = from.entity
+//            position.init(from.position)
+//            rgba.init(from.rgba)
+//        }
+//
+//        override fun cleanup() {
+//            entity = Entity.NONE
+//            position.cleanup()
+//            rgba.cleanup()
+//        }
+//
+//        override fun free() {
+//            cleanup()
+//            pool.free(this)
+//        }
+//
+//        override fun clone(): Plane = pool.alloc()
+//
+//        companion object {
+//            fun staticPlane(config: Plane.() -> Unit ): Plane =
+//                Plane().apply(config)
+//
+//            // Use this function to get a new instance of a component from the pool and add it to an entity
+//            fun plane(config: Plane.() -> Unit ): Plane =
+//                pool.alloc().apply(config)
+//
+//            private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Plane") { Plane() }
+//        }
+//    }
 }
