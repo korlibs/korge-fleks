@@ -92,7 +92,7 @@ class TweenRgbaSystem : IteratingSystem(
     override fun onTickEntity(entity: Entity) {
         val rgbaComponent = entity[RgbaComponent]
         updateProperty(entity, TweenRgbaAlphaComponent, rgbaComponent::alpha)
-        updateProperty(entity, TweenRgbaTintComponent, rgbaComponent::rgba)
+        updateProperty(entity, TweenRgbaTintComponent, rgbaComponent::rgb)
     }
 }
 

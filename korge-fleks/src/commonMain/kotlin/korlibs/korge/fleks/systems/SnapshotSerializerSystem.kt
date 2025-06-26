@@ -53,13 +53,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 // Hint: Cloning of components is done WITHOUT any world functions or features involved like onAdd
                 //       function of components. Otherwise, world functions would be called on the current original
                 //       world and not on the snapshot world! This is not what we want!
-                when (component) {
-                    is PoolableComponents<*> -> componentsCopy.add(component.run { world.clone() })
-                    is PoolableComponent<*> -> componentsCopy.add(component.clone())
-                    else -> {
-                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from Poolable<T>!")
-                    }
-                }
+                if (component !is PoolableComponent<*>) { error("Component '$component' must be derive from PoolableComponent<T>!") }
+                (component as PoolableComponent<*>).clone()
             }
             value.tags.forEach { tag -> tagsCopy.add(tag) }
 
@@ -165,11 +160,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         recording.snapshot.forEach { (_, snapshot) ->
             // Free all components from snapshot
             snapshot.components.forEach { component ->
-                when (component) {
-                    is PoolableComponents<*> -> component.run { world.free() }
-                    is PoolableComponent<*> -> component.free()
-                    else -> {}
-                }
+                (component as PoolableComponent<*>).free()
             }
         }
     }

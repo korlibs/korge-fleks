@@ -33,7 +33,7 @@ class Parallax private constructor(
     // Do not set below properties directly - they will be set by the onAdd hook function
     // List of layers
     val backgroundLayers: MutableList<Layer> = mutableListOf(),
-    val parallaxPlane: Plane = staticPlane(),
+    val parallaxPlane: Plane = staticPlane {},
     val foregroundLayers: MutableList<Layer> = mutableListOf()
 ) : PoolableComponent<Parallax>() {
     // Init an existing component data instance with data from another component
@@ -243,7 +243,6 @@ class Parallax private constructor(
             // Cleanup and put Layer data object back to the pool
             fun MutableList<Layer>.freeAndClear() {
                 this.forEach { item ->
-                    item.cleanup()
                     item.free()
                 }
                 this.clear()
@@ -296,10 +295,12 @@ class Parallax private constructor(
         override fun clone(): Plane = pool.alloc()
 
         companion object {
-            fun staticPlane(): Plane = Plane()
+            fun staticPlane(config: Plane.() -> Unit ): Plane =
+                Plane().apply(config)
 
             // Use this function to get a new instance of a component from the pool and add it to an entity
-            fun plane(config: Plane.() -> Unit ): Plane = pool.alloc().apply(config)
+            fun plane(config: Plane.() -> Unit ): Plane =
+                pool.alloc().apply(config)
 
             private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Plane") { Plane() }
         }

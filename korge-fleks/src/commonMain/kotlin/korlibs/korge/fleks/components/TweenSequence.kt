@@ -1,9 +1,11 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
 import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
 import korlibs.korge.fleks.components.data.tweenSequence.TweenListBase
-import korlibs.korge.fleks.components.data.tweenSequence.free
+import korlibs.korge.fleks.components.data.tweenSequence.freeAndClear
+import korlibs.korge.fleks.components.data.tweenSequence.init
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,7 +19,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("TweenSequence")
 class TweenSequence private constructor(
-    override var tweens: MutableList<TweenBase> = mutableListOf(),
+    override val tweens: MutableList<TweenBase> = mutableListOf(),
 
     // Internal runtime data
     var index: Int = 0,              // This points to the animation step which is currently in progress
@@ -28,7 +30,8 @@ class TweenSequence private constructor(
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: TweenSequence) {
-        tweens = from.tweens  // List is static and elements do not change
+        tweens.init(from.tweens)
+
         index = from.index
         timeProgress = from.timeProgress
         waitTime = from.waitTime
@@ -39,18 +42,13 @@ class TweenSequence private constructor(
     // This is used for component instances when they are part (val property) of another component
     // Usually not needed to be called directly - cleanup will be called by component life cycle of Korge-fleks
     fun cleanup() {
-        // We own the static list of tweens - Thus, we need to put them back to the pool
-        tweens.free()
+        tweens.freeAndClear()
 
-        tweens.clear()
         index = 0
         timeProgress = 0f
         waitTime = 0f
         executed = false
     }
-
-    // Usually not needed to be called directly - cleanup will be called by component life cycle of Korge-fleks
-    override fun freeRecursive() { }
 
     override fun type() = TweenSequenceComponent
 
