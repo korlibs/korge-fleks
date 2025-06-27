@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.data.SpriteLayer
 import korlibs.korge.fleks.components.data.SpriteLayer.Companion.freeAndClear
 import korlibs.korge.fleks.components.data.SpriteLayer.Companion.init
+import korlibs.korge.fleks.components.data.SpriteLayer.Companion.spriteLayer
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -73,5 +74,21 @@ class SpriteLayers private constructor(
     override fun free() {
         cleanup()
         pool.free(this)
+    }
+
+    /**
+     * Adds a new layer to the [layerMap] with the specified [name] and [layer].
+     *
+     * @param name the name of the layer.
+     * @param layer the [SpriteLayer] instance to be added.
+     */
+    fun add(name: String, layer: SpriteLayer) {
+        layerMap[name] = layer
+    }
+
+    fun createSpriteLayer(name: String, config: SpriteLayer.() -> Unit = {}): SpriteLayer {
+        val layer = spriteLayer { config() }
+        add(name, layer)
+        return layer
     }
 }

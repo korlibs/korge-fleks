@@ -1,7 +1,8 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.data.Point
+import korlibs.korge.fleks.components.data.ListOfPoints
+import korlibs.korge.fleks.components.data.ListOfPoints.Companion.listOfPoints
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -19,13 +20,13 @@ import kotlinx.serialization.Serializable
 class OffsetByFrameIndex private constructor(
     var entity: Entity = Entity.NONE,
     // Map of list of points is static - therefore use references to the map when creating copies of the component in init function
-    var mapOfOffsetLists: Map<String, List<Point>> = mapOf()
+    val mapOfOffsetLists: MutableMap<String, ListOfPoints> = mutableMapOf()  // TODO List<Point>> = mutableMapOf()
 ) : PoolableComponent<OffsetByFrameIndex>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: OffsetByFrameIndex) {
         entity = from.entity
-        mapOfOffsetLists = from.mapOfOffsetLists
+        mapOfOffsetLists.init(from.mapOfOffsetLists)
     }
 
     // Cleanup the component data instance manually
@@ -33,7 +34,7 @@ class OffsetByFrameIndex private constructor(
     fun cleanup() {
         entity = Entity.NONE
         // Lists of Points are static and will be freed to the pool in cleanupComponent function when entity is destroyed
-        mapOfOffsetLists = mapOf()
+        mapOfOffsetLists.freeAndClear()
     }
 
     override fun type() = OffsetByFrameIndexComponent
@@ -50,6 +51,28 @@ class OffsetByFrameIndex private constructor(
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "OffsetByFrameIndex") { OffsetByFrameIndex() }
+
+        /**
+         * Init function (deep copy) for [MutableMap] of String keys and [ListOfPoints] values.
+         * This will clone each list of points and add it to the map.
+         */
+        fun MutableMap<String, ListOfPoints>.init(from: Map<String, ListOfPoints>) {
+            from.forEach { (key, list) ->
+                this[key] = list.clone()
+            }
+        }
+
+        /**
+         * Free all lists of points in the map and clear the map.
+         * This will free each list of points and clear the map.
+         */
+        fun MutableMap<String, ListOfPoints>.freeAndClear() {
+            this.forEach { (_, list) ->
+                list.free()
+            }
+            this.clear()
+        }
+
     }
 
     // Clone a new instance of the component from the pool
@@ -61,15 +84,6 @@ class OffsetByFrameIndex private constructor(
 
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
-        this@OffsetByFrameIndex.entity = Entity.NONE
-        // Put all points back to the pool
-        mapOfOffsetLists.forEach { (_, list) ->
-            list.forEach { point ->
-                point.free()
-            }
-        }
-        mapOfOffsetLists = mapOf()
-
         cleanup()
     }
 
@@ -85,5 +99,19 @@ class OffsetByFrameIndex private constructor(
     override fun free() {
         cleanup()
         pool.free(this)
+    }
+
+    /**
+     * Creates a new list of points and adds it to the map of offset lists.
+     * The name is used as a key to access the list later.
+     *
+     * @param name The name of the list of points.
+     * @param config Optional configuration block to initialize the list of points.
+     * @return The created [ListOfPoints] instance.
+     */
+    fun createListOfPoints(name: String, config: ListOfPoints.() -> Unit = {}): ListOfPoints {
+        val listOfPoints = listOfPoints { config() }
+        mapOfOffsetLists[name] = listOfPoints
+        return listOfPoints
     }
 }
