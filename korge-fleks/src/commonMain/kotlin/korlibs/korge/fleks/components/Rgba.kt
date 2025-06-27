@@ -74,25 +74,22 @@ class Rgba private constructor(
         pool.free(this)
     }
 
-    var red: Float = rgba.rf
-        get() = rgba.rf
+    var r: Int
+        get() = rgba.r
         set(value) {
-            rgba = rgba.withRf(value)
-            field = value
+            rgba = rgba.withR(value)
         }
 
-    var green: Float = rgba.gf
-        get() = rgba.gf
+    var g: Int
+        get() = rgba.g
         set(value) {
-            rgba = rgba.withGf(value)
-            field = value
+            rgba = rgba.withG(value)
         }
 
-    var blue: Float = rgba.bf
-        get() = rgba.bf
+    var b: Int
+        get() = rgba.b
         set(value) {
-            rgba = rgba.withBf(value)
-            field = value
+            rgba = rgba.withB(value)
         }
 
     var rgb: Int
@@ -101,11 +98,10 @@ class Rgba private constructor(
             rgba = rgba.withRGB(value)
         }
 
-    var alpha: Float = rgba.af
+    var alpha: Float
         get() = rgba.af
         set(value) {
             rgba = rgba.withAf(value)
-            field = value
         }
 
     override fun toString(): String = "RgbaComponent(rgba=${rgba.hexString})"

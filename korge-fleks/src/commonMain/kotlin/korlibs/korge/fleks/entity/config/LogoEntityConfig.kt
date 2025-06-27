@@ -2,6 +2,7 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.LayeredSprite.Companion.layeredSpriteComponent
@@ -30,7 +31,7 @@ data class LogoEntityConfig(
     private val centerY: Boolean = false,
     private val offsetX: Float = 0f,
     private val offsetY: Float = 0f,
-    private val tint: Int = Colors.WHITE.rgb,
+    @Serializable(with = RGBAAsInt::class) private val tint: RGBA = Colors.WHITE,
     private val alpha: Float = 1f,
     private val layerIndex: Int,
     private val layerTag: RenderLayerTag
@@ -49,7 +50,7 @@ data class LogoEntityConfig(
                 name = assetName
             }
             it += rgbaComponent {
-                rgb = tint
+                rgba = tint
                 alpha = this@LogoEntityConfig.alpha
             }
             it += layerComponent { index = this@LogoEntityConfig.layerIndex }

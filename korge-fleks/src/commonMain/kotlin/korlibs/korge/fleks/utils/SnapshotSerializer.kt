@@ -202,9 +202,9 @@ class SnapshotSerializer {
 
         // Register data classes used in components
         polymorphic(Poolable::class) {
+            subclass(Point::class)
             subclass(SpriteLayer::class)
             subclass(TextureRef::class)
-            subclass(Point::class)
         }
 
         // Register Tween data classes used in TweenSequence
