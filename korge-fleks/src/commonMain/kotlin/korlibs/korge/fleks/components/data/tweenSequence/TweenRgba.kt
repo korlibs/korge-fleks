@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.components.data.tweenSequence
 
 import com.github.quillraven.fleks.*
+import korlibs.image.color.RGBA
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.SerialName
@@ -13,7 +14,9 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("TweenRgba")
 class TweenRgba private constructor(
     var alpha: Float? = null,
-    var tint: Int? = null,
+    var r: Int? = null,
+    var g: Int? = null,
+    var b: Int? = null,
     var visible: Boolean? = null,
 
     override var target: Entity = Entity.NONE,
@@ -24,7 +27,9 @@ class TweenRgba private constructor(
     // Init an existing data instance with data from another one
     override fun init(from: TweenRgba) {
         alpha = from.alpha
-        tint = from.tint
+        r = from.r
+        g = from.g
+        b = from.b
         visible = from.visible
 
         target = from.target
@@ -39,7 +44,9 @@ class TweenRgba private constructor(
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
         alpha = null
-        tint = null
+        r = null
+        g = null
+        b = null
         visible = null
 
         target = Entity.NONE
@@ -67,4 +74,13 @@ class TweenRgba private constructor(
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenRgba") { TweenRgba() }
     }
+
+    var rgb: RGBA
+        get() = RGBA(r ?: 0, g ?: 0, b ?: 0, alpha?.toInt() ?: 255)
+        set(value) {
+            r = value.r
+            g = value.g
+            b = value.b
+        }
+
 }

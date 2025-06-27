@@ -35,6 +35,15 @@ fun MutableList<TweenBase>.init(from: List<TweenBase>) {
 }
 
 /**
+ * This function is used to initialize a list of tweens with a single tween.
+ * It clones the provided tween and adds it to the list.
+ */
+fun MutableList<TweenBase>.init(fromTween: TweenBase) {
+    val newTween = (fromTween as Poolable<*>).clone()
+    this.add(newTween as TweenBase)
+}
+
+/**
  * This function is used to free and clear a list of tweens.
  * It iterates through each tween in the list, frees it, and then clears the list.
  */

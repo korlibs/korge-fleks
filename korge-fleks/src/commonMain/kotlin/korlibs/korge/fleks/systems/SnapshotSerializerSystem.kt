@@ -11,7 +11,6 @@ import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlin.coroutines.*
 
-const val snapshotFps = 30
 
 /**
  * This system operates on a world snapshot of Fleks and stores it in an array for (fast) rewind and forward.
@@ -19,8 +18,11 @@ const val snapshotFps = 30
  * Hint: The world snapshot recording will only work on components which are derived from [CloneableComponent].
  * Please make sure you are not deriving any additional components from [Component].
  */
-class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
-    interval = Fixed(step = 1f / snapshotFps.toFloat())
+class SnapshotSerializerSystem(
+    module: SerializersModule,
+    val timesPerSecond: Int = 30
+) : IntervalSystem(
+    interval = Fixed(step = 1f / timesPerSecond.toFloat())
 ) {
 
     // entity families needed for post-processing
@@ -187,13 +189,13 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
      */
     private fun recordingCleanup(call: (Int) -> Unit) {
         // After 30 seconds start to clean up recordings
-        val startTimeForCleanup: Int = 3 * snapshotFps
+        val startTimeForCleanup: Int = 3 * timesPerSecond
 
         val numberOfRecordings = recordings.size
         if (numberOfRecordings > startTimeForCleanup) {  // Keep very first recording
             val recIndex = numberOfRecordings - startTimeForCleanup
             val rec = recordings[recIndex]
-            if (rec.recNumber % snapshotFps != 0) {  // Do not delete first recording of each second
+            if (rec.recNumber % timesPerSecond != 0) {  // Do not delete first recording of each second
                 call(recIndex)
             }
         }

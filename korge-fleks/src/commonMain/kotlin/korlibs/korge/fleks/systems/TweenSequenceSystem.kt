@@ -17,6 +17,7 @@ import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.*
 import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
 import korlibs.korge.fleks.components.TweenSequence.Companion.tweenSequenceComponent
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity
+import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity.Companion.deleteEntity
 import korlibs.korge.fleks.components.data.tweenSequence.ExecuteConfigFunction
 import korlibs.korge.fleks.components.data.tweenSequence.Jump
 import korlibs.korge.fleks.components.data.tweenSequence.LoopTweens
@@ -115,6 +116,7 @@ class TweenSequenceSystem : IteratingSystem(
                         it += tweenSequenceComponent {
                             // Populate the new TweenSequenceComponent with the tweens from the list of SpawnNewTweenSequence object
                             tweens.init(currentTween.tweens)
+                            deleteEntity { target = it }  // Delete the TweenSequence entity after it has been executed
                         }
                     }
                 }
@@ -123,26 +125,24 @@ class TweenSequenceSystem : IteratingSystem(
                     tweenSequence.index += currentTween.distance - 1
                 }
 // TODO check if loop would be possible otherwise delete
-//                is LoopTweens -> {
+                is LoopTweens -> {
+                    TODO("LoopTweens not implemented yet!")
 //                    tweenSequence.loopStart = tweenSequence.index
-//                }
+                }
                 is ParallelTweens -> {
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
                             // Tween has its own delay -> spawn a new TweenSequence for it
-                            world.entity("ParallelTween: ${tween::class.simpleName} for entity '${tween.target.id}'") {
+                            world.entity("ParallelTween: ${tween::class.simpleName} for entity '${tween.target.id}'") { it ->
                                 it += tweenSequenceComponent {
-
-                                    // TODO: Copy reference to tweens from parent TweenSequenceComponent
-//                                    tweens = listOf(
-//                                        // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
-//                                        tween.also { tween ->
-//                                            if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
-//                                            if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
-//                                        },
-//                                        // After finish the tween delete the entity again - it is not needed anymore
-//                                        DeleteEntity(entity = it)
-//                                    )
+                                    // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
+                                    tweens.init(
+                                        tween.also { tween ->
+                                            if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
+                                            if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
+                                        }
+                                    )
+                                    deleteEntity { target = it }  // Delete the TweenSequence entity after it has been executed
                                 }
                             }
                         } else {
@@ -168,7 +168,9 @@ class TweenSequenceSystem : IteratingSystem(
         when (tween) {
             is TweenRgba -> tween.target.getOrWarning(RgbaComponent)?.let { start ->
                 tween.alpha?.let { end -> createTweenPropertyComponent(RgbaAlpha, value = start.alpha, change = end - start.alpha) }
-                tween.tint?.let { end ->  createTweenPropertyComponent(RgbaTint, value = start.rgba.rgb, change = end - start.rgba.rgb) }
+                tween.r?.let { end ->  createTweenPropertyComponent(RgbaRed, value = start.r, change = end - start.r) }
+                tween.g?.let { end ->  createTweenPropertyComponent(RgbaGreen, value = start.g, change = end - start.g) }
+                tween.b?.let { end ->  createTweenPropertyComponent(RgbaBlue, value = start.b, change = end - start.b) }
                 tween.visible?.let { visible -> createTweenPropertyComponent(RgbaAlpha, value = if (visible) 1f else 0f, change = 0f) }
             }
             is TweenPosition -> tween.target.getOrWarning(PositionComponent)?.let { start ->
