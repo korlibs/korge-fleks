@@ -73,4 +73,16 @@ class EntityRefsByName private constructor(
         cleanup()
         pool.free(this)
     }
+
+    /**
+     * Adds an entity to the map with the specified key.
+     * If an entity with the same key already exists, it will be replaced.
+     */
+    fun add(key: String, entity: Entity) {
+        entitiesByName[key] = entity
+    }
+
+    fun getSubEntity(key: String): Entity {
+        return entitiesByName[key] ?: Entity.NONE
+    }
 }

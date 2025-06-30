@@ -36,12 +36,13 @@ class SpawnerSystem : IteratingSystem(
 //                    spx = it.x + it.offsetX
 //                    spy = it.y + it.offsetY
                 }
+
                 entity.getOrNull(OffsetByFrameIndexComponent)?.let {
                     // Get offset depending on current animation and frame index
                     val spriteComponent = it.entity.getOrNull(SpriteComponent)
                     val currentFrameIndex = spriteComponent?.frameIndex ?: 0
                     val animationName = spriteComponent?.animation ?: ""
-                    val offset = it.mapOfOffsetLists[animationName]?.get(currentFrameIndex)
+                    val offset = it.mapOfOffsetLists[animationName]?.points[currentFrameIndex]
                         ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
                     x += offset.x
                     y += offset.y

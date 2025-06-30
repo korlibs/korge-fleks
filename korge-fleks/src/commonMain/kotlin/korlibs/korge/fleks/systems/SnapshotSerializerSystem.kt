@@ -26,7 +26,6 @@ class SnapshotSerializerSystem(
 ) {
 
     // entity families needed for post-processing
-    private val familyParallax: Family = world.family { all(ParallaxComponent) }
     private val familyLayeredSprite: Family = world.family { all(LayeredSpriteComponent) }
 
     private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
@@ -172,11 +171,6 @@ class SnapshotSerializerSystem(
      */
     private fun postProcessing() {
         // Do some post-processing
-        familyParallax.forEach { entity ->
-            // Update ParallaxComponents
-            val parallaxComponent = entity[ParallaxComponent]
-            parallaxComponent.run { world.updateLayerEntities() }
-        }
         familyLayeredSprite.forEach { entity ->
             val layeredSpriteComponent = entity[LayeredSpriteComponent]
             layeredSpriteComponent.run { world.updateLayerEntities() }
