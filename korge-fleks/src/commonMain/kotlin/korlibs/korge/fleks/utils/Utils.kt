@@ -3,6 +3,7 @@ package korlibs.korge.fleks.utils
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.image.text.*
+import korlibs.korge.fleks.components.data.Point
 import kotlin.jvm.*
 import kotlin.random.Random
 
@@ -115,4 +116,25 @@ fun MutableList<Entity>.free(world: World) {
     this.forEach { entity ->
         world -= entity
     }
+}
+
+/**
+ * Init function (deep copy) for [MutableList] of [Point] elements.
+ * This will clone each point and add it to the list.
+ */
+fun MutableList<Point>.init(from: List<Point>) {
+    from.forEach { point ->
+        this.add(point.clone())
+    }
+}
+
+/**
+ * Free all points in the list and clear the list.
+ * This will free each point and clear the list.
+ */
+fun MutableList<Point>.freeAndClear() {
+    this.forEach { point ->
+        point.free()
+    }
+    this.clear()
 }

@@ -74,6 +74,9 @@ class EntityRefs private constructor(
         pool.free(this)
     }
 
+    /**
+     * Adds all entities to the internal [entities] list.
+     */
     fun addAll(vararg newEntities: Entity) {
         entities.addAll(newEntities)
     }
