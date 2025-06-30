@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.components.collision
 
 import com.github.quillraven.fleks.*
+import korlibs.datastructure.Pool
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
