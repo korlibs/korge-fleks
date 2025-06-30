@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.components.data.tweenSequence
 
-
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.*
@@ -8,6 +7,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
+/**
+ * This Tween is used to spawn a new entity in the world.
+ * The entity will be created with the given entity configuration and positioned at the given coordinates.
+ */
 @Serializable @SerialName("SpawnEntity")
 class SpawnEntity private constructor(
     var entityConfig: String = "",      // name of the entity configuration which creates and configures the spawned entity
@@ -18,39 +21,49 @@ class SpawnEntity private constructor(
     override var delay: Float? = null,
     override var duration: Float? = 0f,    // not used - 0f for immediately
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
-) : TweenBase {
-    // Init an existing tween data instance with data from another tween
-    fun init(from: SpawnEntity) {
+) : TweenBase, Poolable<SpawnEntity> {
+    // Init an existing data instance with data from another one
+    override fun init(from: SpawnEntity) {
         entityConfig = from.entityConfig
         x = from.x
         y = from.y
+
         target = from.target
         delay = from.delay
-        duration = from.duration
-        easing = from.easing
-        // Hint: it is not needed to copy "easing" property by creating new one like below:
-        // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
+        // duration not used
+        // easing not used
     }
 
-    // Cleanup the tween data instance manually
-    override fun free() {
+    // Cleanup data instance manually
+    // This is used for data instances when they are a value property of a component
+    override fun cleanup() {
         entityConfig = ""
         x = 0f
         y = 0f
+
         target = Entity.NONE
         delay = null
-        duration = null
-        easing = null
+        // duration not used
+        // easing not used
+    }
 
+    // Clone a new data instance from the pool
+    override fun clone(): SpawnEntity = pool.alloc().apply { init(from = this@SpawnEntity ) }
+
+    // Cleanup the tween data instance manually
+    override fun free() {
+        cleanup()
         pool.free(this)
     }
 
     companion object {
-        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.spawnEntity (config: SpawnEntity.() -> Unit) {
-            tweens.add(pool.alloc().apply(config))
-        }
+        // Use this function to create a new instance of data as value property inside a component
+        fun staticSpawnEntity(config: SpawnEntity.() -> Unit ): SpawnEntity =
+            SpawnEntity().apply(config)
 
-        private val pool = Pool(preallocate = 0) { SpawnEntity() }
+        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
+        fun TweenListBase.spawnEntity(config: SpawnEntity.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SpawnEntity") { SpawnEntity() }
     }
 }

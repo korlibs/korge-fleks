@@ -61,7 +61,7 @@ class Gravity private constructor(
         fun gravityComponent(config: Gravity.() -> Unit ): Gravity =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Gravity() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Gravity") { Gravity() }
     }
 
     // Clone a new instance of the component from the pool

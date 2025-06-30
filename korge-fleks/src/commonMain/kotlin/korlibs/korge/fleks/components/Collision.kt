@@ -80,13 +80,13 @@ class Collision private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticCollisionComponent(config: Collision.() -> Unit ): Collision =
-        Collision().apply(config)
+            Collision().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun collisionComponent(config: Collision.() -> Unit ): Collision =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Collision() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Collision") { Collision() }
     }
 
     // Clone a new instance of the component from the pool

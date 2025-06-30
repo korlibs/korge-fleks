@@ -41,13 +41,13 @@ class Rigidbody private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticRigidbodyComponent(config: Rigidbody.() -> Unit ): Rigidbody =
-        Rigidbody().apply(config)
+            Rigidbody().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun rigidbodyComponent(config: Rigidbody.() -> Unit ): Rigidbody =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Rigidbody() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Rigidbody") { Rigidbody() }
     }
 
     // Clone a new instance of the component from the pool

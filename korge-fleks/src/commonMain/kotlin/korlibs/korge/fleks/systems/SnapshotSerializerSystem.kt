@@ -11,7 +11,6 @@ import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlin.coroutines.*
 
-const val snapshotFps = 30
 
 /**
  * This system operates on a world snapshot of Fleks and stores it in an array for (fast) rewind and forward.
@@ -19,8 +18,11 @@ const val snapshotFps = 30
  * Hint: The world snapshot recording will only work on components which are derived from [CloneableComponent].
  * Please make sure you are not deriving any additional components from [Component].
  */
-class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
-    interval = Fixed(step = 1f / snapshotFps.toFloat())
+class SnapshotSerializerSystem(
+    module: SerializersModule,
+    val timesPerSecond: Int = 30
+) : IntervalSystem(
+    interval = Fixed(step = 1f / timesPerSecond.toFloat())
 ) {
 
     // entity families needed for post-processing
@@ -53,13 +55,8 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
                 // Hint: Cloning of components is done WITHOUT any world functions or features involved like onAdd
                 //       function of components. Otherwise, world functions would be called on the current original
                 //       world and not on the snapshot world! This is not what we want!
-                when (component) {
-                    is PoolableComponents<*> -> componentsCopy.add(component.run { world.clone() })
-                    is PoolableComponent<*> -> componentsCopy.add(component.clone())
-                    else -> {
-                        println("WARNING: Component '$component' will not be serialized in SnapshotSerializerSystem! The component needs to derive from Poolable<T>!")
-                    }
-                }
+                if (component !is PoolableComponent<*>) { error("Component '$component' must be derive from PoolableComponent<T>!") }
+                componentsCopy.add((component as PoolableComponent<*>).clone())
             }
             value.tags.forEach { tag -> tagsCopy.add(tag) }
 
@@ -165,11 +162,7 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
         recording.snapshot.forEach { (_, snapshot) ->
             // Free all components from snapshot
             snapshot.components.forEach { component ->
-                when (component) {
-                    is PoolableComponents<*> -> component.run { world.free() }
-                    is PoolableComponent<*> -> component.free()
-                    else -> {}
-                }
+                (component as PoolableComponent<*>).free()
             }
         }
     }
@@ -196,13 +189,13 @@ class SnapshotSerializerSystem(module: SerializersModule) : IntervalSystem(
      */
     private fun recordingCleanup(call: (Int) -> Unit) {
         // After 30 seconds start to clean up recordings
-        val startTimeForCleanup: Int = 3 * snapshotFps
+        val startTimeForCleanup: Int = 3 * timesPerSecond
 
         val numberOfRecordings = recordings.size
         if (numberOfRecordings > startTimeForCleanup) {  // Keep very first recording
             val recIndex = numberOfRecordings - startTimeForCleanup
             val rec = recordings[recIndex]
-            if (rec.recNumber % snapshotFps != 0) {  // Do not delete first recording of each second
+            if (rec.recNumber % timesPerSecond != 0) {  // Do not delete first recording of each second
                 call(recIndex)
             }
         }

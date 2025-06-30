@@ -39,13 +39,13 @@ class Rgba private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticRgbaComponent(config: Rgba.() -> Unit ): Rgba =
-        Rgba().apply(config)
+            Rgba().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun rgbaComponent(config: Rgba.() -> Unit ): Rgba =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Rgba() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Rgba") { Rgba() }
     }
 
     // Clone a new instance of the component from the pool
@@ -74,32 +74,34 @@ class Rgba private constructor(
         pool.free(this)
     }
 
-    var red: Float = rgba.rf
-        get() = rgba.rf
+    var r: Int
+        get() = rgba.r
         set(value) {
-            rgba = rgba.withRf(value)
-            field = value
+            rgba = rgba.withR(value)
         }
 
-    var green: Float = rgba.gf
-        get() = rgba.gf
+    var g: Int
+        get() = rgba.g
         set(value) {
-            rgba = rgba.withGf(value)
-            field = value
+            rgba = rgba.withG(value)
         }
 
-    var blue: Float = rgba.bf
-        get() = rgba.bf
+    var b: Int
+        get() = rgba.b
         set(value) {
-            rgba = rgba.withBf(value)
-            field = value
+            rgba = rgba.withB(value)
         }
 
-    var alpha: Float = rgba.af
+    var rgb: Int
+        get() = rgba.rgb
+        set(value) {
+            rgba = rgba.withRGB(value)
+        }
+
+    var alpha: Float
         get() = rgba.af
         set(value) {
             rgba = rgba.withAf(value)
-            field = value
         }
 
     override fun toString(): String = "RgbaComponent(rgba=${rgba.hexString})"

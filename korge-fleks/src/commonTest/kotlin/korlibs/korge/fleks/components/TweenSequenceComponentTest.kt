@@ -29,6 +29,11 @@ internal class TweenSequenceComponentTest {
     private val recreatedWorld = configureWorld {}
 
     @Test
+    fun testTweenSequenceComponentSnapshotting() {
+        // TODO
+    }
+
+        @Test
     fun testTweenSequenceComponentSerialization() {
 
         val testEntityConfig = TestEntityConfig("testEntityConfig")

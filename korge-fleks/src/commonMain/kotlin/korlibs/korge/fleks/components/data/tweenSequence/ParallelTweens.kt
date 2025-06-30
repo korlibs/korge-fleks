@@ -7,6 +7,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
+  /**
+ * This Tween is used to hold a list of tweens that are executed in parallel.
+ */
 @Serializable @SerialName("ParallelTweens")
 class ParallelTweens private constructor(
     override var tweens: MutableList<TweenBase> = mutableListOf(),       // tween objects which contain entity and its properties to be animated in parallel
@@ -16,42 +19,46 @@ class ParallelTweens private constructor(
     override var delay: Float? = null,
     override var duration: Float? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
-) : TweenBase, TweenListBase {
-    // Init an existing tween data instance with data from another tween
-    fun init(from: ParallelTweens) {
-        tweens = from.tweens  // List is static and elements do not change
+) : TweenBase, TweenListBase, Poolable<ParallelTweens> {
+    // Init an existing data instance with data from another one
+    override fun init(from: ParallelTweens) {
+        tweens.init(from.tweens)
+
+        target = from.target
+        // target not used
         delay = from.delay
         duration = from.duration
-        // Hint: it is not needed to copy "easing" property by creating new one like below:
-        // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
+        // easing not used
     }
+
+    // Cleanup data instance manually
+    // This is used for data instances when they are a value property of a component
+    override fun cleanup() {
+        tweens.freeAndClear()
+
+        // target not used
+        delay = null
+        duration = null
+        // easing not used
+    }
+
+    // Clone a new data instance from the pool
+    override fun clone(): ParallelTweens = pool.alloc().apply { init(from = this@ParallelTweens ) }
 
     // Cleanup the tween data instance manually
     override fun free() {
-        // Do not put items back to the pool - we do not own them - TweenSequence is returning them to pool when
-        // component is removed from the entity
-        tweens.clear()
-        delay = null
-        duration = null
-
+        cleanup()
         pool.free(this)
     }
 
-    // This is called by TweenSequence component which owns all (static) tweens
-    override fun freeRecursive() {
-        tweens.free()
-        free()
-    }
-
     companion object {
+        // Use this function to create a new instance of data as value property inside a component
+        fun staticParallelTweens(config: ParallelTweens.() -> Unit ): ParallelTweens =
+            ParallelTweens().apply(config)
+
         // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.parallelTweens(config: ParallelTweens.() -> Unit) {
-            tweens.add(pool.alloc().apply(config))
-        }
+        fun TweenListBase.parallelTweens(config: ParallelTweens.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
 
-        // Use this function to create a new instance of this data class as static value property
-        fun staticParallelTweens(): ParallelTweens = ParallelTweens()
-
-        private val pool = Pool(preallocate = 0) { ParallelTweens() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "ParallelTweens") { ParallelTweens() }
     }
 }

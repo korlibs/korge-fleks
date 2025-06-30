@@ -2,15 +2,15 @@ package korlibs.korge.fleks.components.data
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 /**
- * A simple 2D point with x, y coordinates which is poolable and serializable.
- */
+ * This class is used as simple 2D point with x, y coordinates. It is poolable and serializable.
+*/
 @Serializable @SerialName("Point")
 class Point private constructor(
     var x: Float = 0f,
@@ -23,7 +23,7 @@ class Point private constructor(
     }
 
     // Cleanup data instance manually
-    // This is used for data instances when they are part (val property) of a component
+    // This is used for data instances when they are a value property of a component
     override fun cleanup() {
         x = 0f
         y = 0f
@@ -39,15 +39,15 @@ class Point private constructor(
     }
 
     companion object {
-        // Use this function to create a new instance of data as val inside a component
+        // Use this function to create a new instance of data as value property inside a component
         fun staticPoint(config: Point.() -> Unit ): Point =
             Point().apply(config)
 
-        // Use this function to get a new instance of a component from the pool and add it to an entity
+        // Use this function to get a new instance of the data object from the pool
         fun point(config: Point.() -> Unit ): Point =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Point() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Point") { Point() }
     }
 
     /**

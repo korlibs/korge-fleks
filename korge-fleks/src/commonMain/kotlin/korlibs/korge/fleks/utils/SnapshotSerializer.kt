@@ -38,7 +38,6 @@ import korlibs.korge.fleks.components.TouchInput
 import korlibs.korge.fleks.components.TweenProperty
 import korlibs.korge.fleks.components.TweenSequence
 import korlibs.korge.fleks.components.data.Point
-import korlibs.korge.fleks.components.data.Rgb
 import korlibs.korge.fleks.components.data.SpriteLayer
 import korlibs.korge.fleks.components.data.TextureRef
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity
@@ -167,7 +166,6 @@ class SnapshotSerializer {
     private val internalModule = SerializersModule {
         // Register component and data classes
         polymorphic(Component::class) {
-            // Used as components
             subclass(Collision::class)
             subclass(Debug::class)
             subclass(EntityRef::class)
@@ -201,27 +199,14 @@ class SnapshotSerializer {
             subclass(TweenSequence::class)
         }
 
-        // TODO: merge with TweenBase below to Poolable
-        //       rename Poolable<T> to PoolableComponent<T>
+        // Register data classes used in components
         polymorphic(Poolable::class) {
+            subclass(Point::class)
             subclass(SpriteLayer::class)
             subclass(TextureRef::class)
-            subclass(Parallax.Layer::class)
-            subclass(Parallax.Plane::class)
-            subclass(Point::class)
-            subclass(Rgb::class)
         }
 
-        // Register tags (components without properties)
-        polymorphic(UniqueId::class) {
-            subclass(CameraFollowTag::class)
-            subclass(DebugInfoTag::class, PolymorphicEnumSerializer(DebugInfoTag.serializer()))
-            subclass(MainCameraTag::class)
-            subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
-            subclass(ScreenCoordinatesTag::class)
-        }
-
-        // Data class hierarchy used for AnimationScript component
+        // Register Tween data classes used in TweenSequence
         polymorphic(TweenBase::class) {
             subclass(DeleteEntity::class)
             subclass(ExecuteConfigFunction::class)
@@ -242,6 +227,15 @@ class SnapshotSerializer {
             subclass(TweenTextField::class)
             subclass(TweenTouchInput::class)
             subclass(Wait::class)
+        }
+
+        // Register tags (components without properties)
+        polymorphic(UniqueId::class) {
+            subclass(CameraFollowTag::class)
+            subclass(DebugInfoTag::class, PolymorphicEnumSerializer(DebugInfoTag.serializer()))
+            subclass(MainCameraTag::class)
+            subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
+            subclass(ScreenCoordinatesTag::class)
         }
     }
 }
@@ -333,9 +327,8 @@ object AnyAsString : KSerializer<Any> {
 
     override fun serialize(encoder: Encoder, value: Any) {
         when (value) {
-            is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("String", value.toString()))
+            is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("String", value))
             is Double -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Double", value.toString()))
-            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny("Rgb", value.toString()))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
     }
@@ -345,7 +338,6 @@ object AnyAsString : KSerializer<Any> {
         return when (containerForAny.type) {
             "String" -> containerForAny.value
             "Double" -> containerForAny.value.toDouble()
-// TODO            "Rgb" -> Rgb.fromString(containerForAny.value)
             else -> throw SerializationException("AnySerializer: No rule to deserialize type '${containerForAny.type}'!")
         }
     }
@@ -368,7 +360,6 @@ object AnySerializer : KSerializer<Any> {
         val int: Int? = null,
         val string: String? = null,
         val boolean: Boolean? = null,
-        val rgb: Rgb? = null,
         val direction: ImageAnimation.Direction? = null
     )
 
@@ -379,7 +370,6 @@ object AnySerializer : KSerializer<Any> {
             is Int -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(int = value))
             is String -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(string = value))
             is Boolean -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(boolean = value))
-            is Rgb -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(rgb = value))
             is ImageAnimation.Direction -> ContainerForAny.serializer().serialize(encoder, ContainerForAny(direction = value))
             else -> throw SerializationException("AnySerializer: No rule to serialize type '${value::class}'!")
         }
@@ -388,8 +378,7 @@ object AnySerializer : KSerializer<Any> {
     override fun deserialize(decoder: Decoder): Any {
         val containerForAny = decoder.decodeSerializableValue(ContainerForAny.serializer())
         return (containerForAny.double ?: containerForAny.float ?: containerForAny.int ?:
-                containerForAny.string ?: containerForAny.boolean ?: containerForAny.rgb ?:
-                containerForAny.direction ?:
+                containerForAny.string ?: containerForAny.boolean ?: containerForAny.direction ?:
                 throw SerializationException("AnySerializer: No non-null property in ContainerForAny found!"))
     }
 }

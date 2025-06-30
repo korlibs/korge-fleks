@@ -13,7 +13,9 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionOffse
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionXComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionYComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaAlphaComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaTintComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaBlueComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaGreenComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaRedComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSoundPositionComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSoundStartTriggerComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSoundStopTriggerComponent
@@ -48,7 +50,9 @@ internal class TweenPropertyComponentTest {
             Pair(PositionY, TweenPositionYComponent),
             Pair(MotionVelocityX, TweenMotionVelocityXComponent),
             Pair(RgbaAlpha, TweenRgbaAlphaComponent),
-            Pair(RgbaTint, TweenRgbaTintComponent),
+            Pair(RgbaRed, TweenRgbaRedComponent),
+            Pair(RgbaGreen, TweenRgbaGreenComponent),
+            Pair(RgbaBlue, TweenRgbaBlueComponent),
             Pair(SpawnerInterval, TweenSpawnerIntervalComponent),
             Pair(SpawnerNumberOfObjects, TweenSpawnerNumberOfObjectsComponent),
             Pair(SpawnerPositionVariation, TweenSpawnerPositionVariationComponent),

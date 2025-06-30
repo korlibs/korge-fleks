@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.components.data.tweenSequence
 
-
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.*
@@ -8,6 +7,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
+/**
+ * This Tween is used to animate ...
+ */
 @Serializable @SerialName("ResetEvent")
 class ResetEvent private constructor(
     var event: Int = 0,                           // Set a specific event so that a Wait for event can be unlocked
@@ -16,35 +18,45 @@ class ResetEvent private constructor(
     override var delay: Float? = null,            // Not used
     override var duration: Float? = null,         // not used
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
-) : TweenBase {
-    // Init an existing tween data instance with data from another tween
-    fun init(from: ResetEvent) {
+) : TweenBase, Poolable<ResetEvent> {
+    // Init an existing data instance with data from another one
+    override fun init(from: ResetEvent) {
         event = from.event
-        target = from.target
-        delay = from.delay
-        duration = from.duration
-        easing = from.easing
-        // Hint: it is not needed to copy "easing" property by creating new one like below:
-        // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
+
+        // target not used
+        // delay not used
+        // duration not used
+        // easing not used
     }
+
+    // Cleanup data instance manually
+    // This is used for data instances when they are a value property of a component
+    override fun cleanup() {
+        event = 0
+
+        // target not used
+        // delay not used
+        // duration not used
+        // easing not used
+    }
+
+    // Clone a new data instance from the pool
+    override fun clone(): ResetEvent = pool.alloc().apply { init(from = this@ResetEvent ) }
 
     // Cleanup the tween data instance manually
     override fun free() {
-        event = 0
-        target = Entity.NONE
-        delay = null
-        duration = null
-        easing = null
-
+        cleanup()
         pool.free(this)
     }
 
     companion object {
-        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.resetEvent(config: ResetEvent.() -> Unit) {
-            tweens.add(pool.alloc().apply(config))
-        }
+        // Use this function to create a new instance of data as value property inside a component
+        fun staticResetEvent(config: ResetEvent.() -> Unit ): ResetEvent =
+            ResetEvent().apply(config)
 
-        private val pool = Pool(preallocate = 0) { ResetEvent() }
+        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
+        fun TweenListBase.resetEvent(config: ResetEvent.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "ResetEvent") { ResetEvent() }
     }
 }

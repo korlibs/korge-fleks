@@ -21,11 +21,13 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionYComp
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionOffsetXComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionOffsetYComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaAlphaComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaTintComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaRedComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventPublishComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventResetComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventSubscribeComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenMotionVelocityXComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaBlueComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaGreenComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSoundPositionComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSoundStartTriggerComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSoundStopTriggerComponent
@@ -86,13 +88,15 @@ class TweenMotionSystem : IteratingSystem(
 }
 
 class TweenRgbaSystem : IteratingSystem(
-    family { all(RgbaComponent).any(TweenRgbaAlphaComponent, TweenRgbaTintComponent) },
+    family { all(RgbaComponent).any(TweenRgbaAlphaComponent, TweenRgbaRedComponent, TweenRgbaGreenComponent, TweenRgbaBlueComponent) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
         val rgbaComponent = entity[RgbaComponent]
         updateProperty(entity, TweenRgbaAlphaComponent, rgbaComponent::alpha)
-        updateProperty(entity, TweenRgbaTintComponent, rgbaComponent::rgba)
+        updateProperty(entity, TweenRgbaRedComponent, rgbaComponent::r)
+        updateProperty(entity, TweenRgbaGreenComponent, rgbaComponent::g)
+        updateProperty(entity, TweenRgbaBlueComponent, rgbaComponent::b)
     }
 }
 

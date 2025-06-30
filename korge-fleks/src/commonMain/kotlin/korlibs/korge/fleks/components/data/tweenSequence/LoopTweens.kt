@@ -10,8 +10,7 @@ import kotlinx.serialization.Serializable
 /**
  * TODO: currently not used
  *
- * Author's hint: When adding new properties to the component, make sure to reset them in the
- *                [cleanupComponent] function and initialize them in the [clone] function.
+ * This Tween is used to hold a list of tweens that are executed in a loop. Forever.
  */
 @Serializable @SerialName("LoopTweens")
 class LoopTweens private constructor(
@@ -21,41 +20,45 @@ class LoopTweens private constructor(
     override var delay: Float? = null,
     override var duration: Float? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
-) : TweenBase, TweenListBase {
-    // Init an existing tween data instance with data from another tween
-    fun init(from: LoopTweens) {
-        tweens = from.tweens
-        target = from.target
+) : TweenBase, TweenListBase, Poolable<LoopTweens> {
+    // Init an existing data instance with data from another one
+    override fun init(from: LoopTweens) {
+        tweens.init(from.tweens)
+
+        // target not used
         delay = from.delay
         duration = from.duration
-        easing = from.easing
-        // Hint: it is not needed to copy "easing" property by creating new one like below:
-        // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
+        // easing not used
     }
+
+    // Cleanup data instance manually
+    // This is used for data instances when they are a value property of a component
+    override fun cleanup() {
+        tweens.freeAndClear()
+
+        // target not used
+        delay = null
+        duration = null
+        // easing not used
+    }
+
+    // Clone a new data instance from the pool
+    override fun clone(): LoopTweens = pool.alloc().apply { init(from = this@LoopTweens ) }
 
     // Cleanup the tween data instance manually
     override fun free() {
-        tweens.clear()
-        target = Entity.NONE
-        delay = null
-        duration = null
-        easing = null
-
+        cleanup()
         pool.free(this)
     }
 
-    // This is called by TweenSequence component which owns all (static) tweens
-    override fun freeRecursive() {
-        tweens.free()
-        free()
-    }
-
     companion object {
-        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.loopTweens(config: LoopTweens.() -> Unit) {
-            tweens.add(pool.alloc().apply(config))
-        }
+        // Use this function to create a new instance of data as value property inside a component
+        fun staticLoopTweens(config: LoopTweens.() -> Unit ): LoopTweens =
+            LoopTweens().apply(config)
 
-        private val pool = Pool(preallocate = 0) { LoopTweens() }
+        // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
+        fun TweenListBase.loopTweens(config: LoopTweens.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
+
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "LoopTweens") { LoopTweens() }
     }
 }

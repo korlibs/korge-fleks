@@ -2,6 +2,7 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
 import korlibs.image.text.*
 import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.NinePatch.Companion.ninePatchComponent
@@ -39,7 +40,7 @@ data class DialogBoxConfig(
     private val numberOfLines: Int,  // TODO get this from placed text
 
     // Color and alpha channel of text and graphics
-    private val tint: Int = Colors.WHITE.value,
+    @Serializable(with = RGBAAsInt::class) private val tint: RGBA = Colors.WHITE,
     private val alpha: Float = 0f,
 
     // Avatar
@@ -110,7 +111,7 @@ data class DialogBoxConfig(
             }
             it += spriteComponent { name = avatarName }
             it += rgbaComponent {
-                rgba.withRGB(tint)
+                rgba = tint
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
@@ -129,7 +130,7 @@ data class DialogBoxConfig(
                 height = textBoxHeight
             }
             it += rgbaComponent {
-                rgba.withRGB(tint)
+                rgba = tint
                 alpha = this@DialogBoxConfig.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
@@ -153,7 +154,7 @@ data class DialogBoxConfig(
             }
             it += layerComponent { index = 101 }
             it += rgbaComponent {
-                rgba.withRGB(tint)
+                rgba = tint
                 alpha = 1f
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS

@@ -45,13 +45,13 @@ class Position private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticPositionComponent(config: Position.() -> Unit ): Position =
-        Position().apply(config)
+            Position().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun positionComponent(config: Position.() -> Unit ): Position =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Position() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Position") { Position() }
     }
 
     // Clone a new instance of the component from the pool

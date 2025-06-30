@@ -92,13 +92,13 @@ class Sprite private constructor(
 
         // Use this function to create a new instance of component data as val inside another component
         fun staticSpriteComponent(config: Sprite.() -> Unit ): Sprite =
-        Sprite().apply(config)
+            Sprite().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
         fun spriteComponent(config: Sprite.() -> Unit ): Sprite =
-        pool.alloc().apply(config)
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { Sprite() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Sprite") { Sprite() }
     }
 
     // Clone a new instance of the component from the pool

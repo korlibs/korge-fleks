@@ -65,7 +65,9 @@ class TweenProperty private constructor(
         val TweenMotionVelocityXComponent = TweenPropertyType.MotionVelocityX.type
 
         val TweenRgbaAlphaComponent = TweenPropertyType.RgbaAlpha.type
-        val TweenRgbaTintComponent = TweenPropertyType.RgbaTint.type
+        val TweenRgbaRedComponent = TweenPropertyType.RgbaRed.type
+        val TweenRgbaGreenComponent = TweenPropertyType.RgbaGreen.type
+        val TweenRgbaBlueComponent = TweenPropertyType.RgbaBlue.type
 
         val TweenSpawnerIntervalComponent = TweenPropertyType.SpawnerInterval.type
         val TweenSpawnerNumberOfObjectsComponent = TweenPropertyType.SpawnerNumberOfObjects.type
@@ -112,7 +114,7 @@ class TweenProperty private constructor(
 //            // All component types share the same pool - so just use the first component type to get it
 //            getPoolable(componentType).apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE) { TweenProperty() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenProperty") { TweenProperty() }
 
         // TODO: Check if we should use generic function above or specific one below (need to be created for each component type)
         fun tweenPositionOffsetXComponent(config: TweenProperty.() -> Unit ): TweenProperty =
@@ -158,7 +160,9 @@ class TweenProperty private constructor(
         MotionVelocityX(componentTypeOf<TweenProperty>()),
 
         RgbaAlpha(componentTypeOf<TweenProperty>()),
-        RgbaTint(componentTypeOf<TweenProperty>()),
+        RgbaRed(componentTypeOf<TweenProperty>()),
+        RgbaGreen(componentTypeOf<TweenProperty>()),
+        RgbaBlue(componentTypeOf<TweenProperty>()),
 
         SpawnerInterval(componentTypeOf<TweenProperty>()),
         SpawnerNumberOfObjects(componentTypeOf<TweenProperty>()),

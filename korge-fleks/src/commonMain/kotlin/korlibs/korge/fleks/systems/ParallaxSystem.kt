@@ -6,6 +6,7 @@ import korlibs.datastructure.iterators.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 
 
 class ParallaxSystem(
@@ -23,15 +24,16 @@ class ParallaxSystem(
         val offset = parallaxDataContainer.config.offset
 
         // Update local positions for each layer which is configured to be moving (speedFactor not null or zero)
-        parallaxComponent.backgroundLayers.fastForEachWithIndex { index, layer ->
+        parallaxComponent.bgLayerEntities.fastForEachWithIndex { index, layerEntity ->
             val speedFactor = parallaxDataContainer.config.backgroundLayers!![index].speedFactor
             if (speedFactor != null) {
-                layer.position.x = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + layer.position.x  // f(x) = v * t + x
-                layer.position.y = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + layer.position.y
+                val positionComponent = layerEntity[PositionComponent]
+                positionComponent.x = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + positionComponent.x  // f(x) = v * t + x
+                positionComponent.y = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + positionComponent.y
             }
         }
 
-        parallaxComponent.parallaxPlane.attachedLayersRearPositions.fastForEachWithIndex { index, position ->
+        parallaxComponent.attachedLayersRearPositions.fastForEachWithIndex { index, position ->
             val plane = parallaxDataContainer.config.parallaxPlane!!
             val parallaxMode = parallaxDataContainer.config.mode
             val texture = parallaxDataContainer.attachedLayersRear!!.defaultAnimation.firstFrame.layerData[index]
@@ -42,17 +44,17 @@ class ParallaxSystem(
                 val lineIndex = texture.targetY - offset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
-                parallaxComponent.parallaxPlane.attachedLayersRearPositions[index] = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + position
+                parallaxComponent.attachedLayersRearPositions[index] = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + position
             } else if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = texture.targetX - offset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
-                parallaxComponent.parallaxPlane.attachedLayersRearPositions[index] = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + position
+                parallaxComponent.attachedLayersRearPositions[index] = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + position
             }
         }
 
-        parallaxComponent.parallaxPlane.linePositions.fastForEachWithIndex { index, position ->
+        parallaxComponent.linePositions.fastForEachWithIndex { index, position ->
             val plane = parallaxDataContainer.config.parallaxPlane!!
             val parallaxMode = parallaxDataContainer.config.mode
             if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) {
@@ -60,17 +62,17 @@ class ParallaxSystem(
                 val lineIndex = parallaxDataContainer.parallaxPlane!!.imageDatas[index].defaultAnimation.firstFrame.targetY - offset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax plane line
-                parallaxComponent.parallaxPlane.linePositions[index] = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + position
+                parallaxComponent.linePositions[index] = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + position
             } else if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = parallaxDataContainer.parallaxPlane!!.imageDatas[index].defaultAnimation.firstFrame.targetX - offset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax plane line
-                parallaxComponent.parallaxPlane.linePositions[index] = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + position
+                parallaxComponent.linePositions[index] = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + position
             }
         }
 
-        parallaxComponent.parallaxPlane.attachedLayersFrontPositions.fastForEachWithIndex { index, position ->
+        parallaxComponent.attachedLayersFrontPositions.fastForEachWithIndex { index, position ->
             val plane = parallaxDataContainer.config.parallaxPlane!!
             val parallaxMode = parallaxDataContainer.config.mode
             val texture = parallaxDataContainer.attachedLayersFront!!.defaultAnimation.firstFrame.layerData[index]
@@ -80,22 +82,23 @@ class ParallaxSystem(
                 val lineIndex = texture.targetY - offset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
-                parallaxComponent.parallaxPlane.attachedLayersFrontPositions[index] = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + position
+                parallaxComponent.attachedLayersFrontPositions[index] = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + position
             } else if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE) {
                 // Get correct speed factor for parallax plane lines from FloatArray
                 val lineIndex = texture.targetX - offset + attachTextureOffset
                 val speedFactor = plane.parallaxPlaneSpeedFactors[lineIndex]
                 // Update position of parallax position
-                parallaxComponent.parallaxPlane.attachedLayersFrontPositions[index] = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + position
+                parallaxComponent.attachedLayersFrontPositions[index] = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + position
             }
         }
 
-        parallaxComponent.foregroundLayers.fastForEachWithIndex { index, layer ->
+        parallaxComponent.fgLayerEntities.fastForEachWithIndex { index, layerEntity ->
             val speedFactor: Float = parallaxDataContainer.config.foregroundLayers!![index].speedFactor ?: 0f
             val selfSpeedX = parallaxDataContainer.config.foregroundLayers[index].selfSpeedX
             val selfSpeedY = parallaxDataContainer.config.foregroundLayers[index].selfSpeedY
-            layer.position.x = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + selfSpeedX * deltaTime + layer.position.x
-            layer.position.y = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + layer.position.y
+            val positionComponent = layerEntity[PositionComponent]
+            positionComponent.x = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + selfSpeedX * deltaTime + positionComponent.x
+            positionComponent.y = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + positionComponent.y
         }
     }
 }
