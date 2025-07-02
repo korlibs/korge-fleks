@@ -8,7 +8,6 @@ import korlibs.image.bitmap.*
 import korlibs.image.font.Font
 import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
-import korlibs.image.tiles.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.ldtk.view.*
 import korlibs.time.Stopwatch
@@ -38,11 +37,12 @@ class AssetStore {
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
     internal var specialAssetConfig: AssetModel = AssetModel()
 
-    internal val assetLevelData: MutableMap<String, Pair<AssetType, AssetLevelData>> = mutableMapOf()
     internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
     internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
     internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     internal var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
+
+    internal val assetLevelDataLoader: AssetLevelDataLoader = AssetLevelDataLoader()
 
     data class CollisionData(
         val x: Int,
@@ -77,10 +77,6 @@ class AssetStore {
             println("WARNING - AssetStore: Image '$name' not found!")
             ImageData()
         }
-
-    fun getWorldData(name: String) : WorldData =
-        if (assetLevelData.contains(name)) assetLevelData[name]!!.second.worldData
-        else error("AssetStore: World data '$name' not found!")
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
@@ -140,10 +136,18 @@ class AssetStore {
 
             // Update maps of music, images, ...
             assetConfig.tileMaps.forEach { tileMap ->
+                val levelName = tileMap.key
                 val ldtkFile = tileMap.value.fileName
                 val collisionLayerName = tileMap.value.collisionLayerName
+                val tileSetPaths = tileMap.value.tileSetPaths
                 val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLDTKWorld(extrude = true)
-                assetLevelData[tileMap.key] = Pair(type, AssetLevelData(ldtkWorld, collisionLayerName))
+
+                when  (type) {
+                    AssetType.LEVEL -> { assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths) }
+                    // Load raw tile map data for special assets
+                    AssetType.SPECIAL -> { assetLevelDataLoader.loadTileMapData(ldtkWorld, levelName, tileSetPaths) }
+                    else -> error("AssetStore: Cannot load tile map data for asset type '$type'! Only LEVEL and SPECIAL types are supported!")
+                }
             }
 
             assetConfig.sounds.forEach { sound ->
@@ -213,10 +217,11 @@ class AssetStore {
      * Remove all assets which have a specific given [AssetType].
      */
     private fun removeAssets(type: AssetType) {
+        // TODO: In case of SPECIAL assets we need to consider the level chunk position of the asset
+
         backgrounds.values.removeAll { it.first == type }
         images.values.removeAll { it.first == type }
         fonts.values.removeAll { it.first == type }
         sounds.values.removeAll { it.first == type }
-        assetLevelData.values.removeAll { it.first == type }
     }
 }

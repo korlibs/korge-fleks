@@ -1,9 +1,9 @@
-package korlibs.korge.fleks.assets
+package korlibs.korge.fleks.prefab.data
 
 import korlibs.datastructure.Array2
 import korlibs.datastructure.IntArray2
-import korlibs.image.bitmap.*
-import korlibs.image.tiles.*
+import korlibs.image.bitmap.BmpSlice
+import korlibs.image.tiles.TileMapData
 
 /**
  * Data class for storing level maps and entities for a game world.
@@ -11,7 +11,7 @@ import korlibs.image.tiles.*
  * @param width - Width of whole world in pixels
  * @param height - Height of whole world in pixels
  */
-data class WorldData(
+data class LevelData(
     // Size of all gridvania levels in the world (in pixels / world coordinates)
     val width: Float = 0f,
     val height: Float = 0f,
@@ -23,16 +23,30 @@ data class WorldData(
     // Level maps
     val levelGridVania: Array2<Chunk>,
     val gridVaniaWidth: Int = 0,
-    val gridVaniaHeight: Int = 0
+    val gridVaniaHeight: Int = 0,
+    // Tile maps for special layers (intro, cut-scenes, etc.) - tile maps are independent of the level chunks
+    val specialTileMaps: MutableMap<String, TileMapData> = mutableMapOf()
 ) {
     private val levelMidPointX: Int = levelGridWidth / 2
     private val levelMidPointY: Int = levelGridHeight / 2
 
+    /**
+     * Represents a chunk of the level, containing entity configurations, tile map data and collision map.
+     *
+     * @property entityConfigNames - List of entity configuration names in this chunk.
+     * @property tileMapData - Map of tile map data for different layers in this chunk.
+     * @property collisionMap - Collision map for this chunk, if any.
+     */
     data class Chunk(
         var entityConfigNames: List<String>? = null,
+        /*
+         * Map of tile map data for different layers in this chunk.
+         * The key is the layer name, and the value is the TileMapData for that layer.
+         */
         var tileMapData: Map<String, TileMapData> = mapOf(),
         var collisionMap: IntArray2? = null
     )
+
 
     init {
         // Sanity check for levelGridVania dimensions

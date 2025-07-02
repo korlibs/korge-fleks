@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.assets
+package korlibs.korge.fleks.prefab.data
 
 import korlibs.datastructure.IArray2
 import korlibs.datastructure.IArray2.Companion.forEachPosRect
@@ -16,6 +16,7 @@ import kotlinx.serialization.Serializable
 data class ChunkConfig(
     var entitiesSpawned: Boolean = false,
     // var entities ...
+    // TODO: Reload entities which were unloaded from the chunk previously
 //    var entityConfigNames: List<String>? = null
 )
 

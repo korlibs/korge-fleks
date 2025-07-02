@@ -16,6 +16,7 @@ import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.getImageFrame
 import korlibs.korge.fleks.components.data.Point.Companion.staticPoint
+import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -161,9 +162,8 @@ class DebugRenderSystem(
 
 
                 if (entity has LevelMapComponent && entity has DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS) {
-                    val levelName = entity[LevelMapComponent].levelName
-                    val worldData = assetStore.getWorldData(levelName)
-                    val tileSize = worldData.tileSize
+                    val levelData = Prefab.levelData ?: return@forEach
+                    val tileSize = levelData.tileSize
 
                     val cameraPosition = with(world) { camera[PositionComponent] }
 
@@ -179,7 +179,7 @@ class DebugRenderSystem(
                     val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
 
                     // Draw collision tiles
-                    worldData.forEachCollisionTile(xStart, yStart, xTiles, yTiles) { collisionTile, px, py ->
+                    levelData.forEachCollisionTile(xStart, yStart, xTiles, yTiles) { collisionTile, px, py ->
                         if (collisionTile == 1) {
                             batch.drawVector(Colors.RED) {
                                 rect(px - viewPortPosX, py - viewPortPosY, tileSize.toFloat(), tileSize.toFloat())

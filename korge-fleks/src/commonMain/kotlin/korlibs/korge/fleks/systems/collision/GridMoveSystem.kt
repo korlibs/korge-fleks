@@ -4,7 +4,6 @@ import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IntervalSystem
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.assets.WorldData
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Grid
@@ -18,7 +17,6 @@ import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
 import korlibs.korge.fleks.logic.collision.resolver.SimpleCollisionResolver
-import korlibs.korge.fleks.prefab.LevelPrefab
 import korlibs.korge.fleks.tags.RenderLayerTag.MAIN_LEVELMAP
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.math.isAlmostEquals
@@ -35,7 +33,7 @@ class GridMoveSystem(
 
     val assetStore = world.inject<AssetStore>("AssetStore")
 //    var levelData: WorldData = assetStore.getWorldData(name)
-    var collisionChecker: CollisionChecker = PlatformerCollisionChecker(LevelPrefab.levelData)
+    var collisionChecker: CollisionChecker = PlatformerCollisionChecker()
     var collisionResolver: CollisionResolver = SimpleCollisionResolver(16, 16)
 
     override fun onTick() {

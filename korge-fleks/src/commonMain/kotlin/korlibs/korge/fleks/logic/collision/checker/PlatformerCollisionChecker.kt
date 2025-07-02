@@ -1,10 +1,11 @@
 package korlibs.korge.fleks.logic.collision.checker
 
-import korlibs.korge.fleks.assets.WorldData
+import korlibs.korge.fleks.prefab.Prefab
+import korlibs.korge.fleks.prefab.data.LevelData
 import kotlin.math.floor
 
 class PlatformerCollisionChecker(
-    private var level: WorldData
+//    private var level: LevelData
 ) : CollisionChecker() {
     var rightCollisionRatio: Float = 0.7f
     var leftCollisionRatio: Float = 0.3f
@@ -23,11 +24,13 @@ class PlatformerCollisionChecker(
         height: Float,
         cellSize: Float
     ): Int {
-        if (level.hasCollision(cx + 1, cy) && xr >= rightCollisionRatio) {
-            return 1
-        }
-        if (level.hasCollision(cx - 1, cy) && xr <= leftCollisionRatio) {
-            return -1
+        Prefab.levelData?.let { level ->
+            if (level.hasCollision(cx + 1, cy) && xr >= rightCollisionRatio) {
+                return 1
+            }
+            if (level.hasCollision(cx - 1, cy) && xr <= leftCollisionRatio) {
+                return -1
+            }
         }
         return 0
     }
@@ -43,18 +46,19 @@ class PlatformerCollisionChecker(
         height: Float,
         cellSize: Float
     ): Int {
-        val heightCoordDiff = if (useTopCollisionRatio) topCollisionRatio else floor(height / cellSize)
-        if (level.hasCollision(cx, cy + 1) && yr >= heightCoordDiff) {
-            return 1
-        }
-        if (level.hasCollision(cx, cy - 1) && yr <= bottomCollisionRatio) {
-            return -1
+        Prefab.levelData?.let { level ->
+            val heightCoordDiff = if (useTopCollisionRatio) topCollisionRatio else floor(height / cellSize)
+            if (level.hasCollision(cx, cy + 1) && yr >= heightCoordDiff) {
+                return 1
+            }
+            if (level.hasCollision(cx, cy - 1) && yr <= bottomCollisionRatio) {
+                return -1
+            }
         }
         return 0
     }
 
-    override fun hasCollision(cx: Int, cy: Int): Boolean = level.hasCollision(cx, cy)
-
+    override fun hasCollision(cx: Int, cy: Int): Boolean = Prefab.levelData?.hasCollision(cx, cy) ?: false
 }
 
 /**

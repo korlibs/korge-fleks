@@ -1,12 +1,12 @@
 package korlibs.korge.fleks.logic.collision.resolver
 
-import korlibs.korge.fleks.assets.WorldData
+import korlibs.korge.fleks.prefab.data.LevelData
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 
 class PlatformerCollisionResolver(
-    var level: WorldData
+    var level: LevelData
 ): CollisionResolver() {
 
 }
