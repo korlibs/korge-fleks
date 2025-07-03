@@ -92,12 +92,12 @@ class AssetLevelDataLoader() {
         val ldtkLevel = ldtkWorld.ldtk.levels.firstOrNull()
         if (ldtkLevel != null) {
             // Create new entry in the Prefab levelDataMap list for the level
-            Prefab.levelDataMap[levelName] = mutableListOf()
+            Prefab.tileMaps[levelName] = mutableListOf()
             ldtkLevel.layerInstances?.forEach { ldtkLayer ->
                 // Store tiles into tileMapData for each layer
                 if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
                     // Layer has tile set -> store tile map data - no entity data
-                    Prefab.levelDataMap[levelName]!!.add(storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!))
+                    Prefab.tileMaps[levelName]!!.add(storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!))
                 }
             }
         } else println("ERROR: Could not load tile map for level '$levelName'! Level list is empty.")
@@ -118,15 +118,15 @@ class AssetLevelDataLoader() {
         // Reload tile map data for the level
         val ldtkLevel = ldtkWorld.ldtk.levels.firstOrNull()
         if (ldtkLevel != null) {
-            if (!Prefab.levelDataMap.containsKey(levelName)) {
+            if (!Prefab.tileMaps.containsKey(levelName)) {
                 println("ERROR: Level '$levelName' not found in Prefab levelDataMap! Creating new entry.")
-                Prefab.levelDataMap[levelName] = mutableListOf()
+                Prefab.tileMaps[levelName] = mutableListOf()
             }
             ldtkLevel.layerInstances?.forEach { ldtkLayer ->
                 // Store tiles into tileMapData for each layer
                 if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
                     // Layer has tile set -> store tile map data - no entity data
-                    Prefab.levelDataMap[levelName]!!.add(storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!))
+                    Prefab.tileMaps[levelName]!!.add(storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!))
                 }
             }
         } else println("ERROR: Could not load tile map for level '$levelName'! Level list is empty. (on reloadTileMap)")

@@ -50,7 +50,7 @@ data class LevelMapConfig(
                 levelChunks = ChunkArray2(width = levelData.gridVaniaWidth, height = levelData.gridVaniaHeight)
              }
             // Level map does not have position - camera position will determine what is shown from the level map
-            // Size of level map is static and can be gathered from AssetStore -> AssetLevelData
+            // Size of level map is static and can be gathered from Prefab.levelData
             it += rgbaComponent {
                 alpha = this@LevelMapConfig.alpha
             }
