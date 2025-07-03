@@ -177,7 +177,6 @@ class SnapshotSerializer {
             subclass(Layer::class)
             subclass(LayeredSprite::class)
             subclass(LevelMap::class)
-            subclass(LevelMap::class)
             subclass(LifeCycle::class)
             subclass(Motion::class)
             subclass(NinePatch::class)

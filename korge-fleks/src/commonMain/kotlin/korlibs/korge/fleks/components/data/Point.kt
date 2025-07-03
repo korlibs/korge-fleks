@@ -1,6 +1,9 @@
 package korlibs.korge.fleks.components.data
 
+import com.github.quillraven.fleks.Entity
+import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -45,5 +48,15 @@ class Point private constructor(
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Point") { Point() }
+    }
+
+    /**
+     * Convert the position to screen coordinates.
+     * This is useful to convert the position of an entity to screen coordinates for rendering.
+     */
+    fun World.convertToScreenCoordinates(camera: Entity) {
+        val cameraPosition = camera[PositionComponent]
+        x = x  - cameraPosition.x + cameraPosition.offsetX + AppConfig.VIEW_PORT_WIDTH_HALF
+        y = y - cameraPosition.y + cameraPosition.offsetY + AppConfig.VIEW_PORT_HEIGHT_HALF
     }
 }

@@ -7,6 +7,8 @@ import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.levelMapComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.prefab.Prefab
+import korlibs.korge.fleks.prefab.data.ChunkArray2
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -34,20 +36,19 @@ data class LevelMapConfig(
 ) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
-        val worldData: WorldData = inject<AssetStore>("AssetStore").getWorldData(levelName)
+        val levelData = Prefab.levelData ?: error("ERROR: Level data is not set in Prefab.levelData. " +
+            "Make sure to load the level data before creating a LevelMapConfig entity.")
 
-        // Set level size in CameraSystem for parallax effect
-        if (enableParallax) {
-            system<CameraSystem>().worldWidth = worldData.width
-            system<CameraSystem>().worldHeight = worldData.height
-        }
+        // Set world size in CameraSystem to enable parallax effect
+        system<CameraSystem>().worldWidth = levelData.width
+        system<CameraSystem>().worldHeight = levelData.height
 
         entity.configure {
             it += levelMapComponent {
                 levelName = this@LevelMapConfig.levelName
                 layerNames.init(from = this@LevelMapConfig.layerNames)
-                levelChunks = ChunkArray2(width = worldData.gridVaniaWidth, height = worldData.gridVaniaHeight)
-            }
+                levelChunks = ChunkArray2(width = levelData.gridVaniaWidth, height = levelData.gridVaniaHeight)
+             }
             // Level map does not have position - camera position will determine what is shown from the level map
             // Size of level map is static and can be gathered from AssetStore -> AssetLevelData
             it += rgbaComponent {

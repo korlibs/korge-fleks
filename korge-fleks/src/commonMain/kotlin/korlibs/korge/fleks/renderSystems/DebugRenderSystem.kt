@@ -5,6 +5,7 @@ import korlibs.datastructure.iterators.fastForEachReverse
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
+import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
@@ -14,12 +15,13 @@ import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.getImageFrame
+import korlibs.korge.fleks.components.data.Point.Companion.staticPoint
+import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
-import korlibs.math.geom.*
-import korlibs.math.geom.Point
+import korlibs.math.geom.Rectangle
 
 
 /**
@@ -34,7 +36,7 @@ class DebugRenderSystem(
 ) : View() {
     private val family: Family = world.family {
         all(layerTag)
-            .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent)
+            .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
@@ -52,7 +54,6 @@ class DebugRenderSystem(
                     // Take over entity position
                     position.init(entity[PositionComponent])
 
-                    // TODO: Check if this works...
                     if (entity hasNo ScreenCoordinatesTag) {
                         // Transform world coordinates to screen coordinates
                         position.run { world.convertToScreenCoordinates(camera) }
@@ -134,17 +135,35 @@ class DebugRenderSystem(
                         batch.drawVector(Colors.YELLOW) {
                             val x = position.x + position.offsetX
                             val y = position.y + position.offsetY
-                            circle(Point(x, y), 2)
-                            line(Point(x - 3, y), Point(x + 3, y))
-                            line(Point(x, y - 3), Point(x, y + 3))
+                            circle(korlibs.math.geom.Point(x, y), 2)
+                            line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
+                            line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
                         }
                     }
                 }
 
+                // Draw grid position
+                if(entity has GridComponent && entity has DebugInfoTag.GRID_POSITION) {
+                    val gridComponent = entity[GridComponent]
+
+                    val gridToPosition = staticPoint { x = gridComponent.x; y = gridComponent.y }
+                    if (entity hasNo ScreenCoordinatesTag) {
+                        gridToPosition.run { world.convertToScreenCoordinates(camera) }
+                    }
+
+                    batch.drawVector(Colors.YELLOW) {
+                        val x = gridToPosition.x
+                        val y = gridToPosition.y
+                        circle(korlibs.math.geom.Point(x, y), 2)
+                        line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
+                        line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
+                    }
+                }
+
+
                 if (entity has LevelMapComponent && entity has DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS) {
-                    val levelName = entity[LevelMapComponent].levelName
-                    val worldData = assetStore.getWorldData(levelName)
-                    val tileSize = worldData.tileSize
+                    val levelData = Prefab.levelData ?: return@forEach
+                    val tileSize = levelData.tileSize
 
                     val cameraPosition = with(world) { camera[PositionComponent] }
 
@@ -160,7 +179,7 @@ class DebugRenderSystem(
                     val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
 
                     // Draw collision tiles
-                    worldData.forEachCollisionTile(xStart, yStart, xTiles, yTiles) { collisionTile, px, py ->
+                    levelData.forEachCollisionTile(xStart, yStart, xTiles, yTiles) { collisionTile, px, py ->
                         if (collisionTile == 1) {
                             batch.drawVector(Colors.RED) {
                                 rect(px - viewPortPosX, py - viewPortPosY, tileSize.toFloat(), tileSize.toFloat())

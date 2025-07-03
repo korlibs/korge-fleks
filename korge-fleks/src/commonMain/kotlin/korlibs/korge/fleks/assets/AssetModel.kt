@@ -28,10 +28,9 @@ data class AssetModel(
     @Serializable @SerialName("TileMapConfig")
     data class TileMapConfig(
         val fileName: String,
-        val collisionLayerName: String = "",  // Default is empty string - no collision layer
-        val levels: String? = null,  // Currently not used - since we load all levels of a LDtk tile map world
-        // Set this to "false" if this tile map is used outside the game world
-        // e.g. in intro without the need to dynamically control the parallax layer
-        val hasParallax: Boolean = true  // Currently not used - since we only have one tile map loaded at once
+        val collisionLayerName: String = "",  // Default is empty string - no collision layer or specific layer name for a tile map
+
+        // internally used
+        val tileSetPaths: MutableList<String> = mutableListOf()
     )
 }

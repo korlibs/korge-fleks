@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.assets.ChunkArray2
+import korlibs.korge.fleks.prefab.data.ChunkArray2
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -23,6 +23,7 @@ class LevelMap private constructor(
     var levelName: String = "",
     val layerNames: MutableList<String> = mutableListOf(),
 
+    // TODO: Check if we use this for storing entities when they go out of the active 2x2 chunk area
     var levelChunks: ChunkArray2 = ChunkArray2.empty
 ) : PoolableComponent<LevelMap>() {
     // Init an existing component data instance with data from another component

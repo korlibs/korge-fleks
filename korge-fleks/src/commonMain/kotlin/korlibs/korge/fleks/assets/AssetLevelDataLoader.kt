@@ -4,32 +4,34 @@ import korlibs.datastructure.Array2
 import korlibs.datastructure.IntArray2
 import korlibs.image.tiles.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.assets.WorldData.*
+import korlibs.korge.fleks.prefab.data.LevelData.*
 import korlibs.korge.fleks.gameState.*
+import korlibs.korge.fleks.prefab.Prefab
+import korlibs.korge.fleks.prefab.data.LevelData
 import korlibs.korge.ldtk.*
 import korlibs.korge.ldtk.view.*
 import korlibs.math.*
 import korlibs.memory.*
 import kotlinx.serialization.*
+import kotlin.collections.set
 import kotlin.math.*
 
 /**
  * Data class for storing level maps and entities for a game world.
  */
-class AssetLevelData(
-    val ldtkWorld: LDTKWorld,  // TODO: Get tileset names out and store separately for hot-reloading
-    private val collisionLayerName: String
-) {
-    internal var worldData: WorldData
-    private var gameObjectCnt = 0
-
+class AssetLevelDataLoader() {
+    private var collisionLayerName: String = ""
     /**
      * Load level data from LDtk world file and store it in the worldData object.
      * The worldData object contains all level data and is used to render the levels.
      * The level data is stored in a 2D array where each element is a LevelData object.
      * The LevelData object contains the tile map data and entity data for each level.
      */
-    init {
+    fun loadLevelData(ldtkWorld: LDTKWorld, collisionLayerName: String, levelName: String, tileSetPaths: MutableList<String>) {
+        this.collisionLayerName = collisionLayerName
+
+        // TODO: Add sanity check for level data chunks and throw an error if the LDtk is not configured correctly
+
         val levelWidth = ldtkWorld.ldtk.worldGridWidth ?: 1  // this is also the size of each sub-level
         val levelHeight = ldtkWorld.ldtk.worldGridHeight ?: 1  // all levels have the same size
         var worldWidth = 0
@@ -43,11 +45,19 @@ class AssetLevelData(
         worldWidth += levelWidth
         worldHeight += levelHeight
 
+        // Create list of paths for tilesets - used for hot-reloading of tile maps
+        ldtkWorld.ldtk.defs.tilesets.forEach { tileset ->
+            tileset.relPath?.let { path ->
+                tileSetPaths.add(path)
+            }
+        }
+        
         // Calculate the size of the level grid vania array
         val gridVaniaWidth = (worldWidth / levelWidth) + 1  // +1 for guard needed in world map renderer
         val gridVaniaHeight = (worldHeight / levelHeight) + 1
 
-        worldData = WorldData(
+        Prefab.levelName = levelName
+        Prefab.levelData = LevelData(
             // Set the size of the world
             width = worldWidth.toFloat(),
             height = worldHeight.toFloat(),
@@ -65,32 +75,83 @@ class AssetLevelData(
 
         // Save TileMapData for each Level and layer combination from LDtk world
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-            loadLevel(ldtkWorld, ldtkLevel)
+            loadLevel(ldtkWorld, ldtkLevel, collisionLayerName)
         }
         println("Gridvania size: ${gridVaniaWidth} x ${gridVaniaHeight})")
     }
 
-    fun reloadAsset(ldtkWorld: LDTKWorld) {
+    fun loadTileMapData(ldtkWorld: LDTKWorld, levelName: String, tileSetPaths: MutableList<String>) {
+        // Create list of paths for tilesets - used for hot-reloading of tile maps
+        ldtkWorld.ldtk.defs.tilesets.forEach { tileset ->
+            tileset.relPath?.let { path ->
+                tileSetPaths.add(path)
+            }
+        }
+
+        // Save TileMapData for each layer of the Level from LDtk world
+        val ldtkLevel = ldtkWorld.ldtk.levels.firstOrNull()
+        if (ldtkLevel != null) {
+            // Create new entry in the Prefab levelDataMap list for the level
+            Prefab.levelDataMap[levelName] = mutableListOf()
+            ldtkLevel.layerInstances?.forEach { ldtkLayer ->
+                // Store tiles into tileMapData for each layer
+                if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
+                    // Layer has tile set -> store tile map data - no entity data
+                    Prefab.levelDataMap[levelName]!!.add(storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!))
+                }
+            }
+        } else println("ERROR: Could not load tile map for level '$levelName'! Level list is empty.")
+    }
+
+    /**
+     * Reload all chunks (LDtk levels) from the level (LDtk world).
+     * This is used when the LDtk world file has been changed (hot-reloading).
+     */
+    fun reloadAllLevelChunks(ldtkWorld: LDTKWorld) {
         // Reload all levels from ldtk world file
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-            loadLevel(ldtkWorld, ldtkLevel)
+            loadLevel(ldtkWorld, ldtkLevel, collisionLayerName)
         }
     }
 
-    private fun loadLevel(ldtkWorld: LDTKWorld, ldtkLevel: Level) {
-        val levelX: Int = ldtkLevel.worldX / (worldData.levelGridWidth * worldData.tileSize)
-        val levelY: Int = ldtkLevel.worldY / (worldData.levelGridHeight * worldData.tileSize)
+    fun reloadTileMap(ldtkWorld: LDTKWorld, levelName: String) {
+        // Reload tile map data for the level
+        val ldtkLevel = ldtkWorld.ldtk.levels.firstOrNull()
+        if (ldtkLevel != null) {
+            if (!Prefab.levelDataMap.containsKey(levelName)) {
+                println("ERROR: Level '$levelName' not found in Prefab levelDataMap! Creating new entry.")
+                Prefab.levelDataMap[levelName] = mutableListOf()
+            }
+            ldtkLevel.layerInstances?.forEach { ldtkLayer ->
+                // Store tiles into tileMapData for each layer
+                if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
+                    // Layer has tile set -> store tile map data - no entity data
+                    Prefab.levelDataMap[levelName]!!.add(storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!))
+                }
+            }
+        } else println("ERROR: Could not load tile map for level '$levelName'! Level list is empty. (on reloadTileMap)")
+    }
+
+    /**
+     * Load a level from the LDtk world file and store it in the levelData object.
+     * The level data is stored in a 2D array where each element is a LevelData object.
+     * The LevelData object contains the tile map data and entity data for each level.
+     */
+    private fun loadLevel(ldtkWorld: LDTKWorld, ldtkLevel: Level, collisionLayerName: String) {
+        val levelX: Int = ldtkLevel.worldX / (Prefab.levelData!!.levelGridWidth * Prefab.levelData!!.tileSize)
+        val levelY: Int = ldtkLevel.worldY / (Prefab.levelData!!.levelGridHeight * Prefab.levelData!!.tileSize)
 
         val entities: MutableList<String> = mutableListOf()
         val tileMapData: MutableMap<String, TileMapData> = mutableMapOf()
         var collisionMap: IntArray? = null
+        var gameObjectCnt = 0
 
         val chunkName = ldtkLevel.identifier
         ldtkLevel.layerInstances?.forEach { ldtkLayer ->
             val layerName = ldtkLayer.identifier
-            val levelWidth = worldData.levelGridWidth * worldData.tileSize
-            val levelHeight = worldData.levelGridHeight * worldData.tileSize
-            val gridSize = worldData.tileSize
+            val levelWidth = Prefab.levelData!!.levelGridWidth * Prefab.levelData!!.tileSize
+            val levelHeight = Prefab.levelData!!.levelGridHeight * Prefab.levelData!!.tileSize
+            val gridSize = Prefab.levelData!!.tileSize
 
             // TODO: Check if we want layer to be considered for platform collision
 
@@ -170,13 +231,16 @@ class AssetLevelData(
             if (layerName == collisionLayerName) collisionMap = ldtkLayer.intGridCSV
         }
 
-        val levelData = worldData.levelGridVania[levelX, levelY]
+        val levelData = Prefab.levelData!!.levelGridVania[levelX, levelY]
         levelData.entityConfigNames = entities.ifEmpty { null }
         levelData.tileMapData = tileMapData
-        levelData.collisionMap =
-            if (collisionMap != null) IntArray2(worldData.levelGridWidth, worldData.levelGridWidth, collisionMap) else null
+        levelData.collisionMap = if (collisionMap != null) IntArray2(Prefab.levelData!!.levelGridWidth, Prefab.levelData!!.levelGridWidth, collisionMap) else null
     }
 
+    /**
+     * Get the level data for a specific chunk in the grid vania array.
+     * The chunk is identified by its X and Y position in the grid vania array.
+     */
     private fun storeTiles(ldtkLayer: LayerInstance, tilesetExt: ExtTileset) : TileMapData {
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,

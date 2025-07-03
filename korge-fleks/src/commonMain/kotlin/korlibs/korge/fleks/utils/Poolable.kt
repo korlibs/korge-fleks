@@ -2,9 +2,8 @@ package korlibs.korge.fleks.utils
 
 
 /**
- * Interface for poolable data classes.
- * It provides methods to clone, initialize, cleanup, and free the instance.
- * This is used for managing data object instances in a pool.
+ * Interface for poolable objects. It is used to define objects that can be reused from a pool.
+ * Those objects are used as properties of components.
  */
 interface Poolable<T> {
     fun clone(): T

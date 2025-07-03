@@ -1,7 +1,11 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.utils.*
+import korlibs.math.interpolation.interpolate
+import korlibs.math.interpolation.toRatio
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -103,9 +107,59 @@ class Grid private constructor(
 //            dirty = true
         }
 
+    var interpolatePixelPosition: Boolean = true
+
+    /**
+     * The ratio to interpolate the last position to the new position.
+     * This will need updated before each update.
+     */
+    var interpolationAlpha: Float = 1f
+    var x: Float
+        get() {
+            return if (interpolatePixelPosition) {
+                interpolationAlpha.toRatio().interpolate(lastPx, attachX)
+            } else {
+                attachX
+            }
+        }
+        set(value) {
+            cx = (value / AppConfig.GRID_CELL_SIZE).toInt()
+            xr = (value - cx * AppConfig.GRID_CELL_SIZE) / AppConfig.GRID_CELL_SIZE
+            onPositionManuallyChanged()
+        }
+
+    var y: Float
+        get() {
+            return if (interpolatePixelPosition) {
+                interpolationAlpha.toRatio().interpolate(lastPy, attachY)
+            } else {
+                 attachY
+            }
+        }
+        set(value) {
+            cy = (value / AppConfig.GRID_CELL_SIZE).toInt()
+            yr = (value - cy * AppConfig.GRID_CELL_SIZE) / AppConfig.GRID_CELL_SIZE
+            onPositionManuallyChanged()
+        }
+
     var lastPx: Float = 0f
     var lastPy: Float = 0f
 
     val attachX get() = (cx + xr) * AppConfig.GRID_CELL_SIZE
     val attachY get() = (cy + yr - zr) * AppConfig.GRID_CELL_SIZE
+
+    fun onPositionManuallyChanged() {
+        lastPx = attachX
+        lastPy = attachY
+    }
+
+    /**
+     * Convert the position of the entity to screen coordinates.
+     * This is useful to convert the position of an entity to screen coordinates for rendering.
+     */
+    fun World.convertToScreenCoordinates(camera: Entity, position: Point) {
+        val cameraPosition = camera[PositionComponent]
+        position.x = x  - cameraPosition.x + cameraPosition.offsetX + AppConfig.VIEW_PORT_WIDTH_HALF
+        position.y = y - cameraPosition.y + cameraPosition.offsetY + AppConfig.VIEW_PORT_HEIGHT_HALF
+    }
 }

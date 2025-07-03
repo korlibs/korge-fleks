@@ -7,6 +7,7 @@ import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -48,7 +49,7 @@ class LevelMapRenderSystem(
         family.forEach { entity ->
             val rgba = entity[RgbaComponent].rgba
             val levelMap = entity[LevelMapComponent]
-            val worldData = assetStore.getWorldData(levelMap.levelName)
+            val worldData = Prefab.levelData ?: return@forEach
             val tileSize = worldData.tileSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset

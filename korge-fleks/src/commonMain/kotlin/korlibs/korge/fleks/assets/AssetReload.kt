@@ -6,6 +6,7 @@ import korlibs.image.format.*
 import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
+import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.ldtk.view.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.*
@@ -186,11 +187,9 @@ class ResourceDirWatcherConfiguration(
                 reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
             }
             // Check if any tileset was modified
-            assetStore.assetLevelData[config.key]?.second?.ldtkWorld?.ldtk?.defs?.tilesets?.forEach { tileset ->
-                tileset.relPath?.let {
-                    if (file.fullName.contains(it) && !reloading) {
-                        reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
-                    }
+            config.value.tileSetPaths.forEach { path ->
+                if (file.fullName.contains(path) && !reloading) {
+                    reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
                 }
             }
         }
@@ -205,7 +204,13 @@ class ResourceDirWatcherConfiguration(
 
             val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + fileName].readLDTKWorld(extrude = true)
             //println("\nTriggering asset change for LDtk: $fileName")
-            assetStore.assetLevelData[levelName]?.second?.reloadAsset(ldtkWorld)
+
+            // Check if the name of the level is the one for the level chunks
+            if (Prefab.levelName == levelName) {
+                assetStore.assetLevelDataLoader.reloadAllLevelChunks(ldtkWorld)
+            } else {
+                assetStore.assetLevelDataLoader.reloadTileMap(ldtkWorld, levelName)
+            }
 
             // Guard period until reloading is activated again - this is used for debouncing watch messages
             delay(100)
