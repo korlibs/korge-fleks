@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets
 
+import korlibs.korge.fleks.assets.data.ParallaxConfig
 import kotlinx.serialization.*
 
 

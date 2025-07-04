@@ -18,6 +18,7 @@ import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
+import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
 import korlibs.korge.fleks.components.getImageFrame
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.getMainCamera
@@ -43,7 +44,7 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
-        .any(PositionComponent, LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent)
+        .any(PositionComponent, LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent, TileMapComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
@@ -187,6 +188,56 @@ class ObjectRenderSystem(
 
                 ctx.useBatcher { batch ->
                     batch.drawVertices(tva, ctx.getTex(ninePatch.content.bmp), smoothing = false, blendMode)
+                }
+            }
+            else if (entity has TileMapComponent) {
+                val tileMapComponent = entity[TileMapComponent]
+
+                tileMapComponent.layerNames.forEach { layerName ->
+                    val tileMap = assetStore.getTileMapData(tileMapComponent.levelName, layerName)
+
+                    val tileSet = tileMap.tileSet
+                    val tileSetWidth = tileSet.width
+                    val tileSetHeight = tileSet.height
+                    val offsetScale = tileMap.offsetScale
+
+                    // Draw only visible tiles
+                    val tileMapPosX: Float = position.x + position.offsetX
+                    val tileMapPosY: Float = position.y + position.offsetY
+
+                    // Start and end indexes of viewport area
+                    val xStart: Int = tileMapPosX.toInt() / tileSetWidth - 1  // x in positive direction;  -1 = start one tile before
+                    val xTiles = AppConfig.VIEW_PORT_WIDTH / tileSetWidth + 3
+                    val xEnd: Int = xStart + xTiles
+
+                    val yStart: Int = tileMapPosY.toInt() / tileSetHeight - 1  // y in negative direction;  -1 = start one tile before
+                    val yTiles = AppConfig.VIEW_PORT_HEIGHT / tileSetHeight + 3
+                    val yEnd: Int = yStart + yTiles
+
+                    ctx.useBatcher { batch ->
+                        for (l in 0 until tileMap.maxLevel) {  // Render all stacked tiles in the tile map
+                            for (tx in xStart until xEnd) {
+                                for (ty in yStart until yEnd) {
+                                    val tile = tileMap[tx, ty, l]
+                                    val info = tileSet.getInfo(tile.tile)
+                                    if (info != null) {
+                                        val px = (tx * tileSetWidth) + (tile.offsetX * offsetScale) - tileMapPosX
+                                        val py = (ty * tileSetHeight) + (tile.offsetY * offsetScale) - tileMapPosY
+
+                                        batch.drawQuad(
+                                            tex = ctx.getTex(info.slice),
+                                            x = px,
+                                            y = py,
+                                            filtering = false,
+                                            colorMul = rgba,
+                                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                                        )
+
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -6,9 +6,13 @@ import korlibs.image.format.*
 import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
+import korlibs.korge.fleks.assets.data.AssetType
+import korlibs.korge.fleks.assets.data.LayerTileMaps
+import korlibs.korge.fleks.assets.data.readParallaxDataContainer
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.ldtk.view.*
 import kotlinx.coroutines.*
+import kotlin.collections.set
 import kotlin.coroutines.*
 import kotlin.native.concurrent.*
 
@@ -115,7 +119,7 @@ class ResourceDirWatcherConfiguration(
 
     private suspend fun checkAssetFolders(assetStore: AssetStore, file: VfsFile, assetUpdater: AssetUpdaterConfiguration, assetConfig: AssetModel, assetReloadContext: CoroutineContext) {
 
-        // TODO: Currently only fonts, sprite images and parallax images are reloaded
+        // TODO: Currently only fonts, sprite images, background (parallax images) and tile maps are reloaded
         //       -> Implement reloading also for other asset types
 
         assetConfig.fonts.forEach { config ->
@@ -209,7 +213,10 @@ class ResourceDirWatcherConfiguration(
             if (Prefab.levelName == levelName) {
                 assetStore.assetLevelDataLoader.reloadAllLevelChunks(ldtkWorld)
             } else {
-                assetStore.assetLevelDataLoader.reloadTileMap(ldtkWorld, levelName)
+                // Reload all levels from ldtk world file
+                ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+                    assetStore.tileMaps[ldtkLevel.identifier] = Pair(assetUpdater.type, LayerTileMaps(ldtkWorld, ldtkLevel))
+                }
             }
 
             // Guard period until reloading is activated again - this is used for debouncing watch messages

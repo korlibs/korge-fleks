@@ -80,29 +80,6 @@ class AssetLevelDataLoader() {
         println("Gridvania size: ${gridVaniaWidth} x ${gridVaniaHeight})")
     }
 
-    fun loadTileMapData(ldtkWorld: LDTKWorld, levelName: String, tileSetPaths: MutableList<String>) {
-        // Create list of paths for tilesets - used for hot-reloading of tile maps
-        ldtkWorld.ldtk.defs.tilesets.forEach { tileset ->
-            tileset.relPath?.let { path ->
-                tileSetPaths.add(path)
-            }
-        }
-
-        // Save TileMapData for each layer of the Level from LDtk world
-        val ldtkLevel = ldtkWorld.ldtk.levels.firstOrNull()
-        if (ldtkLevel != null) {
-            // Create new entry in the Prefab levelDataMap list for the level
-            Prefab.tileMaps[levelName] = mutableListOf()
-            ldtkLevel.layerInstances?.forEach { ldtkLayer ->
-                // Store tiles into tileMapData for each layer
-                if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
-                    // Layer has tile set -> store tile map data - no entity data
-                    Prefab.tileMaps[levelName]!!.add(storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!))
-                }
-            }
-        } else println("ERROR: Could not load tile map for level '$levelName'! Level list is empty.")
-    }
-
     /**
      * Reload all chunks (LDtk levels) from the level (LDtk world).
      * This is used when the LDtk world file has been changed (hot-reloading).
@@ -112,24 +89,6 @@ class AssetLevelDataLoader() {
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
             loadLevel(ldtkWorld, ldtkLevel, collisionLayerName)
         }
-    }
-
-    fun reloadTileMap(ldtkWorld: LDTKWorld, levelName: String) {
-        // Reload tile map data for the level
-        val ldtkLevel = ldtkWorld.ldtk.levels.firstOrNull()
-        if (ldtkLevel != null) {
-            if (!Prefab.tileMaps.containsKey(levelName)) {
-                println("ERROR: Level '$levelName' not found in Prefab levelDataMap! Creating new entry.")
-                Prefab.tileMaps[levelName] = mutableListOf()
-            }
-            ldtkLevel.layerInstances?.forEach { ldtkLayer ->
-                // Store tiles into tileMapData for each layer
-                if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
-                    // Layer has tile set -> store tile map data - no entity data
-                    Prefab.tileMaps[levelName]!!.add(storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!))
-                }
-            }
-        } else println("ERROR: Could not load tile map for level '$levelName'! Level list is empty. (on reloadTileMap)")
     }
 
     /**

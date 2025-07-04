@@ -10,9 +10,4 @@ object Prefab {
     // This is loaded in the AssetStore as part of LEVEL data assets
     var levelName: String = ""  // name of the current level - needed for hot-reloading of level map data from LDtk tile map
     var levelData: LevelData? = null  // levels with chunk data
-
-    // This is loaded in the AssetStore as part of COMMON, WORLD and SPECIAL assets
-    // Level map of list of layers
-    val tileMaps: MutableMap<String, MutableList<TileMapData>> = mutableMapOf()
-
 }
