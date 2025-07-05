@@ -16,6 +16,14 @@ import korlibs.korge.fleks.tags.*
 fun World.entity(aName: String, configuration: EntityCreateContext.(Entity) -> Unit = {}) : Entity =
     entity(configuration).apply { configure { it += infoComponent { name = aName } } }
 
+fun World.emptyEntity(aName: String, configuration: EntityCreateContext.(Entity) -> Unit = {}) : Entity =
+    entity(configuration).apply {
+        configure {
+            it += infoComponent { name = aName }
+            it += IntentionallyEmpty
+        }
+    }
+
 /**
  * Delete function for [Entity] which let the [LifeCycleSystem] delete and cleanup all sub-entities, too.
  */

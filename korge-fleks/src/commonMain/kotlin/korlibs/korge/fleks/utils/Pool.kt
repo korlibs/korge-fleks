@@ -14,14 +14,24 @@ class Pool<T> internal constructor() {
     private val items = Stack<T>()
     private var lastId = 0
 
-    val totalAllocatedItems
+    val totalGeneratedItems
         get() = lastId
 
-    val totalItemsInUse
-        get() = totalAllocatedItems - itemsInPool
+    val totalGeneratedItemsInUse
+        get() = totalGeneratedItems - itemsInPool
 
-    val itemsInPool: Int
+    val itemsInPool: Int  // items not used
         get() = items.size
+
+    // Used for health monitoring of pool usage
+    var totalAllocatedItems: Int = 0
+        private set
+
+    var totalFreedItems: Int = 0
+        private set
+
+    val totalItemsInUse
+        get() = totalAllocatedItems - totalFreedItems
 
     /**
      * Structure containing a set of reusable objects.
@@ -31,17 +41,17 @@ class Pool<T> internal constructor() {
      * @param gen the object generate function to create a new object when needed
      */
     constructor(preallocate: Int = 0, name: String, gen: (Int) -> T) : this() {
-        pools[name] = this
+        listOfAllPools[name] = this
         setup( preallocate, gen)
     }
 
     companion object {
-        val pools = mutableMapOf<String, Pool<*>>()
+        val listOfAllPools = mutableMapOf<String, Pool<*>>()
 
         fun writeStatistics() {
             println("Pool statistics:")
-            pools.forEach { (name, pool) ->
-                println("  $name: totalAllocatedItems=${pool.totalAllocatedItems}, itemsInPool=${pool.itemsInPool}, totalItemsInUse=${pool.totalItemsInUse}")
+            listOfAllPools.forEach { (name, pool) ->
+                println("  $name: totalGeneratedItems=${pool.totalGeneratedItems}, itemsInPool=${pool.itemsInPool}, totalItemsInUse=${pool.totalItemsInUse}")
             }
         }
     }
@@ -62,6 +72,9 @@ class Pool<T> internal constructor() {
     }
 
     fun alloc(): T {
+        // Monitor items created
+        totalAllocatedItems++
+
         return if (items.isNotEmpty()) items.pop()
         else
             gen?.invoke(lastId++)
@@ -69,6 +82,9 @@ class Pool<T> internal constructor() {
     }
 
     fun free(element: T) {
+        // Monitor items freed
+        totalFreedItems++
+
         items.push(element)
     }
 

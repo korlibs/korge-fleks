@@ -3,6 +3,7 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IntervalSystem
 import korlibs.korge.fleks.components.Info.Companion.InfoComponent
+import korlibs.korge.fleks.utils.Pool
 
 
 /**
@@ -12,13 +13,14 @@ import korlibs.korge.fleks.components.Info.Companion.InfoComponent
  *
  * This system is not needed in production, but it is useful for debugging and testing.
  */
-class SanityCheckSystem(
+class HealthMonitorSystem(
     timesPerSecond: Int = 1
 ) : IntervalSystem(
+    // Do some sanity checks periodically every second
     interval = Fixed(step = 1f / timesPerSecond.toFloat())
 ) {
     override fun onTick() {
-        // Do some sanity checks periodically every second or so
+        // Health check for empty entities
         world.forEach { entity ->
             val snapshot = world.snapshotOf(entity)
             if (snapshot.tags.isEmpty() && (snapshot.components.isEmpty() || snapshot.components.size == 1 && entity has InfoComponent )) {
@@ -28,6 +30,18 @@ class SanityCheckSystem(
                     println("ERROR: Sanity check - found empty entity '${entity.id}' (v${entity.version}) with no tags and no components.")
                 // Remove empty entity
                 world -= entity
+            }
+        }
+
+        // Health check component and object pool usage
+        Pool.listOfAllPools.forEach { (name, pool) ->
+            if (pool.itemsInPool > pool.totalGeneratedItems) {
+                println("ERROR: Sanity check - pool '$name' has more items in pool (${pool.itemsInPool}) than total generated items (${pool.totalGeneratedItems}).")
+            }
+
+            // Consistency check for total items in use
+            if (pool.totalItemsInUse != pool.totalGeneratedItemsInUse) {
+                println("ERROR: Consistency check - pool '$name' has total items in use (${pool.totalItemsInUse}) different from total generated items in use (${pool.totalGeneratedItemsInUse}).")
             }
         }
     }

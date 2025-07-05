@@ -65,12 +65,12 @@ class Info private constructor(
     // Initialize an external prefab when the component is added to an entity
     override fun World.initPrefabs(entity: Entity) {
         entityId = entity.id
-        EntityByName.add(name, entity)
+//        EntityByName.add(name, entity)
     }
 
     // Cleanup/Reset an external prefab when the component is removed from an entity
     override fun World.cleanupPrefabs(entity: Entity) {
-        EntityByName.remove(name)
+//        EntityByName.remove(name)
     }
 
     // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem

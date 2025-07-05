@@ -232,7 +232,6 @@ class ObjectRenderSystem(
                                             colorMul = rgba,
                                             program = null // Possibility to use a custom shader - add ShaderComponent or similar
                                         )
-
                                     }
                                 }
                             }
