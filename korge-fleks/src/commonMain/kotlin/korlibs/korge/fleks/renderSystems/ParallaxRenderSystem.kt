@@ -5,6 +5,8 @@ import korlibs.datastructure.iterators.*
 import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.korge.fleks.assets.*
+import korlibs.korge.fleks.assets.data.ParallaxConfig
+import korlibs.korge.fleks.assets.data.ParallaxLayerConfig
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent

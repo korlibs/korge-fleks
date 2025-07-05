@@ -57,7 +57,7 @@ abstract class PoolableComponent<T> : Component<T> {
         if (GameStateManager.gameRunning) {
             // Call cleanup function to reset the component when requested by fleks world by calling onRemove
             cleanupComponent(entity)
-            println("Freeing component")
+//            println("Freeing component")
             free()
         }
     }

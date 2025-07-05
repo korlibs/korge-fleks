@@ -8,7 +8,12 @@ import korlibs.image.bitmap.*
 import korlibs.image.font.Font
 import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
+import korlibs.image.tiles.TileMapData
 import korlibs.io.file.std.resourcesVfs
+import korlibs.korge.fleks.assets.data.AssetType
+import korlibs.korge.fleks.assets.data.LayerTileMaps
+import korlibs.korge.fleks.assets.data.ParallaxDataContainer
+import korlibs.korge.fleks.assets.data.readParallaxDataContainer
 import korlibs.korge.ldtk.view.*
 import korlibs.time.Stopwatch
 import kotlin.collections.set
@@ -17,8 +22,8 @@ import kotlin.collections.set
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
  *
- * Assets are separated into [Common][AssetType.COMMON], [World][AssetType.WORLD], [Level][AssetType.LEVEL] and
- * [Special][AssetType.SPECIAL] types. The 'Common' type means that the asset is used throughout
+ * Assets are separated into [Common][korlibs.korge.fleks.assets.data.AssetType.COMMON], [World][korlibs.korge.fleks.assets.data.AssetType.WORLD], [Level][korlibs.korge.fleks.assets.data.AssetType.LEVEL] and
+ * [Special][korlibs.korge.fleks.assets.data.AssetType.SPECIAL] types. The 'Common' type means that the asset is used throughout
  * the game. So it makes sense to not reload those assets on every level or world. The same applies also for 'World' type.
  * It means a world-asset is used in all levels of a world. An asset of type 'Level' means that it is really only used in
  * one level (e.g. level specific graphics or music). The 'Special' type of assets is meant to be used for loading assets
@@ -37,10 +42,11 @@ class AssetStore {
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
     internal var specialAssetConfig: AssetModel = AssetModel()
 
-    internal var backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
-    internal var images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
-    internal var fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
-    internal var sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
+    internal val tileMaps: MutableMap<String, Pair<AssetType, LayerTileMaps>> = mutableMapOf()
+    internal val backgrounds: MutableMap<String, Pair<AssetType, ParallaxDataContainer>> = mutableMapOf()
+    internal val images: MutableMap<String, Pair<AssetType, ImageDataContainer>> = mutableMapOf()
+    internal val fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
+    internal val sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
 
     internal val assetLevelDataLoader: AssetLevelDataLoader = AssetLevelDataLoader()
 
@@ -56,6 +62,13 @@ class AssetStore {
         CollisionData(
             8, 29, 17f, 29f
         )
+
+    fun getTileMapData(level: String, layer: String) : TileMapData =
+        if (tileMaps.contains(level)) {
+            if (tileMaps[level]!!.second.layerTileMaps.contains(layer)) tileMaps[level]!!.second.layerTileMaps[layer]!!
+            else error("AssetStore: Layer '$layer' for Tile map from level '$level' not found!")
+        }
+        else error("AssetStore: Tile map for level '$level' not found!")
 
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second
@@ -144,9 +157,12 @@ class AssetStore {
 
                 when  (type) {
                     AssetType.LEVEL -> { assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths) }
-                    // Load raw tile map data for special assets
-                    AssetType.SPECIAL -> { assetLevelDataLoader.loadTileMapData(ldtkWorld, levelName, tileSetPaths) }
-                    else -> error("AssetStore: Cannot load tile map data for asset type '$type'! Only LEVEL and SPECIAL types are supported!")
+                    else -> {
+                        // Load raw tile map data for other asset types assets
+                        ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(ldtkWorld, ldtkLevel))
+                        }
+                    }
                 }
             }
 
@@ -219,6 +235,7 @@ class AssetStore {
     private fun removeAssets(type: AssetType) {
         // TODO: In case of SPECIAL assets we need to consider the level chunk position of the asset
 
+        tileMaps.values.removeAll { it.first == type }
         backgrounds.values.removeAll { it.first == type }
         images.values.removeAll { it.first == type }
         fonts.values.removeAll { it.first == type }

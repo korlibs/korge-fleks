@@ -7,51 +7,49 @@ import kotlinx.serialization.Serializable
 
 
 /**
- * This component is used to add a name to an entity. Useful for making a save-game snapshot readable.
+ * This component is used to add a tile map to an entity. The tile map is treated as a "normal" game object and not
+ * as a tile map for a level. For using tile maps for levels add [LevelMapComponent] to an entity.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
-@Serializable @SerialName("Info")
-class Info private constructor(
-    //val num: Int = 0,
-    var name: String = "noName",
-    var entityId: Int = -1,
-) : PoolableComponent<Info>() {
+@Serializable @SerialName("TileMap")
+class TileMap private constructor(
+    var levelName: String = "",
+    val layerNames: MutableList<String> = mutableListOf(),
+) : PoolableComponent<TileMap>() {
     // Init an existing component data instance with data from another component
-    // This is used for component instances when they are part (val property) of another component
-    fun init(from: Info) {
-        name = this@Info.name
-        entityId = this@Info.entityId
-        //println("Cloned: Info '$num' from '${this@Info.num}'")
+    // This is used for component instances when they are a value property of another component
+    fun init(from: TileMap) {
+        levelName = from.levelName
+        layerNames.addAll(from.layerNames)
     }
 
     // Cleanup the component data instance manually
-    // This is used for component instances when they are part (val property) of another component
+    // This is used for component instances when they are a value property of another component
     fun cleanup() {
-        name = "noName"
-        entityId = -1
-        //println("Reset: Info '$num'")
+        levelName = ""
+        layerNames.clear()  // Make list empty for reuse
     }
 
-    override fun type() = InfoComponent
+    override fun type() = TileMapComponent
 
     companion object {
-        val InfoComponent = componentTypeOf<Info>()
+        val TileMapComponent = componentTypeOf<TileMap>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticInfoComponent(config: Info.() -> Unit ): Info =
-            Info().apply { config() /*; println("Static created: Info")*/ }
+        fun staticTileMapComponent(config: TileMap.() -> Unit ): TileMap =
+            TileMap().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun infoComponent(config: Info.() -> Unit ): Info =
-            pool.alloc().apply { config() /*; println("Created: Info '$num'")*/ }
+        fun tileMapComponent(config: TileMap.() -> Unit ): TileMap =
+            pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Info") { Info(/* num = it */) }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TileMap") { TileMap() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Info = infoComponent { init(from = this@Info ) }
+    override fun clone(): TileMap = tileMapComponent { init(from = this@TileMap ) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
@@ -64,13 +62,10 @@ class Info private constructor(
 
     // Initialize an external prefab when the component is added to an entity
     override fun World.initPrefabs(entity: Entity) {
-        entityId = entity.id
-//        EntityByName.add(name, entity)
     }
 
     // Cleanup/Reset an external prefab when the component is removed from an entity
     override fun World.cleanupPrefabs(entity: Entity) {
-//        EntityByName.remove(name)
     }
 
     // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem

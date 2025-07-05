@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.assets
+package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.*
 import korlibs.datastructure.iterators.*

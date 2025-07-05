@@ -3,6 +3,7 @@ package korlibs.korge.fleks.gameState
 import com.github.quillraven.fleks.World
 import korlibs.io.file.std.*
 import korlibs.korge.fleks.assets.*
+import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*

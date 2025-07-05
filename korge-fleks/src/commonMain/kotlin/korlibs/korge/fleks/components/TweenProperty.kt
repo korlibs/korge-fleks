@@ -55,12 +55,11 @@ class TweenProperty private constructor(
     override fun type(): ComponentType<TweenProperty> = property.type
 
     companion object {
-//        val TweenPropertyComponent = componentTypeOf<TweenProperty>()
         // TODO update unit test for this mapping from enum to here
-        val TweenPositionOffsetXComponent = TweenPropertyType.PositionOffsetX.type
-        val TweenPositionOffsetYComponent = TweenPropertyType.PositionOffsetY.type
         val TweenPositionXComponent = TweenPropertyType.PositionX.type
         val TweenPositionYComponent = TweenPropertyType.PositionY.type
+        val TweenPositionOffsetXComponent = TweenPropertyType.PositionOffsetX.type
+        val TweenPositionOffsetYComponent = TweenPropertyType.PositionOffsetY.type
 
         val TweenMotionVelocityXComponent = TweenPropertyType.MotionVelocityX.type
 
