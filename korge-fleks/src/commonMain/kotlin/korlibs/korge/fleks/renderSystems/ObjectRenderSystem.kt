@@ -143,7 +143,7 @@ class ObjectRenderSystem(
                         text = textFieldComponent.text,
                         font = assetStore.getFont(textFieldComponent.fontName)
                     ).place(
-                        bounds = Rectangle(position.x, position.y, width, height),
+                        bounds = Rectangle(position.x, position.y, textFieldComponent.width, textFieldComponent.height),
                         wordWrap = textFieldComponent.wordWrap,
                         includePartialLines = false,
                         ellipsis = null,
