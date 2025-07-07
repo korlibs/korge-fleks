@@ -15,10 +15,28 @@ import kotlin.math.max
 
 
 class LayerTileMaps(
+    private var name: String = "noName",
     ldtkWorld: LDTKWorld,
     ldtkLevel: Level
 ) {
-    internal val layerTileMaps: MutableMap<String, TileMapData> = mutableMapOf()
+    private val layerTileMaps: MutableMap<String, TileMapData> = mutableMapOf()
+
+    /**
+     * Width of the level in pixels.
+     */
+    var levelWidth: Int = 0
+        private set
+
+    /**
+     * Height of the level in pixels.
+     */
+    var levelHeight: Int = 0
+        private set
+
+    fun getTileMapLayer(layer: String): TileMapData =
+        if (layerTileMaps.contains(layer)) {
+            layerTileMaps[layer]!!
+        } else error("AssetStore: Layer '$layer' for Tile map '$name' not found!")
 
     init {
         // Save TileMapData for each layer from the LDtk level
@@ -27,6 +45,8 @@ class LayerTileMaps(
             val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
             if (tilesetExt != null) {
                 layerTileMaps[ldtkLayer.identifier] = createTileMapData(ldtkLayer, tilesetExt)
+                levelWidth = ldtkLayer.cWid * tilesetExt.def.tileGridSize
+                levelHeight = ldtkLayer.cHei * tilesetExt.def.tileGridSize
             }
         }
     }

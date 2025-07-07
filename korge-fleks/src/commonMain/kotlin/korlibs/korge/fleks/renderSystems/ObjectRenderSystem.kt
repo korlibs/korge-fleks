@@ -194,11 +194,11 @@ class ObjectRenderSystem(
                 val tileMapComponent = entity[TileMapComponent]
 
                 tileMapComponent.layerNames.forEach { layerName ->
-                    val tileMap = assetStore.getTileMapData(tileMapComponent.levelName, layerName)
+                    val tileMap = assetStore.getTileMapData(tileMapComponent.levelName).getTileMapLayer(layerName)
 
                     val tileSet = tileMap.tileSet
-                    val tileSetWidth = tileSet.width
-                    val tileSetHeight = tileSet.height
+                    val gridWidth = tileSet.width
+                    val gridHeight = tileSet.height
                     val offsetScale = tileMap.offsetScale
 
                     // Draw only visible tiles
@@ -206,12 +206,12 @@ class ObjectRenderSystem(
                     val tileMapPosY: Float = position.y + position.offsetY
 
                     // Start and end indexes of viewport area
-                    val xStart: Int = tileMapPosX.toInt() / tileSetWidth - 1  // x in positive direction;  -1 = start one tile before
-                    val xTiles = AppConfig.VIEW_PORT_WIDTH / tileSetWidth + 3
+                    val xStart: Int = tileMapPosX.toInt() / gridWidth - 1  // x in positive direction;  -1 = start one tile before
+                    val xTiles = AppConfig.VIEW_PORT_WIDTH / gridWidth + 3
                     val xEnd: Int = xStart + xTiles
 
-                    val yStart: Int = tileMapPosY.toInt() / tileSetHeight - 1  // y in negative direction;  -1 = start one tile before
-                    val yTiles = AppConfig.VIEW_PORT_HEIGHT / tileSetHeight + 3
+                    val yStart: Int = tileMapPosY.toInt() / gridHeight - 1  // y in negative direction;  -1 = start one tile before
+                    val yTiles = AppConfig.VIEW_PORT_HEIGHT / gridHeight + 3
                     val yEnd: Int = yStart + yTiles
 
                     ctx.useBatcher { batch ->
@@ -221,8 +221,8 @@ class ObjectRenderSystem(
                                     val tile = tileMap[tx, ty, l]
                                     val info = tileSet.getInfo(tile.tile)
                                     if (info != null) {
-                                        val px = (tx * tileSetWidth) + (tile.offsetX * offsetScale) - tileMapPosX
-                                        val py = (ty * tileSetHeight) + (tile.offsetY * offsetScale) - tileMapPosY
+                                        val px = (tx * gridWidth) + (tile.offsetX * offsetScale) - tileMapPosX
+                                        val py = (ty * gridHeight) + (tile.offsetY * offsetScale) - tileMapPosY
 
                                         batch.drawQuad(
                                             tex = ctx.getTex(info.slice),

@@ -63,10 +63,9 @@ class AssetStore {
             8, 29, 17f, 29f
         )
 
-    fun getTileMapData(level: String, layer: String) : TileMapData =
+    fun getTileMapData(level: String) : LayerTileMaps =
         if (tileMaps.contains(level)) {
-            if (tileMaps[level]!!.second.layerTileMaps.contains(layer)) tileMaps[level]!!.second.layerTileMaps[layer]!!
-            else error("AssetStore: Layer '$layer' for Tile map from level '$level' not found!")
+            tileMaps[level]!!.second
         }
         else error("AssetStore: Tile map for level '$level' not found!")
 
@@ -160,7 +159,7 @@ class AssetStore {
                     else -> {
                         // Load raw tile map data for other asset types assets
                         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(ldtkWorld, ldtkLevel))
+                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
                         }
                     }
                 }

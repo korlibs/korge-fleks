@@ -55,7 +55,7 @@ data class DialogBoxConfig(
     private val text: String,
     private val textFontName: String,
     private val textRangeEnd: Int = 0,  // initial value for drawing the text into the dialog
-    private val textWritingFactor: Float = 0.035f,
+    private val textWritingFactor: Float = 0.025f,  // factor to calculate the time for writing the text into the dialog box
     @Serializable(with = HAlignAsString::class) private val textHAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VAlignAsString::class) private val textVAlign: VerticalAlign = VerticalAlign.TOP,
 ) : EntityConfig {
@@ -63,7 +63,7 @@ data class DialogBoxConfig(
     enum class AvatarPosition { LEFT_TOP, RIGHT_TOP /*, LEFT_BOTTOM, RIGHT_BOTTOM*/ }
 
     private val textSize = 13f  // TODO get this from used font (lineHeight)
-    private val height: Float = textSize * numberOfLines + 2
+    private val height: Float = textSize * numberOfLines + 10
 
     private fun hAlign(h: HorizontalAlign, width: Float, viewPortWidth: Float) : Float {
         if (h.ratio * viewPortWidth < 10) return 10f
@@ -82,14 +82,16 @@ data class DialogBoxConfig(
         val viewPortWidth = AppConfig.VIEW_PORT_WIDTH.toFloat()
         val viewPortHeight = AppConfig.VIEW_PORT_HEIGHT.toFloat()
 
-        val textBoxWidth = width + 14  // 190 <- 176
-        val textBoxHeight = height + 8  // 49 <- 41
-        val textBoxX = hAlign(positionHAlign, textBoxWidth, viewPortWidth)
-        val textBoxY = vAlign(positionVAlign, textBoxHeight, viewPortHeight)
-        val textFieldX = textBoxX + 7
+        val dialogBoxWidth = width
+        val dialogBoxHeight = height
+        // Calculate the position of the dialog box depending on the horizontal and vertical alignment
+        val textBoxX = hAlign(positionHAlign, dialogBoxWidth, viewPortWidth)
+        val textBoxY = vAlign(positionVAlign, dialogBoxHeight, viewPortHeight)
+
+        val textFieldX = textBoxX + 5
         val textFieldY = textBoxY + 4
-        val textFieldWidth = width
-        val textFieldHeight = height
+        val textFieldWidth = width - 10
+        val textFieldHeight = height - 8
 
 
         val avatarLeftInitialX = textBoxX + 10f
@@ -118,7 +120,7 @@ data class DialogBoxConfig(
             it += layerComponent { index = 102 }
 //            it += RenderLayerTag.DEBUG
         }
-        val textBox = entity {
+        val dialogBox = entity {
             it += ScreenCoordinatesTag
             it += positionComponent {
                 x = textBoxX
@@ -126,8 +128,8 @@ data class DialogBoxConfig(
             }
             it += ninePatchComponent {
                 name = textFieldName
-                width = textBoxWidth
-                height = textBoxHeight
+                width = dialogBoxWidth
+                height = dialogBoxHeight
             }
             it += rgbaComponent {
                 rgba = tint
@@ -135,7 +137,8 @@ data class DialogBoxConfig(
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
             it += layerComponent { index = 100 }
-//            it += RenderLayerTag.DEBUG
+            it += RenderLayerTag.DEBUG
+            it += DebugInfoTag.NINE_PATCH_BOUNDS
         }
         val textField = entity {
             it += ScreenCoordinatesTag
@@ -144,9 +147,9 @@ data class DialogBoxConfig(
                 y = textFieldY
             }
             it += textFieldComponent {
-                text = text
+                text = this@DialogBoxConfig.text
                 fontName = textFontName
-                textRangeEnd = textRangeEnd
+                textRangeEnd = this@DialogBoxConfig.textRangeEnd
                 width = textFieldWidth
                 height = textFieldHeight
                 horizontalAlign = textHAlign
@@ -158,7 +161,8 @@ data class DialogBoxConfig(
                 alpha = 1f
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
-//            it += RenderLayerTag.DEBUG
+            it += RenderLayerTag.DEBUG
+            it += DebugInfoTag.TEXT_FIELD_BOUNDS
         }
         entity.configure {
             it += tweenSequenceComponent {
@@ -166,7 +170,7 @@ data class DialogBoxConfig(
                     // Fade in of Dialog with avatar
                     tweenRgba { target = avatar; alpha = 1f; duration = 0.5f; easing = Easing.EASE_OUT_QUAD }
                     tweenPosition { target = avatar; x = avatarTweenX; duration = 0.5f; easing = Easing.EASE_OUT_QUAD }
-                    tweenRgba { target = textBox; alpha = 1f; delay = 0.3f; duration = 0.3f; easing = Easing.EASE_OUT_QUAD }
+                    tweenRgba { target = dialogBox; alpha = 1f; delay = 0.3f; duration = 0.3f; easing = Easing.EASE_OUT_QUAD }
                     // Type write text into the dialog
                     tweenTextField { target = textField; textRangeEnd = this@DialogBoxConfig.text.length; delay = 0.3f + 0.8f; duration = this@DialogBoxConfig.text.length * textWritingFactor }
                 }
@@ -176,13 +180,15 @@ data class DialogBoxConfig(
                     // Fade out of Dialog with avatar
                     tweenRgba { target = avatar; alpha = 0f; duration = 0.5f; easing = Easing.EASE_IN_QUAD }
                     tweenPosition { target = avatar; x = avatarInitialX; duration = 0.5f; easing = Easing.EASE_IN_QUAD }
-                    tweenRgba { target = textBox; alpha = 0f; duration = 0.3f; easing = Easing.EASE_IN_QUAD }
+                    tweenRgba { target = dialogBox; alpha = 0f; duration = 0.3f; easing = Easing.EASE_IN_QUAD }
                     tweenRgba { target = textField; alpha = 0f; duration = 0.3f; easing = Easing.EASE_IN_QUAD }
                 }
-                deleteEntity { target = avatar }
-                deleteEntity { target = textBox }
-                deleteEntity { target = textField }
-                deleteEntity { target = it }
+                parallelTweens {
+                    deleteEntity { target = avatar }
+                    deleteEntity { target = dialogBox }
+                    deleteEntity { target = textField }
+                    deleteEntity { target = it }
+                }
             }
         }
         return entity

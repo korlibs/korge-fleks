@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("TweenProperty")
 class TweenProperty private constructor(
-    var property: TweenPropertyType = TweenPropertyType.PositionOffsetX,
+    var property: TweenPropertyType = TweenPropertyType.UnconfiguredType,
 
     @Serializable(with = AnySerializer::class) var change: Any = Unit,
     @Serializable(with = AnySerializer::class) var value: Any = Unit,
@@ -44,7 +44,7 @@ class TweenProperty private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        property = TweenPropertyType.PositionOffsetX
+        property = TweenPropertyType.UnconfiguredType
         change = Unit
         value = Unit
         duration = 0f
@@ -102,26 +102,18 @@ class TweenProperty private constructor(
         val TweenTouchInputEnableComponent = TweenPropertyType.TouchInputEnable.type
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticTweenPropertyComponent(config: TweenProperty.() -> Unit ): TweenProperty =
-            TweenProperty().apply(config)
+        fun staticTweenPropertyComponent(type: TweenPropertyType, config: TweenProperty.() -> Unit ): TweenProperty =
+            TweenProperty().apply(config).apply { property = type }
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun tweenPropertyComponent(config: TweenProperty.() -> Unit ): TweenProperty =
-            pool.alloc().apply(config)
-
-//        fun tweenPropertyComponent(componentType: ComponentType<TweenProperty>, config: TweenProperty.() -> Unit ): TweenProperty =
-//            // All component types share the same pool - so just use the first component type to get it
-//            getPoolable(componentType).apply(config)
+        fun tweenPropertyComponent(type: TweenPropertyType, config: TweenProperty.() -> Unit ): TweenProperty =
+            pool.alloc().apply(config).apply { property = type }
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenProperty") { TweenProperty() }
-
-        // TODO: Check if we should use generic function above or specific one below (need to be created for each component type)
-        fun tweenPositionOffsetXComponent(config: TweenProperty.() -> Unit ): TweenProperty =
-            pool.alloc().apply(config)
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): TweenProperty = tweenPropertyComponent { init(from = this@TweenProperty ) }
+    override fun clone(): TweenProperty = tweenPropertyComponent(TweenPropertyType.UnconfiguredType) { init(from = this@TweenProperty ) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
@@ -151,6 +143,8 @@ class TweenProperty private constructor(
      * [property](TweenComponent.property) of the base [TweenPropertyComponent] data class.
      */
     enum class TweenPropertyType(val type: ComponentType<TweenProperty>) {
+        UnconfiguredType(componentTypeOf<TweenProperty>()),
+
         PositionOffsetX(componentTypeOf<TweenProperty>()),
         PositionOffsetY(componentTypeOf<TweenProperty>()),
         PositionX(componentTypeOf<TweenProperty>()),
