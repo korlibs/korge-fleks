@@ -215,7 +215,7 @@ class ResourceDirWatcherConfiguration(
             } else {
                 // Reload all levels from ldtk world file
                 ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-                    assetStore.tileMaps[ldtkLevel.identifier] = Pair(assetUpdater.type, LayerTileMaps(ldtkWorld, ldtkLevel))
+                    assetStore.tileMaps[ldtkLevel.identifier] = Pair(assetUpdater.type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
                 }
             }
 

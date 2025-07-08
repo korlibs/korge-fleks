@@ -95,7 +95,7 @@ class TweenSequenceSystem : IteratingSystem(
                     tweenSequence.index++
                     // Check if script of tweens has finished
                     if (tweenSequence.index >= tweenSequence.tweens.size) {
-                        entity.configure { it -= TweenSequenceComponent }
+//                        entity.configure { it -= TweenSequenceComponent }
                         //println("INFO: TweenSequence ended and removed for entity '${entity.id}' (${world.nameOf(entity)}).")
                         return
                     }
@@ -218,7 +218,8 @@ class TweenSequenceSystem : IteratingSystem(
                 EntityFactory.configure(tween.entityConfig, world, spawnedEntity)
             }
             // Directly deletes the given entity from the tween
-            is DeleteEntity -> world.deleteViaLifeCycle(tween.target)
+// TODO - check when deleting 3 topmost clouds if we need to use this method?           is DeleteEntity -> world.deleteViaLifeCycle(tween.target)
+            is DeleteEntity -> world -= tween.target // Use this to delete the entity directly without going through the life cycle - that will crash the tween system
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.target)
             is Wait -> tween.event?.let { event ->
@@ -248,8 +249,7 @@ class TweenSequenceSystem : IteratingSystem(
     private fun createTweenPropertyComponent(componentProperty: TweenPropertyType, value: Any, change: Any = Unit) {
         currentTween.target.configure { animatedEntity ->
             animatedEntity.getOrAdd(componentProperty.type) {
-                tweenPropertyComponent {
-                    this.property = componentProperty
+                tweenPropertyComponent(componentProperty) {
                     this.change = change
                     this.value = value
                     this.duration = currentTween.duration ?: currentParentTween.duration ?: 0f
