@@ -44,6 +44,7 @@ internal class TweenPropertyComponentTest {
     @Test
     fun testTweenPropertyComponentTypeIntegrity() {
         val testVector: List<Pair<TweenProperty.TweenPropertyType, ComponentType<*>>> = listOf(
+            Pair(UnconfiguredType, UnconfiguredType.type),  // UnconfiguredType has no tween component type
             Pair(PositionOffsetX, TweenPositionOffsetXComponent),
             Pair(PositionOffsetY, TweenPositionOffsetYComponent),
             Pair(PositionX, TweenPositionXComponent),
@@ -77,10 +78,13 @@ internal class TweenPropertyComponentTest {
         )
 
         testVector.forEach { animateType ->
+            val expectedType = animateType.first.type
+            val actualType = animateType.second
             assertEquals(
-                animateType.first.type,
-                animateType.second,
-                "Check if AnimateComponentType setup is correct: '${animateType.first.type}' - '${animateType.second}'")
+                expectedType,
+                actualType,
+                "Check if AnimateComponentType setup is correct: '${animateType.first.type}' - '${animateType.second}'"
+            )
         }
 
         assertEquals(
@@ -93,8 +97,7 @@ internal class TweenPropertyComponentTest {
     @Test
     fun testAnimateComponentSerialization() {
 
-        val componentUnderTest = tweenPropertyComponent {
-            property = RgbaAlpha
+        val componentUnderTest = tweenPropertyComponent(type = RgbaAlpha) {
             change = Unit
             value = Unit
             duration = 1.2f
