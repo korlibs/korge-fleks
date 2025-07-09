@@ -20,7 +20,8 @@ import kotlin.coroutines.*
  */
 class SnapshotSerializerSystem(
     module: SerializersModule,
-    val timesPerSecond: Int = 30
+    val timesPerSecond: Int = 30,
+    private val snapshotBufferInSeconds: Int = 30  // How many seconds of recordings should be kept in memory
 ) : IntervalSystem(
     interval = Fixed(step = 1f / timesPerSecond.toFloat())
 ) {
@@ -126,7 +127,7 @@ class SnapshotSerializerSystem(
                 //postProcessing()
                 snapshotLoaded = false
                 // remove current snapshot from the list of recordings - otherwise it would be freed later, but it is still in used
-                recordings.removeLast()
+                freeComponents(recordings.removeLast())
             }
             // Set recording number to the next recording
             recNumber = recordings.last().recNumber + 1
@@ -157,6 +158,19 @@ class SnapshotSerializerSystem(
         }
     }
 
+    /**
+     * Remove all recordings and free all components from all snapshots.
+     * This will reset the recording system to its initial state.
+     */
+    fun removeAll() {
+        // Free all components from all recordings
+        recordings.forEach { recording -> freeComponents(recording) }
+        recordings.clear()
+        recNumber = 0
+        rewindSeek = 0
+        snapshotLoaded = false
+    }
+
     private fun freeComponents(recording: Recording) {
         recording.snapshot.forEach { (_, snapshot) ->
             // Free all components from snapshot
@@ -182,8 +196,8 @@ class SnapshotSerializerSystem(
      * The cleanup strategy is to keep only one snapshot per second after a certain time.
      */
     private fun recordingCleanup(call: (Int) -> Unit) {
-        // After 30 seconds start to clean up recordings
-        val startTimeForCleanup: Int = 3 * timesPerSecond
+        // After XX seconds start to clean up recordings
+        val startTimeForCleanup: Int = snapshotBufferInSeconds * timesPerSecond
 
         val numberOfRecordings = recordings.size
         if (numberOfRecordings > startTimeForCleanup) {  // Keep very first recording
