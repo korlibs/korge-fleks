@@ -251,7 +251,7 @@ class TweenTouchInputSystem : IteratingSystem(
 //    }
 //}
 
-fun SystemConfiguration.setupTweenEngineSystems() {
+fun SystemConfiguration.addTweenEngineSystems() {
     // First add the tween sequence system - it creates TweenPropertyComponents
     add(TweenSequenceSystem())
 
