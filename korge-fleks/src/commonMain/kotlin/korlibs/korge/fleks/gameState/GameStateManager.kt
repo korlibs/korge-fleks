@@ -28,8 +28,13 @@ object GameStateManager {
 
     /**
      * Init function for loading common game config and assets. Call this before any KorGE Scene is active.
+     *
+     * @param testing Flag to indicate that the game is running in testing mode. In that case sounds are not loaded since
+     *                headless runners (Github actions) do not support sound playback.
      */
-    suspend fun initGameState(): GameStateConfig {
+    suspend fun initGameState(testing: Boolean = false): GameStateConfig {
+        assetStore.testing = testing
+
         val vfs = resourcesVfs["common/config.yaml"]
 //        if (vfs.exists()) {
         // TODO Check why exits() function does not work on Android

@@ -31,6 +31,8 @@ import kotlin.collections.set
  * boss. After the boss has been beaten the graphics can be unloaded since they are not needed anymore.
  */
 class AssetStore {
+    var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
+
     val commonAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
     val worldAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
     val levelAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
@@ -165,17 +167,19 @@ class AssetStore {
                 }
             }
 
-            assetConfig.sounds.forEach { sound ->
-                val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound(  //readMusic(
-                    props = AudioDecodingProps(exactTimings = true),
-                    streaming = true
-                )
-//                val soundChannel = soundFile.decode().toWav().readMusic().play()  // -- convert to WAV
-                val soundChannel = soundFile.play()
-//            val soundChannel2 = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound().play()
+            if (!testing) {
+                assetConfig.sounds.forEach { sound ->
+                    val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound(  //readMusic(
+                        props = AudioDecodingProps(exactTimings = true),
+                        streaming = true
+                    )
+//                    val soundChannel = soundFile.decode().toWav().readMusic().play()  // -- convert to WAV
+                    val soundChannel = soundFile.play()
+//                    val soundChannel2 = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound().play()
 
-                soundChannel.pause()
-                sounds[sound.key] = Pair(type, soundChannel)
+                    soundChannel.pause()
+                    sounds[sound.key] = Pair(type, soundChannel)
+                }
             }
             assetConfig.backgrounds.forEach { background ->
                 backgrounds[background.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + background.value.aseName].readParallaxDataContainer(background.value, ASE, atlas = atlas))
