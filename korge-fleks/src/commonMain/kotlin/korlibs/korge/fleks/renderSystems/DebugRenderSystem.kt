@@ -6,7 +6,6 @@ import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
-import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
 import korlibs.korge.fleks.components.Position
@@ -36,7 +35,7 @@ class DebugRenderSystem(
 ) : View() {
     private val family: Family = world.family {
         all(layerTag)
-            .any(PositionComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
+            .any(PositionComponent, SpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
@@ -124,8 +123,8 @@ class DebugRenderSystem(
                             rect(
                                 x = position.x + position.offsetX - anchorX.toFloat(),
                                 y = position.y + position.offsetY - anchorY.toFloat(),
-                                width = colWidth.toFloat(),
-                                height = colHeight.toFloat()
+                                width = colWidth,
+                                height = colHeight
                             )
                         }
                     }
@@ -142,7 +141,7 @@ class DebugRenderSystem(
                     }
                 }
 
-                // Draw grid position
+                // Draw grid position (used in collision system)
                 if(entity has GridComponent && entity has DebugInfoTag.GRID_POSITION) {
                     val gridComponent = entity[GridComponent]
 

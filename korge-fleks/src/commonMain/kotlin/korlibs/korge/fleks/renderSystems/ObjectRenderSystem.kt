@@ -9,7 +9,6 @@ import korlibs.image.text.*
 import korlibs.korge.annotations.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
-import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
 import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -44,7 +43,7 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : View() {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
-        .any(PositionComponent, LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent, TileMapComponent)
+        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent, TileMapComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
@@ -109,26 +108,6 @@ class ObjectRenderSystem(
                                 program = null // Possibility to use a custom shader - add ShaderComponent or similar
                             )
                         }
-                    }
-                }
-            }
-            else if (entity has LayeredSpriteComponent) {
-                val layeredSpriteComponent = entity[LayeredSpriteComponent]
-                val imageFrame = assetStore.getImageFrame(layeredSpriteComponent.name, layeredSpriteComponent.animation, layeredSpriteComponent.frameIndex)
-
-                ctx.useBatcher { batch ->
-                    // Iterate over all layers of each sprite for the frame number
-                    layeredSpriteComponent.layerList.fastForEachWithIndex { index, layer ->
-                        // Get image data for specific layer from asset store
-                        val image = imageFrame.layerData[index]
-                        batch.drawQuad(
-                            tex = ctx.getTex(image.slice),
-                            x = position.x + image.targetX - layeredSpriteComponent.anchorX + layer.position.x + layer.position.offsetX,
-                            y = position.y + image.targetY - layeredSpriteComponent.anchorY + layer.position.y + layer.position.offsetY,
-                            filtering = false,
-                            colorMul = layer.rgba.rgba,
-                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                        )
                     }
                 }
             }

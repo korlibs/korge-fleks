@@ -15,7 +15,6 @@ import korlibs.korge.fleks.components.Gravity
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Info
 import korlibs.korge.fleks.components.Layer
-import korlibs.korge.fleks.components.LayeredSprite
 import korlibs.korge.fleks.components.LevelMap
 import korlibs.korge.fleks.components.LifeCycle
 import korlibs.korge.fleks.components.Motion
@@ -39,7 +38,6 @@ import korlibs.korge.fleks.components.TweenProperty
 import korlibs.korge.fleks.components.TweenSequence
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.components.data.SpriteLayer
-import korlibs.korge.fleks.components.data.TextureRef
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity
 import korlibs.korge.fleks.components.data.tweenSequence.ExecuteConfigFunction
 import korlibs.korge.fleks.components.data.tweenSequence.Jump
@@ -175,7 +173,6 @@ class SnapshotSerializer {
             subclass(Grid::class)
             subclass(Info::class)
             subclass(Layer::class)
-            subclass(LayeredSprite::class)
             subclass(LevelMap::class)
             subclass(LifeCycle::class)
             subclass(Motion::class)
@@ -203,7 +200,6 @@ class SnapshotSerializer {
         polymorphic(Poolable::class) {
             subclass(Point::class)
             subclass(SpriteLayer::class)
-            subclass(TextureRef::class)
         }
 
         // Register Tween data classes used in TweenSequence

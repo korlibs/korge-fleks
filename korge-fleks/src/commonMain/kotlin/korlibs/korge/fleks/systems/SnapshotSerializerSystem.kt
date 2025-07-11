@@ -3,8 +3,6 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import korlibs.io.async.*
 import korlibs.io.file.std.*
-import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
-import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.gameState.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
@@ -25,10 +23,6 @@ class SnapshotSerializerSystem(
 ) : IntervalSystem(
     interval = Fixed(step = 1f / timesPerSecond.toFloat())
 ) {
-
-    // entity families needed for post-processing
-    private val familyLayeredSprite: Family = world.family { all(LayeredSpriteComponent) }
-
     private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
     private val recordings: MutableList<Recording> = mutableListOf()
     private var recNumber: Int = 0  // Overall number of recordings - incremented by 1 for each recording
@@ -85,10 +79,6 @@ class SnapshotSerializerSystem(
                 val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(worldSnapshot)
                 world.loadSnapshot(snapshot)
                 println("snapshot loaded!")
-                // Because we have deserialized a snapshot, we need to run post-processing on all components
-                // which need to be partly initialized again.
-                postProcessing()
-
             } else println("WARNING: Cannot find snapshot file. Snapshot was not loaded!")
         }
     }
@@ -177,17 +167,6 @@ class SnapshotSerializerSystem(
             snapshot.components.forEach { component ->
                 (component as PoolableComponent<*>).free()
             }
-        }
-    }
-
-    /**
-     * Post-processing of the world snapshot after loading it.
-     */
-    private fun postProcessing() {
-        // Do some post-processing
-        familyLayeredSprite.forEach { entity ->
-            val layeredSpriteComponent = entity[LayeredSpriteComponent]
-            layeredSpriteComponent.run { world.updateLayerEntities() }
         }
     }
 

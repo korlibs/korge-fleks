@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 
 /**
- * This class is used to ...
+ * This class is used to reference a sprite layer and being able to animate the layer position offset and layer color properties.
  */
 @Serializable @SerialName("SpriteLayer")
 class SpriteLayer private constructor(
@@ -66,6 +66,36 @@ class SpriteLayer private constructor(
             this.clear()
         }
     }
+
+    var r: Int
+        get() = rgba.r
+        set(value) {
+            rgba = rgba.withR(value)
+        }
+
+    var g: Int
+        get() = rgba.g
+        set(value) {
+            rgba = rgba.withG(value)
+        }
+
+    var b: Int
+        get() = rgba.b
+        set(value) {
+            rgba = rgba.withB(value)
+        }
+
+    var rgb: Int
+        get() = rgba.rgb
+        set(value) {
+            rgba = rgba.withRGB(value)
+        }
+
+    var alpha: Float
+        get() = rgba.af
+        set(value) {
+            rgba = rgba.withAf(value)
+        }
 
     // true (alpha > 0) - false (alpha == 0)
     var visibility: Boolean = rgba.a != 0
