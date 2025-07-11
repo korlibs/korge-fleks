@@ -67,6 +67,9 @@ class CameraSystem(
             val motion = parallaxEntity[MotionComponent]
             val position = parallaxEntity[PositionComponent]
 
+            // Debugging parallax position at the end of the intro
+            //println("parallax y: ${position.y}")
+
             // Convert pixel distance of camera movement in the level to horizontal velocity for parallax layers
             val distanceInWorldUnits = cameraDistX * worldToPixelRatioInv  // (distance in pixel) / (world to pixel ratio)
             motion.velocityX = -distanceInWorldUnits / deltaTime  // world units per delta-time

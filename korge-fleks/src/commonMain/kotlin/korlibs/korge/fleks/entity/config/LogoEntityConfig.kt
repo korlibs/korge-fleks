@@ -24,6 +24,7 @@ import kotlinx.serialization.*
  *
  * Logo can be centered on the screen and additionally an offset can be specified.
  */
+// TODO rename to SpriteWithLayersConfig or something similar?
 @Serializable @SerialName("LogoEntityConfig")
 data class LogoEntityConfig(
     override val name: String,
@@ -52,6 +53,7 @@ data class LogoEntityConfig(
                 name = assetName
             }
             it += spriteLayersComponent {
+                // TODO load all layer names from asset store (from the aseprite file)
                 // Initialize sprite layers in parent EntityConfig
             }
             it += entityRefsByNameComponent {
