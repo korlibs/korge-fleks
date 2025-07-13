@@ -4,11 +4,13 @@ import com.github.quillraven.fleks.*
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.fleks.assets.*
+import korlibs.korge.fleks.components.EntityRefsByName.Companion.entityRefsByNameComponent
 import korlibs.korge.fleks.components.Layer.Companion.layerComponent
-import korlibs.korge.fleks.components.LayeredSprite.Companion.layeredSpriteComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.lifeCycleComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
+import korlibs.korge.fleks.components.SpriteLayers.Companion.spriteLayersComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -22,6 +24,7 @@ import kotlinx.serialization.*
  *
  * Logo can be centered on the screen and additionally an offset can be specified.
  */
+// TODO rename to SpriteWithLayersConfig or something similar?
 @Serializable @SerialName("LogoEntityConfig")
 data class LogoEntityConfig(
     override val name: String,
@@ -46,8 +49,15 @@ data class LogoEntityConfig(
                 x = this@LogoEntityConfig.offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f)
                 y = this@LogoEntityConfig.offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
             }
-            it += layeredSpriteComponent {
+            it += spriteComponent {
                 name = assetName
+            }
+            it += spriteLayersComponent {
+                // TODO load all layer names from asset store (from the aseprite file)
+                // Initialize sprite layers in parent EntityConfig
+            }
+            it += entityRefsByNameComponent {
+                // Initialize entities for each layer in parent EntityConfig
             }
             it += rgbaComponent {
                 rgba = tint

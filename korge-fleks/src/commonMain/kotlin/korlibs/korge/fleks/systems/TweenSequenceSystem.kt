@@ -218,8 +218,19 @@ class TweenSequenceSystem : IteratingSystem(
                 EntityFactory.configure(tween.entityConfig, world, spawnedEntity)
             }
             // Directly deletes the given entity from the tween
-// TODO - check when deleting 3 topmost clouds if we need to use this method?           is DeleteEntity -> world.deleteViaLifeCycle(tween.target)
-            is DeleteEntity -> world -= tween.target // Use this to delete the entity directly without going through the life cycle - that will crash the tween system
+// TODO - check when deleting 3 topmost clouds if we need to use this method?
+            is DeleteEntity -> {
+                println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base" +
+                    "'$baseEntity' (name: ${world.nameOf(baseEntity)}).")
+
+//                if (tween.target.id == -1) {
+//                    Pool.writeStatistics()
+//                }
+                world.deleteViaLifeCycle(tween.target)
+            }
+//            is DeleteEntity -> {  // Use this to delete the entity directly without going through the life cycle - that will crash the tween system
+//                world -= tween.target
+//            }
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.target)
             is Wait -> tween.event?.let { event ->

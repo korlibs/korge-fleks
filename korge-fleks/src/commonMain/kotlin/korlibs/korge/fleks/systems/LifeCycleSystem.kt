@@ -2,29 +2,34 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import korlibs.korge.fleks.components.EntityRef.Companion.EntityRefComponent
 import korlibs.korge.fleks.components.EntityRefs.Companion.EntityRefsComponent
+import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNameComponent
 import korlibs.korge.fleks.components.Info.Companion.InfoComponent
-import korlibs.korge.fleks.components.LayeredSprite.Companion.LayeredSpriteComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 
 class LifeCycleSystem : IteratingSystem(
     family { all(LifeCycleComponent) },
-    interval = EachFrame
+    interval =  Fixed(1f / 60f)
 ) {
     override fun onTickEntity(entity: Entity) {
         val lifeCycle = entity[LifeCycleComponent]
 
         if (lifeCycle.healthCounter <= 0) {
             // Delete first all sub-entities
-            entity.getOrNull(EntityRefsComponent)?.entities?.forEach {
-                world -= it
-                debugPrint(it, "sub")
-            }
-            // Delete first all layer entities
-            entity.getOrNull(LayeredSpriteComponent)?.layerList?.forEach {
+            entity.getOrNull(EntityRefComponent)?.let {
                 world -= it.entity
-                debugPrint(it.entity, "layer")
+                debugPrint(it.entity, "sub")
             }
+            entity.getOrNull(EntityRefsComponent)?.entities?.forEach { entity ->
+                world -= entity
+                debugPrint(entity, "sub")
+            }
+            entity.getOrNull(EntityRefsByNameComponent)?.entitiesByName?.forEach { (_, entity) ->
+                world -= entity
+                debugPrint(entity, "sub")
+            }
+
             world -= entity
             debugPrint(entity, "base")
         }

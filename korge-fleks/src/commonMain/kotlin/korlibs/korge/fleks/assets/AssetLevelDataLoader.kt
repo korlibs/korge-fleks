@@ -157,9 +157,9 @@ class AssetLevelDataLoader() {
                             if (field.identifier != "EntityConfig") yamlString.append("${field.identifier}: ${field.value}\n")
                         }
                         println("INFO: Game object '${entity.identifier}' loaded for '$chunkName'")
-                        println("\n$yamlString")
-                        println("entity grid pos x: ${(levelWidth * levelX) + (entity.gridPos.x * gridSize)}")
-                        println("entity grid pos y: ${(levelWidth * levelX) + (entity.gridPos.y * gridSize)}")
+                        //println("\n$yamlString")
+                        //println("entity grid pos x: ${(levelWidth * levelX) + (entity.gridPos.x * gridSize)}")
+                        //println("entity grid pos y: ${(levelWidth * levelX) + (entity.gridPos.y * gridSize)}")
 
                         try {
                             // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
