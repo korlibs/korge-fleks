@@ -18,7 +18,6 @@ import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
-import korlibs.korge.fleks.components.getImageFrame
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.getMainCamera
 import korlibs.korge.fleks.utils.AppConfig

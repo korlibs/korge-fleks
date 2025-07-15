@@ -72,7 +72,7 @@ class EntityConfigSerializer {
             subclass(DialogBoxConfig::class)
             subclass(RichTextConfig::class)
             subclass(ParallaxEffectConfig::class)
-            subclass(LogoEntityConfig::class)
+            subclass(LayeredSpriteConfig::class)
             subclass(LevelMapConfig::class)
             subclass(MovedSpawnerObjectConfig::class)
             subclass(MainCameraConfig::class)

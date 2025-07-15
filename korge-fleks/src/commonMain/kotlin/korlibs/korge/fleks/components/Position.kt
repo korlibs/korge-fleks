@@ -97,4 +97,13 @@ class Position private constructor(
         y = y - cameraPosition.y + cameraPosition.offsetY + AppConfig.VIEW_PORT_HEIGHT_HALF
         return this@Position
     }
+
+    /**
+     * Set the position of the entity to the specified x and y coordinates.
+     */
+    fun set(x: Float, y: Float)
+    {
+        this.x = x
+        this.y = y
+    }
 }

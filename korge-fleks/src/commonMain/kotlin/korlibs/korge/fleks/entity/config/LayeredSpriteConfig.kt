@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
+import korlibs.datastructure.iterators.fastForEach
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.fleks.assets.*
@@ -26,7 +27,7 @@ import kotlinx.serialization.*
  */
 // TODO rename to SpriteWithLayersConfig or something similar?
 @Serializable @SerialName("LogoEntityConfig")
-data class LogoEntityConfig(
+data class LayeredSpriteConfig(
     override val name: String,
 
     private val assetName: String,
@@ -37,33 +38,52 @@ data class LogoEntityConfig(
     @Serializable(with = RGBAAsInt::class) private val tint: RGBA = Colors.WHITE,
     private val alpha: Float = 1f,
     private val layerIndex: Int,
-    private val layerTag: RenderLayerTag
+    private val layerTag: RenderLayerTag,
+    private val createEntityPerLayer: Boolean = true // If true, creates an entity for each layer in the sprite for tween animation
 
 ) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         val assetStore: AssetStore = inject(name = "AssetStore")
+        val imageFrame = assetStore.getImageFrame(assetName)
 
         entity.configure {
             it += positionComponent {
-                x = this@LogoEntityConfig.offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f)
-                y = this@LogoEntityConfig.offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
+                x = this@LayeredSpriteConfig.offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f)
+                y = this@LayeredSpriteConfig.offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
             }
             it += spriteComponent {
                 name = assetName
             }
             it += spriteLayersComponent {
-                // TODO load all layer names from asset store (from the aseprite file)
-                // Initialize sprite layers in parent EntityConfig
+                // Iterate over all layers of the sprite
+                imageFrame.layerData.fastForEach { layerData ->
+                    val layerName = layerData.layer.name ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
+                    // Add layer to the sprite layers component
+                    createSpriteLayer(layerName)
+                }
             }
-            it += entityRefsByNameComponent {
-                // Initialize entities for each layer in parent EntityConfig
+            if (createEntityPerLayer) {
+                it += entityRefsByNameComponent {
+                    // Iterate over all layers of the sprite
+                    imageFrame.layerData.fastForEach { layerData ->
+                        val layerName = layerData.layer.name
+                            ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
+                        // Add entity for each layer
+                        add(layerName,
+                            entity("layer_$layerName") { layerEntity ->
+                                layerEntity += positionComponent {}
+                                layerEntity += rgbaComponent {}
+                            }
+                        )
+                    }
+                }
             }
             it += rgbaComponent {
                 rgba = tint
-                alpha = this@LogoEntityConfig.alpha
+                alpha = this@LayeredSpriteConfig.alpha
             }
-            it += layerComponent { index = this@LogoEntityConfig.layerIndex }
+            it += layerComponent { index = this@LayeredSpriteConfig.layerIndex }
             it += layerTag
             // Add life cycle component because we have list of layer entities which needs to be cleaned up by LifeCycleSystem on deletion
             it += lifeCycleComponent {}

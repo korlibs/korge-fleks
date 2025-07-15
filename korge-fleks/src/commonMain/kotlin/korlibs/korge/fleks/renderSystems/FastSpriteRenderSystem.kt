@@ -7,7 +7,6 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
-import korlibs.korge.fleks.components.getImageFrame
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
