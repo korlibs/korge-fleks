@@ -20,7 +20,14 @@ import korlibs.korge.fleks.gameState.*
  *     Also during the snapshot rewind/forward feature.
  */
 abstract class PoolableComponent<T> : Component<T> {
+    /**
+     * Use this function to initialize a complex entity which might have sub-entities or similar.
+     */
     open fun World.initComponent(entity: Entity) = Unit
+
+    /**
+     * Use this function to cleanup/reset a complex entity which might have sub-entities or similar.
+     */
     open fun World.cleanupComponent(entity: Entity) = Unit
 
     open fun World.initPrefabs(entity: Entity) = Unit

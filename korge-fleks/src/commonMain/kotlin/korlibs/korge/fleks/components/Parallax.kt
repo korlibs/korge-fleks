@@ -150,7 +150,7 @@ class Parallax private constructor(
 
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
-        // Remove all layer entities
+        // Remove all layer entities when we are in scope of the world
         bgLayerEntities.free(this)
         fgLayerEntities.free(this)
         // Lists will be cleared in the cleanup function
@@ -167,6 +167,7 @@ class Parallax private constructor(
 
     // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
     override fun free() {
+        // Entities do not need to be removed from the work because we are not in the scope of the world
         cleanup()
         pool.free(this)
     }

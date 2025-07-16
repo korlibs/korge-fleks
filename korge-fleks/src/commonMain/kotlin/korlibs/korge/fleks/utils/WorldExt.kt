@@ -20,7 +20,7 @@ fun World.emptyEntity(aName: String, configuration: EntityCreateContext.(Entity)
     entity(configuration).apply {
         configure {
             it += infoComponent { name = aName }
-            it += IntentionallyEmpty
+            it += EmptyInitialized
         }
     }
 

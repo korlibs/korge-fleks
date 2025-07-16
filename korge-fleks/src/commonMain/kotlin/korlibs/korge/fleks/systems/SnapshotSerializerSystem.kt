@@ -30,8 +30,6 @@ class SnapshotSerializerSystem(
     private var rewindSeek: Int = 0
     private var snapshotLoaded: Boolean = false
 
-    private val gameState = world.inject<GameStateManager>("GameStateManager")
-
     data class Recording(
         val recNumber: Int,
         val snapshot: Map<Entity, Snapshot>
@@ -93,43 +91,55 @@ class SnapshotSerializerSystem(
     }
 
     fun triggerPause() {
-        gameState.gameRunning = !gameState.gameRunning
+        GameStateManager.gameRunning = !GameStateManager.gameRunning
         world.systems.forEach { system ->
             when (system) {
                 // Sound system needs special handling, because it has to stop all sounds which are playing
 //                is SoundSystem -> system.soundEnabled = true  // TODO keep sound playing for now -- gameRunning
-                is SoundSystem -> system.soundEnabled = gameState.gameRunning
-                else -> system.enabled = gameState.gameRunning
+                is SoundSystem -> system.soundEnabled = GameStateManager.gameRunning
+                else -> system.enabled = GameStateManager.gameRunning
             }
         }
         // When game is resuming than delete all recordings which are beyond the new play position
-        if (gameState.gameRunning) {
+        if (GameStateManager.gameRunning) {
             // We need to free the used components in old snapshots which are not needed anymore
             // Do not free the last snapshot, because it is loaded in the current world
-            while (rewindSeek < recordings.size - 1) {
+//*
+            while (rewindSeek < recordings.size - 2) {
                 freeComponents(recordings.removeLast())
             }
-            // Do final post-processing if a snapshot was loaded (by rewind or forward)
-            if (snapshotLoaded) {
+            // remove current snapshot from the list of recordings but DO NOT free it - it is in used by the world and would be freed later by the cleanup function
+            if (snapshotLoaded) recordings.removeLast()
+            rewindSeek = recordings.size - 1
+// */
+//            Pool.writeStatistics()
+///*
+            println("\n\nUNIT TEST: Remove all entities from game world...\n\n")
+            world.removeAll()
+            removeAll()
 
-                // TODO: Check - We do not need to run postProcessing() here, because the snapshot which was loaded
-                // was not deserialized from JSON, but loaded from the recordings list
-                //postProcessing()
-                snapshotLoaded = false
-                // remove current snapshot from the list of recordings - otherwise it would be freed later, but it is still in used
-                freeComponents(recordings.removeLast())
-            }
+//            Pool.writeStatistics()
+            Pool.doPoolUsageCheckAfterUnloading()
+            return
+//*/
             // Set recording number to the next recording
             recNumber = recordings.last().recNumber + 1
         }
     }
 
     fun rewind(fast: Boolean = false) {
-        if (gameState.gameRunning) triggerPause()
-        if (!gameState.gameRunning) {
+        if (GameStateManager.gameRunning) {
+            // First call of rewind
+            // Free all components of the current world snapshot
+            freeComponents(Recording(1, world.snapshot()))
+            triggerPause()
+        }
+        if (!GameStateManager.gameRunning) {
             if (fast) rewindSeek -= 4
             else rewindSeek--
             if (rewindSeek < 0) rewindSeek = 0
+            // The very first time rewind is called, we need to free the components of the current world snapshot
+
             world.loadSnapshot(recordings[rewindSeek].snapshot)
             snapshotLoaded = true
             // Hint: gameRunning is false, so that no components are freed from previous world then new world snapshot is loaded
@@ -137,8 +147,8 @@ class SnapshotSerializerSystem(
     }
 
     fun forward(fast: Boolean = false) {
-        if (gameState.gameRunning) triggerPause()
-        if (!gameState.gameRunning) {
+        if (GameStateManager.gameRunning) triggerPause()
+        if (!GameStateManager.gameRunning) {
             if (fast) rewindSeek += 4
             else rewindSeek++
             if (rewindSeek > recordings.size - 1) rewindSeek = recordings.size - 1
@@ -158,7 +168,6 @@ class SnapshotSerializerSystem(
         recordings.clear()
         recNumber = 0
         rewindSeek = 0
-        snapshotLoaded = false
     }
 
     private fun freeComponents(recording: Recording) {

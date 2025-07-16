@@ -232,6 +232,7 @@ class SnapshotSerializer {
             subclass(MainCameraTag::class)
             subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
             subclass(ScreenCoordinatesTag::class)
+            subclass(EmptyInitialized::class)
         }
     }
 }

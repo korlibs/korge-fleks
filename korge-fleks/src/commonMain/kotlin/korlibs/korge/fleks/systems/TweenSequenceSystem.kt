@@ -2,6 +2,9 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import korlibs.korge.fleks.components.EntityRef.Companion.EntityRefComponent
+import korlibs.korge.fleks.components.EntityRefs.Companion.EntityRefsComponent
+import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNameComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
@@ -42,6 +45,8 @@ import korlibs.korge.fleks.components.data.tweenSequence.init
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.Easing
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 /**
  * This system creates Animate... components on entities which should be animated according to the game config.
@@ -113,8 +118,8 @@ class TweenSequenceSystem : IteratingSystem(
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
                     world.entity("SpawnNewTweenSequence") {
+                        // Populate the new TweenSequenceComponent with the tweens from the list of SpawnNewTweenSequence object
                         it += tweenSequenceComponent {
-                            // Populate the new TweenSequenceComponent with the tweens from the list of SpawnNewTweenSequence object
                             tweens.init(currentTween.tweens)
                             deleteEntity { target = it }  // Delete the TweenSequence entity after it has been executed
                         }
@@ -134,14 +139,12 @@ class TweenSequenceSystem : IteratingSystem(
                         if (tween.delay != null && tween.delay!! > 0f) {
                             // Tween has its own delay -> spawn a new TweenSequence for it
                             world.entity("ParallelTween: ${tween::class.simpleName} for entity '${tween.target.id}'") { it ->
+                                // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
                                 it += tweenSequenceComponent {
-                                    // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
-                                    tweens.init(
-                                        tween.also { tween ->
-                                            if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
-                                            if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
-                                        }
-                                    )
+                                    // If duration and easing are not set, inherit the current parent tween's values
+                                    if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
+                                    if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
+                                    tweens.init(fromTween = tween)
                                     deleteEntity { target = it }  // Delete the TweenSequence entity after it has been executed
                                 }
                             }
@@ -219,20 +222,34 @@ class TweenSequenceSystem : IteratingSystem(
             }
             // Directly deletes the given entity from the tween
 // TODO - check when deleting 3 topmost clouds if we need to use this method?
-            is DeleteEntity -> {
-                println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base" +
-                    "'$baseEntity' (name: ${world.nameOf(baseEntity)}).")
+//            is DeleteEntity -> {
+//                println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base" +
+//                    "'$baseEntity' (name: ${world.nameOf(baseEntity)}).")
 
 //                if (tween.target.id == -1) {
 //                    Pool.writeStatistics()
 //                }
-                world.deleteViaLifeCycle(tween.target)
-            }
-//            is DeleteEntity -> {  // Use this to delete the entity directly without going through the life cycle - that will crash the tween system
-//                world -= tween.target
+//                world.deleteViaLifeCycle(tween.target)
 //            }
+            is DeleteEntity -> {
+                val entity = tween.target
+                // Use this to delete the entity directly without going through the life cycle - that will crash the tween system
+                // TODO do the same as in lifecycle system delete funcion (deletion of sub-entities, etc.)
+                entity.getOrNull(EntityRefComponent)?.let {
+                    world -= it.entity
+                }
+                entity.getOrNull(EntityRefsComponent)?.entities?.forEach { entity ->
+                    world -= entity
+                }
+                entity.getOrNull(EntityRefsByNameComponent)?.entitiesByName?.forEach { (_, entity) ->
+                    world -= entity
+                }
+
+                world -= tween.target
+            }
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.target)
+            // Process Wait tween only for event here - wait time was already set above from tween.duration
             is Wait -> tween.event?.let { event ->
                 // Wait for event, SendEvent and ResetEvent need the current entity which comes in via onTickEntity
                 currentTween.target = baseEntity
