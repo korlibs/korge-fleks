@@ -35,6 +35,7 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldText
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeStartComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTouchInputEnableComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.tweenPropertyComponent
+import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.entity
 
 
@@ -160,6 +161,8 @@ internal class TweenPropertyComponentTest {
 
         // Delete the entity with the component from the expected world -> put component back to the pool
         expectedWorld.removeAll()
+
+        Pool.doPoolUsageCheckAfterUnloading()
     }
 //*/
 }

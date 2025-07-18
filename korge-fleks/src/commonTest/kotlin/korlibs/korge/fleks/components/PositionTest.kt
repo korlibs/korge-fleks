@@ -3,6 +3,7 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
+import korlibs.korge.fleks.utils.Pool
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -36,6 +37,8 @@ internal class PositionTest {
 
         // Delete the entity with the component from the expected world -> put component back to the pool
         expectedWorld.removeAll()
+
+        Pool.doPoolUsageCheckAfterUnloading()
     }
 //*/
 }

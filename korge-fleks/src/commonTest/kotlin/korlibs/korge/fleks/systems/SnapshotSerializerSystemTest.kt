@@ -38,14 +38,13 @@ internal class SnapshotSerializerSystemTest {
         repeat(times) { time ->
             gameWorld.update(duration = frameTime.seconds)
 
-            if (time > (20 * (1f / frameTime).toInt())
-                && time < (22 * (1f / frameTime).toInt())
-                ) {
+            if (time > (20 * (1f / frameTime).toInt()) && time < (22 * (1f / frameTime).toInt())) {
+                // Emulate pressing the rewind button for 2 seconds at game time 20 to 22 seconds
                 gameWorld.system<SnapshotSerializerSystem>().rewind()
             }
 
             if (time == (23 * (1f / frameTime).toInt())) {
-                // Resume the game world after rewinding
+                // Resume the game world after rewinding at game time second 23
                 gameWorld.system<SnapshotSerializerSystem>().triggerPause()
             }
         }
