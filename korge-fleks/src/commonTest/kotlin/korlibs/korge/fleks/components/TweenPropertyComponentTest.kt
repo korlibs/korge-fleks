@@ -116,6 +116,9 @@ internal class TweenPropertyComponentTest {
         runAnimateComponentSerializationTest(entity, componentUnderTest, change = "testString", value = "anotherString")  // String test
 // TODO update to RGBA
 //      runAnimateComponentSerializationTest(entity, componentUnderTest, change = Rgb.MIDDLE_GREY, value = Rgb(12, 34, 56))  // Rgba test
+
+        // Delete the entity with the component from the expected world -> put component back to the pool
+        expectedWorld.removeAll()
     }
 
     private fun <T> runAnimateComponentSerializationTest(

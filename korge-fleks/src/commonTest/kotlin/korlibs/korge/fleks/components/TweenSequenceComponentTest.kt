@@ -104,5 +104,8 @@ internal class TweenSequenceComponentTest {
         assertEquals(spawnEntity.target, newSpawnEntity.target, "Check 'spawnEntity.target' property to be equal")
         val spawnedEntity = EntityFactory.configure(spawnEntity.entityConfig, recreatedWorld, Entity.NONE)
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
+
+        // Delete the entity with the component from the expected world -> put component back to the pool
+        expectedWorld.removeAll()
     }
 }
