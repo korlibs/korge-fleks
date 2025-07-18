@@ -12,7 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class SnapshotSerializerSystemTest {
-
+//*
     private val gameWorld = configureWorld {
         addKorgeFleksInjectables()
         addKorgeFleksSystems()
@@ -20,7 +20,8 @@ internal class SnapshotSerializerSystemTest {
 
     @Test
     fun testSnapshotSystem() {
-        println("\n\nUNIT TEST: Start test for SnapshotSerializerSystem...")
+        println("\n\nUNIT TEST: testSnapshotSystem")
+
         // First create entity config for camera
         MainCameraConfig(name = commonMainCamera)
         // Then create camera entity from entity config
@@ -70,4 +71,5 @@ internal class SnapshotSerializerSystemTest {
             )
         }
     }
+//*/
 }

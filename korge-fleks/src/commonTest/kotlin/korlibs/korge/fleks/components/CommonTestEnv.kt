@@ -11,7 +11,6 @@ data class TestEntityConfig(
     override val name: String
 ) : EntityConfig {
     override fun World.entityConfigure(entity: Entity) : Entity {
-        println("Invoke test - configureTestEntity: world: $this, entity: ${entity.id}")
         return Entity(id = 8080, version = 0u)
     }
 

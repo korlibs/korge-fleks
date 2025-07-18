@@ -7,12 +7,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class DebugInfoTest {
-
+//*
     private val expectedWorld = configureWorld {}
     private val recreatedWorld = configureWorld {}
 
     @Test
     fun testDebugInfoSerialization() {
+        println("TEST CASE: testDebugInfoSerialization")
 
         val info = infoComponent {
             name = "DebugTest"
@@ -31,5 +32,9 @@ internal class DebugInfoTest {
 
         assertEquals(info.name, newInfo.name, "Check 'name' property to be equal")
         assertEquals(info.entityId, newInfo.entityId, "Check 'entityId' property to be equal")
+
+        // Delete the entity with the component from the expected world -> put component back to the pool
+        expectedWorld.removeAll()
     }
+//*/
 }

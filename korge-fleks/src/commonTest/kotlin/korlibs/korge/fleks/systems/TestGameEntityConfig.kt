@@ -64,6 +64,7 @@ data class GameObjectConfig(
                 x = 100f
                 y = 200f
             }
+
             it += sizeComponent {
                 width = 100f
                 height = 100f

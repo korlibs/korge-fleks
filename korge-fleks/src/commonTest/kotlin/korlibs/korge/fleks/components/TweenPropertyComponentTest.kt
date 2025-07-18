@@ -1,11 +1,11 @@
 package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.*
+import com.github.quillraven.fleks.ComponentType
+import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventPublishComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventResetComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventSubscribeComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenMotionVelocityXComponent
-import korlibs.math.interpolation.*
 import kotlin.test.*
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.*
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionOffsetXComponent
@@ -35,14 +35,18 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldText
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeStartComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTouchInputEnableComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.tweenPropertyComponent
+import korlibs.korge.fleks.utils.entity
+
 
 internal class TweenPropertyComponentTest {
-
+//*
     private val expectedWorld = configureWorld {}
     private val recreatedWorld = configureWorld {}
 
     @Test
     fun testTweenPropertyComponentTypeIntegrity() {
+        println("TEST CASE: testTweenPropertyComponentTypeIntegrity")
+
         val testVector: List<Pair<TweenProperty.TweenPropertyType, ComponentType<*>>> = listOf(
             Pair(UnconfiguredType, UnconfiguredType.type),  // UnconfiguredType has no tween component type
             Pair(PositionOffsetX, TweenPositionOffsetXComponent),
@@ -95,46 +99,67 @@ internal class TweenPropertyComponentTest {
     }
 
     @Test
-    fun testAnimateComponentSerialization() {
+    fun testTweenPropertyComponentSerialization() {
+        println("TEST CASE: testTweenPropertyComponentSerialization")
 
-        val componentUnderTest = tweenPropertyComponent {
-            property = RgbaAlpha
-            change = Unit
-            value = Unit
-            duration = 1.2f
-            timeProgress = 3.4f
-            easing = Easing.EASE_IN
+        val entityFloat = expectedWorld.entity("testTweenPropertyComponentSerializationFloat12") {
+            it += tweenPropertyComponent {
+                property = RgbaAlpha
+                change = 12.34f
+                value = 56.78f
+            }
         }
 
-        val entity = expectedWorld.entity {
-            it += componentUnderTest
+        val entityInt = expectedWorld.entity("testTweenPropertyComponentSerializationInt") {
+            it += tweenPropertyComponent {
+                property = RgbaAlpha
+                change = 12
+                value = 34
+            }
         }
 
-        runAnimateComponentSerializationTest(entity, componentUnderTest, change = 42.43, value = 45.46)  // Double test
-        runAnimateComponentSerializationTest(entity, componentUnderTest, change = 42, value = 43)  // Int test
-        runAnimateComponentSerializationTest(entity, componentUnderTest, change = true, value = false)  // Boolean test
-        runAnimateComponentSerializationTest(entity, componentUnderTest, change = "testString", value = "anotherString")  // String test
+        val entityBool = expectedWorld.entity("testTweenPropertyComponentSerializationBool") {
+            it += tweenPropertyComponent {
+                property = RgbaAlpha
+                change = true
+                value = false
+            }
+        }
+
+        val entityString = expectedWorld.entity("testTweenPropertyComponentSerializationString") {
+            it += tweenPropertyComponent {
+                property = RgbaAlpha
+                change = "testString"
+                value = "anotherString"
+            }
+        }
+
 // TODO update to RGBA
 //      runAnimateComponentSerializationTest(entity, componentUnderTest, change = Rgb.MIDDLE_GREY, value = Rgb(12, 34, 56))  // Rgba test
-
-        // Delete the entity with the component from the expected world -> put component back to the pool
-        expectedWorld.removeAll()
-    }
-
-    private fun <T> runAnimateComponentSerializationTest(
-        entity: Entity, component: TweenProperty,
-        change: T, value: T
-    ) {
-        component.change = change as Any
-        component.value = value as Any
 
         CommonTestEnv.serializeDeserialize(expectedWorld, recreatedWorld)
 
         // get the component from entity with the same id from the new created world
-        val newEntity = recreatedWorld.asEntityBag()[entity.id]
-        val recreatedTestComponent = with (recreatedWorld) { newEntity[TweenRgbaAlphaComponent] }
+        val newEntityFloat = recreatedWorld.asEntityBag()[entityFloat.id]
+        val recreatedTestComponentFloat = with (recreatedWorld) { newEntityFloat[TweenRgbaAlphaComponent] }
+        val newEntityInt = recreatedWorld.asEntityBag()[entityInt.id]
+        val recreatedTestComponentInt = with (recreatedWorld) { newEntityInt[TweenRgbaAlphaComponent] }
+        val newEntityBool = recreatedWorld.asEntityBag()[entityBool.id]
+        val recreatedTestComponentBool = with (recreatedWorld) { newEntityBool[TweenRgbaAlphaComponent] }
+        val newEntityString = recreatedWorld.asEntityBag()[entityString.id]
+        val recreatedTestComponentString = with (recreatedWorld) { newEntityString[TweenRgbaAlphaComponent] }
 
-        assertEquals(component.change, recreatedTestComponent.change, "Check 'change' property to be equal")
-        assertEquals(component.value, recreatedTestComponent.value, "Check 'value' property to be equal")
+        assertEquals(12.34f, recreatedTestComponentFloat.change, "Check float 'change' property to be equal")
+        assertEquals(56.78f, recreatedTestComponentFloat.value, "Check float 'value' property to be equal")
+        assertEquals(12, recreatedTestComponentInt.change, "Check int 'change' property to be equal")
+        assertEquals(34, recreatedTestComponentInt.value, "Check int 'value' property to be equal")
+        assertEquals(true, recreatedTestComponentBool.change, "Check bool 'change' property to be equal")
+        assertEquals(false, recreatedTestComponentBool.value, "Check bool 'value' property to be equal")
+        assertEquals("testString", recreatedTestComponentString.change, "Check string 'change' property to be equal")
+        assertEquals("anotherString", recreatedTestComponentString.value, "Check string 'value' property to be equal")
+
+        // Delete the entity with the component from the expected world -> put component back to the pool
+        expectedWorld.removeAll()
     }
+//*/
 }

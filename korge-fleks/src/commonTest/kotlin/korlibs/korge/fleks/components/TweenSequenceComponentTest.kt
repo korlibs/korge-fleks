@@ -18,23 +18,26 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite.Companion.t
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchLayerVisibility.Companion.tweenSwitchLayerVisibility
 import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.EntityFactory
+import korlibs.korge.fleks.utils.entity
 import korlibs.math.interpolation.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
 internal class TweenSequenceComponentTest {
-
+//*
     private val expectedWorld = configureWorld {}
     private val recreatedWorld = configureWorld {}
 
     @Test
     fun testTweenSequenceComponentSnapshotting() {
+        println("TEST CASE: testTweenSequenceComponentSnapshotting")
         // TODO
     }
 
-        @Test
+    @Test
     fun testTweenSequenceComponentSerialization() {
+        println("TEST CASE: testTweenSequenceComponentSerialization")
 
         val testEntityConfig = TestEntityConfig("testEntityConfig")
 
@@ -72,7 +75,7 @@ internal class TweenSequenceComponentTest {
             executed = true
         }
 
-        val entity = expectedWorld.entity {
+        val entity = expectedWorld.entity(aName = "testEntity") {
             it += compUnderTest
         }
 
@@ -104,8 +107,10 @@ internal class TweenSequenceComponentTest {
         assertEquals(spawnEntity.target, newSpawnEntity.target, "Check 'spawnEntity.target' property to be equal")
         val spawnedEntity = EntityFactory.configure(spawnEntity.entityConfig, recreatedWorld, Entity.NONE)
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
+        recreatedWorld -= spawnedEntity // remove the entity created by the entity config -> put (info) component back to the pool
 
         // Delete the entity with the component from the expected world -> put component back to the pool
         expectedWorld.removeAll()
     }
+// */
 }
