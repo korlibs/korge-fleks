@@ -19,8 +19,8 @@ import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersCompone
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
 import korlibs.korge.fleks.tags.*
-import korlibs.korge.fleks.utils.getMainCamera
 import korlibs.korge.fleks.utils.AppConfig
+import korlibs.korge.fleks.utils.getMainCameraOrNull
 import korlibs.korge.render.*
 import korlibs.korge.view.*
 import korlibs.math.geom.*
@@ -49,7 +49,7 @@ class ObjectRenderSystem(
 
     @OptIn(KorgeExperimental::class)
     override fun renderInternal(ctx: RenderContext) {
-        val camera: Entity = world.getMainCamera()
+        val camera: Entity = world.getMainCameraOrNull() ?: return
 
         // Sort sprite and text entities by their layerIndex
         family.sort(comparator)

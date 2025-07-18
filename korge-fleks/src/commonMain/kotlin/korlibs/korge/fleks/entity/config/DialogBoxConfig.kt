@@ -137,8 +137,8 @@ data class DialogBoxConfig(
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
             it += layerComponent { index = 100 }
-            it += RenderLayerTag.DEBUG
-            it += DebugInfoTag.NINE_PATCH_BOUNDS
+//            it += RenderLayerTag.DEBUG
+//            it += DebugInfoTag.NINE_PATCH_BOUNDS
         }
         val textField = entity {
             it += ScreenCoordinatesTag
@@ -161,8 +161,8 @@ data class DialogBoxConfig(
                 alpha = 1f
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
-            it += RenderLayerTag.DEBUG
-            it += DebugInfoTag.TEXT_FIELD_BOUNDS
+//            it += RenderLayerTag.DEBUG
+//            it += DebugInfoTag.TEXT_FIELD_BOUNDS
         }
         entity.configure {
             it += tweenSequenceComponent {

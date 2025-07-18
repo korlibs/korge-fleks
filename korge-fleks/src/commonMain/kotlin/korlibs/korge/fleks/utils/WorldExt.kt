@@ -70,3 +70,8 @@ fun World.getMainCamera(): Entity {
 //    }
 //    return cameraFamily.first()
 }
+
+fun World.getMainCameraOrNull(): Entity? {
+    val cameraFamily: Family = family { all(MainCameraTag, PositionComponent) }
+    return cameraFamily.firstOrNull()
+}

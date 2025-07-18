@@ -115,7 +115,7 @@ suspend fun VfsFile.readParallaxDataContainer(
     config.parallaxPlane?.parallaxPlaneSpeedFactors =
         FloatArray(parallaxLayerSize) { i ->
             val midPoint: Float = parallaxLayerSize * 0.5f
-            (config.parallaxPlane!!.speedFactor) * (
+            (config.parallaxPlane.speedFactor) * (
                 // The pixel in the point of view must not stand still, they need to move with the lowest possible speed (= 1 / midpoint)
                 // Otherwise the midpoint is "running" away over time
                 if (i < midPoint)
