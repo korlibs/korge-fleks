@@ -30,7 +30,7 @@ class Point private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): Point = point { init(from = this@Point ) }
+    override fun clone(): Point = point { init(from = this@Point) }
 
     // Cleanup the tween data instance manually
     override fun free() {
@@ -40,11 +40,11 @@ class Point private constructor(
 
     companion object {
         // Use this function to create a new instance of data as value property inside a component
-        fun staticPoint(config: Point.() -> Unit ): Point =
+        fun staticPoint(config: Point.() -> Unit): Point =
             Point().apply(config)
 
         // Use this function to get a new instance of the data object from the pool
-        fun point(config: Point.() -> Unit ): Point =
+        fun point(config: Point.() -> Unit): Point =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Point") { Point() }

@@ -17,13 +17,12 @@ import kotlin.coroutines.*
  * Please make sure you are not deriving any additional components from [Component].
  */
 class SnapshotSerializerSystem(
-    module: SerializersModule,
     val timesPerSecond: Int = 30,
     private val snapshotBufferInSeconds: Int = 30  // How many seconds of recordings should be kept in memory
 ) : IntervalSystem(
     interval = Fixed(step = 1f / timesPerSecond.toFloat())
 ) {
-    private val snapshotSerializer = SnapshotSerializer().apply { register("module", module) }
+    private val snapshotSerializer = SnapshotSerializer()
     private val recordings: MutableList<Recording> = mutableListOf()
     private var recNumber: Int = 0  // Overall number of recordings - incremented by 1 for each recording
 
@@ -47,7 +46,7 @@ class SnapshotSerializerSystem(
                 // Hint: Cloning of components is done WITHOUT any world functions or features involved like onAdd
                 //       function of components. Otherwise, world functions would be called on the current original
                 //       world and not on the snapshot world! This is not what we want!
-                if (component !is PoolableComponent<*>) { error("Component '$component' must be derive from PoolableComponent<T>!") }
+                if (component !is PoolableComponent<*>) { error("Component '$component' must be derived from PoolableComponent<T>!") }
                 componentsCopy.add((component as PoolableComponent<*>).clone())
             }
             value.tags.forEach { tag -> tagsCopy.add(tag) }
@@ -57,6 +56,8 @@ class SnapshotSerializerSystem(
         }
 
 // Fallback: If needed deep copy of snapshot can be done via serialization and deserialization
+//        // Hint: Data objects which are deserialized from JSON are not taken out of the pool - we have to take care
+//        //       to not free them otherwise it would look like that we freed components and objects twice, which is a false positive
 //        val jsonSnapshot = snapshotSerializer.json().encodeToString(world.snapshot())
 //        val snapshotCopy: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(jsonSnapshot)
 
@@ -69,22 +70,29 @@ class SnapshotSerializerSystem(
         rewindSeek = recordings.size - 1
     }
 
+    fun registerOwnSerializersModule(name: String, module: SerializersModule) {
+        snapshotSerializer.register(name, module)
+    }
+
     fun loadGameState(world: World, coroutineContext: CoroutineContext) {
         launchImmediately(context = coroutineContext) {
             val vfs = resourcesVfs["save_game.json"]
             if (vfs.exists()) {
                 val worldSnapshot = vfs.readString()
                 val snapshot: Map<Entity, Snapshot> = snapshotSerializer.json().decodeFromString(worldSnapshot)
+                // TODO: Check the following: Data objects which are deserialized from JSON are not taken out of the pool - we have to take care
+                //       to not free them otherwise it would look like that we freed components and objects twice, which is a false positive
+                //       -> Idea: Make a clone of the snapshot components and load that into the world
                 world.loadSnapshot(snapshot)
                 println("snapshot loaded!")
             } else println("WARNING: Cannot find snapshot file. Snapshot was not loaded!")
         }
     }
 
-    fun saveGameState(world: World, coroutineContext: CoroutineContext) {
+    fun saveGameState(world: World, coroutineContext: CoroutineContext, fileName: String = "save_game.json") {
         val worldSnapshot = snapshotSerializer.json(pretty = true).encodeToString(world.snapshot())
         launchImmediately(context = coroutineContext) {
-            val vfs = resourcesVfs["save_game.json"]
+            val vfs = resourcesVfs[fileName]
             vfs.writeString(worldSnapshot)
             println("Snapshot saved!")
         }
@@ -104,34 +112,75 @@ class SnapshotSerializerSystem(
         if (GameStateManager.gameRunning) {
             // We need to free the used components in old snapshots which are not needed anymore
             // Do not free the last snapshot, because it is loaded in the current world
-//*
-            while (rewindSeek < recordings.size - 2) {
+            while (rewindSeek < recordings.size - 1) {
                 freeComponents(recordings.removeLast())
             }
             // remove current snapshot from the list of recordings but DO NOT free it - it is in used by the world and would be freed later by the cleanup function
             if (snapshotLoaded) recordings.removeLast()
             rewindSeek = recordings.size - 1
-// */
-//            Pool.writeStatistics()
-///*
-            println("\n\nUNIT TEST: Remove all entities from game world...\n\n")
-            world.removeAll()
-            removeAll()
 
-//            Pool.writeStatistics()
-            Pool.doPoolUsageCheckAfterUnloading()
-            return
-//*/
             // Set recording number to the next recording
             recNumber = recordings.last().recNumber + 1
         }
     }
 
+    /// TESTING
+    var runOnce: Boolean = false
+    var counter: Int = 0
+    val snapshotCopy = mutableMapOf<Entity, Snapshot>()
+
     fun rewind(fast: Boolean = false) {
+/*
+// TODO put this code into a unit test - diff two save-games
+        /// TESTING
+        if (!runOnce) {
+            saveGameState(world, EmptyCoroutineContext, "save_game_1.json")
+
+            // Create deep copy of all components and tags of an entity
+            world.snapshot().forEach { (entity, value) ->
+                val componentsCopy = mutableListOf<Component<*>>()
+                val tagsCopy = mutableListOf<UniqueId<*>>()
+
+                value.components.forEach { component ->
+                    // Hint: Cloning of components is done WITHOUT any world functions or features involved like onAdd
+                    //       function of components. Otherwise, world functions would be called on the current original
+                    //       world and not on the snapshot world! This is not what we want!
+                    if (component !is PoolableComponent<*>) { error("Component '$component' must be derive from PoolableComponent<T>!") }
+                    componentsCopy.add((component as PoolableComponent<*>).clone())
+                }
+                value.tags.forEach { tag -> tagsCopy.add(tag) }
+
+                // Create snapshot of entity as deep copy of all components and tags
+                snapshotCopy[entity] = wildcardSnapshotOf(componentsCopy, tagsCopy)
+            }
+            world.removeAll()
+
+            triggerPause()
+
+            world.loadSnapshot(snapshotCopy)
+
+            saveGameState(world, EmptyCoroutineContext, "save_game_2.json")
+
+            runOnce = true
+        }
+        counter++
+
+        if (counter == 120) {
+            println("Remove all")
+
+            GameStateManager.gameRunning = !GameStateManager.gameRunning
+            world.removeAll()
+//            freeComponents(snapshotCopy)
+
+            Pool.doPoolUsageCheckAfterUnloading()
+        }
+        return
+        /// TESTING END
+*/
         if (GameStateManager.gameRunning) {
             // First call of rewind
             // Free all components of the current world snapshot
-            freeComponents(Recording(1, world.snapshot()))
+            world.removeAll()
             triggerPause()
         }
         if (!GameStateManager.gameRunning) {
@@ -172,6 +221,15 @@ class SnapshotSerializerSystem(
 
     private fun freeComponents(recording: Recording) {
         recording.snapshot.forEach { (_, snapshot) ->
+            // Free all components from snapshot
+            snapshot.components.forEach { component ->
+                (component as PoolableComponent<*>).free()
+            }
+        }
+    }
+
+    private fun freeComponents(snapshot: Map<Entity, Snapshot>) {
+        snapshot.forEach { (_, snapshot) ->
             // Free all components from snapshot
             snapshot.components.forEach { component ->
                 (component as PoolableComponent<*>).free()

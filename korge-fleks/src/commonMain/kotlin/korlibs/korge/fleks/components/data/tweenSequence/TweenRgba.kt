@@ -56,7 +56,7 @@ class TweenRgba private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): TweenRgba = pool.alloc().apply { init(from = this@TweenRgba ) }
+    override fun clone(): TweenRgba = pool.alloc().apply { init(from = this@TweenRgba) }
 
     // Cleanup the tween data instance manually
     override fun free() {
@@ -66,11 +66,11 @@ class TweenRgba private constructor(
 
     companion object {
         // Use this function to create a new instance of data as value property inside a component
-        fun staticTweenRgba(config: TweenRgba.() -> Unit ): TweenRgba =
+        fun staticTweenRgba(config: TweenRgba.() -> Unit): TweenRgba =
             TweenRgba().apply(config)
 
         // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.tweenRgba(config: TweenRgba.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
+        fun TweenListBase.tweenRgba(config: TweenRgba.() -> Unit) { tweens.add(pool.alloc().apply(config)) }
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenRgba") { TweenRgba() }
     }

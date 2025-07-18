@@ -40,18 +40,18 @@ class PlayerInput private constructor(
         val PlayerInputComponent = componentTypeOf<PlayerInput>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticPlayerInputComponent(config: PlayerInput.() -> Unit ): PlayerInput =
+        fun staticPlayerInputComponent(config: PlayerInput.() -> Unit): PlayerInput =
             PlayerInput().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun playerInputComponent(config: PlayerInput.() -> Unit ): PlayerInput =
+        fun playerInputComponent(config: PlayerInput.() -> Unit): PlayerInput =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "PlayerInput") { PlayerInput() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): PlayerInput = playerInputComponent { init(from = this@PlayerInput ) }
+    override fun clone(): PlayerInput = playerInputComponent { init(from = this@PlayerInput) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

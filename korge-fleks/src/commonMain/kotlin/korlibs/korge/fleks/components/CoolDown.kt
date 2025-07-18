@@ -34,18 +34,18 @@ class CoolDown private constructor(
         val CoolDownComponent = componentTypeOf<CoolDown>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticCoolDownComponent(config: CoolDown.() -> Unit ): CoolDown =
+        fun staticCoolDownComponent(config: CoolDown.() -> Unit): CoolDown =
             CoolDown().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun coolDownComponent(config: CoolDown.() -> Unit ): CoolDown =
+        fun coolDownComponent(config: CoolDown.() -> Unit): CoolDown =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "CoolDown") { CoolDown() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): CoolDown = coolDownComponent { init(from = this@CoolDown ) }
+    override fun clone(): CoolDown = coolDownComponent { init(from = this@CoolDown) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

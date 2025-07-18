@@ -43,7 +43,7 @@ class ParallelTweens private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): ParallelTweens = pool.alloc().apply { init(from = this@ParallelTweens ) }
+    override fun clone(): ParallelTweens = pool.alloc().apply { init(from = this@ParallelTweens) }
 
     // Cleanup the tween data instance manually
     override fun free() {
@@ -53,11 +53,11 @@ class ParallelTweens private constructor(
 
     companion object {
         // Use this function to create a new instance of data as value property inside a component
-        fun staticParallelTweens(config: ParallelTweens.() -> Unit ): ParallelTweens =
+        fun staticParallelTweens(config: ParallelTweens.() -> Unit): ParallelTweens =
             ParallelTweens().apply(config)
 
         // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.parallelTweens(config: ParallelTweens.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
+        fun TweenListBase.parallelTweens(config: ParallelTweens.() -> Unit) { tweens.add(pool.alloc().apply(config)) }
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "ParallelTweens") { ParallelTweens() }
     }

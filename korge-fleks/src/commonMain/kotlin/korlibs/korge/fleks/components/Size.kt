@@ -37,18 +37,18 @@ class Size private constructor(
         val SizeComponent = componentTypeOf<Size>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticSizeComponent(config: Size.() -> Unit ): Size =
+        fun staticSizeComponent(config: Size.() -> Unit): Size =
             Size().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun sizeComponent(config: Size.() -> Unit ): Size =
+        fun sizeComponent(config: Size.() -> Unit): Size =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Size") { Size() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Size = sizeComponent { init(from = this@Size ) }
+    override fun clone(): Size = sizeComponent { init(from = this@Size) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
@@ -106,18 +106,18 @@ class SizeInt private constructor(
         val SizeIntComponent = componentTypeOf<SizeInt>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticSizeIntComponent(config: SizeInt.() -> Unit ): SizeInt =
+        fun staticSizeIntComponent(config: SizeInt.() -> Unit): SizeInt =
         SizeInt().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun sizeIntComponent(config: SizeInt.() -> Unit ): SizeInt =
+        fun sizeIntComponent(config: SizeInt.() -> Unit): SizeInt =
         pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SizeInt") { SizeInt() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): SizeInt = sizeIntComponent { init(from = this@SizeInt ) }
+    override fun clone(): SizeInt = sizeIntComponent { init(from = this@SizeInt) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

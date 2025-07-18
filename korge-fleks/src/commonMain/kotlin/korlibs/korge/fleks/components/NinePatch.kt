@@ -40,18 +40,18 @@ class NinePatch private constructor(
         val NinePatchComponent = componentTypeOf<NinePatch>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticNinePatchComponent(config: NinePatch.() -> Unit ): NinePatch =
+        fun staticNinePatchComponent(config: NinePatch.() -> Unit): NinePatch =
             NinePatch().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun ninePatchComponent(config: NinePatch.() -> Unit ): NinePatch =
+        fun ninePatchComponent(config: NinePatch.() -> Unit): NinePatch =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "NinePatch") { NinePatch() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): NinePatch = ninePatchComponent { init(from = this@NinePatch ) }
+    override fun clone(): NinePatch = ninePatchComponent { init(from = this@NinePatch) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

@@ -34,18 +34,18 @@ class Platformer private constructor(
         val PlatformerComponent = componentTypeOf<Platformer>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticPlatformerComponent(config: Platformer.() -> Unit ): Platformer =
+        fun staticPlatformerComponent(config: Platformer.() -> Unit): Platformer =
             Platformer().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun platformerComponent(config: Platformer.() -> Unit ): Platformer =
+        fun platformerComponent(config: Platformer.() -> Unit): Platformer =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Platformer") { Platformer() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Platformer = platformerComponent { init(from = this@Platformer ) }
+    override fun clone(): Platformer = platformerComponent { init(from = this@Platformer) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

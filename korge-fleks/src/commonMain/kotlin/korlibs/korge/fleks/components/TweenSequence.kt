@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
 import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
 import korlibs.korge.fleks.components.data.tweenSequence.TweenListBase
 import korlibs.korge.fleks.components.data.tweenSequence.freeAndClear
@@ -56,18 +55,18 @@ class TweenSequence private constructor(
         val TweenSequenceComponent = componentTypeOf<TweenSequence>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticTweenSequenceComponent(config: TweenSequence.() -> Unit ): TweenSequence =
+        fun staticTweenSequenceComponent(config: TweenSequence.() -> Unit): TweenSequence =
             TweenSequence().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun tweenSequenceComponent(config: TweenSequence.() -> Unit ): TweenSequence =
+        fun tweenSequenceComponent(config: TweenSequence.() -> Unit): TweenSequence =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenSequence") { TweenSequence() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): TweenSequence = tweenSequenceComponent { init(from = this@TweenSequence ) }
+    override fun clone(): TweenSequence = tweenSequenceComponent { init(from = this@TweenSequence) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

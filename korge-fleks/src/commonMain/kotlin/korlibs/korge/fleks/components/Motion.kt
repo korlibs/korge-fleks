@@ -55,18 +55,18 @@ class Motion private constructor(
         val MotionComponent = componentTypeOf<Motion>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticMotionComponent(config: Motion.() -> Unit ): Motion =
+        fun staticMotionComponent(config: Motion.() -> Unit): Motion =
             Motion().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun motionComponent(config: Motion.() -> Unit ): Motion =
+        fun motionComponent(config: Motion.() -> Unit): Motion =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Motion") { Motion() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Motion = motionComponent { init(from = this@Motion ) }
+    override fun clone(): Motion = motionComponent { init(from = this@Motion) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

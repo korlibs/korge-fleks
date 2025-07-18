@@ -42,7 +42,7 @@ class SpawnNewTweenSequence private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): SpawnNewTweenSequence = pool.alloc().apply { init(from = this@SpawnNewTweenSequence ) }
+    override fun clone(): SpawnNewTweenSequence = pool.alloc().apply { init(from = this@SpawnNewTweenSequence) }
 
     // Cleanup the tween data instance manually
     override fun free() {
@@ -52,11 +52,11 @@ class SpawnNewTweenSequence private constructor(
 
     companion object {
         // Use this function to create a new instance of data as value property inside a component
-        fun staticSpawnNewTweenSequence(config: SpawnNewTweenSequence.() -> Unit ): SpawnNewTweenSequence =
+        fun staticSpawnNewTweenSequence(config: SpawnNewTweenSequence.() -> Unit): SpawnNewTweenSequence =
             SpawnNewTweenSequence().apply(config)
 
         // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.spawnNewTweenSequence(config: SpawnNewTweenSequence.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
+        fun TweenListBase.spawnNewTweenSequence(config: SpawnNewTweenSequence.() -> Unit) { tweens.add(pool.alloc().apply(config)) }
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SpawnNewTweenSequence") { SpawnNewTweenSequence() }
     }

@@ -81,18 +81,18 @@ class Parallax private constructor(
         val ParallaxComponent = componentTypeOf<Parallax>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticParallaxComponent(config: Parallax.() -> Unit ): Parallax =
+        fun staticParallaxComponent(config: Parallax.() -> Unit): Parallax =
             Parallax().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun parallaxComponent(config: Parallax.() -> Unit ): Parallax =
+        fun parallaxComponent(config: Parallax.() -> Unit): Parallax =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Parallax") { Parallax() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Parallax = parallaxComponent { init(from = this@Parallax ) }
+    override fun clone(): Parallax = parallaxComponent { init(from = this@Parallax) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

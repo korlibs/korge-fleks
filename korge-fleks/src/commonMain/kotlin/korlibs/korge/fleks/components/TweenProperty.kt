@@ -102,18 +102,19 @@ class TweenProperty private constructor(
         val TweenTouchInputEnableComponent = TweenPropertyType.TouchInputEnable.type
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticTweenPropertyComponent(type: TweenPropertyType, config: TweenProperty.() -> Unit ): TweenProperty =
-            TweenProperty().apply(config).apply { property = type }
+        fun staticTweenPropertyComponent(type: TweenPropertyType, config: TweenProperty.() -> Unit): TweenProperty =
+            // Important! First apply property type then the config otherwise property set by config will be overwritten!
+            TweenProperty().apply { property = type }.apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun tweenPropertyComponent(type: TweenPropertyType, config: TweenProperty.() -> Unit ): TweenProperty =
-            pool.alloc().apply(config).apply { property = type }
+        fun tweenPropertyComponent(type: TweenPropertyType, config: TweenProperty.() -> Unit): TweenProperty =
+            pool.alloc().apply { property = type }.apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenProperty") { TweenProperty() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): TweenProperty = tweenPropertyComponent(TweenPropertyType.UnconfiguredType) { init(from = this@TweenProperty ) }
+    override fun clone(): TweenProperty = tweenPropertyComponent(TweenPropertyType.UnconfiguredType) { init(from = this@TweenProperty) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

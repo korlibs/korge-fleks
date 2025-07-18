@@ -46,18 +46,18 @@ class Event private constructor(
         val EventComponent = componentTypeOf<Event>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticEventComponent(config: Event.() -> Unit ): Event =
+        fun staticEventComponent(config: Event.() -> Unit): Event =
             Event().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun eventComponent(config: Event.() -> Unit ): Event =
+        fun eventComponent(config: Event.() -> Unit): Event =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Event") { Event() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Event = eventComponent { init(from = this@Event ) }
+    override fun clone(): Event = eventComponent { init(from = this@Event) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

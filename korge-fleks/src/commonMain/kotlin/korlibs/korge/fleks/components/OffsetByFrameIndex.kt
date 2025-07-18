@@ -43,11 +43,11 @@ class OffsetByFrameIndex private constructor(
         val OffsetByFrameIndexComponent = componentTypeOf<OffsetByFrameIndex>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticOffsetByFrameIndexComponent(config: OffsetByFrameIndex.() -> Unit ): OffsetByFrameIndex =
+        fun staticOffsetByFrameIndexComponent(config: OffsetByFrameIndex.() -> Unit): OffsetByFrameIndex =
             OffsetByFrameIndex().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun offsetByFrameIndexComponent(config: OffsetByFrameIndex.() -> Unit ): OffsetByFrameIndex =
+        fun offsetByFrameIndexComponent(config: OffsetByFrameIndex.() -> Unit): OffsetByFrameIndex =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "OffsetByFrameIndex") { OffsetByFrameIndex() }
@@ -76,7 +76,7 @@ class OffsetByFrameIndex private constructor(
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): OffsetByFrameIndex = offsetByFrameIndexComponent { init(from = this@OffsetByFrameIndex ) }
+    override fun clone(): OffsetByFrameIndex = offsetByFrameIndexComponent { init(from = this@OffsetByFrameIndex) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

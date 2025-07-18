@@ -37,18 +37,18 @@ class Layer private constructor(
         val LayerComponent = componentTypeOf<Layer>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticLayerComponent(config: Layer.() -> Unit ): Layer =
+        fun staticLayerComponent(config: Layer.() -> Unit): Layer =
             Layer().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun layerComponent(config: Layer.() -> Unit ): Layer =
+        fun layerComponent(config: Layer.() -> Unit): Layer =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Layer") { Layer() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Layer = layerComponent { init(from = this@Layer ) }
+    override fun clone(): Layer = layerComponent { init(from = this@Layer) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

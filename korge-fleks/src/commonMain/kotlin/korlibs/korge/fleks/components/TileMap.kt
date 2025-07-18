@@ -38,18 +38,18 @@ class TileMap private constructor(
         val TileMapComponent = componentTypeOf<TileMap>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticTileMapComponent(config: TileMap.() -> Unit ): TileMap =
+        fun staticTileMapComponent(config: TileMap.() -> Unit): TileMap =
             TileMap().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun tileMapComponent(config: TileMap.() -> Unit ): TileMap =
+        fun tileMapComponent(config: TileMap.() -> Unit): TileMap =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TileMap") { TileMap() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): TileMap = tileMapComponent { init(from = this@TileMap ) }
+    override fun clone(): TileMap = tileMapComponent { init(from = this@TileMap) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

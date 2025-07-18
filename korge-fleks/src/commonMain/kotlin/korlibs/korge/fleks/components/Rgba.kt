@@ -38,18 +38,18 @@ class Rgba private constructor(
         val RgbaComponent = componentTypeOf<Rgba>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticRgbaComponent(config: Rgba.() -> Unit ): Rgba =
+        fun staticRgbaComponent(config: Rgba.() -> Unit): Rgba =
             Rgba().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun rgbaComponent(config: Rgba.() -> Unit ): Rgba =
+        fun rgbaComponent(config: Rgba.() -> Unit): Rgba =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Rgba") { Rgba() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Rgba = rgbaComponent { init(from = this@Rgba ) }
+    override fun clone(): Rgba = rgbaComponent { init(from = this@Rgba) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
