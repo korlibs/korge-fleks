@@ -11,4 +11,4 @@ import kotlinx.serialization.Serializable
  * This can be useful for placeholder entities or for entities that are meant to be empty by design.
  */
 @Serializable @SerialName("IntentionallyEmpty")
-data object IntentionallyEmpty : EntityTag()
+data object EmptyInitialized : EntityTag()

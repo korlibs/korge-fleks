@@ -18,23 +18,27 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite.Companion.t
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchLayerVisibility.Companion.tweenSwitchLayerVisibility
 import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.EntityFactory
+import korlibs.korge.fleks.utils.Pool
+import korlibs.korge.fleks.utils.entity
 import korlibs.math.interpolation.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
 internal class TweenSequenceComponentTest {
-
+//*
     private val expectedWorld = configureWorld {}
     private val recreatedWorld = configureWorld {}
 
     @Test
     fun testTweenSequenceComponentSnapshotting() {
+        println("TEST CASE: testTweenSequenceComponentSnapshotting")
         // TODO
     }
 
-        @Test
+    @Test
     fun testTweenSequenceComponentSerialization() {
+        println("TEST CASE: testTweenSequenceComponentSerialization")
 
         val testEntityConfig = TestEntityConfig("testEntityConfig")
 
@@ -66,14 +70,14 @@ internal class TweenSequenceComponentTest {
             }
             wait { duration = 3.2f }
 
-//            index = 42,
+            index = 1
             timeProgress = 3.4f
             waitTime = 5.6f
             executed = true
         }
 
-        val entity = expectedWorld.entity {
-            it += compUnderTest
+        val entity = expectedWorld.entity(aName = "testEntity") {
+            it += compUnderTest  // Hint: Do not pass this component to more than one entity otherwise the component will be freed twice!
         }
 
         CommonTestEnv.serializeDeserialize(expectedWorld, recreatedWorld)
@@ -102,7 +106,13 @@ internal class TweenSequenceComponentTest {
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")
         assertEquals(spawnEntity.target, newSpawnEntity.target, "Check 'spawnEntity.target' property to be equal")
-        val spawnedEntity = EntityFactory.configure(spawnEntity.entityConfig, recreatedWorld, Entity.NONE)
+        val spawnedEntity = EntityFactory.createAndConfigure(spawnEntity.entityConfig, expectedWorld)
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
+
+        // Delete the entity with the component from the expected world -> put component back to the pool
+        expectedWorld.removeAll()
+
+        Pool.doPoolUsageCheckAfterUnloading()
     }
+// */
 }

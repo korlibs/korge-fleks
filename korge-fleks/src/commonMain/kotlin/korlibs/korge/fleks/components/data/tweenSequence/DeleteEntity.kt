@@ -35,7 +35,7 @@ class DeleteEntity private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): DeleteEntity = pool.alloc().apply { init(from = this@DeleteEntity ) }
+    override fun clone(): DeleteEntity = pool.alloc().apply { init(from = this@DeleteEntity) }
 
     // Cleanup the tween data instance manually
     override fun free() {
@@ -45,11 +45,11 @@ class DeleteEntity private constructor(
 
     companion object {
         // Use this function to create a new instance of data as value property inside a component
-        fun staticDeleteEntity(config: DeleteEntity.() -> Unit ): DeleteEntity =
+        fun staticDeleteEntity(config: DeleteEntity.() -> Unit): DeleteEntity =
             DeleteEntity().apply(config)
 
         // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.deleteEntity(config: DeleteEntity.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
+        fun TweenListBase.deleteEntity(config: DeleteEntity.() -> Unit) { tweens.add(pool.alloc().apply(config)) }
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "DeleteEntity") { DeleteEntity() }
     }

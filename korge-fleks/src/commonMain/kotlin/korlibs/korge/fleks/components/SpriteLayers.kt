@@ -40,18 +40,18 @@ class SpriteLayers private constructor(
         val SpriteLayersComponent = componentTypeOf<SpriteLayers>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticSpriteLayersComponent(config: SpriteLayers.() -> Unit ): SpriteLayers =
+        fun staticSpriteLayersComponent(config: SpriteLayers.() -> Unit): SpriteLayers =
             SpriteLayers().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun spriteLayersComponent(config: SpriteLayers.() -> Unit ): SpriteLayers =
+        fun spriteLayersComponent(config: SpriteLayers.() -> Unit): SpriteLayers =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SpriteLayers") { SpriteLayers() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): SpriteLayers = spriteLayersComponent { init(from = this@SpriteLayers ) }
+    override fun clone(): SpriteLayers = spriteLayersComponent { init(from = this@SpriteLayers) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

@@ -32,7 +32,7 @@ class SpriteLayer private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): SpriteLayer = spriteLayer { init(from = this@SpriteLayer ) }
+    override fun clone(): SpriteLayer = spriteLayer { init(from = this@SpriteLayer) }
 
     // Cleanup the tween data instance manually
     override fun free() {
@@ -42,11 +42,11 @@ class SpriteLayer private constructor(
 
     companion object {
         // Use this function to create a new instance of data as val inside a component
-        fun staticSpriteLayer(config: SpriteLayer.() -> Unit ): SpriteLayer =
+        fun staticSpriteLayer(config: SpriteLayer.() -> Unit): SpriteLayer =
             SpriteLayer().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun spriteLayer(config: SpriteLayer.() -> Unit ): SpriteLayer =
+        fun spriteLayer(config: SpriteLayer.() -> Unit): SpriteLayer =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SpriteLayer") { SpriteLayer() }

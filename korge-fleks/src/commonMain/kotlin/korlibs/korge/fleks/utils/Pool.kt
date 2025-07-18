@@ -54,6 +54,16 @@ class Pool<T> internal constructor() {
                 println("  $name: totalGeneratedItems=${pool.totalGeneratedItems}, itemsInPool=${pool.itemsInPool}, totalItemsInUse=${pool.totalItemsInUse}")
             }
         }
+
+        fun doPoolUsageCheckAfterUnloading() {
+            listOfAllPools.forEach { (name, pool) ->
+
+                // Consistency check for total items
+                if (pool.totalGeneratedItems != pool.itemsInPool) {
+                    println("ERROR: Consistency check - pool '$name' has '${pool.totalGeneratedItems - pool.itemsInPool}' leaked objects! (Negative value means duplicate freed objects)")
+                }
+            }
+        }
     }
 
     /**

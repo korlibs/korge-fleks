@@ -59,18 +59,18 @@ class Sound private constructor(
         val SoundComponent = componentTypeOf<Sound>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticSoundComponent(config: Sound.() -> Unit ): Sound =
+        fun staticSoundComponent(config: Sound.() -> Unit): Sound =
             Sound().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun soundComponent(config: Sound.() -> Unit ): Sound =
+        fun soundComponent(config: Sound.() -> Unit): Sound =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Sound") { Sound() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Sound = soundComponent { init(from = this@Sound ) }
+    override fun clone(): Sound = soundComponent { init(from = this@Sound) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

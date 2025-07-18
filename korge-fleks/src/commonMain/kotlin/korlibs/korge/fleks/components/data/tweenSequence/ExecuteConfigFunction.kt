@@ -41,7 +41,7 @@ class ExecuteConfigFunction private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): ExecuteConfigFunction = pool.alloc().apply { init(from = this@ExecuteConfigFunction ) }
+    override fun clone(): ExecuteConfigFunction = pool.alloc().apply { init(from = this@ExecuteConfigFunction) }
 
     // Cleanup the tween data instance manually
     override fun free() {
@@ -51,11 +51,11 @@ class ExecuteConfigFunction private constructor(
 
     companion object {
         // Use this function to create a new instance of data as value property inside a component
-        fun staticExecuteConfigFunction(config: ExecuteConfigFunction.() -> Unit ): ExecuteConfigFunction =
+        fun staticExecuteConfigFunction(config: ExecuteConfigFunction.() -> Unit): ExecuteConfigFunction =
             ExecuteConfigFunction().apply(config)
 
         // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.executeConfigFunction(config: ExecuteConfigFunction.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
+        fun TweenListBase.executeConfigFunction(config: ExecuteConfigFunction.() -> Unit) { tweens.add(pool.alloc().apply(config)) }
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "ExecuteConfigFunction") { ExecuteConfigFunction() }
     }

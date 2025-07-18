@@ -56,18 +56,18 @@ class GridCollisionResult private constructor(
             pool.alloc().apply { axes = Axes.Z }.apply(config)
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticGridCollisionResultComponent(config: GridCollisionResult.() -> Unit ): GridCollisionResult =
+        fun staticGridCollisionResultComponent(config: GridCollisionResult.() -> Unit): GridCollisionResult =
             GridCollisionResult().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun gridCollisionResultComponent(config: GridCollisionResult.() -> Unit ): GridCollisionResult =
+        fun gridCollisionResultComponent(config: GridCollisionResult.() -> Unit): GridCollisionResult =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE) { GridCollisionResult() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): GridCollisionResult = gridCollisionResultComponent { init(from = this@GridCollisionResult ) }
+    override fun clone(): GridCollisionResult = gridCollisionResultComponent { init(from = this@GridCollisionResult) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

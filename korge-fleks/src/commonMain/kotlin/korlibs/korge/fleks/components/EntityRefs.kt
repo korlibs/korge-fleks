@@ -38,18 +38,18 @@ class EntityRefs private constructor(
         val EntityRefsComponent = componentTypeOf<EntityRefs>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticEntityRefsComponent(config: EntityRefs.() -> Unit ): EntityRefs =
+        fun staticEntityRefsComponent(config: EntityRefs.() -> Unit): EntityRefs =
             EntityRefs().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun entityRefsComponent(config: EntityRefs.() -> Unit ): EntityRefs =
+        fun entityRefsComponent(config: EntityRefs.() -> Unit): EntityRefs =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "EntityRefs") { EntityRefs() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): EntityRefs = entityRefsComponent { init(from = this@EntityRefs ) }
+    override fun clone(): EntityRefs = entityRefsComponent { init(from = this@EntityRefs) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

@@ -37,18 +37,18 @@ class Grid private constructor(
         val GridComponent = componentTypeOf<Grid>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticGridComponent(config: Grid.() -> Unit ): Grid =
+        fun staticGridComponent(config: Grid.() -> Unit): Grid =
             Grid().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun gridComponent(config: Grid.() -> Unit ): Grid =
+        fun gridComponent(config: Grid.() -> Unit): Grid =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Grid") { Grid() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Grid = gridComponent { init(from = this@Grid ) }
+    override fun clone(): Grid = gridComponent { init(from = this@Grid) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

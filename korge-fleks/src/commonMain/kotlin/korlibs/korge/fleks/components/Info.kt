@@ -21,8 +21,8 @@ class Info private constructor(
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Info) {
-        name = this@Info.name
-        entityId = this@Info.entityId
+        name = from.name
+        entityId = from.entityId
         //println("Cloned: Info '$num' from '${this@Info.num}'")
     }
 
@@ -40,18 +40,18 @@ class Info private constructor(
         val InfoComponent = componentTypeOf<Info>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticInfoComponent(config: Info.() -> Unit ): Info =
+        fun staticInfoComponent(config: Info.() -> Unit): Info =
             Info().apply { config() /*; println("Static created: Info")*/ }
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun infoComponent(config: Info.() -> Unit ): Info =
+        fun infoComponent(config: Info.() -> Unit): Info =
             pool.alloc().apply { config() /*; println("Created: Info '$num'")*/ }
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Info") { Info(/* num = it */) }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Info = infoComponent { init(from = this@Info ) }
+    override fun clone(): Info = infoComponent { init(from = this@Info) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

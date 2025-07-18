@@ -25,7 +25,7 @@ class ListOfPoints private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): ListOfPoints = listOfPoints { init(from = this@ListOfPoints ) }
+    override fun clone(): ListOfPoints = listOfPoints { init(from = this@ListOfPoints) }
 
     // Cleanup the tween data instance manually
     override fun free() {
@@ -35,11 +35,11 @@ class ListOfPoints private constructor(
 
     companion object {
         // Use this function to create a new instance of data as value property inside a component
-        fun staticListOfPoints(config: ListOfPoints.() -> Unit ): ListOfPoints =
+        fun staticListOfPoints(config: ListOfPoints.() -> Unit): ListOfPoints =
             ListOfPoints().apply(config)
 
         // Use this function to get a new instance of the data object from the pool
-        fun listOfPoints(config: ListOfPoints.() -> Unit ): ListOfPoints =
+        fun listOfPoints(config: ListOfPoints.() -> Unit): ListOfPoints =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "ListOfPoints") { ListOfPoints() }

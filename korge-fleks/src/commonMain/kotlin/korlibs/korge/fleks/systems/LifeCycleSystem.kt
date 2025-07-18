@@ -17,18 +17,7 @@ class LifeCycleSystem : IteratingSystem(
 
         if (lifeCycle.healthCounter <= 0) {
             // Delete first all sub-entities
-            entity.getOrNull(EntityRefComponent)?.let {
-                world -= it.entity
-                debugPrint(it.entity, "sub")
-            }
-            entity.getOrNull(EntityRefsComponent)?.entities?.forEach { entity ->
-                world -= entity
-                debugPrint(entity, "sub")
-            }
-            entity.getOrNull(EntityRefsByNameComponent)?.entitiesByName?.forEach { (_, entity) ->
-                world -= entity
-                debugPrint(entity, "sub")
-            }
+            deleteEntityRefs(entity)
 
             world -= entity
             debugPrint(entity, "base")
@@ -38,5 +27,21 @@ class LifeCycleSystem : IteratingSystem(
     private fun debugPrint(entity: Entity, type: String) {
         val name: String = entity.getOrNull(InfoComponent)?.name ?: "no name"
 //        println("INFO: LifeCycleSystem: Remove $type-entity '${entity.id}' ($name)")
+    }
+
+    fun deleteEntityRefs(entity: Entity) {
+        entity.getOrNull(EntityRefComponent)?.let {
+            world -= it.entity
+            debugPrint(it.entity, "sub")
+        }
+        entity.getOrNull(EntityRefsComponent)?.entities?.forEach { entity ->
+            world -= entity
+            debugPrint(entity, "sub")
+        }
+        entity.getOrNull(EntityRefsByNameComponent)?.entitiesByName?.forEach { (_, entity) ->
+            world -= entity
+            debugPrint(entity, "sub")
+        }
+
     }
 }

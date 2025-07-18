@@ -49,18 +49,18 @@ class LevelMap private constructor(
         val LevelMapComponent = componentTypeOf<LevelMap>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticLevelMapComponent(config: LevelMap.() -> Unit ): LevelMap =
+        fun staticLevelMapComponent(config: LevelMap.() -> Unit): LevelMap =
             LevelMap().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun levelMapComponent(config: LevelMap.() -> Unit ): LevelMap =
+        fun levelMapComponent(config: LevelMap.() -> Unit): LevelMap =
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "LevelMap") { LevelMap() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): LevelMap = levelMapComponent { init(from = this@LevelMap ) }
+    override fun clone(): LevelMap = levelMapComponent { init(from = this@LevelMap) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
