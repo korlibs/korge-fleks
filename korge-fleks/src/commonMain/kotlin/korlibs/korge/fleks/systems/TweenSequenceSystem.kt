@@ -278,7 +278,8 @@ class TweenSequenceSystem : IteratingSystem(
     private fun createTweenPropertyComponent(tween: TweenBase, parentTween: TweenBase, componentProperty: TweenPropertyType, value: Any, change: Any = Unit) {
         tween.target.configure { animatedEntity ->
             animatedEntity.getOrAdd(componentProperty.type) {
-                tweenPropertyComponent(componentProperty) {
+                tweenPropertyComponent {
+                    this.property = componentProperty
                     this.change = change
                     this.value = value
                     this.duration = tween.duration ?: parentTween.duration ?: 0f

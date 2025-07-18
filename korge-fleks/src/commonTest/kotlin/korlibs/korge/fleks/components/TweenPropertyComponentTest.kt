@@ -97,7 +97,8 @@ internal class TweenPropertyComponentTest {
     @Test
     fun testAnimateComponentSerialization() {
 
-        val componentUnderTest = tweenPropertyComponent(type = RgbaAlpha) {
+        val componentUnderTest = tweenPropertyComponent {
+            property = RgbaAlpha
             change = Unit
             value = Unit
             duration = 1.2f

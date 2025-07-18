@@ -12,9 +12,7 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition.Companion
 import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.utils.*
-import korlibs.math.interpolation.EASE_IN
-import korlibs.math.interpolation.EASE_OUT
-import korlibs.math.interpolation.Easing
+import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 
 @Serializable @SerialName("TestGameEntityConfig")

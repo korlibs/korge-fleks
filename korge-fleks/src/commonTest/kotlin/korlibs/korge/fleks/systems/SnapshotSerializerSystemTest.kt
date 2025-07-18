@@ -30,10 +30,9 @@ internal class SnapshotSerializerSystemTest {
         gameWorld.createAndConfigureEntity(entityConfig = "test_game_entity_config")
 
         val frameTime = (1f / 60f)
-        val introDuration = 70f
 
         // Run update methods of fleks ECS world
-        val times = (introDuration * (1f / frameTime)).toInt()
+        val times = (70 * (1f / frameTime)).toInt()
         println("\n\nUNIT TEST: Start updating game world for $times times with frame time of ${frameTime.seconds}.")
         repeat(times) { time ->
             gameWorld.update(duration = frameTime.seconds)
@@ -42,6 +41,11 @@ internal class SnapshotSerializerSystemTest {
                 && time < (22 * (1f / frameTime).toInt())
                 ) {
                 gameWorld.system<SnapshotSerializerSystem>().rewind()
+            }
+
+            if (time == (23 * (1f / frameTime).toInt())) {
+                // Resume the game world after rewinding
+                gameWorld.system<SnapshotSerializerSystem>().triggerPause()
             }
         }
 
