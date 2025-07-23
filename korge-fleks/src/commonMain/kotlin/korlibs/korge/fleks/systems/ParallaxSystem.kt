@@ -97,8 +97,18 @@ class ParallaxSystem(
             val speedFactor: Float = parallaxDataContainer.config.foregroundLayers!![index].speedFactor ?: 0f
             val selfSpeedX = parallaxDataContainer.config.foregroundLayers[index].selfSpeedX
             val selfSpeedY = parallaxDataContainer.config.foregroundLayers[index].selfSpeedY
+
             val positionComponent = layerEntity[PositionComponent]
-            positionComponent.x = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + selfSpeedX * deltaTime + positionComponent.x
+            var layerVelocityX = 0f
+            // Check if layer has MotionComponent for self-movement
+            if (layerEntity has MotionComponent) {
+                layerVelocityX = layerEntity[MotionComponent].velocityX
+            }
+
+            // TODO: Add selfSpeedX to layerVelocityX
+            positionComponent.x = (speedFactor * motionComponent.velocityX + layerVelocityX) * worldToPixelRatio * deltaTime + positionComponent.x  // f(x) = v * t + x
+
+//            positionComponent.x = (speedFactor * motionComponent.velocityX * layerVelocityX * worldToPixelRatio) * deltaTime + selfSpeedX * deltaTime + positionComponent.x
             positionComponent.y = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + positionComponent.y
         }
     }

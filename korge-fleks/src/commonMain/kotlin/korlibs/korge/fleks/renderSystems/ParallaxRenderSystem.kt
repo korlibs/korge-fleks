@@ -51,11 +51,11 @@ class ParallaxRenderSystem(
                 // Draw all background parallax layers
                 parallaxDataContainer.backgroundLayers?.defaultAnimation?.firstFrame?.layerData?.fastForEachWithIndex { index, layer ->
                     // Check local position and wrap around the texture size
-                    val LayerEntity = parallaxComponent.bgLayerEntities[index]
-                    val localPositionComponent = LayerEntity[PositionComponent]
+                    val layerEntity = parallaxComponent.bgLayerEntities[index]
+                    val localPositionComponent = layerEntity[PositionComponent]
                     localPositionComponent.x = wrap(localPositionComponent.x, max = layer.width)
                     localPositionComponent.y = wrap(localPositionComponent.y, max = layer.height)
-                    val localRgba = LayerEntity[RgbaComponent].rgba
+                    val localRgba = layerEntity[RgbaComponent].rgba
 
                     drawLayer(
                         global = globalPositionComponent,
