@@ -27,9 +27,7 @@ data class ParallaxEffectConfig(
                 x = this@ParallaxEffectConfig.x  // global position in screen coordinates
                 y = this@ParallaxEffectConfig.y
             }
-            it += motionComponent {
-                velocityX = -12f  // world units (16 pixels) per second
-            }
+            it += motionComponent {}
             it += parallaxComponent {
                 name = assetName
             }

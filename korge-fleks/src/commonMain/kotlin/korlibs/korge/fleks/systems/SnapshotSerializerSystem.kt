@@ -109,7 +109,7 @@ class SnapshotSerializerSystem(
             }
         }
         // When game is resuming than delete all recordings which are beyond the new play position
-        if (GameStateManager.gameRunning) {
+        if (GameStateManager.gameRunning && recordings.isNotEmpty()) {
             // We need to free the used components in old snapshots which are not needed anymore
             // Do not free the last snapshot, because it is loaded in the current world
             while (rewindSeek < recordings.size - 1) {
