@@ -34,7 +34,7 @@ class FastSpriteRenderSystem(
     private val position: Position = staticPositionComponent {}
 
     override fun renderInternal(ctx: RenderContext) {
-        val camera: Entity = world.getMainCamera()
+        val camera: Entity = world.getMainCameraOrNull() ?: return
 
         // Custom Render Code here
         ctx.useBatcher { batch ->
