@@ -29,8 +29,13 @@ class ParallaxSystem(
             val speedFactor = parallaxDataContainer.config.backgroundLayers!![index].speedFactor
             if (speedFactor != null) {
                 val positionComponent = layerEntity[PositionComponent]
-                positionComponent.x = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + positionComponent.x  // f(x) = v * t + x
-                positionComponent.y = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + positionComponent.y
+                // Check if layer has MotionComponent for self-movement
+                val layerVelocityX = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityX else 0f
+                val layerVelocityY = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityY else 0f
+
+                // Calculate new position based on speed factor and layer velocity
+                positionComponent.x = (speedFactor * motionComponent.velocityX + layerVelocityX) * worldToPixelRatio * deltaTime + positionComponent.x  // f(x) = v * t + x
+                positionComponent.y = (speedFactor * motionComponent.velocityY + layerVelocityY) * worldToPixelRatio * deltaTime + positionComponent.y
             }
         }
 
@@ -95,21 +100,15 @@ class ParallaxSystem(
 
         parallaxComponent.fgLayerEntities.fastForEachWithIndex { index, layerEntity ->
             val speedFactor: Float = parallaxDataContainer.config.foregroundLayers!![index].speedFactor ?: 0f
-            val selfSpeedX = parallaxDataContainer.config.foregroundLayers[index].selfSpeedX
-            val selfSpeedY = parallaxDataContainer.config.foregroundLayers[index].selfSpeedY
 
             val positionComponent = layerEntity[PositionComponent]
-            var layerVelocityX = 0f
             // Check if layer has MotionComponent for self-movement
-            if (layerEntity has MotionComponent) {
-                layerVelocityX = layerEntity[MotionComponent].velocityX
-            }
+            val layerVelocityX = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityX else 0f
+            val layerVelocityY = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityY else 0f
 
-            // TODO: Add selfSpeedX to layerVelocityX
+            // Calculate new position based on speed factor and layer velocity
             positionComponent.x = (speedFactor * motionComponent.velocityX + layerVelocityX) * worldToPixelRatio * deltaTime + positionComponent.x  // f(x) = v * t + x
-
-//            positionComponent.x = (speedFactor * motionComponent.velocityX * layerVelocityX * worldToPixelRatio) * deltaTime + selfSpeedX * deltaTime + positionComponent.x
-            positionComponent.y = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + positionComponent.y
+            positionComponent.y = (speedFactor * motionComponent.velocityY + layerVelocityY) * worldToPixelRatio * deltaTime + positionComponent.y
         }
     }
 }
