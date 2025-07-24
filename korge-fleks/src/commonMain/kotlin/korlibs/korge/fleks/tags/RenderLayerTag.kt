@@ -11,7 +11,6 @@ import kotlinx.serialization.*
 @Serializable @SerialName("RenderLayer")
 enum class RenderLayerTag : EntityTags by entityTagOf() {
     // Background layers
-    BG_LEVELMAP,
     BG_OBJECT_LAYER,
     BG_PARALLAX,
     // Main layers
