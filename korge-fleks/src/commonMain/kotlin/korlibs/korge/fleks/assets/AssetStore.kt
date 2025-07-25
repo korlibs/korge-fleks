@@ -53,8 +53,10 @@ class AssetStore {
     internal val assetLevelDataLoader: AssetLevelDataLoader = AssetLevelDataLoader()
 
     data class CollisionData(
+        // Anchor point of the collision rectangle to the pivot point of the entity
         val x: Int,
         val y: Int,
+        // Size of the collision rectangle
         val width: Float,
         val height: Float
     )
@@ -62,7 +64,7 @@ class AssetStore {
     // TODO
     fun getCollisionData(name: String) : CollisionData =
         CollisionData(
-            8, 29, 17f, 29f
+            8, 28, 17f, 29f
         )
 
     fun getTileMapData(level: String) : LayerTileMaps =

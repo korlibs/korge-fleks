@@ -8,8 +8,7 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rigidbody.Companion.RigidbodyComponent
 
 /**
- * A system which moves entities. It either takes the rigidbody of an entity into account or if not
- * it moves the entity linear without caring about gravity.
+ * A system which moves entities independent of gravity and collision.
  */
 class PositionSystem : IteratingSystem(
     family {
@@ -22,13 +21,14 @@ class PositionSystem : IteratingSystem(
     override fun onTickEntity(entity: Entity) {
         val positionComponent = entity[PositionComponent]
 
-        if (entity has RigidbodyComponent && entity has MotionComponent) {
-            // Entity has a rigidbody - that means the movement will be calculated depending on it
-            val rigidbody = entity[RigidbodyComponent]
-            // Currently we just add gravity to the entity
-            entity[MotionComponent].accelY += rigidbody.mass * 9.81f
-            // TODO implement more sophisticated movement with rigidbody taking damping and friction into account
-        }
+// TODO move into GridMoveSystem
+//        if (entity has RigidbodyComponent && entity has MotionComponent) {
+//            // Entity has a rigidbody - that means the movement will be calculated depending on it
+//            val rigidbody = entity[RigidbodyComponent]
+//            // Currently we just add gravity to the entity
+//            entity[MotionComponent].accelY += rigidbody.mass * 9.81f
+//            // TODO implement more sophisticated movement with rigidbody taking damping and friction into account
+//        }
 
         if (entity has MotionComponent) {
             val motion = entity[MotionComponent]

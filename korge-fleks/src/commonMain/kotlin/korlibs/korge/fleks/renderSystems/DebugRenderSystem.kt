@@ -34,7 +34,7 @@ class DebugRenderSystem(
 ) : View() {
     private val family: Family = world.family {
         all(layerTag)
-            .any(PositionComponent, SpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
+            .any(layerTag, PositionComponent, CollisionComponent, SpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}

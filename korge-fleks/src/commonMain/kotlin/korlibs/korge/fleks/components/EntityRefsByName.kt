@@ -14,21 +14,21 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("EntityRefsByName")
 class EntityRefsByName private constructor(
-    val entitiesByName: MutableMap<String, Entity> = mutableMapOf(),
+    val entities: MutableMap<String, Entity> = mutableMapOf(),
     // Configure what to do with the linked entities
     var moveWith: Boolean = false
 ) : PoolableComponent<EntityRefsByName>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: EntityRefsByName) {
-        entitiesByName.putAll(from.entitiesByName)
+        entities.putAll(from.entities)
         moveWith = from.moveWith
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        entitiesByName.clear()
+        entities.clear()
         moveWith = false
     }
 
@@ -79,10 +79,10 @@ class EntityRefsByName private constructor(
      * If an entity with the same key already exists, it will be replaced.
      */
     fun add(key: String, entity: Entity) {
-        entitiesByName[key] = entity
+        entities[key] = entity
     }
 
     fun getSubEntity(key: String): Entity {
-        return entitiesByName[key] ?: Entity.NONE
+        return entities[key] ?: Entity.NONE
     }
 }

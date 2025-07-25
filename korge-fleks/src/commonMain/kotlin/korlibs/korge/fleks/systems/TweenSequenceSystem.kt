@@ -239,7 +239,7 @@ class TweenSequenceSystem : IteratingSystem(
                 entity.getOrNull(EntityRefsComponent)?.entities?.forEach { entity ->
                     world -= entity
                 }
-                entity.getOrNull(EntityRefsByNameComponent)?.entitiesByName?.forEach { (_, entity) ->
+                entity.getOrNull(EntityRefsByNameComponent)?.entities?.forEach { (_, entity) ->
                     world -= entity
                 }
 

@@ -38,7 +38,7 @@ class LifeCycleSystem : IteratingSystem(
             world -= entity
             debugPrint(entity, "sub")
         }
-        entity.getOrNull(EntityRefsByNameComponent)?.entitiesByName?.forEach { (_, entity) ->
+        entity.getOrNull(EntityRefsByNameComponent)?.entities?.forEach { (_, entity) ->
             world -= entity
             debugPrint(entity, "sub")
         }

@@ -18,6 +18,7 @@ import korlibs.korge.fleks.systems.SpriteLayersSystem
 import korlibs.korge.fleks.systems.SpriteSystem
 import korlibs.korge.fleks.systems.TouchInputSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
+import korlibs.korge.fleks.systems.collision.GridMoveSystem
 import korlibs.korge.fleks.systems.collision.PlatformerGravitySystem
 import korlibs.korge.fleks.systems.collision.PlatformerGroundSystem
 import korlibs.korge.fleks.systems.collision.PlayerInputSystem
@@ -44,8 +45,8 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         add(PlatformerGravitySystem())
         add(PlayerMoveSystem())
         add(PlayerInputSystem())
-// TODO                add(GridMoveSystem())
-// TODO                add(GridCollisionCleanupSystem())
+        add(GridMoveSystem())
+//        add(GridCollisionCleanupSystem())
 
         add(TouchInputSystem())
         add(DebugSystem())
