@@ -7,11 +7,11 @@ import kotlin.math.floor
 class PlatformerCollisionChecker(
 //    private var level: LevelData
 ) : CollisionChecker() {
-    var rightCollisionRatio: Float = 0.7f
-    var leftCollisionRatio: Float = 0.3f
+    var rightCollisionRatio: Float = 1f
+    var leftCollisionRatio: Float = 0f
     var bottomCollisionRatio: Float = 0f
     var topCollisionRatio: Float = 1f
-    var useTopCollisionRatio: Boolean = false
+    var useTopCollisionRatio: Boolean = true
 
     override fun checkXCollision(
         cx: Int,

@@ -16,14 +16,16 @@ class SimpleCollisionResolver(val gridWidth: Int, val gridHeight: Int) : Collisi
     override fun resolveXCollision(
         gridComponent: Grid, motionComponent: Motion, collision: CollisionChecker, dir: Int
     ) {
-//        if (dir == -1) {
+        if (dir == -1) {
 //            gridComponent.cx = 0
-//            gridComponent.xr = 0.3f
-//        }
-//        if (dir == 1) {
+            gridComponent.xr = 0f
+            motionComponent.velocityX = 0f
+        }
+        if (dir == 1) {
 //            gridComponent.cx = gridWidth
-//            gridComponent.xr = 0.7f
-//        }
+            gridComponent.xr = 1f
+            motionComponent.velocityX = 0f
+        }
     }
 
     // TODO: Implement CollisionChecker with "old" raycast system
@@ -36,8 +38,8 @@ class SimpleCollisionResolver(val gridWidth: Int, val gridHeight: Int) : Collisi
 //            gridComponent.yr = 0.3f
         }
         if (dir == 1) {
-            motionComponent.velocityY = 0f
-            gridComponent.yr = 1f
+//            motionComponent.velocityY = 0f
+//            gridComponent.yr = 1f
 //            gridComponent.cy = gridHeight
 //            gridComponent.yr = 0.7f
         }

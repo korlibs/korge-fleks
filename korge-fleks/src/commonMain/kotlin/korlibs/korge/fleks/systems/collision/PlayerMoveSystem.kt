@@ -17,6 +17,7 @@ class PlayerMoveSystem : IteratingSystem(
         val playerInputComponent = entity[PlayerInputComponent]
         val motionComponent = entity[MotionComponent]
 
+        // TODO Check if max velocity for player movement is reached
         motionComponent.velocityX += playerInputComponent.speed * playerInputComponent.xMoveStrength
         motionComponent.velocityY += playerInputComponent.speed * playerInputComponent.yMoveStrength
     }

@@ -23,9 +23,9 @@ class Motion private constructor(
     var velocityX: Float = 0f,
     var velocityY: Float = 0f,
     var velocityZ: Float = 0f,
-    var frictionX: Float = 0.82f,
-    var frictionY: Float = 0.82f,
-    var frictionZ: Float = 0.82f
+    var frictionX: Float = 0f,
+    var frictionY: Float = 0f,
+    var frictionZ: Float = 0f
 ) : PoolableComponent<Motion>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -34,8 +34,10 @@ class Motion private constructor(
         accelY = from.accelY
         velocityX = from.velocityX
         velocityY = from.velocityY
+        velocityZ = from.velocityZ
         frictionX = from.frictionX
         frictionY = from.frictionY
+        frictionZ = from.frictionZ
     }
 
     // Cleanup the component data instance manually
@@ -45,8 +47,10 @@ class Motion private constructor(
         accelY = 0f
         velocityX = 0f
         velocityY = 0f
-        frictionX = 0.82f
-        frictionY = 0.82f
+        velocityZ = 0f
+        frictionX = 0f
+        frictionY = 0f
+        frictionZ = 0f
     }
 
     override fun type() = MotionComponent

@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("PlayerInput")
 class PlayerInput private constructor(
-    var speed: Float = 10f,
+    var speed: Float = 0.1f,
     var xMoveStrength: Float = 0f,
     var yMoveStrength: Float = 0f
 ) : PoolableComponent<PlayerInput>() {

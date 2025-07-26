@@ -10,8 +10,8 @@ import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
-import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionXComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionYComponent
 import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionZComponent
@@ -28,18 +28,17 @@ import kotlin.math.ceil
 
 class GridMoveSystem(
 ) : IteratingSystem(
-    family = World.family { all(MotionComponent, GridComponent, CollisionComponent) /*.any(LevelMapComponent)*/ },
+    family = World.family { all(PositionComponent, GridComponent, MotionComponent, CollisionComponent) /*.any(LevelMapComponent)*/ },
     interval = Fixed(1 / 30f)
 ) {
-    private val entityFamily = World.family { all(MotionComponent, GridComponent, CollisionComponent) /*.any(GridComponent)*/ }
-
     val assetStore = world.inject<AssetStore>("AssetStore")
-//    var levelData: WorldData = assetStore.getWorldData(name)
+
     var collisionChecker: CollisionChecker = PlatformerCollisionChecker()
     var collisionResolver: CollisionResolver = SimpleCollisionResolver(16, 16)
 
     override fun onTickEntity(entity: Entity) {
         // Iterate over all entities that have a GridComponent and MotionComponent
+        val positionComponent = entity[PositionComponent]
         val motionComponent = entity[MotionComponent]
         val gridComponent = entity[GridComponent]
         val collisionComponent = entity[CollisionComponent]
@@ -49,8 +48,9 @@ class GridMoveSystem(
         gridComponent.lastPx = gridComponent.attachX
         gridComponent.lastPy = gridComponent.attachY
         if (gravityComponent != null) {
-            motionComponent.velocityX += gravityComponent.calculateDeltaXGravity()
-            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity()
+// TODO enable gravity again
+//            motionComponent.velocityX += gravityComponent.calculateDeltaXGravity()
+//            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity()
         }
         /**
          * Any movement greater than [Grid.maxGridMovementPercent] will increase the number of steps here.
@@ -74,7 +74,7 @@ class GridMoveSystem(
                         collisionData.height,
                         AppConfig.GRID_CELL_SIZE
                     )
-                    // Check if collision happens within a grid cell
+                    // Check if collision happens within the next grid cell where the entity is moving
                     val result = collisionChecker.checkXCollision(
                         gridComponent.cx,
                         gridComponent.cy,
@@ -174,12 +174,13 @@ class GridMoveSystem(
         if (motionComponent.velocityZ.isAlmostEquals(0.0005f)) {
             motionComponent.velocityZ = 0f
         }
+
+        positionComponent.x = gridComponent.x
+        positionComponent.y = gridComponent.y
 //        println("GridMoveSystem: cx, cy: ${gridComponent.cx}, ${gridComponent.cy} xr, yr: ${gridComponent.xr}, ${gridComponent.yr}")
     }
 
-    override fun onAlpha(alpha: Float) {
-        entityFamily.forEach { entity ->
-            entity[GridComponent].interpolationAlpha = alpha
-        }
+    override fun onAlphaEntity(entity: Entity, alpha: Float) {
+        entity[GridComponent].interpolationAlpha = alpha
     }
 }

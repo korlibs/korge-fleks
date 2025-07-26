@@ -38,7 +38,7 @@ class DebugRenderSystem(
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
-
+    private val gridPosition: Position = staticPositionComponent {}
 
     override fun renderInternal(ctx: RenderContext) {
         val camera: Entity = world.getMainCameraOrNull() ?: return
@@ -143,15 +143,14 @@ class DebugRenderSystem(
                 // Draw grid position (used in collision system)
                 if(entity has GridComponent && entity has DebugInfoTag.GRID_POSITION) {
                     val gridComponent = entity[GridComponent]
+                    // Take over entity grid position and convert to screen coordinates
+                    gridPosition.x = gridComponent.x
+                    gridPosition.y = gridComponent.y
+                    gridPosition.run { world.convertToScreenCoordinates(camera) }
 
-                    val gridToPosition = staticPoint { x = gridComponent.x; y = gridComponent.y }
-                    if (entity hasNo ScreenCoordinatesTag) {
-                        gridToPosition.run { world.convertToScreenCoordinates(camera) }
-                    }
-
-                    batch.drawVector(Colors.YELLOW) {
-                        val x = gridToPosition.x
-                        val y = gridToPosition.y
+                    batch.drawVector(Colors.GREEN) {
+                        val x = gridPosition.x
+                        val y = gridPosition.y
                         circle(korlibs.math.geom.Point(x, y), 2)
                         line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
                         line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
