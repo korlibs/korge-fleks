@@ -3,6 +3,7 @@ package korlibs.korge.fleks.logic.collision.checker
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.prefab.data.LevelData
 import kotlin.math.floor
+import kotlin.math.roundToInt
 
 class PlatformerCollisionChecker(
 //    private var level: LevelData
@@ -25,11 +26,13 @@ class PlatformerCollisionChecker(
         cellSize: Float
     ): Int {
         Prefab.levelData?.let { level ->
-            if (level.hasCollision(cx + 1, cy) && xr >= rightCollisionRatio) {
-                return 1
-            }
-            if (level.hasCollision(cx - 1, cy) && xr <= leftCollisionRatio) {
-                return -1
+            repeat((width / cellSize).roundToInt()) { i ->
+                if (level.hasCollision(cx + 1, cy + i) && xr >= rightCollisionRatio) {
+                    return 1
+                }
+                if (level.hasCollision(cx - 1, cy + i) && xr <= leftCollisionRatio) {
+                    return -1
+                }
             }
         }
         return 0

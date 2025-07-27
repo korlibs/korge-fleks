@@ -28,13 +28,35 @@ import kotlin.math.ceil
 
 class GridMoveSystem(
 ) : IteratingSystem(
-    family = World.family { all(PositionComponent, GridComponent, MotionComponent, CollisionComponent) /*.any(LevelMapComponent)*/ },
+    family = World.family { all(PositionComponent, MotionComponent, CollisionComponent) /*.any(LevelMapComponent)*/ },
     interval = Fixed(1 / 30f)
 ) {
     val assetStore = world.inject<AssetStore>("AssetStore")
 
     var collisionChecker: CollisionChecker = PlatformerCollisionChecker()
     var collisionResolver: CollisionResolver = SimpleCollisionResolver(16, 16)
+
+    data class collisionGridData(
+        val cxTop: Int,
+        val cyTop: Int,
+        val xrTop: Float,
+        val yrTop: Float,
+
+        val cxBottom: Int,
+        val cyBottom: Int,
+        val xrBottom: Float,
+        val yrBottom: Float,
+
+        val cxLeft: Int,
+        val cyLeft: Int,
+        val xrLeft: Float,
+        val yrLeft: Float,
+
+        val cxRight: Int,
+        val cyRight: Int,
+        val xrRight: Float,
+        val yrRight: Float
+    )
 
     override fun onTickEntity(entity: Entity) {
         // Iterate over all entities that have a GridComponent and MotionComponent
@@ -58,11 +80,18 @@ class GridMoveSystem(
          */
         val steps = ceil(abs(motionComponent.velocityX) + abs(motionComponent.velocityY) / AppConfig.maxGridMovementPercent)
         if (steps > 0) {
+            // First we need to calculate the top and bottom points of the collision rectangle
+
+
+
+
+
             var i = 0
             while (i < steps) {
                 // Move the entity in the X direction
                 gridComponent.xr += motionComponent.velocityX / steps
                 if (motionComponent.velocityX != 0f) {
+
                     collisionChecker.preXCheck(
                         gridComponent.cx,
                         gridComponent.cy,
