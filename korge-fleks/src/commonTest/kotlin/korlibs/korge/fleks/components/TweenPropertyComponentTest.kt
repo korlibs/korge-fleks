@@ -36,7 +36,7 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldText
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTouchInputEnableComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.tweenPropertyComponent
 import korlibs.korge.fleks.utils.Pool
-import korlibs.korge.fleks.utils.entity
+import korlibs.korge.fleks.utils.createEntity
 
 
 internal class TweenPropertyComponentTest {
@@ -103,7 +103,7 @@ internal class TweenPropertyComponentTest {
     fun testTweenPropertyComponentSerialization() {
         println("TEST CASE: testTweenPropertyComponentSerialization")
 
-        val entityFloat = expectedWorld.entity("testTweenPropertyComponentSerializationFloat12") {
+        val entityFloat = expectedWorld.createEntity("testTweenPropertyComponentSerializationFloat12") {
             it += tweenPropertyComponent {
                 property = RgbaAlpha
                 change = 12.34f
@@ -111,7 +111,7 @@ internal class TweenPropertyComponentTest {
             }
         }
 
-        val entityInt = expectedWorld.entity("testTweenPropertyComponentSerializationInt") {
+        val entityInt = expectedWorld.createEntity("testTweenPropertyComponentSerializationInt") {
             it += tweenPropertyComponent {
                 property = RgbaAlpha
                 change = 12
@@ -119,7 +119,7 @@ internal class TweenPropertyComponentTest {
             }
         }
 
-        val entityBool = expectedWorld.entity("testTweenPropertyComponentSerializationBool") {
+        val entityBool = expectedWorld.createEntity("testTweenPropertyComponentSerializationBool") {
             it += tweenPropertyComponent {
                 property = RgbaAlpha
                 change = true
@@ -127,7 +127,7 @@ internal class TweenPropertyComponentTest {
             }
         }
 
-        val entityString = expectedWorld.entity("testTweenPropertyComponentSerializationString") {
+        val entityString = expectedWorld.createEntity("testTweenPropertyComponentSerializationString") {
             it += tweenPropertyComponent {
                 property = RgbaAlpha
                 change = "testString"

@@ -120,7 +120,7 @@ class TweenSequenceSystem : IteratingSystem(
 
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
-                    world.entity("SpawnNewTweenSequence") {
+                    world.createEntity("SpawnNewTweenSequence entity") {
                         // Populate the new TweenSequenceComponent with the tweens from the list of SpawnNewTweenSequence object
                         it += tweenSequenceComponent {
                             tweens.init(currentTween.tweens)
@@ -141,7 +141,7 @@ class TweenSequenceSystem : IteratingSystem(
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
                             // Tween has its own delay -> spawn a new TweenSequence for it
-                            world.entity("ParallelTween: ${tween::class.simpleName} for entity '${tween.target.id}'") { it ->
+                            world.createEntity("ParallelTween: ${tween::class.simpleName} for entity '${tween.target.id}'") { it ->
                                 // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
                                 it += tweenSequenceComponent {
                                     // If duration and easing are not set, inherit the current parent tween's values
@@ -217,7 +217,7 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.enabled?.let { value -> createTweenPropertyComponent(tween, parentTween, TouchInputEnable, value) }
             }
             // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
-            is SpawnEntity -> EntityFactory.configure(tween.entityConfig, world, tween.target)
+            is SpawnEntity -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)
             // Directly deletes the given entity from the tween
 // TODO - check when deleting 3 topmost clouds if we need to use this method?
 //            is DeleteEntity -> {
@@ -246,7 +246,7 @@ class TweenSequenceSystem : IteratingSystem(
                 world -= tween.target
             }
             // Runs the config-function on the given entity from the tween
-            is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.target)
+            is ExecuteConfigFunction -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)
             // Process Wait tween only for event here - wait time was already set above from tween.duration
             is Wait -> tween.event?.let { event ->
                 // Wait for event, SendEvent and ResetEvent need the current entity which comes in via onTickEntity

@@ -19,7 +19,7 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchLayerVisibil
 import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.utils.Pool
-import korlibs.korge.fleks.utils.entity
+import korlibs.korge.fleks.utils.createEntity
 import korlibs.math.interpolation.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -76,7 +76,7 @@ internal class TweenSequenceComponentTest {
             executed = true
         }
 
-        val entity = expectedWorld.entity(aName = "testEntity") {
+        val entity = expectedWorld.createEntity(aName = "testEntity") {
             it += compUnderTest  // Hint: Do not pass this component to more than one entity otherwise the component will be freed twice!
         }
 
@@ -106,7 +106,7 @@ internal class TweenSequenceComponentTest {
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")
         assertEquals(spawnEntity.target, newSpawnEntity.target, "Check 'spawnEntity.target' property to be equal")
-        val spawnedEntity = EntityFactory.createAndConfigure(spawnEntity.entityConfig, expectedWorld)
+        val spawnedEntity = EntityFactory.createAndConfigureEntity(expectedWorld, spawnEntity.entityConfig)
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
 
         // Delete the entity with the component from the expected world -> put component back to the pool

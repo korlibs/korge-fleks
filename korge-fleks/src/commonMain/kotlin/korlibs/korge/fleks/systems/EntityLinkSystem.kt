@@ -24,7 +24,6 @@ class EntityLinkSystem  : IteratingSystem(
             val entityRefComponent = entity[EntityRefComponent]
             if (entityRefComponent.moveWith) {
                 if (entityRefComponent.entity has PositionComponent) {
-                    // TODO: Check how we solve this by just using Entity class
                     val linkedPositionComponent = entityRefComponent.entity[PositionComponent]
                     linkedPositionComponent.x = positionComponent.x
                     linkedPositionComponent.y = positionComponent.y

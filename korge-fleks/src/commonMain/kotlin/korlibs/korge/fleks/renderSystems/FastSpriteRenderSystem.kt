@@ -2,6 +2,7 @@ package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.*
+import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
@@ -22,18 +23,17 @@ import korlibs.math.geom.*
  * of an Aseprite file and ignored additional layers. Also, it does not sort the entities before rendering them.
  * This should be used for explosion and dust effects where the order of drawn textures is not significant.
  */
-inline fun Container.fastSpriteRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker FastSpriteRenderSystem.() -> Unit = {}) =
-    FastSpriteRenderSystem(world, layerTag).addTo(this, callback)
+
 
 class FastSpriteRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag
-) : View() {
-    private val family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent) }
+) : RenderSystem {
+    private val family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent).none(LayerComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
 
-    override fun renderInternal(ctx: RenderContext) {
+    override fun render(ctx: RenderContext) {
         val camera: Entity = world.getMainCameraOrNull() ?: return
 
         // Custom Render Code here
@@ -42,14 +42,6 @@ class FastSpriteRenderSystem(
             // Iterate over all entities which should be rendered in this view
             family.forEach { entity ->
                 val entityPosition = entity[PositionComponent]
-
-//                val position = if (entity has ScreenCoordinatesTag) {
-//                    // Take over entity coordinates
-//                    entityPosition
-//                } else {
-//                    // Transform world coordinates to screen coordinates
-//                    entityPosition.run {  world.convertToScreenCoordinates(camera) }
-//                }
 
                 // Take over entity position
                 position.init(entityPosition)
@@ -76,14 +68,5 @@ class FastSpriteRenderSystem(
                 )
             }
         }
-    }
-
-    // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
-    }
-
-    init {
-        name = layerTag.toString()
     }
 }

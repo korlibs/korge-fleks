@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 class EntityRef private constructor(
     var entity: Entity = Entity.NONE,
     // Configure what to do with the linked entity
-    var moveWith: Boolean = true
+    var moveWith: Boolean = false
 ) : PoolableComponent<EntityRef>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -29,7 +29,7 @@ class EntityRef private constructor(
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
         entity = Entity.NONE
-        moveWith = true
+        moveWith = false
     }
 
     override fun type() = EntityRefComponent

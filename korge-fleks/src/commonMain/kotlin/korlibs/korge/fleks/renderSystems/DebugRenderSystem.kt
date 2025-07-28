@@ -25,13 +25,11 @@ import korlibs.math.geom.Rectangle
 /**
  * Creates a new [DebugRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver this */
-inline fun Container.debugRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker DebugRenderSystem.() -> Unit = {}) =
-    DebugRenderSystem(world, layerTag).addTo(this, callback)
 
 class DebugRenderSystem(
     private val world: World,
     private val layerTag: RenderLayerTag
-) : View() {
+) : RenderSystem {
     private val family: Family = world.family {
         all(layerTag)
             .any(layerTag, PositionComponent, CollisionComponent, SpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
@@ -40,7 +38,7 @@ class DebugRenderSystem(
     private val position: Position = staticPositionComponent {}
     private val gridPosition: Position = staticPositionComponent {}
 
-    override fun renderInternal(ctx: RenderContext) {
+    override fun render(ctx: RenderContext) {
         val camera: Entity = world.getMainCameraOrNull() ?: return
 
         // Custom Render Code here
@@ -191,14 +189,5 @@ class DebugRenderSystem(
                 }
             }
         }
-    }
-
-    // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
-    }
-
-    init {
-        name = layerTag.toString()
     }
 }

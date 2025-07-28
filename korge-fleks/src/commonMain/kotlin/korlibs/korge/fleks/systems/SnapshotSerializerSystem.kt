@@ -74,6 +74,13 @@ class SnapshotSerializerSystem(
         snapshotSerializer.register(name, module)
     }
 
+    /**
+     * Returns a JSON string of the world snapshot of the given entity.
+     * The JSON string is pretty printed.
+     */
+    fun traceEntitySnapshot(entity: Entity) : String =
+        snapshotSerializer.json(pretty = true).encodeToString(world.snapshotOf(entity))
+
     fun loadGameState(world: World, coroutineContext: CoroutineContext) {
         launchImmediately(context = coroutineContext) {
             val vfs = resourcesVfs["save_game.json"]

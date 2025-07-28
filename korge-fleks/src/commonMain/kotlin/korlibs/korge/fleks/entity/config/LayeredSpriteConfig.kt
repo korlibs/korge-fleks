@@ -71,7 +71,7 @@ data class LayeredSpriteConfig(
                             ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
                         // Add entity for each layer
                         add(layerName,
-                            entity("layer_$layerName") { layerEntity ->
+                            createEntity("layer_$layerName") { layerEntity ->
                                 layerEntity += positionComponent {}
                                 layerEntity += rgbaComponent {}
                             }

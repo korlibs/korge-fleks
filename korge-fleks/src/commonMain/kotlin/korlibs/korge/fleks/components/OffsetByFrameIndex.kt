@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 class OffsetByFrameIndex private constructor(
     var entity: Entity = Entity.NONE,
     // Map of list of points is static - therefore use references to the map when creating copies of the component in init function
-    val mapOfOffsetLists: MutableMap<String, ListOfPoints> = mutableMapOf()  // TODO List<Point>> = mutableMapOf()
+    val mapOfOffsetLists: MutableMap<String, ListOfPoints> = mutableMapOf()
 ) : PoolableComponent<OffsetByFrameIndex>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component

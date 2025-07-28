@@ -21,42 +21,68 @@ class SpawnerSystem : IteratingSystem(
     interval = Fixed(1f / 60f)
 ) {
     override fun onTickEntity(entity: Entity) {
-        val spawner = entity[SpawnerComponent]
-        if (spawner.interval > 0) {
-            if (spawner.nextSpawnIn <= 0) {
+        val spawnerComponent = entity[SpawnerComponent]
+        if (spawnerComponent.interval > 0) {
+            if (spawnerComponent.nextSpawnIn <= 0) {
                 var x = 0f
                 var y = 0f
 // DEBUGGING
 //                var spx = 0f
 //                var spy = 0f
-                entity.getOrNull(PositionComponent)?.let {
-                    x = it.x + it.offsetX
-                    y = it.y + it.offsetY
+                entity.getOrNull(PositionComponent)?.let { component ->
+                    x = component.x + component.offsetX
+                    y = component.y + component.offsetY
 // DEBUGGING
 //                    spx = it.x + it.offsetX
 //                    spy = it.y + it.offsetY
                 }
 
-                entity.getOrNull(OffsetByFrameIndexComponent)?.let {
+                entity.getOrNull(OffsetByFrameIndexComponent)?.let { component ->
                     // Get offset depending on current animation and frame index
-                    val spriteComponent = it.entity.getOrNull(SpriteComponent)
+                    val spriteComponent = component.entity.getOrNull(SpriteComponent)
                     val currentFrameIndex = spriteComponent?.frameIndex ?: 0
                     val animationName = spriteComponent?.animation ?: ""
-                    val offset = it.mapOfOffsetLists[animationName]?.points[currentFrameIndex]
+                    val offset = component.mapOfOffsetLists[animationName]?.points[currentFrameIndex]
                         ?: error("SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
                     x += offset.x
                     y += offset.y
                 }
 
-                for (i in 0 until spawner.numberOfObjects) {
+// DEBUGGING
+//                if (spawnerComponent.entityConfig.contains("wing_dust")) {
+//                    if (entity hasNo OffsetByFrameIndexComponent) {
+//                        println("SpawnerSystem: Entity '${entity.id}' with config '${spawnerComponent.entityConfig}' is missing OffsetByFrameIndexComponent. ")
+//                    } else {
+//                        val spaceshipEntity = entity[OffsetByFrameIndexComponent].entity
+//                        if (spaceshipEntity == Entity.NONE) {
+//                            println("SpawnerSystem: Entity '${entity.id}' with config '${spawnerComponent.entityConfig}' has no spaceship entity assigned in OffsetByFrameIndexComponent.")
+//                        }
+//                        val spriteComponent = spaceshipEntity.getOrNull(SpriteComponent)
+//                        if (spaceshipEntity.hasNo(SpriteComponent)) {
+//                            println("SpawnerSystem: Entity '${entity.id}' with config '${spawnerComponent.entityConfig}' has no SpriteComponent assigned to the spaceship entity '${spaceshipEntity.id}'.")
+//                        } else {
+//                            val spriteComponent = spaceshipEntity[SpriteComponent]
+//                            val currentFrameIndex = spriteComponent.frameIndex
+//                            val animationName = spriteComponent.animation
+//                            val offset = entity[OffsetByFrameIndexComponent].mapOfOffsetLists[animationName]?.points[currentFrameIndex]
+//                                ?: error("TESTING SpawnerSystem: Cannot get offset by frame index (entity: ${entity.id}, animationName: '$animationName', currentFrameIndex: $currentFrameIndex)")
+//                            if (offset.x == 0f || offset.y == 0f) {
+//                                println("SpawnerSystem: Entity '${entity.id}' with config '${spawnerComponent.entityConfig}' has no offset for animation '$animationName' and frame index $currentFrameIndex.")
+//                            }
+//                        }
+//                    }
+//
+//                }
+
+                for (i in 0 until spawnerComponent.numberOfObjects) {
                     var xx = x
                     var yy = y
                     val newEntity =
-                        if (spawner.newEntity == Entity.NONE) world.entity("spawned_$i") {}  // create new entity
-                        else spawner.newEntity  // use given entity
-                    if (spawner.positionVariation != 0f) {
-                        xx += (-spawner.positionVariation..spawner.positionVariation).random()
-                        yy += (-spawner.positionVariation..spawner.positionVariation).random()
+                        if (spawnerComponent.newEntity == Entity.NONE) world.createEntity("SpawnerSystem: ${spawnerComponent.entityConfig}") {}  // create new entity
+                        else spawnerComponent.newEntity  // use given entity
+                    if (spawnerComponent.positionVariation != 0f) {
+                        xx += (-spawnerComponent.positionVariation..spawnerComponent.positionVariation).random()
+                        yy += (-spawnerComponent.positionVariation..spawnerComponent.positionVariation).random()
                     }
                     // Directly set position
                     newEntity.configure {
@@ -66,22 +92,22 @@ class SpawnerSystem : IteratingSystem(
                         }
                     }
 
-// DEBUGGING
-//                    if (spawner.entityConfig == "introSpaceshipRightWingDust") println("Spawning: newEntity: $newEntity - spaceship pos: ($spx, $spy) - spawing pos: ($xx, $yy")
-//                    if (spawner.entityConfig == "introSpaceshipLeftWingDust") println("Spawning: newEntity: $newEntity - spaceship pos: ($spx, $spy) - spawing pos: ($xx, $yy)")
-
                     // Call the configured spawner function for configuring new objects
-                    world.configureEntity(spawner.entityConfig, newEntity)
+                    world.configureEntity(spawnerComponent.entityConfig, newEntity)
+
+// DEBUGGING
+//                    println("Spawned entity: ${newEntity.id} with config: '${spawnerComponent.entityConfig}'")
+//                    world.traceEntitySnapshot(newEntity)
                 }
 
-                spawner.numberOfObjectsSpawned += spawner.numberOfObjects
-                spawner.nextSpawnIn = spawner.interval
-                if (spawner.timeVariation != 0) spawner.nextSpawnIn += (-spawner.timeVariation..spawner.timeVariation).random()
+                spawnerComponent.numberOfObjectsSpawned += spawnerComponent.numberOfObjects
+                spawnerComponent.nextSpawnIn = spawnerComponent.interval
+                if (spawnerComponent.timeVariation != 0) spawnerComponent.nextSpawnIn += (-spawnerComponent.timeVariation..spawnerComponent.timeVariation).random()
             } else {
-                spawner.nextSpawnIn--
+                spawnerComponent.nextSpawnIn--
             }
         }
-        if (spawner.totalNumberOfObjects > 0 && spawner.numberOfObjectsSpawned >= spawner.totalNumberOfObjects) entity.configure {
+        if (spawnerComponent.totalNumberOfObjects > 0 && spawnerComponent.numberOfObjectsSpawned >= spawnerComponent.totalNumberOfObjects) entity.configure {
             entity -= SpawnerComponent
         }
     }

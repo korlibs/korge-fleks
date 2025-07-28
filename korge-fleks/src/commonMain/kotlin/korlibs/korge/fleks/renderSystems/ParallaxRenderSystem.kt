@@ -25,17 +25,15 @@ import korlibs.math.geom.*
  * @param layerTag is a special Fleks component which tells the [ParallaxRenderSystem] which entities it has to render.
  * @param callback can be used to configure the [ParallaxRenderSystem] object.
  */
-inline fun Container.parallaxRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ParallaxRenderSystem.() -> Unit = {}) =
-    ParallaxRenderSystem(world, layerTag).addTo(this, callback)
 
 class ParallaxRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag
-) : View() {
+) : RenderSystem {
     private val family: Family = world.family { all(layerTag, PositionComponent, ParallaxComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
-    override fun renderInternal(ctx: RenderContext) {
+    override fun render(ctx: RenderContext) {
         // Custom Render Code
         ctx.useBatcher { batch ->
 
@@ -147,11 +145,6 @@ class ParallaxRenderSystem(
         }
     }
 
-    // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
-    }
-
     private fun drawLayer(
         global: Position,
         local: Position,
@@ -176,7 +169,6 @@ class ParallaxRenderSystem(
                     // global + target + (layer index) + local (used for scrolling the layer)
                     x = x + xIndex * layer.width + local.x + local.offsetX,
                     y = y + yIndex * layer.height + local.y + local.offsetY,
-                    m = globalMatrix,
                     filtering = false,
                     colorMul = rgba
                 )
@@ -205,7 +197,6 @@ class ParallaxRenderSystem(
                         tex = ctx.getTex(layer.slice),
                         x = x + xIndex * layer.width + AppConfig.VIEW_PORT_WIDTH * 0.5f + localScroll,
                         y = global.y + layer.targetY + local.offsetY,
-                        m = globalMatrix,
                         filtering = false,
                         colorMul = rgba
                     )
@@ -220,7 +211,6 @@ class ParallaxRenderSystem(
                         tex = ctx.getTex(layer.slice),
                         x = global.x + layer.targetX + local.offsetX,
                         y = y + yIndex * layer.height + AppConfig.VIEW_PORT_HEIGHT * 0.5f + localScroll,
-                        m = globalMatrix,
                         filtering = false,
                         colorMul = rgba
                     )
@@ -232,8 +222,4 @@ class ParallaxRenderSystem(
 
     private fun wrap(value: Float, max: Int, min: Int = 0): Float =
         if (value >= max) value - max else if (value < min) value + max else value
-
-    init {
-        name = layerTag.toString()
-    }
 }

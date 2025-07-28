@@ -6,7 +6,7 @@ import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.utils.entity
+import korlibs.korge.fleks.utils.createEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -111,7 +111,7 @@ class Parallax private constructor(
         repeat(numberBackgroundLayers) { index ->
             // Create new entities for controlling position and color of each layer e.g. by the TweenEngineSystem
             bgLayerEntities.add(
-                world.entity("Parallax BG layer '$index' of entity '${entity.id}'") {
+                world.createEntity("Parallax BG layer '$index' of entity '${entity.id}'") {
                     it += positionComponent {}
                     it += rgbaComponent {}
                 }
@@ -119,7 +119,7 @@ class Parallax private constructor(
         }
         repeat(numberForegroundLayers) { index ->
             fgLayerEntities.add(
-                world.entity("Parallax FG layer '$index' of entity '${entity.id}'") {
+                world.createEntity("Parallax FG layer '$index' of entity '${entity.id}'") {
                     it += positionComponent {}
                     it += rgbaComponent {}
                 }
@@ -130,7 +130,7 @@ class Parallax private constructor(
         repeat(numberParallaxPlaneLines) { linePositions.add(0f) }
         repeat(numberAttachedFrontLayers) { attachedLayersFrontPositions.add(0f) }
 
-        parallaxPlaneEntity = world.entity("Parallax plane of entity '${entity.id}'") {
+        parallaxPlaneEntity = world.createEntity("Parallax plane of entity '${entity.id}'") {
             it += positionComponent {}
             it += rgbaComponent {}
         }
