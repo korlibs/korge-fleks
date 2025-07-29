@@ -5,6 +5,7 @@ import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.EntityRef.Companion.EntityRefComponent
 import korlibs.korge.fleks.components.EntityRefs.Companion.EntityRefsComponent
 import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNameComponent
+import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 
 
@@ -23,11 +24,7 @@ class EntityLinkSystem  : IteratingSystem(
         if (entity has EntityRefComponent) {
             val entityRefComponent = entity[EntityRefComponent]
             if (entityRefComponent.moveWith) {
-                if (entityRefComponent.entity has PositionComponent) {
-                    val linkedPositionComponent = entityRefComponent.entity[PositionComponent]
-                    linkedPositionComponent.x = positionComponent.x
-                    linkedPositionComponent.y = positionComponent.y
-                }
+                setPosition(entityRefComponent.entity, positionComponent)
             }
         }
 
@@ -35,11 +32,7 @@ class EntityLinkSystem  : IteratingSystem(
             val entityRefsComponent = entity[EntityRefsComponent]
             if (entityRefsComponent.moveWith) {
                 for (entityRef in entityRefsComponent.entities) {
-                    if (entityRef has PositionComponent) {
-                        val linkedPositionComponent = entityRef[PositionComponent]
-                        linkedPositionComponent.x = positionComponent.x
-                        linkedPositionComponent.y = positionComponent.y
-                    }
+                    setPosition(entityRef, positionComponent)
                 }
             }
         }
@@ -48,13 +41,19 @@ class EntityLinkSystem  : IteratingSystem(
             val entityRefsByNameComponent = entity[EntityRefsByNameComponent]
             if (entityRefsByNameComponent.moveWith) {
                 for ((_, entityRef) in entityRefsByNameComponent.entities) {
-                    if (entityRef has PositionComponent) {
-                        val linkedPositionComponent = entityRef[PositionComponent]
-                        linkedPositionComponent.x = positionComponent.x
-                        linkedPositionComponent.y = positionComponent.y
-                    }
+                    setPosition(entityRef, positionComponent)
                 }
             }
         }
+    }
+
+    private fun setPosition(entity: Entity, positionComponent: Position) {
+        if (world.contains(entity)) {
+            if (entity has PositionComponent) {
+                val linkedPositionComponent = entity[PositionComponent]
+                linkedPositionComponent.x = positionComponent.x
+                linkedPositionComponent.y = positionComponent.y
+            } else println("ERROR: EntityLinkSystem - Entity '${entity}' has no PositionComponent!")
+        } else println("ERROR: EntityLinkSystem - Entity '${entity}' does not exist or version is different!")
     }
 }
