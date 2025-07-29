@@ -109,17 +109,19 @@ class Parallax private constructor(
 
         // Initialize all layer lists on component creation
         repeat(numberBackgroundLayers) { index ->
+            val name = assetStore.getBackground(name).config.backgroundLayers?.get(index)?.name ?: "No layer name"
             // Create new entities for controlling position and color of each layer e.g. by the TweenEngineSystem
             bgLayerEntities.add(
-                world.createEntity("Parallax BG layer '$index' of entity '${entity.id}'") {
+                world.createEntity("Parallax BG layer '$index' ($name) of entity '${entity.id}'") {
                     it += positionComponent {}
                     it += rgbaComponent {}
                 }
             )
         }
         repeat(numberForegroundLayers) { index ->
+            val name = assetStore.getBackground(name).config.foregroundLayers?.get(index)?.name ?: "No layer name"
             fgLayerEntities.add(
-                world.createEntity("Parallax FG layer '$index' of entity '${entity.id}'") {
+                world.createEntity("Parallax FG layer '$index' ($name) of entity '${entity.id}'") {
                     it += positionComponent {}
                     it += rgbaComponent {}
                 }
@@ -153,6 +155,7 @@ class Parallax private constructor(
         // Remove all layer entities when we are in scope of the world
         bgLayerEntities.free(this)
         fgLayerEntities.free(this)
+        this -= parallaxPlaneEntity
         // Lists will be cleared in the cleanup function
         cleanup()
     }

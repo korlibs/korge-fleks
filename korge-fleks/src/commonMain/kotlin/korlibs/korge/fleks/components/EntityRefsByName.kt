@@ -16,20 +16,23 @@ import kotlinx.serialization.Serializable
 class EntityRefsByName private constructor(
     val entities: MutableMap<String, Entity> = mutableMapOf(),
     // Configure what to do with the linked entities
-    var moveWith: Boolean = false
+    var moveLinked: Boolean = false,
+    var deleteLinked: Boolean = false  // If true, the linked entities will be deleted when the parent entity is deleted
 ) : PoolableComponent<EntityRefsByName>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: EntityRefsByName) {
         entities.putAll(from.entities)
-        moveWith = from.moveWith
+        moveLinked = from.moveLinked
+        deleteLinked = from.deleteLinked
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
         entities.clear()
-        moveWith = false
+        moveLinked = false
+        deleteLinked = false
     }
 
     override fun type() = EntityRefsByNameComponent

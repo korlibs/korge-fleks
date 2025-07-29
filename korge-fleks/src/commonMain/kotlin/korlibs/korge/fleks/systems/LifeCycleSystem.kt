@@ -31,17 +31,26 @@ class LifeCycleSystem : IteratingSystem(
 
     fun deleteEntityRefs(entity: Entity) {
         entity.getOrNull(EntityRefComponent)?.let {
-            world -= it.entity
-            debugPrint(it.entity, "sub")
+            if (entity[EntityRefComponent].deleteLinked) {
+                world -= it.entity
+                debugPrint(it.entity, "sub")
+            }
         }
-        entity.getOrNull(EntityRefsComponent)?.entities?.forEach { entity ->
-            world -= entity
-            debugPrint(entity, "sub")
+        entity.getOrNull(EntityRefsComponent)?.entities?.let {
+            if (entity[EntityRefsComponent].deleteLinked) {
+                it.forEach { entity ->
+                    world -= entity
+                    debugPrint(entity, "sub")
+                }
+            }
         }
-        entity.getOrNull(EntityRefsByNameComponent)?.entities?.forEach { (_, entity) ->
-            world -= entity
-            debugPrint(entity, "sub")
+        entity.getOrNull(EntityRefsByNameComponent)?.entities?.let {
+            if (entity[EntityRefsByNameComponent].deleteLinked) {
+                it.forEach { (_, entity) ->
+                    world -= entity
+                    debugPrint(entity, "sub")
+                }
+            }
         }
-
     }
 }

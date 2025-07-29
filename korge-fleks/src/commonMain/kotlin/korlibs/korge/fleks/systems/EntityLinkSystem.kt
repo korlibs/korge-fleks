@@ -23,31 +23,36 @@ class EntityLinkSystem  : IteratingSystem(
 
         if (entity has EntityRefComponent) {
             val entityRefComponent = entity[EntityRefComponent]
-            if (entityRefComponent.moveWith) {
-                setPosition(entityRefComponent.entity, positionComponent)
+            // Move linked entity with parent
+            if (entityRefComponent.moveLinked) {
+                setPositionOfLinkedEntity(entityRefComponent.entity, positionComponent)
+            }
+            // Move parent with linked entity
+            if (entityRefComponent.moveWithParent) {
+                setPositionOfParentEntity(entityRefComponent.entity, positionComponent)
             }
         }
 
         if (entity has EntityRefsComponent) {
             val entityRefsComponent = entity[EntityRefsComponent]
-            if (entityRefsComponent.moveWith) {
+            if (entityRefsComponent.moveLinked) {
                 for (entityRef in entityRefsComponent.entities) {
-                    setPosition(entityRef, positionComponent)
+                    setPositionOfLinkedEntity(entityRef, positionComponent)
                 }
             }
         }
 
         if (entity has EntityRefsByNameComponent) {
             val entityRefsByNameComponent = entity[EntityRefsByNameComponent]
-            if (entityRefsByNameComponent.moveWith) {
+            if (entityRefsByNameComponent.moveLinked) {
                 for ((_, entityRef) in entityRefsByNameComponent.entities) {
-                    setPosition(entityRef, positionComponent)
+                    setPositionOfLinkedEntity(entityRef, positionComponent)
                 }
             }
         }
     }
 
-    private fun setPosition(entity: Entity, positionComponent: Position) {
+    private fun setPositionOfLinkedEntity(entity: Entity, positionComponent: Position) {
         if (world.contains(entity)) {
             if (entity has PositionComponent) {
                 val linkedPositionComponent = entity[PositionComponent]
@@ -55,5 +60,15 @@ class EntityLinkSystem  : IteratingSystem(
                 linkedPositionComponent.y = positionComponent.y
             } else println("ERROR: EntityLinkSystem - Entity '${entity}' has no PositionComponent!")
         } else println("ERROR: EntityLinkSystem - Entity '${entity}' does not exist or version is different!")
+    }
+
+    private fun setPositionOfParentEntity(linkedEntity: Entity, positionComponent: Position) {
+        if (world.contains(linkedEntity)) {
+            if (linkedEntity has PositionComponent) {
+                val linkedPositionComponent = linkedEntity[PositionComponent]
+                positionComponent.x = linkedPositionComponent.x
+                positionComponent.y = linkedPositionComponent.y
+            } else println("ERROR: EntityLinkSystem - Entity '${linkedEntity}' (parent) has no PositionComponent!")
+        } else println("ERROR: EntityLinkSystem - Entity '${linkedEntity}' (parent) does not exist or version is different!")
     }
 }

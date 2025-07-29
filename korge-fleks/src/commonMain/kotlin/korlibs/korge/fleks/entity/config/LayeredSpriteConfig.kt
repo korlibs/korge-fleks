@@ -77,6 +77,7 @@ data class LayeredSpriteConfig(
                             }
                         )
                     }
+                    deleteLinked = true
                 }
             }
             it += rgbaComponent {
