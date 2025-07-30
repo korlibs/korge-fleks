@@ -219,31 +219,15 @@ class TweenSequenceSystem : IteratingSystem(
             // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
             is SpawnEntity -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)
             // Directly deletes the given entity from the tween
-// TODO - check when deleting 3 topmost clouds if we need to use this method?
-//            is DeleteEntity -> {
-//                println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base" +
-//                    "'$baseEntity' (name: ${world.nameOf(baseEntity)}).")
-
-//                if (tween.target.id == -1) {
-//                    Pool.writeStatistics()
-//                }
-//                world.deleteViaLifeCycle(tween.target)
-//            }
             is DeleteEntity -> {
-                val entity = tween.target
-                // Use this to delete the entity directly without going through the life cycle - that will crash the tween system
-                // TODO do the same as in lifecycle system delete funcion (deletion of sub-entities, etc.)
-                entity.getOrNull(EntityRefComponent)?.let {
-                    world -= it.entity
-                }
-                entity.getOrNull(EntityRefsComponent)?.entities?.forEach { entity ->
-                    world -= entity
-                }
-                entity.getOrNull(EntityRefsByNameComponent)?.entities?.forEach { (_, entity) ->
-                    world -= entity
-                }
+                println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base" +
+                    "'$baseEntity' (name: ${world.nameOf(baseEntity)}).")
 
-                world -= tween.target
+                if (tween.target == Entity.NONE) {
+                    println("ERROR: TweenSequenceSystem - Trying to delete non-existing Entity (NONE)!")
+                    Pool.writeStatistics()
+                }
+                world.deleteViaLifeCycle(tween.target)
             }
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)

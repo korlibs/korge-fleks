@@ -29,7 +29,7 @@ class PlayerInput private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        speed = 10f
+        speed = 0.1f
         xMoveStrength = 0f
         yMoveStrength = 0f
     }
