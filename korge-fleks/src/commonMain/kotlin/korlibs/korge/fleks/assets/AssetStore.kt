@@ -57,14 +57,15 @@ class AssetStore {
         val x: Int,
         val y: Int,
         // Size of the collision rectangle
-        val width: Float,
-        val height: Float
+        val width: Int,
+        val height: Int
     )
 
     // TODO
     fun getCollisionData(name: String) : CollisionData =
         CollisionData(
-            8, 28, 17f, 29f
+            -8, -28, 17, 29
+//                0, 0, 17, 29
         )
 
     fun getTileMapData(level: String) : LayerTileMaps =

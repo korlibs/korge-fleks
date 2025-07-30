@@ -2,6 +2,7 @@ package korlibs.korge.fleks.logic.collision.checker
 
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.prefab.data.LevelData
+import korlibs.korge.fleks.systems.collision.CollisionGrid
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -15,48 +16,46 @@ class PlatformerCollisionChecker(
     var useTopCollisionRatio: Boolean = true
 
     override fun checkXCollision(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
+        collisionGrid: CollisionGrid,
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
+//        width: Int,
+//        height: Int,
         cellSize: Float
     ): Int {
         Prefab.levelData?.let { level ->
-            repeat((width / cellSize).roundToInt()) { i ->
-                if (level.hasCollision(cx + 1, cy + i) && xr >= rightCollisionRatio) {
+            repeat(((collisionGrid.cxBottomRight - collisionGrid.cxTopRight) / cellSize).roundToInt()) { i ->
+                if (level.hasCollision(collisionGrid.cxTopRight + 1, collisionGrid.cyTopRight + i) && collisionGrid.xrTopRight >= rightCollisionRatio) {
                     return 1
                 }
-                if (level.hasCollision(cx - 1, cy + i) && xr <= leftCollisionRatio) {
-                    return -1
-                }
+//                if (level.hasCollision(cx - 1, cy + i) && xr <= leftCollisionRatio) {
+//                    return -1
+//                }
             }
+            if (level.hasCollision(collisionGrid.cxBottomRight + 1, collisionGrid.cyBottomRight) && collisionGrid.xrBottomRight >= rightCollisionRatio) {
+                return 1
+            }
+
         }
         return 0
     }
 
     override fun checkYCollision(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
+        collisionGrid: CollisionGrid,
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
+//        width: Int,
+//        height: Int,
+//        cellSize: Float
     ): Int {
         Prefab.levelData?.let { level ->
-            val heightCoordDiff = if (useTopCollisionRatio) topCollisionRatio else floor(height / cellSize)
-            if (level.hasCollision(cx, cy + 1) && yr >= heightCoordDiff) {
-                return 1
-            }
-            if (level.hasCollision(cx, cy - 1) && yr <= bottomCollisionRatio) {
-                return -1
-            }
+//            val heightCoordDiff = if (useTopCollisionRatio) topCollisionRatio else floor(height / cellSize)
+//            if (level.hasCollision(cx, cy + 1) && yr >= heightCoordDiff) {
+//                return 1
+//            }
+//            if (level.hasCollision(cx, cy - 1) && yr <= bottomCollisionRatio) {
+//                return -1
+//            }
         }
         return 0
     }
@@ -69,42 +68,36 @@ class PlatformerCollisionChecker(
  */
 class SimpleCollisionChecker(val gridWidth: Int, val gridHeight: Int) : CollisionChecker() {
     override fun checkXCollision(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
+        collisionGrid: CollisionGrid,
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
+//        width: Int,
+//        height: Int,
         cellSize: Float
     ): Int {
-        if (cx - 1 < 0 && xr <= 0.3f) {
-            return -1
-        }
-        if (cx + 1 > gridWidth && xr >= 0.7f) {
-            return 1
-        }
+//        if (cx - 1 < 0 && xr <= 0.3f) {
+//            return -1
+//        }
+//        if (cx + 1 > gridWidth && xr >= 0.7f) {
+//            return 1
+//        }
         return 0
     }
 
     override fun checkYCollision(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
+        collisionGrid: CollisionGrid,
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
+//        width: Int,
+//        height: Int,
+//        cellSize: Float
     ): Int {
-        if (cy - 1 < 0 && yr <= 0.3f) {
-            return -1
-        }
-        if (cy + 1 > 112) {  // && yr >= 0.7f) {
-            return 1
-        }
+//        if (cy - 1 < 0 && yr <= 0.3f) {
+//            return -1
+//        }
+//        if (cy + 1 > 112) {  // && yr >= 0.7f) {
+//            return 1
+//        }
         return 0
 
         // 750 / 16 =

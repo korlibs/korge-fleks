@@ -1,5 +1,7 @@
 package korlibs.korge.fleks.logic.collision.checker
 
+import korlibs.korge.fleks.systems.collision.CollisionGrid
+
 /**
  * A base class for collision checking in a grid-based system.
  * This class provides methods to check for collisions in both X and Y directions,
@@ -25,15 +27,12 @@ open class CollisionChecker {
      * @param cellSize The size of each cell in the grid.
      */
     open fun preXCheck(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
+        collisionGrid: CollisionGrid,
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
+//        width: Int,
+//        height: Int,
+//        cellSize: Float
     ) = Unit
 
     /**
@@ -52,15 +51,12 @@ open class CollisionChecker {
      * @param cellSize The size of each cell in the grid.
      */
     open fun preYCheck(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
+        collisionGrid: CollisionGrid,
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
+//        width: Int,
+//        height: Int,
+//        cellSize: Float
     ) = Unit
 
     /**
@@ -80,14 +76,19 @@ open class CollisionChecker {
      * @return An integer indicating the collision result (e.g., 0 for no collision, 1 for right collision, -1 for left collision).
      */
     open fun checkXCollision(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
+        cxTop: Int,
+        cyTop: Int,
+        xrTop: Float,
+        yrTop: Float,
+        cxBottom: Int,
+        cyBottom: Int,
+        xrBottom: Float,
+        yrBottom: Float,
+
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
+        width: Int,
+        height: Int,
         cellSize: Float
     ): Int = 0
 
@@ -108,15 +109,12 @@ open class CollisionChecker {
      * @return An integer indicating the collision result (e.g., 0 for no collision, 1 for bottom collision, -1 for top collision).
      */
     open fun checkYCollision(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
+        collisionGrid: CollisionGrid,
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
+//        width: Int,
+//        height: Int,
+//        cellSize: Float
     ): Int = 0
 
     /**

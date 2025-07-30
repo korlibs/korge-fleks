@@ -20,7 +20,7 @@ class Motion private constructor(
     var accelX: Float = 0f,
     var accelY: Float = 0f,
 
-    var velocityX: Float = 0f,
+    var velocityX: Float = 0f,  // in world units (grid size e.g. 16 pixels) per second
     var velocityY: Float = 0f,
     var velocityZ: Float = 0f,
     var frictionX: Float = 0f,
