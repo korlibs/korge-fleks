@@ -56,7 +56,6 @@ class SpriteSystem : IteratingSystem(
                     spriteComponent.running = false
                     if (spriteComponent.destroyOnAnimationFinished) {
                         world.deleteViaLifeCycle(entity)
-//                        world -= entity
                     }
                 }
 

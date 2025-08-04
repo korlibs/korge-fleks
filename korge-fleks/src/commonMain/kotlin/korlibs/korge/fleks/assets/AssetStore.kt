@@ -64,7 +64,8 @@ class AssetStore {
     // TODO
     fun getCollisionData(name: String) : CollisionData =
         CollisionData(
-            8, 28, 17f, 29f
+            -8, -28, 17f, 29f
+//                0, 0, 17f, 29f
         )
 
     fun getTileMapData(level: String) : LayerTileMaps =

@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("PlayerInput")
 class PlayerInput private constructor(
-    var speed: Float = 0.1f,
+    var speed: Float = 0f,
     var xMoveStrength: Float = 0f,
     var yMoveStrength: Float = 0f
 ) : PoolableComponent<PlayerInput>() {
@@ -29,7 +29,7 @@ class PlayerInput private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        speed = 0.1f
+        speed = 0f
         xMoveStrength = 0f
         yMoveStrength = 0f
     }
