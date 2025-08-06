@@ -1,55 +1,56 @@
 package korlibs.korge.fleks.logic.collision.resolver
 
-import korlibs.korge.fleks.prefab.data.LevelData
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Motion
-import korlibs.korge.fleks.logic.collision.GridPosition
-import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.utils.AppConfig
 
-class PlatformerCollisionResolver(
-    var level: LevelData
-): CollisionResolver() {
 
-}
-
-class SimpleCollisionResolver(val gridWidth: Int, val gridHeight: Int) : CollisionResolver() {
+class PlatformerCollisionResolver : CollisionResolver() {
 
     override fun resolveXCollision(
-        grid: GridPosition, motionComponent: Motion,
-        //collision: CollisionChecker,
-        width: Float,
-        height: Float,
+        gridComponent: Grid,
+        motionComponent: Motion,
+        collisionBox: AssetStore.CollisionData,
         dir: Int
     ) {
-        if (dir == 1) {
-//            grid.cx += 1
-            // We need to move the position to the egde of the cell where the collision happened
-            grid.xr = 1f - width / AppConfig.GRID_CELL_SIZE
+        // We need to calculate the position of the entity in front of the level collider
+        if (dir == 1) {  // Right direction
+            val xxr = gridComponent.xr + (collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE
+            val collisionOverlap = xxr - 1f
+            // Move the grid position to the edge of the cell
+            gridComponent.xr -= collisionOverlap
+
+            // We are in front of a collider cell (wall) - thus we stop the motion
             motionComponent.velocityX = 0f
         }
-        if (dir == -1) {
-//            grid.cx -= 1
-//            grid.xr = 0f
+        if (dir == -1) {  // Left direction
+            // Set postion of the entity to the left edge of the cell - use negative offset of collision box
+            gridComponent.xr = - collisionBox.x / AppConfig.GRID_CELL_SIZE
             motionComponent.velocityX = 0f
         }
     }
 
-    // TODO: Implement CollisionChecker with "old" raycast system
-/*
     override fun resolveYCollision(
-        gridComponent: Grid, motionComponent: Motion, collision: CollisionChecker, dir: Int
+        gridComponent: Grid,
+        motionComponent: Motion,
+        collisionBox: AssetStore.CollisionData,
+        dir: Int
     ) {
-        if (dir == -1) {
+        if (dir == -1) {  // Up direction
+            val yyr = gridComponent.yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
+
 //            gridComponent.cy = 0
 //            gridComponent.yr = 0.3f
         }
-        if (dir == 1) {
-//            motionComponent.velocityY = 0f
-//            gridComponent.yr = 1f
-//            gridComponent.cy = gridHeight
-//            gridComponent.yr = 0.7f
+        if (dir == 1) {  // Down direction
+            val yyr = gridComponent.yr + (collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE
+            val collisionOverlap = yyr - 1f
+            // Move the grid position to the edge of the cell
+            gridComponent.yr -= collisionOverlap
+
+            // We are in front of a collider cell (floor) - thus we stop the motion
+            motionComponent.velocityY = 0f
         }
     }
-*/
 }

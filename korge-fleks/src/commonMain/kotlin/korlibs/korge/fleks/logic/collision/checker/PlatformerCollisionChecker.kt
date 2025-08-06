@@ -1,16 +1,18 @@
 package korlibs.korge.fleks.logic.collision.checker
 
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.logic.collision.GridPosition
 import korlibs.korge.fleks.prefab.Prefab
-import kotlin.math.roundToInt
+import korlibs.korge.fleks.utils.AppConfig
+import kotlin.math.ceil
 
 class PlatformerCollisionChecker(
 //    private var level: LevelData
 ) : CollisionChecker() {
-    var rightCollisionRatio: Float = 0f
+    var rightCollisionRatio: Float = 1f
     var leftCollisionRatio: Float = 0f
-    var bottomCollisionRatio: Float = 0f
-    var topCollisionRatio: Float = 1f
+    var bottomCollisionRatio: Float = 1f
+    var topCollisionRatio: Float = 0f
     var useTopCollisionRatio: Boolean = true
 
     private val grid = GridPosition()
@@ -22,22 +24,17 @@ class PlatformerCollisionChecker(
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
+        collisionBox: AssetStore.CollisionData
     ): Int {
         Prefab.levelData?.let { level ->
-            grid.cx = cx
-            grid.cy = cy
-            grid.xr = xr
-            grid.yr = yr
-
             // Check direction of movement
-            if (velocityX > 0f) {
-                // Add width of collision rectangle
-                val xxr = xr + width / cellSize
+            if (velocityX > 0f) {  // Moving right
+                // First we need to calculate the top right point of the collision box
+                // Add offset to pivot point and width of the collision box
+                val xxr = xr + (collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE
 
-                if (level.hasCollision(grid.cx + 1, grid.cy) && xxr >= rightCollisionRatio) {
+                // Check collision in right cell and if xr is greater than 1 (xr is over cell bounds)
+                if (level.hasCollision(cx + 1, cy) && xxr >= rightCollisionRatio) {
                     return 1
                 }
 
@@ -55,10 +52,16 @@ class PlatformerCollisionChecker(
 //                    return 1
 //                }
 
-//                    if (level.hasCollision(cx - 1, cy + i) && xr <= leftCollisionRatio) {
-//                        return -1
-//                    }
 
+            } else if (velocityX < 0f) {  // Moving left
+                // First we need to calculate the top left point of the collision box
+                // Add offset to pivot point
+                val xxr = xr + collisionBox.x / AppConfig.GRID_CELL_SIZE
+
+                // Check collision in left cell and if xr is lower than 0 (xr is over cell bounds in negative direction)
+                if (level.hasCollision(cx - 1, cy) && xxr <= leftCollisionRatio) {
+                    return -1
+                }
             }
         }
         return 0
@@ -71,70 +74,50 @@ class PlatformerCollisionChecker(
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
+        collisionBox: AssetStore.CollisionData
     ): Int {
         Prefab.levelData?.let { level ->
-//            val heightCoordDiff = if (useTopCollisionRatio) topCollisionRatio else floor(height / cellSize)
-//            if (level.hasCollision(cx, cy + 1) && yr >= heightCoordDiff) {
-//                return 1
-//            }
-//            if (level.hasCollision(cx, cy - 1) && yr <= bottomCollisionRatio) {
-//                return -1
-//            }
+            val xrRight = xr + (collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE
+            val yrBottom = yr + (collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE
+            val xrLeft = xr + collisionBox.x / AppConfig.GRID_CELL_SIZE
+            val yrTop = yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
+
+            // Check direction of movement
+            if (velocityY > 0f) {  // Moving down
+                // Cell coordinates of left corner of the collision box
+                grid.setAndNormalizeX(cx, xrLeft)  // Left corner of the collision box
+
+                // Check collision in bottom cell and if yr is greater than 1 (yr is over cell bounds)
+                repeat( ceil(collisionBox.width / AppConfig.GRID_CELL_SIZE).toInt()) { i ->
+                    if (level.hasCollision(grid.cx + i, cy + 1) && yrBottom >= bottomCollisionRatio) {
+                        return 1
+                    }
+                }
+                // Cell coordinates of right corner of the collision box
+                grid.setAndNormalizeX(cx, xrRight)  // Right corner of the collision box
+                if (level.hasCollision(grid.cx, cy + 1) && yrBottom >= bottomCollisionRatio) {
+                    return 1
+                }
+
+            } else if (velocityY < 0f) {  // Moving up
+                // Cell coordinates of left corner of the collision box
+                grid.setAndNormalizeX(cx, xrLeft)  // Left corner of the collision box
+
+                // Check collision in bottom cell and if yr is greater than 1 (yr is over cell bounds)
+                repeat( ceil(collisionBox.width / AppConfig.GRID_CELL_SIZE).toInt()) { i ->
+                    if (level.hasCollision(grid.cx + i, cy + 1) && yrTop >= topCollisionRatio) {
+                        return -1
+                    }
+                }
+                // Cell coordinates of right corner of the collision box
+                grid.setAndNormalizeX(cx, xrRight)  // Right corner of the collision box
+                if (level.hasCollision(grid.cx, cy - 1) && yrTop >= topCollisionRatio) {
+                    return -1
+                }
+            }
         }
         return 0
     }
 
     override fun hasCollision(cx: Int, cy: Int): Boolean = Prefab.levelData?.hasCollision(cx, cy) ?: false
-}
-
-/**
- *
- */
-class SimpleCollisionChecker(val gridWidth: Int, val gridHeight: Int) : CollisionChecker() {
-    override fun checkXCollision(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
-        velocityX: Float,
-        velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
-    ): Int {
-//        if (cx - 1 < 0 && xr <= 0.3f) {
-//            return -1
-//        }
-//        if (cx + 1 > gridWidth && xr >= 0.7f) {
-//            return 1
-//        }
-        return 0
-    }
-
-    override fun checkYCollision(
-        cx: Int,
-        cy: Int,
-        xr: Float,
-        yr: Float,
-        velocityX: Float,
-        velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
-    ): Int {
-//        if (cy - 1 < 0 && yr <= 0.3f) {
-//            return -1
-//        }
-//        if (cy + 1 > 112) {  // && yr >= 0.7f) {
-//            return 1
-//        }
-        return 0
-
-        // 750 / 16 =
-
-        // 110 * 16
-    }
 }

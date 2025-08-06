@@ -50,4 +50,31 @@ data class GridPosition(
             cy--
         }
     }
+
+    fun setAndNormalizeX(ccx: Int, xxr: Float) {
+        cx = ccx
+        xr = xxr
+        while (xr > 1) {
+            xr--
+            cx++
+        }
+        while (xr < 0) {
+            xr++
+            cx--
+        }
+    }
+
+    fun setAndNormalizeY(ccy: Int, yyr: Float) {
+        cy = ccy
+        yr = yyr
+        while (yr > 1) {
+            yr--
+            cy++
+        }
+        while (yr < 0) {
+            yr++
+            cy--
+        }
+    }
+
 }

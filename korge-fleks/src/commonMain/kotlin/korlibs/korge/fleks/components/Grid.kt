@@ -17,12 +17,19 @@ import kotlinx.serialization.Serializable
  *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("Grid")
-class Grid private constructor(
-) : PoolableComponent<Grid>() {
+class Grid private constructor() : PoolableComponent<Grid>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Grid) {
-//        TODO()
+        cx = from.cx
+        cy = from.cy
+        xr = from.xr
+        yr = from.yr
+        zr = from.zr
+        interpolatePixelPosition = from.interpolatePixelPosition
+        interpolationAlpha = from.interpolationAlpha
+        lastPx = from.lastPx
+        lastPy = from.lastPy
     }
 
     // Cleanup the component data instance manually
@@ -87,7 +94,7 @@ class Grid private constructor(
             field = value
 //            dirty = true
         }
-    var xr: Float = 0.5f
+    var xr: Float = 0f
         set(value) {
             if (field == value) return
             field = value
@@ -145,10 +152,11 @@ class Grid private constructor(
     var lastPx: Float = 0f
     var lastPy: Float = 0f
 
+    // The position of the entity in level coordinates.
     val attachX get() = (cx + xr) * AppConfig.GRID_CELL_SIZE
     val attachY get() = (cy + yr - zr) * AppConfig.GRID_CELL_SIZE
 
-    fun onPositionManuallyChanged() {
+    private fun onPositionManuallyChanged() {
         lastPx = attachX
         lastPy = attachY
     }

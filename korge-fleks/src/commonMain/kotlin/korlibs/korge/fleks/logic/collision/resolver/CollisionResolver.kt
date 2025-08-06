@@ -1,8 +1,8 @@
 package korlibs.korge.fleks.logic.collision.resolver
 
+import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Motion
-import korlibs.korge.fleks.logic.collision.GridPosition
-import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 
 
 /**
@@ -18,18 +18,15 @@ abstract class CollisionResolver {
      * - Modifying the entity's velocity based on the collision.
      * - Triggering any necessary events or actions based on the collision.
      *
-     *
-     * @param grid The grid positon of the collision box.
+     * @param gridComponent The grid component of the entity.
      * @param motionComponent The motion component of the entity.
-     * @param collision The collision checker used to check for collisions.
+     * @param collisionBox The collision box with offset and size.
      * @param dir The direction of the collision (1 for right, -1 for left).
      */
     open fun resolveXCollision(
-        grid: GridPosition,
+        gridComponent: Grid,
         motionComponent: Motion,
-//        collision: CollisionChecker,
-        width: Float,
-        height: Float,
+        collisionBox: AssetStore.CollisionData,
         dir: Int
     ) = Unit
 
@@ -41,15 +38,15 @@ abstract class CollisionResolver {
      * - Modifying the entity's velocity based on the collision.
      * - Triggering any necessary events or actions based on the collision.
      *
-     * @param grid The grid positon of the collision box.
+     * @param gridComponent The grid component of the entity.
      * @param motionComponent The motion component of the entity.
-     * @param collision The collision checker used to check for collisions.
+     * @param collisionBox The collision box with offset and size.
      * @param dir The direction of the collision (1 for down, -1 for up).
      */
     open fun resolveYCollision(
-        grid: GridPosition,
+        gridComponent: Grid,
         motionComponent: Motion,
-        collision: CollisionChecker,
+        collisionBox: AssetStore.CollisionData,
         dir: Int
     ) = Unit
 }

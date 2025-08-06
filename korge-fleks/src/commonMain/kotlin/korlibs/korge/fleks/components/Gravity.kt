@@ -18,10 +18,10 @@ class Gravity private constructor(
     var gravityY: Float = 0f,
     var gravityZ: Float = 0f,
 
-    var gravityMultiplier: Float = 1f,
+    var gravityMultiplier: Float = 0f,
 
     var enableGravityX: Boolean = false,
-    var enableGravityY: Boolean = true,
+    var enableGravityY: Boolean = false,
     var enableGravityZ: Boolean = false
 ) : PoolableComponent<Gravity>() {
     // Init an existing component data instance with data from another component
@@ -42,10 +42,10 @@ class Gravity private constructor(
         gravityX = 0f
         gravityY = 0f
         gravityZ = 0f
-        gravityMultiplier = 1f
-        enableGravityX = true
-        enableGravityY = true
-        enableGravityZ = true
+        gravityMultiplier = 0f
+        enableGravityX = false
+        enableGravityY = false
+        enableGravityZ = false
     }
 
     override fun type() = GravityComponent

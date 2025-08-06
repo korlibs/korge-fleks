@@ -31,7 +31,10 @@ class PlayerInputSystem() : IteratingSystem(
             playerInputComponent.xMoveStrength = 1f
         }
         if (isPressedKeyW) {
-            motionComponent.velocityY = -0.5f
+            playerInputComponent.yMoveStrength = -1f
+        }
+        if (isPressedKeyS) {
+            playerInputComponent.yMoveStrength = 1f
         }
     }
 }
