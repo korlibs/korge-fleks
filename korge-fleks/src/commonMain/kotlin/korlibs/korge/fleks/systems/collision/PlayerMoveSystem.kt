@@ -28,8 +28,8 @@ class PlayerMoveSystem : IteratingSystem(
         // Player pressed up arrow key (w key)
         if (playerInputComponent.yMoveStrength < 0f) {
             motionComponent.velocityY += playerInputComponent.jumpForce * playerInputComponent.yMoveStrength
-            if (motionComponent.velocityY < -1f) {
-                motionComponent.velocityY = -1f // Limit the jump force
+            if (motionComponent.velocityY < -2f) {
+                motionComponent.velocityY = -2f // Limit the jump force
             }
         }
 
@@ -38,6 +38,7 @@ To simulate mass/inertia so that an entity starts moving slowly, introduce an ac
 gradually. The entity's velocity increases over time based on the applied force and its mass.
 
 Example: Add mass and acceleration to your motion component, and update velocity using Newton's second law (F = m * a).
+
 
 data class Motion(
     var velocityX: Float = 0f,

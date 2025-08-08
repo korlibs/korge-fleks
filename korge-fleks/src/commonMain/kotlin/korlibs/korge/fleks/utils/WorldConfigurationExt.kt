@@ -30,6 +30,7 @@ fun WorldConfiguration.addKorgeFleksInjectables() {
     // Register external objects which are used by systems and in component and family hook functions
     injectables {
         add("AssetStore", GameStateManager.assetStore)
+        add("DebugPointPool", DebugPointPool())
     }
 }
 

@@ -160,9 +160,11 @@ class AssetStore {
                 val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLDTKWorld(extrude = true)
 
                 when  (type) {
-                    AssetType.LEVEL -> { assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths) }
+                    AssetType.LEVEL -> {
+                        assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths)
+                    }
                     else -> {
-                        // Load raw tile map data for other asset types assets
+                        // Load raw tile map data for tilemap object types
                         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
                             tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
                         }

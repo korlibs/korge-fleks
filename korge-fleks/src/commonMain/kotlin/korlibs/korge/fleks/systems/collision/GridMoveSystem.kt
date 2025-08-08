@@ -17,19 +17,19 @@ import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
 import korlibs.korge.fleks.logic.collision.resolver.PlatformerCollisionResolver
 import korlibs.korge.fleks.utils.AppConfig
+import korlibs.korge.fleks.utils.DebugPointPool
 import korlibs.math.isAlmostEquals
 import kotlin.math.abs
 import kotlin.math.ceil
 
 
-class GridMoveSystem(
-) : IteratingSystem(
+class GridMoveSystem : IteratingSystem(
     family = World.family { all(GridComponent, MotionComponent, CollisionComponent) /*.any(LevelMapComponent)*/ },
     interval = Fixed(1 / 30f)
 ) {
     val assetStore = world.inject<AssetStore>("AssetStore")
 
-    var collisionChecker: CollisionChecker = PlatformerCollisionChecker()
+    var collisionChecker: CollisionChecker = PlatformerCollisionChecker(world.inject<DebugPointPool>("DebugPointPool"))
     var collisionResolver: CollisionResolver = PlatformerCollisionResolver()
 
     override fun onTickEntity(entity: Entity) {

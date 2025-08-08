@@ -3,10 +3,13 @@ package korlibs.korge.fleks.logic.collision.resolver
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Motion
+import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.utils.AppConfig
 
 
 class PlatformerCollisionResolver : CollisionResolver() {
+
+    private val level = Prefab.levelData
 
     override fun resolveXCollision(
         gridComponent: Grid,
@@ -37,20 +40,26 @@ class PlatformerCollisionResolver : CollisionResolver() {
         collisionBox: AssetStore.CollisionData,
         dir: Int
     ) {
-        if (dir == -1) {  // Up direction
-            val yyr = gridComponent.yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
-
-//            gridComponent.cy = 0
-//            gridComponent.yr = 0.3f
-        }
+        // First check if Y cell is already a collider
         if (dir == 1) {  // Down direction
-            val yyr = gridComponent.yr + (collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE
-            val collisionOverlap = yyr - 1f
+            val yrBottom = gridComponent.yr + (collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE
+            val collisionOverlap = yrBottom - 1f
             // Move the grid position to the edge of the cell
             gridComponent.yr -= collisionOverlap
 
             // We are in front of a collider cell (floor) - thus we stop the motion
             motionComponent.velocityY = 0f
+        }
+        if (dir == -1) {  // Up direction
+            val xrRight = gridComponent.xr + (collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE
+            val yrBottom = gridComponent.yr + (collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE
+            val xrLeft = gridComponent.xr + collisionBox.x / AppConfig.GRID_CELL_SIZE
+            val yrTop = gridComponent.yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
+
+            val yyr = gridComponent.yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
+
+//            gridComponent.cy = 0
+//            gridComponent.yr = 0.3f
         }
     }
 }
