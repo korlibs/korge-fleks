@@ -52,7 +52,7 @@ object AppConfig {
 
     /**
      * Any movement greater than this value will increase the number of steps checked between movement.
-     * The more steps will break down the movement into smaller pieces to avoid skipping grid collissions.
+     * The more steps will break down the movement into smaller pieces to avoid skipping grid collisions.
      */
     var maxGridMovementPercent: Float = 0.33f
 

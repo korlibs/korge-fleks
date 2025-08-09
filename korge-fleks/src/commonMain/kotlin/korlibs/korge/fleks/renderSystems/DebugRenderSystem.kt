@@ -13,35 +13,37 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
-import korlibs.korge.fleks.components.data.Point.Companion.staticPoint
+import korlibs.korge.fleks.components.data.Point
+import korlibs.korge.fleks.logic.collision.GridPosition
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
-import korlibs.korge.view.*
-import korlibs.math.geom.Rectangle
 
 
 /**
  * Creates a new [DebugRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver this */
-inline fun Container.debugRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker DebugRenderSystem.() -> Unit = {}) =
-    DebugRenderSystem(world, layerTag).addTo(this, callback)
 
 class DebugRenderSystem(
     private val world: World,
     private val layerTag: RenderLayerTag
-) : View() {
+) : RenderSystem {
     private val family: Family = world.family {
         all(layerTag)
-            .any(PositionComponent, SpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
+            .any(layerTag, PositionComponent, CollisionComponent, SpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
+    private val gridPosition: Position = staticPositionComponent {}
+    private val grid2Position: Position = staticPositionComponent {}
+    private var camera: Entity = Entity.NONE
 
+    private val grid = GridPosition()
+    private val debugPointPool = world.inject<DebugPointPool>("DebugPointPool")
 
-    override fun renderInternal(ctx: RenderContext) {
-        val camera: Entity = world.getMainCameraOrNull() ?: return
+    override fun render(ctx: RenderContext) {
+        camera = world.getMainCameraOrNull() ?: return
 
         // Custom Render Code here
         ctx.useLineBatcher { batch ->
@@ -115,43 +117,53 @@ class DebugRenderSystem(
                         }
                     }
 
-                    if (entity has CollisionComponent && entity has DebugInfoTag.SPRITE_COLLISION_BOUNDS) {
-                        val (anchorX, anchorY, colWidth, colHeight) = assetStore.getCollisionData(entity[CollisionComponent].name)
-                        // Draw collision bounds
-                        batch.drawVector(Colors.LIGHTBLUE) {
-                            rect(
-                                x = position.x + position.offsetX - anchorX.toFloat(),
-                                y = position.y + position.offsetY - anchorY.toFloat(),
-                                width = colWidth,
-                                height = colHeight
-                            )
+                    if (entity has CollisionComponent && entity has GridComponent) {
+                        if (entity has DebugInfoTag.COLLISION_BOX) {
+                            val gridComponent = entity[GridComponent]
+                            val collisionBox = assetStore.getCollisionData(entity[CollisionComponent].name)
+
+                            // Take over entity grid position and convert to screen coordinates
+                            gridPosition.x = gridComponent.x
+                            gridPosition.y = gridComponent.y
+                            gridPosition.run { world.convertToScreenCoordinates(camera) }
+
+                            // Draw collision bounds
+                            batch.drawVector(Colors.LIGHTBLUE) {
+                                rect(
+                                    x = gridPosition.x + collisionBox.x.toFloat(),
+                                    y = gridPosition.y + collisionBox.y.toFloat(),
+                                    width = collisionBox.width,
+                                    height = collisionBox.height
+                                )
+                            }
+                        }
+
+                        if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS) {
+                            debugPointPool.collisionGridCells.forEach { cell -> drawAndFreeGridCell(batch, cell, Colors.GREEN) }
+                            debugPointPool.collisionGridCells.clear()
+
+                            debugPointPool.collisionRatioPositions.forEach { point -> drawAndFreeRatioPoint(batch, point, Colors.RED) }
+                            debugPointPool.collisionRatioPositions.clear()
                         }
                     }
 
                     // Draw pivot point (zero-point for game object)
                     if (entity has DebugInfoTag.POSITION) {
-                        batch.drawVector(Colors.YELLOW) {
-                            val x = position.x + position.offsetX
-                            val y = position.y + position.offsetY
-                            circle(korlibs.math.geom.Point(x, y), 2)
-                            line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
-                            line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
-                        }
+                        drawPoint(batch, position.x + position.offsetX, position.y + position.offsetY, Colors.YELLOW)
                     }
                 }
 
                 // Draw grid position (used in collision system)
                 if(entity has GridComponent && entity has DebugInfoTag.GRID_POSITION) {
                     val gridComponent = entity[GridComponent]
+                    // Take over entity grid position and convert to screen coordinates
+                    gridPosition.x = gridComponent.x
+                    gridPosition.y = gridComponent.y
+                    gridPosition.run { world.convertToScreenCoordinates(camera) }
 
-                    val gridToPosition = staticPoint { x = gridComponent.x; y = gridComponent.y }
-                    if (entity hasNo ScreenCoordinatesTag) {
-                        gridToPosition.run { world.convertToScreenCoordinates(camera) }
-                    }
-
-                    batch.drawVector(Colors.YELLOW) {
-                        val x = gridToPosition.x
-                        val y = gridToPosition.y
+                    batch.drawVector(Colors.GREEN) {
+                        val x = gridPosition.x
+                        val y = gridPosition.y
                         circle(korlibs.math.geom.Point(x, y), 2)
                         line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
                         line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
@@ -194,12 +206,29 @@ class DebugRenderSystem(
         }
     }
 
-    // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
+    private fun drawPoint(batch: LineRenderBatcher, x: Float, y: Float, color: RGBA) {
+        batch.drawVector(color) {
+            circle(korlibs.math.geom.Point(x, y), 2)
+            line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
+            line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
+        }
     }
 
-    init {
-        name = layerTag.toString()
+    private fun drawAndFreeGridCell(batch: LineRenderBatcher, cell: Point, color: RGBA) {
+        gridPosition.x = cell.x
+        gridPosition.y = cell.y
+        gridPosition.run { world.convertToScreenCoordinates(camera) }
+        batch.drawVector(color) {
+            rect(gridPosition.x, gridPosition.y, AppConfig.GRID_CELL_SIZE, AppConfig.GRID_CELL_SIZE)
+        }
+        cell.free()
+    }
+
+    private fun drawAndFreeRatioPoint(batch: LineRenderBatcher, point: Point, color: RGBA) {
+        gridPosition.x = point.x
+        gridPosition.y = point.y
+        gridPosition.run { world.convertToScreenCoordinates(camera) }
+        drawPoint(batch, gridPosition.x, gridPosition.y, color)
+        point.free()
     }
 }

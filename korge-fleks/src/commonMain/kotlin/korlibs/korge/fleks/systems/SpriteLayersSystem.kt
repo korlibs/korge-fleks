@@ -56,7 +56,7 @@ class SpriteLayersSystem : IteratingSystem(
         if (entity has EntityRefsByNameComponent) {
             val entityRefsByNameComponent = entity[EntityRefsByNameComponent]
             layerMap.forEach { (name, property) ->
-                entityRefsByNameComponent.entitiesByName[name]?.let { linkedEntity ->
+                entityRefsByNameComponent.entities[name]?.let { linkedEntity ->
 
                     val positionComponent = linkedEntity[PositionComponent]
                     property.offsetX = positionComponent.x + positionComponent.offsetX

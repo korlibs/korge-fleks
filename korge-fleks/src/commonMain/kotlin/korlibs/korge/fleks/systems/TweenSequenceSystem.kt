@@ -120,7 +120,7 @@ class TweenSequenceSystem : IteratingSystem(
 
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
-                    world.entity("SpawnNewTweenSequence") {
+                    world.createEntity("SpawnNewTweenSequence entity") {
                         // Populate the new TweenSequenceComponent with the tweens from the list of SpawnNewTweenSequence object
                         it += tweenSequenceComponent {
                             tweens.init(currentTween.tweens)
@@ -141,7 +141,7 @@ class TweenSequenceSystem : IteratingSystem(
                     currentTween.tweens.forEach { tween ->
                         if (tween.delay != null && tween.delay!! > 0f) {
                             // Tween has its own delay -> spawn a new TweenSequence for it
-                            world.entity("ParallelTween: ${tween::class.simpleName} for entity '${tween.target.id}'") { it ->
+                            world.createEntity("ParallelTween: ${tween::class.simpleName} for entity '${tween.target.id}'") { it ->
                                 // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
                                 it += tweenSequenceComponent {
                                     // If duration and easing are not set, inherit the current parent tween's values
@@ -217,36 +217,20 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.enabled?.let { value -> createTweenPropertyComponent(tween, parentTween, TouchInputEnable, value) }
             }
             // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
-            is SpawnEntity -> EntityFactory.configure(tween.entityConfig, world, tween.target)
+            is SpawnEntity -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)
             // Directly deletes the given entity from the tween
-// TODO - check when deleting 3 topmost clouds if we need to use this method?
-//            is DeleteEntity -> {
-//                println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base" +
-//                    "'$baseEntity' (name: ${world.nameOf(baseEntity)}).")
-
-//                if (tween.target.id == -1) {
-//                    Pool.writeStatistics()
-//                }
-//                world.deleteViaLifeCycle(tween.target)
-//            }
             is DeleteEntity -> {
-                val entity = tween.target
-                // Use this to delete the entity directly without going through the life cycle - that will crash the tween system
-                // TODO do the same as in lifecycle system delete funcion (deletion of sub-entities, etc.)
-                entity.getOrNull(EntityRefComponent)?.let {
-                    world -= it.entity
-                }
-                entity.getOrNull(EntityRefsComponent)?.entities?.forEach { entity ->
-                    world -= entity
-                }
-                entity.getOrNull(EntityRefsByNameComponent)?.entitiesByName?.forEach { (_, entity) ->
-                    world -= entity
-                }
+                println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base" +
+                    "'$baseEntity' (name: ${world.nameOf(baseEntity)}).")
 
-                world -= tween.target
+                if (tween.target == Entity.NONE) {
+                    println("ERROR: TweenSequenceSystem - Trying to delete non-existing Entity (NONE)!")
+                    Pool.writeStatistics()
+                }
+                world.deleteViaLifeCycle(tween.target)
             }
             // Runs the config-function on the given entity from the tween
-            is ExecuteConfigFunction -> EntityFactory.configure(tween.entityConfig, world, tween.target)
+            is ExecuteConfigFunction -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)
             // Process Wait tween only for event here - wait time was already set above from tween.duration
             is Wait -> tween.event?.let { event ->
                 // Wait for event, SendEvent and ResetEvent need the current entity which comes in via onTickEntity

@@ -2,7 +2,6 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
 import korlibs.image.format.*
-import korlibs.korge.fleks.components.Info.Companion.infoComponent
 import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.Motion.Companion.motionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
@@ -45,7 +44,6 @@ data class FireAndDustEffectConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             if (screenCoordinates) it += ScreenCoordinatesTag
-            it += infoComponent { name = this@FireAndDustEffectConfig.name }
             it += motionComponent {
                 velocityX =
                     if (velocityVariationX != 0f) this@FireAndDustEffectConfig.velocityX + (-velocityVariationX..velocityVariationX).random()

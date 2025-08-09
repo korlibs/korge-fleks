@@ -53,8 +53,10 @@ class AssetStore {
     internal val assetLevelDataLoader: AssetLevelDataLoader = AssetLevelDataLoader()
 
     data class CollisionData(
+        // Anchor point of the collision rectangle to the pivot point of the entity
         val x: Int,
         val y: Int,
+        // Size of the collision rectangle
         val width: Float,
         val height: Float
     )
@@ -62,7 +64,9 @@ class AssetStore {
     // TODO
     fun getCollisionData(name: String) : CollisionData =
         CollisionData(
-            8, 29, 17f, 29f
+            -10, -28, 17f, 29f
+            //-17, -28, 35f, 29f
+            //0, 0, 17f, 29f
         )
 
     fun getTileMapData(level: String) : LayerTileMaps =
@@ -157,9 +161,11 @@ class AssetStore {
                 val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLDTKWorld(extrude = true)
 
                 when  (type) {
-                    AssetType.LEVEL -> { assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths) }
+                    AssetType.LEVEL -> {
+                        assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths)
+                    }
                     else -> {
-                        // Load raw tile map data for other asset types assets
+                        // Load raw tile map data for tilemap object types
                         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
                             tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
                         }

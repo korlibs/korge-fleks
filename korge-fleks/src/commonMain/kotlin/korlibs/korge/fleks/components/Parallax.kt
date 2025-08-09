@@ -6,7 +6,7 @@ import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.utils.entity
+import korlibs.korge.fleks.utils.createEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -109,17 +109,19 @@ class Parallax private constructor(
 
         // Initialize all layer lists on component creation
         repeat(numberBackgroundLayers) { index ->
+            val name = assetStore.getBackground(name).config.backgroundLayers?.get(index)?.name ?: "No layer name"
             // Create new entities for controlling position and color of each layer e.g. by the TweenEngineSystem
             bgLayerEntities.add(
-                world.entity("Parallax BG layer '$index' of entity '${entity.id}'") {
+                world.createEntity("Parallax BG layer '$index' ($name) of entity '${entity.id}'") {
                     it += positionComponent {}
                     it += rgbaComponent {}
                 }
             )
         }
         repeat(numberForegroundLayers) { index ->
+            val name = assetStore.getBackground(name).config.foregroundLayers?.get(index)?.name ?: "No layer name"
             fgLayerEntities.add(
-                world.entity("Parallax FG layer '$index' of entity '${entity.id}'") {
+                world.createEntity("Parallax FG layer '$index' ($name) of entity '${entity.id}'") {
                     it += positionComponent {}
                     it += rgbaComponent {}
                 }
@@ -130,7 +132,7 @@ class Parallax private constructor(
         repeat(numberParallaxPlaneLines) { linePositions.add(0f) }
         repeat(numberAttachedFrontLayers) { attachedLayersFrontPositions.add(0f) }
 
-        parallaxPlaneEntity = world.entity("Parallax plane of entity '${entity.id}'") {
+        parallaxPlaneEntity = world.createEntity("Parallax plane of entity '${entity.id}'") {
             it += positionComponent {}
             it += rgbaComponent {}
         }
@@ -153,6 +155,7 @@ class Parallax private constructor(
         // Remove all layer entities when we are in scope of the world
         bgLayerEntities.free(this)
         fgLayerEntities.free(this)
+        this -= parallaxPlaneEntity
         // Lists will be cleared in the cleanup function
         cleanup()
     }

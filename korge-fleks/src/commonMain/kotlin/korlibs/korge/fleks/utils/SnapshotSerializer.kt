@@ -33,6 +33,7 @@ import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.SpriteLayers
 import korlibs.korge.fleks.components.SwitchLayerVisibility
 import korlibs.korge.fleks.components.TextField
+import korlibs.korge.fleks.components.TileMap
 import korlibs.korge.fleks.components.TouchInput
 import korlibs.korge.fleks.components.TweenProperty
 import korlibs.korge.fleks.components.TweenSequence
@@ -191,6 +192,7 @@ class SnapshotSerializer {
             subclass(SpriteLayers::class)
             subclass(SwitchLayerVisibility::class)
             subclass(TextField::class)
+            subclass(TileMap::class)
             subclass(TouchInput::class)
             subclass(TweenProperty::class)
             subclass(TweenSequence::class)

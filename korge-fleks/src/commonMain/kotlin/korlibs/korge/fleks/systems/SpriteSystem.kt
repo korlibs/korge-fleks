@@ -5,6 +5,7 @@ import com.github.quillraven.fleks.World.Companion.family
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
+import korlibs.korge.fleks.utils.deleteViaLifeCycle
 import korlibs.math.*
 import korlibs.time.*
 
@@ -34,12 +35,6 @@ class SpriteSystem : IteratingSystem(
                 val numFrames = imageAnimation.frames.size
                 spriteComponent.frameIndex = (spriteComponent.frameIndex + spriteComponent.increment) umod numFrames
 
-                // Check if animation should be played only once
-                if (spriteComponent.increment == 0) {
-                    spriteComponent.running = false
-                    if (spriteComponent.destroyOnAnimationFinished) { world -= entity }
-//                    println("delete at time: ${comp.time}")
-                }
 
                 val frame = imageAnimation.frames[spriteComponent.frameIndex]  // frameIndex is within list bounds
                 spriteComponent.nextFrameIn = frame.duration.seconds.toFloat()
@@ -55,6 +50,15 @@ class SpriteSystem : IteratingSystem(
                         0
                     }
                 }
+
+                // Check if animation should be played only once and if we need to delete the entity afterward
+                if (spriteComponent.increment == 0) {
+                    spriteComponent.running = false
+                    if (spriteComponent.destroyOnAnimationFinished) {
+                        world.deleteViaLifeCycle(entity)
+                    }
+                }
+
             }
         }
     }

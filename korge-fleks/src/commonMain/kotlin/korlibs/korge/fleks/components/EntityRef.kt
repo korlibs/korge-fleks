@@ -9,27 +9,38 @@ import kotlinx.serialization.Serializable
 /**
  * This component is used to link one entity to another entity.
  *
+ * @param entity The entity that this component refers to. It can be used to link entities together.
+ * @param moveLinked If true, the linked entity will be moved with the parent (current) entity.
+ * @param moveWithParent If true, the parent (current) entity will be moved with the linked entity.
+ * @param deleteLinked If true, delete the linked entities in the LifeCycleSystem.
+ *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("EntityRef")
 class EntityRef private constructor(
-    var entity: Entity = Entity.NONE,
-    // Configure what to do with the linked entity
-    var moveWith: Boolean = true
+    var entity: Entity = Entity.NONE,  // The "linked entity" reference
+    // Configuration what to do with the linked entity
+    var moveLinked: Boolean = false,
+    var moveWithParent: Boolean = false,
+    var deleteLinked: Boolean = false  // If true, the linked entity will be deleted when the parent entity is deleted
 ) : PoolableComponent<EntityRef>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: EntityRef) {
         entity = from.entity
-        moveWith = from.moveWith
+        moveLinked = from.moveLinked
+        moveWithParent = from.moveWithParent
+        deleteLinked = from.deleteLinked
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
         entity = Entity.NONE
-        moveWith = true
+        moveLinked = false
+        moveWithParent = false
+        deleteLinked = false
     }
 
     override fun type() = EntityRefComponent

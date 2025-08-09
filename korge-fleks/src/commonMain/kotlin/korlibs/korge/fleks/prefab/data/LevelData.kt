@@ -19,9 +19,9 @@ data class LevelData(
     val levelGridWidth: Int = 0,
     val levelGridHeight: Int = 0,
     // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
-    val tileSize: Int = 1,
+    val tileSize: Int = 0,
     // Level maps
-    val levelGridVania: Array2<Chunk>,
+    val levelGridVania: Array2<Chunk> = Array2(0, 0) { Chunk() },
     val gridVaniaWidth: Int = 0,
     val gridVaniaHeight: Int = 0,
     // Tile maps for special layers (intro, cut-scenes, etc.) - tile maps are independent of the level chunks

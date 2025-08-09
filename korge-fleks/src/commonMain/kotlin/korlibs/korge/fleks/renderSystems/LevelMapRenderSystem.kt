@@ -15,9 +15,6 @@ import korlibs.korge.view.*
 import korlibs.math.geom.*
 
 
-inline fun Container.levelMapRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LevelMapRenderSystem.() -> Unit = {}) =
-    LevelMapRenderSystem(world, layerTag).addTo(this, callback)
-
 /**
  * RenderSystem to render level maps. It uses the [LevelMapComponent] to determine which level maps should be rendered
  * and in which order. The [LayerComponent] is used to determine the rendering order of the level maps.
@@ -33,12 +30,12 @@ class LevelMapRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag,
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
-) : View() {
+) : RenderSystem {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
 
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
-    override fun renderInternal(ctx: RenderContext) {
+    override fun render(ctx: RenderContext) {
         val camera: Entity = world.getMainCameraOrNull() ?: return
         val cameraPosition = with(world) { camera[PositionComponent] }
 
@@ -78,14 +75,5 @@ class LevelMapRenderSystem(
                 }
             }
         }
-    }
-
-    // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
-    }
-
-    init {
-        name = layerTag.toString()
     }
 }

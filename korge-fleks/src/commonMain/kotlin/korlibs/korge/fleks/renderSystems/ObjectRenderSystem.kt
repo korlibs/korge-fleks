@@ -6,6 +6,7 @@ import korlibs.datastructure.iterators.*
 import korlibs.image.bitmap.*
 import korlibs.image.font.*
 import korlibs.image.text.*
+import korlibs.korge.blend.BlendMode
 import korlibs.korge.annotations.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
@@ -22,25 +23,31 @@ import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.fleks.utils.getMainCameraOrNull
 import korlibs.korge.render.*
-import korlibs.korge.view.*
 import korlibs.math.geom.*
 
 
+interface RenderSystem {
+    fun render(ctx: RenderContext)
+}
+
 /**
- * Creates a new [ObjectRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
- * receiver "this".
+ * A [ObjectRenderSystem] extending [RenderSystem] is responsible for rendering all entities which have a [PositionComponent],
+ * [LayerComponent] and [RgbaComponent] and one of the following components:
+ * - [SpriteComponent]
+ * - [TextFieldComponent]
+ * - [SpriteLayersComponent]
+ * - [NinePatchComponent]
+ * - [TileMapComponent]
+ * This system is used to render all game objects which are not part of the level map or parallax background.
  *
- * HINT: This renderer is preliminary and does not use caching of geometry or vertices. It might be replaced by
- * renderers from KorGE 6.
+ * HINT: This renderer does not use caching of geometry or vertices.
  */
-inline fun Container.objectRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ObjectRenderSystem.() -> Unit = {}) =
-    ObjectRenderSystem(world, layerTag).addTo(this, callback)
 
 class ObjectRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag,
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
-) : View() {
+) : RenderSystem {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
         .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent, TileMapComponent)
     }
@@ -48,7 +55,7 @@ class ObjectRenderSystem(
     private val position: Position = staticPositionComponent {}
 
     @OptIn(KorgeExperimental::class)
-    override fun renderInternal(ctx: RenderContext) {
+    override fun render(ctx: RenderContext) {
         val camera: Entity = world.getMainCameraOrNull() ?: return
 
         // Sort sprite and text entities by their layerIndex
@@ -115,7 +122,16 @@ class ObjectRenderSystem(
                 val textFieldComponent = entity[TextFieldComponent]
                 val offset = Point(position.offsetX, position.offsetY)
 
-                renderCtx2d(ctx) { render ->
+                ctx.useCtx2d { render ->  //context ->
+//                    context.keep {
+//                        context.size = Size(this@renderCtx2d.width, this@renderCtx2d.height)
+//                        context.blendMode = renderBlendMode
+//                        context.multiplyColor = renderColorMul
+//                        context.setMatrix(globalMatrix)
+//                        block(context)
+//                    }
+
+//                renderCtx2d(ctx) { render ->
                     var n = 0
                     RichTextData(
                         text = textFieldComponent.text,
@@ -165,7 +181,7 @@ class ObjectRenderSystem(
                 }
 
                 ctx.useBatcher { batch ->
-                    batch.drawVertices(tva, ctx.getTex(ninePatch.content.bmp), smoothing = false, blendMode)
+                    batch.drawVertices(tva, ctx.getTex(ninePatch.content.bmp), smoothing = false, BlendMode.NORMAL)
                 }
             }
             else if (entity has TileMapComponent) {
@@ -218,14 +234,5 @@ class ObjectRenderSystem(
                 }
             }
         }
-    }
-
-    // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
-    }
-
-    init {
-        name = layerTag.toString()
     }
 }

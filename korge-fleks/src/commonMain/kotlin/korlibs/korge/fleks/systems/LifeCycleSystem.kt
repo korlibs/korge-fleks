@@ -17,31 +17,36 @@ class LifeCycleSystem : IteratingSystem(
 
         if (lifeCycle.healthCounter <= 0) {
             // Delete first all sub-entities
-            deleteEntityRefs(entity)
-
-            world -= entity
+            deleteEntity(entity)
             debugPrint(entity, "base")
         }
     }
 
     private fun debugPrint(entity: Entity, type: String) {
         val name: String = entity.getOrNull(InfoComponent)?.name ?: "no name"
-//        println("INFO: LifeCycleSystem: Remove $type-entity '${entity.id}' ($name)")
+        //println("INFO: LifeCycleSystem: Remove $type-entity '${entity.id}' ($name)")
     }
 
-    fun deleteEntityRefs(entity: Entity) {
-        entity.getOrNull(EntityRefComponent)?.let {
-            world -= it.entity
-            debugPrint(it.entity, "sub")
+    private fun deleteEntity(entity: Entity) {
+        // Check if entity has sub-entities and delete them first recursively
+        if (entity has EntityRefComponent && entity[EntityRefComponent].deleteLinked) {
+            deleteEntity(entity[EntityRefComponent].entity)
+            debugPrint(entity[EntityRefComponent].entity, "sub")
         }
-        entity.getOrNull(EntityRefsComponent)?.entities?.forEach { entity ->
-            world -= entity
-            debugPrint(entity, "sub")
+        if (entity has EntityRefsComponent && entity[EntityRefsComponent].deleteLinked) {
+            entity[EntityRefsComponent].entities.forEach { subEntity ->
+                deleteEntity(subEntity)
+                debugPrint(subEntity, "sub")
+            }
         }
-        entity.getOrNull(EntityRefsByNameComponent)?.entitiesByName?.forEach { (_, entity) ->
-            world -= entity
-            debugPrint(entity, "sub")
+        if (entity has EntityRefsByNameComponent && entity[EntityRefsByNameComponent].deleteLinked) {
+            entity[EntityRefsByNameComponent].entities.forEach { (_, subEntity) ->
+                deleteEntity(subEntity)
+                debugPrint(subEntity, "sub")
+            }
         }
 
+        // Finally delete the entity itself
+        world -= entity
     }
 }

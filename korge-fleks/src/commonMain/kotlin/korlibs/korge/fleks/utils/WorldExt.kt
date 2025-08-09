@@ -13,10 +13,13 @@ import korlibs.korge.fleks.tags.*
 /**
  * Create new [Entity] and add a name to it for easier debugging/tracing.
  */
-fun World.entity(aName: String, configuration: EntityCreateContext.(Entity) -> Unit = {}) : Entity =
-    entity(configuration).apply { configure { it += infoComponent { name = aName } } }
+fun World.createEntity(aName: String, configuration: EntityCreateContext.(Entity) -> Unit = {}) : Entity {
+    val newEntity = entity(configuration).apply { configure { it += infoComponent { name = aName } } }
+    //println("Created entity: $aName with id: ${newEntity.id} (v${newEntity.version})")
+    return newEntity
+}
 
-fun World.emptyEntity(aName: String, configuration: EntityCreateContext.(Entity) -> Unit = {}) : Entity =
+fun World.createEmptyEntity(aName: String, configuration: EntityCreateContext.(Entity) -> Unit = {}) : Entity =
     entity(configuration).apply {
         configure {
             it += infoComponent { name = aName }
@@ -36,14 +39,14 @@ fun World.deleteViaLifeCycle(entity: Entity) {
  * by entityConfig string parameter.
  */
 fun World.createAndConfigureEntity(entityConfig: String) : Entity =
-    EntityFactory.createAndConfigure(entityConfig, this)
+    EntityFactory.createAndConfigureEntity(this, entityConfig)
 
 /**
  * Configure existing [Entity] by applying the [EntityConfig][EntityFactory.EntityConfig] which is specified
  * by entityConfig string parameter.
  */
 fun World.configureEntity(entityConfig: String, entity: Entity) : Entity =
-    EntityFactory.configure(entityConfig, this, entity)
+    EntityFactory.configureEntity(this, entityConfig, entity)
 
 /**
  * Execute-function which takes an [EntityConfig][EntityFactory.EntityConfig] and an [Entity] to execute the desired
@@ -74,4 +77,11 @@ fun World.getMainCamera(): Entity {
 fun World.getMainCameraOrNull(): Entity? {
     val cameraFamily: Family = family { all(MainCameraTag, PositionComponent) }
     return cameraFamily.firstOrNull()
+}
+
+/**
+ * Print snapshot of components of given entity for debugging purposes.
+ */
+fun World.traceEntitySnapshot(entity: Entity) {
+    println("Entity snapshot:\n ${system<SnapshotSerializerSystem>().traceEntitySnapshot(entity)}")
 }
