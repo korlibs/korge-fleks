@@ -28,8 +28,8 @@ class PlayerMoveSystem : IteratingSystem(
         // Player pressed up arrow key (w key)
         if (playerInputComponent.yMoveStrength < 0f) {
             motionComponent.velocityY += playerInputComponent.jumpForce * playerInputComponent.yMoveStrength
-            if (motionComponent.velocityY < -2f) {
-                motionComponent.velocityY = -2f // Limit the jump force
+            if (motionComponent.velocityY < -5f) {
+                motionComponent.velocityY = -5f // Limit the jump force
             }
         }
 

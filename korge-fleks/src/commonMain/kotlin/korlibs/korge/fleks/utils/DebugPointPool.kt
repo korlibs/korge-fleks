@@ -4,5 +4,8 @@ import korlibs.korge.fleks.components.data.Point
 
 class DebugPointPool {
 
-    val collisionPoints: Set<Point> = mutableSetOf()
+    val collisionGridCells: MutableList<Point> = mutableListOf()
+    val collisionRatioPositions: MutableList<Point> = mutableListOf()
+
+    val collisionEdges: MutableList<Pair<Point, Point>> = mutableListOf()
 }

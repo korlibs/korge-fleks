@@ -111,7 +111,7 @@ class GridMoveSystem : IteratingSystem(
                 }
 
                 // Move the entity in the Y direction
-                gridComponent.yr += motionComponent.velocityY / steps
+                gridComponent.yr += motionComponent.velocityY / steps / AppConfig.GRID_CELL_SIZE
                 if (motionComponent.velocityY != 0f) {
 /*
                     collisionChecker.preYCheck(

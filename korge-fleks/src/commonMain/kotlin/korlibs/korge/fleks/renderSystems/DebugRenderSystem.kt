@@ -13,6 +13,7 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
+import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.logic.collision.GridPosition
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.tags.*
@@ -35,12 +36,14 @@ class DebugRenderSystem(
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
     private val gridPosition: Position = staticPositionComponent {}
-    private val gridColPosition: Position = staticPositionComponent {}
+    private val grid2Position: Position = staticPositionComponent {}
+    private var camera: Entity = Entity.NONE
 
     private val grid = GridPosition()
+    private val debugPointPool = world.inject<DebugPointPool>("DebugPointPool")
 
     override fun render(ctx: RenderContext) {
-        val camera: Entity = world.getMainCameraOrNull() ?: return
+        camera = world.getMainCameraOrNull() ?: return
 
         // Custom Render Code here
         ctx.useLineBatcher { batch ->
@@ -114,62 +117,34 @@ class DebugRenderSystem(
                         }
                     }
 
-                    if (entity has CollisionComponent && entity has GridComponent && entity has DebugInfoTag.SPRITE_COLLISION_BOUNDS) {
-                        val gridComponent = entity[GridComponent]
-                        val collisionBox = assetStore.getCollisionData(entity[CollisionComponent].name)
+                    if (entity has CollisionComponent && entity has GridComponent) {
+                        if (entity has DebugInfoTag.COLLISION_BOX) {
+                            val gridComponent = entity[GridComponent]
+                            val collisionBox = assetStore.getCollisionData(entity[CollisionComponent].name)
 
-                        // Take over entity grid position and convert to screen coordinates
-                        gridPosition.x = gridComponent.x
-                        gridPosition.y = gridComponent.y
-                        gridPosition.run { world.convertToScreenCoordinates(camera) }
-
-                        // Draw collision bounds
-                        batch.drawVector(Colors.LIGHTBLUE) {
-                            rect(
-                                x = gridPosition.x + collisionBox.x.toFloat(),
-                                y = gridPosition.y + collisionBox.y.toFloat(),
-                                width = collisionBox.width,
-                                height = collisionBox.height
-                            )
-                        }
-
-                        val xrRight = gridComponent.xr + (collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE
-                        val yrBottom = gridComponent.yr + (collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE
-                        val xrLeft = gridComponent.xr + collisionBox.x / AppConfig.GRID_CELL_SIZE
-                        val yrTop = gridComponent.yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
-
-                        fun drawGridPosition(cx: Int, cy: Int, xr: Float, yr: Float, color: RGBA) {
-                            gridPosition.x = (cx + xr) * AppConfig.GRID_CELL_SIZE
-                            gridPosition.y = (cy + yr) * AppConfig.GRID_CELL_SIZE
+                            // Take over entity grid position and convert to screen coordinates
+                            gridPosition.x = gridComponent.x
+                            gridPosition.y = gridComponent.y
                             gridPosition.run { world.convertToScreenCoordinates(camera) }
-                            drawPoint(batch, gridPosition.x, gridPosition.y, color)
+
+                            // Draw collision bounds
+                            batch.drawVector(Colors.LIGHTBLUE) {
+                                rect(
+                                    x = gridPosition.x + collisionBox.x.toFloat(),
+                                    y = gridPosition.y + collisionBox.y.toFloat(),
+                                    width = collisionBox.width,
+                                    height = collisionBox.height
+                                )
+                            }
                         }
 
-//                        // Bottom edge of the collision box
-//                        grid.setAndNormalizeX(gridComponent.cx, xrLeft)
-//                        repeat( ceil(collisionBox.width / AppConfig.GRID_CELL_SIZE).toInt()) { i ->
-//                            drawGridPosition(grid.cx + i, gridComponent.cy, xrLeft, yrBottom, Colors.RED)
-//                        }
-//                        // Top edge of the collision box
-//                        grid.setAndNormalizeX(gridComponent.cx, xrLeft)
-//                        repeat( ceil(collisionBox.width / AppConfig.GRID_CELL_SIZE).toInt()) { i ->
-//                            drawGridPosition(grid.cx + i, gridComponent.cy, xrLeft, yrTop, Colors.RED)
-//                        }
-//                        // Right edge of the collision box
-//                        grid.setAndNormalizeY(gridComponent.cy, yrTop)
-//                        repeat( ceil(collisionBox.height / AppConfig.GRID_CELL_SIZE).toInt()) { i ->
-//                            drawGridPosition(gridComponent.cx, grid.cy + i, xrRight, yrBottom, Colors.RED)
-//                        }
-//                        // Left edge of the collision box
+                        if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS) {
+                            debugPointPool.collisionGridCells.forEach { cell -> drawAndFreeGridCell(batch, cell, Colors.GREEN) }
+                            debugPointPool.collisionGridCells.clear()
 
-                        // Bottom right corner of the collision box
-                        drawGridPosition(gridComponent.cx, gridComponent.cy, xrRight, yrBottom, Colors.GREEN)
-                        // Bottom left corner of the collision box
-                        drawGridPosition(gridComponent.cx, gridComponent.cy, xrLeft, yrBottom, Colors.GREEN)
-                        // Top right corner of the collision box
-                        drawGridPosition(gridComponent.cx, gridComponent.cy, xrRight, yrTop, Colors.GREEN)
-                        // Top left corner of the collision box
-                        drawGridPosition(gridComponent.cx, gridComponent.cy, xrLeft, yrTop, Colors.GREEN)
+                            debugPointPool.collisionRatioPositions.forEach { point -> drawAndFreeRatioPoint(batch, point, Colors.RED) }
+                            debugPointPool.collisionRatioPositions.clear()
+                        }
                     }
 
                     // Draw pivot point (zero-point for game object)
@@ -239,7 +214,21 @@ class DebugRenderSystem(
         }
     }
 
-    private fun drawPointInLevel(batch: LineRenderBatcher, position: Position, color: RGBA) {
+    private fun drawAndFreeGridCell(batch: LineRenderBatcher, cell: Point, color: RGBA) {
+        gridPosition.x = cell.x
+        gridPosition.y = cell.y
+        gridPosition.run { world.convertToScreenCoordinates(camera) }
+        batch.drawVector(color) {
+            rect(gridPosition.x, gridPosition.y, AppConfig.GRID_CELL_SIZE, AppConfig.GRID_CELL_SIZE)
+        }
+        cell.free()
+    }
 
+    private fun drawAndFreeRatioPoint(batch: LineRenderBatcher, point: Point, color: RGBA) {
+        gridPosition.x = point.x
+        gridPosition.y = point.y
+        gridPosition.run { world.convertToScreenCoordinates(camera) }
+        drawPoint(batch, gridPosition.x, gridPosition.y, color)
+        point.free()
     }
 }
