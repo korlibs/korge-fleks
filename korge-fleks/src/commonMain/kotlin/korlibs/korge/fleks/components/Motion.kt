@@ -17,40 +17,35 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Motion")
 class Motion private constructor(
-    var accelX: Float = 0f,
-    var accelY: Float = 0f,
+    var accelerationX: Float = 0f,
+    var accelerationY: Float = 0f,
 
     var velocityX: Float = 0f,  // in world units (grid size e.g. 16 pixels) per second
     var velocityY: Float = 0f,
-    var velocityZ: Float = 0f,
+
     var frictionX: Float = 0f,
-    var frictionY: Float = 0f,
-    var frictionZ: Float = 0f
+    var frictionY: Float = 0f
 ) : PoolableComponent<Motion>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Motion) {
-        accelX = from.accelX
-        accelY = from.accelY
+        accelerationX = from.accelerationX
+        accelerationY = from.accelerationY
         velocityX = from.velocityX
         velocityY = from.velocityY
-        velocityZ = from.velocityZ
         frictionX = from.frictionX
         frictionY = from.frictionY
-        frictionZ = from.frictionZ
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        accelX = 0f
-        accelY = 0f
+        accelerationX = 0f
+        accelerationY = 0f
         velocityX = 0f
         velocityY = 0f
-        velocityZ = 0f
         frictionX = 0f
         frictionY = 0f
-        frictionZ = 0f
     }
 
     override fun type() = MotionComponent

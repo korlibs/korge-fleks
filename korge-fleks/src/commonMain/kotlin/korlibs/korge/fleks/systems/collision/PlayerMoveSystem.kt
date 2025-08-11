@@ -17,8 +17,18 @@ class PlayerMoveSystem : IteratingSystem(
         val playerInputComponent = entity[PlayerInputComponent]
         val motionComponent = entity[MotionComponent]
 
+        // To simulate mass/inertia so that an entity starts moving slowly, we use an acceleration variable and apply forces
+        // gradually. The entity's velocity increases over time based on the applied force and its mass.
+
         // TODO Check if max velocity for player movement is reached
-        motionComponent.velocityX += playerInputComponent.speed * playerInputComponent.xMoveStrength
+
+
+        // a = F / m
+        // Apply acceleration based on player input and mass
+        motionComponent.accelerationX += playerInputComponent.forceX * playerInputComponent.xMoveStrength
+        motionComponent.velocityX += motionComponent.accelerationX * deltaTime
+
+//        motionComponent.velocityX += playerInputComponent.forceX * playerInputComponent.xMoveStrength
 //        motionComponent.velocityY += playerInputComponent.speed * playerInputComponent.yMoveStrength
 
         // Player pressed down arrow key (s key)
@@ -27,26 +37,17 @@ class PlayerMoveSystem : IteratingSystem(
 
         // Player pressed up arrow key (w key)
         if (playerInputComponent.yMoveStrength < 0f) {
-            motionComponent.velocityY += playerInputComponent.jumpForce * playerInputComponent.yMoveStrength
+            motionComponent.velocityY += playerInputComponent.forceY * playerInputComponent.yMoveStrength
             if (motionComponent.velocityY < -5f) {
                 motionComponent.velocityY = -5f // Limit the jump force
             }
         }
 
 /*
-To simulate mass/inertia so that an entity starts moving slowly, introduce an acceleration variable and apply forces
-gradually. The entity's velocity increases over time based on the applied force and its mass.
 
 Example: Add mass and acceleration to your motion component, and update velocity using Newton's second law (F = m * a).
 
 
-data class Motion(
-    var velocityX: Float = 0f,
-    var velocityY: Float = 0f,
-    var accelerationX: Float = 0f,
-    var accelerationY: Float = 0f,
-    var mass: Float = 1f
-)
 
 fun applyForce(motion: Motion, forceX: Float, forceY: Float) {
     // F = m * a => a = F / m
