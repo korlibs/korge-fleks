@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.prefab
 
-import korlibs.image.tiles.TileMapData
 import korlibs.korge.fleks.prefab.data.LevelData
 import kotlin.native.concurrent.ThreadLocal
 

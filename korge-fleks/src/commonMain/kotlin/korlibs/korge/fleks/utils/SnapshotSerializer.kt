@@ -28,6 +28,7 @@ import korlibs.korge.fleks.components.Rgba
 import korlibs.korge.fleks.components.Rigidbody
 import korlibs.korge.fleks.components.Size
 import korlibs.korge.fleks.components.Sound
+import korlibs.korge.fleks.components.State
 import korlibs.korge.fleks.components.Spawner
 import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.SpriteLayers
@@ -187,6 +188,7 @@ class SnapshotSerializer {
             subclass(Rigidbody::class)
             subclass(Size::class)
             subclass(Sound::class)
+            subclass(State::class)
             subclass(Spawner::class)
             subclass(Sprite::class)
             subclass(SpriteLayers::class)

@@ -3,16 +3,12 @@ package korlibs.korge.fleks.logic.collision.resolver
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Motion
-import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.utils.AppConfig
 import kotlin.math.abs
 import kotlin.math.ceil
 
 
 class PlatformerCollisionResolver : CollisionResolver() {
-
-    private val level = Prefab.levelData
-
     override fun resolveXCollision(
         gridComponent: Grid,
         motionComponent: Motion,

@@ -12,12 +12,13 @@ import kotlinx.serialization.Serializable
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
+// TODO to be deleted
 @Serializable @SerialName("PlayerInput")
 class PlayerInput private constructor(
     var forceY: Float = 0f,
     var forceX: Float = 0f,
     var xMoveStrength: Float = 0f,
-    var yMoveStrength: Float = 0f
+    var yMoveStrength: Float = 0f,
 ) : PoolableComponent<PlayerInput>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component

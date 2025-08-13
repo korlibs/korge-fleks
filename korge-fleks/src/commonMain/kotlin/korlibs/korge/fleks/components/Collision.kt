@@ -17,19 +17,25 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Collision")
 class Collision private constructor(
     var name: String = "",
+
+    // Identifiers for collision directions
     var right: Boolean = false,
     var left: Boolean = false,
     var isCollidingAbove: Boolean = false,
     var isGrounded: Boolean = false,
+
     var becameGroundedThisFrame: Boolean = false,
     var wasGroundedLastFrame: Boolean = false,
     var movingDownSlope: Boolean = false,
     var slopeAngle: Float = 0f,
     var isFalling: Boolean = false,
     var collisionWithStaticObject: Boolean = false,  // used currently e.g. by shoot objects
-    var jumpVelocity: Float = 0f,  // TODO: check with MotionComponent
+    var jumpVelocity: Float = 0f,  // Used to store the maximum jump velocity of the player which is then decreased over time
+
     var justHit: Boolean = false,
     var isHit: Boolean = false,
+    var squatDown: Boolean = false,  // true if the player is squatting down
+
     val hitPosition: Point = staticPoint {}
 ) : PoolableComponent<Collision>() {
     // Init an existing component data instance with data from another component
@@ -49,6 +55,7 @@ class Collision private constructor(
         jumpVelocity = from.jumpVelocity
         justHit = from.justHit
         isHit = from.isHit
+        squatDown = from.squatDown
         hitPosition.init(from = from.hitPosition)
     }
 
@@ -69,6 +76,7 @@ class Collision private constructor(
         jumpVelocity = 0f
         justHit = false
         isHit = false
+        squatDown = false
         // Deep init of hit position - reuse object
         hitPosition.cleanup()
     }
@@ -114,4 +122,13 @@ class Collision private constructor(
         cleanup()
         pool.free(this)
     }
+
+    fun isInFrontOfWall(): Boolean {
+        return right || left
+    }
+
+    fun hasCollision(): Boolean {
+        return isGrounded || right || left || isCollidingAbove
+    }
+
 }

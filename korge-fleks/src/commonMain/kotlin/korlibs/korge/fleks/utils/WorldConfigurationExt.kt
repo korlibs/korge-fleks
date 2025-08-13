@@ -42,12 +42,13 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         add(LevelChunkSystem())
 
         // Collision and player input systems
-        add(PlatformerGroundSystem())
-        add(PlatformerGravitySystem())
-        add(PlayerMoveSystem())
-        add(PlayerInputSystem())
+//        add(PlatformerGravitySystem())
+//        add(PlatformerGroundSystem())  TODO check if we need this system - isGrounded is set in the GridMoveSystem
+        val playerInputSystem = PlayerInputSystem()
+        add(playerInputSystem)
+        add(PlayerMoveSystem(playerInputSystem))
         add(GridMoveSystem())
-//        add(GridCollisionCleanupSystem())
+//        add(GridCollisionCleanupSystem())  ??? check why this is needed
 
         add(TouchInputSystem())
         add(DebugSystem())

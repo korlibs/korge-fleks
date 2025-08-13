@@ -39,14 +39,14 @@ class GridMoveSystem : IteratingSystem(
         val collisionComponent = entity[CollisionComponent]
         val assetStore = world.inject<AssetStore>(name = "AssetStore")
         val collisionBox = assetStore.getCollisionData(collisionComponent.name)
-        val gravityComponent = entity.getOrNull(GravityComponent)
+//        val gravityComponent = entity.getOrNull(GravityComponent)
 
         // Apply gravity to the entity if it has a GravityComponent
-        if (gravityComponent != null) {
+//        if (gravityComponent != null) {
 // TODO enable gravity again
 //            motionComponent.velocityX += gravityComponent.calculateDeltaXGravity()
-            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity()
-        }
+//            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity()
+//        }
 
         // Set the last pixel position to the current grid position
         gridComponent.lastPx = gridComponent.attachX
@@ -57,7 +57,7 @@ class GridMoveSystem : IteratingSystem(
          * The steps will break down the movement into smaller iterators to avoid jumping over grid collisions
          */
         val overallMovementX = motionComponent.velocityX * deltaTime
-        val overallMovementY = motionComponent.velocityY * deltaTime
+        val overallMovementY = motionComponent.velocityY * deltaTime  // We need to invert the Y velocity because the Y axis is inverted in the grid system
         // Calculate the number of steps needed to move the entity in relation to the grid size (here 16x16 pixels)
         val steps = ceil((abs(overallMovementX) + abs(overallMovementY)) / AppConfig.GRID_CELL_SIZE)  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
         if (steps > 0) {
@@ -93,11 +93,13 @@ class GridMoveSystem : IteratingSystem(
                     if (result != 0) {
 //                        collisionResolver.resolveXCollision(grid, motionComponent, collisionChecker, result)
                         collisionResolver.resolveXCollision(gridComponent, motionComponent, collisionBox, result)
-                        entity.configure {
-                            it += gridCollisionXComponent {
-                                dir = result
-                            }
-                        }
+                        if (result == 1) collisionComponent.right
+                        else if (result == -1) collisionComponent.left
+//                        entity.configure {
+//                            it += gridCollisionXComponent {
+//                                dir = result
+//                            }
+//                        }
                     }
                 }
                 // Normalize grid coordinates - adjust the xr value to ensure it stays within the grid cell bounds
@@ -111,7 +113,7 @@ class GridMoveSystem : IteratingSystem(
                 }
 
                 // Move the entity in the Y direction
-                gridComponent.yr += motionComponent.velocityY / steps / AppConfig.GRID_CELL_SIZE
+                gridComponent.yr += overallMovementY / steps / AppConfig.GRID_CELL_SIZE
                 if (motionComponent.velocityY != 0f) {
 /*
                     collisionChecker.preYCheck(
@@ -135,12 +137,22 @@ class GridMoveSystem : IteratingSystem(
                     )
                     if (result != 0) {
                         collisionResolver.resolveYCollision(gridComponent, motionComponent, collisionBox, result)
-                        entity.configure {
-                            it += gridCollisionYComponent {
-                                dir = result
-                            }
+                        if (result == 1) {
+                            collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
+                            collisionComponent.isGrounded = true
                         }
+                        else if (result == -1) collisionComponent.isCollidingAbove = true
+//                        entity.configure {
+//                            it += gridCollisionYComponent {
+//                                dir = result
+//                            }
+//                        }
+                    } else {
+                        collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
+                        collisionComponent.isGrounded = false
+                        collisionComponent.isCollidingAbove = false
                     }
+
                 }
                 // Normalize grid coordinates - adjust the yr value to ensure it stays within the grid cell bounds
                 while (gridComponent.yr > 1) {
@@ -155,18 +167,19 @@ class GridMoveSystem : IteratingSystem(
                 i++
             }
         }
-        motionComponent.velocityX *= motionComponent.frictionX
+//        motionComponent.velocityX *= motionComponent.frictionX
         if (motionComponent.velocityX.isAlmostEquals(0.0005f)) {
             motionComponent.velocityX = 0f
         }
-
-        // Friction only in down direction (falling)
-        if (motionComponent.velocityY > 0f) {
-            motionComponent.velocityY *= motionComponent.frictionY
-            if (motionComponent.velocityY.isAlmostEquals(0.0005f)) {
-                motionComponent.velocityY = 0f
-            }
+//
+//        // Friction only in down direction (falling)
+//        if (motionComponent.velocityY > 0f) {
+//            motionComponent.velocityY *= motionComponent.frictionY
+//        }
+        if (motionComponent.velocityY.isAlmostEquals(0.0005f)) {
+            motionComponent.velocityY = 0f
         }
+
 //        gridComponent.zr += motionComponent.velocityZ
 //        if (gridComponent.zr > 0 && gravityComponent != null) {
 //            motionComponent.velocityZ -= gravityComponent.calculateDeltaZGravity()
