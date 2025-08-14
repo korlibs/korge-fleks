@@ -5,13 +5,12 @@ import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
-import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
+import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
-import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionXComponent
-import korlibs.korge.fleks.components.collision.GridCollisionResult.Companion.gridCollisionYComponent
 import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
@@ -63,106 +62,15 @@ class GridMoveSystem : IteratingSystem(
         if (steps > 0) {
             var i = 0
             while (i < steps) {
-                // Move the entity in the X direction
-                gridComponent.xr += overallMovementX / steps / AppConfig.GRID_CELL_SIZE
+                // Reset collision flags
+                collisionComponent.right = false
+                collisionComponent.left = false
+                collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
+                collisionComponent.isGrounded = false
+                collisionComponent.isCollidingAbove = false
 
-                if (motionComponent.velocityX != 0f) {
-
-//                    collisionChecker.preXCheck(
-//                        grid.cx,
-//                        grid.cy,
-//                        grid.xr,
-//                        grid.yr,
-//                        motionComponent.velocityX,
-//                        motionComponent.velocityY,
-//                        colWidth,
-//                        colHeight,
-//                        AppConfig.GRID_CELL_SIZE
-//                    )
-
-                    // Check if collision happens within the next grid cell where the entity is moving
-                    val result = collisionChecker.checkXCollision(
-                        gridComponent.cx,  // Position of entity (pivot point)
-                        gridComponent.cy,
-                        gridComponent.xr,
-                        gridComponent.yr,
-                        motionComponent.velocityX,
-                        motionComponent.velocityY,
-                        collisionBox
-                    )
-                    if (result != 0) {
-//                        collisionResolver.resolveXCollision(grid, motionComponent, collisionChecker, result)
-                        collisionResolver.resolveXCollision(gridComponent, motionComponent, collisionBox, result)
-                        if (result == 1) collisionComponent.right
-                        else if (result == -1) collisionComponent.left
-//                        entity.configure {
-//                            it += gridCollisionXComponent {
-//                                dir = result
-//                            }
-//                        }
-                    }
-                }
-                // Normalize grid coordinates - adjust the xr value to ensure it stays within the grid cell bounds
-                while (gridComponent.xr > 1) {
-                    gridComponent.xr--
-                    gridComponent.cx++
-                }
-                while (gridComponent.xr < 0) {
-                    gridComponent.xr++
-                    gridComponent.cx--
-                }
-
-                // Move the entity in the Y direction
-                gridComponent.yr += overallMovementY / steps / AppConfig.GRID_CELL_SIZE
-                if (motionComponent.velocityY != 0f) {
-/*
-                    collisionChecker.preYCheck(
-                        gridComponent.cx,  // Position of entity (pivot point)
-                        gridComponent.cy,
-                        gridComponent.xr,
-                        gridComponent.yr,
-                        motionComponent.velocityX,
-                        motionComponent.velocityY,
-                        collisionBox
-                    )
-*/
-                    val result = collisionChecker.checkYCollision(
-                        gridComponent.cx,  // Position of entity (pivot point)
-                        gridComponent.cy,
-                        gridComponent.xr,
-                        gridComponent.yr,
-                        motionComponent.velocityX,
-                        motionComponent.velocityY,
-                        collisionBox
-                    )
-                    if (result != 0) {
-                        collisionResolver.resolveYCollision(gridComponent, motionComponent, collisionBox, result)
-                        if (result == 1) {
-                            collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
-                            collisionComponent.isGrounded = true
-                        }
-                        else if (result == -1) collisionComponent.isCollidingAbove = true
-//                        entity.configure {
-//                            it += gridCollisionYComponent {
-//                                dir = result
-//                            }
-//                        }
-                    } else {
-                        collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
-                        collisionComponent.isGrounded = false
-                        collisionComponent.isCollidingAbove = false
-                    }
-
-                }
-                // Normalize grid coordinates - adjust the yr value to ensure it stays within the grid cell bounds
-                while (gridComponent.yr > 1) {
-                    gridComponent.yr--
-                    gridComponent.cy++
-                }
-                while (gridComponent.yr < 0) {
-                    gridComponent.yr++
-                    gridComponent.cy--
-                }
+                checkCollisionVertically(overallMovementY / steps, gridComponent, motionComponent, collisionComponent, collisionBox)
+                checkCollisionHorizontally(overallMovementX / steps, gridComponent, motionComponent, collisionComponent, collisionBox)
 
                 i++
             }
@@ -206,5 +114,70 @@ class GridMoveSystem : IteratingSystem(
     override fun onAlphaEntity(entity: Entity, alpha: Float) {
         //println("GridMoveSystem: onAlphaEntity: ${entity.id} alpha: $alpha")
         entity[GridComponent].interpolationAlpha = alpha
+    }
+
+    //
+    private fun checkCollisionHorizontally(movement: Float, gridComponent: Grid, motionComponent: Motion, collisionComponent: Collision, collisionBox: AssetStore.CollisionData) {
+        // Move the entity in the X direction
+        gridComponent.xr += movement / AppConfig.GRID_CELL_SIZE
+
+        if (motionComponent.velocityX != 0f) {
+            // Check if collision happens within the next grid cell where the entity is moving
+            val result = collisionChecker.checkXCollision(
+                gridComponent.cx,  // Position of entity (pivot point)
+                gridComponent.cy,
+                gridComponent.xr,
+                gridComponent.yr,
+                motionComponent.velocityX,
+                motionComponent.velocityY,
+                collisionBox
+            )
+            if (result != 0) {
+                collisionResolver.resolveXCollision(gridComponent, motionComponent, collisionBox, result)
+                if (result == 1) collisionComponent.right = true
+                else if (result == -1) collisionComponent.left = true
+            }
+        }
+        // Normalize grid coordinates - adjust the xr value to ensure it stays within the grid cell bounds
+        while (gridComponent.xr > 1) {
+            gridComponent.xr--
+            gridComponent.cx++
+        }
+        while (gridComponent.xr < 0) {
+            gridComponent.xr++
+            gridComponent.cx--
+        }
+    }
+
+    fun checkCollisionVertically(movement: Float, gridComponent: Grid, motionComponent: Motion, collisionComponent: Collision, collisionBox: AssetStore.CollisionData) {
+        // Move the entity in the Y direction
+        gridComponent.yr += movement / AppConfig.GRID_CELL_SIZE
+
+        if (motionComponent.velocityY != 0f) {
+            // Check if collision happens within the next grid cell where the entity is moving
+            val result = collisionChecker.checkYCollision(
+                gridComponent.cx,  // Position of entity (pivot point)
+                gridComponent.cy,
+                gridComponent.xr,
+                gridComponent.yr,
+                motionComponent.velocityX,
+                motionComponent.velocityY,
+                collisionBox
+            )
+            if (result != 0) {
+                collisionResolver.resolveYCollision(gridComponent, motionComponent, collisionBox, result)
+                if (result == 1) collisionComponent.isGrounded = true
+                else if (result == -1) collisionComponent.isCollidingAbove = true
+            }
+        }
+        // Normalize grid coordinates - adjust the yr value to ensure it stays within the grid cell bounds
+        while (gridComponent.yr > 1) {
+            gridComponent.yr--
+            gridComponent.cy++
+        }
+        while (gridComponent.yr < 0) {
+            gridComponent.yr++
+            gridComponent.cy--
+        }
     }
 }

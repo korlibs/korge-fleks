@@ -19,7 +19,7 @@ class PlatformerCollisionResolver : CollisionResolver() {
         if (dir == 1) {  // Right direction
             val xrRight = gridComponent.xr + (collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE
 
-            val checkDistance = ceil(abs(collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE).toInt()
+            val checkDistance = ceil(abs(collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE)
 
             val collisionOverlap = checkDistance - xrRight  // Ratio from right edge of the cell
             // Move the grid position to the edge of the cell
@@ -28,7 +28,7 @@ class PlatformerCollisionResolver : CollisionResolver() {
         if (dir == -1) {  // Left direction
             val xrLeft = gridComponent.xr + collisionBox.x / AppConfig.GRID_CELL_SIZE
 
-            val checkDistance = ceil(abs(collisionBox.x) / AppConfig.GRID_CELL_SIZE).toInt()
+            val checkDistance = ceil(abs(collisionBox.x) / AppConfig.GRID_CELL_SIZE)
 
             val collisionOverlap = (1 - checkDistance) - xrLeft  // Ratio from left edge of the cell
             // Move the grid position to the edge of the cell
@@ -48,7 +48,7 @@ class PlatformerCollisionResolver : CollisionResolver() {
         if (dir == 1) {  // Down direction
             val yrBottom = gridComponent.yr + (collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE
 
-            val checkDistance = ceil(abs(collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE).toInt()
+            val checkDistance = ceil(abs(collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE)
 
             val collisionOverlap = checkDistance - yrBottom  // Ratio from bottom edge of the cell
             // Move the grid position to the edge of the cell
@@ -57,11 +57,11 @@ class PlatformerCollisionResolver : CollisionResolver() {
         if (dir == -1) {  // Up direction
             val yrTop = gridComponent.yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
 
-            val checkDistance = ceil(abs(collisionBox.y) / AppConfig.GRID_CELL_SIZE).toInt()
+            val checkDistance = ceil(abs(collisionBox.y) / AppConfig.GRID_CELL_SIZE)
 
             val collisionOverlap = (1 - checkDistance) - yrTop  // Ratio from top edge of the cell
             // Move the grid position to the edge of the cell
-            gridComponent.yr += collisionOverlap
+            gridComponent.yr += collisionOverlap  // TODO this seems not to fix the issue + 0.0001f  // To avoid floating point precision issues
         }
         // We are in front of a collider cell (floor) - thus we stop the motion
         motionComponent.velocityY = 0f
