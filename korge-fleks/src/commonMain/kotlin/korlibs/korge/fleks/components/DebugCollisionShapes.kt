@@ -1,75 +1,55 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 /**
- * A component to define movement for an entity.
- *
- * @param velocityX in "world units" per delta time
- * @param velocityY in "world units" per delta time
+ * This component is used to ...
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
-@Serializable @SerialName("Motion")
-class Motion private constructor(
-    var accelerationX: Float = 0f,
-    var accelerationY: Float = 0f,
-
-    var velocityX: Float = 0f,  // in world units (grid size e.g. 16 pixels) per second
-    var velocityY: Float = 0f,
-
-    var frictionX: Float = 0f,
-    var frictionY: Float = 0f,
-
-    var lastHorizontalVelocity: Float = 0f,
-) : PoolableComponent<Motion>() {
+@Serializable @SerialName("DebugCollisionShapes")
+class DebugCollisionShapes private constructor(
+    val gridCells: MutableList<Point> = mutableListOf(),
+    val ratioPositions: MutableList<Point> = mutableListOf()
+) : PoolableComponent<DebugCollisionShapes>() {
     // Init an existing component data instance with data from another component
-    // This is used for component instances when they are part (val property) of another component
-    fun init(from: Motion) {
-        accelerationX = from.accelerationX
-        accelerationY = from.accelerationY
-        velocityX = from.velocityX
-        velocityY = from.velocityY
-        frictionX = from.frictionX
-        frictionY = from.frictionY
-        lastHorizontalVelocity = from.lastHorizontalVelocity
+    // This is used for component instances when they are a value property of another component
+    fun init(from: DebugCollisionShapes) {
+        gridCells.init(from.gridCells)
+        ratioPositions.init(from.ratioPositions)
     }
 
     // Cleanup the component data instance manually
-    // This is used for component instances when they are part (val property) of another component
+    // This is used for component instances when they are a value property of another component
     fun cleanup() {
-        accelerationX = 0f
-        accelerationY = 0f
-        velocityX = 0f
-        velocityY = 0f
-        frictionX = 0f
-        frictionY = 0f
-        lastHorizontalVelocity = 0f
+        gridCells.freeAndClear()
+        ratioPositions.freeAndClear()
     }
 
-    override fun type() = MotionComponent
+    override fun type() = DebugCollisionShapesComponent
 
     companion object {
-        val MotionComponent = componentTypeOf<Motion>()
+        val DebugCollisionShapesComponent = componentTypeOf<DebugCollisionShapes>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticMotionComponent(config: Motion.() -> Unit): Motion =
-            Motion().apply(config)
+        fun staticDebugCollisionShapesComponent(config: DebugCollisionShapes.() -> Unit ): DebugCollisionShapes =
+            DebugCollisionShapes().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun motionComponent(config: Motion.() -> Unit): Motion =
+        fun debugCollisionShapesComponent(config: DebugCollisionShapes.() -> Unit ): DebugCollisionShapes =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Motion") { Motion() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "DebugCollisionShapes") { DebugCollisionShapes() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Motion = motionComponent { init(from = this@Motion) }
+    override fun clone(): DebugCollisionShapes = debugCollisionShapesComponent { init(from = this@DebugCollisionShapes ) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

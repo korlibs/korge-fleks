@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.logic.collision.checker
 
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.DebugCollisionShapes
 
 /**
  * A base class for collision checking in a grid-based system.
@@ -87,7 +88,8 @@ open class CollisionChecker {
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        collisionBox: AssetStore.CollisionData
+        collisionBox: AssetStore.CollisionData,
+        debugShapesComponent: DebugCollisionShapes?
     ): Int = 0
 
     /**
@@ -113,7 +115,8 @@ open class CollisionChecker {
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        collisionBox: AssetStore.CollisionData
+        collisionBox: AssetStore.CollisionData,
+        debugShapesComponent: DebugCollisionShapes?
     ): Int = 0
 
     /**

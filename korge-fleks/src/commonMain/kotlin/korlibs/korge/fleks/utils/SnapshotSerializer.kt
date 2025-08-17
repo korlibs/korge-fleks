@@ -8,6 +8,7 @@ import korlibs.io.lang.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Debug
+import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.EntityRef
 import korlibs.korge.fleks.components.EntityRefs
 import korlibs.korge.fleks.components.EntityRefsByName
@@ -28,6 +29,7 @@ import korlibs.korge.fleks.components.Rgba
 import korlibs.korge.fleks.components.Rigidbody
 import korlibs.korge.fleks.components.Size
 import korlibs.korge.fleks.components.Sound
+import korlibs.korge.fleks.components.State
 import korlibs.korge.fleks.components.Spawner
 import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.SpriteLayers
@@ -167,6 +169,7 @@ class SnapshotSerializer {
         polymorphic(Component::class) {
             subclass(Collision::class)
             subclass(Debug::class)
+            subclass(DebugCollisionShapes::class)
             subclass(EntityRef::class)
             subclass(EntityRefs::class)
             subclass(EntityRefsByName::class)
@@ -187,6 +190,7 @@ class SnapshotSerializer {
             subclass(Rigidbody::class)
             subclass(Size::class)
             subclass(Sound::class)
+            subclass(State::class)
             subclass(Spawner::class)
             subclass(Sprite::class)
             subclass(SpriteLayers::class)

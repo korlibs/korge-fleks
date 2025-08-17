@@ -41,8 +41,8 @@ class PositionSystem : IteratingSystem(
             // This is used for entities which are statically moving like in the intro sequence
             val motion = entity[MotionComponent]
             // s(t) = a/2 * t^2 + v * t + s(t-1)
-            positionComponent.x = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityX * deltaTime + positionComponent.x
-            positionComponent.y = motion.accelX * 0.5f * deltaTime * deltaTime + motion.velocityY * deltaTime + positionComponent.y
+            positionComponent.x = motion.accelerationX * 0.5f * deltaTime * deltaTime + motion.velocityX * deltaTime + positionComponent.x
+            positionComponent.y = motion.accelerationX * 0.5f * deltaTime * deltaTime + motion.velocityY * deltaTime + positionComponent.y
         }
     }
 }

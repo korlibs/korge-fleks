@@ -14,7 +14,10 @@ import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.ParallaxDataContainer
 import korlibs.korge.fleks.assets.data.readParallaxDataContainer
+import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.ldtk.view.*
+import korlibs.math.interpolation.Ratio
+import korlibs.math.interpolation.toRatio
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -52,6 +55,8 @@ class AssetStore {
 
     internal val assetLevelDataLoader: AssetLevelDataLoader = AssetLevelDataLoader()
 
+    ///////////// TODO /////////////////////////////////////////
+
     data class CollisionData(
         // Anchor point of the collision rectangle to the pivot point of the entity
         val x: Int,
@@ -61,13 +66,42 @@ class AssetStore {
         val height: Float
     )
 
-    // TODO
-    fun getCollisionData(name: String) : CollisionData =
+    data class MotionConfig(
+        // Config for horizontal and vertical movement and acceleration
+        // These values are coming from the game object YAML config
+        var gravity: Float = 0f,                // defined in m/s²
+        var maxHorizontalVelocity: Float = 0f,  // defined in m/s
+        var maxVerticalVelocity: Float = 0f,    // defined in m/s
+        var maxJumpVelocity: Float = 0f,        // defined in m : Sets the overall power for jumping
+        var maxFallingVelocity: Float = 0f,     // defined in m/s
+        var endJumpVelocity: Float = 0f,        // defined in m/s
+        var horizontalProgress: Ratio = 0f.toRatio(),     // Factor to smooth horizontal motion at start and end: [0..1]
+        var initJumpVelocityFactor: Float = 0f  // Factor which is multiplied with maxJumpVelocity and means how much of the
+        // maxJumpVelocity is added every cycle to the jumping object
+    )
+    val collisionData =
         CollisionData(
             -10, -28, 17f, 29f
             //-17, -28, 35f, 29f
             //0, 0, 17f, 29f
         )
+
+    val motionConfig =
+        MotionConfig(
+            gravity = -20f * AppConfig.WORLD_TO_PIXEL_RATIO,              // defined m/s², converted to full-HD pixel / s²
+            maxHorizontalVelocity = 6f * AppConfig.WORLD_TO_PIXEL_RATIO,  // defined m/s
+            maxVerticalVelocity = 0f * AppConfig.WORLD_TO_PIXEL_RATIO,    // not used by player character controller
+            maxJumpVelocity = 360f * AppConfig.WORLD_TO_PIXEL_RATIO,      // Factor describing how high an object can jump up
+            maxFallingVelocity = -15f * AppConfig.WORLD_TO_PIXEL_RATIO,
+            endJumpVelocity = 1f * AppConfig.WORLD_TO_PIXEL_RATIO,
+            horizontalProgress = 0.08f.toRatio(),
+            initJumpVelocityFactor = 0.1f
+        )
+
+    fun getCollisionData(name: String) : CollisionData = collisionData
+
+    fun getMotionConfig(name: String) : MotionConfig = motionConfig
+    ///////////// TODO END /////////////////////////////////////////
 
     fun getTileMapData(level: String) : LayerTileMaps =
         if (tileMaps.contains(level)) {

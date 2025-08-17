@@ -220,14 +220,10 @@ class TweenSequenceSystem : IteratingSystem(
             is SpawnEntity -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)
             // Directly deletes the given entity from the tween
             is DeleteEntity -> {
-                println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base" +
-                    "'$baseEntity' (name: ${world.nameOf(baseEntity)}).")
-
+                //println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base '$baseEntity' (name: ${world.nameOf(baseEntity)}).")
                 if (tween.target == Entity.NONE) {
                     println("ERROR: TweenSequenceSystem - Trying to delete non-existing Entity (NONE)!")
-                    Pool.writeStatistics()
-                }
-                world.deleteViaLifeCycle(tween.target)
+                } else world.deleteViaLifeCycle(tween.target)
             }
             // Runs the config-function on the given entity from the tween
             is ExecuteConfigFunction -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)

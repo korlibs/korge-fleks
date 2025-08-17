@@ -1,13 +1,15 @@
 package korlibs.korge.fleks.logic.collision.checker
 
-abstract class GroundChecker {
+import korlibs.korge.fleks.assets.AssetStore
 
+
+abstract class GroundChecker {
     abstract fun onGround(
-        velocityY: Float,
         cx: Int,
         cy: Int,
         xr: Float,
         yr: Float,
-        collisionChecker: CollisionChecker
+        velocityY: Float,
+        collisionBox: AssetStore.CollisionData
     ): Boolean
 }
