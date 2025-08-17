@@ -7,7 +7,6 @@ import korlibs.korge.fleks.logic.collision.GridPosition
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.fleks.utils.DebugPointPool
-import kotlin.math.abs
 import kotlin.math.ceil
 
 class PlatformerCollisionChecker(
@@ -34,7 +33,8 @@ class PlatformerCollisionChecker(
         if (velocityX > 0f) {  // Moving right
             val xrRight = xr + (collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE
 
-            val checkDistance = ceil(abs(collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE).toInt()
+            grid.setAndNormalizeX(cx, xrRight)  // Get cell of right corner of the collision box
+            val checkDistance = grid.cx - cx  // Check distance between pivot point cell and right corner cell
             val checkRight: Float = checkDistance.toFloat() - 0.0001f  // To avoid floating point precision issues
 
             debugShapesComponent?.let { debugSaveRatioPoint(it, cx, cy, xrRight, yr) }
@@ -59,10 +59,11 @@ class PlatformerCollisionChecker(
         } else if (velocityX < 0f) {  // Moving left
             val xrLeft = xr + collisionBox.x / AppConfig.GRID_CELL_SIZE
 
-            val checkDistance = ceil(abs(collisionBox.x) / AppConfig.GRID_CELL_SIZE).toInt()
+            grid.setAndNormalizeX(cx, xrLeft)  // Get cell of left corner of the collision box
+            val checkDistance = cx - grid.cx  // Check distance between pivot point cell and left corner cell
             val checkLeft: Float = (1 - checkDistance).toFloat() + 0.0001f  // To avoid floating point precision issues
 
-//            debugShapesComponent?.let { debugSaveRatioPoint(it, cx, cy, xrLeft, yr) }
+            debugShapesComponent?.let { debugSaveRatioPoint(it, cx, cy, xrLeft, yr) }
 
             // Cell coordinates of top corner of the collision box
             grid.setAndNormalizeY(cy, yrTop)  // Top corner of the collision box
@@ -103,10 +104,11 @@ class PlatformerCollisionChecker(
         if (velocityY > 0f) {  // Moving down
             val yrBottom = yr + (collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE
 
-            val checkDistance = ceil(abs(collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE).toInt()
+            grid.setAndNormalizeY(cy, yrBottom)  // Get cell of bottom corner of the collision box
+            val checkDistance = grid.cy - cy  // Check distance between pivot point cell and bottom corner cell
             val checkBottom: Float = checkDistance.toFloat() - 0.0001f  // To avoid floating point precision issues
 
-//            debugShapesComponent?.let { debugSaveRatioPoint(debugShapesComponent, cx, cy, xr, yrBottom) }
+            debugShapesComponent?.let { debugSaveRatioPoint(debugShapesComponent, cx, cy, xr, yrBottom) }
 
             // Cell coordinates of left corner of the collision box
             grid.setAndNormalizeX(cx, xrLeft)  // Left corner of the collision box
@@ -128,8 +130,8 @@ class PlatformerCollisionChecker(
         } else if (velocityY < 0f) {  // Moving up
             val yrTop = yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
 
-            val checkDistance = ceil(abs(collisionBox.y) / AppConfig.GRID_CELL_SIZE).toInt()
-//            val checkDistance = ceil(abs(yrTop) / AppConfig.GRID_CELL_SIZE).toInt()
+            grid.setAndNormalizeY(cy, yrTop)  // Get cell of top corner of the collision box
+            val checkDistance = cy - grid.cy  // Check distance between pivot point cell and top corner cell
             val checkTop: Float = (1 - checkDistance).toFloat() + 0.0001f  // To avoid floating point precision issues
 
             debugShapesComponent?.let { debugSaveRatioPoint(debugShapesComponent, cx, cy, xr, yrTop) }
