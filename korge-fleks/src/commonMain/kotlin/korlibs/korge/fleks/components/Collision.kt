@@ -26,6 +26,8 @@ class Collision private constructor(
 
     var becameGroundedThisFrame: Boolean = false,
     var wasGroundedLastFrame: Boolean = false,
+    var wasInFrontOfWall: Boolean = false,  // used to check if the player was in front of a wall last frame
+
     var movingDownSlope: Boolean = false,
     var slopeAngle: Float = 0f,
     var isFalling: Boolean = false,
@@ -48,6 +50,7 @@ class Collision private constructor(
         isGrounded = from.isGrounded
         becameGroundedThisFrame = from.becameGroundedThisFrame
         wasGroundedLastFrame = from.wasGroundedLastFrame
+        wasInFrontOfWall = from.wasInFrontOfWall
         movingDownSlope = from.movingDownSlope
         slopeAngle = from.slopeAngle
         isFalling = from.isFalling
@@ -69,6 +72,7 @@ class Collision private constructor(
         isGrounded = false
         becameGroundedThisFrame = false
         wasGroundedLastFrame = false
+        wasInFrontOfWall = false
         movingDownSlope = false
         slopeAngle = 0f
         isFalling = false

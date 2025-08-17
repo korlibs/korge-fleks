@@ -1,54 +1,11 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.components.data.StateType
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-
-enum class StateType {
-    ILLEGAL,
-
-    EXPLOSION,  // Used normally only by explosion objects
-    FALL,
-    FALL_ATTACK,
-    FLY,
-    FLY_HIT,
-    IDLE,
-    IDLE_HIT,
-    JUMP,
-    JUMP_ATTACK,
-    ON_FLOOR_ATTACK,
-    ON_FLOOR_HIT,
-    RUN,
-    RUN_ATTACK,
-    RUN_HIT,
-    SQUAT,
-    SQUAT_ATTACK,
-    SQUAT_HIT,
-    STAND,
-    STAND_ATTACK,
-    STAND_HIT,
-    TURN,
-    TURN_HIT,
-    WAKEUP,
-    WAKEUP_HIT;
-
-    companion object {
-
-        /** Mapping strings used in Tiled map editor to a specific game object type.
-         *  Use this instead of valueOf() which throws IllegalArgumentException.
-         */
-        fun valueOfString(value: String): StateType {
-            return try {
-                valueOf(value)
-            } catch (e: IllegalArgumentException) {
-                println("ERROR: StateType - Enum for value '$value' does not exist! Exception: $e")
-                ILLEGAL
-            }
-        }
-    }
-}
 
 /**
  * This component is used to store a state value, which can be used for various purposes,
@@ -61,13 +18,15 @@ enum class StateType {
 @Serializable @SerialName("State")
 class State private constructor(
     var current: StateType = StateType.ILLEGAL,
-    var last: StateType = StateType.ILLEGAL
+    var last: StateType = StateType.ILLEGAL,
+    var direction: Int = Geometry.RIGHT_DIRECTION,
 ) : PoolableComponent<State>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
     fun init(from: State) {
         current = from.current
         last = from.last
+        direction = from.direction
     }
 
     // Cleanup the component data instance manually
@@ -75,6 +34,7 @@ class State private constructor(
     fun cleanup() {
         current = StateType.ILLEGAL
         last = StateType.ILLEGAL
+        direction = Geometry.RIGHT_DIRECTION
     }
 
     override fun type() = StateComponent

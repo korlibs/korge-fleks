@@ -17,6 +17,7 @@ import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
 import korlibs.korge.fleks.logic.collision.resolver.PlatformerCollisionResolver
+import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.fleks.utils.DebugPointPool
 import korlibs.math.isAlmostEquals
@@ -115,6 +116,8 @@ class GridMoveSystem : IteratingSystem(
 //        positionComponent.x = grid.x
 //        positionComponent.y = grid.y
 //        println("GridMoveSystem: cx, cy: ${gridComponent.cx}, ${gridComponent.cy} xr, yr: ${gridComponent.xr}, ${gridComponent.yr}")
+
+        checkPlayfieldBoundaries(gridComponent)
     }
 
     override fun onAlphaEntity(entity: Entity, alpha: Float) {
@@ -122,7 +125,23 @@ class GridMoveSystem : IteratingSystem(
         entity[GridComponent].interpolationAlpha = alpha
     }
 
-    //
+    /**
+     * Check for horizontal collisions and resolve them if necessary.
+     * The entity is moved in the X direction and the collision is checked.
+     * If a collision is detected, it is resolved and the collision flags are set accordingly.
+     *
+     * @param movement The amount of movement in pixels to check for collisions.
+     * @param gridComponent The grid component of the entity.
+     * @param motionComponent The motion component of the entity.
+     * @param collisionComponent The collision component of the entity.
+     * @param collisionBox The collision data for the entity.
+     * @param debugShapesComponent Optional debug shapes component for visual debugging.
+     *
+     * @see CollisionChecker.checkXCollision
+     * @see CollisionResolver.resolveXCollision
+     * @see DebugCollisionShapes
+     * @see AssetStore.CollisionData
+     */
     private fun checkCollisionHorizontally(
         movement: Float,
         gridComponent: Grid,
@@ -163,6 +182,23 @@ class GridMoveSystem : IteratingSystem(
         }
     }
 
+    /**
+     * Check for vertical collisions and resolve them if necessary.
+     * The entity is moved in the Y direction and the collision is checked.
+     * If a collision is detected, it is resolved and the collision flags are set accordingly.
+     *
+     * @param movement The amount of movement in pixels to check for collisions.
+     * @param gridComponent The grid component of the entity.
+     * @param motionComponent The motion component of the entity.
+     * @param collisionComponent The collision component of the entity.
+     * @param collisionBox The collision data for the entity.
+     * @param debugShapesComponent Optional debug shapes component for visual debugging.
+     *
+     * @see CollisionChecker.checkYCollision
+     * @see CollisionResolver.resolveYCollision
+     * @see DebugCollisionShapes
+     * @see AssetStore.CollisionData
+     */
     fun checkCollisionVertically(
         movement: Float,
         gridComponent: Grid,
@@ -200,6 +236,25 @@ class GridMoveSystem : IteratingSystem(
         while (gridComponent.yr < 0) {
             gridComponent.yr++
             gridComponent.cy--
+        }
+    }
+
+    /**
+     * Check if the object is within the playfield boundaries.
+     * If the object is outside the boundaries, it is moved back to the nearest boundary.
+     * If the object falls off the playfield at the bottom, the object is considered dead.
+     *
+     * @param gridComponent The grid component of the entity to check.
+     */
+    private fun checkPlayfieldBoundaries(gridComponent: Grid) {
+        // Keep the player sprite inside the level
+        if (gridComponent.x <= 16f) gridComponent.x = 16f
+        else if (gridComponent.x >= Prefab.levelData.width - 16f) gridComponent.x = Prefab.levelData.width - 16f
+
+        // Check if player falls off the playfield at the bottom
+        if (gridComponent.y > Prefab.levelData.height) {
+            // TODO: handle death of object
+            println("ERROR: PositionSystem - Player falls off the playfield!")
         }
     }
 }
