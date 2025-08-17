@@ -8,6 +8,7 @@ import korlibs.io.lang.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Debug
+import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.EntityRef
 import korlibs.korge.fleks.components.EntityRefs
 import korlibs.korge.fleks.components.EntityRefsByName
@@ -168,6 +169,7 @@ class SnapshotSerializer {
         polymorphic(Component::class) {
             subclass(Collision::class)
             subclass(Debug::class)
+            subclass(DebugCollisionShapes::class)
             subclass(EntityRef::class)
             subclass(EntityRefs::class)
             subclass(EntityRefsByName::class)

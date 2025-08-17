@@ -5,6 +5,7 @@ import korlibs.datastructure.iterators.fastForEachReverse
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
+import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
@@ -31,7 +32,8 @@ class DebugRenderSystem(
 ) : RenderSystem {
     private val family: Family = world.family {
         all(layerTag)
-            .any(layerTag, PositionComponent, CollisionComponent, SpriteComponent, TextFieldComponent, NinePatchComponent, LevelMapComponent, GridComponent)
+            .any(layerTag, PositionComponent, CollisionComponent, SpriteComponent, TextFieldComponent,
+                NinePatchComponent, LevelMapComponent, GridComponent, DebugCollisionShapesComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
@@ -40,7 +42,7 @@ class DebugRenderSystem(
     private var camera: Entity = Entity.NONE
 
     private val grid = GridPosition()
-    private val debugPointPool = world.inject<DebugPointPool>("DebugPointPool")
+//    private val debugPointPool = world.inject<DebugPointPool>("DebugPointPool")
 
     override fun render(ctx: RenderContext) {
         camera = world.getMainCameraOrNull() ?: return
@@ -139,11 +141,10 @@ class DebugRenderSystem(
                         }
 
                         if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS) {
-                            debugPointPool.collisionGridCells.forEach { cell -> drawAndFreeGridCell(batch, cell, Colors.GREEN) }
-                            debugPointPool.collisionGridCells.clear()
-
-                            debugPointPool.collisionRatioPositions.forEach { point -> drawAndFreeRatioPoint(batch, point, Colors.RED) }
-                            debugPointPool.collisionRatioPositions.clear()
+                            entity.getOrNull(DebugCollisionShapesComponent)?.let {
+                                it.gridCells.forEach { cell -> drawGridCell(batch, cell, Colors.GREEN) }
+                                it.ratioPositions.forEach { point -> drawRatioPoint(batch, point, Colors.RED) }
+                            }
                         }
                     }
 
@@ -214,21 +215,19 @@ class DebugRenderSystem(
         }
     }
 
-    private fun drawAndFreeGridCell(batch: LineRenderBatcher, cell: Point, color: RGBA) {
+    private fun drawGridCell(batch: LineRenderBatcher, cell: Point, color: RGBA) {
         gridPosition.x = cell.x
         gridPosition.y = cell.y
         gridPosition.run { world.convertToScreenCoordinates(camera) }
         batch.drawVector(color) {
             rect(gridPosition.x, gridPosition.y, AppConfig.GRID_CELL_SIZE, AppConfig.GRID_CELL_SIZE)
         }
-        cell.free()
     }
 
-    private fun drawAndFreeRatioPoint(batch: LineRenderBatcher, point: Point, color: RGBA) {
+    private fun drawRatioPoint(batch: LineRenderBatcher, point: Point, color: RGBA) {
         gridPosition.x = point.x
         gridPosition.y = point.y
         gridPosition.run { world.convertToScreenCoordinates(camera) }
         drawPoint(batch, gridPosition.x, gridPosition.y, color)
-        point.free()
     }
 }

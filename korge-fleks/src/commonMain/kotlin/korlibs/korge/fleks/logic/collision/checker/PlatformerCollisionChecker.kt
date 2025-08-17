@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.logic.collision.checker
 
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.data.Point.Companion.point
 import korlibs.korge.fleks.logic.collision.GridPosition
 import korlibs.korge.fleks.prefab.Prefab
@@ -22,7 +23,8 @@ class PlatformerCollisionChecker(
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        collisionBox: AssetStore.CollisionData
+        collisionBox: AssetStore.CollisionData,
+        debugShapesComponent: DebugCollisionShapes?
     ): Int {
         var dir = 0
         val yrTop = yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
@@ -35,14 +37,14 @@ class PlatformerCollisionChecker(
             val checkDistance = ceil(abs(collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE).toInt()
             val checkRight: Float = checkDistance.toFloat() - 0.0001f  // To avoid floating point precision issues
 
-            debugSaveRatioPoint(cx, cy, xrRight, yr)
+            debugShapesComponent?.let { debugSaveRatioPoint(it, cx, cy, xrRight, yr) }
 
             // Cell coordinates of top corner of the collision box
             grid.setAndNormalizeY(cy, yrTop)  // Top corner of the collision box
 
             // Check collision in bottom cell and if yr is greater than 1 (yr is over cell bounds)
             repeat( ceil(collisionBox.height / AppConfig.GRID_CELL_SIZE).toInt()) { i ->
-                debugSaveGridCell(cx + checkDistance, grid.cy + i)
+                debugShapesComponent?.let { debugSaveGridCell(it, cx + checkDistance, grid.cy + i) }
 
                 if (level.hasCollision(cx + checkDistance, grid.cy + i) && xrRight >= checkRight) {  // Check the next X cell
                     dir = 1
@@ -50,7 +52,7 @@ class PlatformerCollisionChecker(
             }
             // Cell coordinates of bottom corner of the collision box
             grid.setAndNormalizeY(cy, yrBottom)  // Bottom corner of the collision box
-            debugSaveGridCell(cx + checkDistance, grid.cy)
+                debugShapesComponent?.let { debugSaveGridCell(it, cx + checkDistance, grid.cy) }
             if (level.hasCollision(cx + checkDistance, grid.cy) && xrRight >= checkRight) {
                 dir = 1
             }
@@ -60,14 +62,14 @@ class PlatformerCollisionChecker(
             val checkDistance = ceil(abs(collisionBox.x) / AppConfig.GRID_CELL_SIZE).toInt()
             val checkLeft: Float = (1 - checkDistance).toFloat() + 0.0001f  // To avoid floating point precision issues
 
-            debugSaveRatioPoint(cx, cy, xrLeft, yr)
+//            debugShapesComponent?.let { debugSaveRatioPoint(it, cx, cy, xrLeft, yr) }
 
             // Cell coordinates of top corner of the collision box
             grid.setAndNormalizeY(cy, yrTop)  // Top corner of the collision box
 
             // Check collision in bottom cell and if yr is greater than 1 (yr is over cell bounds)
             repeat( ceil(collisionBox.height / AppConfig.GRID_CELL_SIZE).toInt()) { i ->
-                debugSaveGridCell(cx - checkDistance, grid.cy + i)
+                debugShapesComponent?.let { debugSaveGridCell(it, cx - checkDistance, grid.cy + i) }
 
                 if (level.hasCollision(cx - checkDistance, grid.cy + i) && xrLeft <= checkLeft) {  // Check the next X cell
                     dir = -1
@@ -75,7 +77,7 @@ class PlatformerCollisionChecker(
             }
             // Cell coordinates of bottom corner of the collision box
             grid.setAndNormalizeY(cy, yrBottom)  // Bottom corner of the collision box
-            debugSaveGridCell(cx - checkDistance, grid.cy)
+                debugShapesComponent?.let { debugSaveGridCell(debugShapesComponent, cx - checkDistance, grid.cy) }
             if (level.hasCollision(cx - checkDistance, grid.cy) && xrLeft <= checkLeft) {
                 dir = -1
             }
@@ -90,7 +92,8 @@ class PlatformerCollisionChecker(
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        collisionBox: AssetStore.CollisionData
+        collisionBox: AssetStore.CollisionData,
+        debugShapesComponent: DebugCollisionShapes?
     ): Int {
         var dir = 0
         val xrLeft = xr + collisionBox.x / AppConfig.GRID_CELL_SIZE
@@ -103,14 +106,14 @@ class PlatformerCollisionChecker(
             val checkDistance = ceil(abs(collisionBox.y + collisionBox.height) / AppConfig.GRID_CELL_SIZE).toInt()
             val checkBottom: Float = checkDistance.toFloat() - 0.0001f  // To avoid floating point precision issues
 
-            debugSaveRatioPoint(cx, cy, xr, yrBottom)
+//            debugShapesComponent?.let { debugSaveRatioPoint(debugShapesComponent, cx, cy, xr, yrBottom) }
 
             // Cell coordinates of left corner of the collision box
             grid.setAndNormalizeX(cx, xrLeft)  // Left corner of the collision box
 
             // Check collision in bottom cell and if yr is greater than 1 (yr is over cell bounds)
             repeat( ceil(collisionBox.width / AppConfig.GRID_CELL_SIZE).toInt()) { i ->
-                debugSaveGridCell(grid.cx + i, cy + checkDistance)
+                debugShapesComponent?.let { debugSaveGridCell(debugShapesComponent, grid.cx + i, cy + checkDistance) }
 
                 if (level.hasCollision(grid.cx + i, cy + checkDistance) && yrBottom >= checkBottom) {  // Check the next Y cell
                     dir = 1
@@ -118,7 +121,7 @@ class PlatformerCollisionChecker(
             }
             // Cell coordinates of right corner of the collision box
             grid.setAndNormalizeX(cx, xrRight)  // Right corner of the collision box
-            debugSaveGridCell(grid.cx, cy + checkDistance)
+            debugShapesComponent?.let { debugSaveGridCell(debugShapesComponent, grid.cx, cy + checkDistance) }
             if (level.hasCollision(grid.cx, cy + checkDistance) && yrBottom >= checkBottom) {
                 dir = 1
             }
@@ -126,16 +129,17 @@ class PlatformerCollisionChecker(
             val yrTop = yr + collisionBox.y / AppConfig.GRID_CELL_SIZE
 
             val checkDistance = ceil(abs(collisionBox.y) / AppConfig.GRID_CELL_SIZE).toInt()
+//            val checkDistance = ceil(abs(yrTop) / AppConfig.GRID_CELL_SIZE).toInt()
             val checkTop: Float = (1 - checkDistance).toFloat() + 0.0001f  // To avoid floating point precision issues
 
-            debugSaveRatioPoint(cx, cy, xr, yrTop)
+            debugShapesComponent?.let { debugSaveRatioPoint(debugShapesComponent, cx, cy, xr, yrTop) }
 
             // Cell coordinates of left corner of the collision box
             grid.setAndNormalizeX(cx, xrLeft)  // Left corner of the collision box
 
             // Check collision in bottom cell and if yr is greater than 1 (yr is over cell bounds)
             repeat( ceil(collisionBox.width / AppConfig.GRID_CELL_SIZE).toInt()) { i ->
-                debugSaveGridCell(grid.cx + i, cy - checkDistance)
+                debugShapesComponent?.let { debugSaveGridCell(debugShapesComponent, grid.cx + i, cy - checkDistance) }
 
                 if (level.hasCollision(grid.cx + i, cy - checkDistance) && yrTop <= checkTop) {  // Check the next Y cell
                     dir = -1
@@ -143,7 +147,7 @@ class PlatformerCollisionChecker(
             }
             // Cell coordinates of right corner of the collision box
             grid.setAndNormalizeX(cx, xrRight)  // Right corner of the collision box
-            debugSaveGridCell(grid.cx, cy - checkDistance)
+            debugShapesComponent?.let { debugSaveGridCell(debugShapesComponent, grid.cx, cy - checkDistance) }
             if (level.hasCollision(grid.cx, cy - checkDistance) && yrTop <= checkTop) {
                 dir = -1
             }
@@ -151,8 +155,8 @@ class PlatformerCollisionChecker(
         return dir
     }
 
-    private fun debugSaveGridCell(cx: Int, cy: Int) {
-        debugPointPool.collisionGridCells.add(
+    private fun debugSaveGridCell(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int) {
+        debugShapesComponent.gridCells.add(
             point {
                 x = cx.toFloat() * AppConfig.GRID_CELL_SIZE
                 y = cy.toFloat() * AppConfig.GRID_CELL_SIZE
@@ -160,8 +164,8 @@ class PlatformerCollisionChecker(
         )
     }
 
-    private fun debugSaveRatioPoint(cx: Int, cy: Int, xr: Float, yr: Float) {
-        debugPointPool.collisionRatioPositions.add(
+    private fun debugSaveRatioPoint(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Float, yr: Float) {
+        debugShapesComponent.ratioPositions.add(
             point {
                 x = (cx.toFloat() + xr) * AppConfig.GRID_CELL_SIZE
                 y = (cy.toFloat() + yr) * AppConfig.GRID_CELL_SIZE

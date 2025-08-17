@@ -7,6 +7,8 @@ import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
+import korlibs.korge.fleks.components.DebugCollisionShapes
+import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.Motion
@@ -23,7 +25,8 @@ import kotlin.math.ceil
 
 
 class GridMoveSystem : IteratingSystem(
-    family = World.family { all(GridComponent, MotionComponent, CollisionComponent) /*.any(LevelMapComponent)*/ },
+    family = World.family { all(GridComponent, MotionComponent, CollisionComponent)
+        .any(DebugCollisionShapesComponent) },
     interval = Fixed(1 / 30f)
 ) {
     val assetStore = world.inject<AssetStore>("AssetStore")
@@ -38,8 +41,11 @@ class GridMoveSystem : IteratingSystem(
         val collisionComponent = entity[CollisionComponent]
         val assetStore = world.inject<AssetStore>(name = "AssetStore")
         val collisionBox = assetStore.getCollisionData(collisionComponent.name)
-//        val gravityComponent = entity.getOrNull(GravityComponent)
+        val debugShapesComponent: DebugCollisionShapes? = entity.getOrNull(DebugCollisionShapesComponent)
+        // Free debug points before we create new ones
+        debugShapesComponent?.cleanup()
 
+//        val gravityComponent = entity.getOrNull(GravityComponent)
         // Apply gravity to the entity if it has a GravityComponent
 //        if (gravityComponent != null) {
 // TODO enable gravity again
@@ -69,8 +75,8 @@ class GridMoveSystem : IteratingSystem(
                 collisionComponent.isGrounded = false
                 collisionComponent.isCollidingAbove = false
 
-                checkCollisionVertically(overallMovementY / steps, gridComponent, motionComponent, collisionComponent, collisionBox)
-                checkCollisionHorizontally(overallMovementX / steps, gridComponent, motionComponent, collisionComponent, collisionBox)
+                checkCollisionHorizontally(overallMovementX / steps, gridComponent, motionComponent, collisionComponent, collisionBox, debugShapesComponent)
+                checkCollisionVertically(overallMovementY / steps, gridComponent, motionComponent, collisionComponent, collisionBox, debugShapesComponent)
 
                 i++
             }
@@ -117,7 +123,14 @@ class GridMoveSystem : IteratingSystem(
     }
 
     //
-    private fun checkCollisionHorizontally(movement: Float, gridComponent: Grid, motionComponent: Motion, collisionComponent: Collision, collisionBox: AssetStore.CollisionData) {
+    private fun checkCollisionHorizontally(
+        movement: Float,
+        gridComponent: Grid,
+        motionComponent: Motion,
+        collisionComponent: Collision,
+        collisionBox: AssetStore.CollisionData,
+        debugShapesComponent: DebugCollisionShapes?
+    ) {
         // Move the entity in the X direction
         gridComponent.xr += movement / AppConfig.GRID_CELL_SIZE
 
@@ -130,7 +143,8 @@ class GridMoveSystem : IteratingSystem(
                 gridComponent.yr,
                 motionComponent.velocityX,
                 motionComponent.velocityY,
-                collisionBox
+                collisionBox,
+                debugShapesComponent
             )
             if (result != 0) {
                 collisionResolver.resolveXCollision(gridComponent, motionComponent, collisionBox, result)
@@ -149,7 +163,14 @@ class GridMoveSystem : IteratingSystem(
         }
     }
 
-    fun checkCollisionVertically(movement: Float, gridComponent: Grid, motionComponent: Motion, collisionComponent: Collision, collisionBox: AssetStore.CollisionData) {
+    fun checkCollisionVertically(
+        movement: Float,
+        gridComponent: Grid,
+        motionComponent: Motion,
+        collisionComponent: Collision,
+        collisionBox: AssetStore.CollisionData,
+        debugShapesComponent: DebugCollisionShapes?
+    ) {
         // Move the entity in the Y direction
         gridComponent.yr += movement / AppConfig.GRID_CELL_SIZE
 
@@ -162,7 +183,8 @@ class GridMoveSystem : IteratingSystem(
                 gridComponent.yr,
                 motionComponent.velocityX,
                 motionComponent.velocityY,
-                collisionBox
+                collisionBox,
+                debugShapesComponent
             )
             if (result != 0) {
                 collisionResolver.resolveYCollision(gridComponent, motionComponent, collisionBox, result)
