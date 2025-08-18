@@ -8,7 +8,7 @@ import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.State.Companion.StateComponent
-import korlibs.korge.fleks.components.StateType
+import korlibs.korge.fleks.components.data.StateType
 import korlibs.korge.fleks.utils.Geometry
 import kotlin.math.abs
 import korlibs.math.interpolation.interpolate
@@ -41,7 +41,7 @@ class PlayerMoveSystem(
         val wasMovingHorizontally = abs(motionComponent.lastHorizontalVelocity) > 0.1f
         val wasFalling = lastVerticalVelocity < -0.1f
         val wasMovingUp = lastVerticalVelocity > 0f
-        val wasInFrontOfWall: Boolean = collisionComponent.isInFrontOfWall()
+        collisionComponent.wasInFrontOfWall = collisionComponent.isInFrontOfWall()
 // TODO        motionComponent.animationSkipIntro = false
 
         if (!collisionComponent.isGrounded) {
@@ -79,7 +79,7 @@ class PlayerMoveSystem(
         // Check if player should squat down
         if (inputSystem.down && collisionComponent.isGrounded) {
             collisionComponent.squatDown = true
-// TODO            gameObject.data.state = SQUAT
+            stateComponent.current = StateType.SQUAT
             // Slow down any horizontal movement
             velocityX = motionConfig.horizontalProgress.interpolate(motionComponent.lastHorizontalVelocity, 0f)
         } else {
@@ -99,7 +99,7 @@ class PlayerMoveSystem(
 // TODO                playHorizontalRunAnim(gameObject)
             } else if (collisionComponent.isGrounded) {
                 // Sprite does not run
-// TODO                gameObject.data.state = STAND
+                stateComponent.current = StateType.STAND
             }
         } else if (!collisionComponent.isGrounded) {
             // this handles pressing joystick left or right while player is not grounded (that means it is
@@ -180,39 +180,13 @@ class PlayerMoveSystem(
 // TODO            switchState(gameObject, 50, false, StateType.IDLE)
         }
 
+        motionComponent.velocityX = velocityX
+        motionComponent.velocityY = -velocityY  // invert Y velocity because the Y axis is inverted in the grid system
+
         // Let the collision handler check and possibly truncate horizontal and vertical movement
         // of the player sprite according to collisions with walls, etc.
 // TODO       app.staticCollisionHandler.move(gameObject as CollisionObject)
-//        checkPlayfieldBoundaries(gameObject)
-//
-//        // WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!
-//        // Do not change game object state any more after moving
-//        // Otherwise the collider might change and lead to unexpected behaviour
-//        // WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!
-//
-//        // Update animation state after moving if the player is in front of wall
-//        if (gameObject.collisionData.isGrounded
-//            && gameObject.isInFrontOfWall()
-//            && !gameObject.playerData.squatDown) {
-//            gameObject.data.state = if (!app.joystickHandler.attack) STAND
-//            else STAND_ATTACK
-//            // Reset animation timer first time when player is in front of wall - otherwise
-//            // the breath animation will not play
-//            if (!wasInFrontOfWall) {
-//                gameObject.animData.animationFrameCounter = 0
-//            }
-//        }
-//        // flip sprite as needed
-//        if (app.joystickHandler.right) {
-//            gameObject.data.direction = Geometry.RIGHT_DIRECTION
-//        } else if (app.joystickHandler.left) {
-//            gameObject.data.direction = Geometry.LEFT_DIRECTION
-//        }
-//
-//        gameObject.collisionData.isFalling = gameObject.dynamicData.velocity.y < 0f
 
-        motionComponent.velocityX = velocityX
-        motionComponent.velocityY = -velocityY  // invert Y velocity because the Y axis is inverted in the grid system
     }
 
     private fun setHorizontalVelocity(lastHorizontalVelocity: Float, motionConfig: AssetStore.MotionConfig, wasRunningInOppositeDirection: Boolean, direction: Int): Float {
