@@ -13,6 +13,7 @@ import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
+import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.logic.collision.GridPosition
@@ -106,7 +107,7 @@ class DebugRenderSystem(
                         }
                     }
 
-                    if (entity has NinePatchComponent && entity has DebugInfoTag.NINE_PATCH_BOUNDS) {
+                    if (entity has DebugInfoTag.NINE_PATCH_BOUNDS && entity has NinePatchComponent) {
                         // Draw nine patch bounds
                         batch.drawVector(Colors.RED) {
                             val ninePatchComponent = entity[NinePatchComponent]
@@ -119,33 +120,32 @@ class DebugRenderSystem(
                         }
                     }
 
-                    if (entity has CollisionComponent && entity has GridComponent) {
-                        if (entity has DebugInfoTag.COLLISION_BOX) {
-                            val gridComponent = entity[GridComponent]
-                            val collisionBox = assetStore.getCollisionData(entity[CollisionComponent].name)
+                    if (entity has DebugInfoTag.COLLISION_BOX && entity has CollisionComponent && entity has GridComponent) {
+                        val gridComponent = entity[GridComponent]
+                        val stateComponent = entity[StateComponent]
+                        val gameObjectStateConfig = assetStore.getGameObjectStateConfig(stateComponent.name)
+                        val collisionBox = gameObjectStateConfig.getCollisionData(stateComponent.current)
 
-                            // Take over entity grid position and convert to screen coordinates
-                            gridPosition.x = gridComponent.x
-                            gridPosition.y = gridComponent.y
-                            gridPosition.run { world.convertToScreenCoordinates(camera) }
+                        // Take over entity grid position and convert to screen coordinates
+                        gridPosition.x = gridComponent.x
+                        gridPosition.y = gridComponent.y
+                        gridPosition.run { world.convertToScreenCoordinates(camera) }
 
-                            // Draw collision bounds
-                            batch.drawVector(Colors.LIGHTBLUE) {
-                                rect(
-                                    x = gridPosition.x + collisionBox.x.toFloat(),
-                                    y = gridPosition.y + collisionBox.y.toFloat(),
-                                    width = collisionBox.width,
-                                    height = collisionBox.height
-                                )
-                            }
+                        // Draw collision bounds
+                        batch.drawVector(Colors.LIGHTBLUE) {
+                            rect(
+                                x = gridPosition.x + collisionBox.x.toFloat(),
+                                y = gridPosition.y + collisionBox.y.toFloat(),
+                                width = collisionBox.width,
+                                height = collisionBox.height
+                            )
                         }
+                    }
 
-                        if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS) {
-                            entity.getOrNull(DebugCollisionShapesComponent)?.let {
-                                it.gridCells.forEach { cell -> drawGridCell(batch, cell, Colors.GREEN) }
-                                it.ratioPositions.forEach { point -> drawRatioPoint(batch, point, Colors.RED) }
-                            }
-                        }
+                    if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS && entity has DebugCollisionShapesComponent) {
+                        val debugCollisionShapesComponent = entity[DebugCollisionShapesComponent]
+                        debugCollisionShapesComponent.gridCells.forEach { cell -> drawGridCell(batch, cell, Colors.GREEN) }
+                        debugCollisionShapesComponent.ratioPositions.forEach { point -> drawRatioPoint(batch, point, Colors.RED) }
                     }
 
                     // Draw pivot point (zero-point for game object)

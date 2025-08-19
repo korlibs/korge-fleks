@@ -105,8 +105,9 @@ class ObjectRenderSystem(
                         imageFrame.layerData.fastForEach { layerData ->
                             val px = position.x + position.offsetX + layerData.targetX - spriteComponent.anchorX
                             val py = position.y + position.offsetY + layerData.targetY - spriteComponent.anchorY
+                            val slice = layerData.slice  // TODO check why this does not work .transformed(SliceOrientation.MIRROR_HORIZONTAL)
                             batch.drawQuad(
-                                tex = ctx.getTex(layerData.slice),
+                                tex = ctx.getTex(slice),
                                 x = px,
                                 y = py,
                                 filtering = false,

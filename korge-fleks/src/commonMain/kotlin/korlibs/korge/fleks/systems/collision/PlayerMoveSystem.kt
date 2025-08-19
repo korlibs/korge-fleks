@@ -5,8 +5,10 @@ import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.data.gameObject.MotionConfig
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
+import korlibs.korge.fleks.components.State
 import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.data.StateType
 import korlibs.korge.fleks.utils.Geometry
@@ -30,7 +32,7 @@ class PlayerMoveSystem(
         var velocityY = (-motionComponent.velocityY)  // invert Y velocity because the Y axis is inverted in the grid system
         var velocityX = 0f // reset horizontal velocity
 
-        val motionConfig = assetStore.getMotionConfig("")
+        val motionConfig = assetStore.getGameObjectStateConfig(stateComponent.name).getMotionConfig()
 
         // put here code which updates the player game objects
         motionComponent.lastHorizontalVelocity = motionComponent.velocityX
@@ -92,11 +94,11 @@ class PlayerMoveSystem(
             if (inputSystem.right) {
                 // Sprite moves to right direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningLeft, Geometry.RIGHT_DIRECTION)
-// TODO                playHorizontalRunAnim(gameObject)
+                playHorizontalRunAnim(stateComponent)
             } else if (inputSystem.left) {
                 // Sprite moves to left direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningRight, Geometry.LEFT_DIRECTION)
-// TODO                playHorizontalRunAnim(gameObject)
+                playHorizontalRunAnim(stateComponent)
             } else if (collisionComponent.isGrounded) {
                 // Sprite does not run
                 stateComponent.current = StateType.STAND
@@ -189,7 +191,7 @@ class PlayerMoveSystem(
 
     }
 
-    private fun setHorizontalVelocity(lastHorizontalVelocity: Float, motionConfig: AssetStore.MotionConfig, wasRunningInOppositeDirection: Boolean, direction: Int): Float {
+    private fun setHorizontalVelocity(lastHorizontalVelocity: Float, motionConfig: MotionConfig, wasRunningInOppositeDirection: Boolean, direction: Int): Float {
         if (wasRunningInOppositeDirection) {
             // Do immediate turnaround of the player
             return direction * motionConfig.maxHorizontalVelocity
@@ -199,4 +201,34 @@ class PlayerMoveSystem(
 //            return direction * motionConfig.maxHorizontalVelocity
         }
     }
+
+    private fun playHorizontalRunAnim(stateComponent: State) {
+        stateComponent.current = StateType.RUN
+        // If the player was falling and moving also horizontally then
+        // skip the start run anim and play normal run animation
+// TODO check if needed       gameObject.animData.animationSkipIntro = wasFalling && wasMovingHorizontally
+    }
+
+    /*
+        // Switch to specified state after given amount of cycles this game object was in a state in a row
+        // and optional after the animation has finished.
+        // Since there is no Animation Controller this function is in the base class.
+        protected fun switchState(gameObject: AnimationObject, cycles: Int, checkAnimationFinished: Boolean, newState: StateType) {
+            if (gameObject.data.lastCycleCounter == app.cycleCounter - 1) {
+                // This function was called already last cycle
+                if (app.cycleCounter - gameObject.data.startCycleCounter > cycles &&
+                    // Take "animation has finished" into account if it should also be checked
+                    (!checkAnimationFinished || app.animationHandler.isAnimationFinished(gameObject))) {
+                    // Update the root state and mark the subState for do not use
+                    gameObject.data.state = newState
+                    gameObject.animData.animationFrameCounter = 0
+                }
+            } else {
+                // First invoke of this function after some cycles, so save start cycle value
+                gameObject.data.startCycleCounter = app.cycleCounter
+            }
+            // This function was called this state, so save last state cycle counter value for next time
+            gameObject.data.lastCycleCounter = app.cycleCounter
+        }
+    */
 }

@@ -6,6 +6,7 @@ import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
 import korlibs.korge.fleks.systems.EntityLinkSystem
 import korlibs.korge.fleks.systems.EventSystem
+import korlibs.korge.fleks.systems.GameObjectStateSystem
 import korlibs.korge.fleks.systems.HealthMonitorSystem
 import korlibs.korge.fleks.systems.LevelChunkSystem
 import korlibs.korge.fleks.systems.LifeCycleSystem
@@ -49,6 +50,7 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         add(GridMoveSystem())
         add(PlayerMoveAfterCollisionSystem(playerInputSystem))
 //        add(GridCollisionCleanupSystem())  ??? check why this is needed
+        add(GameObjectStateSystem())
 
         add(TouchInputSystem())
         add(DebugSystem())

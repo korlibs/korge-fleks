@@ -1,6 +1,6 @@
 package korlibs.korge.fleks.logic.collision.resolver
 
-import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.data.gameObject.CollisionData
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Motion
 
@@ -26,7 +26,7 @@ abstract class CollisionResolver {
     open fun resolveXCollision(
         gridComponent: Grid,
         motionComponent: Motion,
-        collisionBox: AssetStore.CollisionData,
+        collisionBox: CollisionData,
         dir: Int
     ) = Unit
 
@@ -46,7 +46,7 @@ abstract class CollisionResolver {
     open fun resolveYCollision(
         gridComponent: Grid,
         motionComponent: Motion,
-        collisionBox: AssetStore.CollisionData,
+        collisionBox: CollisionData,
         dir: Int
     ) = Unit
 }
