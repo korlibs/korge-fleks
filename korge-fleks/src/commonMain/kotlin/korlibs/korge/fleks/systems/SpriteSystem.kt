@@ -27,7 +27,6 @@ class SpriteSystem : IteratingSystem(
 
         // Update sprite animation
         if (spriteComponent.running) {
-//            comp.time += deltaTime
             spriteComponent.nextFrameIn -= deltaTime
             if (spriteComponent.nextFrameIn <= 0f) {
 //                println("increment: ${comp.increment}, frameIndex: ${comp.frameIndex} was shown for: ${comp.time}")

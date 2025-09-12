@@ -20,7 +20,9 @@ class State private constructor(
     var name: String = "",  // Name of the game object - currently we do not save it anywhere else
     var current: StateType = StateType.ILLEGAL,
     var last: StateType = StateType.ILLEGAL,
+
     var direction: Int = Geometry.RIGHT_DIRECTION,
+    var resetAnimFrameCounter: Boolean = false
 ) : PoolableComponent<State>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
@@ -29,6 +31,7 @@ class State private constructor(
         current = from.current
         last = from.last
         direction = from.direction
+        resetAnimFrameCounter = from.resetAnimFrameCounter
     }
 
     // Cleanup the component data instance manually
@@ -38,6 +41,7 @@ class State private constructor(
         current = StateType.ILLEGAL
         last = StateType.ILLEGAL
         direction = Geometry.RIGHT_DIRECTION
+        resetAnimFrameCounter = false
     }
 
     override fun type() = StateComponent

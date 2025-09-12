@@ -44,7 +44,9 @@ class PlayerMoveSystem(
         val wasFalling = lastVerticalVelocity < -0.1f
         val wasMovingUp = lastVerticalVelocity > 0f
         collisionComponent.wasInFrontOfWall = collisionComponent.isInFrontOfWall()
-// TODO        motionComponent.animationSkipIntro = false
+
+        // Save last state
+        stateComponent.last = stateComponent.current
 
         if (!collisionComponent.isGrounded) {
            // check if falling speed exceeds a certain limit from which we show the falling anim
@@ -76,7 +78,7 @@ class PlayerMoveSystem(
         // the beginning
         if (!collisionComponent.squatDown && (inputSystem.justLeft || inputSystem.justRight || inputSystem.justDown)) {
             // reset animation timer
-// TODO            gameObject.animData.animationFrameCounter = 0
+            stateComponent.resetAnimFrameCounter = true
         }
         // Check if player should squat down
         if (inputSystem.down && collisionComponent.isGrounded) {
@@ -94,11 +96,11 @@ class PlayerMoveSystem(
             if (inputSystem.right) {
                 // Sprite moves to right direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningLeft, Geometry.RIGHT_DIRECTION)
-                playHorizontalRunAnim(stateComponent)
+                stateComponent.current = StateType.RUN
             } else if (inputSystem.left) {
                 // Sprite moves to left direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningRight, Geometry.LEFT_DIRECTION)
-                playHorizontalRunAnim(stateComponent)
+                stateComponent.current = StateType.RUN
             } else if (collisionComponent.isGrounded) {
                 // Sprite does not run
                 stateComponent.current = StateType.STAND
@@ -115,7 +117,7 @@ class PlayerMoveSystem(
             }
             if (wasFalling) {
                 // reset animation timer
-// TODO                gameObject.animData.animationFrameCounter = 0
+                stateComponent.resetAnimFrameCounter = true
             }
         }
         // check if player is jumping
@@ -171,8 +173,8 @@ class PlayerMoveSystem(
 // TODO            && !(app.animationHandler.isAnimationKeyframeInRunAttackState(gameObject) && gameObject.animData.directionIndex == Geometry.DIRECTION_RIGHT)
             ) {
             // Keep state run_attack after attack button release until the gun is in a position
-            // that the animation switch over looks good
-            // ie. wait until direction is "right" and frame counter has reached a key frame
+            // where the animation switch over from still to running looks good
+            // i.e. wait until direction is "right" and frame counter has reached a key frame
             stateComponent.current = StateType.RUN_ATTACK
         } else if (stateComponent.last == StateType.IDLE && stateComponent.current == StateType.STAND) {
             // Check if player was in idle mode and set that state again if he is still standing
@@ -182,13 +184,10 @@ class PlayerMoveSystem(
 // TODO            switchState(gameObject, 50, false, StateType.IDLE)
         }
 
-        motionComponent.velocityX = velocityX
-        motionComponent.velocityY = -velocityY  // invert Y velocity because the Y axis is inverted in the grid system
-
         // Let the collision handler check and possibly truncate horizontal and vertical movement
         // of the player sprite according to collisions with walls, etc.
-// TODO       app.staticCollisionHandler.move(gameObject as CollisionObject)
-
+        motionComponent.velocityX = velocityX
+        motionComponent.velocityY = -velocityY  // invert Y velocity because the Y axis is inverted in the grid system
     }
 
     private fun setHorizontalVelocity(lastHorizontalVelocity: Float, motionConfig: MotionConfig, wasRunningInOppositeDirection: Boolean, direction: Int): Float {
@@ -200,13 +199,6 @@ class PlayerMoveSystem(
             return motionConfig.horizontalProgress.interpolate(lastHorizontalVelocity, direction * motionConfig.maxHorizontalVelocity)
 //            return direction * motionConfig.maxHorizontalVelocity
         }
-    }
-
-    private fun playHorizontalRunAnim(stateComponent: State) {
-        stateComponent.current = StateType.RUN
-        // If the player was falling and moving also horizontally then
-        // skip the start run anim and play normal run animation
-// TODO check if needed       gameObject.animData.animationSkipIntro = wasFalling && wasMovingHorizontally
     }
 
     /*

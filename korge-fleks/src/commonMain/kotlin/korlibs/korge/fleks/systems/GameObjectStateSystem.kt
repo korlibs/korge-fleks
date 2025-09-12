@@ -8,6 +8,7 @@ import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNameComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.State.Companion.StateComponent
+import korlibs.korge.fleks.utils.Geometry
 import korlibs.korge.fleks.utils.nameOf
 
 
@@ -29,7 +30,25 @@ class GameObjectStateSystem : IteratingSystem(
                 // Set the sprite animation based on the current state
                 state.entities.forEach { (entityName, config) ->
                     val subEntity = entityRefsByNameComponent.getSubEntity(entityName)
-                    subEntity[SpriteComponent].animation = config.animationName
+                    val spriteComponent = subEntity[SpriteComponent]
+                    // Check if there is currently a state switch
+                    if (stateComponent.current != stateComponent.last) {
+                        spriteComponent.animation = config.frameTag
+                        spriteComponent.running = config.isAnimation
+                        spriteComponent.direction = config.direction
+                        spriteComponent.visible = !config.disable
+                        spriteComponent.resetAnimation(assetStore)
+                    }
+                    // Flip sprite as needed
+                    spriteComponent.flipX = stateComponent.direction == Geometry.LEFT_DIRECTION
+//                    println("texture fipX: ${spriteComponent.flipX} (entity: ${world.nameOf(entity)})")
+
+                    // Reset animation frame counter if requested
+                    if (stateComponent.resetAnimFrameCounter) {
+                        spriteComponent.frameIndex = 0
+//                        spriteComponent.nextFrameIn = 0f // force to next frame in the next update
+                        stateComponent.resetAnimFrameCounter = false
+                    }
                 }
             } ?: run {
                 println("ERROR: GameObjectStateSystem - No state config found for state ${stateComponent.current} in entity '${world.nameOf(entity)}'!")

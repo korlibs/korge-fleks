@@ -25,10 +25,6 @@ class LevelChunkSystem(
     val levelFamily = world.family { all(MAIN_LEVELMAP, LevelMapComponent) }
 
     override fun onTick() = with(world) {
-        if (Prefab.levelData == null) {
-            // No level data available - nothing to do
-            return
-        }
 
         val camera: Entity = getMainCamera()
         val cameraPosition = camera[PositionComponent]
@@ -38,7 +34,7 @@ class LevelChunkSystem(
             // Check where we are in the level gridvania
             val levelMapComponent = levelEntity[LevelMapComponent]
             val levelChunks = levelMapComponent.levelChunks
-            val tileSize = Prefab.levelData!!.tileSize
+            val tileSize = Prefab.levelData.tileSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
             val viewPortPosX: Float = cameraPosition.x  // - AppConfig.VIEW_PORT_WIDTH_HALF
@@ -48,7 +44,7 @@ class LevelChunkSystem(
             val viewPortMiddlePosY: Int = viewPortPosY.toInt() / tileSize  // y in negative direction
 
 
-            Prefab.levelData!!.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, levelChunks) { entityConfig ->
+            Prefab.levelData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, levelChunks) { entityConfig ->
                 createAndConfigureEntity(entityConfig)
             }
 

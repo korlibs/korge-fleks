@@ -42,16 +42,19 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("Sprite")
 class Sprite private constructor(
     var name: String = "",
+    var visible: Boolean = true,
     var anchorX: Float = 0f,                          // x,y position of the pivot point within the sprite
     var anchorY: Float = 0f,
 
     var animation: String? = null,                    // Leave null if sprite texture does not have an animation
     var frameIndex: Int = 0,                          // frame number of animation which is currently drawn
     var running: Boolean = false,                     // Switch animation on and off
-    var direction: Direction? = null,  // Default: Get direction from Aseprite file
+    var direction: Direction? = null,                 // Default: Get direction from Aseprite file
     var destroyOnAnimationFinished: Boolean = false,  // Delete entity when direction is [ONCE_FORWARD] or [ONCE_REVERSE]
 
     // internal, do not set directly
+    var flipX: Boolean = false,
+    var flipY: Boolean = false,
     var increment: Int = -2,                          // out of [-1, 0, 1]; will be added to frameIndex each new frame
     var nextFrameIn: Float = 0f                       // time in seconds until next frame of animation shall be shown
 ) : PoolableComponent<Sprite>() {
@@ -59,6 +62,7 @@ class Sprite private constructor(
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Sprite) {
         name = from.name
+        visible = from.visible
         anchorX = from.anchorX
         anchorY = from.anchorY
         animation = from.animation
@@ -66,6 +70,8 @@ class Sprite private constructor(
         running = from.running
         direction = from.direction  // normal ordinary enum - no deep copy needed
         destroyOnAnimationFinished = from.destroyOnAnimationFinished
+        flipX = from.flipX
+        flipY = from.flipY
         increment = from.increment
         nextFrameIn = from.nextFrameIn
     }
@@ -74,6 +80,7 @@ class Sprite private constructor(
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
         name = ""
+        visible = true
         anchorX = 0f
         anchorY = 0f
         animation = null
@@ -81,6 +88,8 @@ class Sprite private constructor(
         running = false
         direction = null
         destroyOnAnimationFinished = false
+        flipX = false
+        flipY = false
         increment = -2
         nextFrameIn = 0f
     }
@@ -108,15 +117,11 @@ class Sprite private constructor(
     override fun World.initComponent(entity: Entity) {
         // Initialize animation properties with data from [AssetStore].
         val assetStore: AssetStore = this.inject(name = "AssetStore")
-
         // Set direction from Aseprite if not specified in the component
         if (direction == null) {
-            direction = assetStore.getAnimationDirection(name, animation)
+            direction = assetStore.getAnimationDirection(name, animation)  // TODO: can be removed?
         }
-        setFrameIndex(assetStore)
-        setNextFrameIn(assetStore)
-        setIncrement()
-
+        resetAnimation(assetStore)
         //println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
     }
 
@@ -137,6 +142,13 @@ class Sprite private constructor(
     override fun free() {
         cleanup()
         pool.free(this)
+    }
+
+    // When changing animation state the component's properties need to be reset
+    fun resetAnimation(assetStore: AssetStore) {
+        setFrameIndex(assetStore)
+        setNextFrameIn(assetStore)
+        setIncrement()
     }
 
     // Set frameIndex for starting animation

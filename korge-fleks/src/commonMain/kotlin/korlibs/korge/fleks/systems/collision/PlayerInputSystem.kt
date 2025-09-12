@@ -23,7 +23,7 @@ class PlayerInputSystem() : IntervalSystem(
     var attackDirection = 0.0f
     var attackIndex = 0
 
-
+    // Input variables - will be set by joystick handler (Korge-virtual-joystick ?? addon)
     var isPressedKeyA: Boolean = false
     var isJustPressedKeyA: Boolean = false
     var isPressedKeyS: Boolean = false

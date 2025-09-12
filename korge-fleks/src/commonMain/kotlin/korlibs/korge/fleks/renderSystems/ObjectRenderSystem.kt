@@ -3,7 +3,10 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
 import korlibs.datastructure.iterators.*
+import korlibs.graphics.shader.Program
 import korlibs.image.bitmap.*
+import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
 import korlibs.image.font.*
 import korlibs.image.text.*
 import korlibs.korge.blend.BlendMode
@@ -17,13 +20,18 @@ import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
+import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
+import korlibs.korge.fleks.utils.Geometry
 import korlibs.korge.fleks.utils.getMainCameraOrNull
+import korlibs.korge.fleks.utils.nameOf
 import korlibs.korge.render.*
 import korlibs.math.geom.*
+import korlibs.math.geom.Matrix.Companion
+import korlibs.math.geom.slice.SliceOrientation
 
 
 interface RenderSystem {
@@ -75,9 +83,12 @@ class ObjectRenderSystem(
             }
 
             // Rendering path for sprites
-            if (entity has SpriteComponent) {
+            if (entity has SpriteComponent && entity[SpriteComponent].visible) {
                 val spriteComponent = entity[SpriteComponent]
                 val imageFrame = assetStore.getImageFrame(spriteComponent.name, spriteComponent.animation, spriteComponent.frameIndex)
+                val imageData = assetStore.getImageData(spriteComponent.name)
+                val spriteWidth = imageData.width
+                val spriteHeight = imageData.height
 
                 if (entity has SpriteLayersComponent) {
                     val layerMap = entity[SpriteLayersComponent].layerMap
@@ -103,17 +114,30 @@ class ObjectRenderSystem(
                     ctx.useBatcher { batch ->
                         // Iterate over all layers of each sprite for the frame number
                         imageFrame.layerData.fastForEach { layerData ->
-                            val px = position.x + position.offsetX + layerData.targetX - spriteComponent.anchorX
+                            val px = position.x + position.offsetX + (if (spriteComponent.flipX) (spriteWidth - layerData.targetX - layerData.slice.width) else layerData.targetX) - spriteComponent.anchorX
                             val py = position.y + position.offsetY + layerData.targetY - spriteComponent.anchorY
-                            val slice = layerData.slice  // TODO check why this does not work .transformed(SliceOrientation.MIRROR_HORIZONTAL)
-                            batch.drawQuad(
-                                tex = ctx.getTex(slice),
-                                x = px,
-                                y = py,
-                                filtering = false,
-                                colorMul = rgba,
-                                program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                            )
+
+                            val slice = layerData.slice  //.transformed(SliceOrientation.MIRROR_HORIZONTAL_ROTATE_0)  <-- does not work
+
+                            if (spriteComponent.flipX) {
+                                batch.drawQuadFlipX(  // mirror texture horizontally
+                                    tex = ctx.getTex(slice),
+                                    x = px,
+                                    y = py,
+                                    filtering = false,
+                                    colorMul = rgba,
+                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                                )
+                            } else {
+                                batch.drawQuad(
+                                    tex = ctx.getTex(slice),
+                                    x = px,
+                                    y = py,
+                                    filtering = false,
+                                    colorMul = rgba,
+                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                                )
+                            }
                         }
                     }
                 }
@@ -237,3 +261,46 @@ class ObjectRenderSystem(
         }
     }
 }
+
+/**
+ * Draws a textured [tex] quad at [x], [y] and size [width]x[height] and flipped in X direction.
+ *
+ * It uses [m] transform matrix, an optional [filtering] and [colorMul], [blendMode] and [program] as state for drawing it.
+ *
+ * Note: To draw solid quads, you can use [Bitmaps.white] + [AgBitmapTextureManager] as texture and the [colorMul] as quad color.
+ */
+fun BatchBuilder2D.drawQuadFlipX(
+    tex: TextureCoords,
+    x: Float,
+    y: Float,
+    width: Float = tex.width.toFloat(),
+    height: Float = tex.height.toFloat(),
+    m: Matrix = Matrix.IDENTITY,
+    filtering: Boolean = true,
+    colorMul: RGBA = Colors.WHITE,
+    blendMode: BlendMode = BlendMode.NORMAL,
+    program: Program? = null
+) {
+    setStateFast(tex.base, filtering, blendMode, program, icount = 6, vcount = 4)
+    drawQuadFlipXFast(x, y, width, height, m, tex, colorMul)
+}
+
+fun BatchBuilder2D.drawQuadFlipXFast(
+    x: Float, y: Float, width: Float, height: Float,
+    m: Matrix,
+    tex: BmpCoords,
+    colorMul: RGBA,
+) {
+    val x0 = (x + width)
+    val x1 = x
+    val y0 = y
+    val y1 = (y + height)
+    drawQuadFast(
+        m.transformX(x0, y0), m.transformY(x0, y0),
+        m.transformX(x1, y0), m.transformY(x1, y0),
+        m.transformX(x1, y1), m.transformY(x1, y1),
+        m.transformX(x0, y1), m.transformY(x0, y1),
+        tex, colorMul,
+    )
+}
+
