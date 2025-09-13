@@ -46,8 +46,6 @@ class GameObjectStateSystem : IteratingSystem(
                     // Reset animation frame counter if requested
                     if (stateComponent.resetAnimFrameCounter) {
                         spriteComponent.frameIndex = 0
-//                        spriteComponent.nextFrameIn = 0f // force to next frame in the next update
-                        stateComponent.resetAnimFrameCounter = false
                     }
                 }
             } ?: run {

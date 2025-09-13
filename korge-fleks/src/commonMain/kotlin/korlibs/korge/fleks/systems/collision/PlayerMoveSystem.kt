@@ -76,10 +76,8 @@ class PlayerMoveSystem(
         // If the player is squat down then ignore here new left and right presses.
         // If the player is running left or right and squats down the squat down animation should start from
         // the beginning
-        if (!collisionComponent.squatDown && (inputSystem.justLeft || inputSystem.justRight || inputSystem.justDown)) {
-            // reset animation timer
-            stateComponent.resetAnimFrameCounter = true
-        }
+        stateComponent.resetAnimFrameCounter = (!collisionComponent.squatDown && (inputSystem.justLeft || inputSystem.justRight || inputSystem.justDown))
+
         // Check if player should squat down
         if (inputSystem.down && collisionComponent.isGrounded) {
             collisionComponent.squatDown = true
@@ -106,19 +104,16 @@ class PlayerMoveSystem(
                 stateComponent.current = StateType.STAND
             }
         } else if (!collisionComponent.isGrounded) {
-            // this handles pressing joystick left or right while player is not grounded (that means it is
-            // jumping or falling)
+            // This handles pressing joystick left or right while player is not grounded (that means player is jumping or falling)
             if (inputSystem.right) {
-                // sprite moves to right direction
+                // Sprite moves to right direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningLeft, Geometry.RIGHT_DIRECTION)
             } else if (inputSystem.left) {
-                // sprite moves to left direction
+                // Sprite moves to left direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningRight, Geometry.LEFT_DIRECTION)
             }
-            if (wasFalling) {
-                // reset animation timer
-                stateComponent.resetAnimFrameCounter = true
-            }
+            // Reset animation timer when falling finished and player is grounded again
+            stateComponent.resetAnimFrameCounter = wasFalling == true
         }
         // check if player is jumping
         if (inputSystem.up && !collisionComponent.isCollidingAbove) {
