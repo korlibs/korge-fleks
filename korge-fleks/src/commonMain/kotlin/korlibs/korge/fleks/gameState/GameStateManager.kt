@@ -37,7 +37,7 @@ object GameStateManager {
 
         val vfs = resourcesVfs["common/config.yaml"]
 //        if (vfs.exists()) {
-        // TODO Check why exits() function does not work on Android
+        // TODO Check why exists() function does not work on Android
 
         val gameConfigString = vfs.readString()
         try {
@@ -119,28 +119,5 @@ object GameStateManager {
                 }
 //            } else println("WARNING: Cannot find special game config file '${gameStateConfig.special}/${gameStateConfig.special}/config.yaml'!")
         }
-    }
-
-    /**
-     * This function is called to start the game. It will load a specific "start script" from the current LDtk world and
-     * create and configure the very first entity of the game.
-     *
-     * Hint: Make sure that a game object with name start script name is present in each LDtk world. It can be of different
-     * EntityConfig type. The type can be set in LDtk level map editor.
-     */
-    fun World.startGame(gameStateConfig: GameStateConfig, loadSnapshot: Boolean = false) {
-        // Check if save game is available and load it
-        if (loadSnapshot) {
-            // Load save game
-            println("INFO: Loading save game")
-        } else {
-            // Start new game - Load start script and create entity
-            if (EntityFactory.contains(gameStateConfig.startScript)) {
-                println("INFO: Start game with asset config '${gameStateConfig.world}_${gameStateConfig.level}_${gameStateConfig.special}' and start script '${gameStateConfig.startScript}'")
-                createAndConfigureEntity(gameStateConfig.startScript)
-            }
-            else println("ERROR: Cannot start game! EntityConfig with name '${gameStateConfig.startScript}' does not exist!")
-        }
-
     }
 }

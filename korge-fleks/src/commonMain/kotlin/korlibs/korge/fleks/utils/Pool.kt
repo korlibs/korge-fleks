@@ -36,8 +36,8 @@ class Pool<T> internal constructor() {
     /**
      * Structure containing a set of reusable objects.
      *
-     * @param reset the function that reset an existing object to its initial state
      * @param preallocate the number of objects to preallocate
+     * @param name the name of the pool for statistics output
      * @param gen the object generate function to create a new object when needed
      */
     constructor(preallocate: Int = 0, name: String, gen: (Int) -> T) : this() {
