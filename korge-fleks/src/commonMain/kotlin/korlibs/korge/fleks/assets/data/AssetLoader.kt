@@ -23,12 +23,8 @@ class AssetLoader(
 
     /**
      * Function for loading common game assets.
-     *
-     * @param testing Flag to indicate that the game is running in testing mode. In that case sounds are not loaded since
-     *                headless runners (Github actions) do not support sound playback.
      */
-    suspend fun loadCommonAssets(testing: Boolean = false) {
-        assetStore.testing = testing
+    suspend fun loadCommonAssets() {
 
         val vfs = resourcesVfs["common/config.yaml"]
 //        if (vfs.exists()) {
