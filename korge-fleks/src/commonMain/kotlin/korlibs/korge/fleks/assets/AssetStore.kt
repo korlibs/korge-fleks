@@ -9,6 +9,7 @@ import korlibs.image.font.Font
 import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
 import korlibs.io.file.std.resourcesVfs
+import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
@@ -31,6 +32,10 @@ import kotlin.collections.set
  * boss. After the boss has been beaten the graphics can be unloaded since they are not needed anymore.
  */
 class AssetStore {
+    // Handles loading of various asset types
+    val loader = AssetLoader(this)
+    internal val assetLevelDataLoader: AssetLevelDataLoader = AssetLevelDataLoader(this)
+
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 
     val commonAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
@@ -50,9 +55,6 @@ class AssetStore {
     internal val fonts: MutableMap<String, Pair<AssetType, Font>> = mutableMapOf()
     internal val sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
-
-    internal val assetLevelDataLoader: AssetLevelDataLoader = AssetLevelDataLoader()
-
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {

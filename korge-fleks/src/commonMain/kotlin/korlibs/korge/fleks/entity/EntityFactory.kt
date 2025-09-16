@@ -52,7 +52,7 @@ object EntityFactory {
                 // println("INFO: Configure entity '${baseEntity.id}' with '${entityConfig.name}' EntityConfig.")
                 entityConfig.run { world.entityConfigure(baseEntity) }
             } else {
-                println("WARNING: Cannot invoke! EntityConfig with name '$name' not registered in EntityFactory!")
+                println("ERROR: Cannot invoke! EntityConfig with name '$name' not registered in EntityFactory!")
                 baseEntity
             }
         }

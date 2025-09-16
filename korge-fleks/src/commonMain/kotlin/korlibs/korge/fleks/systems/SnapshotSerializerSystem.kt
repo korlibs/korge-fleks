@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
+import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.io.async.*
 import korlibs.io.file.std.*
 import korlibs.korge.fleks.gameState.*
@@ -28,6 +29,8 @@ class SnapshotSerializerSystem(
 
     private var rewindSeek: Int = 0
     private var snapshotLoaded: Boolean = false
+
+    private val gameState = inject<GameStateManager>("GameState")
 
     data class Recording(
         val recNumber: Int,
@@ -106,17 +109,17 @@ class SnapshotSerializerSystem(
     }
 
     fun triggerPause() {
-        GameStateManager.gameRunning = !GameStateManager.gameRunning
+        gameState.gameRunning = !gameState.gameRunning
         world.systems.forEach { system ->
             when (system) {
                 // Sound system needs special handling, because it has to stop all sounds which are playing
 //                is SoundSystem -> system.soundEnabled = true  // TODO keep sound playing for now -- gameRunning
-                is SoundSystem -> system.soundEnabled = GameStateManager.gameRunning
-                else -> system.enabled = GameStateManager.gameRunning
+                is SoundSystem -> system.soundEnabled = gameState.gameRunning
+                else -> system.enabled = gameState.gameRunning
             }
         }
         // When game is resuming than delete all recordings which are beyond the new play position
-        if (GameStateManager.gameRunning && recordings.isNotEmpty()) {
+        if (gameState.gameRunning && recordings.isNotEmpty()) {
             // We need to free the used components in old snapshots which are not needed anymore
             // Do not free the last snapshot, because it is loaded in the current world
             while (rewindSeek < recordings.size - 1) {
@@ -175,7 +178,7 @@ class SnapshotSerializerSystem(
         if (counter == 120) {
             println("Remove all")
 
-            GameStateManager.gameRunning = !GameStateManager.gameRunning
+            gameState.gameRunning = !gameState.gameRunning
             world.removeAll()
 //            freeComponents(snapshotCopy)
 
@@ -184,13 +187,13 @@ class SnapshotSerializerSystem(
         return
         /// TESTING END
 */
-        if (GameStateManager.gameRunning) {
+        if (gameState.gameRunning) {
             // First call of rewind
             // Free all components of the current world snapshot
             world.removeAll()
             triggerPause()
         }
-        if (!GameStateManager.gameRunning) {
+        if (!gameState.gameRunning) {
             if (fast) rewindSeek -= 4
             else rewindSeek--
             if (rewindSeek < 0) rewindSeek = 0
@@ -203,8 +206,8 @@ class SnapshotSerializerSystem(
     }
 
     fun forward(fast: Boolean = false) {
-        if (GameStateManager.gameRunning) triggerPause()
-        if (!GameStateManager.gameRunning) {
+        if (gameState.gameRunning) triggerPause()
+        if (!gameState.gameRunning) {
             if (fast) rewindSeek += 4
             else rewindSeek++
             if (rewindSeek > recordings.size - 1) rewindSeek = recordings.size - 1

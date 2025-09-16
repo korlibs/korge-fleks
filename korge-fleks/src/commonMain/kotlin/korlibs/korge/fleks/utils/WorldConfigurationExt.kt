@@ -2,6 +2,7 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.WorldConfiguration
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.gameState.GameStateManager
 import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
 import korlibs.korge.fleks.systems.EntityLinkSystem
@@ -25,12 +26,13 @@ import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveSystem
 
 
-fun WorldConfiguration.addKorgeFleksInjectables(assetStore: AssetStore) {
+fun WorldConfiguration.addKorgeFleksInjectables(assetStore: AssetStore, gameState: GameStateManager) {
 
     // Register external objects which are used by systems and in component and family hook functions
     injectables {
         add("AssetStore", assetStore)
         add("DebugPointPool", DebugPointPool())
+        add("GameState", gameState)
     }
 }
 
