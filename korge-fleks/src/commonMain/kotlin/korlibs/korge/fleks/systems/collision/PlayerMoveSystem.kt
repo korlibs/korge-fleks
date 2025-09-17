@@ -5,8 +5,10 @@ import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.data.gameObject.MotionConfig
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
+import korlibs.korge.fleks.components.State
 import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.data.StateType
 import korlibs.korge.fleks.utils.Geometry
@@ -30,7 +32,7 @@ class PlayerMoveSystem(
         var velocityY = (-motionComponent.velocityY)  // invert Y velocity because the Y axis is inverted in the grid system
         var velocityX = 0f // reset horizontal velocity
 
-        val motionConfig = assetStore.getMotionConfig("")
+        val motionConfig = assetStore.getGameObjectStateConfig(stateComponent.name).getMotionConfig()
 
         // put here code which updates the player game objects
         motionComponent.lastHorizontalVelocity = motionComponent.velocityX
@@ -42,7 +44,9 @@ class PlayerMoveSystem(
         val wasFalling = lastVerticalVelocity < -0.1f
         val wasMovingUp = lastVerticalVelocity > 0f
         collisionComponent.wasInFrontOfWall = collisionComponent.isInFrontOfWall()
-// TODO        motionComponent.animationSkipIntro = false
+
+        // Save last state
+        stateComponent.last = stateComponent.current
 
         if (!collisionComponent.isGrounded) {
            // check if falling speed exceeds a certain limit from which we show the falling anim
@@ -72,10 +76,8 @@ class PlayerMoveSystem(
         // If the player is squat down then ignore here new left and right presses.
         // If the player is running left or right and squats down the squat down animation should start from
         // the beginning
-        if (!collisionComponent.squatDown && (inputSystem.justLeft || inputSystem.justRight || inputSystem.justDown)) {
-            // reset animation timer
-// TODO            gameObject.animData.animationFrameCounter = 0
-        }
+        stateComponent.resetAnimFrameCounter = (!collisionComponent.squatDown && (inputSystem.justLeft || inputSystem.justRight || inputSystem.justDown))
+
         // Check if player should squat down
         if (inputSystem.down && collisionComponent.isGrounded) {
             collisionComponent.squatDown = true
@@ -92,29 +94,26 @@ class PlayerMoveSystem(
             if (inputSystem.right) {
                 // Sprite moves to right direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningLeft, Geometry.RIGHT_DIRECTION)
-// TODO                playHorizontalRunAnim(gameObject)
+                stateComponent.current = StateType.RUN
             } else if (inputSystem.left) {
                 // Sprite moves to left direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningRight, Geometry.LEFT_DIRECTION)
-// TODO                playHorizontalRunAnim(gameObject)
+                stateComponent.current = StateType.RUN
             } else if (collisionComponent.isGrounded) {
                 // Sprite does not run
                 stateComponent.current = StateType.STAND
             }
         } else if (!collisionComponent.isGrounded) {
-            // this handles pressing joystick left or right while player is not grounded (that means it is
-            // jumping or falling)
+            // This handles pressing joystick left or right while player is not grounded (that means player is jumping or falling)
             if (inputSystem.right) {
-                // sprite moves to right direction
+                // Sprite moves to right direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningLeft, Geometry.RIGHT_DIRECTION)
             } else if (inputSystem.left) {
-                // sprite moves to left direction
+                // Sprite moves to left direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningRight, Geometry.LEFT_DIRECTION)
             }
-            if (wasFalling) {
-                // reset animation timer
-// TODO                gameObject.animData.animationFrameCounter = 0
-            }
+            // Reset animation timer when falling finished and player is grounded again
+            stateComponent.resetAnimFrameCounter = wasFalling == true
         }
         // check if player is jumping
         if (inputSystem.up && !collisionComponent.isCollidingAbove) {
@@ -169,8 +168,8 @@ class PlayerMoveSystem(
 // TODO            && !(app.animationHandler.isAnimationKeyframeInRunAttackState(gameObject) && gameObject.animData.directionIndex == Geometry.DIRECTION_RIGHT)
             ) {
             // Keep state run_attack after attack button release until the gun is in a position
-            // that the animation switch over looks good
-            // ie. wait until direction is "right" and frame counter has reached a key frame
+            // where the animation switch over from still to running looks good
+            // i.e. wait until direction is "right" and frame counter has reached a key frame
             stateComponent.current = StateType.RUN_ATTACK
         } else if (stateComponent.last == StateType.IDLE && stateComponent.current == StateType.STAND) {
             // Check if player was in idle mode and set that state again if he is still standing
@@ -180,16 +179,13 @@ class PlayerMoveSystem(
 // TODO            switchState(gameObject, 50, false, StateType.IDLE)
         }
 
-        motionComponent.velocityX = velocityX
-        motionComponent.velocityY = -velocityY  // invert Y velocity because the Y axis is inverted in the grid system
-
         // Let the collision handler check and possibly truncate horizontal and vertical movement
         // of the player sprite according to collisions with walls, etc.
-// TODO       app.staticCollisionHandler.move(gameObject as CollisionObject)
-
+        motionComponent.velocityX = velocityX
+        motionComponent.velocityY = -velocityY  // invert Y velocity because the Y axis is inverted in the grid system
     }
 
-    private fun setHorizontalVelocity(lastHorizontalVelocity: Float, motionConfig: AssetStore.MotionConfig, wasRunningInOppositeDirection: Boolean, direction: Int): Float {
+    private fun setHorizontalVelocity(lastHorizontalVelocity: Float, motionConfig: MotionConfig, wasRunningInOppositeDirection: Boolean, direction: Int): Float {
         if (wasRunningInOppositeDirection) {
             // Do immediate turnaround of the player
             return direction * motionConfig.maxHorizontalVelocity
@@ -199,4 +195,27 @@ class PlayerMoveSystem(
 //            return direction * motionConfig.maxHorizontalVelocity
         }
     }
+
+    /*
+        // Switch to specified state after given amount of cycles this game object was in a state in a row
+        // and optional after the animation has finished.
+        // Since there is no Animation Controller this function is in the base class.
+        protected fun switchState(gameObject: AnimationObject, cycles: Int, checkAnimationFinished: Boolean, newState: StateType) {
+            if (gameObject.data.lastCycleCounter == app.cycleCounter - 1) {
+                // This function was called already last cycle
+                if (app.cycleCounter - gameObject.data.startCycleCounter > cycles &&
+                    // Take "animation has finished" into account if it should also be checked
+                    (!checkAnimationFinished || app.animationHandler.isAnimationFinished(gameObject))) {
+                    // Update the root state and mark the subState for do not use
+                    gameObject.data.state = newState
+                    gameObject.animData.animationFrameCounter = 0
+                }
+            } else {
+                // First invoke of this function after some cycles, so save start cycle value
+                gameObject.data.startCycleCounter = app.cycleCounter
+            }
+            // This function was called this state, so save last state cycle counter value for next time
+            gameObject.data.lastCycleCounter = app.cycleCounter
+        }
+    */
 }

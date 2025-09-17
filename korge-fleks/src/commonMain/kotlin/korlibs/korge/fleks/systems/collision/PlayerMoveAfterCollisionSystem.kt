@@ -45,6 +45,6 @@ class PlayerMoveAfterCollisionSystem(
             stateComponent.direction = Geometry.LEFT_DIRECTION
         }
 
-        collisionComponent.isFalling = motionComponent.velocityY < 0f
+        collisionComponent.isFalling = -(motionComponent.velocityY) < 0f  // invert Y velocity because the Y axis is inverted in the grid system
     }
 }

@@ -2,6 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.configureWorld
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventPublishComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventResetComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventSubscribeComponent
@@ -35,14 +36,23 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldText
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeStartComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTouchInputEnableComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.tweenPropertyComponent
+import korlibs.korge.fleks.gameState.GameStateManager
 import korlibs.korge.fleks.utils.Pool
+import korlibs.korge.fleks.utils.addKorgeFleksInjectables
 import korlibs.korge.fleks.utils.createEntity
 
 
 internal class TweenPropertyComponentTest {
 //*
-    private val expectedWorld = configureWorld {}
-    private val recreatedWorld = configureWorld {}
+private val assetStore = AssetStore().also { it.testing = true }
+    private val gameState = GameStateManager()
+
+    private val expectedWorld = configureWorld {
+        addKorgeFleksInjectables(assetStore, gameState)
+    }
+    private val recreatedWorld = configureWorld {
+        addKorgeFleksInjectables(assetStore, gameState)
+    }
 
     @Test
     fun testTweenPropertyComponentTypeIntegrity() {

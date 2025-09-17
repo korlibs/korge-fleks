@@ -20,22 +20,22 @@ class PlatformerGroundSystem(
     private val assetStore = world.inject<AssetStore>("AssetStore")
 
     override fun onTickEntity(entity: Entity) {
-        val collisionComponent = entity[CollisionComponent]
-        val gridComponent = entity[GridComponent]
-        val motionComponent = entity[MotionComponent]
-        val collisionBox = assetStore.getCollisionData(collisionComponent.name)
-
-        collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
-        collisionComponent.isGrounded = groundChecker.onGround(
-            gridComponent.cx,
-            gridComponent.cy,
-            gridComponent.xr,
-            gridComponent.yr,
-            motionComponent.velocityY,
-            collisionBox
-        )
-
-        println("isGrounded: ${collisionComponent.isGrounded} for entity: ${entity.id} grid: ${gridComponent.cx}, ${gridComponent.cy} " +
-                "xr: ${gridComponent.xr}, yr: ${gridComponent.yr} velocityY: ${motionComponent.velocityY}")
+//        val collisionComponent = entity[CollisionComponent]
+//        val gridComponent = entity[GridComponent]
+//        val motionComponent = entity[MotionComponent]
+//        val collisionBox = assetStore.getCollisionData(collisionComponent.name)
+//
+//        collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
+//        collisionComponent.isGrounded = groundChecker.onGround(
+//            gridComponent.cx,
+//            gridComponent.cy,
+//            gridComponent.xr,
+//            gridComponent.yr,
+//            motionComponent.velocityY,
+//            collisionBox
+//        )
+//
+//        println("isGrounded: ${collisionComponent.isGrounded} for entity: ${entity.id} grid: ${gridComponent.cx}, ${gridComponent.cy} " +
+//                "xr: ${gridComponent.xr}, yr: ${gridComponent.yr} velocityY: ${motionComponent.velocityY}")
     }
 }

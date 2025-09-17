@@ -1,11 +1,13 @@
 package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.WorldConfiguration
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.gameState.GameStateManager
 import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
 import korlibs.korge.fleks.systems.EntityLinkSystem
 import korlibs.korge.fleks.systems.EventSystem
+import korlibs.korge.fleks.systems.GameObjectStateSystem
 import korlibs.korge.fleks.systems.HealthMonitorSystem
 import korlibs.korge.fleks.systems.LevelChunkSystem
 import korlibs.korge.fleks.systems.LifeCycleSystem
@@ -24,12 +26,13 @@ import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveSystem
 
 
-fun WorldConfiguration.addKorgeFleksInjectables() {
+fun WorldConfiguration.addKorgeFleksInjectables(assetStore: AssetStore, gameState: GameStateManager) {
 
     // Register external objects which are used by systems and in component and family hook functions
     injectables {
-        add("AssetStore", GameStateManager.assetStore)
+        add("AssetStore", assetStore)
         add("DebugPointPool", DebugPointPool())
+        add("GameState", gameState)
     }
 }
 
@@ -43,12 +46,15 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         // Collision and player input systems
 //        add(PlatformerGravitySystem())
 //        add(PlatformerGroundSystem())  TODO check if we need this system - isGrounded is set in the GridMoveSystem
+
         val playerInputSystem = PlayerInputSystem()
         add(playerInputSystem)
         add(PlayerMoveSystem(playerInputSystem))
         add(GridMoveSystem())
         add(PlayerMoveAfterCollisionSystem(playerInputSystem))
+
 //        add(GridCollisionCleanupSystem())  ??? check why this is needed
+        add(GameObjectStateSystem())
 
         add(TouchInputSystem())
         add(DebugSystem())

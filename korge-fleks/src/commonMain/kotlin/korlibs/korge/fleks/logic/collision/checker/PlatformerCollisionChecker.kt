@@ -1,6 +1,6 @@
 package korlibs.korge.fleks.logic.collision.checker
 
-import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.data.gameObject.CollisionData
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.data.Point.Companion.point
 import korlibs.korge.fleks.logic.collision.GridPosition
@@ -22,7 +22,7 @@ class PlatformerCollisionChecker(
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        collisionBox: AssetStore.CollisionData,
+        collisionBox: CollisionData,
         debugShapesComponent: DebugCollisionShapes?
     ): Int {
         var dir = 0
@@ -93,7 +93,7 @@ class PlatformerCollisionChecker(
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        collisionBox: AssetStore.CollisionData,
+        collisionBox: CollisionData,
         debugShapesComponent: DebugCollisionShapes?
     ): Int {
         var dir = 0

@@ -19,7 +19,9 @@ import kotlin.math.*
 /**
  * Data class for storing level maps and entities for a game world.
  */
-class AssetLevelDataLoader() {
+class AssetLevelDataLoader(
+    private val assetStore: AssetStore
+) {
     private var collisionLayerName: String = ""
     /**
      * Load level data from LDtk world file and store it in the worldData object.
@@ -164,7 +166,7 @@ class AssetLevelDataLoader() {
                         try {
                             // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
                             val entityConfig: EntityConfig =
-                                GameStateManager.configSerializer.yaml().decodeFromString(yamlString.toString())
+                                assetStore.loader.configSerializer.yaml().decodeFromString(yamlString.toString())
 
                             // We need to store only the name of the entity config for later dynamically spawning of entities
                             if (entity.tags.firstOrNull { it == "unique" } == null) {

@@ -5,7 +5,7 @@ import korlibs.korge.fleks.gameState.*
 
 
 /**
- * All components needs to be derived from [PoolableComponents] to be able to be reused from a Component pool and
+ * All components needs to be derived from [PoolableComponent] to be able to be reused from a Component pool and
  * to be recorded in the SnapshotSerializerSystem.
  *
  * The reset function is called when the component is going to be reused for a new entity.
@@ -15,7 +15,7 @@ import korlibs.korge.fleks.gameState.*
  * Note:
  *   - The initComponent and cleanupComponent functions are called as normal life-cycle functions of the component.
  *     They are not called when the snapshot rewind/forward feature is used because the components are already
- *     initialized when loaded (ie. deserialized) from a snapshot.
+ *     initialized when loaded (i.e. deserialized) from a snapshot.
  *   - The initPrefabs and cleanupPrefabs functions are called always when the component is added to or removed from a world.
  *     Also during the snapshot rewind/forward feature.
  */
@@ -26,7 +26,7 @@ abstract class PoolableComponent<T> : Component<T> {
     open fun World.initComponent(entity: Entity) = Unit
 
     /**
-     * Use this function to cleanup/reset a complex entity which might have sub-entities or similar.
+     * Use this function to clean up/reset a complex entity which might have sub-entities or similar.
      */
     open fun World.cleanupComponent(entity: Entity) = Unit
 
@@ -46,25 +46,32 @@ abstract class PoolableComponent<T> : Component<T> {
      */
     abstract fun free()
 
+    /**
+     * Function that is called when the component is added to an entity.
+     */
     override fun World.onAdd(entity: Entity) {
+        val gameState = inject<GameStateManager>("GameState")
+
         // Only run init function on components when the game is running and not when we load snapshots
-        if (GameStateManager.gameRunning) {
+        if (gameState.gameRunning) {
             initComponent(entity)
         }
         // Call init prefabs always
         initPrefabs(entity)
     }
+
     /**
      * Function that is called when the component is removed from an entity.
      */
     override fun World.onRemove(entity: Entity) {
+        val gameState = inject<GameStateManager>("GameState")
+
         // Call cleanup prefabs always
         cleanupPrefabs(entity)
         // Do not free the component if the game is not running - i.e. during the snapshot rewind / forward feature
-        if (GameStateManager.gameRunning) {
-            // Call cleanup function to reset the component when requested by fleks world by calling onRemove
+        if (gameState.gameRunning) {
+            // Call cleanup function to reset the component when requested by fleks world
             cleanupComponent(entity)
-//            println("Freeing component")
             free()
         }
     }

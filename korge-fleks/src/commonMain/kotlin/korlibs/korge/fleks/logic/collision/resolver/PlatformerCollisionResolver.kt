@@ -1,6 +1,6 @@
 package korlibs.korge.fleks.logic.collision.resolver
 
-import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.data.gameObject.CollisionData
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.logic.collision.GridPosition
@@ -13,7 +13,7 @@ class PlatformerCollisionResolver : CollisionResolver() {
     override fun resolveXCollision(
         gridComponent: Grid,
         motionComponent: Motion,
-        collisionBox: AssetStore.CollisionData,
+        collisionBox: CollisionData,
         dir: Int
     ) {
         if (dir == 1) {  // Right direction
@@ -43,7 +43,7 @@ class PlatformerCollisionResolver : CollisionResolver() {
     override fun resolveYCollision(
         gridComponent: Grid,
         motionComponent: Motion,
-        collisionBox: AssetStore.CollisionData,
+        collisionBox: CollisionData,
         dir: Int
     ) {
         // First check if Y cell is already a collider
