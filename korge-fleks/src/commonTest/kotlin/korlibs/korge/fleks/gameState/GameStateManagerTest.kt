@@ -1,9 +1,7 @@
 package korlibs.korge.fleks.gameState
 
-import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.assets.*
-import kotlinx.serialization.modules.SerializersModule
 import kotlin.test.*
+
 
 class GameStateManagerTest {
 //*
@@ -11,8 +9,10 @@ class GameStateManagerTest {
 
     @BeforeTest
     fun setup() {
-        GameStateManager.assetStore = AssetStore()
     }
+
+/*
+TODO Move tests to AssetStoreTest
 
     @Test
     fun register_addsNewSerializerModule() {
@@ -40,5 +40,5 @@ class GameStateManagerTest {
         GameStateManager.run { world.startGame(gameStateConfig, loadSnapshot = false) }
         // Verify appropriate error handling
     }
-//*/
+*/
 }

@@ -1,8 +1,10 @@
 package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.configureWorld
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.entity.config.MainCameraConfig
 import korlibs.korge.fleks.entity.config.commonMainCamera
+import korlibs.korge.fleks.gameState.GameStateManager
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.addKorgeFleksInjectables
 import korlibs.korge.fleks.utils.addKorgeFleksSystems
@@ -13,8 +15,11 @@ import kotlin.test.assertEquals
 
 internal class SnapshotSerializerSystemTest {
 //*
+    private val assetStore = AssetStore().also { it.testing = true }
+    private val gameState = GameStateManager()
+
     private val gameWorld = configureWorld {
-        addKorgeFleksInjectables()
+        addKorgeFleksInjectables(assetStore, gameState)
         addKorgeFleksSystems()
     }
 
