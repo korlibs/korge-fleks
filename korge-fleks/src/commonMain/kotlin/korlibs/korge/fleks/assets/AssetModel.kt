@@ -18,7 +18,8 @@ data class AssetModel(
     val backgrounds: Map<String, ParallaxConfig> = mapOf(),
     val images: Map<String, ImageDataConfig> = mapOf(),
     val fonts: Map<String, String> = mapOf(),
-    val tileMaps: Map<String, TileMapConfig> = mapOf()
+    val tileMaps: Map<String, TileMapConfig> = mapOf(),
+    val textureAtlas: List<String> = listOf()
 ) {
     @Serializable @SerialName("ImageDataConfig")
     data class ImageDataConfig(

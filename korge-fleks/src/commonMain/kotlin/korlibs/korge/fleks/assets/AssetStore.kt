@@ -3,7 +3,9 @@ package korlibs.korge.fleks.assets
 import korlibs.audio.format.*
 import korlibs.audio.sound.*
 import korlibs.datastructure.*
+import korlibs.image.atlas.Atlas
 import korlibs.image.atlas.MutableAtlasUnit
+import korlibs.image.atlas.readAtlas
 import korlibs.image.bitmap.*
 import korlibs.image.font.Font
 import korlibs.image.font.readBitmapFont
@@ -56,6 +58,9 @@ class AssetStore {
     internal val sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
+    internal val textureAtlases: MutableList<Pair<AssetType, Atlas>> = mutableListOf()
+//    internal val textures: MutableList<String, Pair<AssetType, ImageExt>> = mutableListOf()
+
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {
             println("WARNING - AssetStore: Game object config for '$name' already exists! Overwriting it!")
@@ -94,6 +99,10 @@ class AssetStore {
             println("WARNING - AssetStore: Image '$name' not found!")
             ImageData()
         }
+
+    fun getTexture() {
+//        textureAtlases.first().second.entriesMap[""]?.info
+    }
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
@@ -204,6 +213,10 @@ class AssetStore {
             assetConfig.fonts.forEach { font ->
                 fonts[font.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + font.value].readBitmapFont(atlas = atlas))
             }
+            assetConfig.textureAtlas.forEach { atlas ->
+                // TODO save map of images for each sprite
+                textureAtlases.add(Pair(type, resourcesVfs[assetConfig.folder + "/" + atlas].readAtlas()))
+            }
 
             println("Assets: Loaded resources in ${sw.elapsed}")
 
@@ -248,5 +261,6 @@ class AssetStore {
         images.values.removeAll { it.first == type }
         fonts.values.removeAll { it.first == type }
         sounds.values.removeAll { it.first == type }
+//        textureAtlases.removeAll { it.first == type }
     }
 }
