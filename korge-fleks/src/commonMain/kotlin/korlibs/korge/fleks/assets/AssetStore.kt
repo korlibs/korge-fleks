@@ -16,8 +16,11 @@ import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.ParallaxDataContainer
+import korlibs.korge.fleks.assets.data.SpriteAnimFrames
+import korlibs.korge.fleks.assets.data.SpriteFrame
 import korlibs.korge.fleks.assets.data.readParallaxDataContainer
 import korlibs.korge.ldtk.view.*
+import korlibs.korge.view.SpriteAnimation
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -59,7 +62,10 @@ class AssetStore {
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
     internal val textureAtlases: MutableList<Pair<AssetType, Atlas>> = mutableListOf()
-//    internal val textures: MutableList<String, Pair<AssetType, ImageExt>> = mutableListOf()
+    internal val textures: MutableMap<String, Pair<AssetType, SpriteAnimFrames>> = mutableMapOf()
+
+
+
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {
@@ -215,7 +221,57 @@ class AssetStore {
             }
             assetConfig.textureAtlas.forEach { atlas ->
                 // TODO save map of images for each sprite
-                textureAtlases.add(Pair(type, resourcesVfs[assetConfig.folder + "/" + atlas].readAtlas()))
+                val spriteAtlas = resourcesVfs[assetConfig.folder + "/" + atlas].readAtlas()
+                spriteAtlas.entries.forEach { entry ->
+                    //println("sprite: ${entry.name}")
+
+                    val regex = "_\\d+$".toRegex()
+                    if (regex.containsMatchIn(entry.name)) {
+                        // entry is part of a sprite animation
+                        val spriteName = entry.name.replace(regex, "")
+                        // Get the animation index number
+                        val regex = "_(\\d+)$".toRegex()
+                        val match = regex.find(entry.name)
+                        val animIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get animation index of sprite '${entry.name}'!")
+                        if (textures.containsKey(spriteName)) {
+                            textures[spriteName]!!.second.sprites.add(animIndex, SpriteFrame(
+                                entry.texture,
+                                entry.info.virtFrame?.x ?: 0,
+                                entry.info.virtFrame?.y ?: 0,
+                                entry.info.virtFrame?.width ?: 0,
+                                entry.info.virtFrame?.height ?: 0
+                            ))
+                        } else {
+                            val spriteSourceSize = entry.info.virtFrame
+                            val spriteAnimFrame = SpriteAnimFrames()
+                            spriteAnimFrame.sprites.add(
+                                SpriteFrame(
+                                    entry.texture,
+                                    spriteSourceSize?.x ?: 0,
+                                    spriteSourceSize?.y ?: 0,
+                                    entry.info.virtFrame?.width ?: 0,
+                                    entry.info.virtFrame?.height ?: 0
+                                )
+                            )
+                            textures[spriteName] = Pair(type, spriteAnimFrame)
+                        }
+                    } else {
+                        // entry is not part of a sprite animation
+                        val spriteSourceSize = entry.info.virtFrame
+                        val spriteAnimFrame = SpriteAnimFrames()
+                        spriteAnimFrame.sprites.add(
+                            SpriteFrame(
+                                entry.texture,
+                                spriteSourceSize?.x ?: 0,
+                                spriteSourceSize?.y ?: 0,
+                                entry.info.virtFrame?.width ?: 0,
+                                entry.info.virtFrame?.height ?: 0
+                            )
+                        )
+                        textures[entry.name] = Pair(type, spriteAnimFrame)
+                    }
+                }
+                //println()
             }
 
             println("Assets: Loaded resources in ${sw.elapsed}")
