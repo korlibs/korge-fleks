@@ -61,7 +61,6 @@ class AssetStore {
     internal val sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
-    internal val textureAtlases: MutableList<Pair<AssetType, Atlas>> = mutableListOf()
     internal val textures: MutableMap<String, Pair<AssetType, SpriteAnimFrames>> = mutableMapOf()
 
 
@@ -234,23 +233,23 @@ class AssetStore {
                         val match = regex.find(entry.name)
                         val animIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get animation index of sprite '${entry.name}'!")
                         if (textures.containsKey(spriteName)) {
-                            textures[spriteName]!!.second.sprites.add(animIndex, SpriteFrame(
+                            val spriteData = textures[spriteName]!!.second
+                            spriteData.sprites.add(animIndex, SpriteFrame(
                                 entry.texture,
                                 entry.info.virtFrame?.x ?: 0,
-                                entry.info.virtFrame?.y ?: 0,
-                                entry.info.virtFrame?.width ?: 0,
-                                entry.info.virtFrame?.height ?: 0
+                                entry.info.virtFrame?.y ?: 0
                             ))
                         } else {
                             val spriteSourceSize = entry.info.virtFrame
-                            val spriteAnimFrame = SpriteAnimFrames()
+                            val spriteAnimFrame = SpriteAnimFrames(
+                                spriteWidth = entry.info.virtFrame?.width ?: 0,
+                                spriteHeight = entry.info.virtFrame?.height ?: 0
+                            )
                             spriteAnimFrame.sprites.add(
                                 SpriteFrame(
                                     entry.texture,
                                     spriteSourceSize?.x ?: 0,
-                                    spriteSourceSize?.y ?: 0,
-                                    entry.info.virtFrame?.width ?: 0,
-                                    entry.info.virtFrame?.height ?: 0
+                                    spriteSourceSize?.y ?: 0
                                 )
                             )
                             textures[spriteName] = Pair(type, spriteAnimFrame)
@@ -258,14 +257,15 @@ class AssetStore {
                     } else {
                         // entry is not part of a sprite animation
                         val spriteSourceSize = entry.info.virtFrame
-                        val spriteAnimFrame = SpriteAnimFrames()
+                        val spriteAnimFrame = SpriteAnimFrames(
+                            spriteWidth = entry.info.virtFrame?.width ?: 0,
+                            spriteHeight = entry.info.virtFrame?.height ?: 0
+                        )
                         spriteAnimFrame.sprites.add(
                             SpriteFrame(
                                 entry.texture,
                                 spriteSourceSize?.x ?: 0,
-                                spriteSourceSize?.y ?: 0,
-                                entry.info.virtFrame?.width ?: 0,
-                                entry.info.virtFrame?.height ?: 0
+                                spriteSourceSize?.y ?: 0
                             )
                         )
                         textures[entry.name] = Pair(type, spriteAnimFrame)
