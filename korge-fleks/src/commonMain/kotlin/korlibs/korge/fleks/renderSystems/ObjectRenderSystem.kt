@@ -20,18 +20,13 @@ import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
-import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
-import korlibs.korge.fleks.utils.Geometry
 import korlibs.korge.fleks.utils.getMainCameraOrNull
-import korlibs.korge.fleks.utils.nameOf
 import korlibs.korge.render.*
 import korlibs.math.geom.*
-import korlibs.math.geom.Matrix.Companion
-import korlibs.math.geom.slice.SliceOrientation
 
 
 interface RenderSystem {
@@ -85,59 +80,31 @@ class ObjectRenderSystem(
             // Rendering path for sprites
             if (entity has SpriteComponent && entity[SpriteComponent].visible) {
                 val spriteComponent = entity[SpriteComponent]
-                val imageFrame = assetStore.getImageFrame(spriteComponent.name, spriteComponent.animation, spriteComponent.frameIndex)
-                val imageData = assetStore.getImageData(spriteComponent.name)
-                val spriteWidth = imageData.width
-                val spriteHeight = imageData.height
+                val sprite = assetStore.getTexture(spriteComponent.name)
+                val texture = sprite[spriteComponent.frameIndex]
 
                 if (entity has SpriteLayersComponent) {
-                    val layerMap = entity[SpriteLayersComponent].layerMap
                     ctx.useBatcher { batch ->
-                        // Iterate over all layers of each sprite for the frame number
-                        imageFrame.layerData.fastForEach { layerData ->
-                            val layerName = layerData.layer.name ?: ""
-
-                            layerMap[layerName]?.let { layerProps ->
-
-                                batch.drawQuad(
-                                    tex = ctx.getTex(layerData.slice),
-                                    x = position.x + layerData.targetX - spriteComponent.anchorX + layerProps.offsetX,
-                                    y = position.y + layerData.targetY - spriteComponent.anchorY + layerProps.offsetY,
-                                    filtering = false,
-                                    colorMul = layerProps.rgba,
-                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    ctx.useBatcher { batch ->
-                        // Iterate over all layers of each sprite for the frame number
-                        imageFrame.layerData.fastForEach { layerData ->
-                            val px = position.x + position.offsetX + (if (spriteComponent.flipX) (spriteWidth - layerData.targetX - layerData.slice.width) else layerData.targetX) - spriteComponent.anchorX
-                            val py = position.y + position.offsetY + layerData.targetY - spriteComponent.anchorY
-
-                            val slice = layerData.slice  //.transformed(SliceOrientation.MIRROR_HORIZONTAL_ROTATE_0)  <-- does not work
-
-                            if (spriteComponent.flipX) {
-                                batch.drawQuadFlipX(  // mirror texture horizontally
-                                    tex = ctx.getTex(slice),
-                                    x = px,
-                                    y = py,
-                                    filtering = false,
-                                    colorMul = rgba,
-                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                                )
-                            } else {
-                                batch.drawQuad(
-                                    tex = ctx.getTex(slice),
-                                    x = px,
-                                    y = py,
-                                    filtering = false,
-                                    colorMul = rgba,
-                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                                )
-                            }
+                        val px = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - sprite.width) else texture.targetX) - spriteComponent.anchorX
+                        val py = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - sprite.height) else texture.targetY) - spriteComponent.anchorY
+                        if (spriteComponent.flipX) {
+                            batch.drawQuadFlipX(  // mirror texture horizontally
+                                tex = ctx.getTex(texture.bmpSlice),
+                                x = px,
+                                y = py,
+                                filtering = false,
+                                colorMul = rgba,
+                                program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                            )
+                        } else {
+                            batch.drawQuad(
+                                tex = ctx.getTex(texture.bmpSlice),
+                                x = px,
+                                y = py,
+                                filtering = false,
+                                colorMul = rgba,
+                                program = null
+                            )
                         }
                     }
                 }

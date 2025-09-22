@@ -17,10 +17,10 @@ import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.ParallaxDataContainer
 import korlibs.korge.fleks.assets.data.SpriteAnimFrames
-import korlibs.korge.fleks.assets.data.SpriteFrame
+import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.readParallaxDataContainer
+import korlibs.korge.fleks.assets.data.textureMap
 import korlibs.korge.ldtk.view.*
-import korlibs.korge.view.SpriteAnimation
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -40,6 +40,7 @@ class AssetStore {
     // Handles loading of various asset types
     val loader = AssetLoader(this)
     internal val assetLevelDataLoader: AssetLevelDataLoader = AssetLevelDataLoader(this)
+    private val textureAtlasLoader = TextureAtlasLoader()
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 
@@ -61,7 +62,7 @@ class AssetStore {
     internal val sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
-    internal val textures: MutableMap<String, Pair<AssetType, SpriteAnimFrames>> = mutableMapOf()
+    internal val textures: textureMap = mutableMapOf()
 
 
 
@@ -105,9 +106,10 @@ class AssetStore {
             ImageData()
         }
 
-    fun getTexture() {
-//        textureAtlases.first().second.entriesMap[""]?.info
-    }
+    fun getTexture(name: String) : SpriteAnimFrames =
+        if (textures.contains(name)) {
+            textures[name]!!.second
+        } else error("AssetStore: Texture '$name' not found!")
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {
@@ -218,60 +220,8 @@ class AssetStore {
             assetConfig.fonts.forEach { font ->
                 fonts[font.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + font.value].readBitmapFont(atlas = atlas))
             }
-            assetConfig.textureAtlas.forEach { atlas ->
-                // TODO save map of images for each sprite
-                val spriteAtlas = resourcesVfs[assetConfig.folder + "/" + atlas].readAtlas()
-                spriteAtlas.entries.forEach { entry ->
-                    //println("sprite: ${entry.name}")
-
-                    val regex = "_\\d+$".toRegex()
-                    if (regex.containsMatchIn(entry.name)) {
-                        // entry is part of a sprite animation
-                        val spriteName = entry.name.replace(regex, "")
-                        // Get the animation index number
-                        val regex = "_(\\d+)$".toRegex()
-                        val match = regex.find(entry.name)
-                        val animIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get animation index of sprite '${entry.name}'!")
-                        if (textures.containsKey(spriteName)) {
-                            val spriteData = textures[spriteName]!!.second
-                            spriteData.sprites.add(animIndex, SpriteFrame(
-                                entry.texture,
-                                entry.info.virtFrame?.x ?: 0,
-                                entry.info.virtFrame?.y ?: 0
-                            ))
-                        } else {
-                            val spriteSourceSize = entry.info.virtFrame
-                            val spriteAnimFrame = SpriteAnimFrames(
-                                spriteWidth = entry.info.virtFrame?.width ?: 0,
-                                spriteHeight = entry.info.virtFrame?.height ?: 0
-                            )
-                            spriteAnimFrame.sprites.add(
-                                SpriteFrame(
-                                    entry.texture,
-                                    spriteSourceSize?.x ?: 0,
-                                    spriteSourceSize?.y ?: 0
-                                )
-                            )
-                            textures[spriteName] = Pair(type, spriteAnimFrame)
-                        }
-                    } else {
-                        // entry is not part of a sprite animation
-                        val spriteSourceSize = entry.info.virtFrame
-                        val spriteAnimFrame = SpriteAnimFrames(
-                            spriteWidth = entry.info.virtFrame?.width ?: 0,
-                            spriteHeight = entry.info.virtFrame?.height ?: 0
-                        )
-                        spriteAnimFrame.sprites.add(
-                            SpriteFrame(
-                                entry.texture,
-                                spriteSourceSize?.x ?: 0,
-                                spriteSourceSize?.y ?: 0
-                            )
-                        )
-                        textures[entry.name] = Pair(type, spriteAnimFrame)
-                    }
-                }
-                //println()
+            assetConfig.textureAtlas.forEach { config ->
+                textureAtlasLoader.load(assetConfig.folder, config, textures, type)
             }
 
             println("Assets: Loaded resources in ${sw.elapsed}")

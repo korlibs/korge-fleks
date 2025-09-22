@@ -23,8 +23,7 @@ import kotlinx.serialization.*
 data class FireAndDustEffectConfig(
     override val name: String,
 
-    private val assetName: String,
-    private val animationName: String,
+    private val spriteName: String,
 
     private val offsetX: Float = 0f,
     private val offsetY: Float = 0f,
@@ -53,10 +52,9 @@ data class FireAndDustEffectConfig(
                     else this@FireAndDustEffectConfig.velocityY
             }
             it += spriteComponent {
-                name = assetName
+                name = spriteName
                 anchorX = offsetX
                 anchorY = offsetY
-                animation = animationName
                 running = true
                 direction = ImageAnimation.Direction.ONCE_FORWARD
                 destroyOnAnimationFinished = true

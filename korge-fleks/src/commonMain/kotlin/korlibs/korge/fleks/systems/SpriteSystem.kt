@@ -30,13 +30,13 @@ class SpriteSystem : IteratingSystem(
             spriteComponent.nextFrameIn -= deltaTime
             if (spriteComponent.nextFrameIn <= 0f) {
 //                println("increment: ${comp.increment}, frameIndex: ${comp.frameIndex} was shown for: ${comp.time}")
-                val imageAnimation = assetStore.getImageAnimation(spriteComponent.name, spriteComponent.animation)
-                val numFrames = imageAnimation.frames.size
+                val spriteFrames = assetStore.getTexture(spriteComponent.name)
+                val numFrames = spriteFrames.numberOfFrames
                 spriteComponent.frameIndex = (spriteComponent.frameIndex + spriteComponent.increment) umod numFrames
 
 
-                val frame = imageAnimation.frames[spriteComponent.frameIndex]  // frameIndex is within list bounds
-                spriteComponent.nextFrameIn = frame.duration.seconds.toFloat()
+                val frame = spriteFrames[spriteComponent.frameIndex]  // frameIndex is within list bounds
+                spriteComponent.nextFrameIn = frame.duration
                 spriteComponent.increment = when (spriteComponent.direction) {
                     FORWARD -> +1
                     REVERSE -> -1

@@ -19,7 +19,7 @@ data class AssetModel(
     val images: Map<String, ImageDataConfig> = mapOf(),
     val fonts: Map<String, String> = mapOf(),
     val tileMaps: Map<String, TileMapConfig> = mapOf(),
-    val textureAtlas: List<String> = listOf()
+    val textureAtlas: List<TextureConfig> = listOf()
 ) {
     @Serializable @SerialName("ImageDataConfig")
     data class ImageDataConfig(
@@ -35,4 +35,16 @@ data class AssetModel(
         // internally used
         val tileSetPaths: MutableList<String> = mutableListOf()
     )
+
+    @Serializable @SerialName("TextureConfig")
+    data class TextureConfig(
+        val fileName: String = "",
+        val frameDurations: Map<String, FrameDurationConfig> = mapOf()
+    ) {
+        @Serializable @SerialName("FrameDurationConfig")
+        data class FrameDurationConfig(
+            val default: Int = 60,  // default frame duration in milliseconds
+            val custom: List<Int>? = null  // [optional] custom frame duration for each frame in milliseconds
+        )
+    }
 }

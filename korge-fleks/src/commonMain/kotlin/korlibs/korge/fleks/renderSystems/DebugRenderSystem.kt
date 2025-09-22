@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
-import korlibs.datastructure.iterators.fastForEachReverse
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
@@ -65,8 +64,8 @@ class DebugRenderSystem(
                     // In case the entity is a sprite than render the overall sprite size and the texture bounding boxes
                     if (entity has SpriteComponent) {
                         val spriteComponent = entity[SpriteComponent]
-                        val imageFrame = assetStore.getImageFrame(spriteComponent.name, spriteComponent.animation, spriteComponent.frameIndex)
-                        val imageData = assetStore.getImageData(spriteComponent.name)
+                        val sprite = assetStore.getTexture(spriteComponent.name)
+                        val texture = sprite[spriteComponent.frameIndex]
 
                         // Draw sprite bounds
                         if (entity has DebugInfoTag.SPRITE_BOUNDS) {
@@ -74,22 +73,20 @@ class DebugRenderSystem(
                                 rect(
                                     x = position.x + position.offsetX - spriteComponent.anchorX,
                                     y = position.y + position.offsetY - spriteComponent.anchorY,
-                                    width = imageData.width.toFloat(),
-                                    height = imageData.height.toFloat()
+                                    width = sprite.width.toFloat(),
+                                    height = sprite.height.toFloat()
                                 )
                             }
                         }
                         // Draw texture bounds for each layer
                         if (entity has DebugInfoTag.SPRITE_TEXTURE_BOUNDS) {
-                            imageFrame.layerData.fastForEachReverse { layer ->
-                                batch.drawVector(Colors.GREEN) {
-                                    rect(
-                                        x = position.x + position.offsetX + layer.targetX.toFloat() - spriteComponent.anchorX,
-                                        y = position.y + position.offsetY + layer.targetY.toFloat() - spriteComponent.anchorY,
-                                        width = layer.width.toFloat(),
-                                        height = layer.height.toFloat()
-                                    )
-                                }
+                            batch.drawVector(Colors.GREEN) {
+                                rect(
+                                    x = position.x + position.offsetX + texture.targetX.toFloat() - spriteComponent.anchorX,
+                                    y = position.y + position.offsetY + texture.targetY.toFloat() - spriteComponent.anchorY,
+                                    width = texture.bmpSlice.width.toFloat(),
+                                    height = texture.bmpSlice.height.toFloat()
+                                )
                             }
                         }
                     }
