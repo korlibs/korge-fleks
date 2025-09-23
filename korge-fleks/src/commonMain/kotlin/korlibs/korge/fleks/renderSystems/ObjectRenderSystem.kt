@@ -83,29 +83,27 @@ class ObjectRenderSystem(
                 val sprite = assetStore.getTexture(spriteComponent.name)
                 val texture = sprite[spriteComponent.frameIndex]
 
-                if (entity has SpriteLayersComponent) {
-                    ctx.useBatcher { batch ->
-                        val px = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - sprite.width) else texture.targetX) - spriteComponent.anchorX
-                        val py = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - sprite.height) else texture.targetY) - spriteComponent.anchorY
-                        if (spriteComponent.flipX) {
-                            batch.drawQuadFlipX(  // mirror texture horizontally
-                                tex = ctx.getTex(texture.bmpSlice),
-                                x = px,
-                                y = py,
-                                filtering = false,
-                                colorMul = rgba,
-                                program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                            )
-                        } else {
-                            batch.drawQuad(
-                                tex = ctx.getTex(texture.bmpSlice),
-                                x = px,
-                                y = py,
-                                filtering = false,
-                                colorMul = rgba,
-                                program = null
-                            )
-                        }
+                ctx.useBatcher { batch ->
+                    val px = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.anchorX
+                    val py = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.anchorY
+                    if (spriteComponent.flipX) {
+                        batch.drawQuadFlippedX(  // mirror texture horizontally
+                            tex = ctx.getTex(texture.bmpSlice),
+                            x = px,
+                            y = py,
+                            filtering = false,
+                            colorMul = rgba,
+                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                        )
+                    } else {
+                        batch.drawQuad(
+                            tex = ctx.getTex(texture.bmpSlice),
+                            x = px,
+                            y = py,
+                            filtering = false,
+                            colorMul = rgba,
+                            program = null
+                        )
                     }
                 }
             }
@@ -230,13 +228,13 @@ class ObjectRenderSystem(
 }
 
 /**
- * Draws a textured [tex] quad at [x], [y] and size [width]x[height] and flipped in X direction.
+ * Draws a textured [tex] quad at [x], [y] with size [width]x[height] and flipped in X direction.
  *
  * It uses [m] transform matrix, an optional [filtering] and [colorMul], [blendMode] and [program] as state for drawing it.
  *
  * Note: To draw solid quads, you can use [Bitmaps.white] + [AgBitmapTextureManager] as texture and the [colorMul] as quad color.
  */
-fun BatchBuilder2D.drawQuadFlipX(
+fun BatchBuilder2D.drawQuadFlippedX(
     tex: TextureCoords,
     x: Float,
     y: Float,
@@ -249,10 +247,10 @@ fun BatchBuilder2D.drawQuadFlipX(
     program: Program? = null
 ) {
     setStateFast(tex.base, filtering, blendMode, program, icount = 6, vcount = 4)
-    drawQuadFlipXFast(x, y, width, height, m, tex, colorMul)
+    drawQuadFlippedXFast(x, y, width, height, m, tex, colorMul)
 }
 
-fun BatchBuilder2D.drawQuadFlipXFast(
+fun BatchBuilder2D.drawQuadFlippedXFast(
     x: Float, y: Float, width: Float, height: Float,
     m: Matrix,
     tex: BmpCoords,

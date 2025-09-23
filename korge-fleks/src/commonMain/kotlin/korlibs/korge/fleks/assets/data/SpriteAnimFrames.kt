@@ -1,16 +1,14 @@
 package korlibs.korge.fleks.assets.data
 
 import korlibs.image.bitmap.BmpSlice
-import korlibs.math.umod
-import korlibs.time.FastDuration
 
 
 data class SpriteFrame(
     val bmpSlice: BmpSlice,
     val targetX: Int = 0,  // offset from the top-left corner of the original sprite if cropped
     val targetY: Int = 0,
-    // Duration in seconds
-    val duration: Float = 0f
+    // Duration in seconds will be set later after all frames have been loaded from texture atlas
+    var duration: Float = 0f
 )
 
 class SpriteAnimFrames(
@@ -19,8 +17,6 @@ class SpriteAnimFrames(
     val height: Int = 0
 ) : MutableList<SpriteFrame> by frames {
     val numberOfFrames: Int get() = frames.size
-    val firstSprite: BmpSlice get() = frames[0].bmpSlice
-
 
     override fun get(index: Int): SpriteFrame =
         if (index in 0..<size) frames[index]

@@ -82,8 +82,8 @@ class DebugRenderSystem(
                         if (entity has DebugInfoTag.SPRITE_TEXTURE_BOUNDS) {
                             batch.drawVector(Colors.GREEN) {
                                 rect(
-                                    x = position.x + position.offsetX + texture.targetX.toFloat() - spriteComponent.anchorX,
-                                    y = position.y + position.offsetY + texture.targetY.toFloat() - spriteComponent.anchorY,
+                                    x = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.anchorX,
+                                    y = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.anchorY,
                                     width = texture.bmpSlice.width.toFloat(),
                                     height = texture.bmpSlice.height.toFloat()
                                 )

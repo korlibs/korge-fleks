@@ -18,15 +18,15 @@ class TextureAtlasLoader {
             val regex = "_\\d+$".toRegex()
             if (regex.containsMatchIn(entry.name)) {
                 // entry is part of a sprite animation
-                val spriteName = entry.name.replace(regex, "")
+                val frameTag = entry.name.replace(regex, "")
                 // Get the animation index number
                 val regex = "_(\\d+)$".toRegex()
                 val match = regex.find(entry.name)
                 val animIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get animation index of sprite '${entry.name}'!")
-                if (textures.containsKey(spriteName)) {
-                    val spriteData = textures[spriteName]!!.second
+                if (textures.containsKey(frameTag)) {
+                    val spriteData = textures[frameTag]!!.second
                     spriteData.add(animIndex, SpriteFrame(
-                        entry.texture,
+                        spriteAtlas.texture.slice(entry.info.frame),
                         entry.info.virtFrame?.x ?: 0,
                         entry.info.virtFrame?.y ?: 0
                     ))
@@ -38,12 +38,12 @@ class TextureAtlasLoader {
                     )
                     spriteAnimFrame.add(
                         SpriteFrame(
-                            entry.texture,
+                            spriteAtlas.texture.slice(entry.info.frame),
                             spriteSourceSize?.x ?: 0,
                             spriteSourceSize?.y ?: 0
                         )
                     )
-                    textures[spriteName] = Pair(type, spriteAnimFrame)
+                    textures[frameTag] = Pair(type, spriteAnimFrame)
                 }
             } else {
                 // entry is not part of a sprite animation
@@ -54,7 +54,7 @@ class TextureAtlasLoader {
                 )
                 spriteAnimFrame.add(
                     SpriteFrame(
-                        entry.texture,
+                        spriteAtlas.texture.slice(entry.info.frame),
                         spriteSourceSize?.x ?: 0,
                         spriteSourceSize?.y ?: 0
                     )
@@ -62,8 +62,24 @@ class TextureAtlasLoader {
                 textures[entry.name] = Pair(type, spriteAnimFrame)
             }
         }
-        //println()
 
-        // TODO set frameDuration
+        // Load and set frameDuration
+        config.frameDurations.forEach { (frameTag, duration) ->
+            if (textures.containsKey(frameTag)) {
+                val spriteData = textures[frameTag]!!.second
+                for (i in 0 until spriteData.size) {
+                    if (duration.custom == null) {
+                        // Set all frames to the same default duration
+                        spriteData[i].duration = duration.default / 1000f  // convert ms to seconds
+                    } else if (i < duration.custom.size) {
+                        spriteData[i].duration = duration.custom[i] / 1000f  // convert ms to seconds
+                    } else {
+                        println("ERROR: TextureAtlasLoader.load() - Cannot set custom frameDuration for '$frameTag' of - not enough durations specified in config.yaml!")
+                    }
+                }
+            } else {
+                println("ERROR: TextureAtlasLoader.load() - Cannot set frameDuration for '$frameTag' - texture not found!")
+            }
+        }
     }
 }
