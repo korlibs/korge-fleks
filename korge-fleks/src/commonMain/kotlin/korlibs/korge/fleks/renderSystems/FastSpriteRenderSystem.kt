@@ -11,8 +11,6 @@ import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
-import korlibs.korge.view.*
-import korlibs.math.geom.*
 
 
 /**
@@ -53,7 +51,7 @@ class FastSpriteRenderSystem(
 
                 val spriteComponent = entity[SpriteComponent]
                 val rgba = entity[RgbaComponent].rgba
-                val texture = assetStore.getTexture(spriteComponent.name)[spriteComponent.frameIndex]
+                val texture = assetStore.getTextureSprite(spriteComponent.name)[spriteComponent.frameIndex]
 
                 batch.drawQuad(
                     tex = ctx.getTex(texture.bmpSlice),

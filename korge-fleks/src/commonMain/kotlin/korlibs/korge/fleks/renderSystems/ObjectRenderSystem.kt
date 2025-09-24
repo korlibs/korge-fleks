@@ -80,7 +80,7 @@ class ObjectRenderSystem(
             // Rendering path for sprites
             if (entity has SpriteComponent && entity[SpriteComponent].visible) {
                 val spriteComponent = entity[SpriteComponent]
-                val sprite = assetStore.getTexture(spriteComponent.name)
+                val sprite = assetStore.getTextureSprite(spriteComponent.name)
                 val texture = sprite[spriteComponent.frameIndex]
 
                 ctx.useBatcher { batch ->

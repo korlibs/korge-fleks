@@ -3,9 +3,7 @@ package korlibs.korge.fleks.assets
 import korlibs.audio.format.*
 import korlibs.audio.sound.*
 import korlibs.datastructure.*
-import korlibs.image.atlas.Atlas
 import korlibs.image.atlas.MutableAtlasUnit
-import korlibs.image.atlas.readAtlas
 import korlibs.image.bitmap.*
 import korlibs.image.font.Font
 import korlibs.image.font.readBitmapFont
@@ -19,7 +17,7 @@ import korlibs.korge.fleks.assets.data.ParallaxDataContainer
 import korlibs.korge.fleks.assets.data.SpriteAnimFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.readParallaxDataContainer
-import korlibs.korge.fleks.assets.data.textureMap
+import korlibs.korge.fleks.assets.data.TextureMap
 import korlibs.korge.ldtk.view.*
 import korlibs.time.Stopwatch
 import kotlin.collections.set
@@ -62,7 +60,7 @@ class AssetStore {
     internal val sounds: MutableMap<String, Pair<AssetType, SoundChannel>> = mutableMapOf()
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
-    internal val textures: textureMap = mutableMapOf()
+    internal val textures: TextureMap = mutableMapOf()
 
 
 
@@ -106,10 +104,22 @@ class AssetStore {
             ImageData()
         }
 
-    fun getTexture(name: String) : SpriteAnimFrames =
+    fun getTextureSprite(name: String) : SpriteAnimFrames =
         if (textures.contains(name)) {
             textures[name]!!.second
-        } else error("AssetStore: Texture '$name' not found!")
+        } else error("AssetStore: Texture '$name' not found for Sprite!")
+
+    fun getTextureBitmap(name: String) : Bitmap =
+        if (textures.contains(name)) {
+            textures[name]!!.second.firstFrame.toBitmap()
+        } else error("AssetStore: Texture '$name' not found for Bitmap!")
+
+    fun getTextureNinePatch(name: String) : NinePatchBmpSlice =
+        if (textures.contains(name)) {
+            if (textures[name]!!.second.ninePatchSlice != null) {
+                textures[name]!!.second.ninePatchSlice!!
+            } else error("AssetStore: Texture '$name' does not contain nine-patch data!")
+        } else error("AssetStore: Texture '$name' not found for NinePatch!")
 
     fun getNinePatch(name: String) : NinePatchBmpSlice =
         if (images.contains(name)) {

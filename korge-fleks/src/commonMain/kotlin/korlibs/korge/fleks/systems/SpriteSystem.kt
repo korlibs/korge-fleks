@@ -7,7 +7,6 @@ import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.utils.deleteViaLifeCycle
 import korlibs.math.*
-import korlibs.time.*
 
 
 class SpriteSystem : IteratingSystem(
@@ -30,7 +29,7 @@ class SpriteSystem : IteratingSystem(
             spriteComponent.nextFrameIn -= deltaTime
             if (spriteComponent.nextFrameIn <= 0f) {
 //                println("increment: ${comp.increment}, frameIndex: ${comp.frameIndex} was shown for: ${comp.time}")
-                val spriteFrames = assetStore.getTexture(spriteComponent.name)
+                val spriteFrames = assetStore.getTextureSprite(spriteComponent.name)
                 val numFrames = spriteFrames.numberOfFrames
                 spriteComponent.frameIndex = (spriteComponent.frameIndex + spriteComponent.increment) umod numFrames
 

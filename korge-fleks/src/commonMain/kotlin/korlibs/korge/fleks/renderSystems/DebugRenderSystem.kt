@@ -64,7 +64,7 @@ class DebugRenderSystem(
                     // In case the entity is a sprite than render the overall sprite size and the texture bounding boxes
                     if (entity has SpriteComponent) {
                         val spriteComponent = entity[SpriteComponent]
-                        val sprite = assetStore.getTexture(spriteComponent.name)
+                        val sprite = assetStore.getTextureSprite(spriteComponent.name)
                         val texture = sprite[spriteComponent.frameIndex]
 
                         // Draw sprite bounds

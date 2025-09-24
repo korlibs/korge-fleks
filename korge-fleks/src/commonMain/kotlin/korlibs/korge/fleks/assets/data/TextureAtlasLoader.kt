@@ -1,16 +1,17 @@
 package korlibs.korge.fleks.assets.data
 
 import korlibs.image.atlas.readAtlas
+import korlibs.image.bitmap.asNinePatchSimple
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.AssetModel.TextureConfig
 import kotlin.collections.set
 
 
-typealias textureMap = MutableMap<String, Pair<AssetType, SpriteAnimFrames>>
+typealias TextureMap = MutableMap<String, Pair<AssetType, SpriteAnimFrames>>
 
 class TextureAtlasLoader {
 
-    suspend fun load(assetFolder: String, config: TextureConfig, textures: textureMap, type: AssetType) {
+    suspend fun load(assetFolder: String, config: TextureConfig, textures: TextureMap, type: AssetType) {
         val spriteAtlas = resourcesVfs[assetFolder + "/" + config.fileName].readAtlas()
         spriteAtlas.entries.forEach { entry ->
             //println("sprite: ${entry.name}")
@@ -79,6 +80,16 @@ class TextureAtlasLoader {
                 }
             } else {
                 println("ERROR: TextureAtlasLoader.load() - Cannot set frameDuration for '$frameTag' - texture not found!")
+            }
+        }
+
+        // Load and set ninePatchBmpSlice objects
+        config.nineSlices.forEach { (frameTag, nineSlice) ->
+            if (textures.containsKey(frameTag)) {
+                val spriteData = textures[frameTag]!!.second
+                spriteData.ninePatchSlice = spriteData.firstFrame.asNinePatchSimple(nineSlice.x, nineSlice.y , nineSlice.x + nineSlice.width, nineSlice.y + nineSlice.height)
+            } else {
+                println("ERROR: TextureAtlasLoader.load() - Cannot set nineSlice for '$frameTag' - texture not found!")
             }
         }
     }

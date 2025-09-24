@@ -39,12 +39,21 @@ data class AssetModel(
     @Serializable @SerialName("TextureConfig")
     data class TextureConfig(
         val fileName: String = "",
-        val frameDurations: Map<String, FrameDurationConfig> = mapOf()
+        val frameDurations: Map<String, FrameDurationConfig> = mapOf(),
+        val nineSlices: Map<String, NineSlice> = mapOf()
     ) {
         @Serializable @SerialName("FrameDurationConfig")
         data class FrameDurationConfig(
             val default: Int = 60,  // default frame duration in milliseconds
             val custom: List<Int>? = null  // [optional] custom frame duration for each frame in milliseconds
+        )
+
+        @Serializable @SerialName("NineSlice")
+        data class NineSlice(
+            val x: Int,
+            val y: Int,
+            val width: Int,
+            val height: Int
         )
     }
 }
