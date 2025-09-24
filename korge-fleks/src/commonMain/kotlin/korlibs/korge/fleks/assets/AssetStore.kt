@@ -5,10 +5,14 @@ import korlibs.audio.sound.*
 import korlibs.datastructure.*
 import korlibs.image.atlas.MutableAtlasUnit
 import korlibs.image.bitmap.*
+import korlibs.image.font.BitmapFont
 import korlibs.image.font.Font
 import korlibs.image.font.readBitmapFont
 import korlibs.image.format.*
+import korlibs.io.dynamic.dyn
+import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
+import korlibs.io.util.unquote
 import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
@@ -21,6 +25,7 @@ import korlibs.korge.fleks.assets.data.TextureMap
 import korlibs.korge.ldtk.view.*
 import korlibs.time.Stopwatch
 import kotlin.collections.set
+import kotlin.math.absoluteValue
 
 
 /**
@@ -114,7 +119,7 @@ class AssetStore {
             textures[name]!!.second.firstFrame.toBitmap()
         } else error("AssetStore: Texture '$name' not found for Bitmap!")
 
-    fun getTextureNinePatch(name: String) : NinePatchBmpSlice =
+    fun getNinePatchTexture(name: String) : NinePatchBmpSlice =
         if (textures.contains(name)) {
             if (textures[name]!!.second.ninePatchSlice != null) {
                 textures[name]!!.second.ninePatchSlice!!
@@ -229,6 +234,9 @@ class AssetStore {
             }
             assetConfig.fonts.forEach { font ->
                 fonts[font.key] = Pair(type, resourcesVfs[assetConfig.folder + "/" + font.value].readBitmapFont(atlas = atlas))
+
+                // TODO load font png out of atlas
+
             }
             assetConfig.textureAtlas.forEach { config ->
                 textureAtlasLoader.load(assetConfig.folder, config, textures, type)
@@ -279,4 +287,72 @@ class AssetStore {
         sounds.values.removeAll { it.first == type }
 //        textureAtlases.removeAll { it.first == type }
     }
+}
+
+private suspend fun VfsFile.readFontTxt(
+    callback: ((String) -> BmpSlice)  // callback to pass in BmpSlice from texture atlas
+): BitmapFont {
+    val fntFile = this
+    val content = fntFile.readString().trim()
+    val textures = hashMapOf<Int, BmpSlice>()
+
+
+    val kernings = arrayListOf<BitmapFont.Kerning>()
+    val glyphs = arrayListOf<BitmapFont.Glyph>()
+    var lineHeight = 16.0
+    var fontSize = 16.0
+    var base: Double? = null
+    for (rline in content.lines()) {
+        val line = rline.trim()
+        val map = LinkedHashMap<String, String>()
+        for (part in line.split(' ')) {
+            val (key, value) = part.split('=') + listOf("", "")
+            map[key] = value
+        }
+        when {
+            line.startsWith("info") -> {
+                fontSize = (map["size"]?.toDouble() ?: 16.0).absoluteValue
+            }
+            line.startsWith("page") -> {
+                val id = map["id"]?.toInt() ?: 0
+                val file = map["file"]?.unquote() ?: error("page without file")
+                textures[id] = callback.invoke(file)  // was: fntFile.parent[file].readBitmap(props).mipmaps(mipmaps).slice()
+            }
+            line.startsWith("common ") -> {
+                lineHeight = map["lineHeight"]?.toDoubleOrNull() ?: 16.0
+                base = map["base"]?.toDoubleOrNull()
+            }
+            line.startsWith("char ") -> {
+                //id=54 x=158 y=88 width=28 height=42 xoffset=2 yoffset=8 xadvance=28 page=0 chnl=0
+                val page = map["page"]?.toIntOrNull() ?: 0
+                val texture = textures[page] ?: textures.values.first()
+                val dmap = map.dyn
+                val id = dmap["id"].int
+                glyphs += BitmapFont.Glyph(
+                    fontSize = fontSize,
+                    id = id,
+                    xoffset = dmap["xoffset"].int,
+                    yoffset = dmap["yoffset"].int,
+                    xadvance = dmap["xadvance"].int,
+                    texture = texture.sliceWithSize(dmap["x"].int, dmap["y"].int, dmap["width"].int, dmap["height"].int, "glyph-${id.toChar()}")
+                )
+            }
+            line.startsWith("kerning ") -> {
+                kernings += BitmapFont.Kerning(
+                    first = map["first"]?.toIntOrNull() ?: 0,
+                    second = map["second"]?.toIntOrNull() ?: 0,
+                    amount = map["amount"]?.toIntOrNull() ?: 0
+                )
+            }
+        }
+    }
+    return BitmapFont(
+        fontSize = fontSize,
+        lineHeight = lineHeight,
+        base = base ?: lineHeight,
+        glyphs = glyphs.associateBy { it.id }.toIntMap(),
+        kernings = kernings.associateByInt { _, it ->
+            BitmapFont.Kerning.buildKey(it.first, it.second)
+        }
+    )
 }
