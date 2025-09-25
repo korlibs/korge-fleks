@@ -42,7 +42,7 @@ class Sprite private constructor(
 
     var frameIndex: Int = 0,                          // frame number of animation which is currently drawn
     var running: Boolean = false,                     // Switch animation on and off
-    var direction: Direction? = null,                 // Default: Get direction from Aseprite file
+    var direction: Direction = FORWARD,               // Default: FORWARD, can be changed to REVERSE, PING_PONG, ONCE_FORWARD, ONCE_REVERSE
     var destroyOnAnimationFinished: Boolean = false,  // Delete entity when direction is [ONCE_FORWARD] or [ONCE_REVERSE]
 
     // internal, do not set directly
@@ -77,7 +77,7 @@ class Sprite private constructor(
         anchorY = 0f
         frameIndex = 0
         running = false
-        direction = null
+        direction = FORWARD
         destroyOnAnimationFinished = false
         flipX = false
         flipY = false
@@ -157,7 +157,6 @@ class Sprite private constructor(
             PING_PONG -> +1     // ping-pong is starting forward
             ONCE_FORWARD -> +1  // starting forward
             ONCE_REVERSE -> -1  // starting reverse
-            null -> error("SpriteAnimationFamily: direction shall not be null!")
         }
     }
 }

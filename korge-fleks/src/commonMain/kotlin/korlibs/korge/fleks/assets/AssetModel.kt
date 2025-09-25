@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.assets
 
-import korlibs.korge.fleks.assets.data.ParallaxConfig
 import kotlinx.serialization.*
 
 
@@ -15,9 +14,6 @@ data class AssetModel(
     val folder: String = "",
     val hotReloading: Boolean = false,
     val sounds: Map<String, String> = mapOf(),
-    val backgrounds: Map<String, ParallaxConfig> = mapOf(),
-    val images: Map<String, ImageDataConfig> = mapOf(),
-    val fonts: Map<String, String> = mapOf(),
     val tileMaps: Map<String, TileMapConfig> = mapOf(),
     val textureAtlas: List<TextureConfig> = listOf()
 ) {
@@ -38,14 +34,15 @@ data class AssetModel(
 
     @Serializable @SerialName("TextureConfig")
     data class TextureConfig(
-        val fileName: String = "",
+        val fileName: String,
         val frameDurations: Map<String, FrameDurationConfig> = mapOf(),
-        val nineSlices: Map<String, NineSlice> = mapOf()
+        val nineSlices: Map<String, NineSlice> = mapOf(),
+        val fonts: List<String> = listOf()
     ) {
         @Serializable @SerialName("FrameDurationConfig")
         data class FrameDurationConfig(
-            val default: Int = 60,  // default frame duration in milliseconds
-            val custom: List<Int>? = null  // [optional] custom frame duration for each frame in milliseconds
+            val default: Int = 0,          // default duration in milliseconds for all frames of the animation
+            val custom: List<Int>? = null  // [optional] custom frame duration in milliseconds for each frame of the animation
         )
 
         @Serializable @SerialName("NineSlice")

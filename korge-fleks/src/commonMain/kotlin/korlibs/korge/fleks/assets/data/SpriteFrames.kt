@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.assets.data
 
 import korlibs.image.bitmap.BmpSlice
-import korlibs.image.bitmap.NinePatchBmpSlice
 
 
 data class SpriteFrame(
@@ -12,12 +11,10 @@ data class SpriteFrame(
     var duration: Float = 0f
 )
 
-class SpriteAnimFrames(
+class SpriteFrames(
     private val frames: MutableList<SpriteFrame> = mutableListOf(),
     val width: Int = 0,  // virtual size of the sprite (can be different from bmpSlice.width if cropped)
-    val height: Int = 0,
-    // Nine-slice object will be set later after all frames have been loaded from texture atlas
-    var ninePatchSlice: NinePatchBmpSlice? = null
+    val height: Int = 0
 ) : MutableList<SpriteFrame> by frames {
     val numberOfFrames: Int get() = frames.size
     val firstFrame: BmpSlice get() = frames.first().bmpSlice

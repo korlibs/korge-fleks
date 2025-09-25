@@ -341,7 +341,7 @@ operator fun RGBA.times(f: Float) = RGBA(
 )
 
 @JvmName("updatePropertyDirectionNullable")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenProperty>, value: KMutableProperty0<ImageAnimation.Direction?>, block: EntityUpdateContext.() -> Unit = {}) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenProperty>, value: KMutableProperty0<ImageAnimation.Direction>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
             value.set(it.value as ImageAnimation.Direction)

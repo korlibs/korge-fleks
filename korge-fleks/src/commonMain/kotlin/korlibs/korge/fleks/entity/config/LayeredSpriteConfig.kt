@@ -45,38 +45,40 @@ data class LayeredSpriteConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         val assetStore: AssetStore = inject(name = "AssetStore")
-        val imageFrame = assetStore.getImageFrame(assetName)
+        val spriteFrames = assetStore.getTextureSprite(assetName)
 
         entity.configure {
             it += positionComponent {
-                x = this@LayeredSpriteConfig.offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - assetStore.getImageData(assetName).width).toFloat() * 0.5f else 0f)
-                y = this@LayeredSpriteConfig.offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - assetStore.getImageData(assetName).height).toFloat() * 0.5f else 0f)
+                x = this@LayeredSpriteConfig.offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - spriteFrames.width).toFloat() * 0.5f else 0f)
+                y = this@LayeredSpriteConfig.offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - spriteFrames.height).toFloat() * 0.5f else 0f)
             }
             it += spriteComponent {
                 name = assetName
             }
             it += spriteLayersComponent {
                 // Iterate over all layers of the sprite
-                imageFrame.layerData.fastForEach { layerData ->
-                    val layerName = layerData.layer.name ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
-                    // Add layer to the sprite layers component
-                    createSpriteLayer(layerName)
-                }
+// TODO re-implement sprite layers
+//                imageFrame.layerData.fastForEach { layerData ->
+//                    val layerName = layerData.layer.name ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
+//                    // Add layer to the sprite layers component
+//                    createSpriteLayer(layerName)
+//                }
             }
             if (createEntityPerLayer) {
                 it += entityRefsByNameComponent {
                     // Iterate over all layers of the sprite
-                    imageFrame.layerData.fastForEach { layerData ->
-                        val layerName = layerData.layer.name
-                            ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
-                        // Add entity for each layer
-                        add(layerName,
-                            createEntity("layer_$layerName") { layerEntity ->
-                                layerEntity += positionComponent {}
-                                layerEntity += rgbaComponent {}
-                            }
-                        )
-                    }
+// TODO re-implement sprite layers
+//                    imageFrame.layerData.fastForEach { layerData ->
+//                        val layerName = layerData.layer.name
+//                            ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
+//                        // Add entity for each layer
+//                        add(layerName,
+//                            createEntity("layer_$layerName") { layerEntity ->
+//                                layerEntity += positionComponent {}
+//                                layerEntity += rgbaComponent {}
+//                            }
+//                        )
+//                    }
                     deleteLinked = true
                 }
             }
