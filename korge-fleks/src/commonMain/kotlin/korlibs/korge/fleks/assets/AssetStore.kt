@@ -12,6 +12,7 @@ import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.ParallaxDataContainer
+import korlibs.korge.fleks.assets.data.ParallaxLayerTexture
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.ldtk.view.*
@@ -24,6 +25,7 @@ typealias TileMapType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
 typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
+typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxLayerTexture>>
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -62,6 +64,7 @@ class AssetStore {
     internal val textures: SpriteFramesMapType = mutableMapOf()
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
+    internal val parallaxLayers: ParallaxMapType = mutableMapOf()
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {
@@ -85,17 +88,17 @@ class AssetStore {
         if (sounds.contains(name)) sounds[name]!!.second
         else error("AssetStore: Sound '$name' not found!")
 
-    fun getTextureSprite(name: String) : SpriteFrames =
+    fun getSpriteTexture(name: String) : SpriteFrames =
         if (textures.contains(name)) {
             textures[name]!!.second
         } else error("AssetStore: Texture '$name' not found for Sprite!")
 
-    fun getTextureBitmap(name: String) : Bitmap =
+    fun getBitmapTexture(name: String) : Bitmap =
         if (textures.contains(name)) {
             textures[name]!!.second.firstFrame.toBitmap()
         } else error("AssetStore: Texture '$name' not found for Bitmap!")
 
-    fun getNinePatch(name: String) : NinePatchBmpSlice =
+    fun getNinePatchSlice(name: String) : NinePatchBmpSlice =
         if (ninePatchSlices.contains(name)) {
             ninePatchSlices[name]!!.second
         } else error("AssetStore: NinePatchSlice '$name' not found!")
@@ -188,6 +191,7 @@ class AssetStore {
                     textures,
                     ninePatchSlices,
                     bitMapFonts,
+                    parallaxLayers,
                     type)
             }
 

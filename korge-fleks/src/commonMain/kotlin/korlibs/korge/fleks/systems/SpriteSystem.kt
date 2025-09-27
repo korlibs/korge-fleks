@@ -29,7 +29,7 @@ class SpriteSystem : IteratingSystem(
             spriteComponent.nextFrameIn -= deltaTime
             if (spriteComponent.nextFrameIn <= 0f) {
 //                println("increment: ${comp.increment}, frameIndex: ${comp.frameIndex} was shown for: ${comp.time}")
-                val spriteFrames = assetStore.getTextureSprite(spriteComponent.name)
+                val spriteFrames = assetStore.getSpriteTexture(spriteComponent.name)
                 val numFrames = spriteFrames.numberOfFrames
                 spriteComponent.frameIndex = (spriteComponent.frameIndex + spriteComponent.increment) umod numFrames
 

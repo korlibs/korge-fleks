@@ -17,11 +17,6 @@ data class AssetModel(
     val tileMaps: Map<String, TileMapConfig> = mapOf(),
     val textureAtlas: List<TextureConfig> = listOf()
 ) {
-    @Serializable @SerialName("ImageDataConfig")
-    data class ImageDataConfig(
-        val fileName: String = "",
-        val layers: String? = null
-    )
 
     @Serializable @SerialName("TileMapConfig")
     data class TileMapConfig(
@@ -37,7 +32,8 @@ data class AssetModel(
         val fileName: String,
         val frameDurations: Map<String, FrameDurationConfig> = mapOf(),
         val nineSlices: Map<String, NineSlice> = mapOf(),
-        val fonts: List<String> = listOf()
+        val fonts: List<String> = listOf(),
+        val parallaxEffects: Map<String, ParallaxLayer> = mapOf()
     ) {
         @Serializable @SerialName("FrameDurationConfig")
         data class FrameDurationConfig(
@@ -51,6 +47,26 @@ data class AssetModel(
             val y: Int,
             val width: Int,
             val height: Int
+        )
+
+        /**
+         * This is the configuration for an independent parallax layer. Independent means that these layers are not attached
+         * to the parallax plane. Their speed in X and Y direction can be configured by [speedFactor].
+         * Their self-Speed [selfSpeedX] and [selfSpeedY] can be configured independently.
+         *
+         * [repeatX] and [repeatY] describes if the image of the layer object should be repeated in X and Y direction.
+         * [speedFactor] is the factors for scrolling the parallax layer in X and Y direction relative to the game
+         * play field.
+         * [selfSpeedX] and [selfSpeedY] are the factors for scrolling the parallax layer in X and Y direction continuously
+         * and independently of the player input.
+         */
+        @Serializable @SerialName("ParallaxLayer")
+        data class ParallaxLayer(
+            val repeatX: Boolean = false,
+            val repeatY: Boolean = false,
+            val speedFactor: Float? = null,  // It this is null than no movement is applied to the layer
+            val selfSpeedX: Float = 0f,
+            val selfSpeedY: Float = 0f
         )
     }
 }

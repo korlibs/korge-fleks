@@ -52,7 +52,8 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
-        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent, TileMapComponent)
+        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent,
+            NinePatchComponent, TileMapComponent) //, ParallaxLayerComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
@@ -80,7 +81,7 @@ class ObjectRenderSystem(
             // Rendering path for sprites
             if (entity has SpriteComponent && entity[SpriteComponent].visible) {
                 val spriteComponent = entity[SpriteComponent]
-                val sprite = assetStore.getTextureSprite(spriteComponent.name)
+                val sprite = assetStore.getSpriteTexture(spriteComponent.name)
                 val texture = sprite[spriteComponent.frameIndex]
 
                 ctx.useBatcher { batch ->
@@ -154,7 +155,7 @@ class ObjectRenderSystem(
             // Rendering path for 9-patch graphic (not optimized - no caching)
             else if (entity has NinePatchComponent) {
                 val ninePatchComponent = entity[NinePatchComponent]
-                val ninePatch = assetStore.getNinePatch(ninePatchComponent.name)
+                val ninePatch = assetStore.getNinePatchSlice(ninePatchComponent.name)
 
                 val numQuads = ninePatch.info.totalSegments
                 val indices = TexturedVertexArray.quadIndices(numQuads)

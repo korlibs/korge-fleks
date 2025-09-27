@@ -13,7 +13,10 @@ import korlibs.io.util.unquote
 import korlibs.korge.fleks.assets.AssetModel.TextureConfig
 import korlibs.korge.fleks.assets.BitMapFontMapType
 import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
+import korlibs.korge.fleks.assets.ParallaxMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlin.collections.set
 import kotlin.math.absoluteValue
 
@@ -26,6 +29,7 @@ class TextureAtlasLoader {
         textures: SpriteFramesMapType,
         ninePatchSlices: NinePatchBmpSliceMapType,
         bitMapFonts: BitMapFontMapType,
+        parallaxLayers: ParallaxMapType,
         type: AssetType
     ) {
         val spriteAtlas = resourcesVfs["${assetFolder}/${config.fileName}"].readAtlas()
@@ -127,8 +131,27 @@ class TextureAtlasLoader {
             }
             bitMapFonts[font] = Pair(type, bitmapFont)
         }
+
+        config.parallaxEffects.forEach { (parallaxLayerName, parallaxConfig) ->
+            val spriteFrames = if (textures.containsKey(parallaxLayerName)) {
+                textures[parallaxLayerName]!!.second
+            } else {
+                println("ERROR: TextureAtlasLoader.load() - Cannot create parallax layer for '$parallaxLayerName' - texture not found!")
+                SpriteFrames()
+            }
+            val parallaxLayer = ParallaxLayerTexture(
+                spriteFrames,
+                parallaxConfig.repeatX,
+                parallaxConfig.repeatY,
+                parallaxConfig.speedFactor,
+                parallaxConfig.selfSpeedX,
+                parallaxConfig.selfSpeedY
+            )
+            parallaxLayers[parallaxLayerName] = Pair(type, parallaxLayer)
+        }
     }
 }
+
 
 suspend fun VfsFile.readFontTxt(
     callback: ((String) -> BmpSlice)  // callback to pass in BmpSlice from texture atlas

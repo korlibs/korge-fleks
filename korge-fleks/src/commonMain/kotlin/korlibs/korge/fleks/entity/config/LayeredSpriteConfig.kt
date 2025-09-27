@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
-import korlibs.datastructure.iterators.fastForEach
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.fleks.assets.*
@@ -45,7 +44,7 @@ data class LayeredSpriteConfig(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         val assetStore: AssetStore = inject(name = "AssetStore")
-        val spriteFrames = assetStore.getTextureSprite(assetName)
+        val spriteFrames = assetStore.getSpriteTexture(assetName)
 
         entity.configure {
             it += positionComponent {

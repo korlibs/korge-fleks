@@ -51,7 +51,7 @@ class FastSpriteRenderSystem(
 
                 val spriteComponent = entity[SpriteComponent]
                 val rgba = entity[RgbaComponent].rgba
-                val texture = assetStore.getTextureSprite(spriteComponent.name)[spriteComponent.frameIndex]
+                val texture = assetStore.getSpriteTexture(spriteComponent.name)[spriteComponent.frameIndex]
 
                 batch.drawQuad(
                     tex = ctx.getTex(texture.bmpSlice),

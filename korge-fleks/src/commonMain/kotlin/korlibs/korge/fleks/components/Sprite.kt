@@ -141,12 +141,12 @@ class Sprite private constructor(
     // Set frameIndex for starting animation
     fun setFrameIndex(assetStore: AssetStore) {
         frameIndex = if (direction == REVERSE || direction == ONCE_REVERSE)
-            assetStore.getTextureSprite(name).numberOfFrames - 1 else 0
+            assetStore.getSpriteTexture(name).numberOfFrames - 1 else 0
     }
 
     // Set frame time for first frame
     fun setNextFrameIn(assetStore: AssetStore) {
-        nextFrameIn = assetStore.getTextureSprite(name).getDuration(frameIndex)
+        nextFrameIn = assetStore.getSpriteTexture(name).getDuration(frameIndex)
     }
 
     // Init increment for setting frameIndex
