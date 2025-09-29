@@ -1,8 +1,10 @@
 package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.size
+import korlibs.korge.fleks.utils.ParallaxSpeedFactors
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 
 /**
@@ -32,9 +34,9 @@ import kotlinx.serialization.Serializable
 data class ParallaxConfigNew(
     val offset: Int = 0,
     val mode: Mode = Mode.HORIZONTAL_PLANE,
-    val backgroundLayers: List<ParallaxLayerConfig> = listOf(),
-//    val parallaxPlane: ParallaxPlaneConfig? = null,
-    val foregroundLayers: List<ParallaxLayerConfig> = listOf()
+    val backgroundLayers: Map<String, ParallaxLayerConfig> = mapOf(),
+    val parallaxPlane: ParallaxPlaneConfig = ParallaxPlaneConfig(),
+    val foregroundLayers: Map<String, ParallaxLayerConfig> = mapOf()
 ) {
     enum class Mode {
         HORIZONTAL_PLANE, VERTICAL_PLANE, NO_PLANE
@@ -45,8 +47,6 @@ data class ParallaxConfigNew(
      * to the parallax plane. Their speed in X and Y direction can be configured by [speedFactor].
      * Their self-Speed [selfSpeedX] and [selfSpeedY] can be configured independently.
      *
-     * [name] has to be set to the name of the layer in the texture atlas file. The image on this layer will be taken for
-     * the layer object.
      * [repeatX] and [repeatY] describes if the image of the layer object should be repeated in X and Y direction.
      * [speedFactor] is the factors for scrolling the parallax layer in X and Y direction relative to the game
      * play field.
@@ -55,13 +55,40 @@ data class ParallaxConfigNew(
      */
     @Serializable @SerialName("ParallaxLayerConfig")
     data class ParallaxLayerConfig(
-        val name: String,
         val repeatX: Boolean = false,
         val repeatY: Boolean = false,
         val speedFactor: Float? = null,  // It this is null than no movement is applied to the layer
         val selfSpeedX: Float = 0f,
         val selfSpeedY: Float = 0f
-    )
+    ) {
+        @Transient  // This is set when loading the texture atlas
+        lateinit var frames: MutableList<SpriteFrame>
+    }
 
-
+    /**
+     * This is the configuration of the parallax plane which can be used in [HORIZONTAL_PLANE] and
+     * [VERTICAL_PLANE] modes. The parallax plane itself consists of a top and a bottom part. The top part
+     * can be used to represent a ceiling (e.g. of a cave, building or sky). The bottom part is usually showing some ground.
+     * The top part is the upper half of the Aseprite image. The bottom part is the bottom half of the image. This is used
+     * to simulate a central vanishing point in the resulting parallax effect.
+     *
+     * [speedFactor] is the factor for scrolling the parallax plane relative to the game play field (which usually contains the
+     * level map).
+     * [selfSpeed] is the amount of velocity for scrolling the parallax plane continuously in a direction independently of the player
+     * input.
+     * [attachedLayersFront] contains the config for further layers which are "attached" on top of the parallax plane.
+     * [attachedLayersRear] contains the config for further layers which are "attached" below the parallax plane.
+     * Both attached layer types will scroll depending on their position on the parallax plane.
+     */
+    @Serializable @SerialName("ParallaxPlaneConfig")
+    data class ParallaxPlaneConfig(
+        val speedFactor: Float = 1f,
+        val selfSpeed: Float = 0f,
+// TODO        val attachedLayersFront: ArrayList<ParallaxAttachedLayerConfig>? = null,
+//        val attachedLayersRear: ArrayList<ParallaxAttachedLayerConfig>? = null
+    ) {
+        // This is computed after loading of parallax image data from Aseprite
+        @Transient // @Serializable(with = ParallaxSpeedFactors::class)
+        lateinit var parallaxPlaneSpeedFactors: FloatArray
+    }
 }

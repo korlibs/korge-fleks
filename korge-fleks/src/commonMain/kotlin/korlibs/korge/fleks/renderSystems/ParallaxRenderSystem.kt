@@ -11,6 +11,7 @@ import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -39,6 +40,12 @@ class ParallaxRenderSystem(
 
             // Iterate over all entities which should be rendered in this view
             family.forEach { entity ->
+                val globalPositionComponent = entity[PositionComponent]
+//                val
+                val parallaxComponent = entity[ParallaxComponent]
+//                val parallaxLayerTexture = assetStore.getParallaxLayerTexture(parallaxComponent.name)
+
+/*
                 val globalPositionComponent = entity[PositionComponent]
                 val parallaxComponent = entity[ParallaxComponent]
                 val parallaxDataContainer = assetStore.getBackground(parallaxComponent.name)
@@ -141,6 +148,7 @@ class ParallaxRenderSystem(
                         layer, localRgba, batch, ctx
                     )
                 }
+*/
             }
         }
     }

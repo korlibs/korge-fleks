@@ -9,6 +9,7 @@ import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.Motion.Companion.motionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.parallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.entity.*
@@ -20,7 +21,8 @@ import kotlinx.serialization.*
 data class ParallaxEffectConfig(
     override val name: String,
 
-    private val layerTextureNames: List<String>,
+    private val backgroundLayerNames: List<String>,
+
     private val layerTag: RenderLayerTag,
     private val x: Float = 0f,
     private val y: Float = 0f
@@ -34,25 +36,36 @@ data class ParallaxEffectConfig(
                 y = this@ParallaxEffectConfig.y
             }
             it += motionComponent {}
-            it += entityRefsByNameComponent {
-                layerTextureNames.fastForEachReverse { layerTextureName ->
-                    val layerEntity = createEntity(layerTextureName) { layerEntity ->
-                        layerEntity += entityRefComponent {
-                            // Reference to parent entity to get the global position for rendering
-                            this.entity = entity
+
+            it += parallaxComponent {
+                backgroundLayerNames.fastForEachReverse { layerTextureName ->
+                    bgLayerEntities.add(
+                        createEntity("Parallax BG layer '$layerTextureName' of entity '${entity.id}'") {
+                            it += positionComponent {}
+                            it += rgbaComponent {}
                         }
-                        // Local position of parallax layer in parallax background coordinates
-                        // This position will be updated by ParallaxSystem based on speed factor
-                        layerEntity += positionComponent {}
-                        layerEntity += motionComponent {}
-                        layerEntity += spriteComponent {
-                            name = layerTextureName
-                        }
-                        layerEntity += parallaxComponent {}
-                        layerEntity += layerComponent { index = 1 }
-                    }
-                    add(layerTextureName, layerEntity)
+                    )
                 }
+
+//                repeat(numberForegroundLayers) { index ->
+//                    val name = assetStore.getBackground(name).config.foregroundLayers?.get(index)?.name ?: "No layer name"
+//                    fgLayerEntities.add(
+//                        world.createEntity("Parallax FG layer '$index' ($name) of entity '${entity.id}'") {
+//                            it += positionComponent {}
+//                            it += rgbaComponent {}
+//                        }
+//                    )
+//                }
+//
+//                repeat(numberAttachedRearLayers) { attachedLayersRearPositions.add(0f) }
+//                repeat(numberParallaxPlaneLines) { linePositions.add(0f) }
+//                repeat(numberAttachedFrontLayers) { attachedLayersFrontPositions.add(0f) }
+//
+//                parallaxPlaneEntity = world.createEntity("Parallax plane of entity '${entity.id}'") {
+//                    it += positionComponent {}
+//                    it += rgbaComponent {}
+//                }
+
             }
             it += layerTag
         }

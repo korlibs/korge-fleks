@@ -11,8 +11,8 @@ import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
+import korlibs.korge.fleks.assets.data.ParallaxConfigNew
 import korlibs.korge.fleks.assets.data.ParallaxDataContainer
-import korlibs.korge.fleks.assets.data.ParallaxLayerTexture
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.ldtk.view.*
@@ -25,7 +25,7 @@ typealias TileMapType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
 typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
-typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxLayerTexture>>
+typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxConfigNew>>
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -102,6 +102,11 @@ class AssetStore {
         if (ninePatchSlices.contains(name)) {
             ninePatchSlices[name]!!.second
         } else error("AssetStore: NinePatchSlice '$name' not found!")
+
+//    fun getParallaxLayerTexture(name: String) : ParallaxLayerTexture =
+//        if (parallaxLayers.contains(name)) {
+//            parallaxLayers[name]!!.second
+//        } else error("AssetStore: Parallax layer texture '$name' not found!")
 
     fun getBackground(name: String) : ParallaxDataContainer =
         /*backgrounds[name]?.second ?:*/ error("AssetStore: Parallax background '$name' not found!")

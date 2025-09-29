@@ -132,22 +132,26 @@ class TextureAtlasLoader {
             bitMapFonts[font] = Pair(type, bitmapFont)
         }
 
-        config.parallaxEffects.forEach { (parallaxLayerName, parallaxConfig) ->
-            val spriteFrames = if (textures.containsKey(parallaxLayerName)) {
-                textures[parallaxLayerName]!!.second
-            } else {
-                println("ERROR: TextureAtlasLoader.load() - Cannot create parallax layer for '$parallaxLayerName' - texture not found!")
-                SpriteFrames()
+        // Load and set parallax background environments
+        config.parallaxBackgrounds.forEach { (parallaxName, parallaxConfig) ->
+            parallaxConfig.backgroundLayers.forEach { (layerName, layer) ->
+                layer.frames = if (textures.containsKey(layerName)) {
+                    textures[layerName]!!.second
+                } else {
+                    println("ERROR: TextureAtlasLoader.load() - Cannot create parallax layer '$layerName' for '$parallaxName' - texture not found!")
+                    SpriteFrames()
+                }
             }
-            val parallaxLayer = ParallaxLayerTexture(
-                spriteFrames,
-                parallaxConfig.repeatX,
-                parallaxConfig.repeatY,
-                parallaxConfig.speedFactor,
-                parallaxConfig.selfSpeedX,
-                parallaxConfig.selfSpeedY
-            )
-            parallaxLayers[parallaxLayerName] = Pair(type, parallaxLayer)
+            parallaxConfig.foregroundLayers.forEach { (layerName, layer) ->
+                layer.frames = if (textures.containsKey(layerName)) {
+                    textures[layerName]!!.second
+                } else {
+                    println("ERROR: TextureAtlasLoader.load() - Cannot create parallax layer '$layerName' for '$parallaxName' - texture not found!")
+                    SpriteFrames()
+                }
+            }
+
+            parallaxLayers[parallaxName] = Pair(type, parallaxConfig)
         }
     }
 }
