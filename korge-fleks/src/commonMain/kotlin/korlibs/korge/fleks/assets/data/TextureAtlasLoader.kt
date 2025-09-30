@@ -14,9 +14,8 @@ import korlibs.korge.fleks.assets.AssetModel.TextureConfig
 import korlibs.korge.fleks.assets.BitMapFontMapType
 import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
 import korlibs.korge.fleks.assets.ParallaxMapType
+import korlibs.korge.fleks.assets.ParallaxTexturesMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlin.collections.set
 import kotlin.math.absoluteValue
 
@@ -30,6 +29,7 @@ class TextureAtlasLoader {
         ninePatchSlices: NinePatchBmpSliceMapType,
         bitMapFonts: BitMapFontMapType,
         parallaxLayers: ParallaxMapType,
+        parallaxTextures: ParallaxTexturesMapType,
         type: AssetType
     ) {
         val spriteAtlas = resourcesVfs["${assetFolder}/${config.fileName}"].readAtlas()
@@ -141,6 +141,7 @@ class TextureAtlasLoader {
                     println("ERROR: TextureAtlasLoader.load() - Cannot create parallax layer '$layerName' for '$parallaxName' - texture not found!")
                     SpriteFrames()
                 }
+                parallaxTextures[layerName] = Pair(type, layer)
             }
             parallaxConfig.foregroundLayers.forEach { (layerName, layer) ->
                 layer.frames = if (textures.containsKey(layerName)) {
@@ -149,9 +150,9 @@ class TextureAtlasLoader {
                     println("ERROR: TextureAtlasLoader.load() - Cannot create parallax layer '$layerName' for '$parallaxName' - texture not found!")
                     SpriteFrames()
                 }
+                parallaxTextures[layerName] = Pair(type, layer)
             }
-
-            parallaxLayers[parallaxName] = Pair(type, parallaxConfig)
+            parallaxLayers[parallaxName] = Pair(type, parallaxConfig)  // TODO maybe not needed -- check and remove if so
         }
     }
 }

@@ -11,6 +11,7 @@ import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
+import korlibs.korge.fleks.assets.data.ParallaxConfigNew.ParallaxLayerConfigNew
 import korlibs.korge.fleks.assets.data.ParallaxConfigNew
 import korlibs.korge.fleks.assets.data.ParallaxDataContainer
 import korlibs.korge.fleks.assets.data.SpriteFrames
@@ -26,6 +27,7 @@ typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
 typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxConfigNew>>
+typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxLayerConfigNew>>
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -65,6 +67,7 @@ class AssetStore {
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
     internal val parallaxLayers: ParallaxMapType = mutableMapOf()
+    internal val parallaxTextures: ParallaxTexturesMapType = mutableMapOf()
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {
@@ -103,10 +106,16 @@ class AssetStore {
             ninePatchSlices[name]!!.second
         } else error("AssetStore: NinePatchSlice '$name' not found!")
 
-//    fun getParallaxLayerTexture(name: String) : ParallaxLayerTexture =
-//        if (parallaxLayers.contains(name)) {
-//            parallaxLayers[name]!!.second
-//        } else error("AssetStore: Parallax layer texture '$name' not found!")
+    fun getParallaxTexture(name: String) : ParallaxLayerConfigNew =
+        if (parallaxTextures.contains(name)) {
+            parallaxTextures[name]!!.second
+        } else error("AssetStore: Parallax texture '$name' not found!")
+
+    // TODO this can probably be removed -- cleanup
+    fun getParallaxConfig(name: String) : ParallaxConfigNew =
+        if (parallaxLayers.contains(name)) {
+            parallaxLayers[name]!!.second
+        } else error("AssetStore: Parallax config '$name' not found!")
 
     fun getBackground(name: String) : ParallaxDataContainer =
         /*backgrounds[name]?.second ?:*/ error("AssetStore: Parallax background '$name' not found!")
@@ -197,6 +206,7 @@ class AssetStore {
                     ninePatchSlices,
                     bitMapFonts,
                     parallaxLayers,
+                    parallaxTextures,
                     type)
             }
 

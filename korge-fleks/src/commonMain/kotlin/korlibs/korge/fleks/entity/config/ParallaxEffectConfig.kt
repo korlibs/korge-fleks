@@ -2,15 +2,9 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
-import korlibs.datastructure.iterators.fastForEachReverse
-import korlibs.korge.fleks.components.EntityRef.Companion.entityRefComponent
-import korlibs.korge.fleks.components.EntityRefsByName.Companion.entityRefsByNameComponent
-import korlibs.korge.fleks.components.Layer.Companion.layerComponent
-import korlibs.korge.fleks.components.Motion.Companion.motionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.parallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
-import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.utils.*
@@ -21,7 +15,8 @@ import kotlinx.serialization.*
 data class ParallaxEffectConfig(
     override val name: String,
 
-    private val backgroundLayerNames: List<String>,
+    private val backgroundLayerNames: List<String> = emptyList(),
+    private val foregroundLayerNames: List<String> = emptyList(),
 
     private val layerTag: RenderLayerTag,
     private val x: Float = 0f,
@@ -35,17 +30,44 @@ data class ParallaxEffectConfig(
                 x = this@ParallaxEffectConfig.x  // global position in screen coordinates
                 y = this@ParallaxEffectConfig.y
             }
-            it += motionComponent {}
+//            backgroundLayerNames.forEach { layerName ->
+//                it += positionComponent {}  // local position of each layer, will be updated in ParallaxSystem
+//                it += parallaxComponent { name = layerName }
+//                it += rgbaComponent {}  // default white color tint
+//                it += entityRefComponent { this.entity = entity }  // reference to parent entity for global position
+//                it += layerTag
+//            }
+//            foregroundLayerNames.forEach { layerName ->
+//                it += positionComponent {}  // local position of each layer, will be updated in ParallaxSystem
+//                it += parallaxComponent { name = layerName }
+//                it += rgbaComponent {}  // default white color tint
+//                it += entityRefComponent { this.entity = entity }  // reference to parent entity for global position
+//                it += layerTag
+//            }
+
+
+//            it += motionComponent {}
+
+
+
 
             it += parallaxComponent {
-                backgroundLayerNames.fastForEachReverse { layerTextureName ->
-                    bgLayerEntities.add(
-                        createEntity("Parallax BG layer '$layerTextureName' of entity '${entity.id}'") {
+                backgroundLayerNames.forEach { layerName ->
+                    bgLayerEntities[layerName] =
+                        createEntity("Parallax BG layer '$layerName' of entity '${entity.id}'") {
                             it += positionComponent {}
                             it += rgbaComponent {}
                         }
-                    )
                 }
+
+                foregroundLayerNames.forEach { layerName ->
+                    fgLayerEntities[layerName] =
+                        createEntity("Parallax FG layer '$layerName' of entity '${entity.id}'") {
+                            it += positionComponent {}
+                            it += rgbaComponent {}
+                        }
+                }
+            }
 
 //                repeat(numberForegroundLayers) { index ->
 //                    val name = assetStore.getBackground(name).config.foregroundLayers?.get(index)?.name ?: "No layer name"
@@ -67,8 +89,8 @@ data class ParallaxEffectConfig(
 //                }
 
             }
-            it += layerTag
-        }
+//            it += layerTag
+//        }
         return entity
     }
 

@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.size
-import korlibs.korge.fleks.utils.ParallaxSpeedFactors
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -34,9 +33,9 @@ import kotlinx.serialization.Transient
 data class ParallaxConfigNew(
     val offset: Int = 0,
     val mode: Mode = Mode.HORIZONTAL_PLANE,
-    val backgroundLayers: Map<String, ParallaxLayerConfig> = mapOf(),
+    val backgroundLayers: Map<String, ParallaxLayerConfigNew> = mapOf(),
     val parallaxPlane: ParallaxPlaneConfig = ParallaxPlaneConfig(),
-    val foregroundLayers: Map<String, ParallaxLayerConfig> = mapOf()
+    val foregroundLayers: Map<String, ParallaxLayerConfigNew> = mapOf()
 ) {
     enum class Mode {
         HORIZONTAL_PLANE, VERTICAL_PLANE, NO_PLANE
@@ -54,7 +53,7 @@ data class ParallaxConfigNew(
      * and independently of the player input.
      */
     @Serializable @SerialName("ParallaxLayerConfig")
-    data class ParallaxLayerConfig(
+    data class ParallaxLayerConfigNew(
         val repeatX: Boolean = false,
         val repeatY: Boolean = false,
         val speedFactor: Float? = null,  // It this is null than no movement is applied to the layer
@@ -63,6 +62,9 @@ data class ParallaxConfigNew(
     ) {
         @Transient  // This is set when loading the texture atlas
         lateinit var frames: MutableList<SpriteFrame>
+
+        val firstFrame: SpriteFrame get() = frames.first()
+
     }
 
     /**

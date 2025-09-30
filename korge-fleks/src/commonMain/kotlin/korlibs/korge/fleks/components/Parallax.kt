@@ -40,9 +40,9 @@ class Parallax private constructor(
 
     // Do not set below properties directly - they will be set by the initComponent hook function
     // List of layer entities
-    val bgLayerEntities: MutableList<Entity> = mutableListOf(),
+    val bgLayerEntities: MutableMap<String, Entity> = mutableMapOf(),
     var parallaxPlaneEntity: Entity = Entity.NONE,
-    val fgLayerEntities: MutableList<Entity> = mutableListOf(),
+    val fgLayerEntities: MutableMap<String, Entity> = mutableMapOf(),
     // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
     val linePositions: MutableList<Float> = mutableListOf(),
     // Below lists are static and can be cloned by reference
@@ -96,6 +96,7 @@ class Parallax private constructor(
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
+/*
         val world = this
         val assetStore: AssetStore = inject(name = "AssetStore")
 
@@ -148,6 +149,7 @@ class Parallax private constructor(
         // Set parallax height and offset in the camera system
         system<CameraSystem>().parallaxHeight = parallaxLayerHeight - parallaxDataContainer.config.offset.toFloat()
         system<CameraSystem>().parallaxOffset = parallaxDataContainer.config.offset.toFloat()
+*/
     }
 
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)

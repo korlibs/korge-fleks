@@ -21,12 +21,14 @@ class ParallaxSystem(
     override fun onTickEntity(entity: Entity) {
         val parallaxComponent = entity[ParallaxComponent]
         val motionComponent = entity[MotionComponent]
-        val parallaxDataContainer = assetStore.getBackground(parallaxComponent.name)
-        val offset = parallaxDataContainer.config.offset
+//        val parallaxDataContainer = assetStore.getBackground(parallaxComponent.name)
+//        val parallaxConfig = assetStore.getParallaxConfig(parallaxComponent.name)
 
         // Update local positions for each layer which is configured to be moving (speedFactor not null or zero)
-        parallaxComponent.bgLayerEntities.fastForEachWithIndex { index, layerEntity ->
-            val speedFactor = parallaxDataContainer.config.backgroundLayers!![index].speedFactor
+        parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) ->
+//            val speedFactor = parallaxDataContainer.config.backgroundLayers!![index].speedFactor
+            val parallaxTexture = assetStore.getParallaxTexture(layerName)
+            val speedFactor = parallaxTexture.speedFactor
             if (speedFactor != null) {
                 val positionComponent = layerEntity[PositionComponent]
                 // Check if layer has MotionComponent for self-movement
@@ -36,9 +38,14 @@ class ParallaxSystem(
                 // Calculate new position based on speed factor and layer velocity
                 positionComponent.x = (speedFactor * motionComponent.velocityX + layerVelocityX) * worldToPixelRatio * deltaTime + positionComponent.x  // f(x) = v * t + x
                 positionComponent.y = (speedFactor * motionComponent.velocityY + layerVelocityY) * worldToPixelRatio * deltaTime + positionComponent.y
+
+                // TODO check if wrapping can be done here
+                positionComponent.x = wrap(positionComponent.x, max = parallaxTexture.firstFrame.bmpSlice.width)
+                positionComponent.y = wrap(positionComponent.y, max = parallaxTexture.firstFrame.bmpSlice.height)
             }
         }
-
+/*
+        val offset = parallaxConfig.offset
         parallaxComponent.attachedLayersRearPositions.fastForEachWithIndex { index, position ->
             val plane = parallaxDataContainer.config.parallaxPlane!!
             val parallaxMode = parallaxDataContainer.config.mode
@@ -110,5 +117,9 @@ class ParallaxSystem(
             positionComponent.x = (speedFactor * motionComponent.velocityX + layerVelocityX) * worldToPixelRatio * deltaTime + positionComponent.x  // f(x) = v * t + x
             positionComponent.y = (speedFactor * motionComponent.velocityY + layerVelocityY) * worldToPixelRatio * deltaTime + positionComponent.y
         }
+*/
     }
+
+    private fun wrap(value: Float, max: Int, min: Int = 0): Float =
+        if (value >= max) value - max else if (value < min) value + max else value
 }
