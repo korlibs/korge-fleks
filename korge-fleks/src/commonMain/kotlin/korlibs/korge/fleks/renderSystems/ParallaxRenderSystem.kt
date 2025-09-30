@@ -6,7 +6,6 @@ import korlibs.image.format.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.assets.data.ParallaxConfig
 import korlibs.korge.fleks.assets.data.ParallaxConfigNew.ParallaxLayerConfigNew
-import korlibs.korge.fleks.components.EntityRef.Companion.EntityRefComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -37,25 +36,12 @@ class ParallaxRenderSystem(
 
             // Iterate over all entities which should be rendered in this view
             family.forEach { entity ->
-                val globalPositionComponent = entity[EntityRefComponent].entity[PositionComponent]
+                val globalPositionComponent = entity[PositionComponent]
                 val parallaxComponent = entity[ParallaxComponent]
-
-//                val parallaxTexture = assetStore.getParallaxTexture(parallaxComponent.name)
-//                val localPositionComponent = entity[PositionComponent]
-//                val rgba = entity[RgbaComponent].rgba
-//
-//                drawLayer(
-//                    global = globalPositionComponent,
-//                    local = localPositionComponent,
-//                    parallaxTexture = parallaxTexture,
-//                    rgba, batch, ctx
-//                )
-
 
                 // Draw all background parallax layers
                 parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) ->
                     val layerTexture = assetStore.getParallaxTexture(layerName)
-                    // Check local position and wrap around the texture size
                     val localPositionComponent = layerEntity[PositionComponent]
 //                    localPositionComponent.x = wrap(localPositionComponent.x, max = layerTexture.firstFrame.bmpSlice.width)
 //                    localPositionComponent.y = wrap(localPositionComponent.y, max = layerTexture.firstFrame.bmpSlice.height)
@@ -67,6 +53,8 @@ class ParallaxRenderSystem(
                         parallaxTexture = layerTexture,
                         localRgba, batch, ctx
                     )
+
+//                    println("parallax render: $layerName")
                 }
 /*
                 // Iterate over all parallax layers
@@ -166,8 +154,8 @@ class ParallaxRenderSystem(
         val countH = if (parallaxTexture.repeatX) AppConfig.VIEW_PORT_WIDTH / parallaxTexture.firstFrame.bmpSlice.width else 0
         val countV = if (parallaxTexture.repeatY) AppConfig.VIEW_PORT_HEIGHT / parallaxTexture.firstFrame.bmpSlice.height else 0
 
-        val x = if (countH != 0 && parallaxTexture.speedFactor != null) global.x else global.x + parallaxTexture.firstFrame.targetX
-        val y = if (countV != 0 && parallaxTexture.speedFactor != null) global.y else global.y + parallaxTexture.firstFrame.targetY
+        val x = if (countH != 0 && parallaxTexture.speedFactor != null) global.x else global.x - parallaxTexture.firstFrame.targetX  // TODO change to + again
+        val y = if (countV != 0 && parallaxTexture.speedFactor != null) global.y else global.y - parallaxTexture.firstFrame.targetY
 
         val xStart = if (countH > 0) -1 else 0
         val yStart = if (countV > 0) -1 else 0

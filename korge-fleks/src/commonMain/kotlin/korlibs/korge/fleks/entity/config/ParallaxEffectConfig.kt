@@ -2,6 +2,7 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.components.Motion.Companion.motionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.parallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
@@ -46,7 +47,7 @@ data class ParallaxEffectConfig(
 //            }
 
 
-//            it += motionComponent {}
+            it += motionComponent {}
 
 
 
@@ -88,9 +89,8 @@ data class ParallaxEffectConfig(
 //                    it += rgbaComponent {}
 //                }
 
-            }
-//            it += layerTag
-//        }
+            it += layerTag
+        }
         return entity
     }
 
