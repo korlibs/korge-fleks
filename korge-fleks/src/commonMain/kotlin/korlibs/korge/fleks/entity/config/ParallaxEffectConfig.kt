@@ -2,12 +2,14 @@ package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Motion.Companion.motionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.parallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
@@ -16,6 +18,7 @@ import kotlinx.serialization.*
 data class ParallaxEffectConfig(
     override val name: String,
 
+    private val assetName: String,
     private val backgroundLayerNames: List<String> = emptyList(),
     private val foregroundLayerNames: List<String> = emptyList(),
 
@@ -91,6 +94,14 @@ data class ParallaxEffectConfig(
 
             it += layerTag
         }
+        // Get height of the parallax background
+        val parallaxConfig = inject<AssetStore>("AssetStore").getParallaxConfig(assetName)
+        val parallaxLayerHeight: Float = parallaxConfig.size
+        val offset: Float = parallaxConfig.offset.toFloat()
+        // Set parallax height and offset in the camera system
+        system<CameraSystem>().parallaxHeight = parallaxLayerHeight - offset
+        system<CameraSystem>().parallaxOffset = offset
+
         return entity
     }
 

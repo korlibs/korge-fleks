@@ -40,8 +40,8 @@ class ParallaxSystem(
                 positionComponent.y = (speedFactor * motionComponent.velocityY + layerVelocityY) * worldToPixelRatio * deltaTime + positionComponent.y
 
                 // TODO check if wrapping can be done here
-                positionComponent.x = wrap(positionComponent.x, max = parallaxTexture.firstFrame.bmpSlice.width)
-                positionComponent.y = wrap(positionComponent.y, max = parallaxTexture.firstFrame.bmpSlice.height)
+                positionComponent.x = wrap(positionComponent.x, max = parallaxTexture.layerFrame.bmpSlice.width)
+                positionComponent.y = wrap(positionComponent.y, max = parallaxTexture.layerFrame.bmpSlice.height)
             }
         }
 /*

@@ -28,29 +28,72 @@ class TextureAtlasLoader {
         textures: SpriteFramesMapType,
         ninePatchSlices: NinePatchBmpSliceMapType,
         bitMapFonts: BitMapFontMapType,
-        parallaxLayers: ParallaxMapType,
+        parallaxBackgroundConfig: ParallaxMapType,
         parallaxTextures: ParallaxTexturesMapType,
         type: AssetType
     ) {
         val spriteAtlas = resourcesVfs["${assetFolder}/${config.fileName}"].readAtlas()
+        val bgLayerNames = mutableListOf<String>()
+        val fgLayerNames = mutableListOf<String>()
+        var size = 0
+
         spriteAtlas.entries.forEach { entry ->
             //println("sprite: ${entry.name}")
 
             val regex = "_\\d+$".toRegex()
-            if (regex.containsMatchIn(entry.name)) {
-                // entry is part of a sprite animation
-                val frameTag = entry.name.replace(regex, "")
-                // Get the animation index number
-                val regex = "_(\\d+)$".toRegex()
-                val match = regex.find(entry.name)
-                val animIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get animation index of sprite '${entry.name}'!")
+            val frameTag = if (regex.containsMatchIn(entry.name)) {
+                // entry is part of a sprite animations
+                entry.name.replace(regex, "")
+            } else entry.name
+
+            var textureUsedForParallaxBackground = false
+            config.parallaxBackgrounds.forEach { (parallaxName, parallaxConfig) ->
+                if (parallaxConfig.backgroundLayers.containsKey(frameTag)
+                    || parallaxConfig.foregroundLayers.containsKey(frameTag)) {
+                    // frameTag is used for parallax background layer
+                    val layer = parallaxConfig.backgroundLayers[frameTag]
+                        ?: parallaxConfig.foregroundLayers[frameTag]
+                        ?: error("Cannot find parallax layer '$frameTag' in parallax config!")
+
+                    if (frameTag == "parallax_sky") {
+                        println()
+                    }
+
+                    layer.layerFrame = ParallaxConfigNew.ParallaxLayerConfigNew.LayerFrame(
+                        bmpSlice = spriteAtlas.texture.sliceWithSize(
+                            entry.info.frame.x,
+                            entry.info.frame.y,
+                            entry.info.frame.width - 1,
+                            entry.info.frame.height
+                        ),
+                        entry.info.virtFrame?.x ?: 0,
+                        entry.info.virtFrame?.y ?: 0
+                    )
+                    parallaxTextures[frameTag] = Pair(type, layer)
+                    bgLayerNames.add(frameTag)
+                    size = entry.info.virtFrame?.height ?: 0
+
+                    textureUsedForParallaxBackground = true
+                    return@forEach
+                }
+            }
+
+            if (!textureUsedForParallaxBackground) {
                 if (textures.containsKey(frameTag)) {
                     val spriteData = textures[frameTag]!!.second
+
+                    // Get the animation index number
+                    val regex = "_(\\d+)$".toRegex()
+                    val match = regex.find(entry.name)
+                    val animIndex = match?.groupValues?.get(1)?.toInt()
+                        ?: error("Cannot get animation index of sprite '${entry.name}'!")
+
                     spriteData.add(animIndex, SpriteFrame(
                         spriteAtlas.texture.slice(entry.info.frame),
                         entry.info.virtFrame?.x ?: 0,
                         entry.info.virtFrame?.y ?: 0
                     ))
+
                 } else {
                     val spriteSourceSize = entry.info.virtFrame
                     val spriteAnimFrame = SpriteFrames(
@@ -66,23 +109,21 @@ class TextureAtlasLoader {
                     )
                     textures[frameTag] = Pair(type, spriteAnimFrame)
                 }
-            } else {
-                // entry is not part of a sprite animation
-                val spriteSourceSize = entry.info.virtFrame
-                val spriteAnimFrame = SpriteFrames(
-                    width = entry.info.virtFrame?.width ?: 0,
-                    height = entry.info.virtFrame?.height ?: 0
-                )
-                spriteAnimFrame.add(
-                    SpriteFrame(
-                        spriteAtlas.texture.slice(entry.info.frame),
-                        spriteSourceSize?.x ?: 0,
-                        spriteSourceSize?.y ?: 0
-                    )
-                )
-                textures[entry.name] = Pair(type, spriteAnimFrame)
             }
         }
+        if (config.parallaxBackgrounds.isNotEmpty()) {
+            val parallaxConfig = ParallaxBackgroundConfig(
+                // TODO cleanup
+                config.parallaxBackgrounds.entries.first().value.offset,
+                config.parallaxBackgrounds.entries.first().value.mode,
+                size.toFloat(),
+                bgLayerNames.toList(),
+                fgLayerNames.toList()
+            )
+            // TODO refactor
+            parallaxBackgroundConfig["intro_background"] = Pair(type, parallaxConfig)
+        }
+
 
         // Load and set frameDuration
         config.frameDurations.forEach { (frameTag, duration) ->
@@ -131,29 +172,50 @@ class TextureAtlasLoader {
             }
             bitMapFonts[font] = Pair(type, bitmapFont)
         }
-
+/*
         // Load and set parallax background environments
         config.parallaxBackgrounds.forEach { (parallaxName, parallaxConfig) ->
+            val bgLayerNames = mutableListOf<String>()
+            val fgLayerNames = mutableListOf<String>()
+            var size: Int = 0
             parallaxConfig.backgroundLayers.forEach { (layerName, layer) ->
-                layer.frames = if (textures.containsKey(layerName)) {
+                val frames = if (textures.containsKey(layerName)) {
                     textures[layerName]!!.second
                 } else {
                     println("ERROR: TextureAtlasLoader.load() - Cannot create parallax layer '$layerName' for '$parallaxName' - texture not found!")
                     SpriteFrames()
                 }
+                layer.layerFrame = frames.firstFrame.sliceWithSize()
                 parallaxTextures[layerName] = Pair(type, layer)
+                bgLayerNames.add(layerName)
+                size = frames.height
             }
             parallaxConfig.foregroundLayers.forEach { (layerName, layer) ->
-                layer.frames = if (textures.containsKey(layerName)) {
+                val frames = if (textures.containsKey(layerName)) {
                     textures[layerName]!!.second
                 } else {
                     println("ERROR: TextureAtlasLoader.load() - Cannot create parallax layer '$layerName' for '$parallaxName' - texture not found!")
                     SpriteFrames()
                 }
+                layer.frames = frames
                 parallaxTextures[layerName] = Pair(type, layer)
+                fgLayerNames.add(layerName)
+                size = frames.height
             }
-            parallaxLayers[parallaxName] = Pair(type, parallaxConfig)  // TODO maybe not needed -- check and remove if so
+
+            // TODO load parallax ground plane and attached layers
+
+            val parallaxConfig = ParallaxBackgroundConfig(
+                parallaxConfig.offset,
+                parallaxConfig.mode,
+                size.toFloat(),
+                bgLayerNames.toList(),
+                fgLayerNames.toList()
+            )
+            parallaxBackgroundConfig[parallaxName] = Pair(type, parallaxConfig)
         }
+*/
+        println()
     }
 }
 

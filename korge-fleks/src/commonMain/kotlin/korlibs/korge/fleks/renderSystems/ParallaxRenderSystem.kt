@@ -41,11 +41,15 @@ class ParallaxRenderSystem(
 
                 // Draw all background parallax layers
                 parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) ->
-                    val layerTexture = assetStore.getParallaxTexture(layerName)
+                           val layerTexture = assetStore.getParallaxTexture(layerName)
                     val localPositionComponent = layerEntity[PositionComponent]
 //                    localPositionComponent.x = wrap(localPositionComponent.x, max = layerTexture.firstFrame.bmpSlice.width)
 //                    localPositionComponent.y = wrap(localPositionComponent.y, max = layerTexture.firstFrame.bmpSlice.height)
                     val localRgba = layerEntity[RgbaComponent].rgba
+
+                    if (layerName == "parallax_sky") {
+                        println()
+                    }
 
                     drawLayer(
                         global = globalPositionComponent,
@@ -151,24 +155,26 @@ class ParallaxRenderSystem(
         batch: BatchBuilder2D,
         ctx: RenderContext
     ) {
-        val countH = if (parallaxTexture.repeatX) AppConfig.VIEW_PORT_WIDTH / parallaxTexture.firstFrame.bmpSlice.width else 0
-        val countV = if (parallaxTexture.repeatY) AppConfig.VIEW_PORT_HEIGHT / parallaxTexture.firstFrame.bmpSlice.height else 0
+        val countH = if (parallaxTexture.repeatX) AppConfig.VIEW_PORT_WIDTH / parallaxTexture.layerFrame.bmpSlice.width else 0
+        val countV = if (parallaxTexture.repeatY) AppConfig.VIEW_PORT_HEIGHT / parallaxTexture.layerFrame.bmpSlice.height else 0
 
-        val x = if (countH != 0 && parallaxTexture.speedFactor != null) global.x else global.x - parallaxTexture.firstFrame.targetX  // TODO change to + again
-        val y = if (countV != 0 && parallaxTexture.speedFactor != null) global.y else global.y - parallaxTexture.firstFrame.targetY
+        val x = if (countH != 0 && parallaxTexture.speedFactor != null) global.x else global.x + parallaxTexture.layerFrame.targetX
+        val y = if (countV != 0 && parallaxTexture.speedFactor != null) global.y else global.y + parallaxTexture.layerFrame.targetY
 
         val xStart = if (countH > 0) -1 else 0
         val yStart = if (countV > 0) -1 else 0
         for(xIndex in xStart until countH + 1) {  // +1 <== for right side of the view port when scrolling to the left
             for(yIndex in yStart until countV + 1) {
                 batch.drawQuad(
-                    tex = ctx.getTex(parallaxTexture.firstFrame.bmpSlice),
+                    tex = ctx.getTex(parallaxTexture.layerFrame.bmpSlice),
                     // global + target + (layer index) + local (used for scrolling the layer)
-                    x = x + xIndex * parallaxTexture.firstFrame.bmpSlice.width + local.x + local.offsetX,
-                    y = y + yIndex * parallaxTexture.firstFrame.bmpSlice.height + local.y + local.offsetY,
+                    x = x + xIndex * parallaxTexture.layerFrame.bmpSlice.width + local.x + local.offsetX,
+                    y = y + yIndex * parallaxTexture.layerFrame.bmpSlice.height + local.y + local.offsetY,
                     filtering = false,
                     colorMul = rgba
                 )
+
+                //println("x: ${x + xIndex * parallaxTexture.firstFrame.bmpSlice.width + local.x + local.offsetX}")
             }
         }
     }

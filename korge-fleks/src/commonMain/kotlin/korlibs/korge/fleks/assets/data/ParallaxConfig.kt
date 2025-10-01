@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.size
+import korlibs.image.bitmap.BmpSlice
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -61,9 +62,13 @@ data class ParallaxConfigNew(
         val selfSpeedY: Float = 0f
     ) {
         @Transient  // This is set when loading the texture atlas
-        lateinit var frames: MutableList<SpriteFrame>
+        lateinit var layerFrame: LayerFrame
 
-        val firstFrame: SpriteFrame get() = frames.first()
+        data class LayerFrame(
+            val bmpSlice: BmpSlice,
+            val targetX: Int = 0,  // offset from the top-left corner of the original sprite if cropped
+            val targetY: Int = 0
+        )
 
     }
 

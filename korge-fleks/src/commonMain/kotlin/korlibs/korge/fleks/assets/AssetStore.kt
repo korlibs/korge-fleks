@@ -11,9 +11,8 @@ import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
+import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
 import korlibs.korge.fleks.assets.data.ParallaxConfigNew.ParallaxLayerConfigNew
-import korlibs.korge.fleks.assets.data.ParallaxConfigNew
-import korlibs.korge.fleks.assets.data.ParallaxDataContainer
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.ldtk.view.*
@@ -26,7 +25,7 @@ typealias TileMapType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
 typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
-typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxConfigNew>>
+typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxBackgroundConfig>>
 typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxLayerConfigNew>>
 
 /**
@@ -63,11 +62,11 @@ class AssetStore {
 
     internal val sounds: SoundMapType = mutableMapOf()
     internal val tileMaps: TileMapType = mutableMapOf()
-    internal val textures: SpriteFramesMapType = mutableMapOf()
+    internal val textures: SpriteFramesMapType = mutableMapOf() // TODO remove duplicates (parallax layer textures)
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
-    internal val parallaxLayers: ParallaxMapType = mutableMapOf()
     internal val parallaxTextures: ParallaxTexturesMapType = mutableMapOf()
+    internal val parallaxBackgroundConfig: ParallaxMapType = mutableMapOf()
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {
@@ -111,14 +110,10 @@ class AssetStore {
             parallaxTextures[name]!!.second
         } else error("AssetStore: Parallax texture '$name' not found!")
 
-    // TODO this can probably be removed -- cleanup
-    fun getParallaxConfig(name: String) : ParallaxConfigNew =
-        if (parallaxLayers.contains(name)) {
-            parallaxLayers[name]!!.second
+    fun getParallaxConfig(name: String) : ParallaxBackgroundConfig =
+        if (parallaxBackgroundConfig.contains(name)) {
+            parallaxBackgroundConfig[name]!!.second
         } else error("AssetStore: Parallax config '$name' not found!")
-
-    fun getBackground(name: String) : ParallaxDataContainer =
-        /*backgrounds[name]?.second ?:*/ error("AssetStore: Parallax background '$name' not found!")
 
     fun getFont(name: String) : Font =
         bitMapFonts[name]?.second ?: error("AssetStore: Cannot find font '$name'!")
@@ -205,7 +200,7 @@ class AssetStore {
                     textures,
                     ninePatchSlices,
                     bitMapFonts,
-                    parallaxLayers,
+                    parallaxBackgroundConfig,
                     parallaxTextures,
                     type)
             }

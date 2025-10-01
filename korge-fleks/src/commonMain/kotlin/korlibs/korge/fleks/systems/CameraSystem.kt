@@ -18,6 +18,8 @@ class CameraSystem(
     private val worldToPixelRatioInv = 1f / worldToPixelRatio
     private val factor = 0.05f
 
+    private val parallaxFamily = world.family { all(ParallaxComponent, MotionComponent) }
+
     // These properties need to be set by the entityConfigure function of the level map config
     var worldHeight: Float = 0f
     var worldWidth: Float = 0f
@@ -62,7 +64,6 @@ class CameraSystem(
         val cameraDistX = cameraPosition.x - lastCameraPosX
         //val cameraDistY = cameraPosition.y - lastCameraPosY
 
-        val parallaxFamily = world.family { all(ParallaxComponent, MotionComponent) }
         parallaxFamily.forEach { parallaxEntity ->
             val motion = parallaxEntity[MotionComponent]
             val position = parallaxEntity[PositionComponent]
