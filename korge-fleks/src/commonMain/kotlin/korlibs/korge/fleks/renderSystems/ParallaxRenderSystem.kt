@@ -155,21 +155,21 @@ class ParallaxRenderSystem(
         batch: BatchBuilder2D,
         ctx: RenderContext
     ) {
-        val countH = if (parallaxTexture.repeatX) AppConfig.VIEW_PORT_WIDTH / parallaxTexture.layerFrame.bmpSlice.width else 0
-        val countV = if (parallaxTexture.repeatY) AppConfig.VIEW_PORT_HEIGHT / parallaxTexture.layerFrame.bmpSlice.height else 0
+        val countH = if (parallaxTexture.repeatX) AppConfig.VIEW_PORT_WIDTH / parallaxTexture.layerBmpSlice.width else 0
+        val countV = if (parallaxTexture.repeatY) AppConfig.VIEW_PORT_HEIGHT / parallaxTexture.layerBmpSlice.height else 0
 
-        val x = if (countH != 0 && parallaxTexture.speedFactor != null) global.x else global.x + parallaxTexture.layerFrame.targetX
-        val y = if (countV != 0 && parallaxTexture.speedFactor != null) global.y else global.y + parallaxTexture.layerFrame.targetY
+        val x = if (countH != 0 && parallaxTexture.speedFactor != null) global.x else global.x + parallaxTexture.targetX
+        val y = if (countV != 0 && parallaxTexture.speedFactor != null) global.y else global.y + parallaxTexture.targetY
 
         val xStart = if (countH > 0) -1 else 0
         val yStart = if (countV > 0) -1 else 0
         for(xIndex in xStart until countH + 1) {  // +1 <== for right side of the view port when scrolling to the left
             for(yIndex in yStart until countV + 1) {
                 batch.drawQuad(
-                    tex = ctx.getTex(parallaxTexture.layerFrame.bmpSlice),
+                    tex = ctx.getTex(parallaxTexture.layerBmpSlice),
                     // global + target + (layer index) + local (used for scrolling the layer)
-                    x = x + xIndex * parallaxTexture.layerFrame.bmpSlice.width + local.x + local.offsetX,
-                    y = y + yIndex * parallaxTexture.layerFrame.bmpSlice.height + local.y + local.offsetY,
+                    x = x + xIndex * parallaxTexture.layerBmpSlice.width + local.x + local.offsetX,
+                    y = y + yIndex * parallaxTexture.layerBmpSlice.height + local.y + local.offsetY,
                     filtering = false,
                     colorMul = rgba
                 )

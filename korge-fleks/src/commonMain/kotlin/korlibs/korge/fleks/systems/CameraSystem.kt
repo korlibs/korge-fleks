@@ -24,9 +24,8 @@ class CameraSystem(
     var worldHeight: Float = 0f
     var worldWidth: Float = 0f
 
-    // These properties need to be set by the onAdd hook function of the ParallaxComponent
+    // This property needs to be set by the onAdd hook function of the ParallaxComponent
     var parallaxHeight: Float = 0f
-    var parallaxOffset: Float = 0f
 
     override fun onTickEntity(entity: Entity) {
 
@@ -81,9 +80,7 @@ class CameraSystem(
 
             // Get the global position of the parallax layer in screen coordinates
             val parallaxVerticalLength = AppConfig.VIEW_PORT_HEIGHT - parallaxHeight
-            val parallaxVerticalPosition = ratio * parallaxVerticalLength
-
-            position.y = parallaxVerticalPosition - parallaxOffset
+            position.y = ratio * parallaxVerticalLength
 //            println("parallax y: $position.y")
         }
     }

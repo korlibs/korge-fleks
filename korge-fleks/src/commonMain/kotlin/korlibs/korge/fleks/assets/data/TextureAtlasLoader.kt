@@ -35,7 +35,6 @@ class TextureAtlasLoader {
         val spriteAtlas = resourcesVfs["${assetFolder}/${config.fileName}"].readAtlas()
         val bgLayerNames = mutableListOf<String>()
         val fgLayerNames = mutableListOf<String>()
-        var size = 0
 
         spriteAtlas.entries.forEach { entry ->
             //println("sprite: ${entry.name}")
@@ -59,19 +58,9 @@ class TextureAtlasLoader {
                         println()
                     }
 
-                    layer.layerFrame = ParallaxConfigNew.ParallaxLayerConfigNew.LayerFrame(
-                        bmpSlice = spriteAtlas.texture.sliceWithSize(
-                            entry.info.frame.x,
-                            entry.info.frame.y,
-                            entry.info.frame.width - 1,
-                            entry.info.frame.height
-                        ),
-                        entry.info.virtFrame?.x ?: 0,
-                        entry.info.virtFrame?.y ?: 0
-                    )
+                    layer.layerBmpSlice = spriteAtlas.texture.slice(entry.info.frame)
                     parallaxTextures[frameTag] = Pair(type, layer)
                     bgLayerNames.add(frameTag)
-                    size = entry.info.virtFrame?.height ?: 0
 
                     textureUsedForParallaxBackground = true
                     return@forEach
@@ -113,10 +102,9 @@ class TextureAtlasLoader {
         }
         if (config.parallaxBackgrounds.isNotEmpty()) {
             val parallaxConfig = ParallaxBackgroundConfig(
-                // TODO cleanup
-                config.parallaxBackgrounds.entries.first().value.offset,
                 config.parallaxBackgrounds.entries.first().value.mode,
-                size.toFloat(),
+                width = 0,
+                height = 334,  // TODO get from config
                 bgLayerNames.toList(),
                 fgLayerNames.toList()
             )

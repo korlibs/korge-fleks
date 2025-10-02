@@ -96,11 +96,8 @@ data class ParallaxEffectConfig(
         }
         // Get height of the parallax background
         val parallaxConfig = inject<AssetStore>("AssetStore").getParallaxConfig(assetName)
-        val parallaxLayerHeight: Float = parallaxConfig.size
-        val offset: Float = parallaxConfig.offset.toFloat()
-        // Set parallax height and offset in the camera system
-        system<CameraSystem>().parallaxHeight = parallaxLayerHeight - offset
-        system<CameraSystem>().parallaxOffset = offset
+        // Set parallax height in the camera system
+        system<CameraSystem>().parallaxHeight = parallaxConfig.height.toFloat()
 
         return entity
     }

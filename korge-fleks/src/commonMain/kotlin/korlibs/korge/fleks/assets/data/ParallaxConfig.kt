@@ -32,7 +32,10 @@ import kotlinx.serialization.Transient
  */
 @Serializable @SerialName("ParallaxConfig")
 data class ParallaxConfigNew(
-    val offset: Int = 0,
+    val offsetX: Int = 0,  // TODO offset could be removed if we move the moon up and partly out of the parallax background
+    val offsetY: Int = 0,
+    val parallaxWidth: Int = 0,   // width of the parallax effect used in VERTICAL_PLANE mode for horizontal scrolling
+    val parallaxHeight: Int = 0,  // height of the parallax effect used in HORIZONTAL_PLANE mode for vertical scrolling
     val mode: Mode = Mode.HORIZONTAL_PLANE,
     val backgroundLayers: Map<String, ParallaxLayerConfigNew> = mapOf(),
     val parallaxPlane: ParallaxPlaneConfig = ParallaxPlaneConfig(),
@@ -55,6 +58,9 @@ data class ParallaxConfigNew(
      */
     @Serializable @SerialName("ParallaxLayerConfig")
     data class ParallaxLayerConfigNew(
+        val targetX: Int = 0,  // offset from the left corner of the parallax background image used in VERTICAL_PLANE mode
+        val targetY: Int = 0,  // offset from the top corner of the parallax background image used in HORIZONTAL_PLANE mode
+
         val repeatX: Boolean = false,
         val repeatY: Boolean = false,
         val speedFactor: Float? = null,  // It this is null than no movement is applied to the layer
@@ -62,14 +68,7 @@ data class ParallaxConfigNew(
         val selfSpeedY: Float = 0f
     ) {
         @Transient  // This is set when loading the texture atlas
-        lateinit var layerFrame: LayerFrame
-
-        data class LayerFrame(
-            val bmpSlice: BmpSlice,
-            val targetX: Int = 0,  // offset from the top-left corner of the original sprite if cropped
-            val targetY: Int = 0
-        )
-
+        lateinit var layerBmpSlice: BmpSlice
     }
 
     /**
