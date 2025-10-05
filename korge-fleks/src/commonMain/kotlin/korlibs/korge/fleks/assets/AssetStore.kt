@@ -13,6 +13,7 @@ import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
 import korlibs.korge.fleks.assets.data.ParallaxConfigNew.ParallaxLayerConfigNew
+import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.ldtk.view.*
@@ -27,6 +28,7 @@ typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatc
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
 typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxBackgroundConfig>>
 typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxLayerConfigNew>>
+typealias ParallaxPlaneTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxPlaneTextures>>
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -62,11 +64,13 @@ class AssetStore {
 
     internal val sounds: SoundMapType = mutableMapOf()
     internal val tileMaps: TileMapType = mutableMapOf()
-    internal val textures: SpriteFramesMapType = mutableMapOf() // TODO remove duplicates (parallax layer textures)
+
+    internal val textures: SpriteFramesMapType = mutableMapOf()
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
-    internal val parallaxTextures: ParallaxTexturesMapType = mutableMapOf()
     internal val parallaxBackgroundConfig: ParallaxMapType = mutableMapOf()
+    internal val parallaxTextures: ParallaxTexturesMapType = mutableMapOf()
+    internal val parallaxPlaneTextures: ParallaxPlaneTexturesMapType = mutableMapOf()
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {
@@ -105,15 +109,20 @@ class AssetStore {
             ninePatchSlices[name]!!.second
         } else error("AssetStore: NinePatchSlice '$name' not found!")
 
+    fun getParallaxConfig(name: String) : ParallaxBackgroundConfig =
+        if (parallaxBackgroundConfig.contains(name)) {
+            parallaxBackgroundConfig[name]!!.second
+        } else error("AssetStore: Parallax config '$name' not found!")
+
     fun getParallaxTexture(name: String) : ParallaxLayerConfigNew =
         if (parallaxTextures.contains(name)) {
             parallaxTextures[name]!!.second
         } else error("AssetStore: Parallax texture '$name' not found!")
 
-    fun getParallaxConfig(name: String) : ParallaxBackgroundConfig =
-        if (parallaxBackgroundConfig.contains(name)) {
-            parallaxBackgroundConfig[name]!!.second
-        } else error("AssetStore: Parallax config '$name' not found!")
+    fun getParallaxPlane(name: String) : ParallaxPlaneTextures =
+        if (parallaxPlaneTextures.contains(name)) {
+            parallaxPlaneTextures[name]!!.second
+        } else error("AssetStore: Parallax plane texture '$name' not found!")
 
     fun getFont(name: String) : Font =
         bitMapFonts[name]?.second ?: error("AssetStore: Cannot find font '$name'!")
@@ -202,6 +211,7 @@ class AssetStore {
                     bitMapFonts,
                     parallaxBackgroundConfig,
                     parallaxTextures,
+                    parallaxPlaneTextures,
                     type)
             }
 

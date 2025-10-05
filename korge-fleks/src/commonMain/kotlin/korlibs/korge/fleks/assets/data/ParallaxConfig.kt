@@ -32,13 +32,11 @@ import kotlinx.serialization.Transient
  */
 @Serializable @SerialName("ParallaxConfig")
 data class ParallaxConfigNew(
-    val offsetX: Int = 0,  // TODO offset could be removed if we move the moon up and partly out of the parallax background
-    val offsetY: Int = 0,
     val parallaxWidth: Int = 0,   // width of the parallax effect used in VERTICAL_PLANE mode for horizontal scrolling
     val parallaxHeight: Int = 0,  // height of the parallax effect used in HORIZONTAL_PLANE mode for vertical scrolling
-    val mode: Mode = Mode.HORIZONTAL_PLANE,
+    val mode: Mode = Mode.NO_PLANE,
     val backgroundLayers: Map<String, ParallaxLayerConfigNew> = mapOf(),
-    val parallaxPlane: ParallaxPlaneConfig = ParallaxPlaneConfig(),
+    val parallaxPlane: Map<String, ParallaxPlaneConfig> = mapOf(),
     val foregroundLayers: Map<String, ParallaxLayerConfigNew> = mapOf()
 ) {
     enum class Mode {
@@ -93,8 +91,20 @@ data class ParallaxConfigNew(
 // TODO        val attachedLayersFront: ArrayList<ParallaxAttachedLayerConfig>? = null,
 //        val attachedLayersRear: ArrayList<ParallaxAttachedLayerConfig>? = null
     ) {
-        // This is computed after loading of parallax image data from Aseprite
-        @Transient // @Serializable(with = ParallaxSpeedFactors::class)
+        @Transient  // This is computed after loading of parallax image data from Aseprite
         lateinit var parallaxPlaneSpeedFactors: FloatArray
     }
+}
+
+data class ParallaxPlaneTextures(
+    val selfSpeed: Float = 0f,
+    val lineTextures: MutableList<LineTexture> = mutableListOf(),
+    val topAttachedLayerTextures: Map<String, BmpSlice> = mapOf(),
+    val bottomAttachedLayerTextures: Map<String, BmpSlice> =mapOf()
+) {
+    data class LineTexture(
+        val index: Int,
+        val bmpSlice: BmpSlice,
+        val speedFactor: Float
+    )
 }

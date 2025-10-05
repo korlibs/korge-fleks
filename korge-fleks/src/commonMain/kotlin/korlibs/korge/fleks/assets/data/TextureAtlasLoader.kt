@@ -14,6 +14,7 @@ import korlibs.korge.fleks.assets.AssetModel.TextureConfig
 import korlibs.korge.fleks.assets.BitMapFontMapType
 import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
 import korlibs.korge.fleks.assets.ParallaxMapType
+import korlibs.korge.fleks.assets.ParallaxPlaneTexturesMapType
 import korlibs.korge.fleks.assets.ParallaxTexturesMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
 import kotlin.collections.set
@@ -21,6 +22,19 @@ import kotlin.math.absoluteValue
 
 
 class TextureAtlasLoader {
+
+
+    private fun getParallaxPlaneSpeedFactor(index: Int, size: Int, speedFactor: Float) : Float {
+        val midPoint: Float = size * 0.5f
+        return speedFactor * (
+            // The pixel in the point of view must not stand still, they need to move with the lowest possible speed (= 1 / midpoint)
+            // Otherwise the midpoint is "running" away over time
+            if (index < midPoint)
+                1f - (index / midPoint)
+            else
+                (index - midPoint + 1f) / midPoint
+            )
+    }
 
     suspend fun load(
         assetFolder: String,
@@ -30,6 +44,7 @@ class TextureAtlasLoader {
         bitMapFonts: BitMapFontMapType,
         parallaxBackgroundConfig: ParallaxMapType,
         parallaxTextures: ParallaxTexturesMapType,
+        parallaxPlaneTextures: ParallaxPlaneTexturesMapType,
         type: AssetType
     ) {
         val spriteAtlas = resourcesVfs["${assetFolder}/${config.fileName}"].readAtlas()
@@ -46,7 +61,7 @@ class TextureAtlasLoader {
             } else entry.name
 
             var textureUsedForParallaxBackground = false
-            config.parallaxBackgrounds.forEach { (parallaxName, parallaxConfig) ->
+            config.parallaxBackgrounds.forEach { (_, parallaxConfig) ->
                 if (parallaxConfig.backgroundLayers.containsKey(frameTag)
                     || parallaxConfig.foregroundLayers.containsKey(frameTag)) {
                     // frameTag is used for parallax background layer
@@ -65,6 +80,25 @@ class TextureAtlasLoader {
                     textureUsedForParallaxBackground = true
                     return@forEach
                 }
+                parallaxConfig.parallaxPlane.forEach { (planeName, planeConfig) ->
+                    if (frameTag.contains(planeName)) {
+                        // Get the parallax plane index number
+                        val regex = "_slice(\\d+)$".toRegex()
+                        val match = regex.find(frameTag)
+                        var planeIndex = match?.groupValues?.get(1)?.toInt()
+                            ?: error("Cannot get plane index of texture '${frameTag}'!")
+
+                        planeIndex += parallaxConfig.parallaxHeight / 2  // TODO remove this line and adjust slice index in aseprite file
+
+                        if (!parallaxPlaneTextures.containsKey(planeName)) parallaxPlaneTextures[planeName] = Pair(type, ParallaxPlaneTextures())
+
+                        parallaxPlaneTextures[planeName]!!.second.lineTextures.add(ParallaxPlaneTextures.LineTexture(
+                            index = planeIndex,
+                            bmpSlice = spriteAtlas.texture.slice(entry.info.frame),
+                            speedFactor = getParallaxPlaneSpeedFactor(planeIndex, parallaxConfig.parallaxHeight, planeConfig.speedFactor)
+                        ))
+                    }
+                }
             }
 
             if (!textureUsedForParallaxBackground) {
@@ -82,21 +116,18 @@ class TextureAtlasLoader {
                         entry.info.virtFrame?.x ?: 0,
                         entry.info.virtFrame?.y ?: 0
                     ))
-
                 } else {
-                    val spriteSourceSize = entry.info.virtFrame
-                    val spriteAnimFrame = SpriteFrames(
+                    textures[frameTag] = Pair(type, SpriteFrames(
+                        frames = mutableListOf(
+                            SpriteFrame(
+                                spriteAtlas.texture.slice(entry.info.frame),
+                                entry.info.virtFrame?.x ?: 0,
+                                entry.info.virtFrame?.y ?: 0
+                            )
+                        ),
                         width = entry.info.virtFrame?.width ?: 0,
                         height = entry.info.virtFrame?.height ?: 0
-                    )
-                    spriteAnimFrame.add(
-                        SpriteFrame(
-                            spriteAtlas.texture.slice(entry.info.frame),
-                            spriteSourceSize?.x ?: 0,
-                            spriteSourceSize?.y ?: 0
-                        )
-                    )
-                    textures[frameTag] = Pair(type, spriteAnimFrame)
+                    ))
                 }
             }
         }
@@ -112,6 +143,7 @@ class TextureAtlasLoader {
             parallaxBackgroundConfig["intro_background"] = Pair(type, parallaxConfig)
         }
 
+//        println("")
 
         // Load and set frameDuration
         config.frameDurations.forEach { (frameTag, duration) ->

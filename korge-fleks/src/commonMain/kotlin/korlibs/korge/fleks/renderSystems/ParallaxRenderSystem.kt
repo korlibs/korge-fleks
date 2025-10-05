@@ -6,6 +6,7 @@ import korlibs.image.format.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.assets.data.ParallaxConfig
 import korlibs.korge.fleks.assets.data.ParallaxConfigNew.ParallaxLayerConfigNew
+import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -41,15 +42,13 @@ class ParallaxRenderSystem(
 
                 // Draw all background parallax layers
                 parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) ->
-                           val layerTexture = assetStore.getParallaxTexture(layerName)
+                    val layerTexture = assetStore.getParallaxTexture(layerName)
                     val localPositionComponent = layerEntity[PositionComponent]
-//                    localPositionComponent.x = wrap(localPositionComponent.x, max = layerTexture.firstFrame.bmpSlice.width)
-//                    localPositionComponent.y = wrap(localPositionComponent.y, max = layerTexture.firstFrame.bmpSlice.height)
                     val localRgba = layerEntity[RgbaComponent].rgba
 
-                    if (layerName == "parallax_sky") {
-                        println()
-                    }
+//                    if (layerName == "parallax_sky") {
+//                        println()
+//                    }
 
                     drawLayer(
                         global = globalPositionComponent,
@@ -57,8 +56,39 @@ class ParallaxRenderSystem(
                         parallaxTexture = layerTexture,
                         localRgba, batch, ctx
                     )
+                }
 
-//                    println("parallax render: $layerName")
+                // Draw parallax plane
+                if (parallaxComponent.name != "") {
+                    val parallaxPlane = assetStore.getParallaxPlane(parallaxComponent.name)
+                    val localPositionComponent = parallaxComponent.parallaxPlaneEntity[PositionComponent]
+                    val localRgba = parallaxComponent.parallaxPlaneEntity[RgbaComponent].rgba
+
+                    parallaxPlane.lineTextures.forEach { lineTexture ->
+                        drawParallaxPlaneLayer(
+                            global = globalPositionComponent,
+                            local = localPositionComponent,
+                            localScroll = 0f,
+                            parallaxMode = ParallaxConfig.Mode.HORIZONTAL_PLANE, // parallax.mode,
+                            repeat = true,
+                            lineTexture,
+                            localRgba, batch, ctx
+                        )
+                    }
+                }
+
+                // Draw all foreground parallax layers
+                parallaxComponent.fgLayerEntities.forEach { (layerName, layerEntity) ->
+                    val layerTexture = assetStore.getParallaxTexture(layerName)
+                    val localPositionComponent = layerEntity[PositionComponent]
+                    val localRgba = layerEntity[RgbaComponent].rgba
+
+                    drawLayer(
+                        global = globalPositionComponent,
+                        local = localPositionComponent,
+                        parallaxTexture = layerTexture,
+                        localRgba, batch, ctx
+                    )
                 }
 /*
                 // Iterate over all parallax layers
@@ -185,35 +215,39 @@ class ParallaxRenderSystem(
         localScroll: Float,
         parallaxMode: ParallaxConfig.Mode,
         repeat: Boolean,
-        layer: ImageFrameLayer,
+        lineTexture: ParallaxPlaneTextures.LineTexture,
         rgba: RGBA,
         batch: BatchBuilder2D,
         ctx: RenderContext
     ) {
         when (parallaxMode) {
             ParallaxConfig.Mode.HORIZONTAL_PLANE -> {
-                val countH = if (repeat) AppConfig.VIEW_PORT_WIDTH / layer.width else 0
-                val x = if (countH != 0) global.x else global.x + layer.targetX
+                val targetX = 0  // TODO check if needed
+                val targetY = lineTexture.index
+                val countH = if (repeat) AppConfig.VIEW_PORT_WIDTH / lineTexture.bmpSlice.width else 0
+                val x = if (countH != 0) global.x else global.x + targetX
 
                 for(xIndex in -1 - countH until countH + 1) {
                     batch.drawQuad(
-                        tex = ctx.getTex(layer.slice),
-                        x = x + xIndex * layer.width + AppConfig.VIEW_PORT_WIDTH * 0.5f + localScroll,
-                        y = global.y + layer.targetY + local.offsetY,
+                        tex = ctx.getTex(lineTexture.bmpSlice),
+                        x = x + xIndex * lineTexture.bmpSlice.width + AppConfig.VIEW_PORT_WIDTH * 0.5f + localScroll,
+                        y = global.y + targetY + local.offsetY,
                         filtering = false,
                         colorMul = rgba
                     )
                 }
             }
             ParallaxConfig.Mode.VERTICAL_PLANE -> {
-                val countV = if (repeat) AppConfig.VIEW_PORT_HEIGHT / layer.height else 0
-                val y = if (countV != 0) global.y else global.y + layer.targetY
+                val targetX = lineTexture.index
+                val targetY = 0  // TODO check if needed
+                val countV = if (repeat) AppConfig.VIEW_PORT_HEIGHT / lineTexture.bmpSlice.height else 0
+                val y = if (countV != 0) global.y else global.y + targetY
 
                 for(yIndex in -1 - countV until countV + 1) {
                     batch.drawQuad(
-                        tex = ctx.getTex(layer.slice),
-                        x = global.x + layer.targetX + local.offsetX,
-                        y = y + yIndex * layer.height + AppConfig.VIEW_PORT_HEIGHT * 0.5f + localScroll,
+                        tex = ctx.getTex(lineTexture.bmpSlice),
+                        x = global.x + targetX + local.offsetX,
+                        y = y + yIndex * lineTexture.bmpSlice.height + AppConfig.VIEW_PORT_HEIGHT * 0.5f + localScroll,
                         filtering = false,
                         colorMul = rgba
                     )

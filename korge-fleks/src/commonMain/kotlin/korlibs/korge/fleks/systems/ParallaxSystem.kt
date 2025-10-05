@@ -2,9 +2,8 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.datastructure.iterators.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.assets.data.ParallaxConfig
+import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -21,29 +20,12 @@ class ParallaxSystem(
     override fun onTickEntity(entity: Entity) {
         val parallaxComponent = entity[ParallaxComponent]
         val motionComponent = entity[MotionComponent]
-//        val parallaxDataContainer = assetStore.getBackground(parallaxComponent.name)
-//        val parallaxConfig = assetStore.getParallaxConfig(parallaxComponent.name)
 
         // Update local positions for each layer which is configured to be moving (speedFactor not null or zero)
-        parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) ->
-//            val speedFactor = parallaxDataContainer.config.backgroundLayers!![index].speedFactor
-            val parallaxTexture = assetStore.getParallaxTexture(layerName)
-            val speedFactor = parallaxTexture.speedFactor
-            if (speedFactor != null) {
-                val positionComponent = layerEntity[PositionComponent]
-                // Check if layer has MotionComponent for self-movement
-                val layerVelocityX = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityX else 0f
-                val layerVelocityY = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityY else 0f
+        parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) -> update(layerName, layerEntity, motionComponent) }
+        parallaxComponent.fgLayerEntities.forEach { (layerName, layerEntity) -> update(layerName, layerEntity, motionComponent) }
 
-                // Calculate new position based on speed factor and layer velocity
-                positionComponent.x = (speedFactor * motionComponent.velocityX + layerVelocityX) * worldToPixelRatio * deltaTime + positionComponent.x  // f(x) = v * t + x
-                positionComponent.y = (speedFactor * motionComponent.velocityY + layerVelocityY) * worldToPixelRatio * deltaTime + positionComponent.y
-
-                // TODO check if wrapping can be done here
-                positionComponent.x = wrap(positionComponent.x, max = parallaxTexture.layerBmpSlice.width)
-                positionComponent.y = wrap(positionComponent.y, max = parallaxTexture.layerBmpSlice.height)
-            }
-        }
+        parallaxComponent.parallaxPlaneEntity
 /*
         val offset = parallaxConfig.offset
         parallaxComponent.attachedLayersRearPositions.fastForEachWithIndex { index, position ->
@@ -118,6 +100,25 @@ class ParallaxSystem(
             positionComponent.y = (speedFactor * motionComponent.velocityY + layerVelocityY) * worldToPixelRatio * deltaTime + positionComponent.y
         }
 */
+    }
+
+    private fun update(layerName: String, layerEntity: Entity, motionComponent: Motion) {
+        val parallaxTexture = assetStore.getParallaxTexture(layerName)
+        val speedFactor = parallaxTexture.speedFactor
+        if (speedFactor != null) {
+            val positionComponent = layerEntity[PositionComponent]
+            // Check if layer has MotionComponent for self-movement - if not, use selfSpeed from ParallaxTexture config
+            val layerVelocityX = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityX else parallaxTexture.selfSpeedX
+            val layerVelocityY = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityY else parallaxTexture.selfSpeedY
+
+            // Calculate new position based on speed factor and layer velocity
+            positionComponent.x = (speedFactor * motionComponent.velocityX + layerVelocityX) * worldToPixelRatio * deltaTime + positionComponent.x  // f(x) = v * t + x
+            positionComponent.y = (speedFactor * motionComponent.velocityY + layerVelocityY) * worldToPixelRatio * deltaTime + positionComponent.y
+
+            // TODO check if wrapping can be done here
+            positionComponent.x = wrap(positionComponent.x, max = parallaxTexture.layerBmpSlice.width)
+            positionComponent.y = wrap(positionComponent.y, max = parallaxTexture.layerBmpSlice.height)
+        }
     }
 
     private fun wrap(value: Float, max: Int, min: Int = 0): Float =

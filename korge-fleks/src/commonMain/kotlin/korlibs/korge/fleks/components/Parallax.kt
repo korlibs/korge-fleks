@@ -41,6 +41,7 @@ class Parallax private constructor(
     // Do not set below properties directly - they will be set by the initComponent hook function
     // List of layer entities
     val bgLayerEntities: MutableMap<String, Entity> = mutableMapOf(),
+    var parallaxPlaneName: String = "",
     var parallaxPlaneEntity: Entity = Entity.NONE,
     val fgLayerEntities: MutableMap<String, Entity> = mutableMapOf(),
     // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
@@ -54,6 +55,7 @@ class Parallax private constructor(
     fun init(from: Parallax) {
         name = from.name
         bgLayerEntities.init(from.bgLayerEntities)
+        parallaxPlaneName = from.parallaxPlaneName
         parallaxPlaneEntity = from.parallaxPlaneEntity
         fgLayerEntities.init(from.fgLayerEntities)
         // Make deep copy of the line and layer positions - they are changing
@@ -68,6 +70,7 @@ class Parallax private constructor(
         name = ""
         // Entities are freed in the cleanupComponent function because of world scope
         bgLayerEntities.clear()
+        parallaxPlaneName = ""
         parallaxPlaneEntity = Entity.NONE
         fgLayerEntities.clear()
         linePositions.clear()

@@ -20,6 +20,7 @@ data class ParallaxEffectConfig(
 
     private val assetName: String,
     private val backgroundLayerNames: List<String> = emptyList(),
+    private val parallaxPlaneName: String = "",
     private val foregroundLayerNames: List<String> = emptyList(),
 
     private val layerTag: RenderLayerTag,
@@ -34,27 +35,7 @@ data class ParallaxEffectConfig(
                 x = this@ParallaxEffectConfig.x  // global position in screen coordinates
                 y = this@ParallaxEffectConfig.y
             }
-//            backgroundLayerNames.forEach { layerName ->
-//                it += positionComponent {}  // local position of each layer, will be updated in ParallaxSystem
-//                it += parallaxComponent { name = layerName }
-//                it += rgbaComponent {}  // default white color tint
-//                it += entityRefComponent { this.entity = entity }  // reference to parent entity for global position
-//                it += layerTag
-//            }
-//            foregroundLayerNames.forEach { layerName ->
-//                it += positionComponent {}  // local position of each layer, will be updated in ParallaxSystem
-//                it += parallaxComponent { name = layerName }
-//                it += rgbaComponent {}  // default white color tint
-//                it += entityRefComponent { this.entity = entity }  // reference to parent entity for global position
-//                it += layerTag
-//            }
-
-
             it += motionComponent {}
-
-
-
-
             it += parallaxComponent {
                 backgroundLayerNames.forEach { layerName ->
                     bgLayerEntities[layerName] =
@@ -62,6 +43,14 @@ data class ParallaxEffectConfig(
                             it += positionComponent {}
                             it += rgbaComponent {}
                         }
+                }
+
+                if (this@ParallaxEffectConfig.parallaxPlaneName != "") {
+                    parallaxPlaneName = this@ParallaxEffectConfig.parallaxPlaneName
+                    parallaxPlaneEntity = createEntity("Parallax plane of entity '${entity.id}'") {
+                        it += positionComponent {}
+                        it += rgbaComponent {}
+                    }
                 }
 
                 foregroundLayerNames.forEach { layerName ->
@@ -87,10 +76,6 @@ data class ParallaxEffectConfig(
 //                repeat(numberParallaxPlaneLines) { linePositions.add(0f) }
 //                repeat(numberAttachedFrontLayers) { attachedLayersFrontPositions.add(0f) }
 //
-//                parallaxPlaneEntity = world.createEntity("Parallax plane of entity '${entity.id}'") {
-//                    it += positionComponent {}
-//                    it += rgbaComponent {}
-//                }
 
             it += layerTag
         }
