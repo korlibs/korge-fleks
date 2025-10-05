@@ -12,7 +12,7 @@ import korlibs.korge.fleks.utils.*
 class CameraSystem(
     private val worldToPixelRatio: Float
 ) : IteratingSystem(
-    family = family { all(CameraFollowTag) },
+    family = family { all(CameraFollowTag, PositionComponent) },
     interval = EachFrame
 ) {
     private val worldToPixelRatioInv = 1f / worldToPixelRatio

@@ -52,12 +52,14 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         add(PlayerMoveSystem(playerInputSystem))
         add(GridMoveSystem())
         add(PlayerMoveAfterCollisionSystem(playerInputSystem))
+        // Debug system to move player entity to a specific position on the map overwriting player input data
+        add(DebugSystem())
+
 
 //        add(GridCollisionCleanupSystem())  ??? check why this is needed
         add(GameObjectStateSystem())
 
         add(TouchInputSystem())
-        add(DebugSystem())
         add(SpawnerSystem())
         add(EventSystem())
 

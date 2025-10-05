@@ -162,6 +162,16 @@ class Grid private constructor() : PoolableComponent<Grid>() {
     }
 
     /**
+     * Convert the position of the entity to world coordinates.
+     * This is useful to convert the position of a touch position into world coordinates.
+     */
+    fun World.convertToWorldCoordinates(camera: Entity) {
+        val cameraPosition = camera[PositionComponent]
+        x += cameraPosition.x - cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
+        y += cameraPosition.y - cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
+    }
+
+    /**
      * Convert the position of the entity to screen coordinates.
      * This is useful to convert the position of an entity to screen coordinates for rendering.
      */
