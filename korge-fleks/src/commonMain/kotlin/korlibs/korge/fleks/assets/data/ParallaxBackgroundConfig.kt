@@ -1,6 +1,6 @@
 package korlibs.korge.fleks.assets.data
 
-import korlibs.korge.fleks.assets.data.ParallaxConfigNew.Mode
+import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode
 
 
 data class ParallaxBackgroundConfig(

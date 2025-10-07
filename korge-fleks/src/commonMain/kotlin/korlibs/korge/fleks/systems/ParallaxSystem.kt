@@ -3,7 +3,7 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.assets.data.ParallaxConfigNew.Mode.*
+import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.*
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
@@ -31,11 +31,20 @@ class ParallaxSystem(
             val planeConfig = assetStore.getParallaxPlane(parallaxComponent.parallaxPlane.name)
             val speedFactor = planeConfig.lineTextures[index].speedFactor
             // Update linePosition of parallax plane line
-            if (parallaxConfig.mode == HORIZONTAL_PLANE) {
-                parallaxComponent.parallaxPlane.linePositions[index] = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + linePosition
-            } else if (parallaxConfig.mode == VERTICAL_PLANE) {
-                parallaxComponent.parallaxPlane.linePositions[index] = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + linePosition
+            val lineLength = when (parallaxConfig.mode) {
+                HORIZONTAL_PLANE -> {
+                    parallaxComponent.parallaxPlane.linePositions[index] = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + linePosition
+                    planeConfig.lineTextures[index].bmpSlice.width
+                }
+                VERTICAL_PLANE -> {
+                    parallaxComponent.parallaxPlane.linePositions[index] = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + linePosition
+                    planeConfig.lineTextures[index].bmpSlice.height
+                }
+                else -> 0
             }
+            // Check line positions and wrap around the texture size
+            parallaxComponent.parallaxPlane.linePositions[index] = wrap(parallaxComponent.parallaxPlane.linePositions[index], max = lineLength)
+
         }
 
 /*

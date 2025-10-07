@@ -1,6 +1,6 @@
 package korlibs.korge.fleks.assets
 
-import korlibs.korge.fleks.assets.data.ParallaxConfigNew
+import korlibs.korge.fleks.assets.data.ParallaxConfig
 import kotlinx.serialization.*
 
 
@@ -36,7 +36,7 @@ data class AssetModel(
         val frameDurations: Map<String, FrameDurationConfig> = mapOf(),
         val nineSlices: Map<String, NineSlice> = mapOf(),
         val fonts: List<String> = listOf(),
-        val parallaxBackgrounds: Map<String, ParallaxConfigNew> = mapOf()
+        val parallaxBackgrounds: Map<String, ParallaxConfig> = mapOf()
     ) {
         @Serializable
         @SerialName("FrameDurationConfig")

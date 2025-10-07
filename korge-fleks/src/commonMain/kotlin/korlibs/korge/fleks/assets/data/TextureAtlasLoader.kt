@@ -17,13 +17,12 @@ import korlibs.korge.fleks.assets.ParallaxMapType
 import korlibs.korge.fleks.assets.ParallaxPlaneTexturesMapType
 import korlibs.korge.fleks.assets.ParallaxTexturesMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
+import korlibs.korge.fleks.assets.data.SpriteFrames.*
 import kotlin.collections.set
 import kotlin.math.absoluteValue
 
 
 class TextureAtlasLoader {
-
-
     private fun getParallaxPlaneSpeedFactor(index: Int, size: Int, speedFactor: Float) : Float {
         val midPoint: Float = size * 0.5f
         return speedFactor * (

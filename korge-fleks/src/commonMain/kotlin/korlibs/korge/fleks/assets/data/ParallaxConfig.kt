@@ -10,8 +10,6 @@ import kotlinx.serialization.Transient
 /**
  * This is the main parallax configuration.
  *
- * [offset] is the amount of pixels from the top of the image where the upper part of the parallax plane starts.
- *
  * The parallax [mode] has to be one of the following enum values:
  * - [NO_PLANE]
  *   This type is used to set up a parallax background which will scroll repeatedly in X and Y direction. For this
@@ -27,17 +25,20 @@ import kotlinx.serialization.Transient
  *   This mode is the same as [HORIZONTAL_PLANE] but in vertical direction.
  *
  * [backgroundLayers] and [foregroundLayers] contain the configuration for independent layers. They can be used with
- * all three parallax [mode]s. [parallaxPlane] is the configuration for the special parallax plane with attached
+ * all three parallax [mode]s.
+ *
+ * [parallaxPlane] is the configuration for the special parallax plane with attached
  * layers. Please look at [ParallaxLayerConfig] and [ParallaxPlaneConfig] data classes for more details.
  */
 @Serializable @SerialName("ParallaxConfig")
-data class ParallaxConfigNew(
+data class ParallaxConfig(
     val parallaxWidth: Int = 0,   // width of the parallax effect used in VERTICAL_PLANE mode for horizontal scrolling
     val parallaxHeight: Int = 0,  // height of the parallax effect used in HORIZONTAL_PLANE mode for vertical scrolling
     val mode: Mode = Mode.NO_PLANE,
-    val backgroundLayers: Map<String, ParallaxLayerConfigNew> = mapOf(),
-    val parallaxPlane: Map<String, ParallaxPlaneConfig> = mapOf(),
-    val foregroundLayers: Map<String, ParallaxLayerConfigNew> = mapOf()
+
+    val backgroundLayers: Map<String, ParallaxLayerConfig> = mapOf(),
+    val foregroundLayers: Map<String, ParallaxLayerConfig> = mapOf(),
+    val parallaxPlane: Map<String, ParallaxPlaneConfig> = mapOf()
 ) {
     enum class Mode {
         HORIZONTAL_PLANE, VERTICAL_PLANE, NO_PLANE
@@ -55,12 +56,14 @@ data class ParallaxConfigNew(
      * and independently of the player input.
      */
     @Serializable @SerialName("ParallaxLayerConfig")
-    data class ParallaxLayerConfigNew(
+    data class ParallaxLayerConfig(
         val targetX: Int = 0,  // offset from the left corner of the parallax background image used in VERTICAL_PLANE mode
         val targetY: Int = 0,  // offset from the top corner of the parallax background image used in HORIZONTAL_PLANE mode
 
         val repeatX: Boolean = false,
         val repeatY: Boolean = false,
+        val centerX: Boolean = false,  // Center the layer in the parallax background image
+        val centerY: Boolean = false,
         val speedFactor: Float? = null,  // It this is null than no movement is applied to the layer
         val selfSpeedX: Float = 0f,
         val selfSpeedY: Float = 0f
@@ -88,23 +91,33 @@ data class ParallaxConfigNew(
     data class ParallaxPlaneConfig(
         val speedFactor: Float = 1f,
         val selfSpeed: Float = 0f,
-// TODO        val attachedLayersFront: ArrayList<ParallaxAttachedLayerConfig>? = null,
-//        val attachedLayersRear: ArrayList<ParallaxAttachedLayerConfig>? = null
+        val topAttachedLayers: Map<String, ParallaxAttachedLayerConfig> = mapOf(),
+        val bottomAttachedLayers: Map<String, ParallaxAttachedLayerConfig> = mapOf()
     ) {
         @Transient  // This is computed after loading of parallax image data from Aseprite
         lateinit var parallaxPlaneSpeedFactors: FloatArray
-    }
-}
 
-data class ParallaxPlaneTextures(
-    val selfSpeed: Float = 0f,
-    val lineTextures: MutableList<LineTexture> = mutableListOf(),
-    val topAttachedLayerTextures: Map<String, BmpSlice> = mapOf(),
-    val bottomAttachedLayerTextures: Map<String, BmpSlice> =mapOf()
-) {
-    data class LineTexture(
-        val index: Int,
-        val bmpSlice: BmpSlice,
-        val speedFactor: Float
-    )
+        /**
+         * This is the configuration for layers which are attached to the parallax plane. These layers are moving depending
+         * on its position on the parallax plane. They can be attached to the top or the bottom part of the parallax plane.
+         *
+         * [name] has to be set to the name of the layer in the used Aseprite file. The image on this layer will be taken for
+         * the layer object.
+         * [repeat] describes if the image of the layer object should be repeated in the scroll direction (horizontal or
+         * vertical) of the parallax plane.
+         *
+         * When mode is set to [HORIZONTAL_PLANE] and [attachBottomRight] is set to false then the top
+         * border of the layer is attached to the parallax plane. If [attachBottomRight] is set to true than the bottom
+         * border is attached.
+         * When [mode][ParallaxConfig.Mode] is [VERTICAL_PLANE] and [attachBottomRight] is false then the left border
+         * of the layer will be attached to the parallax plane. If [attachBottomRight] is true then the right border
+         * will be attached.
+         */
+        @Serializable @SerialName("ParallaxAttachedLayerConfig")
+        data class ParallaxAttachedLayerConfig(
+            val attachIndex: Int,
+            val repeat: Boolean = true,
+            val attachBottomRight: Boolean = true
+        )
+    }
 }

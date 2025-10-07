@@ -2,10 +2,10 @@ package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
-import korlibs.image.format.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.assets.data.ParallaxConfig
-import korlibs.korge.fleks.assets.data.ParallaxConfigNew.ParallaxLayerConfigNew
+import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.*
+import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position
@@ -39,6 +39,7 @@ class ParallaxRenderSystem(
             family.forEach { entity ->
                 val globalPositionComponent = entity[PositionComponent]
                 val parallaxComponent = entity[ParallaxComponent]
+                val parallaxConfig = assetStore.getParallaxConfig(parallaxComponent.name)
 
                 // Draw all background parallax layers
                 parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) ->
@@ -46,9 +47,9 @@ class ParallaxRenderSystem(
                     val localPositionComponent = layerEntity[PositionComponent]
                     val localRgba = layerEntity[RgbaComponent].rgba
 
-                    if (layerName == "parallax_clouds_mountains") {
-                        println("clouds_mountains y=${layerTexture.targetY} global y=${globalPositionComponent.y}")
-                    }
+//                    if (layerName == "parallax_clouds_mountains") {
+//                        println("clouds_mountains y=${layerTexture.targetY} global y=${globalPositionComponent.y}")
+//                    }
 
                     drawLayer(
                         global = globalPositionComponent,
@@ -64,14 +65,15 @@ class ParallaxRenderSystem(
                     val localPositionComponent = parallaxComponent.parallaxPlane.entity[PositionComponent]
                     val localRgba = parallaxComponent.parallaxPlane.entity[RgbaComponent].rgba
 
-                    println("parallax_plane first y=${parallaxPlane.lineTextures[0].index}")
+//                    println("parallax_plane first y=${parallaxPlane.lineTextures[0].index}")
 
-                    parallaxPlane.lineTextures.forEach { lineTexture ->
+                    parallaxPlane.lineTextures.forEachIndexed { index, lineTexture ->
+                        val localScroll = parallaxComponent.parallaxPlane.linePositions[index]
                         drawParallaxPlaneLayer(
                             global = globalPositionComponent,
                             local = localPositionComponent,
-                            localScroll = 0f,
-                            parallaxMode = ParallaxConfig.Mode.HORIZONTAL_PLANE, // parallax.mode,
+                            localScroll = localScroll,
+                            parallaxMode = parallaxConfig.mode,
                             repeat = true,
                             lineTexture,
                             localRgba, batch, ctx
@@ -182,7 +184,7 @@ class ParallaxRenderSystem(
     private fun drawLayer(
         global: Position,
         local: Position,
-        parallaxTexture: ParallaxLayerConfigNew,
+        parallaxTexture: ParallaxLayerConfig,
         rgba: RGBA,
         batch: BatchBuilder2D,
         ctx: RenderContext
@@ -222,7 +224,7 @@ class ParallaxRenderSystem(
         ctx: RenderContext
     ) {
         when (parallaxMode) {
-            ParallaxConfig.Mode.HORIZONTAL_PLANE -> {
+            HORIZONTAL_PLANE -> {
                 val targetX = 0  // TODO check if needed
                 val targetY = lineTexture.index
                 val countH = if (repeat) AppConfig.VIEW_PORT_WIDTH / lineTexture.bmpSlice.width else 0
@@ -239,7 +241,7 @@ class ParallaxRenderSystem(
                     )
                 }
             }
-            ParallaxConfig.Mode.VERTICAL_PLANE -> {
+            VERTICAL_PLANE -> {
                 val targetX = lineTexture.index
                 val targetY = 0  // TODO check if needed
                 val countV = if (repeat) AppConfig.VIEW_PORT_HEIGHT / lineTexture.bmpSlice.height else 0
@@ -255,10 +257,7 @@ class ParallaxRenderSystem(
                     )
                 }
             }
-            ParallaxConfig.Mode.NO_PLANE -> {}
+            NO_PLANE -> {}
         }
     }
-
-    private fun wrap(value: Float, max: Int, min: Int = 0): Float =
-        if (value >= max) value - max else if (value < min) value + max else value
 }

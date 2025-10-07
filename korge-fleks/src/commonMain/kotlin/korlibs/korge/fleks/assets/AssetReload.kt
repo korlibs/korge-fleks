@@ -1,14 +1,10 @@
 package korlibs.korge.fleks.assets
 
-import korlibs.datastructure.*
-import korlibs.image.font.*
-import korlibs.image.format.*
 import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.LayerTileMaps
-import korlibs.korge.fleks.assets.data.readParallaxDataContainer
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.ldtk.view.*
 import kotlinx.coroutines.*

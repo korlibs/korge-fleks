@@ -2,12 +2,15 @@ package korlibs.korge.fleks.components.data
 
 import com.github.quillraven.fleks.Entity
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.components.Parallax
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 /**
- * This class is used to ...
+ * This class is used for defining a parallax plane with its line positions
+ * and the positions of the attached layers.
+ * It is used in [Parallax] component for defining the parallax 2.5D plane of a parallax background.
  */
 @Serializable @SerialName("ParallaxPlane")
 class ParallaxPlane private constructor(

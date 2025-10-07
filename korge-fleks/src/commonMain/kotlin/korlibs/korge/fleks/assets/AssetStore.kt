@@ -12,7 +12,7 @@ import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
-import korlibs.korge.fleks.assets.data.ParallaxConfigNew.ParallaxLayerConfigNew
+import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
@@ -27,7 +27,7 @@ typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
 typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxBackgroundConfig>>
-typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxLayerConfigNew>>
+typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxLayerConfig>>
 typealias ParallaxPlaneTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxPlaneTextures>>
 
 /**
@@ -114,7 +114,7 @@ class AssetStore {
             parallaxBackgroundConfig[name]!!.second
         } else error("AssetStore: Parallax config '$name' not found!")
 
-    fun getParallaxTexture(name: String) : ParallaxLayerConfigNew =
+    fun getParallaxTexture(name: String) : ParallaxLayerConfig =
         if (parallaxTextures.contains(name)) {
             parallaxTextures[name]!!.second
         } else error("AssetStore: Parallax texture '$name' not found!")
