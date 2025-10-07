@@ -18,7 +18,7 @@ import kotlinx.serialization.*
 data class ParallaxEffectConfig(
     override val name: String,
 
-    private val assetName: String,
+    private val parallaxAssetName: String,
     private val backgroundLayerNames: List<String> = emptyList(),
     private val parallaxPlaneName: String = "",
     private val foregroundLayerNames: List<String> = emptyList(),
@@ -37,6 +37,8 @@ data class ParallaxEffectConfig(
             }
             it += motionComponent {}
             it += parallaxComponent {
+                name = parallaxAssetName
+
                 backgroundLayerNames.forEach { layerName ->
                     bgLayerEntities[layerName] =
                         createEntity("Parallax BG layer '$layerName' of entity '${entity.id}'") {
@@ -45,12 +47,17 @@ data class ParallaxEffectConfig(
                         }
                 }
 
-                if (this@ParallaxEffectConfig.parallaxPlaneName != "") {
-                    parallaxPlaneName = this@ParallaxEffectConfig.parallaxPlaneName
-                    parallaxPlaneEntity = createEntity("Parallax plane of entity '${entity.id}'") {
+                if (parallaxPlaneName != "") {
+                    parallaxPlane.name = parallaxPlaneName
+                    parallaxPlane.entity = createEntity("Parallax plane of entity '${entity.id}'") {
                         it += positionComponent {}
                         it += rgbaComponent {}
                     }
+
+                    val planeConfig = inject<AssetStore>("AssetStore").getParallaxPlane(parallaxPlaneName)
+                    repeat(planeConfig.lineTextures.size) { parallaxPlane.linePositions.add(0f) }
+                    repeat(planeConfig.topAttachedLayerTextures.size) { parallaxPlane.topAttachedLayerPositions.add(0f) }
+                    repeat(planeConfig.bottomAttachedLayerTextures.size) { parallaxPlane.bottomAttachedLayerPositions.add(0f) }
                 }
 
                 foregroundLayerNames.forEach { layerName ->
@@ -62,25 +69,10 @@ data class ParallaxEffectConfig(
                 }
             }
 
-//                repeat(numberForegroundLayers) { index ->
-//                    val name = assetStore.getBackground(name).config.foregroundLayers?.get(index)?.name ?: "No layer name"
-//                    fgLayerEntities.add(
-//                        world.createEntity("Parallax FG layer '$index' ($name) of entity '${entity.id}'") {
-//                            it += positionComponent {}
-//                            it += rgbaComponent {}
-//                        }
-//                    )
-//                }
-//
-//                repeat(numberAttachedRearLayers) { attachedLayersRearPositions.add(0f) }
-//                repeat(numberParallaxPlaneLines) { linePositions.add(0f) }
-//                repeat(numberAttachedFrontLayers) { attachedLayersFrontPositions.add(0f) }
-//
-
             it += layerTag
         }
         // Get height of the parallax background
-        val parallaxConfig = inject<AssetStore>("AssetStore").getParallaxConfig(assetName)
+        val parallaxConfig = inject<AssetStore>("AssetStore").getParallaxConfig(parallaxAssetName)
         // Set parallax height in the camera system
         system<CameraSystem>().parallaxHeight = parallaxConfig.height.toFloat()
 

@@ -3,6 +3,7 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.assets.*
+import korlibs.korge.fleks.assets.data.ParallaxConfigNew.Mode.*
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
@@ -25,7 +26,18 @@ class ParallaxSystem(
         parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) -> update(layerName, layerEntity, motionComponent) }
         parallaxComponent.fgLayerEntities.forEach { (layerName, layerEntity) -> update(layerName, layerEntity, motionComponent) }
 
-        parallaxComponent.parallaxPlaneEntity
+        parallaxComponent.parallaxPlane.linePositions.forEachIndexed { index, linePosition ->
+            val parallaxConfig = assetStore.getParallaxConfig(parallaxComponent.name)
+            val planeConfig = assetStore.getParallaxPlane(parallaxComponent.parallaxPlane.name)
+            val speedFactor = planeConfig.lineTextures[index].speedFactor
+            // Update linePosition of parallax plane line
+            if (parallaxConfig.mode == HORIZONTAL_PLANE) {
+                parallaxComponent.parallaxPlane.linePositions[index] = (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + linePosition
+            } else if (parallaxConfig.mode == VERTICAL_PLANE) {
+                parallaxComponent.parallaxPlane.linePositions[index] = (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + linePosition
+            }
+        }
+
 /*
         val offset = parallaxConfig.offset
         parallaxComponent.attachedLayersRearPositions.fastForEachWithIndex { index, position ->
@@ -108,6 +120,7 @@ class ParallaxSystem(
         if (speedFactor != null) {
             val positionComponent = layerEntity[PositionComponent]
             // Check if layer has MotionComponent for self-movement - if not, use selfSpeed from ParallaxTexture config
+            // With MotionComponent we can control self-movement with the TweenEngineSystem
             val layerVelocityX = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityX else parallaxTexture.selfSpeedX
             val layerVelocityY = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityY else parallaxTexture.selfSpeedY
 
@@ -115,7 +128,7 @@ class ParallaxSystem(
             positionComponent.x = (speedFactor * motionComponent.velocityX + layerVelocityX) * worldToPixelRatio * deltaTime + positionComponent.x  // f(x) = v * t + x
             positionComponent.y = (speedFactor * motionComponent.velocityY + layerVelocityY) * worldToPixelRatio * deltaTime + positionComponent.y
 
-            // TODO check if wrapping can be done here
+            // Wrap around movement of textures
             positionComponent.x = wrap(positionComponent.x, max = parallaxTexture.layerBmpSlice.width)
             positionComponent.y = wrap(positionComponent.y, max = parallaxTexture.layerBmpSlice.height)
         }

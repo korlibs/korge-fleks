@@ -39,6 +39,7 @@ import korlibs.korge.fleks.components.TileMap
 import korlibs.korge.fleks.components.TouchInput
 import korlibs.korge.fleks.components.TweenProperty
 import korlibs.korge.fleks.components.TweenSequence
+import korlibs.korge.fleks.components.data.ParallaxPlane
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.components.data.SpriteLayer
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity
@@ -206,6 +207,7 @@ class SnapshotSerializer {
         polymorphic(Poolable::class) {
             subclass(Point::class)
             subclass(SpriteLayer::class)
+            subclass(ParallaxPlane::class)
         }
 
         // Register Tween data classes used in TweenSequence

@@ -60,6 +60,7 @@ class TextureAtlasLoader {
                 entry.name.replace(regex, "")
             } else entry.name
 
+            // Check if frameTags are used for parallax background layers and save them in separate maps
             var textureUsedForParallaxBackground = false
             config.parallaxBackgrounds.forEach { (_, parallaxConfig) ->
                 if (parallaxConfig.backgroundLayers.containsKey(frameTag)
@@ -88,7 +89,7 @@ class TextureAtlasLoader {
                         var planeIndex = match?.groupValues?.get(1)?.toInt()
                             ?: error("Cannot get plane index of texture '${frameTag}'!")
 
-                        planeIndex += parallaxConfig.parallaxHeight / 2  // TODO remove this line and adjust slice index in aseprite file
+                        planeIndex += 167  // TODO remove this line and adjust slice index in aseprite file
 
                         if (!parallaxPlaneTextures.containsKey(planeName)) parallaxPlaneTextures[planeName] = Pair(type, ParallaxPlaneTextures())
 
@@ -97,10 +98,13 @@ class TextureAtlasLoader {
                             bmpSlice = spriteAtlas.texture.slice(entry.info.frame),
                             speedFactor = getParallaxPlaneSpeedFactor(planeIndex, parallaxConfig.parallaxHeight, planeConfig.speedFactor)
                         ))
+                        textureUsedForParallaxBackground = true
+                        return@forEach
                     }
                 }
             }
 
+            // Save other textures
             if (!textureUsedForParallaxBackground) {
                 if (textures.containsKey(frameTag)) {
                     val spriteData = textures[frameTag]!!.second
@@ -131,19 +135,20 @@ class TextureAtlasLoader {
                 }
             }
         }
-        if (config.parallaxBackgrounds.isNotEmpty()) {
+
+        // Save the global parallax background configuration AFTER all atlas textures were processed
+        config.parallaxBackgrounds.forEach { (parallaxName, parallaxConfig) ->
             val parallaxConfig = ParallaxBackgroundConfig(
-                config.parallaxBackgrounds.entries.first().value.mode,
+                parallaxConfig.mode,
                 width = 0,
-                height = 334,  // TODO get from config
+                height = parallaxConfig.parallaxHeight,
                 bgLayerNames.toList(),
                 fgLayerNames.toList()
             )
-            // TODO refactor
-            parallaxBackgroundConfig["intro_background"] = Pair(type, parallaxConfig)
+            parallaxBackgroundConfig[parallaxName] = Pair(type, parallaxConfig)
         }
 
-//        println("")
+//        println()
 
         // Load and set frameDuration
         config.frameDurations.forEach { (frameTag, duration) ->

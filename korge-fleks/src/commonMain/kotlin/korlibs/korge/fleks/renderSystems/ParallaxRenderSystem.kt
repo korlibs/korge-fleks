@@ -46,9 +46,9 @@ class ParallaxRenderSystem(
                     val localPositionComponent = layerEntity[PositionComponent]
                     val localRgba = layerEntity[RgbaComponent].rgba
 
-//                    if (layerName == "parallax_sky") {
-//                        println()
-//                    }
+                    if (layerName == "parallax_clouds_mountains") {
+                        println("clouds_mountains y=${layerTexture.targetY} global y=${globalPositionComponent.y}")
+                    }
 
                     drawLayer(
                         global = globalPositionComponent,
@@ -59,10 +59,12 @@ class ParallaxRenderSystem(
                 }
 
                 // Draw parallax plane
-                if (parallaxComponent.name != "") {
-                    val parallaxPlane = assetStore.getParallaxPlane(parallaxComponent.name)
-                    val localPositionComponent = parallaxComponent.parallaxPlaneEntity[PositionComponent]
-                    val localRgba = parallaxComponent.parallaxPlaneEntity[RgbaComponent].rgba
+                if (parallaxComponent.parallaxPlane.name != "") {
+                    val parallaxPlane = assetStore.getParallaxPlane(parallaxComponent.parallaxPlane.name)
+                    val localPositionComponent = parallaxComponent.parallaxPlane.entity[PositionComponent]
+                    val localRgba = parallaxComponent.parallaxPlane.entity[RgbaComponent].rgba
+
+                    println("parallax_plane first y=${parallaxPlane.lineTextures[0].index}")
 
                     parallaxPlane.lineTextures.forEach { lineTexture ->
                         drawParallaxPlaneLayer(
@@ -203,7 +205,6 @@ class ParallaxRenderSystem(
                     filtering = false,
                     colorMul = rgba
                 )
-
                 //println("x: ${x + xIndex * parallaxTexture.firstFrame.bmpSlice.width + local.x + local.offsetX}")
             }
         }
@@ -226,12 +227,13 @@ class ParallaxRenderSystem(
                 val targetY = lineTexture.index
                 val countH = if (repeat) AppConfig.VIEW_PORT_WIDTH / lineTexture.bmpSlice.width else 0
                 val x = if (countH != 0) global.x else global.x + targetX
+                val y = global.y + targetY
 
                 for(xIndex in -1 - countH until countH + 1) {
                     batch.drawQuad(
                         tex = ctx.getTex(lineTexture.bmpSlice),
                         x = x + xIndex * lineTexture.bmpSlice.width + AppConfig.VIEW_PORT_WIDTH * 0.5f + localScroll,
-                        y = global.y + targetY + local.offsetY,
+                        y = y + local.offsetY,
                         filtering = false,
                         colorMul = rgba
                     )

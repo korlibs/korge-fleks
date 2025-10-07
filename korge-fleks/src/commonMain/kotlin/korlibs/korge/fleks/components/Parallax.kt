@@ -4,25 +4,13 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
+import korlibs.korge.fleks.components.data.ParallaxPlane
+import korlibs.korge.fleks.components.data.ParallaxPlane.Companion.staticParallaxPlane
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.utils.createEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-
-//fun MutableList<DataBase>.init(from: List<DataBase>) {
-//    from.forEach { item ->
-//        this.add((item as Poolable<*>).clone() as DataBase)
-//    }
-//}
-//
-//fun MutableList<DataBase>.freeAndClear() {
-//    this.forEach { item ->
-//        (item as Poolable<*>).free()
-//    }
-//    this.clear()
-//}
 
 
 /**
@@ -41,27 +29,16 @@ class Parallax private constructor(
     // Do not set below properties directly - they will be set by the initComponent hook function
     // List of layer entities
     val bgLayerEntities: MutableMap<String, Entity> = mutableMapOf(),
-    var parallaxPlaneName: String = "",
-    var parallaxPlaneEntity: Entity = Entity.NONE,
+    var parallaxPlane: ParallaxPlane = staticParallaxPlane {},
     val fgLayerEntities: MutableMap<String, Entity> = mutableMapOf(),
-    // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
-    val linePositions: MutableList<Float> = mutableListOf(),
-    // Below lists are static and can be cloned by reference
-    val attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
-    val attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
 ) : PoolableComponent<Parallax>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Parallax) {
         name = from.name
         bgLayerEntities.init(from.bgLayerEntities)
-        parallaxPlaneName = from.parallaxPlaneName
-        parallaxPlaneEntity = from.parallaxPlaneEntity
+        parallaxPlane.init(from.parallaxPlane)
         fgLayerEntities.init(from.fgLayerEntities)
-        // Make deep copy of the line and layer positions - they are changing
-        linePositions.addAll(from.linePositions)
-        attachedLayersRearPositions.addAll(from.attachedLayersRearPositions)
-        attachedLayersFrontPositions.addAll(from.attachedLayersFrontPositions)
     }
 
     // Cleanup the component data instance manually
@@ -70,12 +47,8 @@ class Parallax private constructor(
         name = ""
         // Entities are freed in the cleanupComponent function because of world scope
         bgLayerEntities.clear()
-        parallaxPlaneName = ""
-        parallaxPlaneEntity = Entity.NONE
+        parallaxPlane.cleanup()
         fgLayerEntities.clear()
-        linePositions.clear()
-        attachedLayersRearPositions.clear()
-        attachedLayersFrontPositions.clear()
     }
 
     override fun type() = ParallaxComponent
@@ -160,7 +133,7 @@ class Parallax private constructor(
         // Remove all layer entities when we are in scope of the world
         bgLayerEntities.free(this)
         fgLayerEntities.free(this)
-        this -= parallaxPlaneEntity
+        if (parallaxPlane.entity != Entity.NONE) this -= parallaxPlane.entity
         // Lists will be cleared in the cleanup function
         cleanup()
     }
