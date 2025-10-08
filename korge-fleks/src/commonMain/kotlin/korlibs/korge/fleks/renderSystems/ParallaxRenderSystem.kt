@@ -47,10 +47,6 @@ class ParallaxRenderSystem(
                     val localPositionComponent = layerEntity[PositionComponent]
                     val localRgba = layerEntity[RgbaComponent].rgba
 
-//                    if (layerName == "parallax_clouds_mountains") {
-//                        println("clouds_mountains y=${layerTexture.targetY} global y=${globalPositionComponent.y}")
-//                    }
-
                     drawLayer(
                         global = globalPositionComponent,
                         local = localPositionComponent,
@@ -59,16 +55,43 @@ class ParallaxRenderSystem(
                     )
                 }
 
-                // Draw parallax plane
+                // Draw 2.5 D parallax plane and all attached layers
                 if (parallaxComponent.parallaxPlane.name != "") {
                     val parallaxPlane = assetStore.getParallaxPlane(parallaxComponent.parallaxPlane.name)
                     val localPositionComponent = parallaxComponent.parallaxPlane.entity[PositionComponent]
                     val localRgba = parallaxComponent.parallaxPlane.entity[RgbaComponent].rgba
 
-//                    println("parallax_plane first y=${parallaxPlane.lineTextures[0].index}")
+                    // Draw bottom-attached layers
+                    parallaxPlane.bottomAttachedLayerTextures.forEachIndexed { index, lineTexture ->
+                        val localScroll = parallaxComponent.parallaxPlane.bottomAttachedLayerPositions[index]
+                        drawParallaxPlaneLayer(
+                            global = globalPositionComponent,
+                            local = localPositionComponent,
+                            localScroll = localScroll,
+                            parallaxMode = parallaxConfig.mode,
+                            repeat = true,
+                            lineTexture,
+                            localRgba, batch, ctx
+                        )
+                    }
 
+                    // Draw 2.5 D parallax plane lines
                     parallaxPlane.lineTextures.forEachIndexed { index, lineTexture ->
                         val localScroll = parallaxComponent.parallaxPlane.linePositions[index]
+                        drawParallaxPlaneLayer(
+                            global = globalPositionComponent,
+                            local = localPositionComponent,
+                            localScroll = localScroll,
+                            parallaxMode = parallaxConfig.mode,
+                            repeat = true,
+                            lineTexture,
+                            localRgba, batch, ctx
+                        )
+                    }
+
+                    // Draw top-attached layers
+                    parallaxPlane.topAttachedLayerTextures.forEachIndexed { index, lineTexture ->
+                        val localScroll = parallaxComponent.parallaxPlane.topAttachedLayerPositions[index]
                         drawParallaxPlaneLayer(
                             global = globalPositionComponent,
                             local = localPositionComponent,
@@ -94,89 +117,6 @@ class ParallaxRenderSystem(
                         localRgba, batch, ctx
                     )
                 }
-/*
-                // Iterate over all parallax layers
-                val parallaxMode = parallaxConfig.mode
-
-                // Draw rear-attached layers
-                parallaxDataContainer.attachedLayersRear?.defaultAnimation?.firstFrame?.layerData?.fastForEachWithIndex { index, layer ->
-                    val layerConfig = parallaxDataContainer.config.parallaxPlane!!.attachedLayersRear!![index]
-                    val layerSize = if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) layer.width
-                    else layer.height  // if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE)
-
-                    // Check local position and wrap around the texture size
-                    if (layerConfig.repeat) parallaxComponent.attachedLayersRearPositions[index] = wrap(parallaxComponent.attachedLayersRearPositions[index], max = layerSize)
-                    val localPositionComponent = parallaxComponent.parallaxPlaneEntity[PositionComponent]
-                    val localRgba = parallaxComponent.parallaxPlaneEntity[RgbaComponent].rgba
-
-                    drawParallaxPlaneLayer(
-                        global = globalPositionComponent,
-                        local = localPositionComponent,
-                        localScroll = parallaxComponent.attachedLayersRearPositions[index],
-                        parallaxMode = parallaxMode,
-                        repeat = layerConfig.repeat,
-                        layer, localRgba, batch, ctx
-                    )
-                }
-
-                // Draw parallax plane
-                parallaxDataContainer.parallaxPlane?.imageDatas?.fastForEachWithIndex { index, line ->
-                    // Check local position and wrap around the texture size
-                    val layer: ImageFrameLayer = line.defaultAnimation.firstFrame.first ?: return@fastForEachWithIndex
-                    val layerSize = if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) layer.width
-                    else layer.height  // if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE)
-
-                    parallaxComponent.linePositions[index] = wrap(parallaxComponent.linePositions[index], max = layerSize)
-                    val localPositionComponent = parallaxComponent.parallaxPlaneEntity[PositionComponent]
-                    val localRgba = parallaxComponent.parallaxPlaneEntity[RgbaComponent].rgba
-
-                    drawParallaxPlaneLayer(
-                        global = globalPositionComponent,
-                        local = localPositionComponent,
-                        localScroll = parallaxComponent.linePositions[index],
-                        parallaxMode = parallaxMode,
-                        repeat = true, layer, localRgba, batch, ctx
-                    )
-                }
-
-                // Draw front-attached layers
-                parallaxDataContainer.attachedLayersFront?.defaultAnimation?.firstFrame?.layerData?.fastForEachWithIndex { index, layer ->
-                    val layerConfig = parallaxDataContainer.config.parallaxPlane!!.attachedLayersFront!![index]
-                    val layerSize = if (parallaxMode == ParallaxConfig.Mode.HORIZONTAL_PLANE) layer.width
-                    else layer.height  // if (parallaxMode == ParallaxConfig.Mode.VERTICAL_PLANE)
-
-                    // Check local position and wrap around the texture size
-                    if (layerConfig.repeat) parallaxComponent.attachedLayersFrontPositions[index] = wrap(parallaxComponent.attachedLayersFrontPositions[index], max = layerSize)
-                    val localPositionComponent = parallaxComponent.parallaxPlaneEntity[PositionComponent]
-                    val localRgba = parallaxComponent.parallaxPlaneEntity[RgbaComponent].rgba
-
-                    drawParallaxPlaneLayer(
-                        global = globalPositionComponent,
-                        local = localPositionComponent,
-                        localScroll = parallaxComponent.attachedLayersFrontPositions[index],
-                        parallaxMode = parallaxMode,
-                        repeat = layerConfig.repeat,
-                        layer, localRgba, batch, ctx
-                    )
-                }
-
-                // Draw all foreground parallax layers
-                parallaxDataContainer.foregroundLayers?.defaultAnimation?.firstFrame?.layerData?.fastForEachWithIndex { index, layer ->
-                    // Check local position and wrap around the texture size
-                    val layerEntity = parallaxComponent.fgLayerEntities[index]
-                    val localPositionComponent = layerEntity[PositionComponent]
-                    localPositionComponent.x = wrap(localPositionComponent.x, max = layer.width)
-                    localPositionComponent.y = wrap(localPositionComponent.y, max = layer.height)
-                    val localRgba = layerEntity[RgbaComponent].rgba
-
-                    drawLayer(
-                        global = globalPositionComponent,
-                        local = localPositionComponent,
-                        config = parallaxDataContainer.config.foregroundLayers!![index],
-                        layer, localRgba, batch, ctx
-                    )
-                }
-*/
             }
         }
     }

@@ -38,7 +38,8 @@ data class ParallaxConfig(
 
     val backgroundLayers: Map<String, ParallaxLayerConfig> = mapOf(),
     val foregroundLayers: Map<String, ParallaxLayerConfig> = mapOf(),
-    val parallaxPlane: Map<String, ParallaxPlaneConfig> = mapOf()
+
+    val parallaxPlane: ParallaxPlaneConfig? = null
 ) {
     enum class Mode {
         HORIZONTAL_PLANE, VERTICAL_PLANE, NO_PLANE
@@ -89,35 +90,31 @@ data class ParallaxConfig(
      */
     @Serializable @SerialName("ParallaxPlaneConfig")
     data class ParallaxPlaneConfig(
+        val name: String,
         val speedFactor: Float = 1f,
         val selfSpeed: Float = 0f,
         val topAttachedLayers: Map<String, ParallaxAttachedLayerConfig> = mapOf(),
         val bottomAttachedLayers: Map<String, ParallaxAttachedLayerConfig> = mapOf()
-    ) {
-        @Transient  // This is computed after loading of parallax image data from Aseprite
-        lateinit var parallaxPlaneSpeedFactors: FloatArray
+    )
 
-        /**
-         * This is the configuration for layers which are attached to the parallax plane. These layers are moving depending
-         * on its position on the parallax plane. They can be attached to the top or the bottom part of the parallax plane.
-         *
-         * [name] has to be set to the name of the layer in the used Aseprite file. The image on this layer will be taken for
-         * the layer object.
-         * [repeat] describes if the image of the layer object should be repeated in the scroll direction (horizontal or
-         * vertical) of the parallax plane.
-         *
-         * When mode is set to [HORIZONTAL_PLANE] and [attachBottomRight] is set to false then the top
-         * border of the layer is attached to the parallax plane. If [attachBottomRight] is set to true than the bottom
-         * border is attached.
-         * When [mode][ParallaxConfig.Mode] is [VERTICAL_PLANE] and [attachBottomRight] is false then the left border
-         * of the layer will be attached to the parallax plane. If [attachBottomRight] is true then the right border
-         * will be attached.
-         */
-        @Serializable @SerialName("ParallaxAttachedLayerConfig")
-        data class ParallaxAttachedLayerConfig(
-            val attachIndex: Int,
-            val repeat: Boolean = true,
-            val attachBottomRight: Boolean = true
-        )
-    }
+    /**
+     * This is the configuration for layers which are attached to the parallax plane. These layers are moving depending
+     * on its position on the parallax plane. They can be attached to the top or the bottom part of the parallax plane.
+     *
+     * [repeat] describes if the image of the layer object should be repeated in the scroll direction (horizontal or
+     * vertical) of the parallax plane.
+     *
+     * When mode is set to [HORIZONTAL_PLANE] and [attachBottomRight] is set to false then the top
+     * border of the layer is attached to the parallax plane. If [attachBottomRight] is set to true than the bottom
+     * border is attached.
+     * When [mode][ParallaxConfig.Mode] is [VERTICAL_PLANE] and [attachBottomRight] is false then the left border
+     * of the layer will be attached to the parallax plane. If [attachBottomRight] is true then the right border
+     * will be attached.
+     */
+    @Serializable @SerialName("ParallaxAttachedLayerConfig")
+    data class ParallaxAttachedLayerConfig(
+        val attachIndex: Int,
+        val repeat: Boolean = true,
+        val attachBottomRight: Boolean = true
+    )
 }

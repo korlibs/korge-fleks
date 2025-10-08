@@ -63,14 +63,14 @@ class LevelMapRenderSystem(
             levelMap.layerNames.forEach { layerName ->
                 ctx.useBatcher { batch ->
                     worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
-//                        batch.drawQuad(
-//                            tex = ctx.getTex(slice),
-//                            x = px - viewPortPosX,
-//                            y = py - viewPortPosY,
-//                            filtering = false,
-//                            colorMul = rgba,
-//                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
-//                        )
+                        batch.drawQuad(
+                            tex = ctx.getTex(slice),
+                            x = px - viewPortPosX,
+                            y = py - viewPortPosY,
+                            filtering = false,
+                            colorMul = rgba,
+                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                        )
                     }
                 }
             }

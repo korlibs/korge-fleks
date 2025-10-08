@@ -26,6 +26,7 @@ class ParallaxSystem(
         parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) -> update(layerName, layerEntity, motionComponent) }
         parallaxComponent.fgLayerEntities.forEach { (layerName, layerEntity) -> update(layerName, layerEntity, motionComponent) }
 
+        // Update parallax plane lines
         parallaxComponent.parallaxPlane.linePositions.forEachIndexed { index, linePosition ->
             val parallaxConfig = assetStore.getParallaxConfig(parallaxComponent.name)
             val planeConfig = assetStore.getParallaxPlane(parallaxComponent.parallaxPlane.name)
@@ -44,7 +45,52 @@ class ParallaxSystem(
             }
             // Check line positions and wrap around the texture size
             parallaxComponent.parallaxPlane.linePositions[index] = wrap(parallaxComponent.parallaxPlane.linePositions[index], max = lineLength)
+        }
 
+        // Update top-attached layers of parallax plane
+        parallaxComponent.parallaxPlane.topAttachedLayerPositions.forEachIndexed { index, layerPosition ->
+            val parallaxConfig = assetStore.getParallaxConfig(parallaxComponent.name)
+            val planeConfig = assetStore.getParallaxPlane(parallaxComponent.parallaxPlane.name)
+            val speedFactor = planeConfig.topAttachedLayerTextures[index].speedFactor
+            // Update position of parallax position
+            val layerLength = when (parallaxConfig.mode) {
+                HORIZONTAL_PLANE -> {
+                    parallaxComponent.parallaxPlane.topAttachedLayerPositions[index] =
+                        (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + layerPosition
+                    planeConfig.topAttachedLayerTextures[index].bmpSlice.width
+                }
+                VERTICAL_PLANE -> {
+                    parallaxComponent.parallaxPlane.topAttachedLayerPositions[index] =
+                        (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + layerPosition
+                    planeConfig.topAttachedLayerTextures[index].bmpSlice.height
+                }
+                else -> 0
+            }
+            // Check layer positions and wrap around the texture size
+            parallaxComponent.parallaxPlane.topAttachedLayerPositions[index] = wrap(parallaxComponent.parallaxPlane.topAttachedLayerPositions[index], max = layerLength)
+        }
+
+        // Update bottom-attached layers of parallax plane
+        parallaxComponent.parallaxPlane.bottomAttachedLayerPositions.forEachIndexed { index, layerPosition ->
+            val parallaxConfig = assetStore.getParallaxConfig(parallaxComponent.name)
+            val planeConfig = assetStore.getParallaxPlane(parallaxComponent.parallaxPlane.name)
+            val speedFactor = planeConfig.bottomAttachedLayerTextures[index].speedFactor
+            // Update position of parallax position
+            val layerLength = when (parallaxConfig.mode) {
+                HORIZONTAL_PLANE -> {
+                    parallaxComponent.parallaxPlane.bottomAttachedLayerPositions[index] =
+                        (speedFactor * motionComponent.velocityX * worldToPixelRatio) * deltaTime + layerPosition
+                    planeConfig.bottomAttachedLayerTextures[index].bmpSlice.width
+                }
+                VERTICAL_PLANE -> {
+                    parallaxComponent.parallaxPlane.bottomAttachedLayerPositions[index] =
+                        (speedFactor * motionComponent.velocityY * worldToPixelRatio) * deltaTime + layerPosition
+                    planeConfig.bottomAttachedLayerTextures[index].bmpSlice.height
+                }
+                else -> 0
+            }
+            // Check layer positions and wrap around the texture size
+            parallaxComponent.parallaxPlane.bottomAttachedLayerPositions[index] = wrap(parallaxComponent.parallaxPlane.bottomAttachedLayerPositions[index], max = layerLength)
         }
 
 /*

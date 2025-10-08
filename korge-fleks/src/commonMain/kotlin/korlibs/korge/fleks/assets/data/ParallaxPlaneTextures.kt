@@ -4,10 +4,10 @@ import korlibs.image.bitmap.BmpSlice
 
 
 data class ParallaxPlaneTextures(
-    val selfSpeed: Float = 0f,
+    val selfSpeed: Float = 0f,  // TODO not used yet
     val lineTextures: MutableList<LineTexture> = mutableListOf(),
-    val topAttachedLayerTextures: MutableMap<String, LineTexture> = mutableMapOf(),
-    val bottomAttachedLayerTextures: MutableMap<String, LineTexture> = mutableMapOf()
+    val topAttachedLayerTextures: MutableList<LineTexture> = mutableListOf(),
+    val bottomAttachedLayerTextures: MutableList<LineTexture> = mutableListOf()
 ) {
     data class LineTexture(
         val index: Int,
