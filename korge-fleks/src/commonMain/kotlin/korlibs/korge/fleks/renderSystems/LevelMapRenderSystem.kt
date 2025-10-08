@@ -33,8 +33,6 @@ class LevelMapRenderSystem(
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
 
-    private val assetStore: AssetStore = world.inject(name = "AssetStore")
-
     override fun render(ctx: RenderContext) {
         val camera: Entity = world.getMainCameraOrNull() ?: return
         val cameraPosition = with(world) { camera[PositionComponent] }

@@ -187,7 +187,8 @@ class AssetStore {
                 val ldtkFile = tileMap.value.fileName
                 val collisionLayerName = tileMap.value.collisionLayerName
                 val tileSetPaths = tileMap.value.tileSetPaths
-                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLDTKWorld(extrude = true)
+                // Set extrude to false - something is broken with it and smaller tilesets
+                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLDTKWorld(extrude = false)
 
                 when  (type) {
                     AssetType.LEVEL -> {
