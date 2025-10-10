@@ -119,6 +119,16 @@ fun MutableList<Entity>.free(world: World) {
 }
 
 /**
+ * Free all entities in the map.
+ * This will remove all entities from the world but not clear the map.
+ */
+fun MutableMap<String, Entity>.free(world: World) {
+    this.values.forEach { entity ->
+        world -= entity
+    }
+}
+
+/**
  * Init function (deep copy) for [MutableList] of [Point] elements.
  * This will clone each point and add it to the list.
  */

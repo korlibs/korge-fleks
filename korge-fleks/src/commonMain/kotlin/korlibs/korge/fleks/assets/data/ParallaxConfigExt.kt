@@ -20,6 +20,7 @@ import korlibs.korge.fleks.renderSystems.ParallaxRenderSystem
  * The [atlas] parameter is used to pack the image data into an atlas. If it is not null the image data will be packed
  * into the atlas. If it is null the image data will be stored separately.
  */
+/*
 suspend fun VfsFile.readParallaxDataContainer(
     config: ParallaxConfig,
     format: ImageFormat = ASE,
@@ -261,3 +262,4 @@ data class ParallaxLayerConfig(
     val selfSpeedX: Float = 0f,
     val selfSpeedY: Float = 0f
 )
+*/

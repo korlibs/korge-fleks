@@ -4,25 +4,13 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
+import korlibs.korge.fleks.components.data.ParallaxPlane
+import korlibs.korge.fleks.components.data.ParallaxPlane.Companion.staticParallaxPlane
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.utils.createEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-
-//fun MutableList<DataBase>.init(from: List<DataBase>) {
-//    from.forEach { item ->
-//        this.add((item as Poolable<*>).clone() as DataBase)
-//    }
-//}
-//
-//fun MutableList<DataBase>.freeAndClear() {
-//    this.forEach { item ->
-//        (item as Poolable<*>).free()
-//    }
-//    this.clear()
-//}
 
 
 /**
@@ -40,26 +28,17 @@ class Parallax private constructor(
 
     // Do not set below properties directly - they will be set by the initComponent hook function
     // List of layer entities
-    val bgLayerEntities: MutableList<Entity> = mutableListOf(),
-    var parallaxPlaneEntity: Entity = Entity.NONE,
-    val fgLayerEntities: MutableList<Entity> = mutableListOf(),
-    // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
-    val linePositions: MutableList<Float> = mutableListOf(),
-    // Below lists are static and can be cloned by reference
-    val attachedLayersRearPositions: MutableList<Float> = mutableListOf(),
-    val attachedLayersFrontPositions: MutableList<Float> = mutableListOf()
+    val bgLayerEntities: MutableMap<String, Entity> = mutableMapOf(),
+    var parallaxPlane: ParallaxPlane = staticParallaxPlane {},
+    val fgLayerEntities: MutableMap<String, Entity> = mutableMapOf(),
 ) : PoolableComponent<Parallax>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Parallax) {
         name = from.name
         bgLayerEntities.init(from.bgLayerEntities)
-        parallaxPlaneEntity = from.parallaxPlaneEntity
+        parallaxPlane.init(from.parallaxPlane)
         fgLayerEntities.init(from.fgLayerEntities)
-        // Make deep copy of the line and layer positions - they are changing
-        linePositions.addAll(from.linePositions)
-        attachedLayersRearPositions.addAll(from.attachedLayersRearPositions)
-        attachedLayersFrontPositions.addAll(from.attachedLayersFrontPositions)
     }
 
     // Cleanup the component data instance manually
@@ -68,11 +47,8 @@ class Parallax private constructor(
         name = ""
         // Entities are freed in the cleanupComponent function because of world scope
         bgLayerEntities.clear()
-        parallaxPlaneEntity = Entity.NONE
+        parallaxPlane.cleanup()
         fgLayerEntities.clear()
-        linePositions.clear()
-        attachedLayersRearPositions.clear()
-        attachedLayersFrontPositions.clear()
     }
 
     override fun type() = ParallaxComponent
@@ -96,6 +72,7 @@ class Parallax private constructor(
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
+/*
         val world = this
         val assetStore: AssetStore = inject(name = "AssetStore")
 
@@ -148,6 +125,7 @@ class Parallax private constructor(
         // Set parallax height and offset in the camera system
         system<CameraSystem>().parallaxHeight = parallaxLayerHeight - parallaxDataContainer.config.offset.toFloat()
         system<CameraSystem>().parallaxOffset = parallaxDataContainer.config.offset.toFloat()
+*/
     }
 
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
@@ -155,7 +133,7 @@ class Parallax private constructor(
         // Remove all layer entities when we are in scope of the world
         bgLayerEntities.free(this)
         fgLayerEntities.free(this)
-        this -= parallaxPlaneEntity
+        if (parallaxPlane.entity != Entity.NONE) this -= parallaxPlane.entity
         // Lists will be cleared in the cleanup function
         cleanup()
     }

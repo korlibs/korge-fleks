@@ -4,9 +4,6 @@ import com.github.quillraven.fleks.*
 import korlibs.image.format.ImageAnimation.Direction
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.assets.getAnimationDirection
-import korlibs.korge.fleks.assets.getAnimationFrameDuration
-import korlibs.korge.fleks.assets.getAnimationNumberOfFrames
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -20,9 +17,6 @@ import kotlinx.serialization.Serializable
  * @param [anchorX] X offset of the sprite graphic to the zero-point of the sprite (pivot-point).
  * @param [anchorY] Y offset of the sprite graphic to the zero-point of the sprite (pivot-point).
  *
- * @param [animation] is the identifier for getting the animation from the [AssetStore] for the
- *        sprite graphic specified by name property. If the sprite does not have animation than set it
- *        to "null".
  * @param [frameIndex] is the frame number which will be displayed by the [ObjectRenderSystem] for the sprite.
  *        The number can be also set directly to start the animation at a specific frame. Make sure the index
  *        is within the number of frames for the animation.
@@ -46,10 +40,9 @@ class Sprite private constructor(
     var anchorX: Float = 0f,                          // x,y position of the pivot point within the sprite
     var anchorY: Float = 0f,
 
-    var animation: String? = null,                    // Leave null if sprite texture does not have an animation
     var frameIndex: Int = 0,                          // frame number of animation which is currently drawn
     var running: Boolean = false,                     // Switch animation on and off
-    var direction: Direction? = null,                 // Default: Get direction from Aseprite file
+    var direction: Direction = FORWARD,               // Default: FORWARD, can be changed to REVERSE, PING_PONG, ONCE_FORWARD, ONCE_REVERSE
     var destroyOnAnimationFinished: Boolean = false,  // Delete entity when direction is [ONCE_FORWARD] or [ONCE_REVERSE]
 
     // internal, do not set directly
@@ -65,7 +58,6 @@ class Sprite private constructor(
         visible = from.visible
         anchorX = from.anchorX
         anchorY = from.anchorY
-        animation = from.animation
         frameIndex = from.frameIndex
         running = from.running
         direction = from.direction  // normal ordinary enum - no deep copy needed
@@ -83,10 +75,9 @@ class Sprite private constructor(
         visible = true
         anchorX = 0f
         anchorY = 0f
-        animation = null
         frameIndex = 0
         running = false
-        direction = null
+        direction = FORWARD
         destroyOnAnimationFinished = false
         flipX = false
         flipY = false
@@ -117,10 +108,6 @@ class Sprite private constructor(
     override fun World.initComponent(entity: Entity) {
         // Initialize animation properties with data from [AssetStore].
         val assetStore: AssetStore = this.inject(name = "AssetStore")
-        // Set direction from Aseprite if not specified in the component
-        if (direction == null) {
-            direction = assetStore.getAnimationDirection(name, animation)  // TODO: can be removed?
-        }
         resetAnimation(assetStore)
         //println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
     }
@@ -154,12 +141,12 @@ class Sprite private constructor(
     // Set frameIndex for starting animation
     fun setFrameIndex(assetStore: AssetStore) {
         frameIndex = if (direction == REVERSE || direction == ONCE_REVERSE)
-            assetStore.getAnimationNumberOfFrames(name, animation) - 1 else 0
+            assetStore.getSpriteTexture(name).numberOfFrames - 1 else 0
     }
 
     // Set frame time for first frame
     fun setNextFrameIn(assetStore: AssetStore) {
-        nextFrameIn = assetStore.getAnimationFrameDuration(name, animation, frameIndex)
+        nextFrameIn = assetStore.getSpriteTexture(name).getDuration(frameIndex)
     }
 
     // Init increment for setting frameIndex
@@ -170,7 +157,6 @@ class Sprite private constructor(
             PING_PONG -> +1     // ping-pong is starting forward
             ONCE_FORWARD -> +1  // starting forward
             ONCE_REVERSE -> -1  // starting reverse
-            null -> error("SpriteAnimationFamily: direction shall not be null!")
         }
     }
 }

@@ -33,7 +33,7 @@ class GameObjectStateSystem : IteratingSystem(
                     val spriteComponent = subEntity[SpriteComponent]
                     // Check if there is currently a state switch
                     if (stateComponent.current != stateComponent.last) {
-                        spriteComponent.animation = config.frameTag
+                        spriteComponent.name = config.frameTag
                         spriteComponent.running = config.isAnimation
                         spriteComponent.direction = config.direction
                         spriteComponent.visible = !config.disable

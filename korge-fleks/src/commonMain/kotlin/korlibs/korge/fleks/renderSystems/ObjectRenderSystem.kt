@@ -20,18 +20,13 @@ import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
-import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
-import korlibs.korge.fleks.utils.Geometry
 import korlibs.korge.fleks.utils.getMainCameraOrNull
-import korlibs.korge.fleks.utils.nameOf
 import korlibs.korge.render.*
 import korlibs.math.geom.*
-import korlibs.math.geom.Matrix.Companion
-import korlibs.math.geom.slice.SliceOrientation
 
 
 interface RenderSystem {
@@ -57,7 +52,8 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
-        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent, TileMapComponent)
+        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent,
+            NinePatchComponent, TileMapComponent) //, ParallaxLayerComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
@@ -85,60 +81,30 @@ class ObjectRenderSystem(
             // Rendering path for sprites
             if (entity has SpriteComponent && entity[SpriteComponent].visible) {
                 val spriteComponent = entity[SpriteComponent]
-                val imageFrame = assetStore.getImageFrame(spriteComponent.name, spriteComponent.animation, spriteComponent.frameIndex)
-                val imageData = assetStore.getImageData(spriteComponent.name)
-                val spriteWidth = imageData.width
-                val spriteHeight = imageData.height
+                val sprite = assetStore.getSpriteTexture(spriteComponent.name)
+                val texture = sprite[spriteComponent.frameIndex]
 
-                if (entity has SpriteLayersComponent) {
-                    val layerMap = entity[SpriteLayersComponent].layerMap
-                    ctx.useBatcher { batch ->
-                        // Iterate over all layers of each sprite for the frame number
-                        imageFrame.layerData.fastForEach { layerData ->
-                            val layerName = layerData.layer.name ?: ""
-
-                            layerMap[layerName]?.let { layerProps ->
-
-                                batch.drawQuad(
-                                    tex = ctx.getTex(layerData.slice),
-                                    x = position.x + layerData.targetX - spriteComponent.anchorX + layerProps.offsetX,
-                                    y = position.y + layerData.targetY - spriteComponent.anchorY + layerProps.offsetY,
-                                    filtering = false,
-                                    colorMul = layerProps.rgba,
-                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    ctx.useBatcher { batch ->
-                        // Iterate over all layers of each sprite for the frame number
-                        imageFrame.layerData.fastForEach { layerData ->
-                            val px = position.x + position.offsetX + (if (spriteComponent.flipX) (spriteWidth - layerData.targetX - layerData.slice.width) else layerData.targetX) - spriteComponent.anchorX
-                            val py = position.y + position.offsetY + layerData.targetY - spriteComponent.anchorY
-
-                            val slice = layerData.slice  //.transformed(SliceOrientation.MIRROR_HORIZONTAL_ROTATE_0)  <-- does not work
-
-                            if (spriteComponent.flipX) {
-                                batch.drawQuadFlipX(  // mirror texture horizontally
-                                    tex = ctx.getTex(slice),
-                                    x = px,
-                                    y = py,
-                                    filtering = false,
-                                    colorMul = rgba,
-                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                                )
-                            } else {
-                                batch.drawQuad(
-                                    tex = ctx.getTex(slice),
-                                    x = px,
-                                    y = py,
-                                    filtering = false,
-                                    colorMul = rgba,
-                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                                )
-                            }
-                        }
+                ctx.useBatcher { batch ->
+                    val px = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.anchorX
+                    val py = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.anchorY
+                    if (spriteComponent.flipX) {
+                        batch.drawQuadFlippedX(  // mirror texture horizontally
+                            tex = ctx.getTex(texture.bmpSlice),
+                            x = px,
+                            y = py,
+                            filtering = false,
+                            colorMul = rgba,
+                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                        )
+                    } else {
+                        batch.drawQuad(
+                            tex = ctx.getTex(texture.bmpSlice),
+                            x = px,
+                            y = py,
+                            filtering = false,
+                            colorMul = rgba,
+                            program = null
+                        )
                     }
                 }
             }
@@ -189,7 +155,7 @@ class ObjectRenderSystem(
             // Rendering path for 9-patch graphic (not optimized - no caching)
             else if (entity has NinePatchComponent) {
                 val ninePatchComponent = entity[NinePatchComponent]
-                val ninePatch = assetStore.getNinePatch(ninePatchComponent.name)
+                val ninePatch = assetStore.getNinePatchSlice(ninePatchComponent.name)
 
                 val numQuads = ninePatch.info.totalSegments
                 val indices = TexturedVertexArray.quadIndices(numQuads)
@@ -263,13 +229,13 @@ class ObjectRenderSystem(
 }
 
 /**
- * Draws a textured [tex] quad at [x], [y] and size [width]x[height] and flipped in X direction.
+ * Draws a textured [tex] quad at [x], [y] with size [width]x[height] and flipped in X direction.
  *
  * It uses [m] transform matrix, an optional [filtering] and [colorMul], [blendMode] and [program] as state for drawing it.
  *
  * Note: To draw solid quads, you can use [Bitmaps.white] + [AgBitmapTextureManager] as texture and the [colorMul] as quad color.
  */
-fun BatchBuilder2D.drawQuadFlipX(
+fun BatchBuilder2D.drawQuadFlippedX(
     tex: TextureCoords,
     x: Float,
     y: Float,
@@ -282,10 +248,10 @@ fun BatchBuilder2D.drawQuadFlipX(
     program: Program? = null
 ) {
     setStateFast(tex.base, filtering, blendMode, program, icount = 6, vcount = 4)
-    drawQuadFlipXFast(x, y, width, height, m, tex, colorMul)
+    drawQuadFlippedXFast(x, y, width, height, m, tex, colorMul)
 }
 
-fun BatchBuilder2D.drawQuadFlipXFast(
+fun BatchBuilder2D.drawQuadFlippedXFast(
     x: Float, y: Float, width: Float, height: Float,
     m: Matrix,
     tex: BmpCoords,

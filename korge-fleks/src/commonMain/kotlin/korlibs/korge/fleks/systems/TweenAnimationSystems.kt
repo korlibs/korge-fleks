@@ -128,7 +128,7 @@ class TweenSpriteSystem : IteratingSystem(
 
     override fun onTickEntity(entity: Entity) {
         val spriteComponent = entity[SpriteComponent]
-        updateProperty(entity, TweenSpriteAnimationComponent, spriteComponent::animation) {
+        updateProperty(entity, TweenSpriteAnimationComponent, spriteComponent::name) {
             spriteComponent.setFrameIndex(assetStore)
             spriteComponent.setNextFrameIn(assetStore)
         }
@@ -341,7 +341,7 @@ operator fun RGBA.times(f: Float) = RGBA(
 )
 
 @JvmName("updatePropertyDirectionNullable")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenProperty>, value: KMutableProperty0<ImageAnimation.Direction?>, block: EntityUpdateContext.() -> Unit = {}) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenProperty>, value: KMutableProperty0<ImageAnimation.Direction>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
             value.set(it.value as ImageAnimation.Direction)
@@ -374,10 +374,11 @@ fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<Twee
 }
 
 @JvmName("updatePropertyString")
-fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenProperty>, value: KMutableProperty0<String>) {
+fun IteratingSystem.updateProperty(entity: Entity, component: ComponentType<TweenProperty>, value: KMutableProperty0<String>, block: EntityUpdateContext.() -> Unit = {}) {
     entity.getOrNull(component)?.let {
         if (it.timeProgress >= it.duration || it.easing.invoke((it.timeProgress / it.duration)) > 0.5) entity.configure { entity ->
             value.set(it.value as String)
+            block.invoke(this)
             entity -= component
         }
     }

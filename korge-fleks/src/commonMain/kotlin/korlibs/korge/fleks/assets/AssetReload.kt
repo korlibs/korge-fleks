@@ -1,14 +1,10 @@
 package korlibs.korge.fleks.assets
 
-import korlibs.datastructure.*
-import korlibs.image.font.*
-import korlibs.image.format.*
 import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.LayerTileMaps
-import korlibs.korge.fleks.assets.data.readParallaxDataContainer
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.ldtk.view.*
 import kotlinx.coroutines.*
@@ -122,69 +118,31 @@ class ResourceDirWatcherConfiguration(
         // TODO: Currently only fonts, sprite images, background (parallax images) and tile maps are reloaded
         //       -> Implement reloading also for other asset types
 
-        assetConfig.fonts.forEach { config ->
-            // Check filename
-            if (file.fullName.contains(config.value.removeSuffix(".fnt")) && !reloading) {
-                reloading = true  // save that reloading is in progress
-                println("Reloading ${assetConfig.folder}/${config.value} for changes in ${file.fullName} ... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    delay(500)
-                    val assetName = config.key
-                    assetStore.fonts[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value].readBitmapFont(atlas = null))
-                }
-
-                delay(100)
-                reloading = false
-                println("Finished")
-                assetUpdater.fontChangedCallback.forEach { it.invoke() }
-            }
-        }
-        assetConfig.images.forEach { config ->
-            if (file.fullName.contains(config.value.fileName) && !reloading) {
-                reloading = true
-                println("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    delay(500)
-                    val assetName = config.key
-                    assetStore.images[assetName] = Pair(assetUpdater.type,
-                        if (config.value.layers == null) {
-                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
-                        } else {
-                            val props = ASE.toProps()
-                            props.setExtra("layers", config.value.layers)
-                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
-                        }
-                    )
-
-                    delay(100)
-                    reloading = false
-                    println("Finished")
-                    assetUpdater.imageChangedCallback.forEach { it.invoke() }
-                }
-            }
-        }
-        assetConfig.backgrounds.forEach { config ->
-            if (file.fullName.contains(config.value.aseName) && !reloading) {
-                reloading = true  // save that reloading is in progress
-                println("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    // Give aseprite more time to finish writing the files
-                    delay(100)
-                    val assetName = config.key
-                    assetStore.backgrounds[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
-
-                    println("\nTriggering asset change for: $assetName")
-                    // Guard period until reloading is activated again - this is used for debouncing watch messages
-                    delay(100)
-                    reloading = false
-                    println("Finished")
-                    assetUpdater.backgroundCallback.forEach { it.invoke() }
-                }
-            }
-        }
+//        assetConfig.images.forEach { config ->
+//            if (file.fullName.contains(config.value.fileName) && !reloading) {
+//                reloading = true
+//                println("Reloading ${file.fullName}... ")
+//
+//                launchImmediately(context = assetReloadContext) {
+//                    delay(500)
+//                    val assetName = config.key
+//                    assetStore.images[assetName] = Pair(assetUpdater.type,
+//                        if (config.value.layers == null) {
+//                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
+//                        } else {
+//                            val props = ASE.toProps()
+//                            props.setExtra("layers", config.value.layers)
+//                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
+//                        }
+//                    )
+//
+//                    delay(100)
+//                    reloading = false
+//                    println("Finished")
+//                    assetUpdater.imageChangedCallback.forEach { it.invoke() }
+//                }
+//            }
+//        }
         assetConfig.tileMaps.forEach { config ->
             // Check if LDTK json file was modified
             if (file.fullName.contains(config.value.fileName) && !reloading) {

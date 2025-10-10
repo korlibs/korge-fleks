@@ -11,8 +11,6 @@ import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
-import korlibs.korge.view.*
-import korlibs.math.geom.*
 
 
 /**
@@ -53,13 +51,10 @@ class FastSpriteRenderSystem(
 
                 val spriteComponent = entity[SpriteComponent]
                 val rgba = entity[RgbaComponent].rgba
-                val imageFrame = assetStore.getImageFrame(spriteComponent.name, spriteComponent.animation, spriteComponent.frameIndex)
-
-                // Just take the first layer of an Aseprite image file
-                val texture = imageFrame.first ?: return@forEach
+                val texture = assetStore.getSpriteTexture(spriteComponent.name)[spriteComponent.frameIndex]
 
                 batch.drawQuad(
-                    tex = ctx.getTex(texture.slice),
+                    tex = ctx.getTex(texture.bmpSlice),
                     x = position.x + texture.targetX - spriteComponent.anchorX,
                     y = position.y + texture.targetY - spriteComponent.anchorY,
                     filtering = false,
