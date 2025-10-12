@@ -3,21 +3,19 @@ package korlibs.korge.fleks.assets
 import korlibs.datastructure.Array2
 import korlibs.datastructure.IntArray2
 import korlibs.image.tiles.*
-import korlibs.korge.fleks.assets.data.ldtk.ExtTileset
-import korlibs.korge.fleks.assets.data.ldtk.LdtkWorld
+import korlibs.korge.fleks.assets.data.ldtk.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.prefab.data.LevelData.*
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.prefab.data.LevelData
-import korlibs.korge.ldtk.LayerInstance
-import korlibs.korge.ldtk.Level
-import korlibs.korge.ldtk.pivotAnchor
-import korlibs.korge.ldtk.pixelPos
 import korlibs.math.*
 import korlibs.memory.*
 import kotlinx.serialization.*
+import kotlin.collections.get
 import kotlin.collections.set
 import kotlin.math.*
+
+
 
 /**
  * Data class for storing level maps and entities for a game world.

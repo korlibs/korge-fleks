@@ -13,20 +13,12 @@ dependencies:
 #
   - maven::common::com.charleskorn.kaml:kaml:0.61.0  # 0.59.0 <-- last version supporting kotlin 1.9.x and serialization 1.6.x
   - maven::common::com.soywiz.korlibs.korge2:korge
-  - https://github.com/korlibs/korge-ldtk/tree/v1.0.6/korge-ldtk
-  # Use local copy of KorGE addons
-#  - ../../korge-ldtk/korge-ldtk
+
+# Using local copy of Korge-fleks addon repo
 #
-# Using local copy of Korge-addon repos
-#
-# For creating submodules for all involved repositories follow below commands and create
-# needed folders. Example below is for Korge-ldtk:
-#
-#     $ git submodule add https://github.com/korlibs/korge-ldtk.git submodules/korge-ldtk
-#
-# Don't forget to check out commit SHA for korge-ldtk repo from
+# Don't forget to check out commit SHA for korge-fleks repo from
 # "./submodules/korge-fleks/korge-fleks/kproject.yml" in that submodule:
 #
-#     $ cd submodules/korge-ldtk && git checkout c590319a9b9b3811b564a22c20e12cd1e877b528
+#     $ cd submodules/korge-fleks && git checkout c590319a9b9b3811b564a22c20e12cd1e877b528
 
 targets: [jvm, js, android]

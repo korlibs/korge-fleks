@@ -8,11 +8,6 @@ import korlibs.image.format.readBitmap
 import korlibs.image.tiles.TileSet
 import korlibs.image.tiles.TileSetTileInfo
 import korlibs.io.file.VfsFile
-import korlibs.korge.ldtk.LDTKJson
-import korlibs.korge.ldtk.LayerDefinition
-import korlibs.korge.ldtk.LayerInstance
-import korlibs.korge.ldtk.Level
-import korlibs.korge.ldtk.TilesetDefinition
 import korlibs.math.geom.RectangleInt
 
 
