@@ -25,7 +25,7 @@ class LdtkLayer(val level: LdtkLevel, val layer: LayerInstance) {
 
 class LdtkLevel(val world: LdtkWorld, val level: Level) {
     val ldtk get() = world.ldtk
-    val layers by lazy { level.layerInstances?.map { LdtkLayer(this, it) } ?: emptyList() }
+    val layers by lazy { level.layerInstances?.map { layer -> LdtkLayer(this@LdtkLevel, layer) } ?: emptyList() }
     val layersByName by lazy { layers.associateBy { it.layer.identifier } }
 }
 
@@ -34,7 +34,7 @@ class LdtkWorld(
     val ldtk: LDTKJson,
     val tilesetDefsById: Map<Int, ExtTileset>
 ) {
-    val levels by lazy { ldtk.levels.map { LdtkLevel(this, it) } }
+    val levels by lazy { ldtk.levels.map { level -> LdtkLevel(this@LdtkWorld, level) } }
     val levelsByName by lazy { levels.associateBy { it.level.identifier } }
 
     val layersDefsById: Map<Int, LayerDefinition> = ldtk.defs.layers.associateBy { it.uid }
@@ -80,10 +80,31 @@ suspend fun VfsFile.readLdtkWorld(): LdtkWorld {
     ldtk.defs.tilesets.forEach { def ->
     }
 
-
-    val tilesetDefsById: Map<Int, ExtTileset> = ldtk.defs.tilesets.associate { def ->
+    // Load texture bitmaps of tiles which are already extruded and build up a TileSet object
+    val tilesetDefsById: Map<Int, ExtTileset> = ldtk.defs.tilesets.mapNotNull {
+        // Leave out tilesets which do not have an image (e.g. LDtk internal tileset icons)
+        if (it.relPath == null) null else it
+    }.associate { def ->
         val bitmap: Bitmap = def.relPath?.let { file.parent[it].readBitmap() } ?: error("Tileset image not found: ${def.relPath}")
-        val tileset = TileSet(bitmap.slice(), def.tileGridSize, def.tileGridSize)
+        val tileCount = def.cWid * def.cHei
+
+        println("Loading tileset: ${def.identifier}")
+        val tileset = TileSet(
+            (0 until tileCount).map { index ->
+//                println("Tileset: ${def.identifier} Tile: $index / $tileCount")
+                TileSetTileInfo(
+                    index,
+                    bitmap.slice(
+                        RectangleInt(
+                            x = (index % def.cWid) * (def.tileGridSize + 2) + 1,
+                            y = (index / def.cWid) * (def.tileGridSize + 2) + 1,
+                            def.tileGridSize,
+                            def.tileGridSize
+                        )
+                    )
+                )
+            }
+        )
         def.uid to ExtTileset(def, tileset)
     }
     return LdtkWorld(ldtk, tilesetDefsById)

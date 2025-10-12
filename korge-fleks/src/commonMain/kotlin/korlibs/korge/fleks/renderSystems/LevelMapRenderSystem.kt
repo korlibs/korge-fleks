@@ -60,6 +60,7 @@ class LevelMapRenderSystem(
 
             levelMap.layerNames.forEach { layerName ->
                 ctx.useBatcher { batch ->
+                    // Iterate over all tiles in the visible area of the view port
                     worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
                         batch.drawQuad(
                             tex = ctx.getTex(slice),

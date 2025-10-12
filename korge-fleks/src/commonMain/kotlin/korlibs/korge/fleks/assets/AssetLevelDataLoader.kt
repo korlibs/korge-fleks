@@ -209,22 +209,17 @@ class AssetLevelDataLoader(
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,
             height = ldtkLayer.cHei,
-            tileSet = if (tilesetExt.tileset != null) tilesetExt.tileset!! else TileSet.EMPTY
+            tileSet = tilesetExt.tileset
         )
         val gridSize = tilesetExt.def.tileGridSize
-        val tilesetWidth = tilesetExt.def.pxWid
-        val cellsTilesPerRow = tilesetWidth / gridSize
 
         for (tile in ldtkLayer.autoLayerTiles + ldtkLayer.gridTiles) {
             val (px, py) = tile.px
             val x = px / gridSize
             val y = py / gridSize
-            val (tileX, tileY) = tile.src
             val dx = px % gridSize
             val dy = py % gridSize
-            val tx = tileX / gridSize
-            val ty = tileY / gridSize
-            val tileId = ty * cellsTilesPerRow + tx
+            val tileId = tile.t
             val flipX = tile.f.hasBitSet(0)
             val flipY = tile.f.hasBitSet(1)
 
