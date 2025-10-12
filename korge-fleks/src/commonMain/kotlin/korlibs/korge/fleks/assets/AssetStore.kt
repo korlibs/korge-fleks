@@ -16,7 +16,7 @@ import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
-import korlibs.korge.ldtk.view.*
+import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -187,7 +187,8 @@ class AssetStore {
                 val ldtkFile = tileMap.value.fileName
                 val collisionLayerName = tileMap.value.collisionLayerName
                 val tileSetPaths = tileMap.value.tileSetPaths
-                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLDTKWorld(extrude = true)
+                // Set extrude to false - something is broken with it and smaller tilesets
+                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld()
 
                 when  (type) {
                     AssetType.LEVEL -> {

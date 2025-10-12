@@ -5,8 +5,8 @@ import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.LayerTileMaps
+import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.korge.fleks.prefab.Prefab
-import korlibs.korge.ldtk.view.*
 import kotlinx.coroutines.*
 import kotlin.collections.set
 import kotlin.coroutines.*
@@ -164,7 +164,7 @@ class ResourceDirWatcherConfiguration(
             // Give LDtk more time to finish writing the files
             delay(500)
 
-            val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + fileName].readLDTKWorld(extrude = true)
+            val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + fileName].readLdtkWorld()
             //println("\nTriggering asset change for LDtk: $fileName")
 
             // Check if the name of the level is the one for the level chunks

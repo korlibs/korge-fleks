@@ -33,8 +33,6 @@ class LevelMapRenderSystem(
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
 
-    private val assetStore: AssetStore = world.inject(name = "AssetStore")
-
     override fun render(ctx: RenderContext) {
         val camera: Entity = world.getMainCameraOrNull() ?: return
         val cameraPosition = with(world) { camera[PositionComponent] }
@@ -62,6 +60,7 @@ class LevelMapRenderSystem(
 
             levelMap.layerNames.forEach { layerName ->
                 ctx.useBatcher { batch ->
+                    // Iterate over all tiles in the visible area of the view port
                     worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
                         batch.drawQuad(
                             tex = ctx.getTex(slice),

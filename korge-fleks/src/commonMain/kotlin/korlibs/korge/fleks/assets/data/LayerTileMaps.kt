@@ -3,10 +3,10 @@ package korlibs.korge.fleks.assets.data
 import korlibs.image.tiles.Tile
 import korlibs.image.tiles.TileMapData
 import korlibs.image.tiles.TileSet
+import korlibs.korge.fleks.assets.data.ldtk.ExtTileset
+import korlibs.korge.fleks.assets.data.ldtk.LdtkWorld
 import korlibs.korge.ldtk.LayerInstance
 import korlibs.korge.ldtk.Level
-import korlibs.korge.ldtk.view.ExtTileset
-import korlibs.korge.ldtk.view.LDTKWorld
 import korlibs.memory.hasBitSet
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -16,7 +16,7 @@ import kotlin.math.max
 
 class LayerTileMaps(
     private var name: String = "noName",
-    ldtkWorld: LDTKWorld,
+    ldtkWorld: LdtkWorld,
     ldtkLevel: Level
 ) {
     private val layerTileMaps: MutableMap<String, TileMapData> = mutableMapOf()
@@ -51,7 +51,7 @@ class LayerTileMaps(
         }
     }
 
-    fun reloadAsset(ldtkWorld: LDTKWorld, ldtkLevel: Level) {
+    fun reloadAsset(ldtkWorld: LdtkWorld, ldtkLevel: Level) {
         ldtkLevel.layerInstances?.forEach { ldtkLayer ->
             // Check if layer has tile set -> store tile map data for layer
             val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
