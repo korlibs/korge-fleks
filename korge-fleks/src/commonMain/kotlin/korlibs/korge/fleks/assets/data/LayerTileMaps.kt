@@ -10,7 +10,7 @@ import kotlin.math.max
 
 class LayerTileMaps(
     private var name: String = "noName",
-    ldtkWorld: LdtkWorld,
+    ldtkWorld: LDTKWorld,
     ldtkLevel: Level
 ) {
     private val layerTileMaps: MutableMap<String, TileMapData> = mutableMapOf()
@@ -45,7 +45,7 @@ class LayerTileMaps(
         }
     }
 
-    fun reloadAsset(ldtkWorld: LdtkWorld, ldtkLevel: Level) {
+    fun reloadAsset(ldtkWorld: LDTKWorld, ldtkLevel: Level) {
         ldtkLevel.layerInstances?.forEach { ldtkLayer ->
             // Check if layer has tile set -> store tile map data for layer
             val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]

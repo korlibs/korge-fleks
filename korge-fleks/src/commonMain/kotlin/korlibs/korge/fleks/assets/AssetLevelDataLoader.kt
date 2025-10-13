@@ -30,7 +30,7 @@ class AssetLevelDataLoader(
      * The level data is stored in a 2D array where each element is a LevelData object.
      * The LevelData object contains the tile map data and entity data for each level.
      */
-    fun loadLevelData(ldtkWorld: LdtkWorld, collisionLayerName: String, levelName: String, tileSetPaths: MutableList<String>) {
+    fun loadLevelData(ldtkWorld: LDTKWorld, collisionLayerName: String, levelName: String, tileSetPaths: MutableList<String>) {
         this.collisionLayerName = collisionLayerName
 
         // TODO: Add sanity check for level data chunks and throw an error if the LDtk is not configured correctly
@@ -87,7 +87,7 @@ class AssetLevelDataLoader(
      * Reload all chunks (LDtk levels) from the level (LDtk world).
      * This is used when the LDtk world file has been changed (hot-reloading).
      */
-    fun reloadAllLevelChunks(ldtkWorld: LdtkWorld) {
+    fun reloadAllLevelChunks(ldtkWorld: LDTKWorld) {
         // Reload all levels from ldtk world file
         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
             loadLevel(ldtkWorld, ldtkLevel, collisionLayerName)
@@ -99,7 +99,7 @@ class AssetLevelDataLoader(
      * The level data is stored in a 2D array where each element is a LevelData object.
      * The LevelData object contains the tile map data and entity data for each level.
      */
-    private fun loadLevel(ldtkWorld: LdtkWorld, ldtkLevel: Level, collisionLayerName: String) {
+    private fun loadLevel(ldtkWorld: LDTKWorld, ldtkLevel: Level, collisionLayerName: String) {
         val levelX: Int = ldtkLevel.worldX / (Prefab.levelData!!.levelGridWidth * Prefab.levelData!!.tileSize)
         val levelY: Int = ldtkLevel.worldY / (Prefab.levelData!!.levelGridHeight * Prefab.levelData!!.tileSize)
 
@@ -217,7 +217,7 @@ class AssetLevelDataLoader(
             val y = py / gridSize
             val dx = px % gridSize
             val dy = py % gridSize
-            val tileId = tile.t
+            val tileId = tile.t  // Tile id in the tileset which identifies the tile graphic
             val flipX = tile.f.hasBitSet(0)
             val flipY = tile.f.hasBitSet(1)
 

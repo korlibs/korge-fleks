@@ -13,23 +13,23 @@ import korlibs.math.geom.RectangleInt
 
 class ExtTileset(val def: TilesetDefinition, val tileset: TileSet)
 
-class LdtkLayer(val level: LdtkLevel, val layer: LayerInstance) {
+class LDTKLayer(val level: LDTKLevel, val layer: LayerInstance) {
     val world get() = level.world
     val entities get() = layer.entityInstances
 }
 
-class LdtkLevel(val world: LdtkWorld, val level: Level) {
+class LDTKLevel(val world: LDTKWorld, val level: Level) {
     val ldtk get() = world.ldtk
-    val layers by lazy { level.layerInstances?.map { layer -> LdtkLayer(this@LdtkLevel, layer) } ?: emptyList() }
+    val layers by lazy { level.layerInstances?.map { layer -> LDTKLayer(this@LDTKLevel, layer) } ?: emptyList() }
     val layersByName by lazy { layers.associateBy { it.layer.identifier } }
 }
 
 
-class LdtkWorld(
+class LDTKWorld(
     val ldtk: LDTKJson,
     val tilesetDefsById: Map<Int, ExtTileset>
 ) {
-    val levels by lazy { ldtk.levels.map { level -> LdtkLevel(this@LdtkWorld, level) } }
+    val levels by lazy { ldtk.levels.map { level -> LDTKLevel(this@LDTKWorld, level) } }
     val levelsByName by lazy { levels.associateBy { it.level.identifier } }
 
     val layersDefsById: Map<Int, LayerDefinition> = ldtk.defs.layers.associateBy { it.uid }
@@ -67,7 +67,7 @@ class LdtkWorld(
 }
 
 
-suspend fun VfsFile.readLdtkWorld(): LdtkWorld {
+suspend fun VfsFile.readLdtkWorld(): LDTKWorld {
     val file = this
     val json = file.readString()
     val ldtk = LDTKJson.load(json)
@@ -84,10 +84,15 @@ suspend fun VfsFile.readLdtkWorld(): LdtkWorld {
         val tileCount = def.cWid * def.cHei
 
         println("Loading tileset: ${def.identifier}")
+
+        // TODO: This tile set could contain slices for tiles which are located in a texture atlas
+        //       tile id would be the name of the tile in that case (the number part only probably)
+        //       but for now we only support single image tilesets
         val tileset = TileSet(
             (0 until tileCount).map { index ->
 //                println("Tileset: ${def.identifier} Tile: $index / $tileCount")
                 TileSetTileInfo(
+                    // This is the tile id which is used in TileMapData to reference this tile
                     index,
                     bitmap.slice(
                         RectangleInt(
@@ -102,5 +107,5 @@ suspend fun VfsFile.readLdtkWorld(): LdtkWorld {
         )
         def.uid to ExtTileset(def, tileset)
     }
-    return LdtkWorld(ldtk, tilesetDefsById)
+    return LDTKWorld(ldtk, tilesetDefsById)
 }
