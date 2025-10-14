@@ -52,6 +52,19 @@ class TextureAtlasLoader {
         val bgLayerNames = mutableListOf<String>()
         val fgLayerNames = mutableListOf<String>()
 
+        // Create tilesets
+        config.tilesets.forEach { tilesetName ->
+
+        }
+        // Count tileset images in the texture atlas
+        val tilesetRegex = "_tile(\\d+)".toRegex()
+        val tilesetCount = spriteAtlas.entries.count { entry ->
+            tilesetRegex.containsMatchIn(entry.name)
+        }
+
+        // Create Tileset object with the counted amount of tiles
+//        val tileset = Tileset(tilesetCount)
+
         spriteAtlas.entries.forEach { entry ->
             //println("sprite: ${entry.name}")
 
