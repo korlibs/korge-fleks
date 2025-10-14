@@ -6,6 +6,7 @@ import korlibs.image.atlas.MutableAtlasUnit
 import korlibs.image.bitmap.*
 import korlibs.image.font.BitmapFont
 import korlibs.image.font.Font
+import korlibs.image.tiles.TileSet
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
@@ -29,6 +30,7 @@ typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
 typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxBackgroundConfig>>
 typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxLayerConfig>>
 typealias ParallaxPlaneTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxPlaneTextures>>
+typealias TilesetMapType = MutableMap<String, Pair<AssetType, TileSet>>
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -71,6 +73,7 @@ class AssetStore {
     internal val parallaxBackgroundConfig: ParallaxMapType = mutableMapOf()
     internal val parallaxTextures: ParallaxTexturesMapType = mutableMapOf()
     internal val parallaxPlaneTextures: ParallaxPlaneTexturesMapType = mutableMapOf()
+    internal val tilesets: TilesetMapType = mutableMapOf()
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {

@@ -71,9 +71,9 @@ class TextureAtlasLoader {
                         ?: parallaxConfig.foregroundLayers[frameTag]
                         ?: error("Cannot find parallax layer '$frameTag' in parallax config!")
 
-                    if (frameTag == "parallax_sky") {
-                        println()
-                    }
+//                    if (frameTag == "parallax_sky") {
+//                        println()
+//                    }
 
                     layer.layerBmpSlice = spriteAtlas.texture.slice(entry.info.frame)
                     parallaxTextures[frameTag] = Pair(type, layer)
@@ -82,6 +82,7 @@ class TextureAtlasLoader {
                     textureUsedForParallaxBackground = true
                     return@forEach
                 }
+
                 if (parallaxConfig.parallaxPlane != null) {
                     val planeConfig = parallaxConfig.parallaxPlane
                     val planeName = planeConfig.name
@@ -96,8 +97,7 @@ class TextureAtlasLoader {
                         // Get the parallax plane index number
                         val regex = "_slice(\\d+)$".toRegex()
                         val match = regex.find(frameTag)
-                        var planeIndex = match?.groupValues?.get(1)?.toInt()
-                            ?: error("Cannot get plane index of texture '${frameTag}'!")
+                        val planeIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get plane index of texture '${frameTag}'!")
 
                         parallaxPlaneTextures[planeName]!!.second.lineTextures.add(LineTexture(
                             index = planeIndex,
@@ -145,6 +145,21 @@ class TextureAtlasLoader {
                     }
                 }
             }
+
+            // Check for tilesets
+            config.tilesets.forEach { tilesetName ->
+                if (frameTag.contains(tilesetName)) {
+                    // Get the tile index number
+                    val regex = "_tile(\\d+)".toRegex()
+                    val match = regex.find(frameTag)
+                    val tileIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get tile index of texture '${frameTag}'!")
+
+
+
+                }
+            }
+
+
 
             // Save other textures
             if (!textureUsedForParallaxBackground) {

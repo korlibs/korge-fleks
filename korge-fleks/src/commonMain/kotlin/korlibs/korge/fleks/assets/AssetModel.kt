@@ -36,7 +36,8 @@ data class AssetModel(
         val frameDurations: Map<String, FrameDurationConfig> = mapOf(),
         val nineSlices: Map<String, NineSlice> = mapOf(),
         val fonts: List<String> = listOf(),
-        val parallaxBackgrounds: Map<String, ParallaxConfig> = mapOf()
+        val parallaxBackgrounds: Map<String, ParallaxConfig> = mapOf(),
+        val tilesets: List<String> = listOf()
     ) {
         @Serializable
         @SerialName("FrameDurationConfig")
