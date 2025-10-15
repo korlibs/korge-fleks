@@ -1,10 +1,8 @@
 package korlibs.korge.fleks.assets.data.ldtk
 
-import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.bitmap.slice
 import korlibs.image.color.Colors
-import korlibs.image.format.readBitmap
 import korlibs.image.tiles.TileSet
 import korlibs.image.tiles.TileSetTileInfo
 import korlibs.io.file.VfsFile
@@ -13,23 +11,23 @@ import korlibs.math.geom.RectangleInt
 
 class ExtTileset(val def: TilesetDefinition, val tileset: TileSet)
 
-class LdtkLayer(val level: LdtkLevel, val layer: LayerInstance) {
+class LDTKLayer(val level: LDTKLevel, val layer: LayerInstance) {
     val world get() = level.world
     val entities get() = layer.entityInstances
 }
 
-class LdtkLevel(val world: LdtkWorld, val level: Level) {
+class LDTKLevel(val world: LDTKWorld, val level: Level) {
     val ldtk get() = world.ldtk
-    val layers by lazy { level.layerInstances?.map { layer -> LdtkLayer(this@LdtkLevel, layer) } ?: emptyList() }
+    val layers by lazy { level.layerInstances?.map { layer -> LDTKLayer(this@LDTKLevel, layer) } ?: emptyList() }
     val layersByName by lazy { layers.associateBy { it.layer.identifier } }
 }
 
 
-class LdtkWorld(
+class LDTKWorld(
     val ldtk: LDTKJson,
     val tilesetDefsById: Map<Int, ExtTileset>
 ) {
-    val levels by lazy { ldtk.levels.map { level -> LdtkLevel(this@LdtkWorld, level) } }
+    val levels by lazy { ldtk.levels.map { level -> LDTKLevel(this@LDTKWorld, level) } }
     val levelsByName by lazy { levels.associateBy { it.level.identifier } }
 
     val layersDefsById: Map<Int, LayerDefinition> = ldtk.defs.layers.associateBy { it.uid }
@@ -67,7 +65,10 @@ class LdtkWorld(
 }
 
 
-suspend fun VfsFile.readLdtkWorld(): LdtkWorld {
+suspend fun VfsFile.readLdtkWorld(
+    // callback to get a tileset object - it will be already filled with tiles from texture atlas on loading the atlas
+    callback: ((String, Int) -> TileSet)
+): LDTKWorld {
     val file = this
     val json = file.readString()
     val ldtk = LDTKJson.load(json)
@@ -80,14 +81,19 @@ suspend fun VfsFile.readLdtkWorld(): LdtkWorld {
         // Leave out tilesets which do not have an image (e.g. LDtk internal tileset icons)
         if (it.relPath == null) null else it
     }.associate { def ->
-        val bitmap: Bitmap = def.relPath?.let { file.parent[it].readBitmap() } ?: error("Tileset image not found: ${def.relPath}")
+//        val bitmap: Bitmap = def.relPath?.let { file.parent[it].readBitmap() } ?: error("Tileset image not found: ${def.relPath}")
         val tileCount = def.cWid * def.cHei
-
-        println("Loading tileset: ${def.identifier}")
+        val tilesetName = def.identifier
+        val tileset = callback(tilesetName, tileCount)
+/*
+        // TODO: This tile set could contain slices for tiles which are located in a texture atlas
+        //       tile id would be the name of the tile in that case (the number part only probably)
+        //       but for now we only support single image tilesets
         val tileset = TileSet(
             (0 until tileCount).map { index ->
 //                println("Tileset: ${def.identifier} Tile: $index / $tileCount")
                 TileSetTileInfo(
+                    // This is the tile id which is used in TileMapData to reference this tile
                     index,
                     bitmap.slice(
                         RectangleInt(
@@ -100,7 +106,9 @@ suspend fun VfsFile.readLdtkWorld(): LdtkWorld {
                 )
             }
         )
+*/
         def.uid to ExtTileset(def, tileset)
     }
-    return LdtkWorld(ldtk, tilesetDefsById)
+    println()
+    return LDTKWorld(ldtk, tilesetDefsById)
 }

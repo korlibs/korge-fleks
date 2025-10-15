@@ -2,7 +2,6 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.image.tiles.Tile
 import korlibs.image.tiles.TileMapData
-import korlibs.image.tiles.TileSet
 import korlibs.korge.fleks.assets.data.ldtk.*
 import korlibs.memory.hasBitSet
 import kotlin.math.max
@@ -10,7 +9,7 @@ import kotlin.math.max
 
 class LayerTileMaps(
     private var name: String = "noName",
-    ldtkWorld: LdtkWorld,
+    ldtkWorld: LDTKWorld,
     ldtkLevel: Level
 ) {
     private val layerTileMaps: MutableMap<String, TileMapData> = mutableMapOf()
@@ -45,7 +44,7 @@ class LayerTileMaps(
         }
     }
 
-    fun reloadAsset(ldtkWorld: LdtkWorld, ldtkLevel: Level) {
+    fun reloadAsset(ldtkWorld: LDTKWorld, ldtkLevel: Level) {
         ldtkLevel.layerInstances?.forEach { ldtkLayer ->
             // Check if layer has tile set -> store tile map data for layer
             val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
@@ -64,22 +63,18 @@ class LayerTileMaps(
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,
             height = ldtkLayer.cHei,
-            tileSet = if (tilesetExt.tileset != null) tilesetExt.tileset!! else TileSet.EMPTY
+            tileSet = tilesetExt.tileset
         )
         val gridSize = tilesetExt.def.tileGridSize
         val tilesetWidth = tilesetExt.def.pxWid
-        val cellsTilesPerRow = tilesetWidth / gridSize
 
         for (tile in ldtkLayer.autoLayerTiles + ldtkLayer.gridTiles) {
             val (px, py) = tile.px
             val x = px / gridSize
             val y = py / gridSize
-            val (tileX, tileY) = tile.src
             val dx = px % gridSize
             val dy = py % gridSize
-            val tx = tileX / gridSize
-            val ty = tileY / gridSize
-            val tileId = ty * cellsTilesPerRow + tx
+            val tileId = tile.t  // Tile id in the tileset which identifies the tile graphic
             val flipX = tile.f.hasBitSet(0)
             val flipY = tile.f.hasBitSet(1)
 

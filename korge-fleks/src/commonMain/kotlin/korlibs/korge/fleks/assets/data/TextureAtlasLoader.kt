@@ -2,14 +2,20 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.associateByInt
 import korlibs.datastructure.toIntMap
-import korlibs.image.atlas.readAtlas
+import korlibs.image.atlas.Atlas
+import korlibs.image.bitmap.Bitmap
+import korlibs.image.bitmap.Bitmap32
 import korlibs.image.bitmap.BmpSlice
-import korlibs.image.bitmap.asNinePatchSimple
+import korlibs.image.bitmap.NinePatchBmpSlice
+import korlibs.image.bitmap.slice
 import korlibs.image.font.BitmapFont
+import korlibs.image.tiles.TileSet
+import korlibs.image.tiles.TileSetTileInfo
 import korlibs.io.dynamic.dyn
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.util.unquote
+import korlibs.korge.fleks.assets.AssetLevelDataLoader
 import korlibs.korge.fleks.assets.AssetModel.TextureConfig
 import korlibs.korge.fleks.assets.BitMapFontMapType
 import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
@@ -17,12 +23,38 @@ import korlibs.korge.fleks.assets.ParallaxMapType
 import korlibs.korge.fleks.assets.ParallaxPlaneTexturesMapType
 import korlibs.korge.fleks.assets.ParallaxTexturesMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
-import korlibs.korge.fleks.assets.data.SpriteFrames.*
-import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.*
+import korlibs.korge.fleks.assets.TileMapsType
+import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.HORIZONTAL_PLANE
+import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.VERTICAL_PLANE
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures.LineTexture
+import korlibs.korge.fleks.assets.data.SpriteFrames.*
+import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
+import korlibs.math.geom.slice.RectSlice
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.math.absoluteValue
 
+
+/**
+ * Iterate through all atlas entries and execute the given action for each entry
+ * that starts with the given prefix. The action is provided with the entry and
+ * the frameTag (entry name without prefix and animation index).
+ */
+inline fun Iterable<Atlas.Entry>.forEachWith(prefix: String, action: (Atlas.Entry, String) -> Unit) {
+    val imagePrefixRegex = "^${prefix}".toRegex()
+    val frameTagRegex = "_\\d+$".toRegex()
+    for (entry in this) {
+//    forEach { entry ->
+        if (imagePrefixRegex.containsMatchIn(entry.name)) {
+            val imageName = entry.name.replace(imagePrefixRegex, "")
+            val frameTag = if (frameTagRegex.containsMatchIn(imageName)) {
+                imageName.replace(frameTagRegex, "")
+            } else imageName
+            action(entry, frameTag)
+        }
+    }
+}
 
 class TextureAtlasLoader {
     private fun getParallaxPlaneSpeedFactor(index: Int, size: Int, speedFactor: Float) : Float {
@@ -37,51 +69,176 @@ class TextureAtlasLoader {
             )
     }
 
-    suspend fun load(
-        assetFolder: String,
+    /**
+     * Load all images from the texture atlas that are prefixed with "img_"
+     * and store them in the textures map as single-frame or animation Sprites.
+     *
+     * Also sets the frameDuration for each frame according to the config.
+     */
+    fun loadImages(
+        type: AssetType,
+        atlas: Atlas,
         config: TextureConfig,
-        textures: SpriteFramesMapType,
-        ninePatchSlices: NinePatchBmpSliceMapType,
-        bitMapFonts: BitMapFontMapType,
+        textures: SpriteFramesMapType
+    ) {
+        atlas.entries.forEachWith("img_") { entry, frameTag ->
+//            println("$frameTag")
+
+            // Check if there was already a frameTag saved for this animation
+            if (textures.containsKey(frameTag)) {
+                val spriteData = textures[frameTag]!!.second
+
+                // Get the animation index number
+                val regex = "_(\\d+)$".toRegex()
+                val match = regex.find(entry.name)
+                val animIndex = match?.groupValues?.get(1)?.toInt()
+                    ?: error("TextureAtlasLoader - Cannot get animation index of sprite '${entry.name}'!")
+
+                spriteData.add(animIndex, SpriteFrame(
+                    atlas.texture.slice(entry.info.frame),
+                    entry.info.virtFrame?.x ?: 0,
+                    entry.info.virtFrame?.y ?: 0
+                ))
+            } else {
+                textures[frameTag] = Pair(type, SpriteFrames(
+                    frames = mutableListOf(
+                        SpriteFrame(
+                            atlas.texture.slice(entry.info.frame),
+                            entry.info.virtFrame?.x ?: 0,
+                            entry.info.virtFrame?.y ?: 0
+                        )
+                    ),
+                    width = entry.info.virtFrame?.width ?: 0,
+                    height = entry.info.virtFrame?.height ?: 0
+                ))
+            }
+        }
+
+        // Load and set frameDuration
+        config.frameDurations.forEach { (frameTag, duration) ->
+            if (textures.containsKey(frameTag)) {
+                val spriteData = textures[frameTag]!!.second
+                for (i in 0 until spriteData.size) {
+                    if (duration.custom == null) {
+                        // Set all frames to the same default duration
+                        spriteData[i].duration = duration.default / 1000f  // convert ms to seconds
+                    } else if (i < duration.custom.size) {
+                        spriteData[i].duration = duration.custom[i] / 1000f  // convert ms to seconds
+                    } else {
+                        println("ERROR: TextureAtlasLoader - Cannot set custom frameDuration for '$frameTag' of - not enough durations specified in config.yaml!")
+                    }
+                }
+            } else {
+                println("ERROR: TextureAtlasLoader - Cannot set frameDuration for '$frameTag' - texture not found!")
+            }
+        }
+//        println()
+    }
+
+    /**
+     * Load all nine-patch-slice images from the texture atlas that are prefixed with "npt_"
+     * and store them in the ninePatchSlices map.
+     */
+    fun loadNinePatchSlices(
+        type: AssetType,
+        atlas: Atlas,
+        config: TextureConfig,
+        ninePatchSlices: NinePatchBmpSliceMapType
+    ) {
+        atlas.entries.forEachWith("npt_") { entry, frameTag ->
+            // Load nine-patch slice info from config
+            val nineSlice = if (config.nineSlices.containsKey(frameTag)) config.nineSlices[frameTag]
+            else error("TextureAtlasLoader - Cannot find nine-patch slice info for '$frameTag' in '$type' texture atlas config!")
+
+            // Create nine-patch object
+            ninePatchSlices[frameTag] = Pair(
+                type,
+                NinePatchBmpSlice.createSimple(
+                    bmp = atlas.texture.slice(entry.info.frame),
+                    left = nineSlice!!.x,
+                    top = nineSlice.y,
+                    right = nineSlice.x + nineSlice.width,
+                    bottom = nineSlice.y + nineSlice.height
+                )
+            )
+        }
+//        println()
+    }
+
+    /**
+     * This function loads all bitmap fonts from a texture atlas whose entry names start with the prefix pxf_.
+     * For each matching entry, it attempts to load the corresponding font file (with a .fnt extension) from
+     * the asset folder, using the atlas entry as the font texture. The loaded bitmap fonts are then stored in
+     * the provided bitMapFonts map, keyed by font name.
+     */
+    suspend fun loadPixelFonts(
+        type: AssetType,
+        atlas: Atlas,
+        config: TextureConfig,
+        assetFolder: String,
+        bitMapFonts: BitMapFontMapType
+    ) {
+        atlas.entries.forEachWith("pxf_") { entry, fontName ->
+            // Sanity check for pixel font in texture atlas config
+            // TODO Check if we could remove fonts entry from texture atlas config, since font images are marked with "pxf_" prefix
+            if (!config.fonts.contains(fontName)) println("WARNING: TextureAtlasLoader - Cannot find font name '$fontName' in '$type' texture atlas config!")
+
+            // Load and set bitmap fonts
+            // IDEA: check if font file is json, xml, or txt and call the appropriate loader - check BitmapFont.kt in Korge
+            val bitmapFont = resourcesVfs["${assetFolder}/${fontName}.fnt"].readFontTxt { pngName ->
+                // Sanity check
+                if (pngName != fontName) println("ERROR: TextureAtlasLoader - ${fontName}.fnt file points to another png file name '${pngName}'. Please check if this is correct!")
+                // Load bmpSlice for pixel font from texture atlas
+                atlas.texture.slice(entry.info.frame)
+            }
+            bitMapFonts[fontName] = Pair(type, bitmapFont)
+        }
+//        println()
+    }
+
+    /**
+     * Loads all parallax background and plane layer textures from the given texture atlas.
+     *
+     * Iterates through atlas entries with the prefix "plx_" and assigns them to background or foreground
+     * parallax layers, or to parallax planes and their attached layers, based on the provided configuration.
+     * Populates the corresponding maps with the loaded textures and updates the global parallax background configuration.
+     *
+     * @param type The asset type for the loaded textures.
+     * @param atlas The texture atlas containing the entries.
+     * @param config The texture configuration, including parallax settings.
+     * @param parallaxBackgroundConfig The map to store global parallax background configurations.
+     * @param parallaxTextures The map to store background and foreground parallax layer textures.
+     * @param parallaxPlaneTextures The map to store parallax plane and attached layer textures.
+     */
+    fun loadParallaxLayers(
+        type: AssetType,
+        atlas: Atlas,
+        config: TextureConfig,
         parallaxBackgroundConfig: ParallaxMapType,
         parallaxTextures: ParallaxTexturesMapType,
         parallaxPlaneTextures: ParallaxPlaneTexturesMapType,
-        type: AssetType
     ) {
-        val spriteAtlas = resourcesVfs["${assetFolder}/${config.fileName}"].readAtlas()
         val bgLayerNames = mutableListOf<String>()
         val fgLayerNames = mutableListOf<String>()
 
-        spriteAtlas.entries.forEach { entry ->
-            //println("sprite: ${entry.name}")
-
-            val regex = "_\\d+$".toRegex()
-            val frameTag = if (regex.containsMatchIn(entry.name)) {
-                // entry is part of a sprite animations
-                entry.name.replace(regex, "")
-            } else entry.name
-
-            // Check if frameTags are used for parallax background layers and save them in separate maps
-            var textureUsedForParallaxBackground = false
+        atlas.entries.forEachWith("plx_") { entry, frameTag ->
             config.parallaxBackgrounds.forEach { (_, parallaxConfig) ->
+                // Check if frameTags are used for parallax background layers and save them in separate maps
                 if (parallaxConfig.backgroundLayers.containsKey(frameTag)
                     || parallaxConfig.foregroundLayers.containsKey(frameTag)) {
                     // frameTag is used for parallax background layer
                     val layer = parallaxConfig.backgroundLayers[frameTag]
                         ?: parallaxConfig.foregroundLayers[frameTag]
-                        ?: error("Cannot find parallax layer '$frameTag' in parallax config!")
+                        ?: error("TextureAtlasLoader - Cannot find parallax layer '$frameTag' in '$type' parallax config!")
 
-                    if (frameTag == "parallax_sky") {
-                        println()
-                    }
-
-                    layer.layerBmpSlice = spriteAtlas.texture.slice(entry.info.frame)
+                    layer.layerBmpSlice = atlas.texture.slice(entry.info.frame)
                     parallaxTextures[frameTag] = Pair(type, layer)
-                    bgLayerNames.add(frameTag)
-
-                    textureUsedForParallaxBackground = true
+                    if (parallaxConfig.backgroundLayers.containsKey(frameTag)) bgLayerNames.add(frameTag)
+                    if (parallaxConfig.foregroundLayers.containsKey(frameTag)) fgLayerNames.add(frameTag)
                     return@forEach
                 }
+
+                // Check if frameTags are used for 2.5 D parallax plane
                 if (parallaxConfig.parallaxPlane != null) {
                     val planeConfig = parallaxConfig.parallaxPlane
                     val planeName = planeConfig.name
@@ -96,15 +253,13 @@ class TextureAtlasLoader {
                         // Get the parallax plane index number
                         val regex = "_slice(\\d+)$".toRegex()
                         val match = regex.find(frameTag)
-                        var planeIndex = match?.groupValues?.get(1)?.toInt()
-                            ?: error("Cannot get plane index of texture '${frameTag}'!")
+                        val planeIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get plane index of texture '${frameTag}'!")
 
                         parallaxPlaneTextures[planeName]!!.second.lineTextures.add(LineTexture(
                             index = planeIndex,
-                            bmpSlice = spriteAtlas.texture.slice(entry.info.frame),
+                            bmpSlice = atlas.texture.slice(entry.info.frame),
                             speedFactor = getParallaxPlaneSpeedFactor(planeIndex, parallaxConfig.parallaxHeight, planeSpeedFactor)
                         ))
-                        textureUsedForParallaxBackground = true
                         return@forEach
                     }
 
@@ -112,11 +267,11 @@ class TextureAtlasLoader {
                     planeConfig.topAttachedLayers.forEach { (layerName, layerConfig) ->
                         if (frameTag.contains(layerName)) {
                             val planeIndex = layerConfig.attachIndex
-                            val layerTexture = spriteAtlas.texture.slice(entry.info.frame)
+                            val layerTexture = atlas.texture.slice(entry.info.frame)
                             val layerSize = when (parallaxConfig.mode) {
                                 HORIZONTAL_PLANE -> layerTexture.height
                                 VERTICAL_PLANE -> layerTexture.width
-                                else -> error("Cannot use attached parallax layers without a parallax plane!")
+                                else -> error("TextureAtlasLoader - Cannot use top attached parallax layers without a parallax plane!")
                             }
 
                             parallaxPlaneTextures[planeName]!!.second.topAttachedLayerTextures.add(LineTexture(
@@ -129,11 +284,11 @@ class TextureAtlasLoader {
                     planeConfig.bottomAttachedLayers.forEach { (layerName, layerConfig) ->
                         if (frameTag.contains(layerName)) {
                             val planeIndex = layerConfig.attachIndex
-                            val layerTexture = spriteAtlas.texture.slice(entry.info.frame)
+                            val layerTexture = atlas.texture.slice(entry.info.frame)
                             val layerSize = when (parallaxConfig.mode) {
                                 HORIZONTAL_PLANE -> layerTexture.height
                                 VERTICAL_PLANE -> layerTexture.width
-                                else -> error("Cannot use attached parallax layers without a parallax plane!")
+                                else -> error("TextureAtlasLoader - Cannot use bottom attached parallax layers without a parallax plane!")
                             }
 
                             parallaxPlaneTextures[planeName]!!.second.bottomAttachedLayerTextures.add(LineTexture(
@@ -143,37 +298,6 @@ class TextureAtlasLoader {
                             ))
                         }
                     }
-                }
-            }
-
-            // Save other textures
-            if (!textureUsedForParallaxBackground) {
-                if (textures.containsKey(frameTag)) {
-                    val spriteData = textures[frameTag]!!.second
-
-                    // Get the animation index number
-                    val regex = "_(\\d+)$".toRegex()
-                    val match = regex.find(entry.name)
-                    val animIndex = match?.groupValues?.get(1)?.toInt()
-                        ?: error("Cannot get animation index of sprite '${entry.name}'!")
-
-                    spriteData.add(animIndex, SpriteFrame(
-                        spriteAtlas.texture.slice(entry.info.frame),
-                        entry.info.virtFrame?.x ?: 0,
-                        entry.info.virtFrame?.y ?: 0
-                    ))
-                } else {
-                    textures[frameTag] = Pair(type, SpriteFrames(
-                        frames = mutableListOf(
-                            SpriteFrame(
-                                spriteAtlas.texture.slice(entry.info.frame),
-                                entry.info.virtFrame?.x ?: 0,
-                                entry.info.virtFrame?.y ?: 0
-                            )
-                        ),
-                        width = entry.info.virtFrame?.width ?: 0,
-                        height = entry.info.virtFrame?.height ?: 0
-                    ))
                 }
             }
         }
@@ -189,56 +313,93 @@ class TextureAtlasLoader {
             )
             parallaxBackgroundConfig[parallaxName] = Pair(type, parallaxConfig)
         }
+//        println()
+    }
 
-        // Load and set frameDuration
-        config.frameDurations.forEach { (frameTag, duration) ->
-            if (textures.containsKey(frameTag)) {
-                val spriteData = textures[frameTag]!!.second
-                for (i in 0 until spriteData.size) {
-                    if (duration.custom == null) {
-                        // Set all frames to the same default duration
-                        spriteData[i].duration = duration.default / 1000f  // convert ms to seconds
-                    } else if (i < duration.custom.size) {
-                        spriteData[i].duration = duration.custom[i] / 1000f  // convert ms to seconds
-                    } else {
-                        println("ERROR: TextureAtlasLoader.load() - Cannot set custom frameDuration for '$frameTag' of - not enough durations specified in config.yaml!")
+    suspend fun loadTilemapsTilesets(
+        type: AssetType,
+        atlas: Atlas,
+        config: TextureConfig,
+        assetFolder: String,
+        tileMaps: TileMapsType,
+        assetLevelDataLoader: AssetLevelDataLoader
+    ) {
+        // Cache tiles into tilesets
+        val tilesetCache: MutableMap<String, MutableMap<Int, RectSlice<out Bitmap>>> = mutableMapOf()
+        atlas.entries.forEachWith("tls_") { entry, frameTag ->
+            // Get tileset name
+            val tileNumberRegex = "_tile(\\d+)$".toRegex()
+            val tilesetName = frameTag.replace(tileNumberRegex, "")
+            // Get the tile index number
+            val match = tileNumberRegex.find(frameTag)
+            val tileIndex = match?.groupValues?.get(1)?.toInt() ?: error("TextureAtlasLoader - Cannot get tile index of texture '${frameTag}'!")
+            val bmpSlice = atlas.texture.slice(entry.info.frame)
+            if (tilesetCache.containsKey(tilesetName)) tilesetCache[tilesetName]!![tileIndex] = bmpSlice
+            else tilesetCache[tilesetName] = mutableMapOf(tileIndex to bmpSlice)
+        }
+
+        config.tileMaps.forEach { (levelName, tileMapConfig) ->
+            val ldtkFile = tileMapConfig.fileName
+            val collisionLayerName = tileMapConfig.collisionLayerName
+//            fun emptyTileSetTileInfo(index: Int) = TileSetTileInfo(index, Bitmap32.EMPTY.slice())
+            val emptySlice: RectSlice<out Bitmap> = Bitmap32.EMPTY.slice()
+
+            // First we need to load the LDtk world because we need to get the number of tiles for the tileset object
+            // Then we will load each tile from the texture atlas
+            val ldtkWorld = resourcesVfs["$assetFolder/$ldtkFile"].readLdtkWorld { tilesetName, tileCount ->
+                // Load bmp slice from texture atlas and store as tile in tileset
+                val tileset = TileSet(
+                    (0 until tileCount).map { index ->
+                println("Tileset: ${tilesetName} Tile: $index / $tileCount")
+
+                        val bmpSlice = if (tilesetCache.containsKey(tilesetName)
+                            && tilesetCache[tilesetName]!!.containsKey(index)) tilesetCache[tilesetName]!![index]!!
+                        else emptySlice
+
+//                        atlas.entries.forEachWith("tls_") { entry, frameTag ->
+//                            // Get tileset name
+//                            val tileNumberRegex = "_tile(\\d+)$".toRegex()
+//                            val frameTagName = frameTag.replace(tileNumberRegex, "")
+//                            // Get the tile index number
+//                            val match = tileNumberRegex.find(frameTag)
+//                            val tileIndex = match?.groupValues?.get(1)?.toInt() ?: error("TextureAtlasLoader - Cannot get tile index of texture '${frameTag}'!")
+//
+//                            println("tileset name: $frameTagName - tile id: $tileIndex")
+//
+//                            if (index == tileIndex && tilesetName == frameTagName) {
+//                                // Tile found in texture atlas
+//                                bmpSlice = atlas.texture.slice(entry.info.frame)
+//                                return@forEachWith
+//                            }
+//                        }
+                        TileSetTileInfo(
+                            // This is the tile id which is used in TileMapData to reference this tile
+                            index, bmpSlice)
+                    }
+
+//                    (0 until tileCount).map { index -> emptyTileSetTileInfo(index) }
+                )
+                // TODO: Check if we would need to save tileset separately for hot-reloading
+                //       tilesets[tilesetName] = Pair(type, tileset)
+                tileset
+            }
+
+            // TODO: Check if we need this for hot-reloading tilesets - in the end tilesets will be hot-reloaded when texture atlas changes
+            val tileSetPaths = mutableListOf<String>()
+
+            when  (type) {
+                AssetType.LEVEL -> {
+                    assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths)
+                }
+                else -> {
+                    // Load raw tile map data for tilemap object types
+                    ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+                        tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
                     }
                 }
-            } else {
-                println("ERROR: TextureAtlasLoader.load() - Cannot set frameDuration for '$frameTag' - texture not found!")
             }
+            println()
         }
-
-        // Load and set ninePatchBmpSlice objects
-        config.nineSlices.forEach { (frameTag, nineSlice) ->
-            if (textures.containsKey(frameTag)) {
-                val spriteData = textures[frameTag]!!.second
-                ninePatchSlices[frameTag] = Pair(
-                    type,
-                    spriteData.firstFrame.asNinePatchSimple(
-                        nineSlice.x,
-                        nineSlice.y,
-                        nineSlice.x + nineSlice.width,
-                        nineSlice.y + nineSlice.height
-                    )
-                )
-            } else {
-                println("ERROR: TextureAtlasLoader.load() - Cannot create nine-patch-slice for '$frameTag' - texture not found!")
-            }
-        }
-
-        // Load and set bitmap fonts
-        config.fonts.forEach { font ->
-            // IDEA: check if font file is json, xml, or txt and call the appropriate loader - check BitmapFont.kt in Korge
-            val bitmapFont = resourcesVfs["${assetFolder}/${font}.fnt"].readFontTxt { fontName ->
-                if (textures.containsKey(fontName)) {
-                    textures[fontName]!!.second.firstFrame
-                } else error("Cannot find font texture '$fontName' for bitmap font '$font'!")
-            }
-            bitMapFonts[font] = Pair(type, bitmapFont)
-        }
-
-        println()
     }
 }
 
