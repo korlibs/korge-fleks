@@ -3,6 +3,7 @@ package korlibs.korge.fleks.assets
 import korlibs.audio.format.*
 import korlibs.audio.sound.*
 import korlibs.image.atlas.MutableAtlasUnit
+import korlibs.image.atlas.readAtlas
 import korlibs.image.bitmap.*
 import korlibs.image.font.BitmapFont
 import korlibs.image.font.Font
@@ -17,13 +18,12 @@ import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
-import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
 
 typealias SoundMapType = MutableMap<String, Pair<AssetType, SoundChannel>>
-typealias TileMapType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
+typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
 typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
@@ -65,7 +65,7 @@ class AssetStore {
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
     internal val sounds: SoundMapType = mutableMapOf()
-    internal val tileMaps: TileMapType = mutableMapOf()
+    internal val tileMaps: TileMapsType = mutableMapOf()
 
     internal val textures: SpriteFramesMapType = mutableMapOf()
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
@@ -184,14 +184,22 @@ class AssetStore {
                     sounds[sound.key] = Pair(type, soundChannel)
                 }
             }
-
+/* TODO cleanup
             assetConfig.tileMaps.forEach { tileMap ->
                 val levelName = tileMap.key
                 val ldtkFile = tileMap.value.fileName
                 val collisionLayerName = tileMap.value.collisionLayerName
                 val tileSetPaths = tileMap.value.tileSetPaths
-                // Set extrude to false - something is broken with it and smaller tilesets
-                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld()
+                fun emptyTileSetTileInfo(index: Int) = TileSetTileInfo(index, Bitmap32.EMPTY.slice())
+
+                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld { tilesetName, tileCount ->
+                    val tileset = TileSet(
+                        (0 until tileCount).map { index -> emptyTileSetTileInfo(index) }
+                    )
+                    // Save tileset - it will be populated with real tiles in texture atlas loader
+                    tilesets[tilesetName] = Pair(type, tileset)
+                    tileset
+                }
 
                 when  (type) {
                     AssetType.LEVEL -> {
@@ -205,18 +213,20 @@ class AssetStore {
                     }
                 }
             }
-
+*/
             assetConfig.textureAtlas.forEach { config ->
-                textureAtlasLoader.load(
-                    assetConfig.folder,
-                    config,
-                    textures,
-                    ninePatchSlices,
-                    bitMapFonts,
-                    parallaxBackgroundConfig,
-                    parallaxTextures,
-                    parallaxPlaneTextures,
-                    type)
+                val spriteAtlas = resourcesVfs["${assetConfig.folder}/${config.fileName}"].readAtlas()
+
+                // (1) Images and animations into texture atlas
+                textureAtlasLoader.loadImages(type, spriteAtlas, config, textures)
+                // (2) Nine-patch images into texture atlas
+                textureAtlasLoader.loadNinePatchSlices(type, spriteAtlas, config, ninePatchSlices)
+                // (3) Pixel fonts into texture atlas
+                textureAtlasLoader.loadPixelFonts(type, spriteAtlas, config, assetConfig.folder, bitMapFonts)
+                // (4) Parallax layers into texture atlas
+                textureAtlasLoader.loadParallaxLayers(type, spriteAtlas, config, parallaxBackgroundConfig, parallaxTextures, parallaxPlaneTextures)
+                // (5) Tilesets for level maps into texture atlas
+                textureAtlasLoader.loadTilemapsTilesets(type, spriteAtlas, config, assetConfig.folder, tileMaps, assetLevelDataLoader)
             }
 
             println("Assets: Loaded resources in ${sw.elapsed}")

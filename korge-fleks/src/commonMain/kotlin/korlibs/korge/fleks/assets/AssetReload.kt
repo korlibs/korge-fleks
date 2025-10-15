@@ -117,7 +117,7 @@ class ResourceDirWatcherConfiguration(
 
         // TODO: Currently only fonts, sprite images, background (parallax images) and tile maps are reloaded
         //       -> Implement reloading also for other asset types
-
+// TODO clean up
 //        assetConfig.images.forEach { config ->
 //            if (file.fullName.contains(config.value.fileName) && !reloading) {
 //                reloading = true
@@ -143,18 +143,18 @@ class ResourceDirWatcherConfiguration(
 //                }
 //            }
 //        }
-        assetConfig.tileMaps.forEach { config ->
-            // Check if LDTK json file was modified
-            if (file.fullName.contains(config.value.fileName) && !reloading) {
-                reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
-            }
-            // Check if any tileset was modified
-            config.value.tileSetPaths.forEach { path ->
-                if (file.fullName.contains(path) && !reloading) {
-                    reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
-                }
-            }
-        }
+//        assetConfig.tileMaps.forEach { config ->
+//            // Check if LDTK json file was modified
+//            if (file.fullName.contains(config.value.fileName) && !reloading) {
+//                reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
+//            }
+//            // Check if any tileset was modified
+//            config.value.tileSetPaths.forEach { path ->
+//                if (file.fullName.contains(path) && !reloading) {
+//                    reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
+//                }
+//            }
+//        }
     }
 
     private fun reloadLdtkWorld(assetStore: AssetStore, fileName: String, levelName: String, assetUpdater: AssetUpdaterConfiguration, assetConfig: AssetModel, assetReloadContext: CoroutineContext) {
@@ -164,18 +164,18 @@ class ResourceDirWatcherConfiguration(
             // Give LDtk more time to finish writing the files
             delay(500)
 
-            val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + fileName].readLdtkWorld()
-            //println("\nTriggering asset change for LDtk: $fileName")
-
-            // Check if the name of the level is the one for the level chunks
-            if (Prefab.levelName == levelName) {
-                assetStore.assetLevelDataLoader.reloadAllLevelChunks(ldtkWorld)
-            } else {
-                // Reload all levels from ldtk world file
-                ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-                    assetStore.tileMaps[ldtkLevel.identifier] = Pair(assetUpdater.type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
-                }
-            }
+// TODO            val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + fileName].readLdtkWorld()
+//            //println("\nTriggering asset change for LDtk: $fileName")
+//
+//            // Check if the name of the level is the one for the level chunks
+//            if (Prefab.levelName == levelName) {
+//                assetStore.assetLevelDataLoader.reloadAllLevelChunks(ldtkWorld)
+//            } else {
+//                // Reload all levels from ldtk world file
+//                ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+//                    assetStore.tileMaps[ldtkLevel.identifier] = Pair(assetUpdater.type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
+//                }
+//            }
 
             // Guard period until reloading is activated again - this is used for debouncing watch messages
             delay(100)

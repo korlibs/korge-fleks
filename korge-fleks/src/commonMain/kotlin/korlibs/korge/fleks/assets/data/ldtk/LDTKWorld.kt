@@ -1,10 +1,8 @@
 package korlibs.korge.fleks.assets.data.ldtk
 
-import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.bitmap.slice
 import korlibs.image.color.Colors
-import korlibs.image.format.readBitmap
 import korlibs.image.tiles.TileSet
 import korlibs.image.tiles.TileSetTileInfo
 import korlibs.io.file.VfsFile
@@ -67,7 +65,10 @@ class LDTKWorld(
 }
 
 
-suspend fun VfsFile.readLdtkWorld(): LDTKWorld {
+suspend fun VfsFile.readLdtkWorld(
+    // callback to get a tileset object - it will be already filled with tiles from texture atlas on loading the atlas
+    callback: ((String, Int) -> TileSet)
+): LDTKWorld {
     val file = this
     val json = file.readString()
     val ldtk = LDTKJson.load(json)
@@ -80,11 +81,11 @@ suspend fun VfsFile.readLdtkWorld(): LDTKWorld {
         // Leave out tilesets which do not have an image (e.g. LDtk internal tileset icons)
         if (it.relPath == null) null else it
     }.associate { def ->
-        val bitmap: Bitmap = def.relPath?.let { file.parent[it].readBitmap() } ?: error("Tileset image not found: ${def.relPath}")
+//        val bitmap: Bitmap = def.relPath?.let { file.parent[it].readBitmap() } ?: error("Tileset image not found: ${def.relPath}")
         val tileCount = def.cWid * def.cHei
-
-        println("Loading tileset: ${def.identifier}")
-
+        val tilesetName = def.identifier
+        val tileset = callback(tilesetName, tileCount)
+/*
         // TODO: This tile set could contain slices for tiles which are located in a texture atlas
         //       tile id would be the name of the tile in that case (the number part only probably)
         //       but for now we only support single image tilesets
@@ -105,7 +106,9 @@ suspend fun VfsFile.readLdtkWorld(): LDTKWorld {
                 )
             }
         )
+*/
         def.uid to ExtTileset(def, tileset)
     }
+    println()
     return LDTKWorld(ldtk, tilesetDefsById)
 }

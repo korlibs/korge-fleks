@@ -2,7 +2,6 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.image.tiles.Tile
 import korlibs.image.tiles.TileMapData
-import korlibs.image.tiles.TileSet
 import korlibs.korge.fleks.assets.data.ldtk.*
 import korlibs.memory.hasBitSet
 import kotlin.math.max
