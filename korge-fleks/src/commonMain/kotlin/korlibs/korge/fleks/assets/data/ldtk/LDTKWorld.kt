@@ -107,8 +107,9 @@ suspend fun VfsFile.readLdtkWorld(
             }
         )
 */
+//        println()
         def.uid to ExtTileset(def, tileset)
     }
-    println()
+//    println()
     return LDTKWorld(ldtk, tilesetDefsById)
 }
