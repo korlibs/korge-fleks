@@ -207,7 +207,7 @@ class AssetLevelDataLoader(
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,
             height = ldtkLayer.cHei,
-            tileSet = tilesetExt.tileset
+            tileSet = assetStore.getTileset(tilesetExt.tilesetName)
         )
         val gridSize = tilesetExt.def.tileGridSize
 

@@ -23,7 +23,7 @@ import korlibs.korge.fleks.assets.ParallaxMapType
 import korlibs.korge.fleks.assets.ParallaxPlaneTexturesMapType
 import korlibs.korge.fleks.assets.ParallaxTexturesMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
-import korlibs.korge.fleks.assets.TileMapsType
+import korlibs.korge.fleks.assets.TilesetMapType
 import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.HORIZONTAL_PLANE
 import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.VERTICAL_PLANE
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures.LineTexture
@@ -316,13 +316,19 @@ class TextureAtlasLoader {
 //        println()
     }
 
+
+
+    data class TileFrame(
+        val bmpSlice: BmpSlice,
+        val targetX: Int = 0,  // offset from the top-left corner of the original tile if cropped
+        val targetY: Int = 0
+    )
+
     suspend fun loadTilemapsTilesets(
         type: AssetType,
         atlas: Atlas,
         config: TextureConfig,
-        assetFolder: String,
-        tileMaps: TileMapsType,
-        assetLevelDataLoader: AssetLevelDataLoader
+        tilesets: TilesetMapType
     ) {
         // Cache tiles into tilesets
         val tilesetCache: MutableMap<String, MutableMap<Int, RectSlice<out Bitmap>>> = mutableMapOf()
@@ -334,11 +340,40 @@ class TextureAtlasLoader {
             val match = tileNumberRegex.find(frameTag)
             val tileIndex = match?.groupValues?.get(1)?.toInt() ?: error("TextureAtlasLoader - Cannot get tile index of texture '${frameTag}'!")
             val bmpSlice = atlas.texture.slice(entry.info.frame)
+
+            // Store tile slice in tileset cache
             if (tilesetCache.containsKey(tilesetName)) tilesetCache[tilesetName]!![tileIndex] = bmpSlice
             else tilesetCache[tilesetName] = mutableMapOf(tileIndex to bmpSlice)
         }
 
-        config.tileMaps.forEach { (levelName, tileMapConfig) ->
+        // Create tileset objects from cached tile slices
+        config.tilesets.forEach { tilesetConfig ->
+            val emptySlice: RectSlice<out Bitmap> = Bitmap32.EMPTY.slice()
+
+            val tilesetName = tilesetConfig.name
+            if (tilesetCache.containsKey(tilesetName)) {
+                val tileCount = tilesetConfig.size
+                val tileset = TileSet(
+                    (0 until tileCount).map { index ->
+//                        println("Tileset: $tilesetName Tile: $index / $tileCount")
+
+                        val bmpSlice = if (tilesetCache[tilesetName]!!.containsKey(index)) tilesetCache[tilesetName]!![index]!!
+                        else emptySlice
+
+                        TileSetTileInfo(
+                            // This is the tile id which is used in TileMapData to reference this tile
+                            index, bmpSlice)
+
+                    },
+                    width = 16,
+                    height = 16,
+                    border = 0
+                )
+                tilesets[tilesetName] = Pair(type, tileset)
+            } else println("WARNING: TextureAtlasLoader - Cannot find tiles for '$tilesetName' in texture atlas!")
+        }
+/*
+        config. .forEach { (levelName, tileMapConfig) ->
             val ldtkFile = tileMapConfig.fileName
             val collisionLayerName = tileMapConfig.collisionLayerName
 //            fun emptyTileSetTileInfo(index: Int) = TileSetTileInfo(index, Bitmap32.EMPTY.slice())
@@ -348,36 +383,38 @@ class TextureAtlasLoader {
             // Then we will load each tile from the texture atlas
             val ldtkWorld = resourcesVfs["$assetFolder/$ldtkFile"].readLdtkWorld { tilesetName, tileCount ->
                 // Load bmp slice from texture atlas and store as tile in tileset
+
+                val tileset2: List<TileFrame> = (
+                    0 until tileCount).map { index ->
+                    println("Tileset: $tilesetName Tile: $index / $tileCount")
+                    val bmpSlice = if (tilesetCache.containsKey(tilesetName)
+                        && tilesetCache[tilesetName]!!.containsKey(index)
+                    ) tilesetCache[tilesetName]!![index]!!
+                    else emptySlice
+                    TileFrame(
+                        bmpSlice,
+                        // TODO set targetX and Y
+                    )
+                }
+
+
+
                 val tileset = TileSet(
                     (0 until tileCount).map { index ->
-                println("Tileset: ${tilesetName} Tile: $index / $tileCount")
+//                        println("Tileset: $tilesetName Tile: $index / $tileCount")
 
                         val bmpSlice = if (tilesetCache.containsKey(tilesetName)
                             && tilesetCache[tilesetName]!!.containsKey(index)) tilesetCache[tilesetName]!![index]!!
                         else emptySlice
 
-//                        atlas.entries.forEachWith("tls_") { entry, frameTag ->
-//                            // Get tileset name
-//                            val tileNumberRegex = "_tile(\\d+)$".toRegex()
-//                            val frameTagName = frameTag.replace(tileNumberRegex, "")
-//                            // Get the tile index number
-//                            val match = tileNumberRegex.find(frameTag)
-//                            val tileIndex = match?.groupValues?.get(1)?.toInt() ?: error("TextureAtlasLoader - Cannot get tile index of texture '${frameTag}'!")
-//
-//                            println("tileset name: $frameTagName - tile id: $tileIndex")
-//
-//                            if (index == tileIndex && tilesetName == frameTagName) {
-//                                // Tile found in texture atlas
-//                                bmpSlice = atlas.texture.slice(entry.info.frame)
-//                                return@forEachWith
-//                            }
-//                        }
                         TileSetTileInfo(
                             // This is the tile id which is used in TileMapData to reference this tile
                             index, bmpSlice)
-                    }
 
-//                    (0 until tileCount).map { index -> emptyTileSetTileInfo(index) }
+                    },
+                    width = 16,
+                    height = 16,
+                    border = 0
                 )
                 // TODO: Check if we would need to save tileset separately for hot-reloading
                 //       tilesets[tilesetName] = Pair(type, tileset)
@@ -400,6 +437,7 @@ class TextureAtlasLoader {
             }
             println()
         }
+*/
     }
 }
 

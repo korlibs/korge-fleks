@@ -18,6 +18,7 @@ import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
+import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -87,12 +88,6 @@ class AssetStore {
             gameObjectConfig[name]!!
         } else error("AssetStore: Game object state config for '$name' not found!")
 
-    fun getTileMapData(level: String) : LayerTileMaps =
-        if (tileMaps.contains(level)) {
-            tileMaps[level]!!.second
-        }
-        else error("AssetStore: Tile map for level '$level' not found!")
-
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second
         else error("AssetStore: Sound '$name' not found!")
@@ -130,6 +125,16 @@ class AssetStore {
     fun getFont(name: String) : Font =
         bitMapFonts[name]?.second ?: error("AssetStore: Cannot find font '$name'!")
 
+    fun getTileset(name: String) : TileSet =
+        if (tilesets.contains(name)) {
+            tilesets[name]!!.second
+        } else error("AssetStore: Tileset '$name' not found!")
+
+    fun getTileMapData(level: String) : LayerTileMaps =
+        if (tileMaps.contains(level)) {
+            tileMaps[level]!!.second
+        }
+        else error("AssetStore: Tile map for level '$level' not found!")
 
     suspend fun loadAssets(type: AssetType, assetConfig: AssetModel) {
         var assetLoaded = false
@@ -172,7 +177,7 @@ class AssetStore {
             // Update maps of music, images, ...
             if (!testing) {
                 assetConfig.sounds.forEach { sound ->
-                    val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound(  //readMusic(
+                    val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.fileName].readSound(  //readMusic(
                         props = AudioDecodingProps(exactTimings = true),
                         streaming = true
                     )
@@ -181,39 +186,9 @@ class AssetStore {
 //                    val soundChannel2 = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound().play()
 
                     soundChannel.pause()
-                    sounds[sound.key] = Pair(type, soundChannel)
+                    sounds[sound.name] = Pair(type, soundChannel)
                 }
             }
-/* TODO cleanup
-            assetConfig.tileMaps.forEach { tileMap ->
-                val levelName = tileMap.key
-                val ldtkFile = tileMap.value.fileName
-                val collisionLayerName = tileMap.value.collisionLayerName
-                val tileSetPaths = tileMap.value.tileSetPaths
-                fun emptyTileSetTileInfo(index: Int) = TileSetTileInfo(index, Bitmap32.EMPTY.slice())
-
-                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld { tilesetName, tileCount ->
-                    val tileset = TileSet(
-                        (0 until tileCount).map { index -> emptyTileSetTileInfo(index) }
-                    )
-                    // Save tileset - it will be populated with real tiles in texture atlas loader
-                    tilesets[tilesetName] = Pair(type, tileset)
-                    tileset
-                }
-
-                when  (type) {
-                    AssetType.LEVEL -> {
-                        assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths)
-                    }
-                    else -> {
-                        // Load raw tile map data for tilemap object types
-                        ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
-                        }
-                    }
-                }
-            }
-*/
             assetConfig.textureAtlas.forEach { config ->
                 val spriteAtlas = resourcesVfs["${assetConfig.folder}/${config.fileName}"].readAtlas()
 
@@ -226,7 +201,26 @@ class AssetStore {
                 // (4) Parallax layers into texture atlas
                 textureAtlasLoader.loadParallaxLayers(type, spriteAtlas, config, parallaxBackgroundConfig, parallaxTextures, parallaxPlaneTextures)
                 // (5) Tilesets for level maps into texture atlas
-                textureAtlasLoader.loadTilemapsTilesets(type, spriteAtlas, config, assetConfig.folder, tileMaps, assetLevelDataLoader)
+                textureAtlasLoader.loadTilemapsTilesets(type, spriteAtlas, config, tilesets)
+            }
+            assetConfig.tileMaps.forEach { tileMap ->
+                val levelName = tileMap.name
+                val ldtkFile = tileMap.fileName
+                val collisionLayerName = tileMap.collisionLayerName
+                val tileSetPaths = mutableListOf("")
+                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld()
+
+                when  (type) {
+                    AssetType.LEVEL -> {
+                        assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths)
+                    }
+                    else -> {
+                        // Load raw tile map data for tilemap object types
+                        ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(this, levelName, ldtkWorld, ldtkLevel))
+                        }
+                    }
+                }
             }
 
             println("Assets: Loaded resources in ${sw.elapsed}")
@@ -270,5 +264,9 @@ class AssetStore {
         textures.values.removeAll { it.first == type }
         ninePatchSlices.values.removeAll { it.first == type }
         bitMapFonts.values.removeAll { it.first == type }
+        parallaxBackgroundConfig.values.removeAll { it.first == type }
+        parallaxTextures.values.removeAll { it.first == type }
+        parallaxPlaneTextures.values.removeAll { it.first == type }
+        tilesets.values.removeAll { it.first == type }
     }
 }
