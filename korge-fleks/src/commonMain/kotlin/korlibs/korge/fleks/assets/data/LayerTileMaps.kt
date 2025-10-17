@@ -2,12 +2,14 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.image.tiles.Tile
 import korlibs.image.tiles.TileMapData
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.ldtk.*
 import korlibs.memory.hasBitSet
 import kotlin.math.max
 
 
 class LayerTileMaps(
+    private val assetStore: AssetStore,
     private var name: String = "noName",
     ldtkWorld: LDTKWorld,
     ldtkLevel: Level
@@ -63,7 +65,7 @@ class LayerTileMaps(
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,
             height = ldtkLayer.cHei,
-            tileSet = tilesetExt.tileset
+            tileSet = assetStore.getTileset(tilesetExt.tilesetName)
         )
         val gridSize = tilesetExt.def.tileGridSize
         val tilesetWidth = tilesetExt.def.pxWid

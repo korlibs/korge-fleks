@@ -1202,7 +1202,7 @@ enum class Type(val value: String) {
 
 /**
  * The `Tileset` definition is the most important part among project definitions. It
- * contains some extra informations about each integrated tileset. If you only had to parse
+ * contains some extra bit of information about each integrated tileset. If you only had to parse
  * one definition section, that would be the one.
  */
 @Serializable

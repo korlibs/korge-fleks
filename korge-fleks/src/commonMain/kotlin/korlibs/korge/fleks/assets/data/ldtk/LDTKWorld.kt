@@ -9,7 +9,6 @@ import korlibs.io.file.VfsFile
 import korlibs.math.geom.RectangleInt
 
 
-//class ExtTileset(val def: TilesetDefinition, val tileset: TileSet)
 class ExtTileset(val def: TilesetDefinition, val tilesetName: String)
 
 class LDTKLayer(val level: LDTKLevel, val layer: LayerInstance) {
@@ -62,50 +61,20 @@ class LDTKWorld(
 }
 
 
-suspend fun VfsFile.readLdtkWorld(
-    // callback to get a tileset object - it will be already filled with tiles from texture atlas on loading the atlas
-    callback: ((String) -> TileSet)
-): LDTKWorld {
+suspend fun VfsFile.readLdtkWorld(): LDTKWorld {
     val file = this
     val json = file.readString()
     val ldtk = LDTKJson.load(json)
 
-    ldtk.defs.tilesets.forEach { def ->
-    }
-
     // Load texture bitmaps of tiles which are already extruded and build up a TileSet object
-    val tilesetDefsById: Map<Int, ExtTileset> = ldtk.defs.tilesets.mapNotNull {
+    println("Tilesets in LDtk file: (${file.absolutePath})")
+    val tilesetDefsById: Map<Int, ExtTileset> = ldtk.defs.tilesets.mapNotNull { tilesetConfig ->
         // Leave out tilesets which do not have an image (e.g. LDtk internal tileset icons)
-        if (it.relPath == null) null else it
-    }.associate { def ->
-//        val bitmap: Bitmap = def.relPath?.let { file.parent[it].readBitmap() } ?: error("Tileset image not found: ${def.relPath}")
-        val tilesetName = def.identifier
-//        val tileset = callback(tilesetName)
-/*
-        // TODO: This tile set could contain slices for tiles which are located in a texture atlas
-        //       tile id would be the name of the tile in that case (the number part only probably)
-        //       but for now we only support single image tilesets
-        val tileset = TileSet(
-            (0 until tileCount).map { index ->
-//                println("Tileset: ${def.identifier} Tile: $index / $tileCount")
-                TileSetTileInfo(
-                    // This is the tile id which is used in TileMapData to reference this tile
-                    index,
-                    bitmap.slice(
-                        RectangleInt(
-                            x = (index % def.cWid) * (def.tileGridSize + 2) + 1,
-                            y = (index / def.cWid) * (def.tileGridSize + 2) + 1,
-                            def.tileGridSize,
-                            def.tileGridSize
-                        )
-                    )
-                )
-            }
-        )
-*/
-//        println()
-        def.uid to ExtTileset(def, tilesetName)
+        if (tilesetConfig.relPath == null) null else tilesetConfig
+    }.associate { tilesetDef ->
+        val tilesetName = tilesetDef.identifier
+        println("- $tilesetName")
+        tilesetDef.uid to ExtTileset(tilesetDef, tilesetName)
     }
-//    println()
     return LDTKWorld(ldtk, tilesetDefsById)
 }

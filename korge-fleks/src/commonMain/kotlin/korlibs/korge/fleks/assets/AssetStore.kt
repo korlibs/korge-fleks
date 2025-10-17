@@ -88,12 +88,6 @@ class AssetStore {
             gameObjectConfig[name]!!
         } else error("AssetStore: Game object state config for '$name' not found!")
 
-    fun getTileMapData(level: String) : LayerTileMaps =
-        if (tileMaps.contains(level)) {
-            tileMaps[level]!!.second
-        }
-        else error("AssetStore: Tile map for level '$level' not found!")
-
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second
         else error("AssetStore: Sound '$name' not found!")
@@ -131,6 +125,16 @@ class AssetStore {
     fun getFont(name: String) : Font =
         bitMapFonts[name]?.second ?: error("AssetStore: Cannot find font '$name'!")
 
+    fun getTileset(name: String) : TileSet =
+        if (tilesets.contains(name)) {
+            tilesets[name]!!.second
+        } else error("AssetStore: Tileset '$name' not found!")
+
+    fun getTileMapData(level: String) : LayerTileMaps =
+        if (tileMaps.contains(level)) {
+            tileMaps[level]!!.second
+        }
+        else error("AssetStore: Tile map for level '$level' not found!")
 
     suspend fun loadAssets(type: AssetType, assetConfig: AssetModel) {
         var assetLoaded = false
@@ -204,13 +208,7 @@ class AssetStore {
                 val ldtkFile = tileMap.fileName
                 val collisionLayerName = tileMap.collisionLayerName
                 val tileSetPaths = mutableListOf("")
-
-                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld { tilesetName ->
-                    if (tilesets.containsKey(tilesetName)) {
-                        // Return already created tileset - it should be already filled with tiles in texture atlas loader
-                        tilesets[tilesetName]!!.second
-                    } else error("AssetStore: Create empty TileSet for '$tilesetName' - it will be populated later!")
-                }
+                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld()
 
                 when  (type) {
                     AssetType.LEVEL -> {
@@ -219,7 +217,7 @@ class AssetStore {
                     else -> {
                         // Load raw tile map data for tilemap object types
                         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
+                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(this, levelName, ldtkWorld, ldtkLevel))
                         }
                     }
                 }
