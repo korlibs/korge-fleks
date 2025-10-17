@@ -9,7 +9,8 @@ import korlibs.io.file.VfsFile
 import korlibs.math.geom.RectangleInt
 
 
-class ExtTileset(val def: TilesetDefinition, val tileset: TileSet)
+//class ExtTileset(val def: TilesetDefinition, val tileset: TileSet)
+class ExtTileset(val def: TilesetDefinition, val tilesetName: String)
 
 class LDTKLayer(val level: LDTKLevel, val layer: LayerInstance) {
     val world get() = level.world
@@ -31,10 +32,6 @@ class LDTKWorld(
     val levelsByName by lazy { levels.associateBy { it.level.identifier } }
 
     val layersDefsById: Map<Int, LayerDefinition> = ldtk.defs.layers.associateBy { it.uid }
-
-    //val ldtk = world.ldtk
-    //val layersDefsById = world.layersDefsById
-    //val tilesetDefsById = world.tilesetDefsById
 
     val colors = Bitmap32((ldtk.defaultGridSize + 4) * 16, ldtk.defaultGridSize)
     val intsTileSet = TileSet(
@@ -67,7 +64,7 @@ class LDTKWorld(
 
 suspend fun VfsFile.readLdtkWorld(
     // callback to get a tileset object - it will be already filled with tiles from texture atlas on loading the atlas
-    callback: ((String, Int) -> TileSet)
+    callback: ((String) -> TileSet)
 ): LDTKWorld {
     val file = this
     val json = file.readString()
@@ -82,9 +79,8 @@ suspend fun VfsFile.readLdtkWorld(
         if (it.relPath == null) null else it
     }.associate { def ->
 //        val bitmap: Bitmap = def.relPath?.let { file.parent[it].readBitmap() } ?: error("Tileset image not found: ${def.relPath}")
-        val tileCount = def.cWid * def.cHei
         val tilesetName = def.identifier
-        val tileset = callback(tilesetName, tileCount)
+//        val tileset = callback(tilesetName)
 /*
         // TODO: This tile set could contain slices for tiles which are located in a texture atlas
         //       tile id would be the name of the tile in that case (the number part only probably)
@@ -108,7 +104,7 @@ suspend fun VfsFile.readLdtkWorld(
         )
 */
 //        println()
-        def.uid to ExtTileset(def, tileset)
+        def.uid to ExtTileset(def, tilesetName)
     }
 //    println()
     return LDTKWorld(ldtk, tilesetDefsById)

@@ -6,7 +6,7 @@ import kotlinx.serialization.*
 
 /**
  * Asset model contains run time configuration for loading assets for the game.
- * This config could be also loaded later from YAML files.
+ * This config can be also loaded from YAML files.
  *
  * Hint: Make sure to use only basic types (Integer, String, Boolean).
  */
@@ -14,9 +14,26 @@ import kotlinx.serialization.*
 data class AssetModel(
     val folder: String = "",
     val hotReloading: Boolean = false,
-    val sounds: Map<String, String> = mapOf(),
-    val textureAtlas: List<TextureConfig> = listOf()
+
+    val sounds: List<SoundConfig> = listOf(),
+    val textureAtlas: List<TextureConfig> = listOf(),
+    val tileMaps: List<TileMapConfig> = listOf()
 ) {
+
+    @Serializable
+    @SerialName("soundConfig")
+    data class SoundConfig(
+        val name: String,
+        val fileName: String
+    )
+
+    @Serializable
+    @SerialName("TileMapConfig")
+    data class TileMapConfig(
+        val name: String,
+        val fileName: String,
+        val collisionLayerName: String = "",  // Default is empty string - no collision layer or specific layer name for a tile map
+    )
 
     @Serializable
     @SerialName("TextureConfig")
@@ -26,7 +43,7 @@ data class AssetModel(
         val nineSlices: Map<String, NineSlice> = mapOf(),
         val fonts: List<String> = listOf(),
         val parallaxBackgrounds: Map<String, ParallaxConfig> = mapOf(),
-        val tileMaps: Map<String, TileMapConfig> = mapOf()
+        val tilesets: List<TilesetConfig> = listOf()
     ) {
         @Serializable
         @SerialName("FrameDurationConfig")
@@ -45,10 +62,10 @@ data class AssetModel(
         )
 
         @Serializable
-        @SerialName("TileMapConfig")
-        data class TileMapConfig(
-            val fileName: String,
-            val collisionLayerName: String = "",  // Default is empty string - no collision layer or specific layer name for a tile map
+        @SerialName("TilesetConfig")
+        data class TilesetConfig(
+            val name: String,
+            val size: Int
         )
     }
 }
