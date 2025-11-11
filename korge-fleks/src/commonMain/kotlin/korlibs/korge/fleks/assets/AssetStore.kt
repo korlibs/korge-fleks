@@ -13,6 +13,7 @@ import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
+import korlibs.korge.fleks.assets.data.LevelMapConfig
 import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
 import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
@@ -25,6 +26,8 @@ import kotlin.collections.set
 
 typealias SoundMapType = MutableMap<String, Pair<AssetType, SoundChannel>>
 typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
+typealias LevelMapType = MutableMap<String, Pair<AssetType, LevelMapConfig>>  // TODO - cleanup tile maps when new level map renderer is implemented
+
 typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
@@ -52,11 +55,6 @@ class AssetStore {
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 
-    val commonAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
-    val worldAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
-    val levelAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
-    val specialAtlas: MutableAtlasUnit = MutableAtlasUnit(1024, 2048, border = 1)
-
     //    @Volatile
     internal var commonAssetConfig: AssetModel = AssetModel()
     internal var currentWorldAssetConfig: AssetModel = AssetModel()
@@ -67,6 +65,7 @@ class AssetStore {
 
     internal val sounds: SoundMapType = mutableMapOf()
     internal val tileMaps: TileMapsType = mutableMapOf()
+    internal val levels: LevelMapType = mutableMapOf()  // TODO - cleanup tile maps when new level map renderer is implemented
 
     internal val textures: SpriteFramesMapType = mutableMapOf()
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
@@ -138,34 +137,30 @@ class AssetStore {
 
     suspend fun loadAssets(type: AssetType, assetConfig: AssetModel) {
         var assetLoaded = false
-        val atlas = when (type) {
+        when (type) {
             AssetType.COMMON -> {
                 prepareCurrentAssets(type, assetConfig, commonAssetConfig)?.also { config ->
                     commonAssetConfig = config
                     assetLoaded = true
                 }
-                commonAtlas
             }
             AssetType.WORLD -> {
                 prepareCurrentAssets(type, assetConfig, currentWorldAssetConfig)?.also { config ->
                     currentWorldAssetConfig = config
                     assetLoaded = true
                 }
-                worldAtlas
             }
             AssetType.LEVEL -> {
                 prepareCurrentAssets(type, assetConfig, currentLevelAssetConfig)?.also { config ->
                     currentLevelAssetConfig = config
                     assetLoaded = true
                 }
-                levelAtlas
             }
             AssetType.SPECIAL -> {
                 prepareCurrentAssets(type, assetConfig, specialAssetConfig)?.also { config ->
                     specialAssetConfig = config
                     assetLoaded = true
                 }
-                specialAtlas
             }
         }
 
@@ -218,6 +213,7 @@ class AssetStore {
                         // Load raw tile map data for tilemap object types
                         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
                             tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(this, levelName, ldtkWorld, ldtkLevel))
+                            levels[ldtkLevel.identifier] = Pair(type, LevelMapConfig(this, levelName, ldtkWorld, ldtkLevel))  // TODO - cleanup tile maps when new level map renderer is implemented
                         }
                     }
                 }
