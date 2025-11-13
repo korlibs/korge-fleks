@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.image.text.*
+import korlibs.image.tiles.Tile
 import korlibs.io.lang.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Collision
@@ -65,6 +66,7 @@ import korlibs.korge.fleks.components.data.tweenSequence.Wait
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
 import korlibs.math.interpolation.*
+import korlibs.number.toInt53
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -246,16 +248,6 @@ class SnapshotSerializer {
 }
 
 /**
- * A special serializer to prohibit serialization of FloatArray in Parallax plane config.
- * For some reason @EncodeDefault(NEVER) does not work.
- */
-object ParallaxSpeedFactors : KSerializer<FloatArray> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ParallaxSpeedFactors", PrimitiveKind.INT)
-    override fun serialize(encoder: Encoder, value: FloatArray) = encoder.encodeInt(0)
-    override fun deserialize(decoder: Decoder): FloatArray = floatArrayOf()
-}
-
-/**
  * A serializer strategy for Korge [HorizontalAlign] type. The alignment ratio will be saved as double.
  */
 object HorizontalAlignAsDouble : KSerializer<HorizontalAlign> {
@@ -290,6 +282,15 @@ object RGBAAsInt : KSerializer<RGBA> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("RGBAAsInt", PrimitiveKind.INT)
     override fun serialize(encoder: Encoder, value: RGBA) = encoder.encodeInt(value.value)
     override fun deserialize(decoder: Decoder): RGBA = RGBA(decoder.decodeInt())
+}
+
+/**
+ * A serializer strategy for Korge [Tile] type. The tile's raw Int53 representation is saved as integer number.
+ */
+object TileAsInt : KSerializer<Tile> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("TileAsInt", PrimitiveKind.INT)
+    override fun serialize(encoder: Encoder, value: Tile) = encoder.encodeInt(value.raw.toInt())
+    override fun deserialize(decoder: Decoder): Tile = Tile(raw = decoder.decodeInt().toInt53())
 }
 
 /**

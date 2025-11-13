@@ -1,11 +1,10 @@
 package korlibs.korge.fleks.assets
 
-import korlibs.datastructure.Array2
-import korlibs.datastructure.IntArray2
+ import korlibs.datastructure.IntArray2
 import korlibs.image.tiles.*
+import korlibs.korge.fleks.assets.data.TileStackArray2
 import korlibs.korge.fleks.assets.data.ldtk.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.prefab.data.LevelData.*
 import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.prefab.data.LevelData
 import korlibs.math.*
@@ -61,7 +60,7 @@ class AssetLevelDataLoader(
 
         Prefab.levelName = levelName
         Prefab.levelData = LevelData(
-            // Set the size of the world
+            // Set the size of the world in pixels
             width = worldWidth.toFloat(),
             height = worldHeight.toFloat(),
             // Set the size of a level chunk in the grid vania array in tiles
@@ -69,9 +68,7 @@ class AssetLevelDataLoader(
             levelGridHeight = levelHeight / ldtkWorld.ldtk.defaultGridSize,
             // Set the size of a grid cell (tile) in pixels
             tileSize = ldtkWorld.ldtk.defaultGridSize,
-            // We store the level data config in a 2D array depending on its gridvania position in the world
-            // Then later we will spawn the entities depending on the level which the player is currently in
-            levelGridVania = Array2(gridVaniaWidth, gridVaniaHeight) { Chunk() },
+            // Set the size of the grid vania array
             gridVaniaWidth = gridVaniaWidth,
             gridVaniaHeight = gridVaniaHeight
         )
@@ -187,6 +184,7 @@ class AssetLevelDataLoader(
             if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
                 // Layer has tile set -> store tile map data - no entity data
                 tileMapData[layerName] = storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!)
+                stackTilesIntoTileMap(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!)
             }
 
             // Store collision data for Playfield layer
@@ -250,5 +248,27 @@ class AssetLevelDataLoader(
             }
         }
         return tileMapData
+    }
+
+    private fun stackTilesIntoTileMap(ldtkLayer: LayerInstance, tilesetExt: ExtTileset) {
+        val width = ldtkLayer.cWid
+        val height = ldtkLayer.cHei
+        val gridSize = tilesetExt.def.tileGridSize
+
+        // TODO get this from pool
+        val stackedTileMap = TileStackArray2(width, height)
+
+
+        for (tile in ldtkLayer.autoLayerTiles + ldtkLayer.gridTiles) {
+            val (px, py) = tile.px
+            val x = px / gridSize
+            val y = py / gridSize
+            val dx = px % gridSize
+            val dy = py % gridSize
+            val tileId = tile.t  // Tile id in the tileset which identifies the tile graphic
+            val flipX = tile.f.hasBitSet(0)
+            val flipY = tile.f.hasBitSet(1)
+
+        }
     }
 }

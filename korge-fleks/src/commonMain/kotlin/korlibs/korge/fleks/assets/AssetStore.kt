@@ -26,7 +26,6 @@ import kotlin.collections.set
 
 typealias SoundMapType = MutableMap<String, Pair<AssetType, SoundChannel>>
 typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
-typealias LevelMapType = MutableMap<String, Pair<AssetType, LevelMapConfig>>  // TODO - cleanup tile maps when new level map renderer is implemented
 
 typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
@@ -65,7 +64,6 @@ class AssetStore {
 
     internal val sounds: SoundMapType = mutableMapOf()
     internal val tileMaps: TileMapsType = mutableMapOf()
-    internal val levels: LevelMapType = mutableMapOf()  // TODO - cleanup tile maps when new level map renderer is implemented
 
     internal val textures: SpriteFramesMapType = mutableMapOf()
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
@@ -213,7 +211,6 @@ class AssetStore {
                         // Load raw tile map data for tilemap object types
                         ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
                             tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(this, levelName, ldtkWorld, ldtkLevel))
-                            levels[ldtkLevel.identifier] = Pair(type, LevelMapConfig(this, levelName, ldtkWorld, ldtkLevel))  // TODO - cleanup tile maps when new level map renderer is implemented
                         }
                     }
                 }

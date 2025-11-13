@@ -1,12 +1,12 @@
 package korlibs.korge.fleks.assets.data
 
-import korlibs.image.tiles.TileMapData
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.ldtk.LDTKWorld
 import korlibs.korge.fleks.assets.data.ldtk.Level
 
 /**
  * This class contains the tile map data for each chunk of the level.
+ * The tile map data consists of a 2D array of stacked tiles.
  */
 class LevelMapConfig(
     private val assetStore: AssetStore,
@@ -14,7 +14,7 @@ class LevelMapConfig(
     ldtkWorld: LDTKWorld,
     ldtkLevel: Level
 ) {
-    private val tileMapStack: MutableMap<String, TileMapData> = mutableMapOf()
+//    private val tileMapStack: TileStackArray2 = TileStackArray2()
 
     /**
      * Width of the level in pixels.

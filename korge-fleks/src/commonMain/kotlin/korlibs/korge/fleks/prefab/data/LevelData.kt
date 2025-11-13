@@ -4,9 +4,13 @@ import korlibs.datastructure.Array2
 import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
 import korlibs.image.tiles.TileMapData
+import korlibs.korge.fleks.assets.data.TileStackArray2
 
 /**
  * Data class for storing level maps and entities for a game world.
+ *
+ * We store the level data config in a 2D array depending on its gridvania position in the world
+ * Then later we will spawn the entities depending on the level which the player is currently in
  *
  * @param width - Width of whole world in pixels
  * @param height - Height of whole world in pixels
@@ -15,18 +19,19 @@ data class LevelData(
     // Size of all gridvania levels in the world (in pixels / world coordinates)
     val width: Float = 0f,
     val height: Float = 0f,
-    // Size of a level inside the grid vania array in tiles (all levels have the same size)
+    // Size of a level inside the grid vania array in tiles (all levels have the same size; in tiles)
     val levelGridWidth: Int = 0,
     val levelGridHeight: Int = 0,
     // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
     val tileSize: Int = 0,
-    // Level maps
-    val levelGridVania: Array2<Chunk> = Array2(0, 0) { Chunk() },
+    // Size of the gridvania array (in chunks)
     val gridVaniaWidth: Int = 0,
     val gridVaniaHeight: Int = 0,
-    // Tile maps for special layers (intro, cut-scenes, etc.) - tile maps are independent of the level chunks
-    val specialTileMaps: MutableMap<String, TileMapData> = mutableMapOf()
+
+    // Internal - do not set directly
+    val levelGridVania: Array2<Chunk> = Array2(gridVaniaWidth, gridVaniaHeight) { Chunk() },
 ) {
+
     private val levelMidPointX: Int = levelGridWidth / 2
     private val levelMidPointY: Int = levelGridHeight / 2
 
@@ -43,7 +48,8 @@ data class LevelData(
          * Map of tile map data for different layers in this chunk.
          * The key is the layer name, and the value is the TileMapData for that layer.
          */
-        var tileMapData: Map<String, TileMapData> = mapOf(),
+        var tileMapData: Map<String, TileMapData> = mapOf(),  // TODO replace with below when ready
+        var stackedTileMap: TileStackArray2? = null,  // TileStackArray2(levelGridWidth, levelGridHeight)
         var collisionMap: IntArray2? = null
     )
 
