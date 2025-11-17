@@ -154,7 +154,7 @@ class AssetLevelDataLoader(
 
                         // Add all other fields of entity
                         entity.fieldInstances.forEach { field ->
-                            if (field.identifier != "EntityConfig") yamlString.append("${field.identifier}: ${field.value}\n")
+                            if (field.identifier != "entityConfig") yamlString.append("${field.identifier}: ${field.value}\n")
                         }
                         println("INFO: Game object '${entity.identifier}' loaded for '$chunkName'")
                         //println("\n$yamlString")
