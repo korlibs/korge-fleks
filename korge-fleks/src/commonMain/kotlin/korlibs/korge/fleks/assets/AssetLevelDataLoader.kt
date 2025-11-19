@@ -34,8 +34,8 @@ class AssetLevelDataLoader(
 
         // TODO: Add sanity check for level data chunks and throw an error if the LDtk is not configured correctly
 
-        val levelWidth = ldtkWorld.ldtk.worldGridWidth ?: 1  // this is also the size of each sub-level
-        val levelHeight = ldtkWorld.ldtk.worldGridHeight ?: 1  // all levels have the same size
+        val levelWidth: Int = ldtkWorld.ldtk.worldGridWidth ?: 1  // this is also the size of each sub-level
+        val levelHeight = ldtkWorld.ldtk.worldGridHeight ?: 1     // all levels have the same size
         var worldWidth = 0
         var worldHeight = 0
 
@@ -132,13 +132,17 @@ class AssetLevelDataLoader(
                     val yamlString = StringBuilder()
                     // Sanity check - entity needs to have a field 'entityConfig'
                     if (entity.fieldInstances.firstOrNull { it.identifier == "entityConfig" } != null) {
-                        if (entity.tags.firstOrNull { it == "unique" } != null) {
+                        val gameObjectName = if (entity.tags.firstOrNull { it == "unique" } != null) {
                             // Add scripts without unique count value - they are unique by name because they exist only once
-                            yamlString.append("name: ${entity.identifier}\n")
+                            entity.identifier
                         } else {
                             // Add other game objects with a unique name as identifier
-                            yamlString.append("name: ${chunkName}_${entity.identifier}_${gameObjectCnt++}\n")
+                            "${chunkName}_${entity.identifier}_${gameObjectCnt++}"
                         }
+                        yamlString.append("name: ${gameObjectName}\n")
+                        // Add entity config type
+                        val entityConfigField = entity.fieldInstances.first { it.identifier == "entityConfig" }
+                        yamlString.append("entityConfig: ${entityConfigField.value}\n")
 
                         // Add position of entity = (chunk position in the level) + (position within the chunk) + (pivot point)
                         val entityPosX: Int = (levelWidth * levelX) + entity.pixelPos.x
