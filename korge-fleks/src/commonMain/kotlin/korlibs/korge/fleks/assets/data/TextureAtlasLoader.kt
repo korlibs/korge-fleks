@@ -45,7 +45,6 @@ inline fun Iterable<Atlas.Entry>.forEachWith(prefix: String, action: (Atlas.Entr
     val imagePrefixRegex = "^${prefix}".toRegex()
     val frameTagRegex = "_\\d+$".toRegex()
     for (entry in this) {
-//    forEach { entry ->
         if (imagePrefixRegex.containsMatchIn(entry.name)) {
             val imageName = entry.name.replace(imagePrefixRegex, "")
             val frameTag = if (frameTagRegex.containsMatchIn(imageName)) {
