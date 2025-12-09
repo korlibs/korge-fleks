@@ -1,8 +1,12 @@
 package korlibs.korge.fleks.assets
 
+import com.charleskorn.kaml.MultiLineStringStyle
+import com.charleskorn.kaml.PolymorphismStyle
+import com.charleskorn.kaml.SingleLineStringStyle
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlConfiguration
 import korlibs.audio.format.*
 import korlibs.audio.sound.*
-import korlibs.image.atlas.MutableAtlasUnit
 import korlibs.image.atlas.readAtlas
 import korlibs.image.bitmap.*
 import korlibs.image.font.BitmapFont
@@ -13,14 +17,16 @@ import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
-import korlibs.korge.fleks.assets.data.LevelMapConfig
 import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
 import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
+import korlibs.korge.fleks.assets.data.TextureAtlasInfo
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.time.Stopwatch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.modules.SerializersModule
 import kotlin.collections.set
 
 
@@ -186,7 +192,20 @@ class AssetStore {
                 val spriteAtlas = resourcesVfs["${assetConfig.folder}/${config.fileName}"].readAtlas()
 
                 // (1) Images and animations into texture atlas
-                textureAtlasLoader.loadImages(type, spriteAtlas, config, textures)
+                // TODO add new image loader with Aseprite support
+                if (type == AssetType.COMMON) {
+                    // Use new image loader with Aseprite support for common assets
+                    val vfs = resourcesVfs["common/texture.atlas.yml"]
+                    if (vfs.exists()) {
+                        val configInfo = vfs.readString()
+                        val assetInfoSerializer = AssetInfoSerializer()
+                        val textureAtlasInfo = assetInfoSerializer.yaml.decodeFromString<TextureAtlasInfo>(configInfo)
+                        //println(textureAtlasInfo)
+                        //textureAtlasLoader.loadImages(type, spriteAtlas, config, textures)
+                    }
+                }
+                // TODO Remove old loaders when new one is fully working
+                textureAtlasLoader.loadImages_old(type, spriteAtlas, config, textures)
                 // (2) Nine-patch images into texture atlas
                 textureAtlasLoader.loadNinePatchSlices(type, spriteAtlas, config, ninePatchSlices)
                 // (3) Pixel fonts into texture atlas
@@ -262,4 +281,32 @@ class AssetStore {
         parallaxPlaneTextures.values.removeAll { it.first == type }
         tilesets.values.removeAll { it.first == type }
     }
+}
+
+// TODO move in separate file
+class AssetInfoSerializer {
+
+    /**
+     * This polymorphic module config for kotlinx serialization lists all Korge-fleks
+     * internal asset classes used for asset data representation.
+     * TODO check if needed at all
+     */
+    private val internalModule = SerializersModule {
+        // Register asset model data classes
+//        polymorphic(Component::class) {
+//            subclass(Collision::class)
+//        }
+    }
+
+    val yaml: Yaml = Yaml(
+//        serializersModule = internalModule,
+        configuration = YamlConfiguration(
+            encodingIndentationSize = 2,
+            singleLineStringStyle = SingleLineStringStyle.DoubleQuoted,
+            multiLineStringStyle = MultiLineStringStyle.DoubleQuoted,
+            allowAnchorsAndAliases = true,
+            polymorphismStyle = PolymorphismStyle.Property,
+            polymorphismPropertyName = "entityConfig"
+        )
+    )
 }

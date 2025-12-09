@@ -15,7 +15,6 @@ import korlibs.io.dynamic.dyn
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.util.unquote
-import korlibs.korge.fleks.assets.AssetLevelDataLoader
 import korlibs.korge.fleks.assets.AssetModel.TextureConfig
 import korlibs.korge.fleks.assets.BitMapFontMapType
 import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
@@ -28,7 +27,6 @@ import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.HORIZONTAL_PLANE
 import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.VERTICAL_PLANE
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures.LineTexture
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
-import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.math.geom.slice.RectSlice
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -55,6 +53,17 @@ inline fun Iterable<Atlas.Entry>.forEachWith(prefix: String, action: (Atlas.Entr
     }
 }
 
+inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit) {
+    val frameTagRegex = "_\\d+$".toRegex()
+    for (entry in this) {
+        val imageName = entry.name
+        val frameTag = if (frameTagRegex.containsMatchIn(imageName)) {
+            imageName.replace(frameTagRegex, "")
+        } else imageName
+        action(entry, frameTag)
+    }
+}
+
 class TextureAtlasLoader {
     private fun getParallaxPlaneSpeedFactor(index: Int, size: Int, speedFactor: Float) : Float {
         val midPoint: Float = size * 0.5f
@@ -75,6 +84,71 @@ class TextureAtlasLoader {
      * Also sets the frameDuration for each frame according to the config.
      */
     fun loadImages(
+        type: AssetType,
+        atlas: Atlas,
+        config: TextureConfig,
+        textures: SpriteFramesMapType
+    ) {
+        atlas.entries.forEach { entry, frameTag ->
+//            println("$frameTag")
+
+            // Check if there was already a frameTag saved for this animation
+            if (textures.containsKey(frameTag)) {
+                val spriteData = textures[frameTag]!!.second
+
+                // Get the animation index number
+                val regex = "_(\\d+)$".toRegex()
+                val match = regex.find(entry.name)
+                val animIndex = match?.groupValues?.get(1)?.toInt()
+                    ?: error("TextureAtlasLoader - Cannot get animation index of sprite '${entry.name}'!")
+
+                spriteData.add(
+                    animIndex, SpriteFrame(
+                        atlas.texture.slice(entry.info.frame),
+                        entry.info.virtFrame?.x ?: 0,
+                        entry.info.virtFrame?.y ?: 0
+                    )
+                )
+            } else {
+                textures[frameTag] = Pair(
+                    type, SpriteFrames(
+                        frames = mutableListOf(
+                            SpriteFrame(
+                                atlas.texture.slice(entry.info.frame),
+                                entry.info.virtFrame?.x ?: 0,
+                                entry.info.virtFrame?.y ?: 0
+                            )
+                        ),
+                        width = entry.info.virtFrame?.width ?: 0,
+                        height = entry.info.virtFrame?.height ?: 0
+                    )
+                )
+            }
+        }
+
+        // Load and set frameDuration
+        config.frameDurations.forEach { (frameTag, duration) ->
+            if (textures.containsKey(frameTag)) {
+                val spriteData = textures[frameTag]!!.second
+                for (i in 0 until spriteData.size) {
+                    if (duration.custom == null) {
+                        // Set all frames to the same default duration
+                        spriteData[i].duration = duration.default / 1000f  // convert ms to seconds
+                    } else if (i < duration.custom.size) {
+                        spriteData[i].duration = duration.custom[i] / 1000f  // convert ms to seconds
+                    } else {
+                        println("ERROR: TextureAtlasLoader - Cannot set custom frameDuration for '$frameTag' of - not enough durations specified in config.yaml!")
+                    }
+                }
+            } else {
+                println("ERROR: TextureAtlasLoader - Cannot set frameDuration for '$frameTag' - texture not found!")
+            }
+        }
+//        println()
+    }
+
+
+    fun loadImages_old(
         type: AssetType,
         atlas: Atlas,
         config: TextureConfig,
