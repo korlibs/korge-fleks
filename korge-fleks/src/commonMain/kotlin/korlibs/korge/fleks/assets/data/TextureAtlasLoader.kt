@@ -9,8 +9,11 @@ import korlibs.image.bitmap.BmpSlice
 import korlibs.image.bitmap.NinePatchBmpSlice
 import korlibs.image.bitmap.slice
 import korlibs.image.font.BitmapFont
+import korlibs.image.format.ImageDecodingProps
+import korlibs.image.format.readBitmapSlice
 import korlibs.image.tiles.TileSet
 import korlibs.image.tiles.TileSetTileInfo
+import korlibs.io.dynamic.Dyn
 import korlibs.io.dynamic.dyn
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
@@ -27,6 +30,7 @@ import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.HORIZONTAL_PLANE
 import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.VERTICAL_PLANE
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures.LineTexture
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
+import korlibs.math.geom.RectangleInt
 import korlibs.math.geom.slice.RectSlice
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -64,6 +68,48 @@ inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit)
     }
 }
 
+suspend fun VfsFile.readKorgeFleksAssets(type: AssetType, textures: SpriteFramesMapType) {
+    val atlasInfo = korlibs.io.serialization.yaml.Yaml.read(this.readString()).dyn
+
+    val version = atlasInfo["info"]["v"].toInt()
+    val build = atlasInfo["info"]["b"].toInt()
+
+    val textureAtlases: List<BmpSlice> = atlasInfo["textures"].toList().map { texture ->
+        parent[texture.toString()].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
+    }
+
+    val images = atlasInfo["images"] as Map<String, Dyn>
+
+    images.forEach { (name, image) ->
+        val frames = image["frames"].toList().map { frameDyn ->
+            val frameInfo = frameDyn["frame"] as Map<String, Int>
+            SpriteFrame(
+                bmpSlice = textureAtlases[frameInfo["i"] ?: error("readKorgeFleksAssets - texture atlas index not found")].slice(
+                    RectangleInt(
+                    frameInfo["x"] ?: error("readKorgeFleksAssets - frame info x not found"),
+                    frameInfo["y"] ?: error("readKorgeFleksAssets - frame info y not found"),
+                    frameInfo["w"] ?: error("readKorgeFleksAssets - frame info w not found"),
+                    frameInfo["h"] ?: error("readKorgeFleksAssets - frame info h not found")
+                    )
+                ),
+                targetX = frameDyn["x"].toInt(),
+                targetY = frameDyn["y"].toInt(),
+                duration = frameDyn["duration"].toFloat() / 1000f  // convert ms to seconds
+            )
+        }
+
+        textures[name] = Pair(
+            type, SpriteFrames(
+                frames = frames.toMutableList(),  // TODO Change to List<>
+                width = image["w"].toInt(),
+                height = image["h"].toInt()
+            )
+        )
+    }
+
+
+}
+
 class TextureAtlasLoader {
     private fun getParallaxPlaneSpeedFactor(index: Int, size: Int, speedFactor: Float) : Float {
         val midPoint: Float = size * 0.5f
@@ -76,77 +122,6 @@ class TextureAtlasLoader {
                 (index - midPoint + 1f) / midPoint
             )
     }
-
-    /**
-     * Load all images from the texture atlas that are prefixed with "img_"
-     * and store them in the textures map as single-frame or animation Sprites.
-     *
-     * Also sets the frameDuration for each frame according to the config.
-     */
-    fun loadImages(
-        type: AssetType,
-        atlas: Atlas,
-        config: TextureConfig,
-        textures: SpriteFramesMapType
-    ) {
-        atlas.entries.forEach { entry, frameTag ->
-//            println("$frameTag")
-
-            // Check if there was already a frameTag saved for this animation
-            if (textures.containsKey(frameTag)) {
-                val spriteData = textures[frameTag]!!.second
-
-                // Get the animation index number
-                val regex = "_(\\d+)$".toRegex()
-                val match = regex.find(entry.name)
-                val animIndex = match?.groupValues?.get(1)?.toInt()
-                    ?: error("TextureAtlasLoader - Cannot get animation index of sprite '${entry.name}'!")
-
-                spriteData.add(
-                    animIndex, SpriteFrame(
-                        atlas.texture.slice(entry.info.frame),
-                        entry.info.virtFrame?.x ?: 0,
-                        entry.info.virtFrame?.y ?: 0
-                    )
-                )
-            } else {
-                textures[frameTag] = Pair(
-                    type, SpriteFrames(
-                        frames = mutableListOf(
-                            SpriteFrame(
-                                atlas.texture.slice(entry.info.frame),
-                                entry.info.virtFrame?.x ?: 0,
-                                entry.info.virtFrame?.y ?: 0
-                            )
-                        ),
-                        width = entry.info.virtFrame?.width ?: 0,
-                        height = entry.info.virtFrame?.height ?: 0
-                    )
-                )
-            }
-        }
-
-        // Load and set frameDuration
-        config.frameDurations.forEach { (frameTag, duration) ->
-            if (textures.containsKey(frameTag)) {
-                val spriteData = textures[frameTag]!!.second
-                for (i in 0 until spriteData.size) {
-                    if (duration.custom == null) {
-                        // Set all frames to the same default duration
-                        spriteData[i].duration = duration.default / 1000f  // convert ms to seconds
-                    } else if (i < duration.custom.size) {
-                        spriteData[i].duration = duration.custom[i] / 1000f  // convert ms to seconds
-                    } else {
-                        println("ERROR: TextureAtlasLoader - Cannot set custom frameDuration for '$frameTag' of - not enough durations specified in config.yaml!")
-                    }
-                }
-            } else {
-                println("ERROR: TextureAtlasLoader - Cannot set frameDuration for '$frameTag' - texture not found!")
-            }
-        }
-//        println()
-    }
-
 
     fun loadImages_old(
         type: AssetType,

@@ -21,11 +21,10 @@ import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
 import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
-import korlibs.korge.fleks.assets.data.TextureAtlasInfo
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
+import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
 import korlibs.time.Stopwatch
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.modules.SerializersModule
 import kotlin.collections.set
 
@@ -195,14 +194,7 @@ class AssetStore {
                 // TODO add new image loader with Aseprite support
                 if (type == AssetType.COMMON) {
                     // Use new image loader with Aseprite support for common assets
-                    val vfs = resourcesVfs["common/texture.atlas.yml"]
-                    if (vfs.exists()) {
-                        val configInfo = vfs.readString()
-                        val assetInfoSerializer = AssetInfoSerializer()
-                        val textureAtlasInfo = assetInfoSerializer.yaml.decodeFromString<TextureAtlasInfo>(configInfo)
-                        //println(textureAtlasInfo)
-                        //textureAtlasLoader.loadImages(type, spriteAtlas, config, textures)
-                    }
+                    resourcesVfs["${assetConfig.folder}/texture.atlas.yml"].readKorgeFleksAssets(type, textures)
                 }
                 // TODO Remove old loaders when new one is fully working
                 textureAtlasLoader.loadImages_old(type, spriteAtlas, config, textures)

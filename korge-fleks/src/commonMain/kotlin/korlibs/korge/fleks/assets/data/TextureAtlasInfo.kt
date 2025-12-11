@@ -31,10 +31,11 @@ data class TextureAtlasInfo(
         ) {
             @Serializable
             data class Frame(
+                @SerialName("i") val index: Int = 0,
                 val x: Int = 0,
                 val y: Int = 0,
-                val w: Int = 0,
-                val h: Int = 0
+                @SerialName("w") val width: Int = 0,
+                @SerialName("h") val height: Int = 0
             )
         }
     }
