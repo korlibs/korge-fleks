@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class TextureAtlasInfo(
+data class AssetConfig(
     val info: Info,
     val textures: List<String> = emptyList(),
     val images: Map<String, ImageInfo> = emptyMap()
@@ -27,7 +27,7 @@ data class TextureAtlasInfo(
             val frame: Frame = Frame(),
             val x: Int = 0,
             val y: Int = 0,
-            val duration: Float = 0f
+            val duration: Int = 0
         ) {
             @Serializable
             data class Frame(

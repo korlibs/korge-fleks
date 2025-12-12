@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets.data
 
+import com.charleskorn.kaml.*
 import korlibs.datastructure.associateByInt
 import korlibs.datastructure.toIntMap
 import korlibs.image.atlas.Atlas
@@ -13,7 +14,6 @@ import korlibs.image.format.ImageDecodingProps
 import korlibs.image.format.readBitmapSlice
 import korlibs.image.tiles.TileSet
 import korlibs.image.tiles.TileSetTileInfo
-import korlibs.io.dynamic.Dyn
 import korlibs.io.dynamic.dyn
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
@@ -32,6 +32,7 @@ import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures.LineTexture
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
 import korlibs.math.geom.RectangleInt
 import korlibs.math.geom.slice.RectSlice
+import kotlinx.serialization.decodeFromString
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -69,46 +70,48 @@ inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit)
 }
 
 suspend fun VfsFile.readKorgeFleksAssets(type: AssetType, textures: SpriteFramesMapType) {
-    val atlasInfo = korlibs.io.serialization.yaml.Yaml.read(this.readString()).dyn
+    val atlasText = this.readString()
 
-    val version = atlasInfo["info"]["v"].toInt()
-    val build = atlasInfo["info"]["b"].toInt()
+    val yaml = Yaml(
+        configuration = YamlConfiguration(
+            encodingIndentationSize = 2,
+            singleLineStringStyle = SingleLineStringStyle.DoubleQuoted,
+            multiLineStringStyle = MultiLineStringStyle.DoubleQuoted
+        )
+    )
 
-    val textureAtlases: List<BmpSlice> = atlasInfo["textures"].toList().map { texture ->
-        parent[texture.toString()].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
+    val assetConfig: AssetConfig = yaml.decodeFromString(atlasText)
+
+    val version: Int = assetConfig.info.version
+    val build: Int = assetConfig.info.build
+    // Check later if asset version/build is compatible otherwise convert to new version
+
+    val textureAtlases: List<BmpSlice> = assetConfig.textures.map { texture ->
+        parent[texture].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
     }
 
-    val images = atlasInfo["images"] as Map<String, Dyn>
-
-    images.forEach { (name, image) ->
-        val frames = image["frames"].toList().map { frameDyn ->
-            val frameInfo = frameDyn["frame"] as Map<String, Int>
+    assetConfig.images.forEach { (name, image) ->
+        val frames = image.frames.map { frames ->
+            val frame = frames.frame
             SpriteFrame(
-                bmpSlice = textureAtlases[frameInfo["i"] ?: error("readKorgeFleksAssets - texture atlas index not found")].slice(
-                    RectangleInt(
-                    frameInfo["x"] ?: error("readKorgeFleksAssets - frame info x not found"),
-                    frameInfo["y"] ?: error("readKorgeFleksAssets - frame info y not found"),
-                    frameInfo["w"] ?: error("readKorgeFleksAssets - frame info w not found"),
-                    frameInfo["h"] ?: error("readKorgeFleksAssets - frame info h not found")
-                    )
-                ),
-                targetX = frameDyn["x"].toInt(),
-                targetY = frameDyn["y"].toInt(),
-                duration = frameDyn["duration"].toFloat() / 1000f  // convert ms to seconds
+                bmpSlice = textureAtlases.getOrElse(frame.index) { error("readKorgeFleksAssets - texture atlas index not found: ${frame.index}") }
+                    .slice(RectangleInt(frame.x, frame.y, frame.width, frame.height)),
+                targetX = frames.x,
+                targetY = frames.y,
+                duration = frames.duration.toFloat() / 1000f
             )
         }
 
         textures[name] = Pair(
             type, SpriteFrames(
-                frames = frames.toMutableList(),  // TODO Change to List<>
-                width = image["w"].toInt(),
-                height = image["h"].toInt()
+                frames = frames.toMutableList(),
+                width = image.width,
+                height = image.height
             )
         )
     }
-
-
 }
+
 
 class TextureAtlasLoader {
     private fun getParallaxPlaneSpeedFactor(index: Int, size: Int, speedFactor: Float) : Float {

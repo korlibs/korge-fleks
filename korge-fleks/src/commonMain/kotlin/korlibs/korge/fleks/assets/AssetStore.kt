@@ -70,7 +70,8 @@ class AssetStore {
     internal val sounds: SoundMapType = mutableMapOf()
     internal val tileMaps: TileMapsType = mutableMapOf()
 
-    internal val textures: SpriteFramesMapType = mutableMapOf()
+    internal val textures: SpriteFramesMapType = mutableMapOf()  // TODO replace with below later
+    internal val textures2: SpriteFramesMapType = mutableMapOf()
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
     internal val parallaxBackgroundConfig: ParallaxMapType = mutableMapOf()
@@ -194,7 +195,7 @@ class AssetStore {
                 // TODO add new image loader with Aseprite support
                 if (type == AssetType.COMMON) {
                     // Use new image loader with Aseprite support for common assets
-                    resourcesVfs["${assetConfig.folder}/texture.atlas.yml"].readKorgeFleksAssets(type, textures)
+                    resourcesVfs["${type.folder}/texture.atlas.yml"].readKorgeFleksAssets(type, textures)
                 }
                 // TODO Remove old loaders when new one is fully working
                 textureAtlasLoader.loadImages_old(type, spriteAtlas, config, textures)
