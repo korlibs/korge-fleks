@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.assets.data
 
-import com.charleskorn.kaml.*
 import korlibs.datastructure.associateByInt
 import korlibs.datastructure.toIntMap
 import korlibs.image.atlas.Atlas
@@ -32,7 +31,7 @@ import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures.LineTexture
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
 import korlibs.math.geom.RectangleInt
 import korlibs.math.geom.slice.RectSlice
-import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -70,20 +69,12 @@ inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit)
 }
 
 suspend fun VfsFile.readKorgeFleksAssets(type: AssetType, textures: SpriteFramesMapType) {
-    val atlasText = this.readString()
+    val assetConfig: AssetConfig = Json.decodeFromString(this.readString())
 
-    val yaml = Yaml(
-        configuration = YamlConfiguration(
-            encodingIndentationSize = 2,
-            singleLineStringStyle = SingleLineStringStyle.DoubleQuoted,
-            multiLineStringStyle = MultiLineStringStyle.DoubleQuoted
-        )
-    )
-
-    val assetConfig: AssetConfig = yaml.decodeFromString(atlasText)
-
-    val version: Int = assetConfig.info.version
-    val build: Int = assetConfig.info.build
+    // Get version info
+    val major: Int = assetConfig.info[0]
+    val minor: Int = assetConfig.info[1]
+    val build: Int = assetConfig.info[2]
     // Check later if asset version/build is compatible otherwise convert to new version
 
     val textureAtlases: List<BmpSlice> = assetConfig.textures.map { texture ->
@@ -93,11 +84,16 @@ suspend fun VfsFile.readKorgeFleksAssets(type: AssetType, textures: SpriteFrames
     assetConfig.images.forEach { (name, image) ->
         val frames = image.frames.map { frames ->
             val frame = frames.frame
+            val index = frame[0]
+            val x = frame[1]
+            val y = frame[2]
+            val width = frame[3]
+            val height = frame[4]
             SpriteFrame(
-                bmpSlice = textureAtlases.getOrElse(frame.index) { error("readKorgeFleksAssets - texture atlas index not found: ${frame.index}") }
-                    .slice(RectangleInt(frame.x, frame.y, frame.width, frame.height)),
-                targetX = frames.x,
-                targetY = frames.y,
+                bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index not found: $index") }
+                    .slice(RectangleInt(x, y, width, height)),
+                targetX = frames.xOffset,
+                targetY = frames.yOffset,
                 duration = frames.duration.toFloat() / 1000f
             )
         }

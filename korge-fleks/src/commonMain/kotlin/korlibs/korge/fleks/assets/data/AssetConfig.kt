@@ -4,39 +4,64 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
+/**
+ * Asset configuration data class.
+ *
+ *  - info: version info
+ *  - textures: list of texture atlas file names
+ *  - images: map of image names to [ImageInfo]
+ *  - ninePatches: map of nine-patch image names to [NinePatchInfo]
+ */
 @Serializable
 data class AssetConfig(
-    val info: Info,
+    val info: List<Int> = emptyList(),
     val textures: List<String> = emptyList(),
-    val images: Map<String, ImageInfo> = emptyMap()
+    val images: Map<String, ImageInfo> = emptyMap(),
+    val ninePatches: Map<String, NinePatchInfo> = emptyMap()
 ) {
-    @Serializable
-    data class Info(
-        @SerialName("v") val version: Int = 0,
-        @SerialName("b") val build: Int = 0
-    )
+    /**
+     * Image info data class.
+     *
+     *  - width, height: original image width and height (before cropping)
+     *  - frames: list of image frames for animations
+     */
 
     @Serializable
     data class ImageInfo(
         @SerialName("w") val width: Int = 0,
         @SerialName("h") val height: Int = 0,
-        val frames: List<ImageFrame> = emptyList()
+        @SerialName("fs") val frames: List<ImageFrame> = emptyList()
     ) {
+        /**
+         * Image frame info data class.
+         *
+         *  - frame: [textureIndex, x, y, width, height] - Position and size in texture atlas
+         *  - xOffset, yOffset: frame offset position for cropped images
+         *  - duration: frame duration in milliseconds (for animations)
+         */
         @Serializable
         data class ImageFrame(
-            val frame: Frame = Frame(),
-            val x: Int = 0,
-            val y: Int = 0,
-            val duration: Int = 0
-        ) {
-            @Serializable
-            data class Frame(
-                @SerialName("i") val index: Int = 0,
-                val x: Int = 0,
-                val y: Int = 0,
-                @SerialName("w") val width: Int = 0,
-                @SerialName("h") val height: Int = 0
-            )
-        }
+            @SerialName("f") val frame: List<Int> = emptyList(),
+            @SerialName("x") val xOffset: Int = 0,
+            @SerialName("y") val yOffset: Int = 0,
+            @SerialName("d") val duration: Int = 0
+        )
     }
+
+    /**
+     * Nine-patch image info data class.
+     * Nine-patch textures are never cropped in the texture atlas
+     *
+     *  - frame: [textureIndex, x, y, width, height] - Position and size in texture atlas
+     *  - centerX, centerY: nine-patch center position offset
+     *  - centerWidth, centerHeight: nine-patch center size
+     */
+    @Serializable
+    data class NinePatchInfo(
+        @SerialName("f") val frame: List<Int> = emptyList(),
+        @SerialName("x") val centerX: Int = 0,
+        @SerialName("y") val centerY: Int = 0,
+        @SerialName("w") val centerWidth: Int = 0,
+        @SerialName("h") val centerHeight: Int = 0
+    )
 }
