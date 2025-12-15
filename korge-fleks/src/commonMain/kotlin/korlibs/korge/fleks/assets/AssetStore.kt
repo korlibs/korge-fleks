@@ -195,7 +195,7 @@ class AssetStore {
                 // TODO add new image loader with Aseprite support
                 if (type == AssetType.COMMON) {
                     // Use new image loader with Aseprite support for common assets
-                    resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(type, textures)
+                    resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(type, textures, ninePatchSlices)
                 }
                 // TODO Remove old loaders when new one is fully working
                 textureAtlasLoader.loadImages_old(type, spriteAtlas, config, textures)

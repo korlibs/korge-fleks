@@ -68,7 +68,11 @@ inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit)
     }
 }
 
-suspend fun VfsFile.readKorgeFleksAssets(type: AssetType, textures: SpriteFramesMapType) {
+suspend fun VfsFile.readKorgeFleksAssets(
+    type: AssetType,
+    textures: SpriteFramesMapType,
+    ninePatchSlices: NinePatchBmpSliceMapType
+) {
     val assetConfig: AssetConfig = Json.decodeFromString(this.readString())
 
     // Get version info
@@ -81,6 +85,7 @@ suspend fun VfsFile.readKorgeFleksAssets(type: AssetType, textures: SpriteFrames
         parent[texture].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
     }
 
+    // Laod images and store into textures map
     assetConfig.images.forEach { (name, image) ->
         val frames = image.frames.map { frames ->
             val frame = frames.frame
@@ -103,6 +108,26 @@ suspend fun VfsFile.readKorgeFleksAssets(type: AssetType, textures: SpriteFrames
                 frames = frames.toMutableList(),
                 width = image.width,
                 height = image.height
+            )
+        )
+    }
+
+    // Load nine-patch images and store into ninePatchSlices map
+    assetConfig.ninePatches.forEach { (name, image) ->
+        ninePatchSlices[name] = Pair(
+            type, NinePatchBmpSlice.createSimple(
+                bmp = textureAtlases.getOrElse(
+                    index = image.frame[0]) { error("readKorgeFleksAssets - texture atlas index not found: ${image.frame[0]}") }
+                    .slice(RectangleInt(
+                        x = image.frame[1],
+                        y = image.frame[2],
+                        width = image.frame[3],
+                        height = image.frame[4]
+                    )),
+                left = image.centerX,
+                top = image.centerY,
+                right = image.centerX + image.centerWidth,
+                bottom = image.centerY + image.centerHeight
             )
         )
     }
