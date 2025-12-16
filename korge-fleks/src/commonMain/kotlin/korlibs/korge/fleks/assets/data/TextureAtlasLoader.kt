@@ -71,7 +71,8 @@ inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit)
 suspend fun VfsFile.readKorgeFleksAssets(
     type: AssetType,
     textures: SpriteFramesMapType,
-    ninePatchSlices: NinePatchBmpSliceMapType
+    ninePatchSlices: NinePatchBmpSliceMapType,
+    bitMapFonts: BitMapFontMapType,
 ) {
     val assetConfig: AssetConfig = Json.decodeFromString(this.readString())
 
@@ -95,7 +96,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
             val width = frame[3]
             val height = frame[4]
             SpriteFrame(
-                bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index not found: $index") }
+                bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
                     .slice(RectangleInt(x, y, width, height)),
                 targetX = frames.xOffset,
                 targetY = frames.yOffset,
@@ -117,7 +118,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
         ninePatchSlices[name] = Pair(
             type, NinePatchBmpSlice.createSimple(
                 bmp = textureAtlases.getOrElse(
-                    index = image.frame[0]) { error("readKorgeFleksAssets - texture atlas index not found: ${image.frame[0]}") }
+                    index = image.frame[0]) { error("readKorgeFleksAssets - texture atlas index '${image.frame[0]}' for nine-patch image '$name' not found!") }
                     .slice(RectangleInt(
                         x = image.frame[1],
                         y = image.frame[2],
@@ -130,6 +131,26 @@ suspend fun VfsFile.readKorgeFleksAssets(
                 bottom = image.centerY + image.centerHeight
             )
         )
+    }
+
+    // Load pixel fonts into bitMapFonts map
+    assetConfig.pixelFonts.forEach { (fontName, fontImage) ->
+        val assetFolder = this.parent.path
+        val ext = fontImage.type
+
+        // Load and set bitmap fonts
+        // IDEA: check if font file is json, xml, or txt and call the appropriate loader - check BitmapFont.kt in Korge
+        val bitmapFont = resourcesVfs["${assetFolder}/${fontName}.${ext}"].readFontTxt { pngName ->
+            // Load bmpSlice for pixel font from texture atlas
+            textureAtlases.getOrElse(index = fontImage.frame[0]) { error("readKorgeFleksAssets - texture atlas index '${fontImage.frame[0]}' for pixel font image '$fontName' not found!") }
+                .slice(RectangleInt(
+                    x = fontImage.frame[1],
+                    y = fontImage.frame[2],
+                    width = fontImage.frame[3],
+                    height = fontImage.frame[4]
+                ))
+        }
+        bitMapFonts[fontName] = Pair(type, bitmapFont)
     }
 }
 
@@ -145,96 +166,6 @@ class TextureAtlasLoader {
             else
                 (index - midPoint + 1f) / midPoint
             )
-    }
-
-    fun loadImages_old(
-        type: AssetType,
-        atlas: Atlas,
-        config: TextureConfig,
-        textures: SpriteFramesMapType
-    ) {
-        atlas.entries.forEachWith("img_") { entry, frameTag ->
-//            println("$frameTag")
-
-            // Check if there was already a frameTag saved for this animation
-            if (textures.containsKey(frameTag)) {
-                val spriteData = textures[frameTag]!!.second
-
-                // Get the animation index number
-                val regex = "_(\\d+)$".toRegex()
-                val match = regex.find(entry.name)
-                val animIndex = match?.groupValues?.get(1)?.toInt()
-                    ?: error("TextureAtlasLoader - Cannot get animation index of sprite '${entry.name}'!")
-
-                spriteData.add(animIndex, SpriteFrame(
-                    atlas.texture.slice(entry.info.frame),
-                    entry.info.virtFrame?.x ?: 0,
-                    entry.info.virtFrame?.y ?: 0
-                ))
-            } else {
-                textures[frameTag] = Pair(type, SpriteFrames(
-                    frames = mutableListOf(
-                        SpriteFrame(
-                            atlas.texture.slice(entry.info.frame),
-                            entry.info.virtFrame?.x ?: 0,
-                            entry.info.virtFrame?.y ?: 0
-                        )
-                    ),
-                    width = entry.info.virtFrame?.width ?: 0,
-                    height = entry.info.virtFrame?.height ?: 0
-                ))
-            }
-        }
-
-        // Load and set frameDuration
-        config.frameDurations.forEach { (frameTag, duration) ->
-            if (textures.containsKey(frameTag)) {
-                val spriteData = textures[frameTag]!!.second
-                for (i in 0 until spriteData.size) {
-                    if (duration.custom == null) {
-                        // Set all frames to the same default duration
-                        spriteData[i].duration = duration.default / 1000f  // convert ms to seconds
-                    } else if (i < duration.custom.size) {
-                        spriteData[i].duration = duration.custom[i] / 1000f  // convert ms to seconds
-                    } else {
-                        println("ERROR: TextureAtlasLoader - Cannot set custom frameDuration for '$frameTag' of - not enough durations specified in config.yaml!")
-                    }
-                }
-            } else {
-                println("ERROR: TextureAtlasLoader - Cannot set frameDuration for '$frameTag' - texture not found!")
-            }
-        }
-//        println()
-    }
-
-    /**
-     * Load all nine-patch-slice images from the texture atlas that are prefixed with "npt_"
-     * and store them in the ninePatchSlices map.
-     */
-    fun loadNinePatchSlices(
-        type: AssetType,
-        atlas: Atlas,
-        config: TextureConfig,
-        ninePatchSlices: NinePatchBmpSliceMapType
-    ) {
-        atlas.entries.forEachWith("npt_") { entry, frameTag ->
-            // Load nine-patch slice info from config
-            val nineSlice = if (config.nineSlices.containsKey(frameTag)) config.nineSlices[frameTag]
-            else error("TextureAtlasLoader - Cannot find nine-patch slice info for '$frameTag' in '$type' texture atlas config!")
-
-            // Create nine-patch object
-            ninePatchSlices[frameTag] = Pair(
-                type,
-                NinePatchBmpSlice.createSimple(
-                    bmp = atlas.texture.slice(entry.info.frame),
-                    left = nineSlice!!.x,
-                    top = nineSlice.y,
-                    right = nineSlice.x + nineSlice.width,
-                    bottom = nineSlice.y + nineSlice.height
-                )
-            )
-        }
-//        println()
     }
 
     /**

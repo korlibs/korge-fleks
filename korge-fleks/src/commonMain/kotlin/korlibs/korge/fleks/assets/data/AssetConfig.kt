@@ -17,7 +17,9 @@ data class AssetConfig(
     val info: List<Int> = emptyList(),
     val textures: List<String> = emptyList(),
     val images: Map<String, ImageInfo> = emptyMap(),
-    val ninePatches: Map<String, NinePatchInfo> = emptyMap()
+    val ninePatches: Map<String, NinePatchInfo> = emptyMap(),
+    val pixelFonts: Map<String, PixelFontInfo> = emptyMap(),
+    val parallaxLayers: Map<String, ParallaxLayerInfo> = emptyMap()
 ) {
     /**
      * Image info data class.
@@ -63,5 +65,22 @@ data class AssetConfig(
         @SerialName("y") val centerY: Int = 0,
         @SerialName("w") val centerWidth: Int = 0,
         @SerialName("h") val centerHeight: Int = 0
+    )
+
+    /**
+     * Pixel font info data class.
+     *
+     *  - type: font extension type (e.g. "fnt")
+     *  - frame: [textureIndex, x, y, width, height] - Position and size in texture atlas
+     */
+    @Serializable
+    data class PixelFontInfo(
+        @SerialName("t") val type: String = "",
+        @SerialName("f") val frame: List<Int> = emptyList()
+    )
+
+    @Serializable
+    data class ParallaxLayerInfo(
+        val dummy: Int
     )
 }

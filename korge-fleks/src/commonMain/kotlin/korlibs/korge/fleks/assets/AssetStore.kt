@@ -191,18 +191,20 @@ class AssetStore {
             assetConfig.textureAtlas.forEach { config ->
                 val spriteAtlas = resourcesVfs["${assetConfig.folder}/${config.fileName}"].readAtlas()
 
-                // (1) Images and animations into texture atlas
-                // TODO add new image loader with Aseprite support
-                if (type == AssetType.COMMON) {
-                    // Use new image loader with Aseprite support for common assets
-                    resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(type, textures, ninePatchSlices)
+                // TODO get this sorted out
+                when (type) {
+                    AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(type, textures, ninePatchSlices, bitMapFonts)
+                    AssetType.WORLD -> {}
+                    AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(type, textures, ninePatchSlices, bitMapFonts)
+                    AssetType.SPECIAL -> {}
                 }
                 // TODO Remove old loaders when new one is fully working
-                textureAtlasLoader.loadImages_old(type, spriteAtlas, config, textures)
+                // (1) Images and animations into texture atlas
+//                textureAtlasLoader.loadImages_old(type, spriteAtlas, config, textures)
                 // (2) Nine-patch images into texture atlas
-                textureAtlasLoader.loadNinePatchSlices(type, spriteAtlas, config, ninePatchSlices)
+//                textureAtlasLoader.loadNinePatchSlices(type, spriteAtlas, config, ninePatchSlices)
                 // (3) Pixel fonts into texture atlas
-                textureAtlasLoader.loadPixelFonts(type, spriteAtlas, config, assetConfig.folder, bitMapFonts)
+//                textureAtlasLoader.loadPixelFonts(type, spriteAtlas, config, assetConfig.folder, bitMapFonts)
                 // (4) Parallax layers into texture atlas
                 textureAtlasLoader.loadParallaxLayers(type, spriteAtlas, config, parallaxBackgroundConfig, parallaxTextures, parallaxPlaneTextures)
                 // (5) Tilesets for level maps into texture atlas
