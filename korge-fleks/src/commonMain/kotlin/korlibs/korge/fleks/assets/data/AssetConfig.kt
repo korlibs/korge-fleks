@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets.data
 
+import korlibs.korge.fleks.assets.data.AssetConfig.ImageInfo.ImageFrame
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -19,7 +20,7 @@ data class AssetConfig(
     val images: Map<String, ImageInfo> = emptyMap(),
     val ninePatches: Map<String, NinePatchInfo> = emptyMap(),
     val pixelFonts: Map<String, PixelFontInfo> = emptyMap(),
-    val parallaxLayers: Map<String, ParallaxLayerInfo> = emptyMap()
+    val parallaxLayers: Map<String, ParallaxImageInfo> = emptyMap()
 ) {
     /**
      * Image info data class.
@@ -80,7 +81,10 @@ data class AssetConfig(
     )
 
     @Serializable
-    data class ParallaxLayerInfo(
-        val dummy: Int
+    data class ParallaxImageInfo(
+        @SerialName("w") val width: Int = 0,
+        @SerialName("h") val height: Int = 0,
+        @SerialName("fs") val frames: List<ImageFrame> = emptyList(),
+        @SerialName("p") val parallaxLayerConfig: ParallaxConfig.ParallaxLayerConfig
     )
 }
