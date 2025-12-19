@@ -97,6 +97,6 @@ data class AssetConfig(
         @SerialName("h") val height: Int = 0,
         @SerialName("f") val frames: List<ImageFrame> = emptyList(),
         @SerialName("l") val parallaxLayerConfig: ParallaxConfig.ParallaxLayerConfig? = null,
-        @SerialName("p") val parallaxAttachedLayerConfig: ParallaxConfig.ParallaxAttachedLayerConfig? = null
+        @SerialName("a") val parallaxAttachedLayerConfig: ParallaxConfig.ParallaxAttachedLayerConfig? = null
     )
 }

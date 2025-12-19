@@ -3,6 +3,7 @@ package korlibs.korge.fleks.assets.data
 import korlibs.datastructure.size
 import korlibs.image.bitmap.BmpSlice
 import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode
+import korlibs.korge.fleks.assets.data.SpriteFrames.SpriteFrame
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -27,6 +28,28 @@ data class ParallaxConfigV2(
         @SerialName("b") val bottomAttachedLayers: List<String> = emptyList()
     )
 }
+
+data class LayerFrames(
+    val frames: List<SpriteFrame> = mutableListOf(),
+    val layerConfig: ParallaxConfig.ParallaxLayerConfig
+)
+
+data class AttachedLayerFrames(
+    val frames: List<SpriteFrame> = mutableListOf(),
+    val layerConfig: ParallaxConfig.ParallaxAttachedLayerConfig
+)
+
+
+data class LineFrames(
+    val frames: List<LineFrame> = mutableListOf(),
+) {
+    data class LineFrame(
+        val bmpSlice: BmpSlice,
+        var duration: Float = 0f
+    )
+}
+
+
 
 /**
  * This is the main parallax configuration.

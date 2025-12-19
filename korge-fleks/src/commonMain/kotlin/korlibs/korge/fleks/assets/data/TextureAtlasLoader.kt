@@ -20,9 +20,10 @@ import korlibs.io.util.unquote
 import korlibs.korge.fleks.assets.AssetModel.TextureConfig
 import korlibs.korge.fleks.assets.BitMapFontMapType
 import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
-import korlibs.korge.fleks.assets.ParallaxMapType
-import korlibs.korge.fleks.assets.ParallaxPlaneTexturesMapType
-import korlibs.korge.fleks.assets.ParallaxTexturesMapType
+import korlibs.korge.fleks.assets.ParallaxAttachedLayerMapType
+import korlibs.korge.fleks.assets.ParallaxConfigMapType
+import korlibs.korge.fleks.assets.ParallaxPlaneMapType
+import korlibs.korge.fleks.assets.ParallaxLayerMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
 import korlibs.korge.fleks.assets.TilesetMapType
 import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.HORIZONTAL_PLANE
@@ -73,8 +74,10 @@ suspend fun VfsFile.readKorgeFleksAssets(
     textures: SpriteFramesMapType,
     ninePatchSlices: NinePatchBmpSliceMapType,
     bitMapFonts: BitMapFontMapType,
-
-    parallaxConfig: ParallaxMapType,
+    parallaxLayers: ParallaxLayerMapType,
+    parallaxAttachedLayers: ParallaxAttachedLayerMapType,
+    parallaxPlaneLines: ParallaxPlaneMapType,
+    parallaxConfig: ParallaxConfigMapType,
 ) {
     val assetConfig: AssetConfig = Json.decodeFromString(this.readString())
 
@@ -156,54 +159,50 @@ suspend fun VfsFile.readKorgeFleksAssets(
     }
 
     // Load parallax layers into parallaxTextures map
-    assetConfig.parallaxLayers.forEach { (name, layerImage) ->
-        val layerFrames = layerImage.frames.map { frames ->
-            val frame = frames.frame
-            val index = frame[0]
-            val x = frame[1]
-            val y = frame[2]
-            val width = frame[3]
-            val height = frame[4]
-            SpriteFrame(
-                bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
-                    .slice(RectangleInt(x, y, width, height)),
-                targetX = frames.xOffset,
-                targetY = frames.yOffset,
-                duration = frames.duration.toFloat() / 1000f
-            )
+    assetConfig.parallaxLayers.forEach { (name, image) ->
+        val frames = if (image.parallaxLayerConfig != null || image.parallaxAttachedLayerConfig != null) {
+            image.frames.map { frames ->
+                val frame = frames.frame
+                val index = frame[0]
+                val x = frame[1]
+                val y = frame[2]
+                val width = frame[3]
+                val height = frame[4]
+                SpriteFrame(
+                    bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
+                        .slice(RectangleInt(x, y, width, height)),
+                    targetX = frames.xOffset,  // offset of layer from top-left corner of parallax background
+                    targetY = frames.yOffset,
+                    duration = frames.duration.toFloat() / 1000f
+                )
+            }
+        } else {
+            image.frames.map { frames ->
+                val frame = frames.frame
+                val index = frame[0]
+                val x = frame[1]
+                val y = frame[2]
+                val width = frame[3]
+                val height = frame[4]
+                LineFrames.LineFrame(
+                    bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
+                        .slice(RectangleInt(x, y, width, height)),
+                    duration = frames.duration.toFloat() / 1000f
+                )
+            }
+
         }
-
-
-
-        layerImage.parallaxLayerConfig?.let { layer ->
-//            layer.
-
-        } ?: layerImage.parallaxAttachedLayerConfig?.let { layer ->
-
-            } ?: error("TextureAtlasLoader - Parallax layer '$name' has no valid parallax layer config!")
-
-//        textures[name] = Pair(
-//            type, SpriteFrames(
-//                frames = frames.toMutableList(),
-//                width = image.width,
-//                height = image.height
-//            )
-//        )
-
 /*
-        if (parallaxConfig.backgroundLayers.containsKey(frameTag)
-            || parallaxConfig.foregroundLayers.containsKey(frameTag)) {
-            // frameTag is used for parallax background layer
-            val layer = parallaxConfig.backgroundLayers[frameTag]
-                ?: parallaxConfig.foregroundLayers[frameTag]
-                ?: error("TextureAtlasLoader - Cannot find parallax layer '$frameTag' in '$type' parallax config!")
-
-            layer.layerBmpSlice = atlas.texture.slice(entry.info.frame)
-            parallaxTextures[frameTag] = Pair(type, layer)
-            if (parallaxConfig.backgroundLayers.containsKey(frameTag)) bgLayerNames.add(frameTag)
-            if (parallaxConfig.foregroundLayers.containsKey(frameTag)) fgLayerNames.add(frameTag)
-            return@forEach
-        }
+        image.parallaxLayerConfig?.let { config ->
+            parallaxLayers[name] = Pair(type, LayerFrames(frames = frames as List<SpriteFrame>, layerConfig = config))
+        } ?:
+        image.parallaxAttachedLayerConfig?.let { config ->
+            val attachIndex = config.attachIndex
+            parallaxAttachedLayers[name] = Pair(type, AttachedLayerFrames(frames as List<SpriteFrame>, config))
+        } ?:
+        image.parallaxPlaneLineConfig?.let { config ->
+            parallaxPlaneLines[name] = Pair(type, LineFrames(frames as List<LineFrames.LineFrame>, config.index, config.speedFactor, config.repeat))
+        } ?: error("TextureAtlasLoader - Parallax layer '$name' has no valid parallax layer config!")
 */
     }
 
@@ -246,10 +245,11 @@ class TextureAtlasLoader {
         type: AssetType,
         atlas: Atlas,
         config: TextureConfig,
-        parallaxBackgroundConfig: ParallaxMapType,
-        parallaxTextures: ParallaxTexturesMapType,
-        parallaxPlaneTextures: ParallaxPlaneTexturesMapType,
+        parallaxBackgroundConfig: ParallaxConfigMapType,
+        parallaxTextures: ParallaxLayerMapType,
+        parallaxPlaneTextures: ParallaxPlaneMapType,
     ) {
+/*
         val bgLayerNames = mutableListOf<String>()
         val fgLayerNames = mutableListOf<String>()
 
@@ -346,6 +346,7 @@ class TextureAtlasLoader {
             parallaxBackgroundConfig[parallaxName] = Pair(type, parallaxConfig)
         }
 //        println()
+*/
     }
 
 
