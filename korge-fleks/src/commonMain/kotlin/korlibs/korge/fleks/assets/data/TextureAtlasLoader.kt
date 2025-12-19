@@ -73,6 +73,8 @@ suspend fun VfsFile.readKorgeFleksAssets(
     textures: SpriteFramesMapType,
     ninePatchSlices: NinePatchBmpSliceMapType,
     bitMapFonts: BitMapFontMapType,
+
+    parallaxConfig: ParallaxMapType,
 ) {
     val assetConfig: AssetConfig = Json.decodeFromString(this.readString())
 
@@ -152,6 +154,63 @@ suspend fun VfsFile.readKorgeFleksAssets(
         }
         bitMapFonts[fontName] = Pair(type, bitmapFont)
     }
+
+    // Load parallax layers into parallaxTextures map
+    assetConfig.parallaxLayers.forEach { (name, layerImage) ->
+        val layerFrames = layerImage.frames.map { frames ->
+            val frame = frames.frame
+            val index = frame[0]
+            val x = frame[1]
+            val y = frame[2]
+            val width = frame[3]
+            val height = frame[4]
+            SpriteFrame(
+                bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
+                    .slice(RectangleInt(x, y, width, height)),
+                targetX = frames.xOffset,
+                targetY = frames.yOffset,
+                duration = frames.duration.toFloat() / 1000f
+            )
+        }
+
+
+
+        layerImage.parallaxLayerConfig?.let { layer ->
+//            layer.
+
+        } ?: layerImage.parallaxAttachedLayerConfig?.let { layer ->
+
+            } ?: error("TextureAtlasLoader - Parallax layer '$name' has no valid parallax layer config!")
+
+//        textures[name] = Pair(
+//            type, SpriteFrames(
+//                frames = frames.toMutableList(),
+//                width = image.width,
+//                height = image.height
+//            )
+//        )
+
+/*
+        if (parallaxConfig.backgroundLayers.containsKey(frameTag)
+            || parallaxConfig.foregroundLayers.containsKey(frameTag)) {
+            // frameTag is used for parallax background layer
+            val layer = parallaxConfig.backgroundLayers[frameTag]
+                ?: parallaxConfig.foregroundLayers[frameTag]
+                ?: error("TextureAtlasLoader - Cannot find parallax layer '$frameTag' in '$type' parallax config!")
+
+            layer.layerBmpSlice = atlas.texture.slice(entry.info.frame)
+            parallaxTextures[frameTag] = Pair(type, layer)
+            if (parallaxConfig.backgroundLayers.containsKey(frameTag)) bgLayerNames.add(frameTag)
+            if (parallaxConfig.foregroundLayers.containsKey(frameTag)) fgLayerNames.add(frameTag)
+            return@forEach
+        }
+*/
+    }
+
+    // Save parallax layer (object) configs into parallaxConfig map
+    assetConfig.parallaxConfigs.forEach { (name, config) ->
+        parallaxConfig[name] = Pair(type, config)
+    }
 }
 
 
@@ -168,36 +227,6 @@ class TextureAtlasLoader {
             )
     }
 
-    /**
-     * This function loads all bitmap fonts from a texture atlas whose entry names start with the prefix pxf_.
-     * For each matching entry, it attempts to load the corresponding font file (with a .fnt extension) from
-     * the asset folder, using the atlas entry as the font texture. The loaded bitmap fonts are then stored in
-     * the provided bitMapFonts map, keyed by font name.
-     */
-    suspend fun loadPixelFonts(
-        type: AssetType,
-        atlas: Atlas,
-        config: TextureConfig,
-        assetFolder: String,
-        bitMapFonts: BitMapFontMapType
-    ) {
-        atlas.entries.forEachWith("pxf_") { entry, fontName ->
-            // Sanity check for pixel font in texture atlas config
-            // TODO Check if we could remove fonts entry from texture atlas config, since font images are marked with "pxf_" prefix
-            if (!config.fonts.contains(fontName)) println("WARNING: TextureAtlasLoader - Cannot find font name '$fontName' in '$type' texture atlas config!")
-
-            // Load and set bitmap fonts
-            // IDEA: check if font file is json, xml, or txt and call the appropriate loader - check BitmapFont.kt in Korge
-            val bitmapFont = resourcesVfs["${assetFolder}/${fontName}.fnt"].readFontTxt { pngName ->
-                // Sanity check
-                if (pngName != fontName) println("ERROR: TextureAtlasLoader - ${fontName}.fnt file points to another png file name '${pngName}'. Please check if this is correct!")
-                // Load bmpSlice for pixel font from texture atlas
-                atlas.texture.slice(entry.info.frame)
-            }
-            bitMapFonts[fontName] = Pair(type, bitmapFont)
-        }
-//        println()
-    }
 
     /**
      * Loads all parallax background and plane layer textures from the given texture atlas.
@@ -307,10 +336,10 @@ class TextureAtlasLoader {
 
         // Save the global parallax background configuration AFTER all atlas textures were processed
         config.parallaxBackgrounds.forEach { (parallaxName, parallaxConfig) ->
-            val parallaxConfig = ParallaxBackgroundConfig(
-                parallaxConfig.mode,
+            val parallaxConfig = ParallaxConfigV2(
                 width = 0,
                 height = parallaxConfig.parallaxHeight,
+                parallaxConfig.mode,
                 bgLayerNames.toList(),
                 fgLayerNames.toList()
             )

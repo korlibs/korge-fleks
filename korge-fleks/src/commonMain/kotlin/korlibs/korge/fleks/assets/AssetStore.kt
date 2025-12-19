@@ -17,7 +17,7 @@ import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
-import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
+import korlibs.korge.fleks.assets.data.ParallaxConfigV2
 import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
@@ -35,7 +35,7 @@ typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
 typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
-typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxBackgroundConfig>>
+typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxConfigV2>>
 typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxLayerConfig>>
 typealias ParallaxPlaneTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxPlaneTextures>>
 typealias TilesetMapType = MutableMap<String, Pair<AssetType, TileSet>>
@@ -110,7 +110,7 @@ class AssetStore {
             ninePatchSlices[name]!!.second
         } else error("AssetStore: NinePatchSlice '$name' not found!")
 
-    fun getParallaxConfig(name: String) : ParallaxBackgroundConfig =
+    fun getParallaxConfig(name: String) : ParallaxConfigV2 =
         if (parallaxBackgroundConfig.contains(name)) {
             parallaxBackgroundConfig[name]!!.second
         } else error("AssetStore: Parallax config '$name' not found!")
@@ -193,9 +193,9 @@ class AssetStore {
 
                 // TODO get this sorted out
                 when (type) {
-                    AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(type, textures, ninePatchSlices, bitMapFonts)
+                    AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(type, textures, ninePatchSlices, bitMapFonts, parallaxBackgroundConfig)
                     AssetType.WORLD -> {}
-                    AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(type, textures, ninePatchSlices, bitMapFonts)
+                    AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(type, textures, ninePatchSlices, bitMapFonts, parallaxBackgroundConfig)
                     AssetType.SPECIAL -> {}
                 }
                 // TODO Remove old loaders when new one is fully working
@@ -206,7 +206,7 @@ class AssetStore {
                 // (3) Pixel fonts into texture atlas
 //                textureAtlasLoader.loadPixelFonts(type, spriteAtlas, config, assetConfig.folder, bitMapFonts)
                 // (4) Parallax layers into texture atlas
-                textureAtlasLoader.loadParallaxLayers(type, spriteAtlas, config, parallaxBackgroundConfig, parallaxTextures, parallaxPlaneTextures)
+//                textureAtlasLoader.loadParallaxLayers(type, spriteAtlas, config, parallaxBackgroundConfig, parallaxTextures, parallaxPlaneTextures)
                 // (5) Tilesets for level maps into texture atlas
                 textureAtlasLoader.loadTilemapsTilesets(type, spriteAtlas, config, tilesets)
             }

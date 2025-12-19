@@ -2,10 +2,31 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.size
 import korlibs.image.bitmap.BmpSlice
+import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
+
+// TODO check if we can merge
+@Serializable
+data class ParallaxConfigV2(
+    @SerialName("w") val width: Int,  // virtual size in the parallax effect (height for horizontal mode, width for vertical mode)
+    @SerialName("h") val height: Int,
+    @SerialName("m") val mode: Mode,
+    @SerialName("b") val backgroundLayers: List<String> = emptyList(),
+    @SerialName("f") val foregroundLayers:  List<String> = emptyList(),
+    @SerialName("p") val parallaxPlane: ParallaxPlaneConfig? = null
+) {
+    @Serializable
+    data class ParallaxPlaneConfig(
+        @SerialName("n") val name: String,
+        @SerialName("sf") val speedFactor: Float = 1f,
+        @SerialName("s") val selfSpeed: Float = 0f,
+        @SerialName("t") val topAttachedLayers: List<String> = emptyList(),
+        @SerialName("b") val bottomAttachedLayers: List<String> = emptyList()
+    )
+}
 
 /**
  * This is the main parallax configuration.
@@ -58,16 +79,16 @@ data class ParallaxConfig(
      */
     @Serializable @SerialName("ParallaxLayerConfig")
     data class ParallaxLayerConfig(
-        val targetX: Int = 0,  // offset from the left corner of the parallax background image used in VERTICAL_PLANE mode
-        val targetY: Int = 0,  // offset from the top corner of the parallax background image used in HORIZONTAL_PLANE mode
+        @SerialName("tx") val targetX: Int = 0,  // offset from the left corner of the parallax background image used in VERTICAL_PLANE mode
+        @SerialName("ty") val targetY: Int = 0,  // offset from the top corner of the parallax background image used in HORIZONTAL_PLANE mode
 
-        val repeatX: Boolean = false,
-        val repeatY: Boolean = false,
-        val centerX: Boolean = false,  // Center the layer in the parallax background image
-        val centerY: Boolean = false,
-        val speedFactor: Float? = null,  // It this is null than no movement is applied to the layer
-        val selfSpeedX: Float = 0f,
-        val selfSpeedY: Float = 0f
+        @SerialName("rx") val repeatX: Boolean = false,
+        @SerialName("ry") val repeatY: Boolean = false,
+        @SerialName("cx") val centerX: Boolean = false,  // Center the layer in the parallax background image
+        @SerialName("cy") val centerY: Boolean = false,
+        @SerialName("sf") val speedFactor: Float? = null,  // It this is null than no movement is applied to the layer
+        @SerialName("sx") val selfSpeedX: Float = 0f,
+        @SerialName("sy") val selfSpeedY: Float = 0f
     ) {
         @Transient  // This is set when loading the texture atlas
         lateinit var layerBmpSlice: BmpSlice
@@ -111,10 +132,10 @@ data class ParallaxConfig(
      * of the layer will be attached to the parallax plane. If [attachBottomRight] is true then the right border
      * will be attached.
      */
-    @Serializable @SerialName("ParallaxAttachedLayerConfig")
+    @Serializable
     data class ParallaxAttachedLayerConfig(
-        val attachIndex: Int,
-        val repeat: Boolean = true,
-        val attachBottomRight: Boolean = true
+        @SerialName("i") val attachIndex: Int,
+        @SerialName("r") val repeat: Boolean = true,
+        @SerialName("a") val attachBottomRight: Boolean = true
     )
 }

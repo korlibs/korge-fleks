@@ -3,7 +3,7 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.assets.data.ParallaxConfig
+import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode
 import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.*
 import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
@@ -156,7 +156,7 @@ class ParallaxRenderSystem(
         global: Position,
         local: Position,
         localScroll: Float,
-        parallaxMode: ParallaxConfig.Mode,
+        parallaxMode: Mode,
         repeat: Boolean,
         lineTexture: ParallaxPlaneTextures.LineTexture,
         rgba: RGBA,

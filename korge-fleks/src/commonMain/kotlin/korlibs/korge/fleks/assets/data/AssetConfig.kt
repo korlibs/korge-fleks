@@ -20,7 +20,8 @@ data class AssetConfig(
     val images: Map<String, ImageInfo> = emptyMap(),
     val ninePatches: Map<String, NinePatchInfo> = emptyMap(),
     val pixelFonts: Map<String, PixelFontInfo> = emptyMap(),
-    val parallaxLayers: Map<String, ParallaxImageInfo> = emptyMap()
+    val parallaxLayers: Map<String, ParallaxImageInfo> = emptyMap(),
+    val parallaxConfigs: Map<String, ParallaxConfigV2> = emptyMap()
 ) {
     /**
      * Image info data class.
@@ -33,7 +34,7 @@ data class AssetConfig(
     data class ImageInfo(
         @SerialName("w") val width: Int = 0,
         @SerialName("h") val height: Int = 0,
-        @SerialName("fs") val frames: List<ImageFrame> = emptyList()
+        @SerialName("f") val frames: List<ImageFrame> = emptyList()
     ) {
         /**
          * Image frame info data class.
@@ -80,11 +81,22 @@ data class AssetConfig(
         @SerialName("f") val frame: List<Int> = emptyList()
     )
 
+    /**
+     * Parallax image info data class.
+     *
+     *  - width, height: virtual size of parallax background (used only for HORIZONTAL_PLANE and VERTICAL_PLANE modes)
+     *  - frames: list of image frames for animations
+     *  - parallaxLayerConfig: optional parallax layer configuration
+     *  - ParallaxAttachedLayerConfig: optional parallax plane configuration
+     *
+     *  Normally a parallax image will have either a parallaxLayerConfig or a ParallaxAttachedLayerConfig defined.
+     */
     @Serializable
     data class ParallaxImageInfo(
         @SerialName("w") val width: Int = 0,
         @SerialName("h") val height: Int = 0,
-        @SerialName("fs") val frames: List<ImageFrame> = emptyList(),
-        @SerialName("p") val parallaxLayerConfig: ParallaxConfig.ParallaxLayerConfig
+        @SerialName("f") val frames: List<ImageFrame> = emptyList(),
+        @SerialName("l") val parallaxLayerConfig: ParallaxConfig.ParallaxLayerConfig? = null,
+        @SerialName("p") val parallaxAttachedLayerConfig: ParallaxConfig.ParallaxAttachedLayerConfig? = null
     )
 }

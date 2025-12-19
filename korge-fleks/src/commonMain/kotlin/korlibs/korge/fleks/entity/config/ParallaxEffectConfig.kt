@@ -19,6 +19,7 @@ data class ParallaxEffectConfig(
     override val name: String,
 
     private val parallaxAssetName: String,
+    // TODO remove below - use layer names as defined in the parallax asset config
     private val backgroundLayerNames: List<String> = emptyList(),
     private val parallaxPlaneName: String = "",
     private val foregroundLayerNames: List<String> = emptyList(),
