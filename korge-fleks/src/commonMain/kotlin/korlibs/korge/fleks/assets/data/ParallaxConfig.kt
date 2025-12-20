@@ -36,7 +36,7 @@ data class LayerFrames(
 
 data class AttachedLayerFrames(
     val frames: List<SpriteFrame> = mutableListOf(),
-    val layerConfig: ParallaxConfig.ParallaxAttachedLayerConfig
+    val layerConfig: ParallaxConfig.ParallaxAttachedLayerConfigV2
 )
 
 
@@ -102,6 +102,22 @@ data class ParallaxConfig(
      */
     @Serializable @SerialName("ParallaxLayerConfig")
     data class ParallaxLayerConfig(
+        val targetX: Int = 0,  // offset from the left corner of the parallax background image used in VERTICAL_PLANE mode
+        val targetY: Int = 0,  // offset from the top corner of the parallax background image used in HORIZONTAL_PLANE mode
+        val repeatX: Boolean = false,
+        val repeatY: Boolean = false,
+        val centerX: Boolean = false,  // Center the layer in the parallax background image
+        val centerY: Boolean = false,
+        val speedFactor: Float? = null,  // It this is null than no movement is applied to the layer
+        val selfSpeedX: Float = 0f,
+        val selfSpeedY: Float = 0f
+    ) {
+        @Transient  // This is set when loading the texture atlas
+        lateinit var layerBmpSlice: BmpSlice
+    }
+
+    @Serializable
+    data class ParallaxLayerConfigV2(
         @SerialName("tx") val targetX: Int = 0,  // offset from the left corner of the parallax background image used in VERTICAL_PLANE mode
         @SerialName("ty") val targetY: Int = 0,  // offset from the top corner of the parallax background image used in HORIZONTAL_PLANE mode
 
@@ -157,6 +173,12 @@ data class ParallaxConfig(
      */
     @Serializable
     data class ParallaxAttachedLayerConfig(
+        val attachIndex: Int,
+        val repeat: Boolean = true,
+        val attachBottomRight: Boolean = true
+    )
+    @Serializable
+    data class ParallaxAttachedLayerConfigV2(
         @SerialName("i") val attachIndex: Int,
         @SerialName("r") val repeat: Boolean = true,
         @SerialName("a") val attachBottomRight: Boolean = true

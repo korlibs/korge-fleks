@@ -21,6 +21,9 @@ import korlibs.korge.fleks.assets.data.LayerFrames
 import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.ParallaxConfigV2
 import korlibs.korge.fleks.assets.data.LineFrames
+import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
+import korlibs.korge.fleks.assets.data.ParallaxConfig
+import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
@@ -41,6 +44,12 @@ typealias ParallaxLayerMapType = MutableMap<String, Pair<AssetType, LayerFrames>
 typealias ParallaxAttachedLayerMapType = MutableMap<String, Pair<AssetType, AttachedLayerFrames>>
 typealias ParallaxPlaneMapType = MutableMap<String, Pair<AssetType, LineFrames>>
 typealias TilesetMapType = MutableMap<String, Pair<AssetType, TileSet>>
+
+// old types - remove later
+typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxBackgroundConfig>>
+typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxConfig.ParallaxLayerConfig>>
+typealias ParallaxPlaneTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxPlaneTextures>>
+
 
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
@@ -75,9 +84,17 @@ class AssetStore {
     internal val textures: SpriteFramesMapType = mutableMapOf()  // TODO replace with below later
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
+
     internal val parallaxConfigs: ParallaxConfigMapType = mutableMapOf()
     internal val parallaxLayers: ParallaxLayerMapType = mutableMapOf()
+    internal val parallaxAttachedLayers: ParallaxAttachedLayerMapType = mutableMapOf()
     internal val parallaxPlanes: ParallaxPlaneMapType = mutableMapOf()
+
+    // old maps - remove later
+    internal val parallaxBackgroundConfig: ParallaxMapType = mutableMapOf()
+    internal val parallaxTextures: ParallaxTexturesMapType = mutableMapOf()
+    internal val parallaxPlaneTextures: ParallaxPlaneTexturesMapType = mutableMapOf()
+
     internal val tilesets: TilesetMapType = mutableMapOf()
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
@@ -111,17 +128,32 @@ class AssetStore {
             ninePatchSlices[name]!!.second
         } else error("AssetStore: NinePatchSlice '$name' not found!")
 
-    fun getParallaxConfig(name: String) : ParallaxConfigV2 =
+    fun getParallaxConfig(name: String) : ParallaxBackgroundConfig =
+        if (parallaxBackgroundConfig.contains(name)) {
+            parallaxBackgroundConfig[name]!!.second
+        } else error("AssetStore: Parallax config '$name' not found!")
+
+    fun getParallaxTexture(name: String) : ParallaxConfig.ParallaxLayerConfig =
+        if (parallaxTextures.contains(name)) {
+            parallaxTextures[name]!!.second
+        } else error("AssetStore: Parallax texture '$name' not found!")
+
+    fun getParallaxPlane(name: String) : ParallaxPlaneTextures =
+        if (parallaxPlaneTextures.contains(name)) {
+            parallaxPlaneTextures[name]!!.second
+        } else error("AssetStore: Parallax plane texture '$name' not found!")
+
+    fun getParallaxConfigV2(name: String) : ParallaxConfigV2 =
         if (parallaxConfigs.contains(name)) {
             parallaxConfigs[name]!!.second
         } else error("AssetStore: Parallax config '$name' not found!")
 
-    fun getParallaxTexture(name: String) : LayerFrames =
+    fun getParallaxTextureV2(name: String) : LayerFrames =
         if (parallaxLayers.contains(name)) {
             parallaxLayers[name]!!.second
         } else error("AssetStore: Parallax texture '$name' not found!")
 
-    fun getParallaxPlane(name: String) : LineFrames =
+    fun getParallaxPlaneV2(name: String) : LineFrames =
         if (parallaxPlanes.contains(name)) {
             parallaxPlanes[name]!!.second
         } else error("AssetStore: Parallax plane texture '$name' not found!")
@@ -195,10 +227,10 @@ class AssetStore {
                 // TODO get this sorted out
                 when (type) {
                     AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(
-                        type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, parallaxPlanes, parallaxConfigs)
+                        type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, parallaxAttachedLayers, parallaxPlanes, parallaxConfigs)
                     AssetType.WORLD -> {}
                     AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(
-                        type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, parallaxPlanes, parallaxConfigs)
+                        type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, parallaxAttachedLayers, parallaxPlanes, parallaxConfigs)
                     AssetType.SPECIAL -> {}
                 }
                 // TODO Remove old loaders when new one is fully working
@@ -209,7 +241,7 @@ class AssetStore {
                 // (3) Pixel fonts into texture atlas
 //                textureAtlasLoader.loadPixelFonts(type, spriteAtlas, config, assetConfig.folder, bitMapFonts)
                 // (4) Parallax layers into texture atlas
-               textureAtlasLoader.loadParallaxLayers(type, spriteAtlas, config, parallaxConfigs, parallaxLayers, parallaxPlanes)
+               textureAtlasLoader.loadParallaxLayers(type, spriteAtlas, config, parallaxBackgroundConfig, parallaxTextures, parallaxPlaneTextures)
                 // (5) Tilesets for level maps into texture atlas
                 textureAtlasLoader.loadTilemapsTilesets(type, spriteAtlas, config, tilesets)
             }
@@ -279,32 +311,4 @@ class AssetStore {
         parallaxPlanes.values.removeAll { it.first == type }
         tilesets.values.removeAll { it.first == type }
     }
-}
-
-// TODO move in separate file
-class AssetInfoSerializer {
-
-    /**
-     * This polymorphic module config for kotlinx serialization lists all Korge-fleks
-     * internal asset classes used for asset data representation.
-     * TODO check if needed at all
-     */
-    private val internalModule = SerializersModule {
-        // Register asset model data classes
-//        polymorphic(Component::class) {
-//            subclass(Collision::class)
-//        }
-    }
-
-    val yaml: Yaml = Yaml(
-//        serializersModule = internalModule,
-        configuration = YamlConfiguration(
-            encodingIndentationSize = 2,
-            singleLineStringStyle = SingleLineStringStyle.DoubleQuoted,
-            multiLineStringStyle = MultiLineStringStyle.DoubleQuoted,
-            allowAnchorsAndAliases = true,
-            polymorphismStyle = PolymorphismStyle.Property,
-            polymorphismPropertyName = "entityConfig"
-        )
-    )
 }

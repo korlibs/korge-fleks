@@ -8,20 +8,23 @@ import kotlinx.serialization.Serializable
 /**
  * Asset configuration data class.
  *
- *  - info: version info
+ *  - version: version info (major, minor, build)
  *  - textures: list of texture atlas file names
  *  - images: map of image names to [ImageInfo]
  *  - ninePatches: map of nine-patch image names to [NinePatchInfo]
  */
 @Serializable
 data class AssetConfig(
-    val info: List<Int> = emptyList(),
+    val version: List<Int> = emptyList(),
     val textures: List<String> = emptyList(),
     val images: Map<String, ImageInfo> = emptyMap(),
     val ninePatches: Map<String, NinePatchInfo> = emptyMap(),
     val pixelFonts: Map<String, PixelFontInfo> = emptyMap(),
     val parallaxLayers: Map<String, ParallaxImageInfo> = emptyMap(),
-    val parallaxConfigs: Map<String, ParallaxConfigV2> = emptyMap()
+    val parallaxConfigs: Map<String, ParallaxConfigV2> = emptyMap(),
+
+    // TODO remove later
+    val parallaxImages: Map<String, ParallaxImageInfo> = emptyMap()
 ) {
     /**
      * Image info data class.
@@ -96,7 +99,7 @@ data class AssetConfig(
         @SerialName("w") val width: Int = 0,
         @SerialName("h") val height: Int = 0,
         @SerialName("f") val frames: List<ImageFrame> = emptyList(),
-        @SerialName("l") val parallaxLayerConfig: ParallaxConfig.ParallaxLayerConfig? = null,
-        @SerialName("a") val parallaxAttachedLayerConfig: ParallaxConfig.ParallaxAttachedLayerConfig? = null
+        @SerialName("l") val parallaxLayerConfig: ParallaxConfig.ParallaxLayerConfigV2? = null,
+        @SerialName("a") val parallaxAttachedLayerConfig: ParallaxConfig.ParallaxAttachedLayerConfigV2? = null
     )
 }
