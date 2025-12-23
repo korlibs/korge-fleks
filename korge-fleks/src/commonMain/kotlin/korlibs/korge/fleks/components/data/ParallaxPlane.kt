@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("ParallaxPlane")
 class ParallaxPlane private constructor(
-    var name: String = "",
+    var name: String = "",  // TODO - remove, not used anymore
     var entity: Entity = Entity.NONE,
     // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
     val linePositions: MutableList<Float> = mutableListOf(),

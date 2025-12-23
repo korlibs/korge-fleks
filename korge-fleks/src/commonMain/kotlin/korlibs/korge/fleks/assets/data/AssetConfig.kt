@@ -1,8 +1,9 @@
 package korlibs.korge.fleks.assets.data
 
-import korlibs.korge.fleks.assets.data.AssetConfig.ImageInfo.ImageFrame
+import korlibs.image.bitmap.BmpSlice
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 
 /**
@@ -20,11 +21,7 @@ data class AssetConfig(
     val images: Map<String, ImageInfo> = emptyMap(),
     val ninePatches: Map<String, NinePatchInfo> = emptyMap(),
     val pixelFonts: Map<String, PixelFontInfo> = emptyMap(),
-    val parallaxLayers: Map<String, ParallaxImageInfo> = emptyMap(),
-    val parallaxConfigs: Map<String, ParallaxConfigV2> = emptyMap(),
-
-    // TODO remove later
-    val parallaxImages: Map<String, ParallaxImageInfo> = emptyMap()
+    val parallaxLayers: Map<String, ParallaxLayersInfo> = emptyMap(),
 ) {
     /**
      * Image info data class.
@@ -85,21 +82,62 @@ data class AssetConfig(
     )
 
     /**
-     * Parallax image info data class.
+     * Parallax layers info data class.
      *
      *  - width, height: virtual size of parallax background (used only for HORIZONTAL_PLANE and VERTICAL_PLANE modes)
-     *  - frames: list of image frames for animations
-     *  - parallaxLayerConfig: optional parallax layer configuration
-     *  - ParallaxAttachedLayerConfig: optional parallax plane configuration
-     *
-     *  Normally a parallax image will have either a parallaxLayerConfig or a ParallaxAttachedLayerConfig defined.
      */
     @Serializable
-    data class ParallaxImageInfo(
+    data class ParallaxLayersInfo(
         @SerialName("w") val width: Int = 0,
         @SerialName("h") val height: Int = 0,
-        @SerialName("f") val frames: List<ImageFrame> = emptyList(),
-        @SerialName("l") val parallaxLayerConfig: ParallaxConfig.ParallaxLayerConfigV2? = null,
-        @SerialName("a") val parallaxAttachedLayerConfig: ParallaxConfig.ParallaxAttachedLayerConfigV2? = null
-    )
+        @SerialName("m") val mode: Mode = Mode.NO_PLANE,
+        @SerialName("b") val backgroundLayers: List<ParallaxLayer> = emptyList(),
+        @SerialName("f") val foregroundLayers: List<ParallaxLayer> = emptyList(),
+        @SerialName("p") val parallaxPlane: ParallaxPlane? = null
+    ) {
+        enum class Mode {
+            HORIZONTAL_PLANE, VERTICAL_PLANE, NO_PLANE
+        }
+
+        @Serializable
+        data class ParallaxLayer(
+            @SerialName("n") val name: String = "",
+            @SerialName("f") val frame: List<Int> = emptyList(),
+
+            // TODO check if we can get this from atlas frame info and make it transient
+            @SerialName("tx") val targetX: Int = 0,  // offset from the left corner of the parallax background image used in VERTICAL_PLANE mode
+            @SerialName("ty") val targetY: Int = 0,  // offset from the top corner of the parallax background image used in HORIZONTAL_PLANE mode
+
+            @SerialName("rx") val repeatX: Boolean = false,
+            @SerialName("ry") val repeatY: Boolean = false,
+            @SerialName("cx") val centerX: Boolean = false,  // Center the layer in the parallax background image
+            @SerialName("cy") val centerY: Boolean = false,
+            @SerialName("sf") val speedFactor: Float? = null,  // It this is null than no movement is applied to the layer
+            @SerialName("sx") val selfSpeedX: Float = 0f,
+            @SerialName("sy") val selfSpeedY: Float = 0f
+        ) {
+            @Transient  // This is set when loading the texture atlas
+            lateinit var bmpSlice: BmpSlice
+        }
+
+        @Serializable
+        data class ParallaxPlane(
+            @SerialName("n") val name: String = "",
+            @SerialName("s") val selfSpeed: Float = 0f,
+            @SerialName("l") val lineTextures: MutableList<LineTexture> = mutableListOf(),
+            @SerialName("t") val topAttachedLayerTextures: MutableList<LineTexture> = mutableListOf(),
+            @SerialName("b") val bottomAttachedLayerTextures: MutableList<LineTexture> = mutableListOf()
+        ) {
+            @Serializable
+            data class LineTexture(
+                @SerialName("f") val frame: List<Int> = emptyList(),
+                @SerialName("i") val index: Int,
+                @SerialName("s") val speedFactor: Float
+            ) {
+                @Transient  // This is set when loading the texture atlas
+                lateinit var bmpSlice: BmpSlice
+            }
+        }
+
+    }
 }

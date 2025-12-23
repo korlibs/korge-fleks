@@ -20,10 +20,7 @@ import korlibs.io.util.unquote
 import korlibs.korge.fleks.assets.AssetModel.TextureConfig
 import korlibs.korge.fleks.assets.BitMapFontMapType
 import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
-import korlibs.korge.fleks.assets.ParallaxAttachedLayerMapType
-import korlibs.korge.fleks.assets.ParallaxConfigMapType
-import korlibs.korge.fleks.assets.ParallaxPlaneMapType
-import korlibs.korge.fleks.assets.ParallaxLayerMapType
+import korlibs.korge.fleks.assets.ParallaxV2MapType
 import korlibs.korge.fleks.assets.ParallaxMapType
 import korlibs.korge.fleks.assets.ParallaxPlaneTexturesMapType
 import korlibs.korge.fleks.assets.ParallaxTexturesMapType
@@ -77,12 +74,10 @@ suspend fun VfsFile.readKorgeFleksAssets(
     textures: SpriteFramesMapType,
     ninePatchSlices: NinePatchBmpSliceMapType,
     bitMapFonts: BitMapFontMapType,
-    parallaxLayers: ParallaxLayerMapType,
-    parallaxAttachedLayers: ParallaxAttachedLayerMapType,
-    parallaxPlaneLines: ParallaxPlaneMapType,
-    parallaxConfig: ParallaxConfigMapType,
+    parallaxTextures: ParallaxV2MapType,
 ) {
-    val assetConfig: AssetConfig = Json.decodeFromString(this.readString())
+    // TODO remove ignoreUnknownKeys after testing
+    val assetConfig: AssetConfig = Json { ignoreUnknownKeys = true }.decodeFromString(this.readString())
 
     // Get version info
     val major: Int = assetConfig.version[0]
@@ -163,38 +158,38 @@ suspend fun VfsFile.readKorgeFleksAssets(
 
     // Load parallax layers into parallaxTextures map
     assetConfig.parallaxLayers.forEach { (name, image) ->
-        val frames = if (image.parallaxLayerConfig != null || image.parallaxAttachedLayerConfig != null) {
-            image.frames.map { frames ->
-                val frame = frames.frame
-                val index = frame[0]
-                val x = frame[1]
-                val y = frame[2]
-                val width = frame[3]
-                val height = frame[4]
-                SpriteFrame(
-                    bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
-                        .slice(RectangleInt(x, y, width, height)),
-                    targetX = frames.xOffset,  // offset of layer from top-left corner of parallax background
-                    targetY = frames.yOffset,
-                    duration = frames.duration.toFloat() / 1000f
-                )
-            }
-        } else {
-            image.frames.map { frames ->
-                val frame = frames.frame
-                val index = frame[0]
-                val x = frame[1]
-                val y = frame[2]
-                val width = frame[3]
-                val height = frame[4]
-                LineFrames.LineFrame(
-                    bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
-                        .slice(RectangleInt(x, y, width, height)),
-                    duration = frames.duration.toFloat() / 1000f
-                )
-            }
-
-        }
+//        val frames = if (image.parallaxLayerConfig != null || image.parallaxAttachedLayerConfig != null) {
+//            image.frames.map { frames ->
+//                val frame = frames.frame
+//                val index = frame[0]
+//                val x = frame[1]
+//                val y = frame[2]
+//                val width = frame[3]
+//                val height = frame[4]
+//                SpriteFrame(
+//                    bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
+//                        .slice(RectangleInt(x, y, width, height)),
+//                    targetX = frames.xOffset,  // offset of layer from top-left corner of parallax background
+//                    targetY = frames.yOffset,
+//                    duration = frames.duration.toFloat() / 1000f
+//                )
+//            }
+//        } else {
+//            image.frames.map { frames ->
+//                val frame = frames.frame
+//                val index = frame[0]
+//                val x = frame[1]
+//                val y = frame[2]
+//                val width = frame[3]
+//                val height = frame[4]
+//                LineFrames.LineFrame(
+//                    bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
+//                        .slice(RectangleInt(x, y, width, height)),
+//                    duration = frames.duration.toFloat() / 1000f
+//                )
+//            }
+//
+//        }
 /*
         image.parallaxLayerConfig?.let { config ->
             parallaxLayers[name] = Pair(type, LayerFrames(frames = frames as List<SpriteFrame>, layerConfig = config))
@@ -210,9 +205,9 @@ suspend fun VfsFile.readKorgeFleksAssets(
     }
 
     // Save parallax layer (object) configs into parallaxConfig map
-    assetConfig.parallaxConfigs.forEach { (name, config) ->
-        parallaxConfig[name] = Pair(type, config)
-    }
+//    assetConfig.parallaxConfigs.forEach { (name, config) ->
+//        parallaxTextures[name] = Pair(type, config)
+//    }
 }
 
 
@@ -248,7 +243,7 @@ class TextureAtlasLoader {
         type: AssetType,
         atlas: Atlas,
         config: TextureConfig,
-        parallaxBackgroundConfig: ParallaxConfigMapType,
+        parallaxBackgroundConfig: ParallaxV2MapType,
         parallaxTextures: ParallaxTexturesMapType,
         parallaxPlaneTextures: ParallaxPlaneTexturesMapType
     ) {
@@ -345,7 +340,7 @@ class TextureAtlasLoader {
                 bgLayerNames.toList(),
                 fgLayerNames.toList()
             )
-            parallaxBackgroundConfig[parallaxName] = Pair(type, parallaxConfig)
+//            parallaxBackgroundConfig[parallaxName] = Pair(type, parallaxConfig)
         }
 //        println()
     }

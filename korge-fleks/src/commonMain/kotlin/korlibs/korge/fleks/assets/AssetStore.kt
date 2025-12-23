@@ -1,10 +1,5 @@
 package korlibs.korge.fleks.assets
 
-import com.charleskorn.kaml.MultiLineStringStyle
-import com.charleskorn.kaml.PolymorphismStyle
-import com.charleskorn.kaml.SingleLineStringStyle
-import com.charleskorn.kaml.Yaml
-import com.charleskorn.kaml.YamlConfiguration
 import korlibs.audio.format.*
 import korlibs.audio.sound.*
 import korlibs.image.atlas.readAtlas
@@ -13,14 +8,11 @@ import korlibs.image.font.BitmapFont
 import korlibs.image.font.Font
 import korlibs.image.tiles.TileSet
 import korlibs.io.file.std.resourcesVfs
+import korlibs.korge.fleks.assets.data.AssetConfig.*
 import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
-import korlibs.korge.fleks.assets.data.AttachedLayerFrames
 import korlibs.korge.fleks.assets.data.GameObjectConfig
-import korlibs.korge.fleks.assets.data.LayerFrames
 import korlibs.korge.fleks.assets.data.LayerTileMaps
-import korlibs.korge.fleks.assets.data.ParallaxConfigV2
-import korlibs.korge.fleks.assets.data.LineFrames
 import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
 import korlibs.korge.fleks.assets.data.ParallaxConfig
 import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
@@ -29,7 +21,6 @@ import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
 import korlibs.time.Stopwatch
-import kotlinx.serialization.modules.SerializersModule
 import kotlin.collections.set
 
 
@@ -39,13 +30,10 @@ typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
 typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
-typealias ParallaxConfigMapType = MutableMap<String, Pair<AssetType, ParallaxConfigV2>>
-typealias ParallaxLayerMapType = MutableMap<String, Pair<AssetType, LayerFrames>>
-typealias ParallaxAttachedLayerMapType = MutableMap<String, Pair<AssetType, AttachedLayerFrames>>
-typealias ParallaxPlaneMapType = MutableMap<String, Pair<AssetType, LineFrames>>
+typealias ParallaxV2MapType = MutableMap<String, Pair<AssetType, ParallaxLayersInfo>>
 typealias TilesetMapType = MutableMap<String, Pair<AssetType, TileSet>>
 
-// old types - remove later
+// old types - remove later when parallax v2 is fully working
 typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxBackgroundConfig>>
 typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxConfig.ParallaxLayerConfig>>
 typealias ParallaxPlaneTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxPlaneTextures>>
@@ -85,10 +73,7 @@ class AssetStore {
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
 
-    internal val parallaxConfigs: ParallaxConfigMapType = mutableMapOf()
-    internal val parallaxLayers: ParallaxLayerMapType = mutableMapOf()
-    internal val parallaxAttachedLayers: ParallaxAttachedLayerMapType = mutableMapOf()
-    internal val parallaxPlanes: ParallaxPlaneMapType = mutableMapOf()
+    internal val parallaxTexturesV2: ParallaxV2MapType = mutableMapOf()
 
     // old maps - remove later
     internal val parallaxBackgroundConfig: ParallaxMapType = mutableMapOf()
@@ -143,20 +128,12 @@ class AssetStore {
             parallaxPlaneTextures[name]!!.second
         } else error("AssetStore: Parallax plane texture '$name' not found!")
 
-    fun getParallaxConfigV2(name: String) : ParallaxConfigV2 =
-        if (parallaxConfigs.contains(name)) {
-            parallaxConfigs[name]!!.second
-        } else error("AssetStore: Parallax config '$name' not found!")
+    fun getParallaxConfigV2(name: String) : ParallaxLayersInfo =
+        ParallaxLayersInfo()
 
-    fun getParallaxTextureV2(name: String) : LayerFrames =
-        if (parallaxLayers.contains(name)) {
-            parallaxLayers[name]!!.second
-        } else error("AssetStore: Parallax texture '$name' not found!")
-
-    fun getParallaxPlaneV2(name: String) : LineFrames =
-        if (parallaxPlanes.contains(name)) {
-            parallaxPlanes[name]!!.second
-        } else error("AssetStore: Parallax plane texture '$name' not found!")
+//        if (parallaxTexturesV2.contains(name)) {
+//            parallaxTexturesV2[name]!!.second
+//        } else error("AssetStore: Parallax config '$name' not found!")
 
     fun getFont(name: String) : Font =
         bitMapFonts[name]?.second ?: error("AssetStore: Cannot find font '$name'!")
@@ -227,10 +204,10 @@ class AssetStore {
                 // TODO get this sorted out
                 when (type) {
                     AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(
-                        type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, parallaxAttachedLayers, parallaxPlanes, parallaxConfigs)
+                        type, textures, ninePatchSlices, bitMapFonts, parallaxTexturesV2)
                     AssetType.WORLD -> {}
                     AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(
-                        type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, parallaxAttachedLayers, parallaxPlanes, parallaxConfigs)
+                        type, textures, ninePatchSlices, bitMapFonts, parallaxTexturesV2)
                     AssetType.SPECIAL -> {}
                 }
                 // TODO Remove old loaders when new one is fully working
@@ -306,9 +283,7 @@ class AssetStore {
         textures.values.removeAll { it.first == type }
         ninePatchSlices.values.removeAll { it.first == type }
         bitMapFonts.values.removeAll { it.first == type }
-        parallaxConfigs.values.removeAll { it.first == type }
-        parallaxLayers.values.removeAll { it.first == type }
-        parallaxPlanes.values.removeAll { it.first == type }
+        parallaxTexturesV2.values.removeAll { it.first == type }
         tilesets.values.removeAll { it.first == type }
     }
 }
