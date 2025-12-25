@@ -104,10 +104,8 @@ data class AssetConfig(
             @SerialName("n") val name: String = "",
             @SerialName("f") val frame: List<Int> = emptyList(),
 
-            // TODO check if we can get this from atlas frame info and make it transient
             @SerialName("tx") val targetX: Int = 0,  // offset from the left corner of the parallax background image used in VERTICAL_PLANE mode
             @SerialName("ty") val targetY: Int = 0,  // offset from the top corner of the parallax background image used in HORIZONTAL_PLANE mode
-
             @SerialName("rx") val repeatX: Boolean = false,
             @SerialName("ry") val repeatY: Boolean = false,
             @SerialName("cx") val centerX: Boolean = false,  // Center the layer in the parallax background image
@@ -125,8 +123,8 @@ data class AssetConfig(
             @SerialName("n") val name: String = "",
             @SerialName("s") val selfSpeed: Float = 0f,
             @SerialName("l") val lineTextures: MutableList<LineTexture> = mutableListOf(),
-            @SerialName("t") val topAttachedLayerTextures: MutableList<LineTexture> = mutableListOf(),
-            @SerialName("b") val bottomAttachedLayerTextures: MutableList<LineTexture> = mutableListOf()
+            @SerialName("t") val topAttachedLayers: MutableList<LineTexture> = mutableListOf(),
+            @SerialName("b") val bottomAttachedLayers: MutableList<LineTexture> = mutableListOf()
         ) {
             @Serializable
             data class LineTexture(

@@ -20,15 +20,11 @@ import korlibs.io.util.unquote
 import korlibs.korge.fleks.assets.AssetModel.TextureConfig
 import korlibs.korge.fleks.assets.BitMapFontMapType
 import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
-import korlibs.korge.fleks.assets.ParallaxV2MapType
-import korlibs.korge.fleks.assets.ParallaxMapType
-import korlibs.korge.fleks.assets.ParallaxPlaneTexturesMapType
-import korlibs.korge.fleks.assets.ParallaxTexturesMapType
+import korlibs.korge.fleks.assets.ParallaxLayersMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
 import korlibs.korge.fleks.assets.TilesetMapType
-import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.HORIZONTAL_PLANE
-import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.VERTICAL_PLANE
-import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures.LineTexture
+import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxPlane.*
+import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxLayer
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
 import korlibs.math.geom.RectangleInt
 import korlibs.math.geom.slice.RectSlice
@@ -74,7 +70,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
     textures: SpriteFramesMapType,
     ninePatchSlices: NinePatchBmpSliceMapType,
     bitMapFonts: BitMapFontMapType,
-    parallaxTextures: ParallaxV2MapType,
+    parallaxLayers: ParallaxLayersMapType,
 ) {
     // TODO remove ignoreUnknownKeys after testing
     val assetConfig: AssetConfig = Json { ignoreUnknownKeys = true }.decodeFromString(this.readString())
@@ -157,57 +153,40 @@ suspend fun VfsFile.readKorgeFleksAssets(
     }
 
     // Load parallax layers into parallaxTextures map
-    assetConfig.parallaxLayers.forEach { (name, image) ->
-//        val frames = if (image.parallaxLayerConfig != null || image.parallaxAttachedLayerConfig != null) {
-//            image.frames.map { frames ->
-//                val frame = frames.frame
-//                val index = frame[0]
-//                val x = frame[1]
-//                val y = frame[2]
-//                val width = frame[3]
-//                val height = frame[4]
-//                SpriteFrame(
-//                    bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
-//                        .slice(RectangleInt(x, y, width, height)),
-//                    targetX = frames.xOffset,  // offset of layer from top-left corner of parallax background
-//                    targetY = frames.yOffset,
-//                    duration = frames.duration.toFloat() / 1000f
-//                )
-//            }
-//        } else {
-//            image.frames.map { frames ->
-//                val frame = frames.frame
-//                val index = frame[0]
-//                val x = frame[1]
-//                val y = frame[2]
-//                val width = frame[3]
-//                val height = frame[4]
-//                LineFrames.LineFrame(
-//                    bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
-//                        .slice(RectangleInt(x, y, width, height)),
-//                    duration = frames.duration.toFloat() / 1000f
-//                )
-//            }
-//
-//        }
-/*
-        image.parallaxLayerConfig?.let { config ->
-            parallaxLayers[name] = Pair(type, LayerFrames(frames = frames as List<SpriteFrame>, layerConfig = config))
-        } ?:
-        image.parallaxAttachedLayerConfig?.let { config ->
-            val attachIndex = config.attachIndex
-            parallaxAttachedLayers[name] = Pair(type, AttachedLayerFrames(frames as List<SpriteFrame>, config))
-        } ?:
-        image.parallaxPlaneLineConfig?.let { config ->
-            parallaxPlaneLines[name] = Pair(type, LineFrames(frames as List<LineFrames.LineFrame>, config.index, config.speedFactor, config.repeat))
-        } ?: error("TextureAtlasLoader - Parallax layer '$name' has no valid parallax layer config!")
-*/
-    }
+    assetConfig.parallaxLayers.forEach { (name, parallaxInfo) ->
 
-    // Save parallax layer (object) configs into parallaxConfig map
-//    assetConfig.parallaxConfigs.forEach { (name, config) ->
-//        parallaxTextures[name] = Pair(type, config)
-//    }
+        fun setBmpSlice(layer: ParallaxLayer) {
+            layer.bmpSlice = textureAtlases.getOrElse(index = layer.frame[0]) { error("readKorgeFleksAssets - texture atlas index '${layer.frame[0]}' for parallax info '$name' not found!") }
+                .slice(RectangleInt(
+                    x = layer.frame[1],
+                    y = layer.frame[2],
+                    width = layer.frame[3],
+                    height = layer.frame[4]
+                ))
+        }
+
+        parallaxInfo.backgroundLayers.forEach { layer -> setBmpSlice(layer) }
+        parallaxInfo.foregroundLayers.forEach { layer -> setBmpSlice(layer) }
+
+        parallaxInfo.parallaxPlane?.let { planeInfo ->
+
+            fun setBmpSlice(line: LineTexture) {
+                line.bmpSlice = textureAtlases.getOrElse(index = line.frame[0]) { error("readKorgeFleksAssets - texture atlas index '${line.frame[0]}' for parallax info '$name' not found!") }
+                    .slice(RectangleInt(
+                        x = line.frame[1],
+                        y = line.frame[2],
+                        width = line.frame[3],
+                        height = line.frame[4]
+                    ))
+            }
+
+            planeInfo.topAttachedLayers.forEach { layer -> setBmpSlice(layer) }
+            planeInfo.bottomAttachedLayers.forEach { layer -> setBmpSlice(layer) }
+            planeInfo.lineTextures.forEach { line -> setBmpSlice(line) }
+        }
+
+        parallaxLayers[name] = Pair(type, parallaxInfo)
+    }
 }
 
 
@@ -222,233 +201,6 @@ class TextureAtlasLoader {
             else
                 (index - midPoint + 1f) / midPoint
             )
-    }
-
-
-    /**
-     * Loads all parallax background and plane layer textures from the given texture atlas.
-     *
-     * Iterates through atlas entries with the prefix "plx_" and assigns them to background or foreground
-     * parallax layers, or to parallax planes and their attached layers, based on the provided configuration.
-     * Populates the corresponding maps with the loaded textures and updates the global parallax background configuration.
-     *
-     * @param type The asset type for the loaded textures.
-     * @param atlas The texture atlas containing the entries.
-     * @param config The texture configuration, including parallax settings.
-     * @param parallaxBackgroundConfig The map to store global parallax background configurations.
-     * @param parallaxTextures The map to store background and foreground parallax layer textures.
-     * @param parallaxPlaneTextures The map to store parallax plane and attached layer textures.
-     */
-    fun loadParallaxLayersV2(
-        type: AssetType,
-        atlas: Atlas,
-        config: TextureConfig,
-        parallaxBackgroundConfig: ParallaxV2MapType,
-        parallaxTextures: ParallaxTexturesMapType,
-        parallaxPlaneTextures: ParallaxPlaneTexturesMapType
-    ) {
-        val bgLayerNames = mutableListOf<String>()
-        val fgLayerNames = mutableListOf<String>()
-
-        atlas.entries.forEachWith("plx_") { entry, frameTag ->
-            config.parallaxBackgrounds.forEach { (_, parallaxConfig) ->
-                // Check if frameTags are used for parallax background layers and save them in separate maps
-                if (parallaxConfig.backgroundLayers.containsKey(frameTag)
-                    || parallaxConfig.foregroundLayers.containsKey(frameTag)) {
-                    // frameTag is used for parallax background layer
-                    val layer = parallaxConfig.backgroundLayers[frameTag]
-                        ?: parallaxConfig.foregroundLayers[frameTag]
-                        ?: error("TextureAtlasLoader - Cannot find parallax layer '$frameTag' in '$type' parallax config!")
-
-                    layer.layerBmpSlice = atlas.texture.slice(entry.info.frame)
-                    parallaxTextures[frameTag] = Pair(type, layer)
-                    if (parallaxConfig.backgroundLayers.containsKey(frameTag)) bgLayerNames.add(frameTag)
-                    if (parallaxConfig.foregroundLayers.containsKey(frameTag)) fgLayerNames.add(frameTag)
-                    return@forEach
-                }
-
-                // Check if frameTags are used for 2.5 D parallax plane
-                if (parallaxConfig.parallaxPlane != null) {
-                    val planeConfig = parallaxConfig.parallaxPlane
-                    val planeName = planeConfig.name
-                    val planeSpeedFactor = planeConfig.speedFactor
-
-                    // Create object for parallax plane textures if not existing yet
-                    if (!parallaxPlaneTextures.containsKey(planeName)) parallaxPlaneTextures[planeName] =
-                        Pair(type, ParallaxPlaneTextures())
-
-                    // Check if frameTag is used for parallax plane
-                    if (frameTag.contains(planeName)) {
-                        // Get the parallax plane index number
-                        val regex = "_slice(\\d+)$".toRegex()
-                        val match = regex.find(frameTag)
-                        val planeIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get plane index of texture '${frameTag}'!")
-
-                        parallaxPlaneTextures[planeName]!!.second.lineTextures.add(LineTexture(
-                            index = planeIndex,
-                            bmpSlice = atlas.texture.slice(entry.info.frame),
-                            speedFactor = getParallaxPlaneSpeedFactor(planeIndex, parallaxConfig.parallaxHeight, planeSpeedFactor)
-                        ))
-                        return@forEach
-                    }
-
-                    // Check if frameTag is used for parallax plane attached layers
-                    planeConfig.topAttachedLayers.forEach { (layerName, layerConfig) ->
-                        if (frameTag.contains(layerName)) {
-                            val planeIndex = layerConfig.attachIndex
-                            val layerTexture = atlas.texture.slice(entry.info.frame)
-                            val layerSize = when (parallaxConfig.mode) {
-                                HORIZONTAL_PLANE -> layerTexture.height
-                                VERTICAL_PLANE -> layerTexture.width
-                                else -> error("TextureAtlasLoader - Cannot use top attached parallax layers without a parallax plane!")
-                            }
-
-                            parallaxPlaneTextures[planeName]!!.second.topAttachedLayerTextures.add(LineTexture(
-                                index = if (layerConfig.attachBottomRight) planeIndex - layerSize else planeIndex,
-                                bmpSlice = layerTexture,
-                                speedFactor = getParallaxPlaneSpeedFactor(planeIndex, parallaxConfig.parallaxHeight, planeSpeedFactor)
-                            ))
-                        }
-                    }
-                    planeConfig.bottomAttachedLayers.forEach { (layerName, layerConfig) ->
-                        if (frameTag.contains(layerName)) {
-                            val planeIndex = layerConfig.attachIndex
-                            val layerTexture = atlas.texture.slice(entry.info.frame)
-                            val layerSize = when (parallaxConfig.mode) {
-                                HORIZONTAL_PLANE -> layerTexture.height
-                                VERTICAL_PLANE -> layerTexture.width
-                                else -> error("TextureAtlasLoader - Cannot use bottom attached parallax layers without a parallax plane!")
-                            }
-
-                            parallaxPlaneTextures[planeName]!!.second.bottomAttachedLayerTextures.add(LineTexture(
-                                index = if (layerConfig.attachBottomRight) planeIndex - layerSize else planeIndex,
-                                bmpSlice = layerTexture,
-                                speedFactor = getParallaxPlaneSpeedFactor(planeIndex, parallaxConfig.parallaxHeight, planeSpeedFactor)
-                            ))
-                        }
-                    }
-                }
-            }
-        }
-
-        // Save the global parallax background configuration AFTER all atlas textures were processed
-        config.parallaxBackgrounds.forEach { (parallaxName, parallaxConfig) ->
-            val parallaxConfig = ParallaxConfigV2(
-                width = 0,
-                height = parallaxConfig.parallaxHeight,
-                parallaxConfig.mode,
-                bgLayerNames.toList(),
-                fgLayerNames.toList()
-            )
-//            parallaxBackgroundConfig[parallaxName] = Pair(type, parallaxConfig)
-        }
-//        println()
-    }
-
-    fun loadParallaxLayers(
-        type: AssetType,
-        atlas: Atlas,
-        config: TextureConfig,
-        parallaxBackgroundConfig: ParallaxMapType,
-        parallaxTextures: ParallaxTexturesMapType,
-        parallaxPlaneTextures: ParallaxPlaneTexturesMapType,
-    ) {
-        val bgLayerNames = mutableListOf<String>()
-        val fgLayerNames = mutableListOf<String>()
-
-        atlas.entries.forEachWith("plx_") { entry, frameTag ->
-            config.parallaxBackgrounds.forEach { (_, parallaxConfig) ->
-                // Check if frameTags are used for parallax background layers and save them in separate maps
-                if (parallaxConfig.backgroundLayers.containsKey(frameTag)
-                    || parallaxConfig.foregroundLayers.containsKey(frameTag)) {
-                    // frameTag is used for parallax background layer
-                    val layer = parallaxConfig.backgroundLayers[frameTag]
-                        ?: parallaxConfig.foregroundLayers[frameTag]
-                        ?: error("TextureAtlasLoader - Cannot find parallax layer '$frameTag' in '$type' parallax config!")
-
-                    layer.layerBmpSlice = atlas.texture.slice(entry.info.frame)
-                    parallaxTextures[frameTag] = Pair(type, layer)
-                    if (parallaxConfig.backgroundLayers.containsKey(frameTag)) bgLayerNames.add(frameTag)
-                    if (parallaxConfig.foregroundLayers.containsKey(frameTag)) fgLayerNames.add(frameTag)
-                    return@forEach
-                }
-
-                // Check if frameTags are used for 2.5 D parallax plane
-                if (parallaxConfig.parallaxPlane != null) {
-                    val planeConfig = parallaxConfig.parallaxPlane
-                    val planeName = planeConfig.name
-                    val planeSpeedFactor = planeConfig.speedFactor
-
-                    // Create object for parallax plane textures if not existing yet
-                    if (!parallaxPlaneTextures.containsKey(planeName)) parallaxPlaneTextures[planeName] =
-                        Pair(type, ParallaxPlaneTextures())
-
-                    // Check if frameTag is used for parallax plane
-                    if (frameTag.contains(planeName)) {
-                        // Get the parallax plane index number
-                        val regex = "_slice(\\d+)$".toRegex()
-                        val match = regex.find(frameTag)
-                        val planeIndex = match?.groupValues?.get(1)?.toInt() ?: error("Cannot get plane index of texture '${frameTag}'!")
-
-                        parallaxPlaneTextures[planeName]!!.second.lineTextures.add(LineTexture(
-                            index = planeIndex,
-                            bmpSlice = atlas.texture.slice(entry.info.frame),
-                            speedFactor = getParallaxPlaneSpeedFactor(planeIndex, parallaxConfig.parallaxHeight, planeSpeedFactor)
-                        ))
-                        return@forEach
-                    }
-
-                    // Check if frameTag is used for parallax plane attached layers
-                    planeConfig.topAttachedLayers.forEach { (layerName, layerConfig) ->
-                        if (frameTag.contains(layerName)) {
-                            val planeIndex = layerConfig.attachIndex
-                            val layerTexture = atlas.texture.slice(entry.info.frame)
-                            val layerSize = when (parallaxConfig.mode) {
-                                HORIZONTAL_PLANE -> layerTexture.height
-                                VERTICAL_PLANE -> layerTexture.width
-                                else -> error("TextureAtlasLoader - Cannot use top attached parallax layers without a parallax plane!")
-                            }
-
-                            parallaxPlaneTextures[planeName]!!.second.topAttachedLayerTextures.add(LineTexture(
-                                index = if (layerConfig.attachBottomRight) planeIndex - layerSize else planeIndex,
-                                bmpSlice = layerTexture,
-                                speedFactor = getParallaxPlaneSpeedFactor(planeIndex, parallaxConfig.parallaxHeight, planeSpeedFactor)
-                            ))
-                        }
-                    }
-                    planeConfig.bottomAttachedLayers.forEach { (layerName, layerConfig) ->
-                        if (frameTag.contains(layerName)) {
-                            val planeIndex = layerConfig.attachIndex
-                            val layerTexture = atlas.texture.slice(entry.info.frame)
-                            val layerSize = when (parallaxConfig.mode) {
-                                HORIZONTAL_PLANE -> layerTexture.height
-                                VERTICAL_PLANE -> layerTexture.width
-                                else -> error("TextureAtlasLoader - Cannot use bottom attached parallax layers without a parallax plane!")
-                            }
-
-                            parallaxPlaneTextures[planeName]!!.second.bottomAttachedLayerTextures.add(LineTexture(
-                                index = if (layerConfig.attachBottomRight) planeIndex - layerSize else planeIndex,
-                                bmpSlice = layerTexture,
-                                speedFactor = getParallaxPlaneSpeedFactor(planeIndex, parallaxConfig.parallaxHeight, planeSpeedFactor)
-                            ))
-                        }
-                    }
-                }
-            }
-        }
-
-        // Save the global parallax background configuration AFTER all atlas textures were processed
-        config.parallaxBackgrounds.forEach { (parallaxName, parallaxConfig) ->
-            val parallaxConfig = ParallaxBackgroundConfig(
-                parallaxConfig.mode,
-                width = 0,
-                height = parallaxConfig.parallaxHeight,
-                bgLayerNames.toList(),
-                fgLayerNames.toList()
-            )
-            parallaxBackgroundConfig[parallaxName] = Pair(type, parallaxConfig)
-        }
-//        println()
     }
 
     data class TileFrame(

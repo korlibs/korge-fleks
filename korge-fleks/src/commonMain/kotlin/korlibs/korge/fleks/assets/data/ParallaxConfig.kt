@@ -29,25 +29,6 @@ data class ParallaxConfigV2(
     )
 }
 
-data class LayerFrames(
-    val frames: List<SpriteFrame> = mutableListOf(),
-    val layerConfig: ParallaxConfig.ParallaxLayerConfig
-)
-
-data class AttachedLayerFrames(
-    val frames: List<SpriteFrame> = mutableListOf(),
-    val layerConfig: ParallaxConfig.ParallaxAttachedLayerConfigV2
-)
-
-
-data class LineFrames(
-    val frames: List<LineFrame> = mutableListOf(),
-) {
-    data class LineFrame(
-        val bmpSlice: BmpSlice,
-        var duration: Float = 0f
-    )
-}
 
 
 
@@ -176,11 +157,5 @@ data class ParallaxConfig(
         val attachIndex: Int,
         val repeat: Boolean = true,
         val attachBottomRight: Boolean = true
-    )
-    @Serializable
-    data class ParallaxAttachedLayerConfigV2(
-        @SerialName("i") val attachIndex: Int,
-        @SerialName("r") val repeat: Boolean = true,
-        @SerialName("a") val attachBottomRight: Boolean = true
     )
 }

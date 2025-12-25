@@ -77,7 +77,7 @@ class Parallax private constructor(
     override fun World.initComponent(entity: Entity) {
         // Prepare all layer entities according to the parallax config
         val assetStore: AssetStore = inject(name = "AssetStore")
-        val parallaxConfig = assetStore.getParallaxConfigV2(name)
+        val parallaxConfig = assetStore.getParallaxLayers(name)
 
         parallaxConfig.backgroundLayers.forEach { layer ->
             bgLayerEntities[layer.name] = createEntity("Parallax BG layer '${layer.name}' of entity '${entity.id}'") {
@@ -99,8 +99,8 @@ class Parallax private constructor(
                 it += rgbaComponent {}
             }
             repeat(plane.lineTextures.size) { parallaxPlane.linePositions.add(0f) }
-            repeat(plane.topAttachedLayerTextures.size) { parallaxPlane.topAttachedLayerPositions.add(0f) }
-            repeat(plane.bottomAttachedLayerTextures.size) { parallaxPlane.bottomAttachedLayerPositions.add(0f) }
+            repeat(plane.topAttachedLayers.size) { parallaxPlane.topAttachedLayerPositions.add(0f) }
+            repeat(plane.bottomAttachedLayers.size) { parallaxPlane.bottomAttachedLayerPositions.add(0f) }
         }
     }
 

@@ -3,6 +3,8 @@ package korlibs.korge.fleks.assets.data
 import korlibs.image.bitmap.BmpSlice
 
 
+
+// TODO clean up
 data class ParallaxPlaneTextures(
     val selfSpeed: Float = 0f,  // TODO not used yet
     val lineTextures: MutableList<LineTexture> = mutableListOf(),

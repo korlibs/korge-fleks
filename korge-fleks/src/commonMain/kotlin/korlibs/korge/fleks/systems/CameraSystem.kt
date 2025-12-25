@@ -2,6 +2,8 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import com.github.quillraven.fleks.World.Companion.inject
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -18,14 +20,12 @@ class CameraSystem(
     private val worldToPixelRatioInv = 1f / worldToPixelRatio
     private val factor = 0.05f
 
-    private val parallaxFamily = world.family { all(ParallaxComponent, MotionComponent) }
+    private val assetStore = inject<AssetStore>("AssetStore")
+    private val parallaxFamily = world.family { all(ParallaxComponent, PositionComponent, MotionComponent) }
 
     // These properties need to be set by the entityConfigure function of the level map config
     var worldHeight: Float = 0f
     var worldWidth: Float = 0f
-
-    // This property needs to be set by the onAdd hook function of the ParallaxComponent
-    var parallaxHeight: Float = 0f
 
     override fun onTickEntity(entity: Entity) {
 
@@ -66,6 +66,8 @@ class CameraSystem(
         parallaxFamily.forEach { parallaxEntity ->
             val motion = parallaxEntity[MotionComponent]
             val position = parallaxEntity[PositionComponent]
+            val parallax = parallaxEntity[ParallaxComponent]
+            val parallaxHeight = assetStore.getParallaxLayers(parallax.name).height.toFloat()
 
             // Debugging parallax position at the end of the intro
             //println("parallax y: ${position.y}")
