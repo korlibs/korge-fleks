@@ -5,7 +5,6 @@ import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxLayer
 import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.Mode.*
-import korlibs.korge.fleks.assets.data.ParallaxConfig
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax

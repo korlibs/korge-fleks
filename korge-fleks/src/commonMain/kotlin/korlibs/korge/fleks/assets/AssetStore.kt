@@ -13,9 +13,6 @@ import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
-import korlibs.korge.fleks.assets.data.ParallaxBackgroundConfig
-import korlibs.korge.fleks.assets.data.ParallaxConfig
-import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
@@ -25,18 +22,14 @@ import kotlin.collections.set
 
 
 typealias SoundMapType = MutableMap<String, Pair<AssetType, SoundChannel>>
-typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
 
 typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
 typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
 typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
 typealias ParallaxLayersMapType = MutableMap<String, Pair<AssetType, ParallaxLayersInfo>>
-typealias TilesetMapType = MutableMap<String, Pair<AssetType, TileSet>>
 
-// old types - remove later when parallax v2 is fully working
-typealias ParallaxMapType = MutableMap<String, Pair<AssetType, ParallaxBackgroundConfig>>
-typealias ParallaxTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxConfig.ParallaxLayerConfig>>
-typealias ParallaxPlaneTexturesMapType = MutableMap<String, Pair<AssetType, ParallaxPlaneTextures>>
+typealias TilesetMapType = MutableMap<String, Pair<AssetType, TileSet>>
+typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
 
 
 /**
@@ -58,7 +51,7 @@ class AssetStore {
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 
-    //    @Volatile
+    // TODO refactor asset configs when new asset loading is fully working
     internal var commonAssetConfig: AssetModel = AssetModel()
     internal var currentWorldAssetConfig: AssetModel = AssetModel()
     internal var currentLevelAssetConfig: AssetModel = AssetModel()
@@ -67,19 +60,13 @@ class AssetStore {
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
     internal val sounds: SoundMapType = mutableMapOf()
-    internal val tileMaps: TileMapsType = mutableMapOf()
 
     internal val textures: SpriteFramesMapType = mutableMapOf()  // TODO replace with below later
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
-
     internal val parallaxLayers: ParallaxLayersMapType = mutableMapOf()
 
-    // old maps - remove later
-    internal val parallaxBackgroundConfig: ParallaxMapType = mutableMapOf()
-    internal val parallaxTextures: ParallaxTexturesMapType = mutableMapOf()
-    internal val parallaxPlaneTextures: ParallaxPlaneTexturesMapType = mutableMapOf()
-
+    internal val tileMaps: TileMapsType = mutableMapOf()
     internal val tilesets: TilesetMapType = mutableMapOf()
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
@@ -113,30 +100,10 @@ class AssetStore {
             ninePatchSlices[name]!!.second
         } else error("AssetStore: NinePatchSlice '$name' not found!")
 
-    fun getParallaxConfig(name: String) : ParallaxBackgroundConfig =
-        if (parallaxBackgroundConfig.contains(name)) {
-            parallaxBackgroundConfig[name]!!.second
-        } else error("AssetStore: Parallax config '$name' not found!")
-
-    fun getParallaxTexture(name: String) : ParallaxConfig.ParallaxLayerConfig =
-        if (parallaxTextures.contains(name)) {
-            parallaxTextures[name]!!.second
-        } else error("AssetStore: Parallax texture '$name' not found!")
-
-    fun getParallaxPlane(name: String) : ParallaxPlaneTextures =
-        if (parallaxPlaneTextures.contains(name)) {
-            parallaxPlaneTextures[name]!!.second
-        } else error("AssetStore: Parallax plane texture '$name' not found!")
-
     fun getParallaxLayers(name: String) : ParallaxLayersInfo =
         if (parallaxLayers.contains(name)) {
             parallaxLayers[name]!!.second
         } else error("AssetStore: Parallax layers config '$name' not found!")
-//        ParallaxLayersInfo()
-
-//        if (parallaxTexturesV2.contains(name)) {
-//            parallaxTexturesV2[name]!!.second
-//        } else error("AssetStore: Parallax config '$name' not found!")
 
     fun getFont(name: String) : Font =
         bitMapFonts[name]?.second ?: error("AssetStore: Cannot find font '$name'!")
@@ -201,19 +168,20 @@ class AssetStore {
                     sounds[sound.name] = Pair(type, soundChannel)
                 }
             }
-            assetConfig.textureAtlas.forEach { config ->
-                val spriteAtlas = resourcesVfs["${assetConfig.folder}/${config.fileName}"].readAtlas()
 
-                // TODO get this sorted out
-                when (type) {
-                    AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(
-                        type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
-                    AssetType.WORLD -> resourcesVfs["world_1/texture.atlas.json"].readKorgeFleksAssets(
-                        type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
-                    AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(
-                        type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
-                    AssetType.SPECIAL -> {}
-                }
+            // TODO get this sorted out
+            when (type) {
+                AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(
+                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
+                AssetType.WORLD -> resourcesVfs["world_1/texture.atlas.json"].readKorgeFleksAssets(
+                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
+                AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(
+                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
+                AssetType.SPECIAL -> resourcesVfs["world_1/level_1/chunk/texture.atlas.json"].readKorgeFleksAssets(
+                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
+            }
+
+            assetConfig.textureAtlas.forEach { config ->
                 // TODO Remove old loaders when new one is fully working
                 // (1) Images and animations into texture atlas
 //                textureAtlasLoader.loadImages_old(type, spriteAtlas, config, textures)
@@ -224,6 +192,7 @@ class AssetStore {
                 // (4) Parallax layers into texture atlas
 //               textureAtlasLoader.loadParallaxLayers(type, spriteAtlas, config, parallaxBackgroundConfig, parallaxTextures, parallaxPlaneTextures)
                 // (5) Tilesets for level maps into texture atlas
+                val spriteAtlas = resourcesVfs["${assetConfig.folder}/${config.fileName}"].readAtlas()
                 textureAtlasLoader.loadTilemapsTilesets(type, spriteAtlas, config, tilesets)
             }
             assetConfig.tileMaps.forEach { tileMap ->
@@ -283,11 +252,13 @@ class AssetStore {
      */
     private fun removeAssets(type: AssetType) {
         sounds.values.removeAll { it.first == type }
-        tileMaps.values.removeAll { it.first == type }
+
         textures.values.removeAll { it.first == type }
         ninePatchSlices.values.removeAll { it.first == type }
         bitMapFonts.values.removeAll { it.first == type }
         parallaxLayers.values.removeAll { it.first == type }
+
         tilesets.values.removeAll { it.first == type }
+        tileMaps.values.removeAll { it.first == type }
     }
 }

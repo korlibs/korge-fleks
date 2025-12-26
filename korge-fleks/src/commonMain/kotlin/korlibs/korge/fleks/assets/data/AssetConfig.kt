@@ -13,6 +13,8 @@ import kotlinx.serialization.Transient
  *  - textures: list of texture atlas file names
  *  - images: map of image names to [ImageInfo]
  *  - ninePatches: map of nine-patch image names to [NinePatchInfo]
+ *  - pixelFonts: map of pixel font names to [PixelFontInfo]
+ *  - parallaxLayers: map of parallax layer config objects to [ParallaxLayersInfo]
  */
 @Serializable
 data class AssetConfig(
@@ -128,7 +130,8 @@ data class AssetConfig(
         ) {
             @Serializable
             data class LineTexture(
-                @SerialName("f") val frame: List<Int> = emptyList(),
+                @SerialName("n") val name: String? = null,  // name only loaded for top and bottom attached layers
+                @SerialName("f") val frame: List<Int>,
                 @SerialName("i") val index: Int,
                 @SerialName("s") val speedFactor: Float
             ) {

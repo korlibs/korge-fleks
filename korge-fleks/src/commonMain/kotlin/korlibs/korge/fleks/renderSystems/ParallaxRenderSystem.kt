@@ -7,9 +7,6 @@ import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxLa
 import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxPlane.LineTexture
 import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.Mode
 import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.Mode.*
-import korlibs.korge.fleks.assets.data.ParallaxConfig
-import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
-import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent

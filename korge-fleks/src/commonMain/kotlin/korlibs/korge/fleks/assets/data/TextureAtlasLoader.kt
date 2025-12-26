@@ -72,8 +72,9 @@ suspend fun VfsFile.readKorgeFleksAssets(
     bitMapFonts: BitMapFontMapType,
     parallaxLayers: ParallaxLayersMapType,
 ) {
-    // TODO remove ignoreUnknownKeys after testing
-    val assetConfig: AssetConfig = Json { ignoreUnknownKeys = true }.decodeFromString(this.readString())
+    // Enable ignoreUnknownKeys for testing when needed
+    //val assetConfig: AssetConfig = Json { ignoreUnknownKeys = true }.decodeFromString(this.readString())
+    val assetConfig: AssetConfig = Json.decodeFromString(this.readString())
 
     // Get version info
     val major: Int = assetConfig.version[0]
@@ -85,7 +86,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
         parent[texture].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
     }
 
-    // Laod images and store into textures map
+    // Load images and store into textures map
     assetConfig.images.forEach { (name, image) ->
         val frames = image.frames.map { frames ->
             val frame = frames.frame
@@ -191,25 +192,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
 
 
 class TextureAtlasLoader {
-    private fun getParallaxPlaneSpeedFactor(index: Int, size: Int, speedFactor: Float) : Float {
-        val midPoint: Float = size * 0.5f
-        return speedFactor * (
-            // The pixel in the point of view must not stand still, they need to move with the lowest possible speed (= 1 / midpoint)
-            // Otherwise the midpoint is "running" away over time
-            if (index < midPoint)
-                1f - (index / midPoint)
-            else
-                (index - midPoint + 1f) / midPoint
-            )
-    }
-
-    data class TileFrame(
-        val bmpSlice: BmpSlice,
-        val targetX: Int = 0,  // offset from the top-left corner of the original tile if cropped
-        val targetY: Int = 0
-    )
-
-    suspend fun loadTilemapsTilesets(
+    fun loadTilemapsTilesets(
         type: AssetType,
         atlas: Atlas,
         config: TextureConfig,
