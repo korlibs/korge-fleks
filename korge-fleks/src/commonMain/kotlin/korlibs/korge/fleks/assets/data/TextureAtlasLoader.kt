@@ -23,6 +23,7 @@ import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
 import korlibs.korge.fleks.assets.ParallaxLayersMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
 import korlibs.korge.fleks.assets.TilesetMapType
+import korlibs.korge.fleks.assets.TilesetMapType2
 import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxPlane.*
 import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxLayer
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
@@ -71,6 +72,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
     ninePatchSlices: NinePatchBmpSliceMapType,
     bitMapFonts: BitMapFontMapType,
     parallaxLayers: ParallaxLayersMapType,
+    tilesets: TilesetMapType2
 ) {
     // Enable ignoreUnknownKeys for testing when needed
     //val assetConfig: AssetConfig = Json { ignoreUnknownKeys = true }.decodeFromString(this.readString())
@@ -187,6 +189,16 @@ suspend fun VfsFile.readKorgeFleksAssets(
         }
 
         parallaxLayers[name] = Pair(type, parallaxInfo)
+    }
+
+    // Load tileset atlases
+    val tilesetAtlases: List<BmpSlice> = assetConfig.tilesets.map { tileset ->
+        parent[tileset].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
+    }
+
+    // Load tiles into tilesets map
+    assetConfig.tiles.frames.forEach { (name, frames) ->
+        // TODO
     }
 }
 
@@ -365,6 +377,7 @@ suspend fun VfsFile.readFontTxt(
             }
         }
     }
+
     return BitmapFont(
         fontSize = fontSize,
         lineHeight = lineHeight,

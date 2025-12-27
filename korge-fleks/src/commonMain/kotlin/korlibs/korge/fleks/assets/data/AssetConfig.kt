@@ -20,10 +20,12 @@ import kotlinx.serialization.Transient
 data class AssetConfig(
     val version: List<Int> = emptyList(),
     val textures: List<String> = emptyList(),
+    val tilesets: List<String> = emptyList(),
     val images: Map<String, ImageInfo> = emptyMap(),
     val ninePatches: Map<String, NinePatchInfo> = emptyMap(),
     val pixelFonts: Map<String, PixelFontInfo> = emptyMap(),
     val parallaxLayers: Map<String, ParallaxLayersInfo> = emptyMap(),
+    val tiles: TilesInfo = TilesInfo()
 ) {
     /**
      * Image info data class.
@@ -139,6 +141,12 @@ data class AssetConfig(
                 lateinit var bmpSlice: BmpSlice
             }
         }
-
     }
+
+    @Serializable
+    data class TilesInfo(
+        @SerialName("w") val tileWidth: Int = 0,
+        @SerialName("h") val tileHeight: Int = 0,
+        @SerialName("f") val frames: Map<String, List<Int>> = emptyMap()
+    )
 }

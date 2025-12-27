@@ -15,6 +15,7 @@ import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
+import korlibs.korge.fleks.assets.data.TileSet2
 import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
 import korlibs.time.Stopwatch
@@ -30,6 +31,9 @@ typealias ParallaxLayersMapType = MutableMap<String, Pair<AssetType, ParallaxLay
 
 typealias TilesetMapType = MutableMap<String, Pair<AssetType, TileSet>>
 typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
+
+// NEW
+typealias TilesetMapType2 = MutableMap<String, Pair<AssetType, TileSet2>>
 
 
 /**
@@ -68,6 +72,9 @@ class AssetStore {
 
     internal val tileMaps: TileMapsType = mutableMapOf()
     internal val tilesets: TilesetMapType = mutableMapOf()
+
+    // NEW
+    internal val tilesets2: TilesetMapType2 = mutableMapOf()
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {
@@ -172,13 +179,13 @@ class AssetStore {
             // TODO get this sorted out
             when (type) {
                 AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(
-                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
+                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
                 AssetType.WORLD -> resourcesVfs["world_1/texture.atlas.json"].readKorgeFleksAssets(
-                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
+                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
                 AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(
-                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
+                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
                 AssetType.SPECIAL -> resourcesVfs["world_1/level_1/chunk/texture.atlas.json"].readKorgeFleksAssets(
-                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers)
+                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
             }
 
             assetConfig.textureAtlas.forEach { config ->
