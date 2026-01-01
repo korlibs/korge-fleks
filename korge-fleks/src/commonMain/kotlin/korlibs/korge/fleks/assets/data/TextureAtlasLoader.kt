@@ -67,6 +67,7 @@ inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit)
 }
 
 suspend fun VfsFile.readKorgeFleksAssets(
+    name: String,
     type: AssetType,
     textures: SpriteFramesMapType,
     ninePatchSlices: NinePatchBmpSliceMapType,
@@ -196,12 +197,17 @@ suspend fun VfsFile.readKorgeFleksAssets(
         parent[tileset].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
     }
 
-    // Load tiles into tilesets map
-    assetConfig.tiles.frames.forEach { (name, frames) ->
-        // TODO
+    // Create tile set into and store into tilesets map
+    if (assetConfig.tiles.frames.isNotEmpty()) {
+        val tileset = SimpleTileSet(
+            tiles = assetConfig.tiles.frames,
+            tilesetAtlases = tilesetAtlases,
+            tileWidth = assetConfig.tiles.tileWidth,
+            tileHeight = assetConfig.tiles.tileHeight
+        )
+        tilesets[name] = Pair(type, tileset)
     }
 }
-
 
 class TextureAtlasLoader {
     fun loadTilemapsTilesets(

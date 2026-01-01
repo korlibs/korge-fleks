@@ -145,8 +145,34 @@ data class AssetConfig(
 
     @Serializable
     data class TilesInfo(
+        @SerialName("n") val name: String = "",
         @SerialName("w") val tileWidth: Int = 0,
         @SerialName("h") val tileHeight: Int = 0,
-        @SerialName("f") val frames: Map<String, List<Int>> = emptyMap()
-    )
+        @SerialName("t") val tilesetNames: List<String> = emptyList(),
+        @SerialName("f") val frames: Array<IntArray> = emptyArray()
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as TilesInfo
+
+            if (tileWidth != other.tileWidth) return false
+            if (tileHeight != other.tileHeight) return false
+            if (name != other.name) return false
+            if (tilesetNames != other.tilesetNames) return false
+            if (!frames.contentDeepEquals(other.frames)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = tileWidth
+            result = 31 * result + tileHeight
+            result = 31 * result + name.hashCode()
+            result = 31 * result + tilesetNames.hashCode()
+            result = 31 * result + frames.contentDeepHashCode()
+            return result
+        }
+    }
 }

@@ -15,7 +15,7 @@ import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
-import korlibs.korge.fleks.assets.data.TileSet2
+import korlibs.korge.fleks.assets.data.SimpleTileSet
 import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
 import korlibs.time.Stopwatch
@@ -33,7 +33,7 @@ typealias TilesetMapType = MutableMap<String, Pair<AssetType, TileSet>>
 typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
 
 // NEW
-typealias TilesetMapType2 = MutableMap<String, Pair<AssetType, TileSet2>>
+typealias TilesetMapType2 = MutableMap<String, Pair<AssetType, SimpleTileSet>>
 
 
 /**
@@ -179,13 +179,14 @@ class AssetStore {
             // TODO get this sorted out
             when (type) {
                 AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(
-                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
+                    "common", type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
                 AssetType.WORLD -> resourcesVfs["world_1/texture.atlas.json"].readKorgeFleksAssets(
-                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
+                    "world", type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
                 AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(
-                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
+                    "level", type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
                 AssetType.SPECIAL -> resourcesVfs["world_1/level_1/chunk/texture.atlas.json"].readKorgeFleksAssets(
-                    type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
+                    // TODO where do we get the special asset name from?
+                    "special", type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
             }
 
             assetConfig.textureAtlas.forEach { config ->
