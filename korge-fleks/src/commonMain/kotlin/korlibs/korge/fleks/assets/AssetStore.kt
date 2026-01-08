@@ -104,11 +104,6 @@ class AssetStore {
             textures[name]!!.second.firstFrameSlice.toBitmap()
         } else error("AssetStore: Texture '$name' not found for Bitmap!")
 
-    fun getSpriteFrames(name: String) : SpriteFrames =
-        if (textures.contains(name)) {
-            textures[name]!!.second
-        } else error("AssetStore: Texture '$name' not found for ImageView!")
-
     fun getNinePatchSlice(name: String) : NinePatchBmpSlice =
         if (ninePatchSlices.contains(name)) {
             ninePatchSlices[name]!!.second
