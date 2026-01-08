@@ -9,7 +9,8 @@ class SpriteFrames(
     val height: Int = 0
 ) : MutableList<SpriteFrames.SpriteFrame> by frames {
     val numberOfFrames: Int get() = frames.size
-    val firstFrame: BmpSlice get() = frames.first().bmpSlice
+    val firstFrameSlice: BmpSlice get() = frames.first().bmpSlice
+    val firstFrame: SpriteFrame get() = frames.first()
 
     override fun get(index: Int): SpriteFrame =
         if (index in 0..<size) frames[index]

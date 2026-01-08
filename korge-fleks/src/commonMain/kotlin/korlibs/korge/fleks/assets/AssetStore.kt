@@ -18,6 +18,8 @@ import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.SimpleTileSet
 import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
+import korlibs.korge.view.Container
+import korlibs.korge.view.Image
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -65,7 +67,7 @@ class AssetStore {
 
     internal val sounds: SoundMapType = mutableMapOf()
 
-    internal val textures: SpriteFramesMapType = mutableMapOf()  // TODO replace with below later
+    internal val textures: SpriteFramesMapType = mutableMapOf()
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
     internal val parallaxLayers: ParallaxLayersMapType = mutableMapOf()
@@ -99,8 +101,13 @@ class AssetStore {
 
     fun getBitmapTexture(name: String) : Bitmap =
         if (textures.contains(name)) {
-            textures[name]!!.second.firstFrame.toBitmap()
+            textures[name]!!.second.firstFrameSlice.toBitmap()
         } else error("AssetStore: Texture '$name' not found for Bitmap!")
+
+    fun getSpriteFrames(name: String) : SpriteFrames =
+        if (textures.contains(name)) {
+            textures[name]!!.second
+        } else error("AssetStore: Texture '$name' not found for ImageView!")
 
     fun getNinePatchSlice(name: String) : NinePatchBmpSlice =
         if (ninePatchSlices.contains(name)) {
