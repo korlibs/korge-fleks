@@ -224,6 +224,7 @@ fun configureAssetUpdater(type: AssetType, cfg: AssetUpdaterConfiguration.() -> 
             AssetType.SPECIAL -> currentWatcher.specialAssetUpdater.apply(cfg)
         }
     } else {
-        println("INFO: Asset reloading for type '$type' not applied, because ResourceDirWatcher is not set up!")
+        // TODO get hot-reloading working again later when new asset system loading is ready
+        //println("INFO: Asset reloading for type '$type' not applied, because ResourceDirWatcher is not set up!")
     }
 }
