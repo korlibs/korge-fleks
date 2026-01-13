@@ -10,6 +10,13 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 
 
 /**
+ * This system links entities together based on EntityRefComponent, EntityRefsComponent, and EntityRefsByNameComponent.
+ * It is useful when entity IDs are knows on compile/configure time. For example, when an entity is created staticall and
+ * needs to be linked to another entity.
+ *
+ * If entity IDs are only known at runtime (for example when spawning entities dynamically), consider using
+ * [MessagePassingSystem].
+ *
  * This system updates the position of any linked entities if moveWith is true.
  * It checks for EntityRefComponent, EntityRefsComponent, and EntityRefsByNameComponent.
  * If the linked entity has a PositionComponent, it updates the position of the current entity accordingly.

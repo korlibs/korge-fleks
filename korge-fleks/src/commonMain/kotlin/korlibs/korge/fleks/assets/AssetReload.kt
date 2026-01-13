@@ -4,11 +4,8 @@ import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.AssetType
-import korlibs.korge.fleks.assets.data.LayerTileMaps
-import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
-import korlibs.korge.fleks.prefab.Prefab
+import korlibs.platform.Platform
 import kotlinx.coroutines.*
-import kotlin.collections.set
 import kotlin.coroutines.*
 import kotlin.native.concurrent.*
 
@@ -211,20 +208,25 @@ suspend fun AssetStore.configureResourceDirWatcher(cfg: ResourceDirWatcherConfig
 /**
  * Configure callbacks for asset reloading in game objects.
  *
+ * Hint: Assets are only reloaded on JVM platform.
+ *
  * @param cfg the [configuration][AssetUpdaterConfiguration] for specifying the callbacks which
  * will update the assets in specific game objects.
  */
 fun configureAssetUpdater(type: AssetType, cfg: AssetUpdaterConfiguration.() -> Unit) {
-    val currentWatcher = ResourceDirWatcherConfiguration.CURRENT_WATCHER
-    if (currentWatcher != null) {
-        when(type) {
-            AssetType.COMMON -> currentWatcher.commonAssetUpdater.apply(cfg)
-            AssetType.WORLD -> currentWatcher.worldAssetUpdater.apply(cfg)
-            AssetType.LEVEL -> currentWatcher.levelAssetUpdater.apply(cfg)
-            AssetType.SPECIAL -> currentWatcher.specialAssetUpdater.apply(cfg)
+    // Run asset reloading only on JVM platform
+    if (Platform.isJvm) {
+        val currentWatcher = ResourceDirWatcherConfiguration.CURRENT_WATCHER
+        if (currentWatcher != null) {
+            when (type) {
+                AssetType.COMMON -> currentWatcher.commonAssetUpdater.apply(cfg)
+                AssetType.WORLD -> currentWatcher.worldAssetUpdater.apply(cfg)
+                AssetType.LEVEL -> currentWatcher.levelAssetUpdater.apply(cfg)
+                AssetType.SPECIAL -> currentWatcher.specialAssetUpdater.apply(cfg)
+            }
+        } else {
+            // TODO get hot-reloading working again later when new asset system loading is ready
+            //println("INFO: Asset reloading for type '$type' not applied, because ResourceDirWatcher is not set up!")
         }
-    } else {
-        // TODO get hot-reloading working again later when new asset system loading is ready
-        //println("INFO: Asset reloading for type '$type' not applied, because ResourceDirWatcher is not set up!")
     }
 }

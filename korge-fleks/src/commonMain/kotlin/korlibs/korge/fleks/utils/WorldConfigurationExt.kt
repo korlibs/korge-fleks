@@ -6,7 +6,7 @@ import korlibs.korge.fleks.gameState.GameStateManager
 import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
 import korlibs.korge.fleks.systems.EntityLinkSystem
-import korlibs.korge.fleks.systems.EventSystem
+import korlibs.korge.fleks.systems.MessagePassingSystem
 import korlibs.korge.fleks.systems.GameObjectStateSystem
 import korlibs.korge.fleks.systems.HealthMonitorSystem
 import korlibs.korge.fleks.systems.LevelChunkSystem
@@ -61,7 +61,7 @@ fun WorldConfiguration.addKorgeFleksSystems() {
 
         add(TouchInputSystem())
         add(SpawnerSystem())
-        add(EventSystem())
+        add(MessagePassingSystem())
 
         // Tween engine system
         addTweenEngineSystems()

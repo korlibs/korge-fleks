@@ -1,64 +1,60 @@
 package korlibs.korge.fleks.components
 
-import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
+import com.github.quillraven.fleks.Entity
+import com.github.quillraven.fleks.World
+import com.github.quillraven.fleks.componentTypeOf
+import korlibs.korge.fleks.systems.EntityMsg
+import korlibs.korge.fleks.utils.AppConfig
+import korlibs.korge.fleks.utils.Pool
+import korlibs.korge.fleks.utils.PoolableComponent
 import korlibs.korge.fleks.systems.MessagePassingSystem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 /**
- * Component which is used to implement a publish-subscribe message passing system.
- * It is used by [MessagePassingSystem].
- *
- * Hint: Not yet used in KorGE-Fleks.
+ * This component is used to store messages that an entity is subscribed to.
+ * It is used by [MessagePassingSystem] to store entity which have subscribed to a
+ * specific message type.
+ * Message types are simple integer numbers. They map to [EntityMsg] instances.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
-@Serializable @SerialName("Event")
-class Event private constructor(
-    var publish: Boolean = false,
-    var subscribe: Boolean = false,
-    var event: Int = 0,
-    var eventConfig: String = ""
-) : PoolableComponent<Event>() {
+@Serializable @SerialName("SubscribedMessages")
+class SubscribedMessages private constructor(
+    val messages: MutableMap<Int, EntityMsg> = mutableMapOf()
+) : PoolableComponent<SubscribedMessages>() {
     // Init an existing component data instance with data from another component
-    // This is used for component instances when they are part (val property) of another component
-    fun init(from: Event) {
-        publish = from.publish
-        subscribe = from.subscribe
-        event = from.event
-        eventConfig = from.eventConfig
+    // This is used for component instances when they are a value property of another component
+    fun init(from: SubscribedMessages) {
+        messages.putAll(from.messages)
     }
 
     // Cleanup the component data instance manually
-    // This is used for component instances when they are part (val property) of another component
+    // This is used for component instances when they are a value property of another component
     fun cleanup() {
-        publish = false
-        subscribe = false
-        event = 0
-        eventConfig = ""
+        messages.clear()
     }
 
-    override fun type() = EventComponent
+    override fun type() = SubscribedMessagesComponent
 
     companion object {
-        val EventComponent = componentTypeOf<Event>()
+        val SubscribedMessagesComponent = componentTypeOf<SubscribedMessages>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticEventComponent(config: Event.() -> Unit): Event =
-            Event().apply(config)
+        fun staticSubscribedMessagesComponent(config: SubscribedMessages.() -> Unit ): SubscribedMessages =
+            SubscribedMessages().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun eventComponent(config: Event.() -> Unit): Event =
+        fun subscribedMessagesComponent(config: SubscribedMessages.() -> Unit ): SubscribedMessages =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Event") { Event() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SubscribedMessages") { SubscribedMessages() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): Event = eventComponent { init(from = this@Event) }
+    override fun clone(): SubscribedMessages = subscribedMessagesComponent { init(from = this@SubscribedMessages ) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
