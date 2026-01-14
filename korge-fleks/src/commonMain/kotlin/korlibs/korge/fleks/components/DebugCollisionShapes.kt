@@ -1,6 +1,8 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.components.data.ListOfPoints.Companion.cleanup
+import korlibs.korge.fleks.components.data.ListOfPoints.Companion.init
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
@@ -28,8 +30,8 @@ class DebugCollisionShapes private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are a value property of another component
     fun cleanup() {
-        gridCells.freeAndClear()
-        ratioPositions.freeAndClear()
+        gridCells.cleanup()
+        ratioPositions.cleanup()
     }
 
     override fun type() = DebugCollisionShapesComponent

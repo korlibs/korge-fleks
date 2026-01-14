@@ -9,6 +9,7 @@ import korlibs.korge.fleks.components.data.ParallaxPlane.Companion.staticParalla
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.utils.createEntity
+import korlibs.korge.fleks.utils.cleanup
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -49,9 +50,9 @@ class Parallax private constructor(
     fun cleanup() {
         name = ""
         // Entities are freed in the cleanupComponent function because of world scope
-        bgLayerEntities.clear()
+        bgLayerEntities.cleanup()
         parallaxPlane.cleanup()
-        fgLayerEntities.clear()
+        fgLayerEntities.cleanup()
     }
 
     override fun type() = ParallaxComponent
@@ -107,8 +108,8 @@ class Parallax private constructor(
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
         // Remove all layer entities when we are in scope of the world
-        bgLayerEntities.free(this)
-        fgLayerEntities.free(this)
+        bgLayerEntities.removeFromWorld(this)
+        fgLayerEntities.removeFromWorld(this)
         if (parallaxPlane.entity != Entity.NONE) this -= parallaxPlane.entity
         // Lists will be cleared in the cleanup function
         cleanup()

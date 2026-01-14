@@ -6,6 +6,7 @@ import korlibs.korge.fleks.components.Info.Companion.infoComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.lifeCycleComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig.Companion.MessagePassingConfigComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.tags.*
@@ -72,6 +73,14 @@ fun World.getMainCamera(): Entity {
 //        error("No main camera found in world!")
 //    }
 //    return cameraFamily.first()
+}
+
+/**
+ * Get entity which holds the runtime configuration for the [MessagePassingSystem].
+ */
+fun World.getMessagePassingEntity(): Entity {
+    val family: Family = family { all(MessagePassingConfigComponent) }
+    return family.firstOrNull() ?: error("No message passing config entity found in world!")
 }
 
 fun World.getMainCameraOrNull(): Entity? {

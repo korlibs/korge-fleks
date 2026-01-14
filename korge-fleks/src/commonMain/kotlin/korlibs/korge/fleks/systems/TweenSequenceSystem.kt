@@ -19,6 +19,7 @@ import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.*
 import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
 import korlibs.korge.fleks.components.TweenSequence.Companion.tweenSequenceComponent
+import korlibs.korge.fleks.components.data.TxMsg.Companion.txMsg
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity.Companion.deleteEntity
 import korlibs.korge.fleks.components.data.tweenSequence.ExecuteConfigFunction
@@ -33,6 +34,7 @@ import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
 import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
 import korlibs.korge.fleks.components.data.tweenSequence.TweenMotion
 import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition
+import korlibs.korge.fleks.components.data.tweenSequence.TweenPublishMessage
 import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSound
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSpawner
@@ -42,6 +44,8 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenTextField
 import korlibs.korge.fleks.components.data.tweenSequence.TweenTouchInput
 import korlibs.korge.fleks.components.data.tweenSequence.Wait
 import korlibs.korge.fleks.components.data.tweenSequence.init
+import korlibs.korge.fleks.components.messagePassing.PublishMessages.Companion.PublishMessagesComponent
+import korlibs.korge.fleks.components.messagePassing.PublishMessages.Companion.publishMessagesComponent
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.Easing
@@ -244,6 +248,16 @@ class TweenSequenceSystem : IteratingSystem(
                 createTweenPropertyComponent(tween, parentTween, EventReset, value = tween.event)
                 tween.target = Entity.NONE
             }
+            // TODO what do we do when target is null?
+            is TweenPublishMessage -> tween.target.configure { txEntity ->
+                val publishMessagesComponent = txEntity.getOrAdd(PublishMessagesComponent) { publishMessagesComponent {} }
+                publishMessagesComponent.listOfTxMsgs.add(
+                    txMsg {
+                        type = tween.type                  // set message type
+                        entityConfig = tween.entityConfig  // set (possibly) entityConfig string which shall be executed on publish message
+                    })
+            }
+
             else -> {
                 when (tween) {
                     is SpawnNewTweenSequence -> println("WARNING - TweenSequenceSystem: \"SpawnNewTweenSequence\" not allowed in ParallelTweens!")
