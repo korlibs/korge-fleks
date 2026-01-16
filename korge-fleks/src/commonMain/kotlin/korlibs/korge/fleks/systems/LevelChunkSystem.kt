@@ -45,6 +45,7 @@ class LevelChunkSystem(
 
 
             Prefab.levelData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, levelChunks) { entityConfig ->
+                println("Chunk entity to create: $entityConfig")
                 createAndConfigureEntity(entityConfig)
             }
 

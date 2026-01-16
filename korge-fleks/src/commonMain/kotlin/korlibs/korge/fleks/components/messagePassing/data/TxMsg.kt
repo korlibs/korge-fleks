@@ -1,14 +1,16 @@
-package korlibs.korge.fleks.components.data
+package korlibs.korge.fleks.components.messagePassing.data
 
-import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.AppConfig
+import korlibs.korge.fleks.utils.Pool
+import korlibs.korge.fleks.utils.Poolable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
 
 /**
  * This class is used to store message type and (to be executed) entityConfig in a [PublishMessage] component.
  */
-@Serializable @SerialName("TxMsg")
+@Serializable
+@SerialName("TxMsg")
 class TxMsg private constructor(
     var type: Int = 0,
     var entityConfig: String? = null

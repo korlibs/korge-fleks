@@ -1,9 +1,9 @@
 package korlibs.korge.fleks.components.messagePassing
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.data.TxMsg.Companion.init
-import korlibs.korge.fleks.components.data.TxMsg.Companion.cleanup
-import korlibs.korge.fleks.components.data.TxMsg
+import korlibs.korge.fleks.components.messagePassing.data.TxMsg.Companion.init
+import korlibs.korge.fleks.components.messagePassing.data.TxMsg.Companion.cleanup
+import korlibs.korge.fleks.components.messagePassing.data.TxMsg
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -71,5 +71,12 @@ class PublishMessages private constructor(
     override fun free() {
         cleanup()
         pool.free(this)
+    }
+
+    /**
+     * Adds a new [TxMsg] to the [listOfTxMsgs].
+     */
+    fun add(txMsg: TxMsg) {
+        listOfTxMsgs.add(txMsg)
     }
 }

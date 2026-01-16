@@ -160,7 +160,7 @@ class AssetLevelDataLoader(
                         entity.fieldInstances.forEach { field ->
                             if (field.identifier != "entityConfig") yamlString.append("${field.identifier}: ${field.value}\n")
                         }
-                        println("INFO: Game object '${entity.identifier}' loaded for '$chunkName'")
+                        print("INFO: Game object '${entity.identifier}' loaded for '$chunkName'")
                         //println("\n$yamlString")
                         //println("entity grid pos x: ${(levelWidth * levelX) + (entity.gridPos.x * gridSize)}")
                         //println("entity grid pos y: ${(levelWidth * levelX) + (entity.gridPos.y * gridSize)}")
@@ -170,16 +170,17 @@ class AssetLevelDataLoader(
                             val entityConfig: EntityConfig =
                                 assetStore.loader.configSerializer.yaml().decodeFromString(yamlString.toString())
 
-                            // We need to store only the name of the entity config for later dynamically spawning of entities
-                            if (entity.tags.firstOrNull { it == "unique" } == null) {
-                                // Do not add unique entities to the list of entities - they are spawn separately
+                            // Only entities marked with "gameobject" will be added to the list of entities for the level
+                            // other "script" entities are spawned separately and individually
+                            if (entity.tags.firstOrNull { it == "gameobject" } != null) {
+                                print(" as game object")
                                 entities.add(entityConfig.name)
                             }
                             //println("INFO: Registering entity config '${entity.identifier}' for '$levelName'")
                         } catch (e: Throwable) {
                             println("ERROR: Loading entity config - $e")
                         }
-
+                        println()
                     } else println("ERROR: Game object with name '${entity.identifier}' has no field entityConfig!")
                 }
             }

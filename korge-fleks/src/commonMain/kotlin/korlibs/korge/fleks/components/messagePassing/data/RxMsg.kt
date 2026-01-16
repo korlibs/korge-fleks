@@ -1,35 +1,38 @@
-package korlibs.korge.fleks.components.data
+package korlibs.korge.fleks.components.messagePassing.data
 
 import com.github.quillraven.fleks.Entity
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.Poolable
-import korlibs.korge.fleks.utils.cleanup
-import korlibs.korge.fleks.utils.init
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-
 /**
- * This class is used my the [RxMsgPassingConfig] component to save a list of entities which want to be informed when
- * a specific RxMsg type was sent.
+ * This class is used by [ListOfRxMsg] to save data for a rx message. Each rx message contains:
+ * - an entity which wants to receive a specific message type.
+ * - an optional entityConfig string to configure the entity when the message was received.
+ * - an optional remainingMsgs counter to limit the number of messages to receive before unsubscribing automatically.
  */
-@Serializable @SerialName("RxMsg")
+@Serializable
+@SerialName("RxMsg")
 class RxMsg private constructor(
-    val entities: MutableList<Entity> = mutableListOf(),
-    var entityConfig: String? = null
+    var entity: Entity = Entity.NONE,
+    var entityConfig: String? = null,
+    var remainingMsgs: Int? = null
 ) : Poolable<RxMsg> {
     // Init an existing data instance with data from another one
     override fun init(from: RxMsg) {
-        entities.init(from.entities)
+        entity = from.entity
         entityConfig = from.entityConfig
+        remainingMsgs = from.remainingMsgs
     }
 
     // Cleanup data instance manually
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
-        entities.cleanup()
-        entityConfig = ""
+        entity = Entity.NONE
+        entityConfig = null
+        remainingMsgs = null
     }
 
     // Clone a new data instance from the pool

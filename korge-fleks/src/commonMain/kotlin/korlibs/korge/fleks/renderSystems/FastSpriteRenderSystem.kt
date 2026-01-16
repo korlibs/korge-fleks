@@ -30,9 +30,12 @@ class FastSpriteRenderSystem(
     private val family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent).none(LayerComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
+    private var camera: Entity? = null
 
     override fun render(ctx: RenderContext) {
-        val camera: Entity = world.getMainCameraOrNull() ?: return
+        // Get main camera entity only once for performance reasons - family search is expensive
+        if (camera == null) camera = world.getMainCameraOrNull() ?: return
+        val camera = this.camera!!
 
         // Custom Render Code here
         ctx.useBatcher { batch ->

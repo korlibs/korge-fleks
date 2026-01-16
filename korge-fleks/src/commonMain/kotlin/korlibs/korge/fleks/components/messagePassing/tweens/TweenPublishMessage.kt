@@ -1,11 +1,20 @@
-package korlibs.korge.fleks.components.data.tweenSequence
+package korlibs.korge.fleks.components.messagePassing.tweens
 
-import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.utils.*
-import korlibs.math.interpolation.*
+import com.github.quillraven.fleks.Entity
+import com.github.quillraven.fleks.World
+import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
+import korlibs.korge.fleks.components.data.tweenSequence.TweenListBase
+import korlibs.korge.fleks.components.messagePassing.PublishMessages.Companion.PublishMessagesComponent
+import korlibs.korge.fleks.components.messagePassing.PublishMessages.Companion.publishMessagesComponent
+import korlibs.korge.fleks.components.messagePassing.data.TxMsg.Companion.txMsg
+import korlibs.korge.fleks.utils.AppConfig
+import korlibs.korge.fleks.utils.EasingAsString
+import korlibs.korge.fleks.utils.Pool
+import korlibs.korge.fleks.utils.Poolable
+import korlibs.korge.fleks.utils.createEntity
+import korlibs.math.interpolation.Easing
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
 
 /**
  * This Tween is used to set the message type and an entityConfig for a message which shall be published.
@@ -15,9 +24,9 @@ class TweenPublishMessage private constructor(
     var type: Int = 0,
     var entityConfig: String? = null,
 
-    override var target: Entity = Entity.NONE,
+    override var target: Entity = Entity.NONE,  // not used
     override var delay: Float? = null,
-    override var duration: Float? = null,
+    override var duration: Float? = null,       // not used
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null
 ) : TweenBase, Poolable<TweenPublishMessage> {
     // Init an existing data instance with data from another one
@@ -63,5 +72,14 @@ class TweenPublishMessage private constructor(
         fun TweenListBase.tweenPublishMessage(config: TweenPublishMessage.() -> Unit ) { tweens.add(pool.alloc().apply(config)) }
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenPublishMessage") { TweenPublishMessage() }
+
+        fun World.createMsgPublishEntity(msgType: Int, msgEntityConfig: String?) {
+            createEntity("TweenPublishMessage").configure { txEntity ->
+                txEntity.getOrAdd(PublishMessagesComponent) { publishMessagesComponent {} }.add(txMsg {
+                    type = msgType                  // set message type
+                    entityConfig = msgEntityConfig  // set (possibly) entityConfig string which shall be executed on publish message
+                })
+            }
+        }
     }
 }

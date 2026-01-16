@@ -57,10 +57,13 @@ class ObjectRenderSystem(
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
+    private var camera: Entity? = null
 
     @OptIn(KorgeExperimental::class)
     override fun render(ctx: RenderContext) {
-        val camera: Entity = world.getMainCameraOrNull() ?: return
+        // Get main camera entity only once for performance reasons - family search is expensive
+        if (camera == null) camera = world.getMainCameraOrNull() ?: return
+        val camera = this.camera!!
 
         // Sort sprite and text entities by their layerIndex
         family.sort(comparator)

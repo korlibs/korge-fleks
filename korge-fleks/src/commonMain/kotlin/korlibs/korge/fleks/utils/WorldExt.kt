@@ -83,6 +83,10 @@ fun World.getMessagePassingEntity(): Entity {
     return family.firstOrNull() ?: error("No message passing config entity found in world!")
 }
 
+
+/**
+ * Get entity for main camera or null if no such entity exists.
+ */
 fun World.getMainCameraOrNull(): Entity? {
     val cameraFamily: Family = family { all(MainCameraTag, PositionComponent) }
     return cameraFamily.firstOrNull()

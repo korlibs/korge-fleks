@@ -32,9 +32,12 @@ class LevelMapRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
+    private var camera: Entity? = null
 
     override fun render(ctx: RenderContext) {
-        val camera: Entity = world.getMainCameraOrNull() ?: return
+        // Get main camera entity only once for performance reasons - family search is expensive
+        if (camera == null) camera = world.getMainCameraOrNull() ?: return
+        val camera = this.camera!!
         val cameraPosition = with(world) { camera[PositionComponent] }
 
         // Sort level maps by their layerIndex

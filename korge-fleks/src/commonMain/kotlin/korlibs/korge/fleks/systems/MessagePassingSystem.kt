@@ -9,6 +9,7 @@ import korlibs.korge.fleks.utils.*
 
 // Message types
 const val RELEASE_CAMERA = 1
+const val ATTACH_CAMERA = 2
 
 /**
  * This system implements sending messages between entities. Entities can subscribe to
@@ -24,9 +25,15 @@ class MessagePassingSystem : IteratingSystem(
     family = family { all(PublishMessagesComponent) },
     interval = Fixed(1 / 60f)
 ) {
+    private var runtimeConfigEntity: Entity? = null
+
     override fun onTickEntity(entity: Entity) {
-        val runtimeConfigEntity: Entity = world.getMessagePassingEntity()
-        val publishMessagesComponent = entity[PublishMessagesComponent]  // senderEntity
+        val senderEntity = entity  // name alias for better readability
+        // Get runtime config entity only once for performance reasons - family search is expensive
+        if (runtimeConfigEntity == null) runtimeConfigEntity = world.getMessagePassingEntity()
+        val runtimeConfigEntity = this.runtimeConfigEntity!!
+
+        val publishMessagesComponent = senderEntity[PublishMessagesComponent]
         val subscribesMessagesComponent = runtimeConfigEntity[MessagePassingConfigComponent]
 
         // Do the message send "procedure"
@@ -35,22 +42,30 @@ class MessagePassingSystem : IteratingSystem(
             val senderEntityConfig = txMsg.entityConfig
 
             // Check for each published message type if a receiver has subscribed
-            subscribesMessagesComponent.rxMessagesByMsgType[msgType]?.let { message ->
+            subscribesMessagesComponent.rxMessagesByMsgType[msgType]?.messages?.forEach { message ->
                 // Execute given entityConfig on all entities which have subscribed to this message
-                message.entities.forEach { receiverEntity ->
-                    // Part (1) message source knows what the message destination needs
-                    senderEntityConfig?.let { senderEntityConfig ->
-                        world.configureEntity(senderEntityConfig, receiverEntity)
-                    }
-                    // Part (2) message destination knows what to do when this message arrives
-                    message.entityConfig?.let { receiverEntityConfig ->
-                        world.configureEntity(receiverEntityConfig, receiverEntity)
+                val receiverEntity = message.entity
+                // Part (1) message source knows what the message destination needs
+                senderEntityConfig?.let { senderEntityConfig ->
+                    world.configureEntity(senderEntityConfig, receiverEntity)
+                }
+                // Part (2) message destination knows what to do when this message arrives
+                message.entityConfig?.let { receiverEntityConfig ->
+                    world.configureEntity(receiverEntityConfig, receiverEntity)
+                }
+                // Check if we need to unsubscribe the receiver entity automatically
+                message.remainingMsgs?.let { remainingMsgs ->
+                    if (remainingMsgs > 1) {
+                        message.remainingMsgs = remainingMsgs - 1
+                    } else {
+                        // Unsubscribe - remove message from the list
+                        subscribesMessagesComponent.rxMessagesByMsgType[msgType]?.messages?.remove(message)
                     }
                 }
             }
         }
 
-        // Cleanup - delete component after all messages have be sent
+        // Cleanup - delete component after all messages have been sent
         entity.configure { it -= PublishMessagesComponent }
     }
 }

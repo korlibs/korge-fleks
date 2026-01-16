@@ -39,13 +39,15 @@ class DebugRenderSystem(
     private val position: Position = staticPositionComponent {}
     private val gridPosition: Position = staticPositionComponent {}
     private val grid2Position: Position = staticPositionComponent {}
-    private var camera: Entity = Entity.NONE
+    private var camera: Entity? = null
 
     private val grid = GridPosition()
 //    private val debugPointPool = world.inject<DebugPointPool>("DebugPointPool")
 
     override fun render(ctx: RenderContext) {
-        camera = world.getMainCameraOrNull() ?: return
+        // Get main camera entity only once for performance reasons - family search is expensive
+        if (camera == null) camera = world.getMainCameraOrNull() ?: return
+        val camera = this.camera!!
 
         // Custom Render Code here
         ctx.useLineBatcher { batch ->
@@ -213,6 +215,7 @@ class DebugRenderSystem(
     }
 
     private fun drawGridCell(batch: LineRenderBatcher, cell: Point, color: RGBA) {
+        val camera = this.camera!!
         gridPosition.x = cell.x
         gridPosition.y = cell.y
         gridPosition.run { world.convertToScreenCoordinates(camera) }
@@ -222,6 +225,7 @@ class DebugRenderSystem(
     }
 
     private fun drawRatioPoint(batch: LineRenderBatcher, point: Point, color: RGBA) {
+        val camera = this.camera!!
         gridPosition.x = point.x
         gridPosition.y = point.y
         gridPosition.run { world.convertToScreenCoordinates(camera) }
