@@ -2,6 +2,7 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.WorldConfiguration
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.entity.config.registerCommonEntityConfigs
 import korlibs.korge.fleks.gameState.GameStateManager
 import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
@@ -81,4 +82,7 @@ fun WorldConfiguration.addKorgeFleksSystems() {
 
         add(HealthMonitorSystem())
     }
+
+    // Make sure we have all common entity configs registered which comes with Korge-fleks
+    registerCommonEntityConfigs()
 }

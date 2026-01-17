@@ -129,4 +129,16 @@ class Parallax private constructor(
         cleanup()
         pool.free(this)
     }
+
+    /**
+     * Return background layer entity if it exists.
+     */
+    fun getBgLayerEntity(name: String): Entity =
+        bgLayerEntities[name] ?: error("ParallaxComponent: bgLayerEntity '$name' not found!")
+
+    /**
+     * Return foreground layer entity if it exists.
+     */
+    fun getFgLayerEntity(name: String): Entity =
+        fgLayerEntities[name] ?: error("ParallaxComponent: fgLayerEntity '$name' not found!")
 }

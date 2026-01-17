@@ -43,7 +43,7 @@ class ParallaxRenderSystem(
 
                 // Draw all background parallax layers
                 parallaxConfig.backgroundLayers.forEach { layer ->
-                    val layerEntity = parallaxComponent.bgLayerEntities[layer.name]!!
+                    val layerEntity = parallaxComponent.getBgLayerEntity(layer.name)
                     val localPositionComponent = layerEntity[PositionComponent]
                     val localRgba = layerEntity[RgbaComponent].rgba
 
@@ -106,7 +106,7 @@ class ParallaxRenderSystem(
 
                 // Draw all foreground parallax layers
                 parallaxConfig.foregroundLayers.forEach { layer ->
-                    val layerEntity = parallaxComponent.fgLayerEntities[layer.name]!!
+                    val layerEntity = parallaxComponent.getFgLayerEntity(layer.name)
                     val localPositionComponent = layerEntity[PositionComponent]
                     val localRgba = layerEntity[RgbaComponent].rgba
 
