@@ -5,6 +5,7 @@ import korlibs.korge.fleks.components.Info.Companion.InfoComponent
 import korlibs.korge.fleks.components.Info.Companion.infoComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.lifeCycleComponent
+import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig.Companion.MessagePassingConfigComponent
 import korlibs.korge.fleks.entity.*
@@ -62,20 +63,6 @@ fun World.execute(entityConfig: String, entity: Entity) : Entity =
 fun World.nameOf(entity: Entity) : String = if (entity has InfoComponent) entity[InfoComponent].name else "noName"
 
 /**
- * Get entity for main camera.
- */
-fun World.getMainCamera(): Entity {
-    val cameraFamily: Family = family { all(MainCameraTag, PositionComponent) }
-    return cameraFamily.firstOrNull() ?: error("No main camera found in world!")
-// For TESTING
-//    if (cameraFamily.isEmpty) {
-//        println("Snapshot: ${snapshot()}")
-//        error("No main camera found in world!")
-//    }
-//    return cameraFamily.first()
-}
-
-/**
  * Get entity which holds the runtime configuration for the [MessagePassingSystem].
  */
 fun World.getMessagePassingEntity(): Entity {
@@ -83,13 +70,13 @@ fun World.getMessagePassingEntity(): Entity {
     return family.firstOrNull() ?: error("No message passing config entity found in world!")
 }
 
-
 /**
- * Get entity for main camera or null if no such entity exists.
+ * Get camera position or null if no camera entity exists.
  */
-fun World.getMainCameraOrNull(): Entity? {
+fun World.getMainCameraPositionOrNull(): Position? {
     val cameraFamily: Family = family { all(MainCameraTag, PositionComponent) }
-    return cameraFamily.firstOrNull()
+    val cameraEntity = cameraFamily.firstOrNull()
+    return if (cameraEntity != null) cameraEntity[PositionComponent] else null
 }
 
 /**

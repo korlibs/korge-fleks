@@ -5,6 +5,7 @@ import com.github.quillraven.fleks.collection.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
+import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.prefab.Prefab
@@ -32,13 +33,12 @@ class LevelMapRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
-    private var camera: Entity? = null
+    private var cameraPosition: Position? = null  // using PositionComponent
 
     override fun render(ctx: RenderContext) {
-        // Get main camera entity only once for performance reasons - family search is expensive
-        if (camera == null) camera = world.getMainCameraOrNull() ?: return
-        val camera = this.camera!!
-        val cameraPosition = with(world) { camera[PositionComponent] }
+        // Get main camera position only once for performance reasons - family search is expensive
+        if (cameraPosition == null) cameraPosition = world.getMainCameraPositionOrNull() ?: return
+        val cameraPosition = cameraPosition!!
 
         // Sort level maps by their layerIndex
         family.sort(comparator)

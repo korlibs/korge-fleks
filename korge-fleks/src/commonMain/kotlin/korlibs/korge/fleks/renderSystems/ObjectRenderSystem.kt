@@ -24,7 +24,6 @@ import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
-import korlibs.korge.fleks.utils.getMainCameraOrNull
 import korlibs.korge.render.*
 import korlibs.math.geom.*
 
