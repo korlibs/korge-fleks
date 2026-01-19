@@ -80,8 +80,8 @@ class TweenProperty private constructor(
 
 //        val TweenLifeCycleHealthCounter = TweenPropertyType.LifeCycleHealthCounter.type
 
-        val TweenSwitchLayerVisibilityOnVarianceComponent = TweenPropertyType.SwitchLayerVisibilityOnVariance.type
-        val TweenSwitchLayerVisibilityOffVarianceComponent = TweenPropertyType.SwitchLayerVisibilityOffVariance.type
+        val TweenSwitchVisibilityOnVarianceComponent = TweenPropertyType.SwitchLayerVisibilityOnVariance.type
+        val TweenSwitchVisibilityOffVarianceComponent = TweenPropertyType.SwitchLayerVisibilityOffVariance.type
 
         val TweenSoundStartTriggerComponent = TweenPropertyType.SoundStartTrigger.type
         val TweenSoundStopTriggerComponent = TweenPropertyType.SoundStopTrigger.type

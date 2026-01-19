@@ -34,7 +34,7 @@ import korlibs.korge.fleks.components.State
 import korlibs.korge.fleks.components.Spawner
 import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.SpriteLayers
-import korlibs.korge.fleks.components.SwitchLayerVisibility
+import korlibs.korge.fleks.components.SwitchVisibility
 import korlibs.korge.fleks.components.TextField
 import korlibs.korge.fleks.components.TileMap
 import korlibs.korge.fleks.components.TouchInput
@@ -59,7 +59,7 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSound
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSpawner
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite
-import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchLayerVisibility
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchVisibility
 import korlibs.korge.fleks.components.data.tweenSequence.TweenTextField
 import korlibs.korge.fleks.components.data.tweenSequence.TweenTouchInput
 import korlibs.korge.fleks.components.data.tweenSequence.Wait
@@ -197,7 +197,7 @@ class SnapshotSerializer {
             subclass(Spawner::class)
             subclass(Sprite::class)
             subclass(SpriteLayers::class)
-            subclass(SwitchLayerVisibility::class)
+            subclass(SwitchVisibility::class)
             subclass(TextField::class)
             subclass(TileMap::class)
             subclass(TouchInput::class)
@@ -229,7 +229,7 @@ class SnapshotSerializer {
             subclass(TweenSound::class)
             subclass(TweenSpawner::class)
             subclass(TweenSprite::class)
-            subclass(TweenSwitchLayerVisibility::class)
+            subclass(TweenSwitchVisibility::class)
             subclass(TweenTextField::class)
             subclass(TweenTouchInput::class)
             subclass(Wait::class)

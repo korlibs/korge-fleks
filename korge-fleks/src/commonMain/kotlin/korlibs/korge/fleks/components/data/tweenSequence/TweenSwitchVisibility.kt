@@ -10,8 +10,8 @@ import kotlinx.serialization.Serializable
 /**
  * This Tween is used to animate ...
  */
-@Serializable @SerialName("TweenSwitchLayerVisibility")
-class TweenSwitchLayerVisibility private constructor(
+@Serializable @SerialName("TweenSwitchVisibility")
+class TweenSwitchVisibility private constructor(
     var offVariance: Float? = null,
     var onVariance: Float? = null,
 
@@ -19,9 +19,9 @@ class TweenSwitchLayerVisibility private constructor(
     override var delay: Float? = null,
     override var duration: Float? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null
-) : TweenBase, Poolable<TweenSwitchLayerVisibility> {
+) : TweenBase, Poolable<TweenSwitchVisibility> {
     // Init an existing data instance with data from another one
-    override fun init(from: TweenSwitchLayerVisibility) {
+    override fun init(from: TweenSwitchVisibility) {
         offVariance = from.offVariance
         onVariance = from.onVariance
 
@@ -46,7 +46,7 @@ class TweenSwitchLayerVisibility private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): TweenSwitchLayerVisibility = pool.alloc().apply { init(from = this@TweenSwitchLayerVisibility) }
+    override fun clone(): TweenSwitchVisibility = pool.alloc().apply { init(from = this@TweenSwitchVisibility) }
 
     // Cleanup the tween data instance manually
     override fun free() {
@@ -56,12 +56,12 @@ class TweenSwitchLayerVisibility private constructor(
 
     companion object {
         // Use this function to create a new instance of data as value property inside a component
-        fun staticTweenSwitchLayerVisibility(config: TweenSwitchLayerVisibility.() -> Unit): TweenSwitchLayerVisibility =
-            TweenSwitchLayerVisibility().apply(config)
+        fun staticTweenSwitchVisibility(config: TweenSwitchVisibility.() -> Unit): TweenSwitchVisibility =
+            TweenSwitchVisibility().apply(config)
 
         // Use this function to get a new instance of a tween from the pool and add it to the tweens list of a component or sub-list
-        fun TweenListBase.tweenSwitchLayerVisibility(config: TweenSwitchLayerVisibility.() -> Unit) { tweens.add(pool.alloc().apply(config)) }
+        fun TweenListBase.tweenSwitchVisibility(config: TweenSwitchVisibility.() -> Unit) { tweens.add(pool.alloc().apply(config)) }
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenSwitchLayerVisibility") { TweenSwitchLayerVisibility() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenSwitchVisibility") { TweenSwitchVisibility() }
     }
 }

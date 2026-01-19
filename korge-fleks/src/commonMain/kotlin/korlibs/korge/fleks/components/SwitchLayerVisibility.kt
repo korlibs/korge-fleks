@@ -4,7 +4,6 @@ import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
 
 /**
  * This component is manipulating the rgba value of [SpriteLayersComponent].
@@ -12,14 +11,14 @@ import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersCompone
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
-@Serializable @SerialName("SwitchLayerVisibility")
-class SwitchLayerVisibility private constructor(
+@Serializable @SerialName("SwitchVisibility")
+class SwitchVisibility private constructor(
     var offVariance: Float = 0f,  // variance in switching value off: 1f - every frame switching possible, 0f - no switching at all
     var onVariance: Float = 1f,   // variance in switching value on again: 1f - changed value switches back immediately, 0f - changed value stays forever
-) : PoolableComponent<SwitchLayerVisibility>() {
+) : PoolableComponent<SwitchVisibility>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
-    fun init(from: SwitchLayerVisibility) {
+    fun init(from: SwitchVisibility) {
         offVariance = from.offVariance
         onVariance = from.onVariance
     }
@@ -31,24 +30,24 @@ class SwitchLayerVisibility private constructor(
         onVariance = 1f
     }
 
-    override fun type() = SwitchLayerVisibilityComponent
+    override fun type() = SwitchVisibilityComponent
 
     companion object {
-        val SwitchLayerVisibilityComponent = componentTypeOf<SwitchLayerVisibility>()
+        val SwitchVisibilityComponent = componentTypeOf<SwitchVisibility>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticSwitchLayerVisibilityComponent(config: SwitchLayerVisibility.() -> Unit): SwitchLayerVisibility =
-            SwitchLayerVisibility().apply(config)
+        fun staticSwitchVisibilityComponent(config: SwitchVisibility.() -> Unit): SwitchVisibility =
+            SwitchVisibility().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun switchLayerVisibilityComponent(config: SwitchLayerVisibility.() -> Unit): SwitchLayerVisibility =
+        fun switchVisibilityComponent(config: SwitchVisibility.() -> Unit): SwitchVisibility =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SwitchLayerVisibility") { SwitchLayerVisibility() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "SwitchVisibility") { SwitchVisibility() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): SwitchLayerVisibility = switchLayerVisibilityComponent { init(from = this@SwitchLayerVisibility) }
+    override fun clone(): SwitchVisibility = switchVisibilityComponent { init(from = this@SwitchVisibility) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
