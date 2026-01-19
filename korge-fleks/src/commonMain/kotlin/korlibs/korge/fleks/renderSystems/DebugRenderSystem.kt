@@ -17,6 +17,7 @@ import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.logic.collision.GridPosition
 import korlibs.korge.fleks.prefab.Prefab
+import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -39,15 +40,14 @@ class DebugRenderSystem(
     private val position: Position = staticPositionComponent {}
     private val gridPosition: Position = staticPositionComponent {}
     private val grid2Position: Position = staticPositionComponent {}
-    private var camera: Entity? = null
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
 
     private val grid = GridPosition()
 //    private val debugPointPool = world.inject<DebugPointPool>("DebugPointPool")
 
     override fun render(ctx: RenderContext) {
-        // Get main camera entity only once for performance reasons - family search is expensive
-        if (camera == null) camera = world.getMainCameraOrNull() ?: return
-        val camera = this.camera!!
+        // Get main camera position or exit if it does not exist
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         // Custom Render Code here
         ctx.useLineBatcher { batch ->
@@ -60,7 +60,7 @@ class DebugRenderSystem(
 
                     if (entity hasNo ScreenCoordinatesTag) {
                         // Transform world coordinates to screen coordinates
-                        position.run { world.convertToScreenCoordinates(camera) }
+                        position.convertToScreenCoordinates(cameraPosition)
                     }
 
                     // In case the entity is a sprite than render the overall sprite size and the texture bounding boxes
@@ -128,7 +128,7 @@ class DebugRenderSystem(
                         // Take over entity grid position and convert to screen coordinates
                         gridPosition.x = gridComponent.x
                         gridPosition.y = gridComponent.y
-                        gridPosition.run { world.convertToScreenCoordinates(camera) }
+                        gridPosition.convertToScreenCoordinates(cameraPosition)
 
                         // Draw collision bounds
                         batch.drawVector(Colors.LIGHTBLUE) {
@@ -143,8 +143,8 @@ class DebugRenderSystem(
 
                     if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS && entity has DebugCollisionShapesComponent) {
                         val debugCollisionShapesComponent = entity[DebugCollisionShapesComponent]
-                        debugCollisionShapesComponent.gridCells.forEach { cell -> drawGridCell(batch, cell, Colors.GREEN) }
-                        debugCollisionShapesComponent.ratioPositions.forEach { point -> drawRatioPoint(batch, point, Colors.RED) }
+                        debugCollisionShapesComponent.gridCells.forEach { cell -> drawGridCell(batch, cell, Colors.GREEN, cameraPosition) }
+                        debugCollisionShapesComponent.ratioPositions.forEach { point -> drawRatioPoint(batch, point, Colors.RED, cameraPosition) }
                     }
 
                     // Draw pivot point (zero-point for game object)
@@ -159,7 +159,7 @@ class DebugRenderSystem(
                     // Take over entity grid position and convert to screen coordinates
                     gridPosition.x = gridComponent.x
                     gridPosition.y = gridComponent.y
-                    gridPosition.run { world.convertToScreenCoordinates(camera) }
+                    gridPosition.convertToScreenCoordinates(cameraPosition)
 
                     batch.drawVector(Colors.GREEN) {
                         val x = gridPosition.x
@@ -174,8 +174,6 @@ class DebugRenderSystem(
                 if (entity has LevelMapComponent && entity has DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS) {
                     val levelData = Prefab.levelData ?: return@forEach
                     val tileSize = levelData.tileSize
-
-                    val cameraPosition = with(world) { camera[PositionComponent] }
 
                     // Calculate viewport position in world coordinates from Camera position (x,y) + offset
                     val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
@@ -214,21 +212,19 @@ class DebugRenderSystem(
         }
     }
 
-    private fun drawGridCell(batch: LineRenderBatcher, cell: Point, color: RGBA) {
-        val camera = this.camera!!
+    private fun drawGridCell(batch: LineRenderBatcher, cell: Point, color: RGBA, cameraPosition: Position) {
         gridPosition.x = cell.x
         gridPosition.y = cell.y
-        gridPosition.run { world.convertToScreenCoordinates(camera) }
+        gridPosition.convertToScreenCoordinates(cameraPosition)
         batch.drawVector(color) {
             rect(gridPosition.x, gridPosition.y, AppConfig.GRID_CELL_SIZE, AppConfig.GRID_CELL_SIZE)
         }
     }
 
-    private fun drawRatioPoint(batch: LineRenderBatcher, point: Point, color: RGBA) {
-        val camera = this.camera!!
+    private fun drawRatioPoint(batch: LineRenderBatcher, point: Point, color: RGBA, cameraPosition: Position) {
         gridPosition.x = point.x
         gridPosition.y = point.y
-        gridPosition.run { world.convertToScreenCoordinates(camera) }
+        gridPosition.convertToScreenCoordinates(cameraPosition)
         drawPoint(batch, gridPosition.x, gridPosition.y, color)
     }
 }

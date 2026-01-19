@@ -6,14 +6,12 @@ import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.components.Position
-import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.prefab.Prefab
+import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
-import korlibs.korge.view.*
-import korlibs.math.geom.*
 
 
 /**
@@ -33,12 +31,11 @@ class LevelMapRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
-    private var cameraPosition: Position? = null  // using PositionComponent
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
 
     override fun render(ctx: RenderContext) {
-        // Get main camera position only once for performance reasons - family search is expensive
-        if (cameraPosition == null) cameraPosition = world.getMainCameraPositionOrNull() ?: return
-        val cameraPosition = cameraPosition!!
+        // Get main camera position or exit if it does not exist
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         // Sort level maps by their layerIndex
         family.sort(comparator)

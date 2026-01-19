@@ -29,8 +29,8 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteAnimati
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteDestroyOnPlayingFinishedComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteDirectionComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteRunningComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchLayerVisibilityOffVarianceComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchLayerVisibilityOnVarianceComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchVisibilityOffVarianceComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchVisibilityOnVarianceComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeEndComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeStartComponent
@@ -77,8 +77,8 @@ private val assetStore = AssetStore().also { it.testing = true }
             Pair(SpriteDirection, TweenSpriteDirectionComponent),
             Pair(SpriteDestroyOnPlayingFinished, TweenSpriteDestroyOnPlayingFinishedComponent),
             Pair(SpriteAnimation, TweenSpriteAnimationComponent),
-            Pair(SwitchLayerVisibilityOnVariance, TweenSwitchLayerVisibilityOnVarianceComponent),
-            Pair(SwitchLayerVisibilityOffVariance, TweenSwitchLayerVisibilityOffVarianceComponent),
+            Pair(SwitchLayerVisibilityOnVariance, TweenSwitchVisibilityOnVarianceComponent),
+            Pair(SwitchLayerVisibilityOffVariance, TweenSwitchVisibilityOffVarianceComponent),
             Pair(SoundStartTrigger, TweenSoundStartTriggerComponent),
             Pair(SoundStopTrigger, TweenSoundStopTriggerComponent),
             Pair(SoundPosition, TweenSoundPositionComponent),

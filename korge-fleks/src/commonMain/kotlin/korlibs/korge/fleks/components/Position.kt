@@ -81,8 +81,7 @@ class Position private constructor(
      * Convert the position of the entity to world coordinates.
      * This is useful to convert the position of a touch position into world coordinates.
      */
-    fun World.convertToWorldCoordinates(camera: Entity) {
-        val cameraPosition = camera[PositionComponent]
+    fun convertToWorldCoordinates(cameraPosition: Position) {
         x += cameraPosition.x - cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
         y += cameraPosition.y - cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
     }
@@ -91,8 +90,7 @@ class Position private constructor(
      * Convert the position of the entity to screen coordinates.
      * This is useful to convert the position of an entity to screen coordinates for rendering.
      */
-    fun World.convertToScreenCoordinates(camera: Entity): Position {
-        val cameraPosition = camera[PositionComponent]
+    fun convertToScreenCoordinates(cameraPosition: Position): Position {
         x = x - cameraPosition.x + cameraPosition.offsetX + AppConfig.VIEW_PORT_WIDTH_HALF
         y = y - cameraPosition.y + cameraPosition.offsetY + AppConfig.VIEW_PORT_HEIGHT_HALF
         return this@Position

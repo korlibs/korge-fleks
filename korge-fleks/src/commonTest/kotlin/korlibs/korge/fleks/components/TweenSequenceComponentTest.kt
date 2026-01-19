@@ -16,7 +16,6 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba.Companion.twe
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSound.Companion.tweenSound
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSpawner.Companion.tweenSpawner
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite.Companion.tweenSprite
-import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchLayerVisibility.Companion.tweenSwitchLayerVisibility
 import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.gameState.GameStateManager

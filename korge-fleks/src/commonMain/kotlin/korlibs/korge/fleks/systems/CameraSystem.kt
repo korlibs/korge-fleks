@@ -7,6 +7,7 @@ import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 
@@ -21,6 +22,7 @@ class CameraSystem(
     private val factor = 0.05f
 
     private val assetStore = inject<AssetStore>("AssetStore")
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
     private val parallaxFamily = world.family { all(ParallaxComponent, PositionComponent, MotionComponent) }
 
     // These properties need to be set by the entityConfigure function of the level map config
@@ -28,12 +30,11 @@ class CameraSystem(
     var worldWidth: Float = 0f
 
     override fun onTickEntity(entity: Entity) {
+        // Get main camera position or exit if it does not exist
+        val cameraPosition = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         // Set camera position to entity with "CameraFollowTag" component
         val followPosition = entity[PositionComponent]
-
-        val camera: Entity = world.getMainCamera()
-        val cameraPosition = camera[PositionComponent]
 
         val lastCameraPosX = cameraPosition.x
         //val lastCameraPosY = cameraPosition.y

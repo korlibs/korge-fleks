@@ -63,23 +63,6 @@ fun World.execute(entityConfig: String, entity: Entity) : Entity =
 fun World.nameOf(entity: Entity) : String = if (entity has InfoComponent) entity[InfoComponent].name else "noName"
 
 /**
- * Get entity which holds the runtime configuration for the [MessagePassingSystem].
- */
-fun World.getMessagePassingEntity(): Entity {
-    val family: Family = family { all(MessagePassingConfigComponent) }
-    return family.firstOrNull() ?: error("No message passing config entity found in world!")
-}
-
-/**
- * Get camera position or null if no camera entity exists.
- */
-fun World.getMainCameraPositionOrNull(): Position? {
-    val cameraFamily: Family = family { all(MainCameraTag, PositionComponent) }
-    val cameraEntity = cameraFamily.firstOrNull()
-    return if (cameraEntity != null) cameraEntity[PositionComponent] else null
-}
-
-/**
  * Print snapshot of components of given entity for debugging purposes.
  */
 fun World.traceEntitySnapshot(entity: Entity) {

@@ -19,9 +19,9 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
-import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
+import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.render.*
@@ -37,7 +37,6 @@ interface RenderSystem {
  * [LayerComponent] and [RgbaComponent] and one of the following components:
  * - [SpriteComponent]
  * - [TextFieldComponent]
- * - [SpriteLayersComponent]
  * - [NinePatchComponent]
  * - [TileMapComponent]
  * This system is used to render all game objects which are not part of the level map or parallax background.
@@ -51,18 +50,17 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
-        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent,
+        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent,
             NinePatchComponent, TileMapComponent) //, ParallaxLayerComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
-    private var camera: Entity? = null
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
 
     @OptIn(KorgeExperimental::class)
     override fun render(ctx: RenderContext) {
-        // Get main camera entity only once for performance reasons - family search is expensive
-        if (camera == null) camera = world.getMainCameraOrNull() ?: return
-        val camera = this.camera!!
+        // Get main camera position or exit if it does not exist
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         // Sort sprite and text entities by their layerIndex
         family.sort(comparator)
@@ -77,7 +75,7 @@ class ObjectRenderSystem(
 
             if (entity hasNo ScreenCoordinatesTag) {
                 // Transform world coordinates to screen coordinates
-                position.run { world.convertToScreenCoordinates(camera) }
+                position.convertToScreenCoordinates(cameraPosition)
             }
 
             // Rendering path for sprites

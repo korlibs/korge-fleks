@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.WorldConfiguration
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.entity.config.registerCommonEntityConfigs
 import korlibs.korge.fleks.gameState.GameStateManager
+import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
 import korlibs.korge.fleks.systems.EntityLinkSystem
@@ -17,7 +18,7 @@ import korlibs.korge.fleks.systems.PositionSystem
 import korlibs.korge.fleks.systems.SnapshotSerializerSystem
 import korlibs.korge.fleks.systems.SoundSystem
 import korlibs.korge.fleks.systems.SpawnerSystem
-import korlibs.korge.fleks.systems.SpriteLayersSystem
+import korlibs.korge.fleks.systems.SpriteVisibilitySystem
 import korlibs.korge.fleks.systems.SpriteSystem
 import korlibs.korge.fleks.systems.TouchInputSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
@@ -27,13 +28,17 @@ import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveSystem
 
 
-fun WorldConfiguration.addKorgeFleksInjectables(assetStore: AssetStore, gameState: GameStateManager) {
+fun WorldConfiguration.addKorgeFleksInjectables(
+    assetStore: AssetStore,
+    gameState: GameStateManager
+) {
 
     // Register external objects which are used by systems and in component and family hook functions
     injectables {
         add("AssetStore", assetStore)
         add("DebugPointPool", DebugPointPool())
         add("GameState", gameState)
+        add("SystemRuntimeConfigs", SystemRuntimeConfigs())
     }
 }
 
@@ -71,7 +76,7 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         add(LifeCycleSystem())
         add(ParallaxSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))
         add(PositionSystem())
-        add(SpriteLayersSystem())
+        add(SpriteVisibilitySystem())
         add(EntityLinkSystem())
         add(SpriteSystem())
 

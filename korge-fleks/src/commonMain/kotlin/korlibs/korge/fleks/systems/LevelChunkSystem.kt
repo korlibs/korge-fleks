@@ -5,10 +5,9 @@ import com.github.quillraven.fleks.IntervalSystem
 import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.prefab.Prefab
+import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.RenderLayerTag.MAIN_LEVELMAP
 import korlibs.korge.fleks.utils.createAndConfigureEntity
-import korlibs.korge.fleks.utils.getMainCameraPositionOrNull
-import korlibs.korge.render.RenderContext
 
 
 /**
@@ -23,12 +22,11 @@ class LevelChunkSystem(
     interval = Fixed(1 / 60f)
 ) {
     val levelFamily = world.family { all(MAIN_LEVELMAP, LevelMapComponent) }
-    private var cameraPosition: Position? = null  // using PositionComponent
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
 
     override fun onTick() = with(world) {
-        // Get main camera position only once for performance reasons - family search is expensive
-        if (cameraPosition == null) cameraPosition = world.getMainCameraPositionOrNull() ?: return
-        val cameraPosition = cameraPosition!!
+        // Get main camera position or exit if it does not exist
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         if (levelFamily.isNotEmpty) {
             val levelEntity = levelFamily.first()

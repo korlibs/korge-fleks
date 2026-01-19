@@ -10,7 +10,6 @@ import korlibs.korge.fleks.components.LifeCycle.Companion.lifeCycleComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
-import korlibs.korge.fleks.components.SpriteLayers.Companion.spriteLayersComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -54,15 +53,15 @@ data class LayeredSpriteConfig(
             it += spriteComponent {
                 name = assetName
             }
-            it += spriteLayersComponent {
-                // Iterate over all layers of the sprite
+//            it += spriteLayersComponent {
+//                // Iterate over all layers of the sprite
 // TODO re-implement sprite layers
 //                imageFrame.layerData.fastForEach { layerData ->
 //                    val layerName = layerData.layer.name ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
 //                    // Add layer to the sprite layers component
 //                    createSpriteLayer(layerName)
 //                }
-            }
+//            }
             if (createEntityPerLayer) {
                 it += entityRefsByNameComponent {
                     // Iterate over all layers of the sprite

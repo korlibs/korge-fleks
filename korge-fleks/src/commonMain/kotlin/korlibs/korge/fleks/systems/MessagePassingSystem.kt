@@ -2,8 +2,8 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig.Companion.MessagePassingConfigComponent
 import korlibs.korge.fleks.components.messagePassing.PublishMessages.Companion.PublishMessagesComponent
+import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.utils.*
 
 
@@ -25,16 +25,14 @@ class MessagePassingSystem : IteratingSystem(
     family = family { all(PublishMessagesComponent) },
     interval = Fixed(1 / 60f)
 ) {
-    private var runtimeConfigEntity: Entity? = null
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
 
     override fun onTickEntity(entity: Entity) {
         val senderEntity = entity  // name alias for better readability
-        // Get runtime config entity only once for performance reasons - family search is expensive
-        if (runtimeConfigEntity == null) runtimeConfigEntity = world.getMessagePassingEntity()
-        val runtimeConfigEntity = this.runtimeConfigEntity!!
+        // Get subscribed messages info from runtime config
+        val subscribesMessagesComponent = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
 
         val publishMessagesComponent = senderEntity[PublishMessagesComponent]
-        val subscribesMessagesComponent = runtimeConfigEntity[MessagePassingConfigComponent]
 
         // Do the message send "procedure"
         publishMessagesComponent.listOfTxMsgs.forEach { txMsg ->

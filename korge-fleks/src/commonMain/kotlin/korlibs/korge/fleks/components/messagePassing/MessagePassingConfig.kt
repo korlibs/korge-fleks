@@ -6,6 +6,7 @@ import com.github.quillraven.fleks.componentTypeOf
 import korlibs.korge.fleks.components.messagePassing.data.ListOfRxMsg
 import korlibs.korge.fleks.components.messagePassing.data.ListOfRxMsg.Companion.listOfRxMsg
 import korlibs.korge.fleks.components.messagePassing.data.RxMsg
+import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.PoolableComponent
@@ -92,10 +93,16 @@ class MessagePassingConfig private constructor(
 
     // Initialize an external prefab when the component is added to an entity
     override fun World.initPrefabs(entity: Entity) {
+        // Register this entity as message passing config in the system runtime configs when component is added
+        val systemRuntimeConfigs = inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
+        systemRuntimeConfigs.messagePassing = entity
     }
 
     // Cleanup/Reset an external prefab when the component is removed from an entity
     override fun World.cleanupPrefabs(entity: Entity) {
+        // Unregister this entity as message passing config in the system runtime configs when component is removed
+        val systemRuntimeConfigs = inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
+        systemRuntimeConfigs.messagePassing = null
     }
 
     // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem
