@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * This component is manipulating the rgba value of [SpriteLayersComponent].
+ * This component is used to manipulate the visibility property in [sprite component][korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent].
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
