@@ -7,24 +7,24 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * This class is used to store message type and (to be executed) entityConfig in a [PublishMessage] component.
+ * This class is used to store message event (number) and (to be executed) entityConfig in a [PublishMessage] component.
  */
 @Serializable
 @SerialName("TxMsg")
 class TxMsg private constructor(
-    var type: Int = 0,
+    var event: Int = 0,
     var entityConfig: String? = null
 ) : Poolable<TxMsg> {
     // Init an existing data instance with data from another one
     override fun init(from: TxMsg) {
-        type = from.type
+        event = from.event
         entityConfig = from.entityConfig
     }
 
     // Cleanup data instance manually
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
-        type = 0
+        event = 0
         entityConfig = null
     }
 

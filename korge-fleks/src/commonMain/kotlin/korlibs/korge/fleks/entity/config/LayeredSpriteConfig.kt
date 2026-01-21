@@ -35,8 +35,8 @@ data class LayeredSpriteConfig(
     private val alpha: Float = 1f,
     private val layerIndex: Int,
     private val renderLayerTag: RenderLayerTag,
-    private val createEntityPerLayer: Boolean = true // If true, creates an entity for each layer in the sprite for tween animation
-
+    private val createEntityPerLayer: Boolean = true, // If true, creates an entity for each layer in the sprite for tween animation
+    private val screenCoordinates: Boolean = false
 ) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
@@ -73,7 +73,10 @@ data class LayeredSpriteConfig(
             SpriteConfig(
                 name = "generic_sprite_$image",
                 assetName = image,
-                renderLayerTag = renderLayerTag
+                // TODO we need to put each texture on its own layerIndex - thus specify the layer index together with the image name
+                layerIndex = layerIndex,
+                renderLayerTag = renderLayerTag,
+                screenCoordinates = screenCoordinates
             )
         }
     }

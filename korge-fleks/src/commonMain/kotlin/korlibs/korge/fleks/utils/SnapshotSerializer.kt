@@ -40,6 +40,7 @@ import korlibs.korge.fleks.components.TileMap
 import korlibs.korge.fleks.components.TouchInput
 import korlibs.korge.fleks.components.TweenProperty
 import korlibs.korge.fleks.components.TweenSequence
+import korlibs.korge.fleks.components.data.ListOfPoints
 import korlibs.korge.fleks.components.data.ParallaxPlane
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.components.data.SpriteLayer
@@ -63,6 +64,13 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchVisibility
 import korlibs.korge.fleks.components.data.tweenSequence.TweenTextField
 import korlibs.korge.fleks.components.data.tweenSequence.TweenTouchInput
 import korlibs.korge.fleks.components.data.tweenSequence.Wait
+import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig
+import korlibs.korge.fleks.components.messagePassing.PublishMessages
+import korlibs.korge.fleks.components.messagePassing.data.ListOfRxMsg
+import korlibs.korge.fleks.components.messagePassing.data.RxMsg
+import korlibs.korge.fleks.components.messagePassing.data.TxMsg
+import korlibs.korge.fleks.components.messagePassing.tweens.TweenPublishMessage
+import korlibs.korge.fleks.components.messagePassing.tweens.TweenSubscribeMessage
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
 import korlibs.math.interpolation.*
@@ -182,6 +190,7 @@ class SnapshotSerializer {
             subclass(Layer::class)
             subclass(LevelMap::class)
             subclass(LifeCycle::class)
+            subclass(MessagePassingConfig::class)
             subclass(Motion::class)
             subclass(NinePatch::class)
             subclass(OffsetByFrameIndex::class)
@@ -189,6 +198,7 @@ class SnapshotSerializer {
             subclass(Platformer::class)
             subclass(PlayerInput::class)
             subclass(Position::class)
+            subclass(PublishMessages::class)
             subclass(Rgba::class)
             subclass(Rigidbody::class)
             subclass(Size::class)
@@ -207,8 +217,12 @@ class SnapshotSerializer {
 
         // Register data classes used in components
         polymorphic(Poolable::class) {
+            subclass(ListOfPoints::class)
+            subclass(ListOfRxMsg::class)
             subclass(Point::class)
+            subclass(RxMsg::class)
             subclass(SpriteLayer::class)
+            subclass(TxMsg::class)
             subclass(ParallaxPlane::class)
         }
 
@@ -225,10 +239,12 @@ class SnapshotSerializer {
             subclass(SpawnNewTweenSequence::class)
             subclass(TweenMotion::class)
             subclass(TweenPosition::class)
+            subclass(TweenPublishMessage::class)
             subclass(TweenRgba::class)
             subclass(TweenSound::class)
             subclass(TweenSpawner::class)
             subclass(TweenSprite::class)
+            subclass(TweenSubscribeMessage::class)
             subclass(TweenSwitchVisibility::class)
             subclass(TweenTextField::class)
             subclass(TweenTouchInput::class)

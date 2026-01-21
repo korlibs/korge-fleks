@@ -51,7 +51,7 @@ class ObjectRenderSystem(
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
         .any(PositionComponent, SpriteComponent, TextFieldComponent,
-            NinePatchComponent, TileMapComponent) //, ParallaxLayerComponent)
+            NinePatchComponent, TileMapComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}

@@ -17,11 +17,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * This Tween is used to set the message type and an entityConfig for a message which shall be published.
+ * This Tween is used to set the message event (number) and an entityConfig for a message which shall be published.
  */
 @Serializable @SerialName("TweenPublishMessage")
 class TweenPublishMessage private constructor(
-    var type: Int = 0,
+    var event: Int = 0,
     var entityConfig: String? = null,
 
     override var target: Entity = Entity.NONE,  // not used
@@ -31,7 +31,7 @@ class TweenPublishMessage private constructor(
 ) : TweenBase, Poolable<TweenPublishMessage> {
     // Init an existing data instance with data from another one
     override fun init(from: TweenPublishMessage) {
-        type = from.type
+        event = from.event
         entityConfig = from.entityConfig
 
         target = from.target
@@ -45,7 +45,7 @@ class TweenPublishMessage private constructor(
     // Cleanup data instance manually
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
-        type = 0
+        event = 0
         entityConfig = null
 
         target = Entity.NONE
@@ -76,7 +76,7 @@ class TweenPublishMessage private constructor(
         fun World.createMsgPublishEntity(msgType: Int, msgEntityConfig: String?) {
             createEntity("TweenPublishMessage").configure { txEntity ->
                 txEntity.getOrAdd(PublishMessagesComponent) { publishMessagesComponent {} }.add(txMsg {
-                    type = msgType                  // set message type
+                    event = msgType                  // set message type
                     entityConfig = msgEntityConfig  // set (possibly) entityConfig string which shall be executed on publish message
                 })
             }

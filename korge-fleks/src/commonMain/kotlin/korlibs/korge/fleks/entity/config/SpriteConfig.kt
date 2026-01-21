@@ -6,7 +6,9 @@ import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
 import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.tags.DebugInfoTag
 import korlibs.korge.fleks.tags.RenderLayerTag
+import korlibs.korge.fleks.tags.ScreenCoordinatesTag
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
@@ -26,6 +28,7 @@ data class SpriteConfig(
     private val alpha: Float = 1f,
     private val layerIndex: Int = 0,
     private val renderLayerTag: RenderLayerTag,
+    private val screenCoordinates: Boolean = false
 ) : EntityConfig {
 
     // Function for adding components to this entity
@@ -46,6 +49,11 @@ data class SpriteConfig(
                 index = layerIndex
             }
             it += renderLayerTag
+            if (screenCoordinates) it += ScreenCoordinatesTag
+            // Enable below debug render shapes
+            it += RenderLayerTag.DEBUG
+            it += DebugInfoTag.SPRITE_BOUNDS
+            it += DebugInfoTag.POSITION
         }
         return entity
     }

@@ -246,14 +246,14 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.target = Entity.NONE
             }
             // Create new entity for publishing messages
-            is TweenPublishMessage -> world.createMsgPublishEntity(tween.type, tween.entityConfig)
+            is TweenPublishMessage -> world.createMsgPublishEntity(tween.event, tween.entityConfig)
             // Subscribe entity to receive messages
             is TweenSubscribeMessage -> {
                 // Get subscribed messages info from runtime config
                 // Get subscribed messages info from runtime config
                 val subscribesMessagesComponent = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
                 subscribesMessagesComponent.add(
-                    msgType = tween.type,
+                    msgType = tween.event,
                     rxMsg {
                         entity = baseEntity  // the entity which wants to receive the message
                         entityConfig = tween.entityConfig

@@ -10,16 +10,16 @@ import kotlinx.serialization.Serializable
 
 
 /**
- * This Tween is used to subscribe to a message type with an optional entityConfig and lifeTime.
+ * This Tween is used to subscribe to a message event with an optional entityConfig and lifeTime.
  *
- * @param type The message type to subscribe to.
+ * @param event The message event to subscribe to.
  * @param entityConfig Optional entity configuration associated with the subscription.
  * @param remainingMsgs Optional number of messages to receive before unsubscribing. If null, the subscription is indefinite.
  *                      If set to a specific number, the subscription will automatically unsubscribe after receiving that many messages.
  */
 @Serializable @SerialName("TweenSubscribeMessage")
 class TweenSubscribeMessage private constructor(
-    var type: Int = 0,
+    var event: Int = 0,
     var entityConfig: String? = null,
     var remainingMsgs: Int? = null,
 
@@ -30,7 +30,7 @@ class TweenSubscribeMessage private constructor(
 ) : TweenBase, Poolable<TweenSubscribeMessage> {
     // Init an existing data instance with data from another one
     override fun init(from: TweenSubscribeMessage) {
-        type = from.type
+        event = from.event
         entityConfig = from.entityConfig
         remainingMsgs = from.remainingMsgs
 
@@ -45,7 +45,7 @@ class TweenSubscribeMessage private constructor(
     // Cleanup data instance manually
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
-        type = 0
+        event = 0
         entityConfig = null
         remainingMsgs = 0
 

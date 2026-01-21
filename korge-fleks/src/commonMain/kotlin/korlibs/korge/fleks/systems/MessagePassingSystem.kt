@@ -36,7 +36,7 @@ class MessagePassingSystem : IteratingSystem(
 
         // Do the message send "procedure"
         publishMessagesComponent.listOfTxMsgs.forEach { txMsg ->
-            val msgType = txMsg.type
+            val msgType = txMsg.event
             val senderEntityConfig = txMsg.entityConfig
 
             // Check for each published message type if a receiver has subscribed
