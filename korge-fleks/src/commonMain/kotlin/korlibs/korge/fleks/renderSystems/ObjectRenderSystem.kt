@@ -50,7 +50,7 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
-        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent,
+        .any(PositionComponent, SpriteComponent, TextFieldComponent,
             NinePatchComponent, TileMapComponent) //, ParallaxLayerComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")

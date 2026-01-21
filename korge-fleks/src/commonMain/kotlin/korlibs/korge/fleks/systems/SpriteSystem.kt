@@ -59,12 +59,13 @@ class SpriteSystem : IteratingSystem(
                     }
                 }
 
+                // For DEBUGGING start of animations at different point in time
                 val infoComponent = entity[InfoComponent]
                 if (infoComponent.name.contains("whiteFireA")) {
-                    println("whiteFireA: frameIndex=${spriteComponent.frameIndex}, nextFrameIn=${spriteComponent.nextFrameIn}, increment=${spriteComponent.increment}" )
+//                    println("whiteFireA: frameIndex=${spriteComponent.frameIndex}, nextFrameIn=${spriteComponent.nextFrameIn}, increment=${spriteComponent.increment}" )
                 }
                 if (infoComponent.name.contains("whiteFireB")) {
-                    println("whiteFireB: frameIndex=${spriteComponent.frameIndex}, nextFrameIn=${spriteComponent.nextFrameIn}, increment=${spriteComponent.increment}" )
+//                    println("whiteFireB: frameIndex=${spriteComponent.frameIndex}, nextFrameIn=${spriteComponent.nextFrameIn}, increment=${spriteComponent.increment}" )
                 }
             }
         }

@@ -3,13 +3,10 @@ package korlibs.korge.fleks.entity.config
 import com.github.quillraven.fleks.*
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
-import korlibs.korge.fleks.assets.*
+import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNameComponent
 import korlibs.korge.fleks.components.EntityRefsByName.Companion.entityRefsByNameComponent
-import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.lifeCycleComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
-import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
-import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -28,7 +25,9 @@ import kotlinx.serialization.*
 data class LayeredSpriteConfig(
     override val name: String,
 
-    private val assetName: String,
+    private val listOfImages: List<String>,
+    private val width: Float,
+    private val height: Float,
     private val centerX: Boolean = false,
     private val centerY: Boolean = false,
     private val offsetX: Float = 0f,
@@ -36,63 +35,47 @@ data class LayeredSpriteConfig(
     @Serializable(with = RGBAAsInt::class) private val tint: RGBA = Colors.WHITE,
     private val alpha: Float = 1f,
     private val layerIndex: Int,
-    private val layerTag: RenderLayerTag,
+    private val renderLayerTag: RenderLayerTag,
     private val createEntityPerLayer: Boolean = true // If true, creates an entity for each layer in the sprite for tween animation
 
 ) : EntityConfig {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
-        val assetStore: AssetStore = inject(name = "AssetStore")
-        val spriteFrames = assetStore.getSpriteTexture(assetName)
-
+        // Base entity
         entity.configure {
+            // global position
             it += positionComponent {
-                x = this@LayeredSpriteConfig.offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - spriteFrames.width).toFloat() * 0.5f else 0f)
-                y = this@LayeredSpriteConfig.offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - spriteFrames.height).toFloat() * 0.5f else 0f)
+                x = this@LayeredSpriteConfig.offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - width) * 0.5f else 0f)
+                y = this@LayeredSpriteConfig.offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - height) * 0.5f else 0f)
             }
-            it += spriteComponent {
-                name = assetName
+
+            it += entityRefsByNameComponent {
+                moveLinked = true
+                deleteLinked = true
             }
-//            it += spriteLayersComponent {
-//                // Iterate over all layers of the sprite
-// TODO re-implement sprite layers
-//                imageFrame.layerData.fastForEach { layerData ->
-//                    val layerName = layerData.layer.name ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
-//                    // Add layer to the sprite layers component
-//                    createSpriteLayer(layerName)
-//                }
-//            }
-            if (createEntityPerLayer) {
-                it += entityRefsByNameComponent {
-                    // Iterate over all layers of the sprite
-// TODO re-implement sprite layers
-//                    imageFrame.layerData.fastForEach { layerData ->
-//                        val layerName = layerData.layer.name
-//                            ?: error("LayeredSpriteConfig: Layer name is null for layer index ${layerData.layer.index} in asset '$assetName'!")
-//                        // Add entity for each layer
-//                        add(layerName,
-//                            createEntity("layer_$layerName") { layerEntity ->
-//                                layerEntity += positionComponent {}
-//                                layerEntity += rgbaComponent {}
-//                            }
-//                        )
-//                    }
-                    deleteLinked = true
-                }
-            }
-            it += rgbaComponent {
-                rgba = tint
-                alpha = this@LayeredSpriteConfig.alpha
-            }
-            it += layerComponent { index = this@LayeredSpriteConfig.layerIndex }
-            it += layerTag
             // Add life cycle component because we have list of layer entities which needs to be cleaned up by LifeCycleSystem on deletion
             it += lifeCycleComponent {}
         }
+
+        val entityRefsByNameComponent = entity[EntityRefsByNameComponent]
+
+        listOfImages.forEach { image ->
+            val layerEntity = createAndConfigureEntity(entityConfig = "generic_sprite_$image" )
+            entityRefsByNameComponent.add(image, layerEntity)
+        }
+
         return entity
     }
 
     init {
         EntityFactory.register(this)
+
+        listOfImages.forEach { image ->
+            SpriteConfig(
+                name = "generic_sprite_$image",
+                assetName = image,
+                renderLayerTag = renderLayerTag
+            )
+        }
     }
 }

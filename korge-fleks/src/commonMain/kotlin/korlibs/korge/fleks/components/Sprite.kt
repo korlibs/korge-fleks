@@ -35,7 +35,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Sprite")
 class Sprite private constructor(
-    var name: String = "",
+    var name: String = "",  // TODO rename to animation (?)
     var visible: Boolean = true,
     var anchorX: Float = 0f,                          // x,y position of the pivot point within the sprite
     var anchorY: Float = 0f,
