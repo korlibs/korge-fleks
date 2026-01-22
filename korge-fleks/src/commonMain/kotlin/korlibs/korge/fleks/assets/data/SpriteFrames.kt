@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets.data
 
+import korlibs.image.bitmap.Bitmaps
 import korlibs.image.bitmap.BmpSlice
 
 
@@ -39,4 +40,8 @@ class SpriteFrames(
         // Duration in seconds will be set later after all frames have been loaded from texture atlas
         var duration: Float = 0f
     )
+
+    companion object {
+        val EMPTY = SpriteFrames(frames = mutableListOf(SpriteFrame(bmpSlice = Bitmaps.transparent)))
+    }
 }

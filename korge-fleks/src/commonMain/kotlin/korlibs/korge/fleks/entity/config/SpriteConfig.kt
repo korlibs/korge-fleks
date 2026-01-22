@@ -1,6 +1,8 @@
 package korlibs.korge.fleks.entity.config
 
 import com.github.quillraven.fleks.*
+import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
 import korlibs.korge.fleks.components.Layer.Companion.layerComponent
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
@@ -25,8 +27,9 @@ data class SpriteConfig(
     private val x: Float = 0f,
     private val y: Float = 0f,
     private val assetName: String,
-    private val alpha: Float = 1f,
     private val layerIndex: Int = 0,
+    @Serializable(with = RGBAAsInt::class) private val tint: RGBA = Colors.WHITE,
+    private val alpha: Float = 1f,
     private val renderLayerTag: RenderLayerTag,
     private val screenCoordinates: Boolean = false
 ) : EntityConfig {
@@ -51,9 +54,9 @@ data class SpriteConfig(
             it += renderLayerTag
             if (screenCoordinates) it += ScreenCoordinatesTag
             // Enable below debug render shapes
-            it += RenderLayerTag.DEBUG
-            it += DebugInfoTag.SPRITE_BOUNDS
-            it += DebugInfoTag.POSITION
+            //it += RenderLayerTag.DEBUG
+            //it += DebugInfoTag.SPRITE_BOUNDS
+            //it += DebugInfoTag.POSITION
         }
         return entity
     }

@@ -18,8 +18,7 @@ import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.SimpleTileSet
 import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
-import korlibs.korge.view.Container
-import korlibs.korge.view.Image
+import korlibs.korge.fleks.assets.data.AssetType.UNKNOWN
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -97,7 +96,12 @@ class AssetStore {
     fun getSpriteTexture(name: String) : SpriteFrames =
         if (textures.contains(name)) {
             textures[name]!!.second
-        } else error("AssetStore: Texture '$name' not found for Sprite!")
+        } else {
+            // Add transparent texture as fallback to avoid continous error messages
+            textures[name] = Pair(UNKNOWN, SpriteFrames.EMPTY)
+            println("ERROR: AssetStore - Texture '$name' not found for Sprite!")
+            SpriteFrames.EMPTY
+        }
 
     fun getBitmapTexture(name: String) : Bitmap =
         if (textures.contains(name)) {
@@ -155,6 +159,7 @@ class AssetStore {
                     assetLoaded = true
                 }
             }
+            else -> {}
         }
 
         if (assetLoaded) {
@@ -189,6 +194,7 @@ class AssetStore {
                 AssetType.SPECIAL -> resourcesVfs["world_1/level_1/chunk/texture.atlas.json"].readKorgeFleksAssets(
                     // TODO where do we get the special asset name from?
                     "special", type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
+                else -> {}
             }
 
             assetConfig.textureAtlas.forEach { config ->

@@ -104,4 +104,13 @@ class Position private constructor(
         this.x = x
         this.y = y
     }
+
+    /**
+     * Set the offset of the entity to the specified x and y coordinates.
+     */
+    fun setOffset(x: Float, y: Float)
+    {
+        this.offsetX = x
+        this.offsetY = y
+    }
 }

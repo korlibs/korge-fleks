@@ -36,11 +36,11 @@ class MessagePassingSystem : IteratingSystem(
 
         // Do the message send "procedure"
         publishMessagesComponent.listOfTxMsgs.forEach { txMsg ->
-            val msgType = txMsg.event
+            val msgEvent = txMsg.event
             val senderEntityConfig = txMsg.entityConfig
 
             // Check for each published message type if a receiver has subscribed
-            subscribesMessagesComponent.rxMessagesByMsgType[msgType]?.messages?.forEach { message ->
+            subscribesMessagesComponent.rxMessagesByEvent[msgEvent]?.messages?.forEach { message ->
                 // Execute given entityConfig on all entities which have subscribed to this message
                 val receiverEntity = message.entity
                 // Part (1) message source knows what the message destination needs
@@ -57,13 +57,13 @@ class MessagePassingSystem : IteratingSystem(
                         message.remainingMsgs = remainingMsgs - 1
                     } else {
                         // Unsubscribe - remove message from the list
-                        subscribesMessagesComponent.rxMessagesByMsgType[msgType]?.messages?.remove(message)
+                        subscribesMessagesComponent.rxMessagesByEvent[msgEvent]?.messages?.remove(message)
                     }
                 }
             }
         }
 
-        // Cleanup - delete component after all messages have been sent
-        entity.configure { it -= PublishMessagesComponent }
+        // Cleanup - delete publish messages entity after all messages have been sent
+        world -= entity
     }
 }

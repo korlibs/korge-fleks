@@ -250,7 +250,6 @@ class TweenSequenceSystem : IteratingSystem(
             // Subscribe entity to receive messages
             is TweenSubscribeMessage -> {
                 // Get subscribed messages info from runtime config
-                // Get subscribed messages info from runtime config
                 val subscribesMessagesComponent = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
                 subscribesMessagesComponent.add(
                     msgType = tween.event,
@@ -259,19 +258,6 @@ class TweenSequenceSystem : IteratingSystem(
                         entityConfig = tween.entityConfig
                         remainingMsgs = tween.remainingMsgs
                     })
-
-// TODO check if above works correctly, old code below can be deleted if yes
-                // Get message passing config entity only once for performance reasons - family search is expensive
-//                if (messagePassingEntity == null) messagePassingEntity = world.getMessagePassingEntity()
-//                messagePassingEntity!!.configure { mpsEntity ->
-//                    mpsEntity[MessagePassingConfigComponent].add(
-//                        msgType = tween.type,
-//                        rxMsg {
-//                            entity = baseEntity  // the entity which wants to receive the message
-//                            entityConfig = tween.entityConfig
-//                            remainingMsgs = tween.remainingMsgs
-//                        })
-//                }
             }
             else -> {
                 when (tween) {

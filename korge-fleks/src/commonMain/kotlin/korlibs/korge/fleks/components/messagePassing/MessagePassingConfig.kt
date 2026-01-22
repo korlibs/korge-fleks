@@ -28,18 +28,18 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("MessagePassingConfig")
 class MessagePassingConfig private constructor(
-    val rxMessagesByMsgType: MutableMap<Int, ListOfRxMsg> = mutableMapOf()
+    val rxMessagesByEvent: MutableMap<Int, ListOfRxMsg> = mutableMapOf()
 ) : PoolableComponent<MessagePassingConfig>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
     fun init(from: MessagePassingConfig) {
-        rxMessagesByMsgType.init(from.rxMessagesByMsgType)
+        rxMessagesByEvent.init(from.rxMessagesByEvent)
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are a value property of another component
     fun cleanup() {
-        rxMessagesByMsgType.cleanup()
+        rxMessagesByEvent.cleanup()
     }
 
     override fun type() = MessagePassingConfigComponent
@@ -62,8 +62,8 @@ class MessagePassingConfig private constructor(
          * This will clone each ListOfRxMsg and add it to the map.
          */
         fun MutableMap<Int, ListOfRxMsg>.init(from: Map<Int, ListOfRxMsg>) {
-            from.forEach { (msgType, listOfRxMessages) ->
-                this[msgType] = listOfRxMessages.clone()
+            from.forEach { (msgEvent, listOfRxMessages) ->
+                this[msgEvent] = listOfRxMessages.clone()
             }
         }
 
@@ -112,13 +112,13 @@ class MessagePassingConfig private constructor(
     }
 
     /**
-     * Adds a new [RxMsg] to the [rxMessagesByMsgType] for the given message type.
+     * Adds a new [RxMsg] to the [rxMessagesByEvent] for the given message type.
      */
     fun add(msgType: Int, rxMsg: RxMsg) {
-        if (rxMessagesByMsgType.contains(msgType)) {
-            rxMessagesByMsgType[msgType]!!.messages.add(rxMsg)
+        if (rxMessagesByEvent.contains(msgType)) {
+            rxMessagesByEvent[msgType]!!.messages.add(rxMsg)
         } else {
-            rxMessagesByMsgType[msgType] = listOfRxMsg {
+            rxMessagesByEvent[msgType] = listOfRxMsg {
                 messages.add(rxMsg)
             }
         }

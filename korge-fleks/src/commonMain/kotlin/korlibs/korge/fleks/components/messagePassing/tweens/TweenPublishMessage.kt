@@ -73,10 +73,10 @@ class TweenPublishMessage private constructor(
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenPublishMessage") { TweenPublishMessage() }
 
-        fun World.createMsgPublishEntity(msgType: Int, msgEntityConfig: String?) {
+        fun World.createMsgPublishEntity(msgEvent: Int, msgEntityConfig: String?) {
             createEntity("TweenPublishMessage").configure { txEntity ->
                 txEntity.getOrAdd(PublishMessagesComponent) { publishMessagesComponent {} }.add(txMsg {
-                    event = msgType                  // set message type
+                    event = msgEvent                // set message event number
                     entityConfig = msgEntityConfig  // set (possibly) entityConfig string which shall be executed on publish message
                 })
             }

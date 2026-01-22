@@ -25,15 +25,10 @@ data class LayeredSpriteConfig(
     override val name: String,
 
     private val listOfImages: List<String>,
-    private val width: Float,
-    private val height: Float,
-    private val centerX: Boolean = false,
-    private val centerY: Boolean = false,
-    private val offsetX: Float = 0f,
-    private val offsetY: Float = 0f,
+    private val listOfLayerIndexes: List<Int>,  // layer index per image
     @Serializable(with = RGBAAsInt::class) private val tint: RGBA = Colors.WHITE,
     private val alpha: Float = 1f,
-    private val layerIndex: Int,
+    private val baseLayerIndex: Int = 0,
     private val renderLayerTag: RenderLayerTag,
     private val createEntityPerLayer: Boolean = true, // If true, creates an entity for each layer in the sprite for tween animation
     private val screenCoordinates: Boolean = false
@@ -43,11 +38,7 @@ data class LayeredSpriteConfig(
         // Base entity
         entity.configure {
             // global position
-            it += positionComponent {
-                x = this@LayeredSpriteConfig.offsetX + (if (centerX) (AppConfig.VIEW_PORT_WIDTH - width) * 0.5f else 0f)
-                y = this@LayeredSpriteConfig.offsetY + (if (centerY) (AppConfig.VIEW_PORT_HEIGHT - height) * 0.5f else 0f)
-            }
-
+            it += positionComponent {}
             it += entityRefsByNameComponent {
                 moveLinked = true
                 deleteLinked = true
@@ -59,7 +50,7 @@ data class LayeredSpriteConfig(
         val entityRefsByNameComponent = entity[EntityRefsByNameComponent]
 
         listOfImages.forEach { image ->
-            val layerEntity = createAndConfigureEntity(entityConfig = "generic_sprite_$image" )
+            val layerEntity = createAndConfigureEntity(entityConfig = "${name}_${image}" )
             entityRefsByNameComponent.add(image, layerEntity)
         }
 
@@ -69,12 +60,20 @@ data class LayeredSpriteConfig(
     init {
         EntityFactory.register(this)
 
-        listOfImages.forEach { image ->
+        // Sanity check
+        if (listOfImages.size != listOfLayerIndexes.size)
+            println("\nERROR: LayeredSpriteConfig '$name' - Sizes of listOfImages '${listOfImages.size}' " +
+                "and listOfLayerIndexes '${listOfLayerIndexes.size}' does not match!")
+
+        listOfImages.forEachIndexed { idx, image ->
+            val layerIndex = if (listOfLayerIndexes.size > idx) listOfLayerIndexes[idx] else 0
             SpriteConfig(
-                name = "generic_sprite_$image",
+                name = "${name}_${image}",
+                // Specify the layer index together with the image name
                 assetName = image,
-                // TODO we need to put each texture on its own layerIndex - thus specify the layer index together with the image name
-                layerIndex = layerIndex,
+                layerIndex = baseLayerIndex + layerIndex,
+                tint = tint,
+                alpha = alpha,
                 renderLayerTag = renderLayerTag,
                 screenCoordinates = screenCoordinates
             )
