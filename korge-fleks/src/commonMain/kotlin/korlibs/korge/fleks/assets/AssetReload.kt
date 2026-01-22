@@ -78,6 +78,9 @@ class ResourceDirWatcherConfiguration(
                 specialAssetUpdater.toBeEnabled = true
                 specialAssetUpdater.apply(callback)
             }
+            AssetType.UNKNOWN -> {
+                // Do nothing
+            }
         }
     }
 
@@ -223,6 +226,7 @@ fun configureAssetUpdater(type: AssetType, cfg: AssetUpdaterConfiguration.() -> 
                 AssetType.WORLD -> currentWatcher.worldAssetUpdater.apply(cfg)
                 AssetType.LEVEL -> currentWatcher.levelAssetUpdater.apply(cfg)
                 AssetType.SPECIAL -> currentWatcher.specialAssetUpdater.apply(cfg)
+                AssetType.UNKNOWN -> { /* Do nothing */ }
             }
         } else {
             // TODO get hot-reloading working again later when new asset system loading is ready
