@@ -18,12 +18,14 @@ import kotlinx.serialization.Serializable
 class RxMsg private constructor(
     var entity: Entity = Entity.NONE,
     var entityConfig: String? = null,
-    var remainingMsgs: Int? = null
+    var releaseWait: Boolean = false,
+    var remainingMsgs: Int = 0
 ) : Poolable<RxMsg> {
     // Init an existing data instance with data from another one
     override fun init(from: RxMsg) {
         entity = from.entity
         entityConfig = from.entityConfig
+        releaseWait = from.releaseWait
         remainingMsgs = from.remainingMsgs
     }
 
@@ -32,7 +34,8 @@ class RxMsg private constructor(
     override fun cleanup() {
         entity = Entity.NONE
         entityConfig = null
-        remainingMsgs = null
+        releaseWait = false
+        remainingMsgs = 0
     }
 
     // Clone a new data instance from the pool

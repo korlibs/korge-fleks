@@ -21,7 +21,8 @@ import kotlinx.serialization.Serializable
 class TweenSubscribeMessage private constructor(
     var event: Int = 0,
     var entityConfig: String? = null,
-    var remainingMsgs: Int? = null,
+    var releaseWait: Boolean = false,
+    var remainingMsgs: Int = 0,                 // 0 = infinite
 
     override var target: Entity = Entity.NONE,  // not used
     override var delay: Float? = null,
@@ -32,6 +33,7 @@ class TweenSubscribeMessage private constructor(
     override fun init(from: TweenSubscribeMessage) {
         event = from.event
         entityConfig = from.entityConfig
+        releaseWait = from.releaseWait
         remainingMsgs = from.remainingMsgs
 
         target = from.target
@@ -47,6 +49,7 @@ class TweenSubscribeMessage private constructor(
     override fun cleanup() {
         event = 0
         entityConfig = null
+        releaseWait = false
         remainingMsgs = 0
 
         target = Entity.NONE
