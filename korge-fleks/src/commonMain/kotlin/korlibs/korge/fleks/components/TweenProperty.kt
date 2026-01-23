@@ -88,16 +88,9 @@ class TweenProperty private constructor(
         val TweenSoundPositionComponent = TweenPropertyType.SoundPosition.type
         val TweenSoundVolumeComponent = TweenPropertyType.SoundVolume.type
 
-//        val TweenNoisyMoveX = TweenPropertyType.NoisyMoveX.type
-//        val TweenNoisyMoveY = TweenPropertyType.NoisyMoveY.type
-
         val TweenTextFieldTextComponent = TweenPropertyType.TextFieldText.type
         val TweenTextFieldTextRangeStartComponent = TweenPropertyType.TextFieldTextRangeStart.type
         val TweenTextFieldTextRangeEndComponent = TweenPropertyType.TextFieldTextRangeEnd.type
-
-        val TweenEventPublishComponent = TweenPropertyType.EventPublish.type
-        val TweenEventResetComponent = TweenPropertyType.EventReset.type
-        val TweenEventSubscribeComponent = TweenPropertyType.EventSubscribe.type
 
         val TweenTouchInputEnableComponent = TweenPropertyType.TouchInputEnable.type
 
@@ -179,16 +172,9 @@ class TweenProperty private constructor(
         SoundPosition(componentTypeOf<TweenProperty>()),
         SoundVolume(componentTypeOf<TweenProperty>()),
 
-//        NoisyMoveX(componentTypeOf<TweenProperty>()),
-//        NoisyMoveY(componentTypeOf<TweenProperty>()),
-
         TextFieldText(componentTypeOf<TweenProperty>()),
         TextFieldTextRangeStart(componentTypeOf<TweenProperty>()),
         TextFieldTextRangeEnd(componentTypeOf<TweenProperty>()),
-
-        EventPublish(componentTypeOf<TweenProperty>()),
-        EventReset(componentTypeOf<TweenProperty>()),
-        EventSubscribe(componentTypeOf<TweenProperty>()),
 
         TouchInputEnable(componentTypeOf<TweenProperty>())
     }

@@ -23,8 +23,6 @@ import korlibs.korge.fleks.components.data.tweenSequence.Jump
 import korlibs.korge.fleks.components.data.tweenSequence.LoopTweens
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens.Companion.staticParallelTweens
-import korlibs.korge.fleks.components.data.tweenSequence.ResetEvent
-import korlibs.korge.fleks.components.data.tweenSequence.SendEvent
 import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity
 import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
 import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
@@ -230,29 +228,26 @@ class TweenSequenceSystem : IteratingSystem(
             is ExecuteConfigFunction -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)
             // Process Wait tween only for event here - wait time was already set above from tween.duration
             is Wait -> tween.event?.let { event ->
-                // Wait for event, SendEvent and ResetEvent need the current entity which comes in via onTickEntity
-                tween.target = baseEntity
-                createTweenPropertyComponent(tween, parentTween, EventSubscribe, value = event)
-                tween.target = Entity.NONE  // Reset target again since it is marked as not used
-            }
-            is SendEvent -> {
-                tween.target = baseEntity
-                createTweenPropertyComponent(tween, parentTween, EventPublish, value = tween.event)
-                tween.target = Entity.NONE
-            }
-            is ResetEvent -> {
-                tween.target = baseEntity
-                createTweenPropertyComponent(tween, parentTween, EventReset, value = tween.event)
-                tween.target = Entity.NONE
+                // Get subscribed messages info from runtime config
+                val messagePassingConfigComponent = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
+                messagePassingConfigComponent.add(
+                    msgEvent = event,
+                    rxMsg {
+                        entity = baseEntity  // the entity which wants to receive the message
+                        entityConfig = null  // no entityConfig on wait - maybe in future?
+                        releaseWait = true   // release wait on message arrival
+                        remainingMsgs = 1    // only need one message to release the wait - unsubscribe afterward
+                    })
+                tween.event = null // reset event to avoid adding multiple times
             }
             // Create new entity for publishing messages
             is TweenPublishMessage -> world.createMsgPublishEntity(tween.event, tween.entityConfig)
             // Subscribe entity to receive messages
             is TweenSubscribeMessage -> {
                 // Get subscribed messages info from runtime config
-                val subscribesMessagesComponent = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
-                subscribesMessagesComponent.add(
-                    msgType = tween.event,
+                val messagePassingConfig = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
+                messagePassingConfig.add(
+                    msgEvent = tween.event,
                     rxMsg {
                         entity = baseEntity  // the entity which wants to receive the message
                         entityConfig = tween.entityConfig

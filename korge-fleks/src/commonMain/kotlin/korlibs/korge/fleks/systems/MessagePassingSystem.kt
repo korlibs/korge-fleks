@@ -4,14 +4,9 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
 import korlibs.korge.fleks.components.messagePassing.PublishMessages.Companion.PublishMessagesComponent
+import korlibs.korge.fleks.components.messagePassing.data.ListOfRxMsg.Companion.cleanupAt
 import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.utils.*
-
-
-// Message types
-const val RELEASE_CAMERA = 1
-const val ATTACH_CAMERA = 2
-const val TOUCH_INPUT = 3  // TODO
 
 
 /**
@@ -37,7 +32,7 @@ class MessagePassingSystem : IteratingSystem(
     override fun onTickEntity(entity: Entity) {
         val senderEntity = entity  // name alias for better readability
         // Get subscribed messages info from runtime config
-        val subscribesMessagesComponent = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
+        val messagePassingConfigComponent = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
 
         val publishMessagesComponent = senderEntity[PublishMessagesComponent]
 
@@ -47,35 +42,39 @@ class MessagePassingSystem : IteratingSystem(
             val senderEntityConfig = txMsg.entityConfig
 
             // Check for each published message type if a receiver has subscribed
-            subscribesMessagesComponent.rxMessagesByEvent[msgEvent]?.messages?.forEach { message ->
-                // Execute given entityConfig on all entities which have subscribed to this message
-                val receiverEntity = message.entity
-                // Part (1) message source knows what the message destination needs
-                senderEntityConfig?.let { senderEntityConfig ->
-                    world.configureEntity(senderEntityConfig, receiverEntity)
-                }
-                // Part (2) message destination knows what to do when this message arrives
-                message.entityConfig?.let { receiverEntityConfig ->
-                    world.configureEntity(receiverEntityConfig, receiverEntity)
-                }
-                // Release wait state if required - this is used in tween sequences to wait for a message
-                if (message.releaseWait && receiverEntity has TweenSequenceComponent) {
-                    val tweenSequenceComponent = receiverEntity[TweenSequenceComponent]
-                    tweenSequenceComponent.waitTime = 0f
-                }
-                // Check if we need to unsubscribe the receiver entity automatically
-                if (message.remainingMsgs != 0) {
-                    if (message.remainingMsgs > 1) {
+            messagePassingConfigComponent.rxMessagesByEvent[msgEvent]?.messages?.let { rxMessagesList ->
+                rxMessagesList.forEach { message ->
+                    // Execute given entityConfig on all entities which have subscribed to this message
+                    val receiverEntity = message.entity
+                    // Part (1) message source knows what the message destination needs
+                    senderEntityConfig?.let { senderEntityConfig ->
+                        world.configureEntity(senderEntityConfig, receiverEntity)
+                    }
+                    // Part (2) message destination knows what to do when this message arrives
+                    message.entityConfig?.let { receiverEntityConfig ->
+                        world.configureEntity(receiverEntityConfig, receiverEntity)
+                    }
+                    // Release wait state if required - this is used in tween sequences to wait for a message
+                    if (message.releaseWait && receiverEntity has TweenSequenceComponent) {
+                        val tweenSequenceComponent = receiverEntity[TweenSequenceComponent]
+                        tweenSequenceComponent.waitTime = 0f
+                    }
+                    // If not unlimited messages, decrease counter - cleanup must be done OUTSIDE of this loop
+                    if (message.remainingMsgs > 0) {
                         message.remainingMsgs -= 1
-                    } else {
-                        // Unsubscribe - remove message from the list
-                        subscribesMessagesComponent.rxMessagesByEvent[msgEvent]?.messages?.remove(message)
+                    }
+                }
+
+                // Remove all messages which have remainingMsgs == 0 (means auto-unsubscribe)
+                for (i in rxMessagesList.size -1 downTo 0) {
+                    if (rxMessagesList[i].remainingMsgs == 0) {
+                        rxMessagesList.cleanupAt(i)
                     }
                 }
             }
         }
 
-        // Cleanup - delete publish messages entity after all messages have been sent
+        // Cleanup - delete publish messages entity after all message events have been sent
         world -= entity
     }
 }

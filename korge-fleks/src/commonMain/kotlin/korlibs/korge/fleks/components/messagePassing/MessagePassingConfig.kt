@@ -114,11 +114,11 @@ class MessagePassingConfig private constructor(
     /**
      * Adds a new [RxMsg] to the [rxMessagesByEvent] for the given message type.
      */
-    fun add(msgType: Int, rxMsg: RxMsg) {
-        if (rxMessagesByEvent.contains(msgType)) {
-            rxMessagesByEvent[msgType]!!.messages.add(rxMsg)
+    fun add(msgEvent: Int, rxMsg: RxMsg) {
+        if (rxMessagesByEvent.contains(msgEvent)) {
+            rxMessagesByEvent[msgEvent]!!.messages.add(rxMsg)
         } else {
-            rxMessagesByEvent[msgType] = listOfRxMsg {
+            rxMessagesByEvent[msgEvent] = listOfRxMsg {
                 messages.add(rxMsg)
             }
         }

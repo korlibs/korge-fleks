@@ -2,7 +2,6 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.collection.*
 import korlibs.image.color.RGBA
 import korlibs.image.format.*
 import korlibs.korge.fleks.assets.*
@@ -22,9 +21,6 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionOffse
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionOffsetYComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaAlphaComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaRedComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventPublishComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventResetComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventSubscribeComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenMotionVelocityXComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaBlueComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaGreenComponent
@@ -185,50 +181,6 @@ class TweenTextFieldSystem : IteratingSystem(
     }
 }
 
-class TweenEventSystem : IteratingSystem(
-    family = family {
-        all(TweenSequenceComponent)
-            .any(TweenEventPublishComponent, TweenEventResetComponent, TweenEventSubscribeComponent) },
-    interval = EachFrame
-) {
-    // Event bitmap
-    private val eventMap: BitArray = BitArray()
-
-    fun setEvent(idx: Int) {
-        eventMap.set(idx)
-    }
-
-    override fun onTickEntity(entity: Entity) {
-        if (entity has TweenEventPublishComponent) {
-            // "event" is saved as value in TweenPropertyComponent
-            val event = entity[TweenEventPublishComponent].value
-            // Set event which we want to publish
-            eventMap.set(event as Int)
-            // Reset
-            entity.configure { it -= TweenEventPublishComponent }
-        } else if (entity has TweenEventResetComponent) {
-            val event = entity[TweenEventResetComponent].value
-            eventMap.clear(event as Int)
-            entity.configure { it -= TweenEventResetComponent }
-        }
-        if (entity has TweenEventSubscribeComponent) {
-            // "entityConfig" is saved as change in TweenPropertyComponent
-            // "event" is saved as value in TweenPropertyComponent
-            val event = entity[TweenEventSubscribeComponent].value
-            // Run the specific event config function on the entity which is subscribed to this event
-            if (eventMap[event as Int]) {
-                // TODO move this into EntityConfig configure function
-                // Unblock tween script
-                val tweenSequence = entity[TweenSequenceComponent]
-                tweenSequence.waitTime = 0f
-                // Reset event already
-//                eventMap.clear(event)
-                entity.configure { it -= TweenEventSubscribeComponent }
-            }
-        }
-    }
-}
-
 class TweenTouchInputSystem : IteratingSystem(
     family {
         all(TouchInputComponent)
@@ -264,7 +216,6 @@ fun SystemConfiguration.addTweenEngineSystems() {
     add(TweenSwitchVisibilitySystem())
     add(TweenSoundSystem())
     add(TweenTextFieldSystem())
-    add(TweenEventSystem())
     add(TweenTouchInputSystem())
 }
 

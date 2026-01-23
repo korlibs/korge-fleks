@@ -22,12 +22,12 @@ class TweenSubscribeMessage private constructor(
     var event: Int = 0,
     var entityConfig: String? = null,
     var releaseWait: Boolean = false,
-    var remainingMsgs: Int = 0,                 // 0 = infinite
+    var remainingMsgs: Int = INFINITE,
 
     override var target: Entity = Entity.NONE,  // not used
     override var delay: Float? = null,
     override var duration: Float? = null,       // not used
-    @Serializable(with = EasingAsString::class) override var easing: Easing? = null
+    @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
 ) : TweenBase, Poolable<TweenSubscribeMessage> {
     // Init an existing data instance with data from another one
     override fun init(from: TweenSubscribeMessage) {
@@ -36,10 +36,10 @@ class TweenSubscribeMessage private constructor(
         releaseWait = from.releaseWait
         remainingMsgs = from.remainingMsgs
 
-        target = from.target
+        // target not used
         delay = from.delay
-        duration = from.duration
-        easing = from.easing
+        // duration not used
+        // easing not used
         // Hint: it is not needed to copy "easing" property by creating new one like below:
         // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
     }
@@ -50,12 +50,12 @@ class TweenSubscribeMessage private constructor(
         event = 0
         entityConfig = null
         releaseWait = false
-        remainingMsgs = 0
+        remainingMsgs = INFINITE
 
-        target = Entity.NONE
+        // target not used
         delay = null
-        duration = null
-        easing = null
+        // duration not used
+        // easing not used
     }
 
     // Clone a new data instance from the pool
@@ -68,6 +68,8 @@ class TweenSubscribeMessage private constructor(
     }
 
     companion object {
+        const val INFINITE = -1
+        const val ONCE = 1
         // Use this function to create a new instance of data as value property inside a component
         fun staticTweenSubscribeMessage(config: TweenSubscribeMessage.() -> Unit ): TweenSubscribeMessage =
             TweenSubscribeMessage().apply(config)

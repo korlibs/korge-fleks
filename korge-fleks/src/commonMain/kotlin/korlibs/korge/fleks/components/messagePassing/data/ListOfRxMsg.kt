@@ -68,5 +68,13 @@ class ListOfRxMsg private constructor(
             }
             this.clear()
         }
+
+        /**
+         * Cleanup and remove the [RxMsg] at index [i] from the list.
+         */
+        fun MutableList<RxMsg>.cleanupAt(i: Int) {
+            this[i].free()
+            this.removeAt(i)
+        }
     }
 }

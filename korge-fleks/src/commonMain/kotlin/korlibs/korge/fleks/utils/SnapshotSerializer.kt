@@ -49,8 +49,6 @@ import korlibs.korge.fleks.components.data.tweenSequence.ExecuteConfigFunction
 import korlibs.korge.fleks.components.data.tweenSequence.Jump
 import korlibs.korge.fleks.components.data.tweenSequence.LoopTweens
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens
-import korlibs.korge.fleks.components.data.tweenSequence.ResetEvent
-import korlibs.korge.fleks.components.data.tweenSequence.SendEvent
 import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity
 import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
 import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
@@ -233,8 +231,6 @@ class SnapshotSerializer {
             subclass(Jump::class)
             subclass(LoopTweens::class)
             subclass(ParallelTweens::class)
-            subclass(ResetEvent::class)
-            subclass(SendEvent::class)
             subclass(SpawnEntity::class)
             subclass(SpawnNewTweenSequence::class)
             subclass(TweenMotion::class)

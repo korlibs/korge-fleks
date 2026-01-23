@@ -13,13 +13,12 @@ import kotlinx.serialization.Serializable
  * - an optional entityConfig string to configure the entity when the message was received.
  * - an optional remainingMsgs counter to limit the number of messages to receive before unsubscribing automatically.
  */
-@Serializable
-@SerialName("RxMsg")
+@Serializable @SerialName("RxMsg")
 class RxMsg private constructor(
     var entity: Entity = Entity.NONE,
     var entityConfig: String? = null,
     var releaseWait: Boolean = false,
-    var remainingMsgs: Int = 0
+    var remainingMsgs: Int = UNLIMITED
 ) : Poolable<RxMsg> {
     // Init an existing data instance with data from another one
     override fun init(from: RxMsg) {
@@ -35,7 +34,7 @@ class RxMsg private constructor(
         entity = Entity.NONE
         entityConfig = null
         releaseWait = false
-        remainingMsgs = 0
+        remainingMsgs = UNLIMITED
     }
 
     // Clone a new data instance from the pool
@@ -48,6 +47,9 @@ class RxMsg private constructor(
     }
 
     companion object {
+        const val UNLIMITED = -1
+        const val ONCE = 1
+
         // Use this function to create a new instance of data as value property inside a component
         fun staticRxMsg(config: RxMsg.() -> Unit): RxMsg =
             RxMsg().apply(config)

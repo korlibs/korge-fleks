@@ -27,17 +27,17 @@ class TweenPublishMessage private constructor(
     override var target: Entity = Entity.NONE,  // not used
     override var delay: Float? = null,
     override var duration: Float? = null,       // not used
-    @Serializable(with = EasingAsString::class) override var easing: Easing? = null
+    @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
 ) : TweenBase, Poolable<TweenPublishMessage> {
     // Init an existing data instance with data from another one
     override fun init(from: TweenPublishMessage) {
         event = from.event
         entityConfig = from.entityConfig
 
-        target = from.target
+        // entity not used
         delay = from.delay
-        duration = from.duration
-        easing = from.easing
+        // duration not used
+        // easing not used
         // Hint: it is not needed to copy "easing" property by creating new one like below:
         // easing = Easing.ALL[easing::class.toString().substringAfter('$')]
     }
@@ -48,10 +48,10 @@ class TweenPublishMessage private constructor(
         event = 0
         entityConfig = null
 
-        target = Entity.NONE
+        // target not used
         delay = null
-        duration = null
-        easing = null
+        // duration not used
+        // easing not used
     }
 
     // Clone a new data instance from the pool
@@ -73,7 +73,7 @@ class TweenPublishMessage private constructor(
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TweenPublishMessage") { TweenPublishMessage() }
 
-        fun World.createMsgPublishEntity(msgEvent: Int, msgEntityConfig: String?) {
+        fun World.createMsgPublishEntity(msgEvent: Int, msgEntityConfig: String? = null) {
             createEntity("TweenPublishMessage").configure { txEntity ->
                 txEntity.getOrAdd(PublishMessagesComponent) { publishMessagesComponent {} }.add(txMsg {
                     event = msgEvent                // set message event number
