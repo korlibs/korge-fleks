@@ -174,6 +174,7 @@ data class DialogBoxConfig(
                     // Type write text into the dialog
                     tweenTextField { target = textField; textRangeEnd = this@DialogBoxConfig.text.length; delay = 0.3f + 0.8f; duration = this@DialogBoxConfig.text.length * textWritingFactor }
                 }
+                // TODO wait in addition to an event that the player pressed a button to fast-forward the dialog
                 wait { duration = this@DialogBoxConfig.duration }
                 parallelTweens {
                     duration = 1f
