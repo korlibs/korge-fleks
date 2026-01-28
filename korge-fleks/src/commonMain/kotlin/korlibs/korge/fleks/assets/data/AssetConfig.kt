@@ -148,7 +148,12 @@ data class AssetConfig(
         @SerialName("n") val name: String = "",
         @SerialName("w") val tileWidth: Int = 0,
         @SerialName("h") val tileHeight: Int = 0,
+        // List of tileset names included in the tileset atlas
         @SerialName("t") val tilesetNames: List<String> = emptyList(),
+        // textureIndex  - index to texture atlas where the tile is located
+        // x             - x position in texture atlas
+        // y             - y position in texture atlas
+        // [frame index] - optional frame index for debugging
         @SerialName("f") val frames: Array<IntArray> = emptyArray()
     ) {
         override fun equals(other: Any?): Boolean {
