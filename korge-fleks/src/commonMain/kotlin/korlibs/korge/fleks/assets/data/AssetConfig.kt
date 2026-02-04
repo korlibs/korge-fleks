@@ -15,6 +15,17 @@ import kotlinx.serialization.Transient
  *  - ninePatches: map of nine-patch image names to [NinePatchInfo]
  *  - pixelFonts: map of pixel font names to [PixelFontInfo]
  *  - parallaxLayers: map of parallax layer config objects to [ParallaxLayersInfo]
+ *  - tiles: [TilesInfo] object containing tile set info#
+ *           Each tile frame contains the info [textureIndex, x, y, width, height]
+ *           - textureIndex: index to tileset atlas where the tile is located
+ *           - x: x position in tileset atlas
+ *           - y: y position in tileset atlas
+ *           - tileWidth, tileHeight: size of each tile in pixels
+ *  - tileMaps: [TileMapData] object containing tile map info
+ *           Each tile map contains the info for:
+ *           - tileMapName: name of the tile map
+ *           - stackedTileMapData: list of stacked tile map data
+ *           - clusterList: list of cluster names used by the tile map. That means which tileset clusters are needed to render the tile map
  */
 @Serializable
 data class AssetConfig(
@@ -25,7 +36,8 @@ data class AssetConfig(
     val ninePatches: Map<String, NinePatchInfo> = emptyMap(),
     val pixelFonts: Map<String, PixelFontInfo> = emptyMap(),
     val parallaxLayers: Map<String, ParallaxLayersInfo> = emptyMap(),
-    val tiles: TilesInfo = TilesInfo()
+    val tiles: TilesInfo = TilesInfo(),
+    val tileMaps: TileMapData = TileMapData()
 ) {
     /**
      * Image info data class.
@@ -180,4 +192,11 @@ data class AssetConfig(
             return result
         }
     }
+
+    @Serializable
+    data class TileMapData(
+        @SerialName("n") val tileMapName: String = "",
+        @SerialName("m") val stackedTileMapData: List<List<Int>> = emptyList(),  // Stacked tile map data for each world level chunk
+        @SerialName("c") val clusterList: List<String> = emptyList()  // Needed by renderer for offsets of tilesets in clusters
+    )
 }
