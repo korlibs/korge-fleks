@@ -195,6 +195,9 @@ data class ClusterAssetInfo(
     @Serializable
     data class TileMapInfo(
         @SerialName("m") val stackedTileMapData: List<List<Int>> = emptyList(),  // Stacked tile map data for each world level chunk
+        @SerialName("w") val gridWidth: Int = 0,
+        @SerialName("h") val gridHeight: Int = 0,
+        @SerialName("g") val gridSize: Int = 0,
         @SerialName("c") val clusterList: List<String> = emptyList()  // Needed by renderer for offsets of tilesets in clusters
     )
 }

@@ -4,34 +4,29 @@ import korlibs.audio.sound.*
 import korlibs.image.bitmap.*
 import korlibs.image.font.BitmapFont
 import korlibs.image.font.Font
-import korlibs.image.tiles.TileSet
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.*
 import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
-import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.SpriteFrames
-import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.SimpleTileSet
 import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
 import korlibs.korge.fleks.assets.data.UNKNOWN
+import korlibs.korge.fleks.components.data.ChunkLevelMap
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
 
-typealias SoundMapType = MutableMap<String, Pair<AssetType, SoundChannel>>
+typealias SoundsAssetType = MutableMap<String, Pair<AssetType, SoundChannel>>
 
-typealias SpriteFramesMapType = MutableMap<String, Pair<AssetType, SpriteFrames>>
-typealias NinePatchBmpSliceMapType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
-typealias BitMapFontMapType = MutableMap<String, Pair<AssetType, BitmapFont>>
-typealias ParallaxLayersMapType = MutableMap<String, Pair<AssetType, ParallaxLayersInfo>>
+typealias SpriteFramesAssetType = MutableMap<String, Pair<AssetType, SpriteFrames>>
+typealias NinePatchBmpSlicesAssetType = MutableMap<String, Pair<AssetType, NinePatchBmpSlice>>
+typealias BitMapFontsAssetType = MutableMap<String, Pair<AssetType, BitmapFont>>
+typealias ParallaxLayersAssetType = MutableMap<String, Pair<AssetType, ParallaxLayersInfo>>
 
-typealias TilesetMapType = MutableMap<String, Pair<AssetType, TileSet>>
-typealias TileMapsType = MutableMap<String, Pair<AssetType, LayerTileMaps>>
-
-// NEW
-typealias TilesetMapType2 = MutableMap<String, Pair<AssetType, SimpleTileSet>>
+typealias TileMapsAssetType = MutableMap<String, Pair<AssetType, ChunkLevelMap>>
+typealias TileSetsAssetType = MutableMap<String, Pair<AssetType, SimpleTileSet>>
 
 
 /**
@@ -48,9 +43,7 @@ typealias TilesetMapType2 = MutableMap<String, Pair<AssetType, SimpleTileSet>>
  */
 class AssetStore {
     // Handles loading of various asset types
-    val loader = AssetLoader(this)
-    internal val assetLevelDataLoader: AssetLevelDataLoader = AssetLevelDataLoader(this)
-    private val textureAtlasLoader = TextureAtlasLoader()
+    val loader = AssetLoader(this)  // TODO check if we should put the loader into an extra class
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 
@@ -59,20 +52,17 @@ class AssetStore {
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
     // Sound related assets
-    internal val sounds: SoundMapType = mutableMapOf()
+    internal val sounds: SoundsAssetType = mutableMapOf()
 
     // Image related assets
-    internal val textures: SpriteFramesMapType = mutableMapOf()
-    internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
-    internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
-    internal val parallaxLayers: ParallaxLayersMapType = mutableMapOf()
+    internal val textures: SpriteFramesAssetType = mutableMapOf()
+    internal val ninePatchSlices: NinePatchBmpSlicesAssetType = mutableMapOf()
+    internal val bitMapFonts: BitMapFontsAssetType = mutableMapOf()
+    internal val parallaxLayers: ParallaxLayersAssetType = mutableMapOf()
 
     // tiles (tileset and tilemap) related assets
-    internal val tileMaps: TileMapsType = mutableMapOf()
-    internal val tilesets: TilesetMapType = mutableMapOf()
-
-    // NEW
-    internal val tilesets2: TilesetMapType2 = mutableMapOf()
+    internal val tileMaps: TileMapsAssetType = mutableMapOf()
+    internal val tileSets: TileSetsAssetType = mutableMapOf()
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {
@@ -118,19 +108,20 @@ class AssetStore {
     fun getFont(name: String) : Font =
         bitMapFonts[name]?.second ?: error("AssetStore: Cannot find font '$name'!")
 
-    fun getTileset(name: String) : TileSet =
-        if (tilesets.contains(name)) {
-            tilesets[name]!!.second
-        } else error("AssetStore: Tileset '$name' not found!")
+    fun getTileSet(name: String) : SimpleTileSet =
+        if (tileSets.contains(name)) {
+            tileSets[name]!!.second
+        } else error("AssetStore: Tile set '$name' not found!")
 
-    fun getTileMapData(level: String) : LayerTileMaps =
-        if (tileMaps.contains(level)) {
-            tileMaps[level]!!.second
+    fun getTileMap(name: String) : ChunkLevelMap =
+        if (tileMaps.contains(name)) {
+            tileMaps[name]!!.second
         }
-        else error("AssetStore: Tile map for level '$level' not found!")
+        else error("AssetStore: Chunk tile map '$name' not found!")
 
-    suspend fun loadClusterAssets(clusterPath: String, hotReloading: Boolean = false) {
-
+    suspend fun loadClusterAssets(world: Int? = null, clusterName: String, hotReloading: Boolean = false) {
+        // Keep track was loaded already to avoid reloading of assets which are already in memory.
+        val clusterPath = world?.let { "world_${world}/${clusterName}" } ?: clusterName
         if (loadedClusterAssets.contains(clusterPath)) {
             println("INFO: Asset cluster '$clusterPath' already loaded! No reload is happening!")
             return
@@ -158,36 +149,15 @@ class AssetStore {
 //                }
 //            }
 
-            resourcesVfs["${clusterPath}/assets.json"].readKorgeFleksAssets(
-                clusterPath, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
-
-// TODO load tile maps from LDtk files
-//            assetConfig.tileMaps.forEach { tileMap ->
-//                val levelName = tileMap.name
-//                val ldtkFile = tileMap.fileName
-//                val collisionLayerName = tileMap.collisionLayerName
-//                val tileSetPaths = mutableListOf("")
-//                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld()
-//
-//                when  (type) {
-//                    AssetType.LEVEL -> {
-//                        assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths)
-//                    }
-//                    else -> {
-//                        // Load raw tile map data for tilemap object types
-//                        ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-//                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(this, levelName, ldtkWorld, ldtkLevel))
-//                        }
-//                    }
-//                }
-//            }
+        resourcesVfs["${clusterPath}/assets.json"].readKorgeFleksAssets(
+            clusterName, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tileSets, tileMaps)
 
         println("INFO: AssetStore - Resources loaded in ${sw.elapsed}")
 
         // TODO hot reloading needs rework!!!
         if (hotReloading) {
             configureResourceDirWatcher {
-                addAssetWatcher(clusterPath) {}
+                addAssetWatcher(clusterName) {}
             }
         }
     }
@@ -195,15 +165,15 @@ class AssetStore {
     /**
      * Remove all assets which have a specific given [AssetType].
      */
-    private fun removeAssets(type: AssetType) {
-        sounds.values.removeAll { it.first == type }
+    private fun removeAssets(clusterName: AssetType) {
+        sounds.values.removeAll { it.first == clusterName }
 
-        textures.values.removeAll { it.first == type }
-        ninePatchSlices.values.removeAll { it.first == type }
-        bitMapFonts.values.removeAll { it.first == type }
-        parallaxLayers.values.removeAll { it.first == type }
+        textures.values.removeAll { it.first == clusterName }
+        ninePatchSlices.values.removeAll { it.first == clusterName }
+        bitMapFonts.values.removeAll { it.first == clusterName }
+        parallaxLayers.values.removeAll { it.first == clusterName }
 
-        tilesets.values.removeAll { it.first == type }
-        tileMaps.values.removeAll { it.first == type }
+        tileSets.values.removeAll { it.first == clusterName }
+        tileMaps.values.removeAll { it.first == clusterName }
     }
 }

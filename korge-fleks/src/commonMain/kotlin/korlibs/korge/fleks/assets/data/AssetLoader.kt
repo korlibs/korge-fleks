@@ -23,7 +23,7 @@ class AssetLoader(
      * Function for loading common game assets.
      */
     suspend fun loadCommonAssets() {
-        assetStore.loadClusterAssets("common")
+        assetStore.loadClusterAssets(clusterName = "common")
     }
 
     /**
@@ -33,8 +33,8 @@ class AssetLoader(
      */
     suspend fun loadAssets(gameStateConfig: GameStateConfig) {
         // TODO hardcoded for now - we need to load cluster assets depending on the position in the world
-        assetStore.loadClusterAssets("world_1/common")
-        assetStore.loadClusterAssets("world_1/intro")
+        assetStore.loadClusterAssets(world = 1, "common")
+        assetStore.loadClusterAssets(world = 1, "intro")
 
         // TODO hardcoded for now
         loadChunkAssets("world_1/level_data/chunk_1")

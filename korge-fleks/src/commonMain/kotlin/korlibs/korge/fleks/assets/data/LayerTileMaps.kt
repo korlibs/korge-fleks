@@ -39,7 +39,7 @@ class LayerTileMaps(
             // Check if layer has tile set -> store tile map data for layer
             val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
             if (tilesetExt != null) {
-                layerTileMaps[ldtkLayer.identifier] = createTileMapData(ldtkLayer, tilesetExt)
+//                layerTileMaps[ldtkLayer.identifier] = createTileMapData(ldtkLayer, tilesetExt)
                 levelWidth = ldtkLayer.cWid * tilesetExt.def.tileGridSize
                 levelHeight = ldtkLayer.cHei * tilesetExt.def.tileGridSize
             }
@@ -51,7 +51,7 @@ class LayerTileMaps(
             // Check if layer has tile set -> store tile map data for layer
             val tilesetExt = ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]
             if (tilesetExt != null) {
-                layerTileMaps[ldtkLayer.identifier] = createTileMapData(ldtkLayer, tilesetExt)
+//                layerTileMaps[ldtkLayer.identifier] = createTileMapData(ldtkLayer, tilesetExt)
                 println("\nTriggering asset change for LDtk level : ${ldtkLevel.identifier}_${ldtkLayer.identifier}")
             }
         }
@@ -61,11 +61,12 @@ class LayerTileMaps(
      * Get the level data for a specific chunk in the grid vania array.
      * The chunk is identified by its X and Y position in the grid vania array.
      */
+/*
     private fun createTileMapData(ldtkLayer: LayerInstance, tilesetExt: ExtTileset) : TileMapData {
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,
             height = ldtkLayer.cHei,
-            tileSet = assetStore.getTileset(tilesetExt.tilesetName)
+            tileSet = assetStore.getTileSet(tilesetExt.tilesetName)
         )
         val gridSize = tilesetExt.def.tileGridSize
         val tilesetWidth = tilesetExt.def.pxWid
@@ -115,4 +116,5 @@ class LayerTileMaps(
         }
         return tileMapData
     }
+ */
 }

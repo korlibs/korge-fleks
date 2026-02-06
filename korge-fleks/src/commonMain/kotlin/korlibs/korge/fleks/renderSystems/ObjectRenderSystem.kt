@@ -25,6 +25,7 @@ import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.render.*
+import korlibs.math.clamp
 import korlibs.math.geom.*
 
 
@@ -85,8 +86,10 @@ class ObjectRenderSystem(
                 val texture = sprite[spriteComponent.frameIndex]
 
                 ctx.useBatcher { batch ->
-                    val px = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.anchorX
-                    val py = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.anchorY
+                    val px =
+                        position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.anchorX
+                    val py =
+                        position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.anchorY
                     if (spriteComponent.flipX) {
                         batch.drawQuadFlippedX(  // mirror texture horizontally
                             tex = ctx.getTex(texture.bmpSlice),
@@ -161,10 +164,16 @@ class ObjectRenderSystem(
                 val indices = TexturedVertexArray.quadIndices(numQuads)
                 val tva = TexturedVertexArray(numQuads * 4, indices)
                 var index = 0
-                val viewBounds = RectangleInt(position.x.toInt(), position.y.toInt(), ninePatchComponent.width.toInt(), ninePatchComponent.height.toInt())
+                val viewBounds = RectangleInt(
+                    position.x.toInt(),
+                    position.y.toInt(),
+                    ninePatchComponent.width.toInt(),
+                    ninePatchComponent.height.toInt()
+                )
                 ninePatch.info.computeScale(viewBounds) { segment, xx, yy, ww, hh ->
                     val bmpSlice = ninePatch.getSegmentBmpSlice(segment)
-                    tva.quad(index++ * 4,
+                    tva.quad(
+                        index++ * 4,
                         xx.toFloat(), yy.toFloat(),
                         ww.toFloat(), hh.toFloat(),
                         Matrix.IDENTITY, bmpSlice, rgba
@@ -174,43 +183,46 @@ class ObjectRenderSystem(
                 ctx.useBatcher { batch ->
                     batch.drawVertices(tva, ctx.getTex(ninePatch.content.bmp), smoothing = false, BlendMode.NORMAL)
                 }
-            }
-            else if (entity has TileMapComponent) {
+            } else if (entity has TileMapComponent) {
                 val tileMapComponent = entity[TileMapComponent]
 
-                tileMapComponent.layerNames.forEach { layerName ->
-                    val tileMap = assetStore.getTileMapData(tileMapComponent.levelName).getTileMapLayer(layerName)
+                val tileMap = assetStore.getTileMap(tileMapComponent.name)
+                val clusterName = tileMap.clusterList[0]  // Tile map object has only one cluster
 
-                    val tileSet = tileMap.tileSet
-                    val gridWidth = tileSet.width
-                    val gridHeight = tileSet.height
-                    val offsetScale = tileMap.offsetScale
+                val gridWidth = tileMap.gridWidth
+                val gridHeight = tileMap.gridHeight
+                val gridSize = tileMap.gridSize
 
-                    // Draw only visible tiles
-                    val tileMapPosX: Float = position.x + position.offsetX
-                    val tileMapPosY: Float = position.y + position.offsetY
+                // Draw only visible tiles
+                val tileMapPosX: Float = position.x + position.offsetX
+                val tileMapPosY: Float = position.y + position.offsetY
 
-                    // Start and end indexes of viewport area
-                    val xStart: Int = tileMapPosX.toInt() / gridWidth - 1  // x in positive direction;  -1 = start one tile before
-                    val xTiles = AppConfig.VIEW_PORT_WIDTH / gridWidth + 3
-                    val xEnd: Int = xStart + xTiles
+                // Start and end indexes of viewport area
+                val xStart: Int = (tileMapPosX.toInt() / gridSize - 1).clamp(0, tileMap.gridWidth)  // TODO check if clamp is really needed
+                                  // x in positive direction;  -1 = start one tile before
+                val xTiles = AppConfig.VIEW_PORT_WIDTH / gridSize + 3
+                val xEnd: Int = (xStart + xTiles).clamp(0, tileMap.gridWidth)
 
-                    val yStart: Int = tileMapPosY.toInt() / gridHeight - 1  // y in negative direction;  -1 = start one tile before
-                    val yTiles = AppConfig.VIEW_PORT_HEIGHT / gridHeight + 3
-                    val yEnd: Int = yStart + yTiles
+                val yStart: Int = (tileMapPosY.toInt() / gridSize - 1).clamp(0, tileMap.gridHeight)
+                                  // y in negative direction;  -1 = start one tile before
+                val yTiles = AppConfig.VIEW_PORT_HEIGHT / gridSize + 3
+                val yEnd: Int = (yStart + yTiles).clamp(0, tileMap.gridHeight)
 
-                    ctx.useBatcher { batch ->
-                        for (l in 0 until tileMap.maxLevel) {  // Render all stacked tiles in the tile map
-                            for (tx in xStart until xEnd) {
-                                for (ty in yStart until yEnd) {
-                                    val tile = tileMap[tx, ty, l]
-                                    val info = tileSet.getInfo(tile.tile)
-                                    if (info != null) {
-                                        val px = (tx * gridWidth) + (tile.offsetX * offsetScale) - tileMapPosX
-                                        val py = (ty * gridHeight) + (tile.offsetY * offsetScale) - tileMapPosY
-
+                ctx.useBatcher { batch ->
+                    val tileSet = assetStore.getTileSet(clusterName)
+                    for (tx in xStart until xEnd) {
+                        for (ty in yStart until yEnd) {
+                            val tiles = tileMap.stackedTiles[tx + ty * gridWidth]
+                            val px = (tx * gridSize) - tileMapPosX
+                            val py = (ty * gridSize) - tileMapPosY
+                            // Render all stacked tiles in the tile map
+                            tiles.forEach { tile ->
+                                if (tile != -1) {
+                                    // Get bits 4-16 for tile position in the tileset atlas
+                                    val tileIndex = tile shr 4
+                                    tileSet[tileIndex]?.let { bmpSlice ->
                                         batch.drawQuad(
-                                            tex = ctx.getTex(info.slice),
+                                            tex = ctx.getTex(bmpSlice),
                                             x = px,
                                             y = py,
                                             filtering = false,
@@ -218,7 +230,7 @@ class ObjectRenderSystem(
                                             program = null // Possibility to use a custom shader - add ShaderComponent or similar
                                         )
                                     }
-                                }
+                                } else return@forEach
                             }
                         }
                     }

@@ -4,15 +4,10 @@ package korlibs.korge.fleks.assets
 import korlibs.image.tiles.*
 import korlibs.korge.fleks.assets.data.TileStackArray2
 import korlibs.korge.fleks.assets.data.ldtk.*
-import korlibs.korge.fleks.utils.*
-import korlibs.korge.fleks.prefab.Prefab
+ import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.prefab.data.LevelData
-import korlibs.math.*
 import korlibs.memory.*
-import kotlinx.serialization.*
-import kotlin.collections.get
-import kotlin.collections.set
-import kotlin.math.*
+ import kotlin.collections.get
 
 
 
@@ -188,8 +183,8 @@ class AssetLevelDataLoader(
             // Store tiles into tileMapData for each layer
             if (ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid] != null) {
                 // Layer has tile set -> store tile map data - no entity data
-                tileMapData[layerName] = storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!)
-                stackTilesIntoTileMap(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!)
+//                tileMapData[layerName] = storeTiles(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!)
+//                stackTilesIntoTileMap(ldtkLayer, ldtkWorld.tilesetDefsById[ldtkLayer.tilesetDefUid]!!)
             }
 
             // Store collision data for Playfield layer
@@ -206,11 +201,12 @@ class AssetLevelDataLoader(
      * Get the level data for a specific chunk in the grid vania array.
      * The chunk is identified by its X and Y position in the grid vania array.
      */
+/*
     private fun storeTiles(ldtkLayer: LayerInstance, tilesetExt: ExtTileset) : TileMapData {
         val tileMapData = TileMapData(
             width = ldtkLayer.cWid,
             height = ldtkLayer.cHei,
-            tileSet = assetStore.getTileset(tilesetExt.tilesetName)
+            tileSet = assetStore.getTileSet(tilesetExt.tilesetName)
         )
         val gridSize = tilesetExt.def.tileGridSize
 
@@ -254,7 +250,7 @@ class AssetLevelDataLoader(
         }
         return tileMapData
     }
-
+*/
     private fun stackTilesIntoTileMap(ldtkLayer: LayerInstance, tilesetExt: ExtTileset) {
         val width = ldtkLayer.cWid
         val height = ldtkLayer.cHei

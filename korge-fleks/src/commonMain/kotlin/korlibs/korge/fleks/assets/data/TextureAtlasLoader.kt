@@ -3,32 +3,26 @@ package korlibs.korge.fleks.assets.data
 import korlibs.datastructure.associateByInt
 import korlibs.datastructure.toIntMap
 import korlibs.image.atlas.Atlas
-import korlibs.image.bitmap.Bitmap
-import korlibs.image.bitmap.Bitmap32
 import korlibs.image.bitmap.BmpSlice
 import korlibs.image.bitmap.NinePatchBmpSlice
-import korlibs.image.bitmap.slice
 import korlibs.image.font.BitmapFont
 import korlibs.image.format.ImageDecodingProps
 import korlibs.image.format.readBitmapSlice
-import korlibs.image.tiles.TileSet
-import korlibs.image.tiles.TileSetTileInfo
 import korlibs.io.dynamic.dyn
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.util.unquote
-import korlibs.korge.fleks.assets.AssetModel.TextureConfig
-import korlibs.korge.fleks.assets.BitMapFontMapType
-import korlibs.korge.fleks.assets.NinePatchBmpSliceMapType
-import korlibs.korge.fleks.assets.ParallaxLayersMapType
-import korlibs.korge.fleks.assets.SpriteFramesMapType
-import korlibs.korge.fleks.assets.TilesetMapType
-import korlibs.korge.fleks.assets.TilesetMapType2
+import korlibs.korge.fleks.assets.BitMapFontsAssetType
+import korlibs.korge.fleks.assets.NinePatchBmpSlicesAssetType
+import korlibs.korge.fleks.assets.ParallaxLayersAssetType
+import korlibs.korge.fleks.assets.SpriteFramesAssetType
+import korlibs.korge.fleks.assets.TileMapsAssetType
+import korlibs.korge.fleks.assets.TileSetsAssetType
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxPlane.*
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxLayer
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
+import korlibs.korge.fleks.components.data.ChunkLevelMap.Companion.chunkLevelMap
 import korlibs.math.geom.RectangleInt
-import korlibs.math.geom.slice.RectSlice
 import kotlinx.serialization.json.Json
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -67,14 +61,15 @@ inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit)
 }
 
 suspend fun VfsFile.readKorgeFleksAssets(
-    name: String,
-    textures: SpriteFramesMapType,
-    ninePatchSlices: NinePatchBmpSliceMapType,
-    bitMapFonts: BitMapFontMapType,
-    parallaxLayers: ParallaxLayersMapType,
-    tilesets: TilesetMapType2
+    clusterName: String,
+    textures: SpriteFramesAssetType,
+    ninePatchSlices: NinePatchBmpSlicesAssetType,
+    bitMapFonts: BitMapFontsAssetType,
+    parallaxLayers: ParallaxLayersAssetType,
+    tileSets: TileSetsAssetType,
+    tileMaps: TileMapsAssetType
 ) {
-    val type: AssetType = name
+    val clusterName: AssetType = clusterName
     // Enable ignoreUnknownKeys for testing when needed
     //val assetConfig: AssetConfig = Json { ignoreUnknownKeys = true }.decodeFromString(this.readString())
     val clusterAssetInfo: ClusterAssetInfo = Json.decodeFromString(this.readString())
@@ -108,7 +103,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
         }
 
         textures[name] = Pair(
-            type, SpriteFrames(
+            clusterName, SpriteFrames(
                 frames = frames.toMutableList(),
                 width = image.width,
                 height = image.height
@@ -119,7 +114,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
     // Load nine-patch images and store into ninePatchSlices map
     clusterAssetInfo.ninePatches.forEach { (name, image) ->
         ninePatchSlices[name] = Pair(
-            type, NinePatchBmpSlice.createSimple(
+            clusterName, NinePatchBmpSlice.createSimple(
                 bmp = textureAtlases.getOrElse(
                     index = image.frame[0]) { error("readKorgeFleksAssets - texture atlas index '${image.frame[0]}' for nine-patch image '$name' not found!") }
                     .slice(RectangleInt(
@@ -153,7 +148,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
                     height = fontImage.frame[4]
                 ))
         }
-        bitMapFonts[fontName] = Pair(type, bitmapFont)
+        bitMapFonts[fontName] = Pair(clusterName, bitmapFont)
     }
 
     // Load parallax layers into parallaxTextures map
@@ -189,7 +184,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
             planeInfo.lineTextures.forEach { line -> setBmpSlice(line) }
         }
 
-        parallaxLayers[name] = Pair(type, parallaxInfo)
+        parallaxLayers[name] = Pair(clusterName, parallaxInfo)
     }
 
     // Load tileset atlases
@@ -197,7 +192,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
         parent[tileset].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
     }
 
-    // Create tile set into and store into tilesets map
+    // Create tile set info and store into tileSets map
     if (clusterAssetInfo.tiles.frames.isNotEmpty()) {
         val tileset = SimpleTileSet(
             tiles = clusterAssetInfo.tiles.frames,
@@ -205,133 +200,39 @@ suspend fun VfsFile.readKorgeFleksAssets(
             tileWidth = clusterAssetInfo.tiles.tileWidth,
             tileHeight = clusterAssetInfo.tiles.tileHeight
         )
-        tilesets[name] = Pair(type, tileset)
+        tileSets[clusterName] = Pair(clusterName, tileset)
     }
 
     // Load tilemap objects and store into tilemaps map
     clusterAssetInfo.tileMaps.forEach { (name, tileMapInfo) ->
-        println("TODO: Load tilemap: $name")
-    }
-}
+        // Sanity check
+        // TODO move this check into gradle plugin
+        if (tileMapInfo.stackedTileMapData.size > 4096)
+            error("readKorgeFleksAssets - tile map '${name}' has more than 4096 chunks which is currently not supported!")
 
-class TextureAtlasLoader {
-    fun loadTilemapsTilesets(
-        type: AssetType,
-        atlas: Atlas,
-        config: TextureConfig,
-        tilesets: TilesetMapType
-    ) {
-        // Cache tiles into tilesets
-        val tilesetCache: MutableMap<String, MutableMap<Int, RectSlice<out Bitmap>>> = mutableMapOf()
-        atlas.entries.forEachWith("tls_") { entry, frameTag ->
-            // Get tileset name
-            val tileNumberRegex = "_tile(\\d+)$".toRegex()
-            val tilesetName = frameTag.replace(tileNumberRegex, "")
-            // Get the tile index number
-            val match = tileNumberRegex.find(frameTag)
-            val tileIndex = match?.groupValues?.get(1)?.toInt() ?: error("TextureAtlasLoader - Cannot get tile index of texture '${frameTag}'!")
-            val bmpSlice = atlas.texture.slice(entry.info.frame)
-
-            // Store tile slice in tileset cache
-            if (tilesetCache.containsKey(tilesetName)) tilesetCache[tilesetName]!![tileIndex] = bmpSlice
-            else tilesetCache[tilesetName] = mutableMapOf(tileIndex to bmpSlice)
-        }
-
-        // Create tileset objects from cached tile slices
-        config.tilesets.forEach { tilesetConfig ->
-            val emptySlice: RectSlice<out Bitmap> = Bitmap32.EMPTY.slice()
-
-            val tilesetName = tilesetConfig.name
-            if (tilesetCache.containsKey(tilesetName)) {
-                val tileCount = tilesetConfig.size
-                val tileset = TileSet(
-                    (0 until tileCount).map { index ->
-//                        println("Tileset: $tilesetName Tile: $index / $tileCount")
-
-                        val bmpSlice = if (tilesetCache[tilesetName]!!.containsKey(index)) tilesetCache[tilesetName]!![index]!!
-                        else emptySlice
-
-                        TileSetTileInfo(
-                            // This is the tile id which is used in TileMapData to reference this tile
-                            index, bmpSlice)
-
-                    },
-                    width = 16,
-                    height = 16,
-                    border = 0
-                )
-                tilesets[tilesetName] = Pair(type, tileset)
-            } else println("WARNING: TextureAtlasLoader - Cannot find tiles for '$tilesetName' in texture atlas!")
-        }
-/*
-        config. .forEach { (levelName, tileMapConfig) ->
-            val ldtkFile = tileMapConfig.fileName
-            val collisionLayerName = tileMapConfig.collisionLayerName
-//            fun emptyTileSetTileInfo(index: Int) = TileSetTileInfo(index, Bitmap32.EMPTY.slice())
-            val emptySlice: RectSlice<out Bitmap> = Bitmap32.EMPTY.slice()
-
-            // First we need to load the LDtk world because we need to get the number of tiles for the tileset object
-            // Then we will load each tile from the texture atlas
-            val ldtkWorld = resourcesVfs["$assetFolder/$ldtkFile"].readLdtkWorld { tilesetName, tileCount ->
-                // Load bmp slice from texture atlas and store as tile in tileset
-
-                val tileset2: List<TileFrame> = (
-                    0 until tileCount).map { index ->
-                    println("Tileset: $tilesetName Tile: $index / $tileCount")
-                    val bmpSlice = if (tilesetCache.containsKey(tilesetName)
-                        && tilesetCache[tilesetName]!!.containsKey(index)
-                    ) tilesetCache[tilesetName]!![index]!!
-                    else emptySlice
-                    TileFrame(
-                        bmpSlice,
-                        // TODO set targetX and Y
-                    )
-                }
-
-
-
-                val tileset = TileSet(
-                    (0 until tileCount).map { index ->
-//                        println("Tileset: $tilesetName Tile: $index / $tileCount")
-
-                        val bmpSlice = if (tilesetCache.containsKey(tilesetName)
-                            && tilesetCache[tilesetName]!!.containsKey(index)) tilesetCache[tilesetName]!![index]!!
-                        else emptySlice
-
-                        TileSetTileInfo(
-                            // This is the tile id which is used in TileMapData to reference this tile
-                            index, bmpSlice)
-
-                    },
-                    width = 16,
-                    height = 16,
-                    border = 0
-                )
-                // TODO: Check if we would need to save tileset separately for hot-reloading
-                //       tilesets[tilesetName] = Pair(type, tileset)
-                tileset
-            }
-
-            // TODO: Check if we need this for hot-reloading tilesets - in the end tilesets will be hot-reloaded when texture atlas changes
-            val tileSetPaths = mutableListOf<String>()
-
-            when  (type) {
-                AssetType.LEVEL -> {
-                    assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths)
-                }
-                else -> {
-                    // Load raw tile map data for tilemap object types
-                    ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-                        tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
+        val chunkLevelMap = chunkLevelMap {
+            tileMapInfo.stackedTileMapData.forEachIndexed { idx, tiles ->
+                tiles.forEachIndexed { stackIdx, tile ->
+                    if (tile != -1) stackedTiles[idx][stackIdx] = tile
+                    else {
+                        // Mark end of tile stack with -1 in the tile map data
+                        stackedTiles[idx][stackIdx] = -1
+                        return@forEachIndexed
                     }
                 }
             }
-            println()
+
+            tileMapInfo.clusterList.forEachIndexed { idx, name ->
+                clusterList[idx] = name
+            }
+
+            gridWidth = tileMapInfo.gridWidth
+            gridHeight = tileMapInfo.gridWidth
+            gridSize = tileMapInfo.gridSize
         }
-*/
+        tileMaps[name] = Pair(clusterName, chunkLevelMap)
     }
 }
-
 
 suspend fun VfsFile.readFontTxt(
     callback: ((String) -> BmpSlice)  // callback to pass in BmpSlice from texture atlas

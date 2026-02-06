@@ -35,6 +35,8 @@ class SimpleTileSet private constructor(
 ) {
     override fun toString(): String = "TileSet(size=${width}x$height, tiles=${tilesArray})"
     operator fun get(index: Int): BmpSlice? = tilesArray[index]?.slice
+    var size: Int = tilesArray.size
+        private set
 
     companion object {
         val EMPTY = SimpleTileSet(arrayOf(), 0, 0)
