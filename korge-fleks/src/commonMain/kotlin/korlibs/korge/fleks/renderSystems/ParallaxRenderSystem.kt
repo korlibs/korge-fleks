@@ -3,10 +3,10 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxLayer
-import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxPlane.LineTexture
-import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.Mode
-import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.Mode.*
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxLayer
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxPlane.LineTexture
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.Mode
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.Mode.*
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent

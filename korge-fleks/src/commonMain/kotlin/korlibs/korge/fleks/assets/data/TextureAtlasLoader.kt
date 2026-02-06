@@ -24,8 +24,8 @@ import korlibs.korge.fleks.assets.ParallaxLayersMapType
 import korlibs.korge.fleks.assets.SpriteFramesMapType
 import korlibs.korge.fleks.assets.TilesetMapType
 import korlibs.korge.fleks.assets.TilesetMapType2
-import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxPlane.*
-import korlibs.korge.fleks.assets.data.AssetConfig.ParallaxLayersInfo.ParallaxLayer
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxPlane.*
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxLayer
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
 import korlibs.math.geom.RectangleInt
 import korlibs.math.geom.slice.RectSlice
@@ -68,29 +68,29 @@ inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit)
 
 suspend fun VfsFile.readKorgeFleksAssets(
     name: String,
-    type: AssetType,
     textures: SpriteFramesMapType,
     ninePatchSlices: NinePatchBmpSliceMapType,
     bitMapFonts: BitMapFontMapType,
     parallaxLayers: ParallaxLayersMapType,
     tilesets: TilesetMapType2
 ) {
+    val type: AssetType = name
     // Enable ignoreUnknownKeys for testing when needed
     //val assetConfig: AssetConfig = Json { ignoreUnknownKeys = true }.decodeFromString(this.readString())
-    val assetConfig: AssetConfig = Json.decodeFromString(this.readString())
+    val clusterAssetInfo: ClusterAssetInfo = Json.decodeFromString(this.readString())
 
     // Get version info
-    val major: Int = assetConfig.version[0]
-    val minor: Int = assetConfig.version[1]
-    val build: Int = assetConfig.version[2]
+    val major: Int = clusterAssetInfo.version[0]
+    val minor: Int = clusterAssetInfo.version[1]
+    val build: Int = clusterAssetInfo.version[2]
     // Check later if asset version/build is compatible otherwise convert to new version
 
-    val textureAtlases: List<BmpSlice> = assetConfig.textures.map { texture ->
+    val textureAtlases: List<BmpSlice> = clusterAssetInfo.textures.map { texture ->
         parent[texture].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
     }
 
     // Load images and store into textures map
-    assetConfig.images.forEach { (name, image) ->
+    clusterAssetInfo.images.forEach { (name, image) ->
         val frames = image.frames.map { frames ->
             val frame = frames.frame
             val index = frame[0]
@@ -117,7 +117,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
     }
 
     // Load nine-patch images and store into ninePatchSlices map
-    assetConfig.ninePatches.forEach { (name, image) ->
+    clusterAssetInfo.ninePatches.forEach { (name, image) ->
         ninePatchSlices[name] = Pair(
             type, NinePatchBmpSlice.createSimple(
                 bmp = textureAtlases.getOrElse(
@@ -137,7 +137,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
     }
 
     // Load pixel fonts into bitMapFonts map
-    assetConfig.pixelFonts.forEach { (fontName, fontImage) ->
+    clusterAssetInfo.pixelFonts.forEach { (fontName, fontImage) ->
         val assetFolder = this.parent.path
         val ext = fontImage.type
 
@@ -157,7 +157,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
     }
 
     // Load parallax layers into parallaxTextures map
-    assetConfig.parallaxLayers.forEach { (name, parallaxInfo) ->
+    clusterAssetInfo.parallaxLayers.forEach { (name, parallaxInfo) ->
 
         fun setBmpSlice(layer: ParallaxLayer) {
             layer.bmpSlice = textureAtlases.getOrElse(index = layer.frame[0]) { error("readKorgeFleksAssets - texture atlas index '${layer.frame[0]}' for parallax info '$name' not found!") }
@@ -193,19 +193,24 @@ suspend fun VfsFile.readKorgeFleksAssets(
     }
 
     // Load tileset atlases
-    val tilesetAtlases: List<BmpSlice> = assetConfig.tilesets.map { tileset ->
+    val tilesetAtlases: List<BmpSlice> = clusterAssetInfo.tilesets.map { tileset ->
         parent[tileset].readBitmapSlice(props = ImageDecodingProps.DEFAULT)
     }
 
     // Create tile set into and store into tilesets map
-    if (assetConfig.tiles.frames.isNotEmpty()) {
+    if (clusterAssetInfo.tiles.frames.isNotEmpty()) {
         val tileset = SimpleTileSet(
-            tiles = assetConfig.tiles.frames,
+            tiles = clusterAssetInfo.tiles.frames,
             tilesetAtlases = tilesetAtlases,
-            tileWidth = assetConfig.tiles.tileWidth,
-            tileHeight = assetConfig.tiles.tileHeight
+            tileWidth = clusterAssetInfo.tiles.tileWidth,
+            tileHeight = clusterAssetInfo.tiles.tileHeight
         )
         tilesets[name] = Pair(type, tileset)
+    }
+
+    // Load tilemap objects and store into tilemaps map
+    clusterAssetInfo.tileMaps.forEach { (name, tileMapInfo) ->
+        println("TODO: Load tilemap: $name")
     }
 }
 

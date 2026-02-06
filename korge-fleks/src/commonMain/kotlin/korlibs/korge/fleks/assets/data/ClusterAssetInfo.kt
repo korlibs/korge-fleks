@@ -21,14 +21,13 @@ import kotlinx.serialization.Transient
  *           - x: x position in tileset atlas
  *           - y: y position in tileset atlas
  *           - tileWidth, tileHeight: size of each tile in pixels
- *  - tileMaps: [TileMapData] object containing tile map info
+ *  - tileMaps: [TileMapInfo] object containing tile map info for "tileMapName"
  *           Each tile map contains the info for:
- *           - tileMapName: name of the tile map
  *           - stackedTileMapData: list of stacked tile map data
  *           - clusterList: list of cluster names used by the tile map. That means which tileset clusters are needed to render the tile map
  */
 @Serializable
-data class AssetConfig(
+data class ClusterAssetInfo(
     val version: List<Int> = emptyList(),
     val textures: List<String> = emptyList(),
     val tilesets: List<String> = emptyList(),
@@ -37,7 +36,7 @@ data class AssetConfig(
     val pixelFonts: Map<String, PixelFontInfo> = emptyMap(),
     val parallaxLayers: Map<String, ParallaxLayersInfo> = emptyMap(),
     val tiles: TilesInfo = TilesInfo(),
-    val tileMaps: TileMapData = TileMapData()
+    val tileMaps: Map<String, TileMapInfo> = emptyMap()
 ) {
     /**
      * Image info data class.
@@ -194,8 +193,7 @@ data class AssetConfig(
     }
 
     @Serializable
-    data class TileMapData(
-        @SerialName("n") val tileMapName: String = "",
+    data class TileMapInfo(
         @SerialName("m") val stackedTileMapData: List<List<Int>> = emptyList(),  // Stacked tile map data for each world level chunk
         @SerialName("c") val clusterList: List<String> = emptyList()  // Needed by renderer for offsets of tilesets in clusters
     )

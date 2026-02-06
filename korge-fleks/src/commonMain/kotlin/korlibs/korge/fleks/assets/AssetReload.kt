@@ -4,6 +4,7 @@ import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.AssetType
+import korlibs.korge.fleks.assets.data.UNKNOWN
 import korlibs.platform.Platform
 import kotlinx.coroutines.*
 import kotlin.coroutines.*
@@ -21,7 +22,7 @@ annotation class AssetReloadCfgMarker
  */
 @AssetReloadCfgMarker
 class AssetUpdaterConfiguration(
-    internal var type: AssetType,
+    internal var assetFolder: AssetType,
     internal var toBeEnabled: Boolean = false,
     internal var enabled: Boolean = false,
     internal val imageChangedCallback: MutableList<() -> Unit> = mutableListOf(),
@@ -42,43 +43,43 @@ class AssetUpdaterConfiguration(
  */
 @AssetReloadCfgMarker
 class ResourceDirWatcherConfiguration(
-    internal var commonAssetUpdater: AssetUpdaterConfiguration = AssetUpdaterConfiguration(type = AssetType.COMMON),
-    internal var worldAssetUpdater: AssetUpdaterConfiguration = AssetUpdaterConfiguration(type = AssetType.WORLD),
-    internal var levelAssetUpdater: AssetUpdaterConfiguration = AssetUpdaterConfiguration(type = AssetType.LEVEL),
-    internal var specialAssetUpdater: AssetUpdaterConfiguration = AssetUpdaterConfiguration(type = AssetType.SPECIAL),
+    internal var commonAssetUpdater: AssetUpdaterConfiguration = AssetUpdaterConfiguration(assetFolder = "common"),
+//    internal var worldAssetUpdater: AssetUpdaterConfiguration = AssetUpdaterConfiguration(type = AssetType.WORLD),
+//    internal var levelAssetUpdater: AssetUpdaterConfiguration = AssetUpdaterConfiguration(type = AssetType.LEVEL),
+//    internal var specialAssetUpdater: AssetUpdaterConfiguration = AssetUpdaterConfiguration(type = AssetType.SPECIAL),
 ) {
     private var reloading: Boolean = false  // Used for debouncing reload of config (in case the modification message comes twice from the system)
 
     fun addAssetWatcherAll(callback: AssetUpdaterConfiguration.() -> Unit) {
         commonAssetUpdater.toBeEnabled = true
-        worldAssetUpdater.toBeEnabled = true
-        levelAssetUpdater.toBeEnabled = true
-        specialAssetUpdater.toBeEnabled = true
+//        worldAssetUpdater.toBeEnabled = true
+//        levelAssetUpdater.toBeEnabled = true
+//        specialAssetUpdater.toBeEnabled = true
         commonAssetUpdater.apply(callback)
-        worldAssetUpdater.apply(callback)
-        levelAssetUpdater.apply(callback)
-        specialAssetUpdater.apply(callback)
+//        worldAssetUpdater.apply(callback)
+//        levelAssetUpdater.apply(callback)
+//        specialAssetUpdater.apply(callback)
     }
 
     fun addAssetWatcher(type: AssetType, callback: AssetUpdaterConfiguration.() -> Unit) {
         when(type) {
-            AssetType.COMMON -> {
+            "common" -> {
                 commonAssetUpdater.toBeEnabled = true
                 commonAssetUpdater.apply(callback)
             }
-            AssetType.WORLD -> {
-                worldAssetUpdater.toBeEnabled = true
-                worldAssetUpdater.apply(callback)
-            }
-            AssetType.LEVEL -> {
-                levelAssetUpdater.toBeEnabled = true
-                levelAssetUpdater.apply(callback)
-            }
-            AssetType.SPECIAL -> {
-                specialAssetUpdater.toBeEnabled = true
-                specialAssetUpdater.apply(callback)
-            }
-            AssetType.UNKNOWN -> {
+//            AssetType.WORLD -> {
+//                worldAssetUpdater.toBeEnabled = true
+//                worldAssetUpdater.apply(callback)
+//            }
+//            AssetType.LEVEL -> {
+//                levelAssetUpdater.toBeEnabled = true
+//                levelAssetUpdater.apply(callback)
+//            }
+//            AssetType.SPECIAL -> {
+//                specialAssetUpdater.toBeEnabled = true
+//                specialAssetUpdater.apply(callback)
+//            }
+            UNKNOWN -> {
                 // Do nothing
             }
         }
@@ -88,24 +89,24 @@ class ResourceDirWatcherConfiguration(
      * Configures the resource directory watcher for each enabled asset type.
      */
     suspend fun configure(assetStore: AssetStore) : ResourceDirWatcherConfiguration {
-        enableAssetWatcher(assetStore, commonAssetUpdater, assetStore.commonAssetConfig)
-        enableAssetWatcher(assetStore, worldAssetUpdater, assetStore.currentWorldAssetConfig)
-        enableAssetWatcher(assetStore, levelAssetUpdater, assetStore.currentLevelAssetConfig)
-        enableAssetWatcher(assetStore, specialAssetUpdater, assetStore.specialAssetConfig)
+        enableAssetWatcher(assetStore, commonAssetUpdater)
+//        enableAssetWatcher(assetStore, worldAssetUpdater, assetStore.currentWorldAssetConfig)
+//        enableAssetWatcher(assetStore, levelAssetUpdater, assetStore.currentLevelAssetConfig)
+//        enableAssetWatcher(assetStore, specialAssetUpdater, assetStore.specialAssetConfig)
         return this
     }
 
-    private suspend fun enableAssetWatcher(assetStore: AssetStore, assetUpdater: AssetUpdaterConfiguration, assetConfig: AssetModel) {
+    private suspend fun enableAssetWatcher(assetStore: AssetStore, assetUpdater: AssetUpdaterConfiguration) {
         if (!assetUpdater.enabled && assetUpdater.toBeEnabled) {
             assetUpdater.enabled = true
             assetUpdater.toBeEnabled = false
 
-            resourcesVfs[assetConfig.folder].apply {
+            resourcesVfs[assetUpdater.assetFolder].apply {
                 if (stat().isDirectory) {
                     println("Add watcher for '${path}'")
                     watch {
                         if (it.kind == Vfs.FileEvent.Kind.MODIFIED) {
-                            checkAssetFolders(assetStore, it.file, assetUpdater, assetConfig, coroutineContext)
+                            checkAssetFolders(assetStore, it.file, assetUpdater, coroutineContext)
                         }
                     }
                 }
@@ -113,7 +114,7 @@ class ResourceDirWatcherConfiguration(
         }
     }
 
-    private suspend fun checkAssetFolders(assetStore: AssetStore, file: VfsFile, assetUpdater: AssetUpdaterConfiguration, assetConfig: AssetModel, assetReloadContext: CoroutineContext) {
+    private suspend fun checkAssetFolders(assetStore: AssetStore, file: VfsFile, assetUpdater: AssetUpdaterConfiguration, assetReloadContext: CoroutineContext) {
 
         // TODO: Currently only fonts, sprite images, background (parallax images) and tile maps are reloaded
         //       -> Implement reloading also for other asset types
@@ -216,17 +217,18 @@ suspend fun AssetStore.configureResourceDirWatcher(cfg: ResourceDirWatcherConfig
  * @param cfg the [configuration][AssetUpdaterConfiguration] for specifying the callbacks which
  * will update the assets in specific game objects.
  */
-fun configureAssetUpdater(type: AssetType, cfg: AssetUpdaterConfiguration.() -> Unit) {
+fun configureAssetUpdater(assetFolder: AssetType, cfg: AssetUpdaterConfiguration.() -> Unit) {
     // Run asset reloading only on JVM platform
     if (Platform.isJvm) {
         val currentWatcher = ResourceDirWatcherConfiguration.CURRENT_WATCHER
         if (currentWatcher != null) {
-            when (type) {
-                AssetType.COMMON -> currentWatcher.commonAssetUpdater.apply(cfg)
-                AssetType.WORLD -> currentWatcher.worldAssetUpdater.apply(cfg)
-                AssetType.LEVEL -> currentWatcher.levelAssetUpdater.apply(cfg)
-                AssetType.SPECIAL -> currentWatcher.specialAssetUpdater.apply(cfg)
-                AssetType.UNKNOWN -> { /* Do nothing */ }
+            when (assetFolder) {
+                "common" -> currentWatcher.commonAssetUpdater.apply(cfg)
+//                AssetType.WORLD -> currentWatcher.worldAssetUpdater.apply(cfg)
+//                AssetType.LEVEL -> currentWatcher.levelAssetUpdater.apply(cfg)
+//                AssetType.SPECIAL -> currentWatcher.specialAssetUpdater.apply(cfg)
+//                AssetType.UNKNOWN -> { /* Do nothing */ }
+                else -> println("ERROR: Reloading asset cluster '$assetFolder' is not yet implemented!")
             }
         } else {
             // TODO get hot-reloading working again later when new asset system loading is ready

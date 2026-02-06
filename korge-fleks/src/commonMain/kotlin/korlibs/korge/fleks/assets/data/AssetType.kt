@@ -11,10 +11,13 @@ package korlibs.korge.fleks.assets.data
  * - SPECIAL: Assets that are loaded for specific chunks or sections of a level, often used for optimization.
  * - UNKNOWN: Assets that could not be found in the asset store. They are created on the fly and act as placeholders.
  */
-enum class AssetType(val folder: String) {
-    COMMON("common"),
-    WORLD("world"),
-    LEVEL("level"),
-    SPECIAL("chunk"),
-    UNKNOWN("unknown")
-}
+typealias AssetType = String
+
+const val UNKNOWN = "unknown"
+//enum class AssetType(val folder: String) {
+//    COMMON("common"),
+//    WORLD("world"),
+//    LEVEL("level"),
+//    SPECIAL("chunk"),
+//    UNKNOWN("unknown")
+//}

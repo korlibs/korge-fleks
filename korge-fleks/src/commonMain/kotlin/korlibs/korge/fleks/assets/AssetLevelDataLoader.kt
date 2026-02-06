@@ -165,21 +165,21 @@ class AssetLevelDataLoader(
                         //println("entity grid pos x: ${(levelWidth * levelX) + (entity.gridPos.x * gridSize)}")
                         //println("entity grid pos y: ${(levelWidth * levelX) + (entity.gridPos.y * gridSize)}")
 
-                        try {
-                            // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
-                            val entityConfig: EntityConfig =
-                                assetStore.loader.configSerializer.yaml().decodeFromString(yamlString.toString())
-
-                            // Only entities marked with "gameobject" will be added to the list of entities for the level
-                            // other "script" entities are spawned separately and individually
-                            if (entity.tags.firstOrNull { it == "gameobject" } != null) {
-                                print(" as game object")
-                                entities.add(entityConfig.name)
-                            }
-                            //println("INFO: Registering entity config '${entity.identifier}' for '$levelName'")
-                        } catch (e: Throwable) {
-                            println("ERROR: Loading entity config - $e")
-                        }
+//                        try {
+//                            // By deserializing the YAML string we get an EntityConfig object which itself registers in the EntityFactory
+//                            val entityConfig: EntityConfig =
+//                                assetStore.loader.configSerializer.yaml().decodeFromString(yamlString.toString())
+//
+//                            // Only entities marked with "gameobject" will be added to the list of entities for the level
+//                            // other "script" entities are spawned separately and individually
+//                            if (entity.tags.firstOrNull { it == "gameobject" } != null) {
+//                                print(" as game object")
+//                                entities.add(entityConfig.name)
+//                            }
+//                            //println("INFO: Registering entity config '${entity.identifier}' for '$levelName'")
+//                        } catch (e: Throwable) {
+//                            println("ERROR: Loading entity config - $e")
+//                        }
                         println()
                     } else println("ERROR: Game object with name '${entity.identifier}' has no field entityConfig!")
                 }

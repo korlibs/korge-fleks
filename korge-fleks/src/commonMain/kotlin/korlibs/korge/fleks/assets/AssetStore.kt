@@ -1,14 +1,12 @@
 package korlibs.korge.fleks.assets
 
-import korlibs.audio.format.*
 import korlibs.audio.sound.*
-import korlibs.image.atlas.readAtlas
 import korlibs.image.bitmap.*
 import korlibs.image.font.BitmapFont
 import korlibs.image.font.Font
 import korlibs.image.tiles.TileSet
 import korlibs.io.file.std.resourcesVfs
-import korlibs.korge.fleks.assets.data.AssetConfig.*
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.*
 import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.GameObjectConfig
@@ -16,9 +14,8 @@ import korlibs.korge.fleks.assets.data.LayerTileMaps
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.TextureAtlasLoader
 import korlibs.korge.fleks.assets.data.SimpleTileSet
-import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
 import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
-import korlibs.korge.fleks.assets.data.AssetType.UNKNOWN
+import korlibs.korge.fleks.assets.data.UNKNOWN
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -40,6 +37,7 @@ typealias TilesetMapType2 = MutableMap<String, Pair<AssetType, SimpleTileSet>>
 /**
  * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
  *
+ * TODO below description section needs rework
  * Assets are separated into [Common][korlibs.korge.fleks.assets.data.AssetType.COMMON], [World][korlibs.korge.fleks.assets.data.AssetType.WORLD], [Level][korlibs.korge.fleks.assets.data.AssetType.LEVEL] and
  * [Special][korlibs.korge.fleks.assets.data.AssetType.SPECIAL] types. The 'Common' type means that the asset is used throughout
  * the game. So it makes sense to not reload those assets on every level or world. The same applies also for 'World' type.
@@ -56,21 +54,20 @@ class AssetStore {
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 
-    // TODO refactor asset configs when new asset loading is fully working
-    internal var commonAssetConfig: AssetModel = AssetModel()
-    internal var currentWorldAssetConfig: AssetModel = AssetModel()
-    internal var currentLevelAssetConfig: AssetModel = AssetModel()
-    internal var specialAssetConfig: AssetModel = AssetModel()
+    internal val loadedClusterAssets: MutableSet<String> = mutableSetOf()
 
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
+    // Sound related assets
     internal val sounds: SoundMapType = mutableMapOf()
 
+    // Image related assets
     internal val textures: SpriteFramesMapType = mutableMapOf()
     internal val ninePatchSlices: NinePatchBmpSliceMapType = mutableMapOf()
     internal val bitMapFonts: BitMapFontMapType = mutableMapOf()
     internal val parallaxLayers: ParallaxLayersMapType = mutableMapOf()
 
+    // tiles (tileset and tilemap) related assets
     internal val tileMaps: TileMapsType = mutableMapOf()
     internal val tilesets: TilesetMapType = mutableMapOf()
 
@@ -97,7 +94,7 @@ class AssetStore {
         if (textures.contains(name)) {
             textures[name]!!.second
         } else {
-            // Add transparent texture as fallback to avoid continous error messages
+            // Add transparent texture as fallback to avoid continuous error messages
             textures[name] = Pair(UNKNOWN, SpriteFrames.EMPTY)
             println("ERROR: AssetStore - Texture '$name' not found for Sprite!")
             SpriteFrames.EMPTY
@@ -132,136 +129,68 @@ class AssetStore {
         }
         else error("AssetStore: Tile map for level '$level' not found!")
 
-    suspend fun loadAssets(type: AssetType, assetConfig: AssetModel) {
-        var assetLoaded = false
-        when (type) {
-            AssetType.COMMON -> {
-                prepareCurrentAssets(type, assetConfig, commonAssetConfig)?.also { config ->
-                    commonAssetConfig = config
-                    assetLoaded = true
-                }
-            }
-            AssetType.WORLD -> {
-                prepareCurrentAssets(type, assetConfig, currentWorldAssetConfig)?.also { config ->
-                    currentWorldAssetConfig = config
-                    assetLoaded = true
-                }
-            }
-            AssetType.LEVEL -> {
-                prepareCurrentAssets(type, assetConfig, currentLevelAssetConfig)?.also { config ->
-                    currentLevelAssetConfig = config
-                    assetLoaded = true
-                }
-            }
-            AssetType.SPECIAL -> {
-                prepareCurrentAssets(type, assetConfig, specialAssetConfig)?.also { config ->
-                    specialAssetConfig = config
-                    assetLoaded = true
-                }
-            }
-            else -> {}
+    suspend fun loadClusterAssets(clusterPath: String, hotReloading: Boolean = false) {
+
+        if (loadedClusterAssets.contains(clusterPath)) {
+            println("INFO: Asset cluster '$clusterPath' already loaded! No reload is happening!")
+            return
+        } else {
+            loadedClusterAssets.add(clusterPath)
         }
 
-        if (assetLoaded) {
+        val sw = Stopwatch().start()
+        println("INFO: AssetStore - Start loading asset cluster '$clusterPath'... ")
 
-            val sw = Stopwatch().start()
-            println("AssetStore: Start loading [${type.name}] resources from '${assetConfig.folder}'...")
+// TODO load sounds and music
+//            // Update maps of music, images, ...
+//            if (!testing) {
+//                assetConfig.sounds.forEach { sound ->
+//                    val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.fileName].readSound(  //readMusic(
+//                        props = AudioDecodingProps(exactTimings = true),
+//                        streaming = true
+//                    )
+////                    val soundChannel = soundFile.decode().toWav().readMusic().play()  // -- convert to WAV
+//                    val soundChannel = soundFile.play()
+////                    val soundChannel2 = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound().play()
+//
+//                    soundChannel.pause()
+//                    sounds[sound.name] = Pair(type, soundChannel)
+//                }
+//            }
 
-            // Update maps of music, images, ...
-            if (!testing) {
-                assetConfig.sounds.forEach { sound ->
-                    val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.fileName].readSound(  //readMusic(
-                        props = AudioDecodingProps(exactTimings = true),
-                        streaming = true
-                    )
-//                    val soundChannel = soundFile.decode().toWav().readMusic().play()  // -- convert to WAV
-                    val soundChannel = soundFile.play()
-//                    val soundChannel2 = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound().play()
+            resourcesVfs["${clusterPath}/assets.json"].readKorgeFleksAssets(
+                clusterPath, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
 
-                    soundChannel.pause()
-                    sounds[sound.name] = Pair(type, soundChannel)
-                }
-            }
+// TODO load tile maps from LDtk files
+//            assetConfig.tileMaps.forEach { tileMap ->
+//                val levelName = tileMap.name
+//                val ldtkFile = tileMap.fileName
+//                val collisionLayerName = tileMap.collisionLayerName
+//                val tileSetPaths = mutableListOf("")
+//                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld()
+//
+//                when  (type) {
+//                    AssetType.LEVEL -> {
+//                        assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths)
+//                    }
+//                    else -> {
+//                        // Load raw tile map data for tilemap object types
+//                        ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+//                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(this, levelName, ldtkWorld, ldtkLevel))
+//                        }
+//                    }
+//                }
+//            }
 
-            // TODO get this sorted out
-            when (type) {
-                AssetType.COMMON -> resourcesVfs["${type.folder}/texture.atlas.json"].readKorgeFleksAssets(
-                    "common", type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
-                AssetType.WORLD -> resourcesVfs["world_1/texture.atlas.json"].readKorgeFleksAssets(
-                    "world", type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
-                AssetType.LEVEL -> resourcesVfs["world_1/level_1/texture.atlas.json"].readKorgeFleksAssets(
-                    "level", type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
-                AssetType.SPECIAL -> resourcesVfs["world_1/level_1/chunk/texture.atlas.json"].readKorgeFleksAssets(
-                    // TODO where do we get the special asset name from?
-                    "special", type, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tilesets2)
-                else -> {}
-            }
+        println("INFO: AssetStore - Resources loaded in ${sw.elapsed}")
 
-            assetConfig.textureAtlas.forEach { config ->
-                // TODO Remove old loaders when new one is fully working
-                // (1) Images and animations into texture atlas
-//                textureAtlasLoader.loadImages_old(type, spriteAtlas, config, textures)
-                // (2) Nine-patch images into texture atlas
-//                textureAtlasLoader.loadNinePatchSlices(type, spriteAtlas, config, ninePatchSlices)
-                // (3) Pixel fonts into texture atlas
-//                textureAtlasLoader.loadPixelFonts(type, spriteAtlas, config, assetConfig.folder, bitMapFonts)
-                // (4) Parallax layers into texture atlas
-//               textureAtlasLoader.loadParallaxLayers(type, spriteAtlas, config, parallaxBackgroundConfig, parallaxTextures, parallaxPlaneTextures)
-                // (5) Tilesets for level maps into texture atlas
-                val spriteAtlas = resourcesVfs["${assetConfig.folder}/${config.fileName}"].readAtlas()
-                textureAtlasLoader.loadTilemapsTilesets(type, spriteAtlas, config, tilesets)
-            }
-            assetConfig.tileMaps.forEach { tileMap ->
-                val levelName = tileMap.name
-                val ldtkFile = tileMap.fileName
-                val collisionLayerName = tileMap.collisionLayerName
-                val tileSetPaths = mutableListOf("")
-                val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + ldtkFile].readLdtkWorld()
-
-                when  (type) {
-                    AssetType.LEVEL -> {
-                        assetLevelDataLoader.loadLevelData(ldtkWorld, collisionLayerName, levelName, tileSetPaths)
-                    }
-                    else -> {
-                        // Load raw tile map data for tilemap object types
-                        ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
-                            tileMaps[ldtkLevel.identifier] = Pair(type, LayerTileMaps(this, levelName, ldtkWorld, ldtkLevel))
-                        }
-                    }
-                }
-            }
-
-            println("Assets: Loaded resources in ${sw.elapsed}")
-
-            if (assetConfig.hotReloading) {
-                configureResourceDirWatcher {
-                    addAssetWatcher(type) {}
-                }
+        // TODO hot reloading needs rework!!!
+        if (hotReloading) {
+            configureResourceDirWatcher {
+                addAssetWatcher(clusterPath) {}
             }
         }
     }
-
-    private fun prepareCurrentAssets(type: AssetType, newAssetConfig: AssetModel, currentAssetConfig: AssetModel): AssetModel? =
-        when (currentAssetConfig.folder) {
-            "" -> {
-                // Just load new assets
-                newAssetConfig
-            }
-            newAssetConfig.folder -> {
-                if (newAssetConfig.hotReloading) {
-                    println("INFO: Reload $type assets '${newAssetConfig.folder}'.")
-                    newAssetConfig
-                } else {
-                    println("INFO: $type assets '${newAssetConfig.folder}' already loaded! No reload is happening!")
-                    null
-                }
-            }
-            else -> {
-                println("INFO: Remove old $type assets and load new ones!")
-                removeAssets(type)
-                newAssetConfig
-            }
-        }
 
     /**
      * Remove all assets which have a specific given [AssetType].
