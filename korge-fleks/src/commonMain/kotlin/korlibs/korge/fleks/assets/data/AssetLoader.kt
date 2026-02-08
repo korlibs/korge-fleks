@@ -101,15 +101,18 @@ class AssetLoader(
 //        resourcesVfs["${chunkPath}.json"].readKorgeFleksLevelDataChunk(
 //            chunkPath
 //        )
+        // By deserializing the chunk json file the EntityConfig objects for the chunk will be created and registered in the EntityFactory.
+        // The chunk asset info will be used to load the tile map and other assets for the chunk and to check if the chunk asset version is
+        // compatible with the current version of the game.
         val chunkAssetInfo: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${chunkPath}.json"].readString())
 
         // Get version info
         val major: Int = chunkAssetInfo.version[0]
         val minor: Int = chunkAssetInfo.version[1]
         val build: Int = chunkAssetInfo.version[2]
-        // Check later if asset version/build is compatible otherwise convert to new version
+        // TODO Check later if asset version/build is compatible otherwise convert to new version
 
-        // Load entities
+
         println(chunkAssetInfo)
 
     }
