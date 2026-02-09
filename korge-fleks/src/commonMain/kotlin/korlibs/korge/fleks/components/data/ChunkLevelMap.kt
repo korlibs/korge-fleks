@@ -23,6 +23,7 @@ import kotlinx.serialization.Serializable
  * @param clusterList List of cluster names which are needed to render the tile map. The cluster names are used to
  *        determine which tileset a tile is using.
  */
+// TODO rename to TileMap
 @Serializable @SerialName("ChunkLevelMap")
 class ChunkLevelMap private constructor(
     val stackedTiles: List<MutableList<Int>> = List(4096) { MutableList(10) { -1 } },

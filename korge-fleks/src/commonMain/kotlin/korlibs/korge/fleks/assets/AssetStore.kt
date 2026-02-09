@@ -119,9 +119,9 @@ class AssetStore {
         }
         else error("AssetStore: Chunk tile map '$name' not found!")
 
-    suspend fun loadClusterAssets(world: Int? = null, clusterName: String, hotReloading: Boolean = false) {
+    suspend fun loadClusterAssets(world: String? = null, clusterName: String, hotReloading: Boolean = false) {
         // Keep track was loaded already to avoid reloading of assets which are already in memory.
-        val clusterPath = world?.let { "world_${world}/${clusterName}" } ?: clusterName
+        val clusterPath = world?.let { "${world}/${clusterName}" } ?: clusterName
         if (loadedClusterAssets.contains(clusterPath)) {
             println("INFO: Asset cluster '$clusterPath' already loaded! No reload is happening!")
             return

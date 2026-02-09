@@ -32,18 +32,22 @@ class AssetLoader(
      * be loaded/reloaded.
      */
     suspend fun loadAssets(gameStateConfig: GameStateConfig) {
-        // TODO hardcoded for now - we need to load cluster assets depending on the position in the world
-        assetStore.loadClusterAssets(world = 1, "common")
-        assetStore.loadClusterAssets(world = 1, "intro")
+        val worldName = gameStateConfig.worldName
+        val chunkNumber  = gameStateConfig.chunk
 
+        // First load chunks and get list of asset clusters which need to be loaded.
+        loadChunkAssets(worldName, chunkNumber)
         // TODO hardcoded for now
-        loadChunkAssets("world_1/level_data/chunk_1")
-        loadChunkAssets("world_1/level_data/chunk_2")
-        loadChunkAssets("world_1/level_data/chunk_3")
-        loadChunkAssets("world_1/level_data/chunk_4")
-        loadChunkAssets("world_1/level_data/chunk_5")
-        loadChunkAssets("world_1/level_data/chunk_6")
-        loadChunkAssets("world_1/level_data/chunk_7")
+        loadChunkAssets(worldName, 2)
+        loadChunkAssets(worldName, 3)
+        loadChunkAssets(worldName, 4)
+        loadChunkAssets(worldName, 5)
+        loadChunkAssets(worldName, 6)
+        loadChunkAssets(worldName, 7)
+
+        assetStore.loadClusterAssets("world_1", "common")
+        assetStore.loadClusterAssets("world_1", "intro")
+
 /*
         // Sanity check - world needs to be always present
         if (gameStateConfig.world.isEmpty() || gameStateConfig.level.isEmpty()) {
@@ -96,7 +100,7 @@ class AssetLoader(
 */
     }
 
-    private suspend fun loadChunkAssets(chunkPath: String) {
+    private suspend fun loadChunkAssets(worldName: String, chunk: Int) {
         // TODO implement loading of chunk assets
 //        resourcesVfs["${chunkPath}.json"].readKorgeFleksLevelDataChunk(
 //            chunkPath
@@ -104,7 +108,7 @@ class AssetLoader(
         // By deserializing the chunk json file the EntityConfig objects for the chunk will be created and registered in the EntityFactory.
         // The chunk asset info will be used to load the tile map and other assets for the chunk and to check if the chunk asset version is
         // compatible with the current version of the game.
-        val chunkAssetInfo: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${chunkPath}.json"].readString())
+        val chunkAssetInfo: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/chunk_${chunk}.json"].readString())
 
         // Get version info
         val major: Int = chunkAssetInfo.version[0]

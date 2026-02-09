@@ -7,9 +7,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ChunkAssetInfo(
-    val version: List<Int> = emptyList(),
-    val entities: List<EntityConfig> = emptyList(),
-    val levelMap: Map<String, TileMapInfo>
+    @SerialName("v") val version: List<Int> = emptyList(),
+    @SerialName("e") val entities: List<EntityConfig> = emptyList(),
+
+    @SerialName("x") val chunkX: Int,
+    @SerialName("y") val chunkY: Int,
+
+    @SerialName("t") val chunkTop: Int,
+    @SerialName("b") val chunkBottom: Int,
+    @SerialName("l") val chunkLeft: Int,
+    @SerialName("r") val chunkRight: Int,
+
+    @SerialName("ls") val levelMaps: Map<String, TileMapInfo>
 ) {
     @Serializable
     data class TileMapInfo(
@@ -18,7 +27,7 @@ data class ChunkAssetInfo(
         @SerialName("w") val gridWidth: Int = 0,
         @SerialName("h") val gridHeight: Int = 0,
         @SerialName("g") val gridSize: Int = 0,
+
         @SerialName("c") val clusterList: List<String> = emptyList()  // Needed by renderer for offsets of tilesets in clusters
     )
-
 }
