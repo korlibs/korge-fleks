@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.prefab.data.ChunkArray2
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -20,27 +19,33 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("LevelMap")
 class LevelMap private constructor(
-    var levelName: String = "",
-    val layerNames: MutableList<String> = mutableListOf(),
+//    var levelName: String = "",
+//    val layerNames: MutableList<String> = mutableListOf(),
+
+    // List of chunk number which entities were spawned
+    val activatedChunks: MutableSet<Int> = mutableSetOf()
+
 
     // TODO: Check if we use this for storing entities when they go out of the active 2x2 chunk area
-    var levelChunks: ChunkArray2 = ChunkArray2.empty
+//    var levelChunks: ChunkArray2 = ChunkArray2.empty
 ) : PoolableComponent<LevelMap>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: LevelMap) {
-        levelName = from.levelName
-        layerNames.addAll(from.layerNames)
+        activatedChunks.addAll(from.activatedChunks)
+//        levelName = from.levelName
+//        layerNames.addAll(from.layerNames)
         // TODO: Refactor levelChunks data class to support poolable
-        levelChunks = from.levelChunks.clone()
+//        levelChunks = from.levelChunks.clone()
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
+        activatedChunks.clear()
         // level name will be set on initialization of the component
-        layerNames.clear()  // Make list empty for reuse
-        levelChunks = ChunkArray2.empty
+//        layerNames.clear()  // Make list empty for reuse
+//        levelChunks = ChunkArray2.empty
     }
 
     override fun type() = LevelMapComponent

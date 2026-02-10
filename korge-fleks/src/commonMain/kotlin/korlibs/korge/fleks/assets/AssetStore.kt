@@ -13,7 +13,7 @@ import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.SimpleTileSet
 import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
 import korlibs.korge.fleks.assets.data.UNKNOWN
-import korlibs.korge.fleks.components.data.ChunkLevelMap
+import korlibs.korge.fleks.components.data.TileMap
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -25,7 +25,7 @@ typealias NinePatchBmpSlicesAssetType = MutableMap<String, Pair<AssetType, NineP
 typealias BitMapFontsAssetType = MutableMap<String, Pair<AssetType, BitmapFont>>
 typealias ParallaxLayersAssetType = MutableMap<String, Pair<AssetType, ParallaxLayersInfo>>
 
-typealias TileMapsAssetType = MutableMap<String, Pair<AssetType, ChunkLevelMap>>
+typealias TileMapsAssetType = MutableMap<String, Pair<AssetType, TileMap>>
 typealias TileSetsAssetType = MutableMap<String, Pair<AssetType, SimpleTileSet>>
 
 
@@ -113,7 +113,7 @@ class AssetStore {
             tileSets[name]!!.second
         } else error("AssetStore: Tile set '$name' not found!")
 
-    fun getTileMap(name: String) : ChunkLevelMap =
+    fun getTileMap(name: String) : TileMap =
         if (tileMaps.contains(name)) {
             tileMaps[name]!!.second
         }

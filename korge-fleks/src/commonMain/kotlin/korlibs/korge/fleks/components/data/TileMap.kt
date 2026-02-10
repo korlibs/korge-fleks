@@ -6,35 +6,34 @@ import kotlinx.serialization.Serializable
 
 
 /**
- * This class is used to store the tile map data for a world chunk.
- * It contains a list of stacked tiles for each position in the chunk and a list of cluster names which
+ * This class is used to store the tile map data for a game object. It is not ment to be used as level map data.
+ * It contains a list of stacked tiles  and a list of cluster names which
  * are needed to render the tile map. The cluster names are used to determine which tileset a tile is using.
  *
  * Tile:
  *   [
  *     4 bits for tile index in tileset
  *     12 bits for tile position in the tileset atlas
- *     ... bits for collision data
+ *     ... other bits not used
  *   ]
  *
- * @param stackedTiles List of stacked tiles for each position in the chunk. Each position can have up to 10 stacked tiles.
+ * @param stackedTiles List of stacked tiles. Each tile position can have up to 10 stacked tiles.
  * @param gridWidth The width of the tile map grid (number of tiles in x direction).
  * @param gridHeight The height of the tile map grid (number of tiles in y direction
  * @param clusterList List of cluster names which are needed to render the tile map. The cluster names are used to
  *        determine which tileset a tile is using.
  */
-// TODO rename to TileMap
-@Serializable @SerialName("ChunkLevelMap")
-class ChunkLevelMap private constructor(
+@Serializable @SerialName("TileMap")
+class TileMap private constructor(
     val stackedTiles: List<MutableList<Int>> = List(4096) { MutableList(10) { -1 } },
     var gridWidth: Int = 0,
     var gridHeight: Int = 0,
     var gridSize: Int = 0,
     var clusterList: MutableList<String> = MutableList(16) { "" }
-) : Poolable<ChunkLevelMap> {
+) : Poolable<TileMap> {
     // Init an existing data instance with data from another one
-    override fun init(from: ChunkLevelMap) {
-        error("Do not call 'init' on ChunkLevelMap!")
+    override fun init(from: TileMap) {
+        error("Do not call 'init' on TileMap!")
     }
 
     // Cleanup data instance manually
@@ -47,9 +46,9 @@ class ChunkLevelMap private constructor(
     }
 
     // Clone a new data instance from the pool
-    override fun clone(): ChunkLevelMap = chunkLevelMap {
-        error("Do not call 'clone' on ChunkLevelMap, since it is not used as a value property of a component and does not" +
-            " contain any data that needs to be cloned. Just use the chunkLevelMap function to get a new instance from the pool.")
+    override fun clone(): TileMap = tileMap {
+        error("Do not call 'clone' on TileMap, since it is not used as a value property of a component and does not" +
+            " contain any data that needs to be cloned. Just use the tileMap function to get a new instance from the pool.")
     }
 
     // Cleanup the tween data instance manually
@@ -60,13 +59,13 @@ class ChunkLevelMap private constructor(
 
     companion object {
         // Use this function to create a new instance of data as value property inside a component
-        //fun staticChunkLevelMap(config: ChunkLevelMap.() -> Unit): ChunkLevelMap =
-        //    ChunkLevelMap().apply(config)
+        //fun staticTileMap(config: TileMap.() -> Unit): TileMap =
+        //    TileMap().apply(config)
 
         // Use this function to get a new instance of the data object from the pool
-        fun chunkLevelMap(config: ChunkLevelMap.() -> Unit): ChunkLevelMap =
+        fun tileMap(config: TileMap.() -> Unit): TileMap =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "ChunkLevelMap") { ChunkLevelMap() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "TileMap") { TileMap() }
     }
 }

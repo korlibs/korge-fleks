@@ -7,7 +7,11 @@ import kotlinx.serialization.Serializable
 
 
 /**
- * This component is used to ...
+ * This component is used to specify the world chunk in which an entity is located.
+ * This is needed to determine the position of the entity in the world. Since the size of the world
+ * is not fixed, the world is divided into chunks and each entity is assigned to a chunk. This allows for efficient
+ * management of entities in the world, as only the entities in the current chunk and neighboring chunks
+ * need to be updated and rendered.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.

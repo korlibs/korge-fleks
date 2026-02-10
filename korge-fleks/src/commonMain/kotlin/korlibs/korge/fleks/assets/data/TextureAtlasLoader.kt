@@ -21,7 +21,6 @@ import korlibs.korge.fleks.assets.TileSetsAssetType
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxPlane.*
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxLayer
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
-import korlibs.korge.fleks.components.data.ChunkLevelMap.Companion.chunkLevelMap
 import korlibs.math.geom.RectangleInt
 import kotlinx.serialization.json.Json
 import kotlin.collections.component1

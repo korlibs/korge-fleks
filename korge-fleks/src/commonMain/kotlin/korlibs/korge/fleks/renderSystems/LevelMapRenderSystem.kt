@@ -30,22 +30,26 @@ class LevelMapRenderSystem(
     layerTag: RenderLayerTag,
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : RenderSystem {
-    private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
+//    private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
     private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
+    private val assetStore = world.inject<AssetStore>("AssetStore")
 
     override fun render(ctx: RenderContext) {
         // Get main camera position or exit if it does not exist
         val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         // Sort level maps by their layerIndex
-        family.sort(comparator)
+//        family.sort(comparator)
 
         // Iterate over all entities which should be rendered in this view
-        family.forEach { entity ->
-            val rgba = entity[RgbaComponent].rgba
-            val levelMap = entity[LevelMapComponent]
-            val worldData = Prefab.levelData ?: return@forEach
-            val tileSize = worldData.tileSize
+//        family.forEach { entity ->
+//            val rgba = entity[RgbaComponent].rgba
+//            val levelMap = entity[LevelMapComponent]
+//            val worldData = Prefab.levelData ?: return@forEach
+//            val tileSize = worldData.tileSize
+
+        val tileSize = 16
+        val worldData = assetStore.get
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
             val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
@@ -67,7 +71,7 @@ class LevelMapRenderSystem(
                             x = px - viewPortPosX,
                             y = py - viewPortPosY,
                             filtering = false,
-                            colorMul = rgba,
+//                            colorMul = rgba,
                             program = null // Possibility to use a custom shader - add ShaderComponent or similar
                         )
                     }
