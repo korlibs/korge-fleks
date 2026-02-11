@@ -43,11 +43,13 @@ class AssetLoader(
         val build: Int = commonChunkInfo.version[2]
         // TODO Check later if asset version/build is compatible otherwise convert to new version
 
-        assetStore.levelData.worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth).toFloat()
-        assetStore.levelData.worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.gridVaniaHeight).toFloat()
-        assetStore.levelData.levelChunkWidth = commonChunkInfo.chunkWidth
-        assetStore.levelData.levelChunkHeight = commonChunkInfo.chunkHeight
-        assetStore.levelData.tileSize = commonChunkInfo.tileSize
+        assetStore.levelData.init(
+            worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth).toFloat(),
+            worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.gridVaniaHeight).toFloat(),
+            levelChunkWidth = commonChunkInfo.chunkWidth,
+            levelChunkHeight = commonChunkInfo.chunkHeight,
+            tileSize = commonChunkInfo.tileSize
+        )
 
         // First load chunks and get list of asset clusters which need to be loaded.
         loadChunkAssets(worldName, chunkNumber)

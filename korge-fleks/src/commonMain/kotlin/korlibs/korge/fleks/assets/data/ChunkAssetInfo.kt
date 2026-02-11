@@ -11,8 +11,8 @@ data class CommonChunkInfo(
     @SerialName("v") val version: List<Int> = emptyList(),
     @SerialName("x") val gridVaniaWidth: Int = 0,   // in tiles
     @SerialName("y") val gridVaniaHeight: Int = 0,  // in tiles
-    @SerialName("w") val chunkWidth: Int = 0,   // in pixels
-    @SerialName("h") val chunkHeight: Int = 0,  // in pixels
+    @SerialName("w") val chunkWidth: Int = 0,   // in tiles
+    @SerialName("h") val chunkHeight: Int = 0,  // in tiles
     @SerialName("t") val tileSize: Int = 0      // in pixels
 )
 
@@ -20,7 +20,7 @@ data class CommonChunkInfo(
 data class ChunkAssetInfo(
     @SerialName("e") val entities: List<EntityConfig> = emptyList(),
 
-    @SerialName("x") val chunkX: Int,
+    @SerialName("x") val chunkX: Int,  // in grid coordinates
     @SerialName("y") val chunkY: Int,
 
     @SerialName("t") val chunkTop: Int,
@@ -32,6 +32,10 @@ data class ChunkAssetInfo(
 ) {
     @Transient
     lateinit var listOfEntityNames: List<String>
+    @Transient
+    var chunkPositionX: Float = 0f  // in pixels
+    @Transient
+    var chunkPositionY: Float = 0f
 
     @Serializable
     data class TileMapInfo(

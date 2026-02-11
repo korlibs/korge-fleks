@@ -1,28 +1,16 @@
 package korlibs.korge.fleks.prefab.data
 
+import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
 import korlibs.korge.fleks.assets.data.ChunkAssetInfo
 
 /**
- * Data class for storing level maps and entities for a game world.
+ * Data class for storing world chunks and entities for a game world.
  *
  * We store the level data config in a 2D array depending on its gridvania position in the world
  * Then later we will spawn the entities depending on the level which the player is currently in
- *
- * @param width - Width of whole world in pixels
- * @param height - Height of whole world in pixels
  */
-class LevelData(
-    // Size of all gridvania levels in the world (in pixels / world coordinates)
-//    val width: Float = 0f,
-//    val height: Float = 0f,
-    // Size of the gridvania array (in chunks)
-//    val gridVaniaWidth: Int = 0,
-//    val gridVaniaHeight: Int = 0,
-
-    // Internal - do not set directly
-//    val levelGridVania: Array2<Chunk> = Array2(gridVaniaWidth, gridVaniaHeight) { Chunk() },
-) {
+class LevelData {
 
     // Size of a level inside the grid vania array in tiles (all levels have the same size; in tiles)
     var levelChunkWidth: Int = 0
@@ -31,25 +19,30 @@ class LevelData(
     var worldWidth: Float = 0f  // Size of whole world in pixels
     var worldHeight: Float = 0f
 
-
     // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
     var tileSize: Int = 0
 
     internal val chunkMeshes: MutableMap<Int, ChunkAssetInfo> = mutableMapOf()
+    internal lateinit var levelGridVania: IntArray2
 
     private val levelMidPointX: Int = levelChunkWidth / 2
     private val levelMidPointY: Int = levelChunkHeight / 2
 
-    init {
-        // Sanity check for levelGridVania dimensions
-//        levelGridVania.forEach { chunk ->
-//            require(
-//                chunk.collisionMap == null ||
-//                chunk.collisionMap?.width == levelGridWidth && chunk.collisionMap?.height == levelGridHeight
-//            ) {
-//                "Collision map dimensions must match level grid dimensions!"
-//            }
-//        }
+    fun init(
+        worldWidth: Float,
+        worldHeight: Float,
+        levelChunkWidth: Int,
+        levelChunkHeight: Int,
+        tileSize: Int
+    ) {
+        this.worldWidth = worldWidth
+        this.worldHeight = worldHeight
+        this.levelChunkWidth = levelChunkWidth
+        this.levelChunkHeight = levelChunkHeight
+        this.tileSize = tileSize
+
+        // Set up grid-vania array
+        levelGridVania = IntArray2(levelChunkWidth, levelChunkHeight) { -1 }
     }
 
     /**
@@ -146,7 +139,7 @@ class LevelData(
      * @param width - width of view port in tiles
      * @param height - height of view port in tiles
      */
-    fun forEachTile(layer: String, currentChunk: Int, cx: Int, cy: Int, width: Int, height: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+    fun forEachTile(layer: String, cx: Int, cy: Int, width: Int, height: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
         // Calculate the view port corners (top-left, top-right, bottom-left and bottom-right positions) in grid-vania indexes
         // and check if the corners are in different level chunks
         val gridX = cx / levelChunkWidth
@@ -160,24 +153,24 @@ class LevelData(
             // We have only one chunk in horizontal direction
             if (gridY == gridY2) {
                 // We have only one chunk in vertical direction
-                processTiles(layer, currentChunk, gridX, gridY, xStart, yStart, xStart + width, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX, gridY, xStart, yStart, xStart + width, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
             } else {
-                // We have vertically two levels
-//                processTiles(layer, gridX, gridY, xStart, yStart, xStart + width, levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
-//                processTiles(layer, gridX, gridY2, xStart, 0, xStart + width, (yStart + height) % levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                // We have vertically two chunks
+                processTiles(layer, gridX, gridY, xStart, yStart, xStart + width, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX, gridY2, xStart, 0, xStart + width, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
             }
         } else {
-            // We have horizontal two levels
+            // We have horizontally two chunks
             if (gridY == gridY2) {
-                // We have only one level in vertical direction
-//                processTiles(layer, gridX, gridY, xStart, yStart, levelGridWidth, yStart + height, levelGridWidth, levelGridHeight, renderCall)
-//                processTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelGridWidth, yStart + height, levelGridWidth, levelGridHeight, renderCall)
+                // We have only one chunk in vertical direction
+                processTiles(layer, gridX, gridY, xStart, yStart, levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
             } else {
                 // We have vertical two levels
-//                processTiles(layer, gridX, gridY, xStart, yStart, levelGridWidth, levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
-//                processTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelGridWidth, levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
-//                processTiles(layer, gridX, gridY2, xStart, 0, levelGridWidth, (yStart + height) % levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
-//                processTiles(layer, gridX2, gridY2, 0, 0, (xStart + width) % levelGridWidth, (yStart + height) % levelGridHeight, levelGridWidth, levelGridHeight, renderCall)
+                processTiles(layer, gridX, gridY, xStart, yStart, levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX, gridY2, xStart, 0, levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX2, gridY2, 0, 0, (xStart + width) % levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
             }
         }
     }
@@ -218,19 +211,26 @@ class LevelData(
         }
     }
 
-    private fun processTiles(layer: String, currentChunk: Int, gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
-
-        val levelMap = chunkMeshes[currentChunk]?.levelMaps[layer] ?: return
+    private fun processTiles(layer: String, gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+        val chunkIndex = levelGridVania[gridX, gridY]
+        val chunk = chunkMeshes[chunkIndex] ?: error("LevelData - processTiles: No chunk mesh found for chunk index '$chunkIndex' in grid position ($gridX, $gridY)!")
+        val levelMap = chunk.levelMaps[layer] ?: error("LevelData - processTiles: No level map found for layer '$layer' in chunk index '$chunkIndex'!")
+        val chunkX = chunk.chunkX
+        val chunkY = chunk.chunkY
         for (tx in xStart until xEnd) {
             for (ty in yStart until yEnd) {
+
+                // TODO remove later
+                if (ty < 0 || tx < 0) return
+
                 val tiles = levelMap.stackedTileMapData[tx + ty * levelChunkWidth]
 
                 tiles.forEach { tile ->
-                    val clusterIndex = tile and 0xf // Get bits 0-4 for cluster index
+                    val clusterIndex = tile and 0xf // Get bits 0-3 for cluster index
                     val tileIndex = tile shr 4  // Get bits 4-16 for tile index in tileset
                     levelMap.listOfTileSets[clusterIndex][tileIndex]?.let { bmpSlice ->
-                        val px = (tx * tileSize) + (gridX * levelWidth * tileSize)
-                        val py = (ty * tileSize) + (gridY * levelHeight * tileSize)
+                        val px = (tx * tileSize) + (chunkX * levelWidth * tileSize)
+                        val py = (ty * tileSize) + (chunkY * levelHeight * tileSize)
                         renderCall(bmpSlice, px.toFloat(), py.toFloat())
                     }
                 }

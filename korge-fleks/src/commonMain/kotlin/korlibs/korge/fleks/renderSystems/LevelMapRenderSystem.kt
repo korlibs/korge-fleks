@@ -20,8 +20,7 @@ import korlibs.korge.render.*
  * The [EntityComparator] is used to sort the level maps by their layer index.
  *
  * @param world the world containing the entities to render
- * @param layerTag the tag to determine the layer on which the level maps should be rendered
- * @param comparator the comparator to sort the level maps by their layer index
+ * @param layerName the name of the layer to render (e.g. "background", "main", "foreground")
  */
 class LevelMapRenderSystem(
     private val world: World,
@@ -34,42 +33,35 @@ class LevelMapRenderSystem(
     override fun render(ctx: RenderContext) {
         // Get main camera position or exit if it does not exist
         val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
-        val cameraChunk: Int = systemRuntimeConfigs.getCameraChunk(world)
-
-        // Iterate over all entities which should be rendered in this view
-//        family.forEach { entity ->
-//            val rgba = entity[RgbaComponent].rgba
-//            val levelMap = entity[LevelMapComponent]
-//            val worldData = Prefab.levelData ?: return@forEach
-//            val tileSize = worldData.tileSize
 
         val tileSize = assetStore.levelData.tileSize
-        val chunkWidth = assetStore.levelData.levelChunkWidth
-        val chunkHeight = assetStore.levelData.levelChunkHeight
-        val levelChunkX = assetStore.levelData.chunkMeshes[cameraChunk]?.chunkX ?: 0
-        val levelChunkY = assetStore.levelData.chunkMeshes[cameraChunk]?.chunkY ?: 0
-        val cameraX = chunkWidth * levelChunkX + cameraPosition.x
-        val cameraY = chunkHeight * levelChunkY + cameraPosition.y
+//        val chunkWidth = assetStore.levelData.levelChunkWidth
+//        val chunkHeight = assetStore.levelData.levelChunkHeight
+//        val levelChunkX = assetStore.levelData.chunkMeshes[cameraChunk]?.chunkX ?: 0
+//        val levelChunkY = assetStore.levelData.chunkMeshes[cameraChunk]?.chunkY ?: 0
+//        val cameraX = chunkWidth * levelChunkX + cameraPosition.x
+//        val cameraY = chunkHeight * levelChunkY + cameraPosition.y
 
         // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-        val viewPortPosX: Float = cameraX + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
-        val viewPortPosY: Float = cameraY + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
+        val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
+        val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
         // Start and end indexes of viewport area (in tile coordinates)
         val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
         val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
         val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
         val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
 
+//        println("Viewport: ${viewPortPosX}, ${viewPortPosY} - Tiles: ($xStart, $yStart) -> (${xStart + xTiles}, ${yStart + yTiles})")
+
         ctx.useBatcher { batch ->
             // Iterate over all tiles in the visible area of the view port
-            val currentChunk = cameraChunk
-            assetStore.levelData.forEachTile(layerName, currentChunk, xStart, yStart, xTiles, yTiles) { slice, px, py ->
+            assetStore.levelData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
                 batch.drawQuad(
                     tex = ctx.getTex(slice),
                     x = px - viewPortPosX,
                     y = py - viewPortPosY,
                     filtering = false,
-//                    colorMul = rgba,
+                    // colorMul = rgba,
                     program = null // Possibility to use a custom shader - add ShaderComponent or similar
                 )
             }

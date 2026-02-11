@@ -70,6 +70,7 @@ class AssetStore {
 
     fun addWorldChunk(chunkIndex: Int, worldChunk: ChunkAssetInfo) {
         levelData.chunkMeshes[chunkIndex] = worldChunk
+        levelData.levelGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex
     }
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {

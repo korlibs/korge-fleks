@@ -21,7 +21,6 @@ import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
-import korlibs.korge.fleks.components.WorldChunk.Companion.WorldChunkComponent
 import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
@@ -71,8 +70,6 @@ class ObjectRenderSystem(
         family.forEach { entity ->
             val rgba = entity[RgbaComponent].rgba
 
-            // TODO Check if entity has WorldChunkComponent - if yes, than convert world coordinates to screen coordinates
-//            val entityWorldChunk = entity[WorldChunkComponent].chunk
             val entityPosition = entity[PositionComponent]
 
             // Take over entity position

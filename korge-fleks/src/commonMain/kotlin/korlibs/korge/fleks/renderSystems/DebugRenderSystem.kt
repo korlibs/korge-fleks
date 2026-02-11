@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
-import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
@@ -45,7 +44,7 @@ class DebugRenderSystem(
     private val grid = GridPosition()
 //    private val debugPointPool = world.inject<DebugPointPool>("DebugPointPool")
 
-    private val levelData = inject<AssetStore>("AssetStore").levelData
+    private val levelData = world.inject<AssetStore>("AssetStore").levelData
 
     override fun render(ctx: RenderContext) {
         // Get main camera position or exit if it does not exist

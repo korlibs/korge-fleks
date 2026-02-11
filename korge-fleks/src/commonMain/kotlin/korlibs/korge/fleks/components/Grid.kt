@@ -175,7 +175,7 @@ class Grid private constructor() : PoolableComponent<Grid>() {
      * This is useful to convert the position of an entity to screen coordinates for rendering.
      */
     fun convertToScreenCoordinates(cameraPosition: Position, position: Point) {
-        position.x = x  - cameraPosition.x + cameraPosition.offsetX + AppConfig.VIEW_PORT_WIDTH_HALF
+        position.x = x - cameraPosition.x + cameraPosition.offsetX + AppConfig.VIEW_PORT_WIDTH_HALF
         position.y = y - cameraPosition.y + cameraPosition.offsetY + AppConfig.VIEW_PORT_HEIGHT_HALF
     }
 }
