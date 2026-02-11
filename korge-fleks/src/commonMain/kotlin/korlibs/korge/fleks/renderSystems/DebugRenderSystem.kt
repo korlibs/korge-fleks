@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
+import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
@@ -16,7 +17,6 @@ import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.logic.collision.GridPosition
-import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
@@ -44,6 +44,8 @@ class DebugRenderSystem(
 
     private val grid = GridPosition()
 //    private val debugPointPool = world.inject<DebugPointPool>("DebugPointPool")
+
+    private val levelData = inject<AssetStore>("AssetStore").levelData
 
     override fun render(ctx: RenderContext) {
         // Get main camera position or exit if it does not exist
@@ -172,7 +174,6 @@ class DebugRenderSystem(
 
 
                 if (entity has LevelMapComponent && entity has DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS) {
-                    val levelData = Prefab.levelData ?: return@forEach
                     val tileSize = levelData.tileSize
 
                     // Calculate viewport position in world coordinates from Camera position (x,y) + offset

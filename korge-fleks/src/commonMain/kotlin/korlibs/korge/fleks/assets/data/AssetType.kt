@@ -14,10 +14,5 @@ package korlibs.korge.fleks.assets.data
 typealias AssetType = String
 
 const val UNKNOWN = "unknown"
-//enum class AssetType(val folder: String) {
-//    COMMON("common"),
-//    WORLD("world"),
-//    LEVEL("level"),
-//    SPECIAL("chunk"),
-//    UNKNOWN("unknown")
-//}
+
+

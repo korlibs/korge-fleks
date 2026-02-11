@@ -25,9 +25,8 @@ class CameraSystem(
     private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
     private val parallaxFamily = world.family { all(ParallaxComponent, PositionComponent, MotionComponent) }
 
-    // These properties need to be set by the entityConfigure function of the level map config
-    var worldHeight: Float = 0f
-    var worldWidth: Float = 0f
+    var worldWidth: Float = assetStore.levelData.worldWidth
+    var worldHeight: Float = assetStore.levelData.worldHeight
 
     override fun onTickEntity(entity: Entity) {
         // Get main camera position or exit if it does not exist

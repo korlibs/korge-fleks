@@ -35,6 +35,20 @@ class AssetLoader(
         val worldName = gameStateConfig.worldName
         val chunkNumber  = gameStateConfig.chunk
 
+        val commonChunkInfo: CommonChunkInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/common.json"].readString())
+
+        // Get version info
+        val major: Int = commonChunkInfo.version[0]
+        val minor: Int = commonChunkInfo.version[1]
+        val build: Int = commonChunkInfo.version[2]
+        // TODO Check later if asset version/build is compatible otherwise convert to new version
+
+        assetStore.levelData.worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth).toFloat()
+        assetStore.levelData.worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.gridVaniaHeight).toFloat()
+        assetStore.levelData.levelChunkWidth = commonChunkInfo.chunkWidth
+        assetStore.levelData.levelChunkHeight = commonChunkInfo.chunkHeight
+        assetStore.levelData.tileSize = commonChunkInfo.tileSize
+
         // First load chunks and get list of asset clusters which need to be loaded.
         loadChunkAssets(worldName, chunkNumber)
         // TODO hardcoded for now
@@ -44,9 +58,6 @@ class AssetLoader(
         loadChunkAssets(worldName, 5)
         loadChunkAssets(worldName, 6)
         loadChunkAssets(worldName, 7)
-
-        assetStore.loadClusterAssets("world_1", "common")
-        assetStore.loadClusterAssets("world_1", "intro")
 
 /*
         // Sanity check - world needs to be always present
@@ -110,16 +121,19 @@ class AssetLoader(
         // compatible with the current version of the game.
         val chunkAssetInfo: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/chunk_${chunk}.json"].readString())
 
-        // Get version info
-        val major: Int = chunkAssetInfo.version[0]
-        val minor: Int = chunkAssetInfo.version[1]
-        val build: Int = chunkAssetInfo.version[2]
-        // TODO Check later if asset version/build is compatible otherwise convert to new version
+        // Create list of entity names for spawning entities in the chunk
+        chunkAssetInfo.listOfEntityNames = chunkAssetInfo.entities.map { it.name }
+        // Create list of tile sets for each level map in the chunk - this is needed for the renderer to get the correct tile set objects for rendering the tile maps of the chunk.
+        chunkAssetInfo.levelMaps.forEach { (_, layer) ->
+            // Load cluster assets for the tile map of the chunk if it was not loaded already
+            layer.clusterList.forEach { clusterName ->
+                assetStore.loadClusterAssets(worldName, clusterName)
+            }
 
+            layer.listOfTileSets = layer.clusterList.map { assetStore.getTileSet(it) }
+        }
 
-        println(chunkAssetInfo)
-
+        assetStore.addWorldChunk(chunk, chunkAssetInfo)
+        println()
     }
-
-
 }

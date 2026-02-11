@@ -21,6 +21,7 @@ import korlibs.korge.fleks.assets.TileSetsAssetType
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxPlane.*
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxLayer
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
+import korlibs.korge.fleks.components.data.TileMap.Companion.tileMap
 import korlibs.math.geom.RectangleInt
 import kotlinx.serialization.json.Json
 import kotlin.collections.component1
@@ -209,7 +210,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
         if (tileMapInfo.stackedTileMapData.size > 4096)
             error("readKorgeFleksAssets - tile map '${name}' has more than 4096 chunks which is currently not supported!")
 
-        val chunkLevelMap = chunkLevelMap {
+        val chunkLevelMap = tileMap {
             tileMapInfo.stackedTileMapData.forEachIndexed { idx, tiles ->
                 tiles.forEachIndexed { stackIdx, tile ->
                     if (tile != -1) stackedTiles[idx][stackIdx] = tile
@@ -225,9 +226,9 @@ suspend fun VfsFile.readKorgeFleksAssets(
                 clusterList[idx] = name
             }
 
-            gridWidth = tileMapInfo.gridWidth
-            gridHeight = tileMapInfo.gridWidth
-            gridSize = tileMapInfo.gridSize
+            tileMapWidth = tileMapInfo.tileMapWidth
+            tileMapHeight = tileMapInfo.tileMapWidth
+            tileSize = tileMapInfo.tileSize
         }
         tileMaps[name] = Pair(clusterName, chunkLevelMap)
     }

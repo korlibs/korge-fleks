@@ -1,8 +1,9 @@
 package korlibs.korge.fleks.logic.collision.checker
 
+import com.github.quillraven.fleks.World.Companion.inject
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.gameObject.CollisionData
 import korlibs.korge.fleks.logic.collision.GridPosition
-import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.utils.AppConfig
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -10,7 +11,7 @@ import kotlin.math.ceil
 
 class PlatformerGroundChecker : GroundChecker() {
     private val grid = GridPosition()
-    private val level = Prefab.levelData
+    private val level = inject<AssetStore>("AssetStore").levelData
 
     override fun onGround(
         cx: Int,

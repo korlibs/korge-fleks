@@ -18,17 +18,17 @@ import kotlinx.serialization.Serializable
  *   ]
  *
  * @param stackedTiles List of stacked tiles. Each tile position can have up to 10 stacked tiles.
- * @param gridWidth The width of the tile map grid (number of tiles in x direction).
- * @param gridHeight The height of the tile map grid (number of tiles in y direction
+ * @param tileMapWidth The width of the tile map grid (number of tiles in x direction).
+ * @param tileMapHeight The height of the tile map grid (number of tiles in y direction
  * @param clusterList List of cluster names which are needed to render the tile map. The cluster names are used to
  *        determine which tileset a tile is using.
  */
 @Serializable @SerialName("TileMap")
 class TileMap private constructor(
     val stackedTiles: List<MutableList<Int>> = List(4096) { MutableList(10) { -1 } },
-    var gridWidth: Int = 0,
-    var gridHeight: Int = 0,
-    var gridSize: Int = 0,
+    var tileMapWidth: Int = 0,
+    var tileMapHeight: Int = 0,
+    var tileSize: Int = 0,
     var clusterList: MutableList<String> = MutableList(16) { "" }
 ) : Poolable<TileMap> {
     // Init an existing data instance with data from another one
@@ -39,9 +39,9 @@ class TileMap private constructor(
     // Cleanup data instance manually
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
-        gridWidth = 0
-        gridHeight = 0
-        gridSize = 0
+        tileMapWidth = 0
+        tileMapHeight = 0
+        tileSize = 0
         clusterList.fill("undefined")
     }
 

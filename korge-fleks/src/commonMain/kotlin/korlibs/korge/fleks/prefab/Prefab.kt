@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.WorldChunk.Companion.WorldChunkComponent
 import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig
 import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig.Companion.MessagePassingConfigComponent
 import korlibs.korge.fleks.prefab.data.LevelData
@@ -24,16 +25,9 @@ class SystemRuntimeConfigs {
     fun getCameraPosition(world: World): Position? =
         if (camera != null) world.run { camera!![PositionComponent] } else null
 
+    fun getCameraChunk(world: World): Int =
+        if (camera != null) world.run { camera!![WorldChunkComponent].chunk } else 0
+
     fun getMessagePassingConfig(world: World): MessagePassingConfig? =
         if (messagePassing != null) world.run { messagePassing!![MessagePassingConfigComponent] } else null
-}
-
-
-// TODO this we need to refactor when we implement new level loading mechanism
-@ThreadLocal
-object Prefab {
-    private val noLevelData = LevelData()
-    // This is loaded in the AssetStore as part of LEVEL data assets
-    var levelName: String = ""  // name of the current level - needed for hot-reloading of level map data from LDtk tile map
-    var levelData: LevelData = noLevelData  // levels with chunk data
 }

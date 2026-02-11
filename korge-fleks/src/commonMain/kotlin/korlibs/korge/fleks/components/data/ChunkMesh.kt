@@ -21,7 +21,10 @@ package korlibs.korge.fleks.components.data
  * @param clusterList List of asset cluster names which are needed to render the tile map. The cluster names are used to
  *        determine which tileset a tile is using.
  */
+// TODO check if we need this mapping from chunk asset info
 data class ChunkMesh(
+
+
     // Mesh data
     var chunkTop: ChunkMesh? = null,
     var chunkBottom: ChunkMesh? = null,
@@ -34,7 +37,9 @@ data class ChunkMesh(
     val listOfEntityNames: MutableList<String> = MutableList(64) { "" },
 
     // Level map data
-    val stackedTiles: List<MutableList<Int>> = List(4096) { MutableList(10) { -1 } },
+//    val stackedTiles: List<MutableList<Int>> = List(4096) { MutableList(10) { -1 } },
+    val layers: Map<String, List<MutableList<Int>>>,  // Map of layer name to stacked tile data for each layer
+
     var gridWidth: Int = 0,
     var gridHeight: Int = 0,
     var gridSize: Int = 0,

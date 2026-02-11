@@ -8,12 +8,14 @@ import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.*
 import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
+import korlibs.korge.fleks.assets.data.ChunkAssetInfo
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.SimpleTileSet
 import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
 import korlibs.korge.fleks.assets.data.UNKNOWN
 import korlibs.korge.fleks.components.data.TileMap
+import korlibs.korge.fleks.prefab.data.LevelData
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -63,6 +65,12 @@ class AssetStore {
     // tiles (tileset and tilemap) related assets
     internal val tileMaps: TileMapsAssetType = mutableMapOf()
     internal val tileSets: TileSetsAssetType = mutableMapOf()
+
+    val levelData = LevelData()
+
+    fun addWorldChunk(chunkIndex: Int, worldChunk: ChunkAssetInfo) {
+        levelData.chunkMeshes[chunkIndex] = worldChunk
+    }
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {
