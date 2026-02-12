@@ -42,30 +42,28 @@ class SimpleTileSet private constructor(
         val EMPTY = SimpleTileSet(arrayOf(), 0, 0)
 
         operator fun invoke(
-            tiles: Array<IntArray>,
+            tiles: List<List<Int>>,
             tilesetAtlases: List<BmpSlice>,
             tileWidth: Int,
             tileHeight: Int
-        ): SimpleTileSet {
-            return SimpleTileSet(
+        ): SimpleTileSet =
+            SimpleTileSet(
                 tilesArray = Array(tiles.size) { index ->
                     val tile = tiles[index]
                     val tilesetIndex = tile[0]
-                    val x = tile[1]
-                    val y = tile[2]
-                    // Put null if tile is empty (identified by x=0 and y=0)
-                    if (x == 0 && y == 0) null
+                    // If the first int in tile list is already -1, it means that the tile is empty and no further info is needed
+                    if (tilesetIndex == -1) null  // empty tiles are null
                     else {
-                        val slice = tilesetAtlases[tilesetIndex].slice(RectangleInt(x, y, tileWidth, tileHeight))
+                        val x = tile[1]
+                        val y = tile[2]
                         TileSetTileInfo(
                             id = index,
-                            slice = slice
+                            slice = tilesetAtlases[tilesetIndex].slice(RectangleInt(x, y, tileWidth, tileHeight))
                         )
                     }
                 },
                 width = tileWidth,
                 height = tileHeight
             )
-        }
     }
 }

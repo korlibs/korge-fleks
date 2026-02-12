@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets.data
 
+import korlibs.datastructure.IntList
 import korlibs.image.bitmap.BmpSlice
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -160,37 +161,13 @@ data class ClusterAssetInfo(
         @SerialName("w") val tileWidth: Int = 0,
         @SerialName("h") val tileHeight: Int = 0,
         // List of tileset names included in the tileset atlas
-        @SerialName("t") val tilesetNames: List<String> = emptyList(),
+        //@SerialName("t") val tilesetNames: List<String> = emptyList(),  // [Optional] enable for debugging purposes
         // textureIndex  - index to texture atlas where the tile is located
         // x             - x position in texture atlas
         // y             - y position in texture atlas
         // [frame index] - optional frame index for debugging
-        @SerialName("f") val frames: Array<IntArray> = emptyArray()
-    ) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other == null || this::class != other::class) return false
-
-            other as TilesInfo
-
-            if (tileWidth != other.tileWidth) return false
-            if (tileHeight != other.tileHeight) return false
-            if (name != other.name) return false
-            if (tilesetNames != other.tilesetNames) return false
-            if (!frames.contentDeepEquals(other.frames)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = tileWidth
-            result = 31 * result + tileHeight
-            result = 31 * result + name.hashCode()
-            result = 31 * result + tilesetNames.hashCode()
-            result = 31 * result + frames.contentDeepHashCode()
-            return result
-        }
-    }
+        @SerialName("f") val frames: List<List<Int>> = emptyList()
+    )
 
     @Serializable
     data class TileMapInfo(

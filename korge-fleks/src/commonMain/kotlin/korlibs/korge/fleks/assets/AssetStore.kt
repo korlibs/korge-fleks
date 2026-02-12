@@ -132,14 +132,14 @@ class AssetStore {
         // Keep track was loaded already to avoid reloading of assets which are already in memory.
         val clusterPath = world?.let { "${world}/${clusterName}" } ?: clusterName
         if (loadedClusterAssets.contains(clusterPath)) {
-            println("INFO: Asset cluster '$clusterPath' already loaded! No reload is happening!")
+            //println("INFO: Asset cluster '$clusterPath' already loaded! No reload is happening!")
             return
         } else {
             loadedClusterAssets.add(clusterPath)
         }
 
         val sw = Stopwatch().start()
-        println("INFO: AssetStore - Start loading asset cluster '$clusterPath'... ")
+        print("INFO: AssetStore - Start loading asset cluster '$clusterPath'... ")
 
 // TODO load sounds and music
 //            // Update maps of music, images, ...
@@ -161,7 +161,7 @@ class AssetStore {
         resourcesVfs["${clusterPath}/assets.json"].readKorgeFleksAssets(
             clusterName, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tileSets, tileMaps)
 
-        println("INFO: AssetStore - Resources loaded in ${sw.elapsed}")
+        println("- Resources loaded in ${sw.elapsed}")
 
         // TODO hot reloading needs rework!!!
         if (hotReloading) {
