@@ -11,7 +11,7 @@ import kotlin.math.ceil
 
 class PlatformerGroundChecker : GroundChecker() {
     private val grid = GridPosition()
-    private val level = inject<AssetStore>("AssetStore").levelData
+    private val level = inject<AssetStore>("AssetStore").worldMapData
 
     override fun onGround(
         cx: Int,

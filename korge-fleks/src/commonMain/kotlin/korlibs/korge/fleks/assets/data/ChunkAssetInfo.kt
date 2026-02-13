@@ -16,9 +16,15 @@ data class CommonChunkInfo(
     @SerialName("t") val tileSize: Int = 0      // in pixels
 )
 
+
+/**
+ *
+ * @param entitiesToBeSpawned List of entity names which shall be spawned automatically by the WorldChunkSystem.
+ */
 @Serializable
 data class ChunkAssetInfo(
     @SerialName("e") val entities: List<EntityConfig> = emptyList(),
+    @SerialName("s") val entitiesToBeSpawned: List<String> = emptyList(),
 
     @SerialName("x") val chunkX: Int,  // in grid coordinates
     @SerialName("y") val chunkY: Int,
@@ -31,8 +37,6 @@ data class ChunkAssetInfo(
     @SerialName("ls") val levelMaps: Map<String, TileMapInfo>
 ) {
     @Transient
-    lateinit var listOfEntityNames: List<String>
-    @Transient
     var chunkPositionX: Float = 0f  // in pixels
     @Transient
     var chunkPositionY: Float = 0f
@@ -41,9 +45,8 @@ data class ChunkAssetInfo(
     data class TileMapInfo(
         @SerialName("s") val speedFactor: Float,
         @SerialName("m") val stackedTileMapData: List<List<Int>> = emptyList(),  // Stacked tile map data for each world level chunk
-//        @SerialName("w") val gridWidth: Int = 0,  TODO check if we need this
-//        @SerialName("h") val gridHeight: Int = 0,
-//        @SerialName("t") val gridSize: Int = 0,
+        @SerialName("w") val tileMapWidth: Int = 0,  // Needed for background and foreground layers - those layers have different tile map sizes
+        @SerialName("h") val tileMapHeight: Int = 0,  // because they are scrolling with different speeds
 
         @SerialName("c") val clusterList: List<String> = emptyList()  // Needed by renderer for offsets of tilesets in clusters
     ) {

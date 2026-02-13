@@ -2,7 +2,7 @@ package korlibs.korge.fleks.familyHooks
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
-import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
+import korlibs.korge.fleks.systems.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 
 /**

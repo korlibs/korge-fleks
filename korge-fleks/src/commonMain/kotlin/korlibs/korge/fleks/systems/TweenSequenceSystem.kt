@@ -42,7 +42,6 @@ import korlibs.korge.fleks.components.messagePassing.data.RxMsg.Companion.rxMsg
 import korlibs.korge.fleks.components.messagePassing.tweens.TweenPublishMessage.Companion.createMsgPublishEntity
 import korlibs.korge.fleks.components.messagePassing.tweens.TweenSubscribeMessage
 import korlibs.korge.fleks.entity.EntityFactory
-import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.Easing
 

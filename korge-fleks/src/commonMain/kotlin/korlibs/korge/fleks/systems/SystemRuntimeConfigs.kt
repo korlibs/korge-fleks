@@ -1,12 +1,10 @@
-package korlibs.korge.fleks.prefab
+package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.components.Position
-import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.WorldMap
 import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig
-import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig.Companion.MessagePassingConfigComponent
-
 
 /**
  * This class holds runtime configuration data which can be used by various systems during the game loop.
@@ -18,10 +16,14 @@ import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig.Compan
 class SystemRuntimeConfigs {
     var camera: Entity? = null
     var messagePassing: Entity? = null
+    var worldChunk: Entity? = null
 
     fun getCameraPosition(world: World): Position? =
-        if (camera != null) world.run { camera!![PositionComponent] } else null
+        if (camera != null) world.run { camera!![Position.Companion.PositionComponent] } else null
 
     fun getMessagePassingConfig(world: World): MessagePassingConfig? =
-        if (messagePassing != null) world.run { messagePassing!![MessagePassingConfigComponent] } else null
+        if (messagePassing != null) world.run { messagePassing!![MessagePassingConfig.Companion.MessagePassingConfigComponent] } else null
+
+    fun getWorldChunkConfig(world: World): WorldMap? =
+        if (worldChunk != null) world.run { worldChunk!![WorldMap.Companion.WorldMapComponent] } else null
 }

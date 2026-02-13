@@ -14,7 +14,7 @@ class PlatformerCollisionChecker(
     private val debugPointPool: DebugPointPool
 ) : CollisionChecker() {
     private val grid = GridPosition()
-    private val level = inject<AssetStore>("AssetStore").levelData
+    private val level = inject<AssetStore>("AssetStore").worldMapData
 
     override fun checkXCollision(
         cx: Int,

@@ -21,7 +21,7 @@ import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
-import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
+import korlibs.korge.fleks.systems.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.render.*
@@ -191,7 +191,6 @@ class ObjectRenderSystem(
                 val clusterName = tileMap.clusterList[0]  // Tile map object has only one cluster
 
                 val tileMapWidth = tileMap.tileMapWidth
-//                val tileMapHeight = tileMap.tileMapHeight
                 val tileSize = tileMap.tileSize
 
                 // Draw only visible tiles

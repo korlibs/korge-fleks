@@ -4,14 +4,14 @@ import com.github.quillraven.fleks.WorldConfiguration
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.entity.config.registerCommonEntityConfigs
 import korlibs.korge.fleks.gameState.GameStateManager
-import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
+import korlibs.korge.fleks.systems.SystemRuntimeConfigs
 import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
 import korlibs.korge.fleks.systems.EntityLinkSystem
 import korlibs.korge.fleks.systems.MessagePassingSystem
 import korlibs.korge.fleks.systems.GameObjectStateSystem
 import korlibs.korge.fleks.systems.HealthMonitorSystem
-import korlibs.korge.fleks.systems.LevelChunkSystem
+import korlibs.korge.fleks.systems.WorldChunkSystem
 import korlibs.korge.fleks.systems.LifeCycleSystem
 import korlibs.korge.fleks.systems.ParallaxSystem
 import korlibs.korge.fleks.systems.PositionSystem
@@ -47,7 +47,7 @@ fun WorldConfiguration.addKorgeFleksSystems() {
     // The order of systems here also define the order in which the systems are called inside Fleks ECS
     systems {
         // Spawn new entities if we enter a new level chunk
-        add(LevelChunkSystem())
+        add(WorldChunkSystem())
 
         // Collision and player input systems
 //        add(PlatformerGravitySystem())

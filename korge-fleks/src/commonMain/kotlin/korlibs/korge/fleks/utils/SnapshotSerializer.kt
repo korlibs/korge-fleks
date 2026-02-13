@@ -17,7 +17,7 @@ import korlibs.korge.fleks.components.Gravity
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Info
 import korlibs.korge.fleks.components.Layer
-import korlibs.korge.fleks.components.LevelMap
+import korlibs.korge.fleks.components.WorldMap
 import korlibs.korge.fleks.components.LifeCycle
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.NinePatch
@@ -186,7 +186,7 @@ class SnapshotSerializer {
             subclass(Grid::class)
             subclass(Info::class)
             subclass(Layer::class)
-            subclass(LevelMap::class)
+            subclass(WorldMap::class)
             subclass(LifeCycle::class)
             subclass(MessagePassingConfig::class)
             subclass(Motion::class)

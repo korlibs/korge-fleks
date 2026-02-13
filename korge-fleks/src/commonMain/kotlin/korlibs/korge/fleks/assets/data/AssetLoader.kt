@@ -44,7 +44,7 @@ class AssetLoader(
         val build: Int = commonChunkInfo.version[2]
         // TODO Check later if asset version/build is compatible otherwise convert to new version
 
-        assetStore.levelData.init(
+        assetStore.worldMapData.init(
             worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth * commonChunkInfo.tileSize).toFloat(),
             worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.chunkHeight * commonChunkInfo.tileSize).toFloat(),
             levelChunkWidth = commonChunkInfo.chunkWidth,
@@ -75,8 +75,6 @@ class AssetLoader(
 
         println("- Resources loaded in ${sw.elapsed}")
 
-        // Create list of entity names for spawning entities in the chunk
-        chunkAssetInfo.listOfEntityNames = chunkAssetInfo.entities.map { it.name }
         // Create list of tile sets for each level map in the chunk - this is needed for the renderer to get the correct tile set objects for rendering the tile maps of the chunk.
         chunkAssetInfo.levelMaps.forEach { (_, layer) ->
             // Load cluster assets for the tile map of the chunk if it was not loaded already

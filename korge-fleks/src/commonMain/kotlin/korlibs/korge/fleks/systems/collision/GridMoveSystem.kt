@@ -33,7 +33,7 @@ class GridMoveSystem : IteratingSystem(
 ) {
     val assetStore = world.inject<AssetStore>("AssetStore")
 
-    private val levelData = assetStore.levelData
+    private val levelData = assetStore.worldMapData
 
     var collisionChecker: CollisionChecker = PlatformerCollisionChecker(world.inject<DebugPointPool>("DebugPointPool"))
     var collisionResolver: CollisionResolver = PlatformerCollisionResolver()

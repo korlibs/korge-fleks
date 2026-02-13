@@ -1,8 +1,7 @@
-package korlibs.korge.fleks.prefab.data
+package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
-import korlibs.korge.fleks.assets.data.ChunkAssetInfo
 
 /**
  * Data class for storing world chunks and entities for a game world.
@@ -10,19 +9,18 @@ import korlibs.korge.fleks.assets.data.ChunkAssetInfo
  * We store the level data config in a 2D array depending on its gridvania position in the world
  * Then later we will spawn the entities depending on the level which the player is currently in
  */
-class LevelData {
+class WorldMapData {
 
     // Size of a level inside the grid vania array in tiles (all levels have the same size; in tiles)
-    var levelChunkWidth: Int = 0
+    var levelChunkWidth: Int = 0  // Size of world chunk in grid cells
         private set
     var levelChunkHeight: Int = 0
         private set
-    var worldWidth: Float = 0f  // Size of whole world in pixels
+    var worldWidth: Float = 0f  // Size of whole world in grid cells
         private set
     var worldHeight: Float = 0f
         private set
-    // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
-    var tileSize: Int = 0
+    var tileSize: Int = 0  // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
         private set
 
     internal val chunkMeshes: MutableMap<Int, ChunkAssetInfo> = mutableMapOf()
@@ -45,7 +43,7 @@ class LevelData {
         this.tileSize = tileSize
 
         // Set up grid-vania array
-        levelGridVania = IntArray2(levelChunkWidth, levelChunkHeight) { -1 }
+        levelGridVania = IntArray2.Companion(levelChunkWidth, levelChunkHeight) { -1 }
     }
 
     /**
@@ -53,6 +51,8 @@ class LevelData {
      */
     fun hasCollision(cx: Int, cy: Int): Boolean {
 /*
+                    val collisionMask = tile shr 16  //
+
         // Get the chunk coordinates in the levelGridvainia array
         val gridCx = cx / levelGridWidth
         val gridCy = cy / levelGridHeight
@@ -74,8 +74,11 @@ class LevelData {
     /**
      * Iterate over all entities within the chunk, where the camera is currently located, and all
      * adjacent chunks. Call the callback function for each entity config.
+     *
+     * @param viewPortMiddlePosX Horizontal position of view port in world grid cells
+     * @param viewPortMiddlePosY Vertical position of view port in world grid cells
      */
-    fun forEachEntityInChunk(viewPortMiddlePosX: Int, viewPortMiddlePosY: Int, levelChunkConfig: ChunkArray2, callback: (String) -> Unit) {
+    fun forEachEntityInChunk(viewPortMiddlePosX: Int, viewPortMiddlePosY: Int, activatedChunks: MutableSet<Int>, callback: (String) -> Unit) {
         // Calculate the grid position of the view port middle position
         val gridX: Int = viewPortMiddlePosX / levelChunkWidth
         val gridY: Int = viewPortMiddlePosY / levelChunkHeight
@@ -120,18 +123,22 @@ class LevelData {
             }
         }
 
-// TODO
-//        for( x in startGridX .. endGridX) {
-//            for (y in startGridY .. endGridY) {
-//                // Check if the chunk is already spawned
-//                if (levelGridVania.inside(x, y) && !levelChunkConfig[x, y].entitiesSpawned) {
-//                    levelChunkConfig[x, y].entitiesSpawned = true
-//                    levelGridVania[x, y].entityConfigNames?.forEach { entityConfigName ->
-//                        callback(entityConfigName)
-//                    }
-//                }
-//            }
-//        }
+        for(x in startGridX .. endGridX) {
+            for (y in startGridY .. endGridY) {
+                // Check if the chunk is already spawned
+                if (levelGridVania.inside(x, y)) {
+                    // Get chunk from levelGridVania at grid cell coordinates
+                    val chunk = levelGridVania[x, y]
+                    if (!activatedChunks.contains(chunk)) {
+                        activatedChunks.add(chunk)
+                        // Now spawn the entities by providing each name to the callback lambda
+                        chunkMeshes[chunk]?.entitiesToBeSpawned?.forEach { entityConfigName ->
+                            callback(entityConfigName)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -222,12 +229,7 @@ class LevelData {
         val chunkY = chunk.chunkY
         for (tx in xStart until xEnd) {
             for (ty in yStart until yEnd) {
-
-                // TODO remove later
-//                if (ty < 0 || tx < 0) return
-
                 val tiles = levelMap.stackedTileMapData[tx + ty * levelChunkWidth]
-
                 tiles.forEach { tile ->
                     val clusterIndex = tile and 0xf // Get bits 0-3 for cluster index
                     val tileIndex = tile shr 4  // Get bits 4-16 for tile index in tileset
@@ -243,6 +245,8 @@ class LevelData {
 
     private fun processCollisionTiles(gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (Int, Float, Float) -> Unit) {
 /*
+                    val collisionMask = tile shr 16  //
+
         levelGridVania[gridX, gridY].collisionMap?.let { collisionMap ->
             for (tx in xStart until xEnd) {
                 for (ty in yStart until yEnd) {

@@ -12,9 +12,9 @@ import korlibs.korge.fleks.assets.data.ChunkAssetInfo
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.SimpleTileSet
-import korlibs.korge.fleks.assets.data.readKorgeFleksAssets
+import korlibs.korge.fleks.assets.data.readKorgeFleksClusterAssetJson
 import korlibs.korge.fleks.assets.data.UNKNOWN
-import korlibs.korge.fleks.prefab.data.LevelData
+import korlibs.korge.fleks.assets.data.WorldMapData
 import korlibs.time.Stopwatch
 import kotlin.collections.set
 
@@ -65,11 +65,11 @@ class AssetStore {
     internal val tileMaps: TileMapsAssetType = mutableMapOf()
     internal val tileSets: TileSetsAssetType = mutableMapOf()
 
-    val levelData = LevelData()
+    val worldMapData = WorldMapData()
 
     fun addWorldChunk(chunkIndex: Int, worldChunk: ChunkAssetInfo) {
-        levelData.chunkMeshes[chunkIndex] = worldChunk
-        levelData.levelGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex
+        worldMapData.chunkMeshes[chunkIndex] = worldChunk
+        worldMapData.levelGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex
     }
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
@@ -157,7 +157,7 @@ class AssetStore {
 //                }
 //            }
 
-        resourcesVfs["${clusterPath}/assets.json"].readKorgeFleksAssets(
+        resourcesVfs["${clusterPath}/assets.json"].readKorgeFleksClusterAssetJson(
             clusterName, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tileSets, tileMaps)
 
         println("- Resources loaded in ${sw.elapsed}")
@@ -171,9 +171,9 @@ class AssetStore {
     }
 
     /**
-     * Remove all assets which have a specific given [AssetType].
+     * Remove all assets which have a specific given [AssetType] string.
      */
-    private fun removeAssets(clusterName: AssetType) {
+    private fun removeAssets(clusterName: String) {
         sounds.values.removeAll { it.first == clusterName }
 
         textures.values.removeAll { it.first == clusterName }

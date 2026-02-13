@@ -5,7 +5,6 @@ import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
 import korlibs.korge.fleks.components.messagePassing.PublishMessages.Companion.PublishMessagesComponent
 import korlibs.korge.fleks.components.messagePassing.data.ListOfRxMsg.Companion.cleanupAt
-import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.utils.*
 
 

@@ -7,7 +7,6 @@ import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
-import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 
@@ -27,8 +26,8 @@ class CameraSystem(
 
     override fun onTickEntity(entity: Entity) {
         // Load world size from level data (always)
-        val worldWidth: Float = assetStore.levelData.worldWidth
-        val worldHeight: Float = assetStore.levelData.worldHeight
+        val worldWidth: Float = assetStore.worldMapData.worldWidth
+        val worldHeight: Float = assetStore.worldMapData.worldHeight
 
         // Get main camera position or exit if it does not exist
         val cameraPosition = systemRuntimeConfigs.getCameraPosition(world) ?: return

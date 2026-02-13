@@ -1,12 +1,10 @@
 package korlibs.korge.fleks.assets
 
-import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.AssetType
 import korlibs.korge.fleks.assets.data.UNKNOWN
 import korlibs.platform.Platform
-import kotlinx.coroutines.*
 import kotlin.coroutines.*
 import kotlin.native.concurrent.*
 
@@ -22,7 +20,7 @@ annotation class AssetReloadCfgMarker
  */
 @AssetReloadCfgMarker
 class AssetUpdaterConfiguration(
-    internal var assetFolder: AssetType,
+    internal var assetFolder: String,
     internal var toBeEnabled: Boolean = false,
     internal var enabled: Boolean = false,
     internal val imageChangedCallback: MutableList<() -> Unit> = mutableListOf(),
@@ -61,7 +59,7 @@ class ResourceDirWatcherConfiguration(
 //        specialAssetUpdater.apply(callback)
     }
 
-    fun addAssetWatcher(type: AssetType, callback: AssetUpdaterConfiguration.() -> Unit) {
+    fun addAssetWatcher(type: String, callback: AssetUpdaterConfiguration.() -> Unit) {
         when(type) {
             "common" -> {
                 commonAssetUpdater.toBeEnabled = true
@@ -158,13 +156,13 @@ class ResourceDirWatcherConfiguration(
 //        }
     }
 
-    private fun reloadLdtkWorld(assetStore: AssetStore, fileName: String, levelName: String, assetUpdater: AssetUpdaterConfiguration, assetConfig: AssetModel, assetReloadContext: CoroutineContext) {
-        reloading = true  // save that reloading is in progress
-        print("Reloading ${assetConfig.folder + "/" + fileName}... ")
-        launchImmediately(context = assetReloadContext) {
-            // Give LDtk more time to finish writing the files
-            delay(500)
-
+//    private fun reloadLdtkWorld(assetStore: AssetStore, fileName: String, levelName: String, assetUpdater: AssetUpdaterConfiguration, assetConfig: AssetModel, assetReloadContext: CoroutineContext) {
+//        reloading = true  // save that reloading is in progress
+//        print("Reloading ${assetConfig.folder + "/" + fileName}... ")
+//        launchImmediately(context = assetReloadContext) {
+//            // Give LDtk more time to finish writing the files
+//            delay(500)
+//
 // TODO            val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + fileName].readLdtkWorld()
 //            //println("\nTriggering asset change for LDtk: $fileName")
 //
@@ -177,14 +175,14 @@ class ResourceDirWatcherConfiguration(
 //                    assetStore.tileMaps[ldtkLevel.identifier] = Pair(assetUpdater.type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
 //                }
 //            }
-
-            // Guard period until reloading is activated again - this is used for debouncing watch messages
-            delay(100)
-            reloading = false
-            println("Finished")
-            assetUpdater.ldtkLevelMapCallback.forEach { it.invoke() }
-        }
-    }
+//
+//            // Guard period until reloading is activated again - this is used for debouncing watch messages
+//            delay(100)
+//            reloading = false
+//            println("Finished")
+//            assetUpdater.ldtkLevelMapCallback.forEach { it.invoke() }
+//        }
+//    }
 
     @ThreadLocal
     companion object {

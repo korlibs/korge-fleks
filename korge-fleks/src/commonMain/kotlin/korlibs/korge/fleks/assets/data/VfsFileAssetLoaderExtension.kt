@@ -28,7 +28,7 @@ import kotlin.collections.set
 import kotlin.math.absoluteValue
 
 
-suspend fun VfsFile.readKorgeFleksAssets(
+suspend fun VfsFile.readKorgeFleksClusterAssetJson(
     clusterName: String,
     textures: SpriteFramesAssetType,
     ninePatchSlices: NinePatchBmpSlicesAssetType,
@@ -179,29 +179,6 @@ suspend fun VfsFile.readKorgeFleksAssets(
             error("readKorgeFleksAssets - tile map '${name}' has more than 4096 chunks which is currently not supported!")
 
         tileMaps[name] = Pair(clusterName, tileMapInfo)
-/*
-        val chunkLevelMap = tileMap {
-            tileMapInfo.stackedTileMapData.forEachIndexed { idx, tiles ->
-                tiles.forEachIndexed { stackIdx, tile ->
-                    if (tile != -1) stackedTiles[idx][stackIdx] = tile
-                    else {
-                        // Mark end of tile stack with -1 in the tile map data
-                        stackedTiles[idx][stackIdx] = -1
-                        return@forEachIndexed
-                    }
-                }
-            }
-
-            tileMapInfo.clusterList.forEachIndexed { idx, name ->
-                clusterList[idx] = name
-            }
-
-            tileMapWidth = tileMapInfo.tileMapWidth
-            tileMapHeight = tileMapInfo.tileMapWidth
-            tileSize = tileMapInfo.tileSize
-        }
-        tileMaps[name] = Pair(clusterName, chunkLevelMap)
-*/
     }
 }
 

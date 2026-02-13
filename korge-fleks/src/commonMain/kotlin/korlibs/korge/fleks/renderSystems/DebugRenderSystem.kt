@@ -6,7 +6,7 @@ import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
-import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
+import korlibs.korge.fleks.components.WorldMap.Companion.WorldMapComponent
 import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -16,7 +16,7 @@ import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.logic.collision.GridPosition
-import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
+import korlibs.korge.fleks.systems.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
@@ -33,7 +33,7 @@ class DebugRenderSystem(
     private val family: Family = world.family {
         all(layerTag)
             .any(layerTag, PositionComponent, CollisionComponent, SpriteComponent, TextFieldComponent,
-                NinePatchComponent, LevelMapComponent, GridComponent, DebugCollisionShapesComponent)
+                NinePatchComponent, WorldMapComponent, GridComponent, DebugCollisionShapesComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
@@ -44,7 +44,7 @@ class DebugRenderSystem(
     private val grid = GridPosition()
 //    private val debugPointPool = world.inject<DebugPointPool>("DebugPointPool")
 
-    private val levelData = world.inject<AssetStore>("AssetStore").levelData
+    private val levelData = world.inject<AssetStore>("AssetStore").worldMapData
 
     override fun render(ctx: RenderContext) {
         // Get main camera position or exit if it does not exist
@@ -172,7 +172,7 @@ class DebugRenderSystem(
                 }
 
 
-                if (entity has LevelMapComponent && entity has DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS) {
+                if (entity has WorldMapComponent && entity has DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS) {
                     val tileSize = levelData.tileSize
 
                     // Calculate viewport position in world coordinates from Camera position (x,y) + offset

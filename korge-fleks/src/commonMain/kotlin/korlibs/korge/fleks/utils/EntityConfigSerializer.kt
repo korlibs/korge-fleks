@@ -73,7 +73,7 @@ class EntityConfigSerializer {
             subclass(RichTextConfig::class)
             subclass(ParallaxEffectConfig::class)
             subclass(LayeredSpriteConfig::class)
-            subclass(LevelMapConfig::class)
+            subclass(WorldMapConfig::class)
             subclass(MovedSpawnerObjectConfig::class)
             subclass(MainCameraConfig::class)
         }

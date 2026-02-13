@@ -6,7 +6,7 @@ import com.github.quillraven.fleks.componentTypeOf
 import korlibs.korge.fleks.components.messagePassing.data.ListOfRxMsg
 import korlibs.korge.fleks.components.messagePassing.data.ListOfRxMsg.Companion.listOfRxMsg
 import korlibs.korge.fleks.components.messagePassing.data.RxMsg
-import korlibs.korge.fleks.prefab.SystemRuntimeConfigs
+import korlibs.korge.fleks.systems.SystemRuntimeConfigs
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.PoolableComponent
