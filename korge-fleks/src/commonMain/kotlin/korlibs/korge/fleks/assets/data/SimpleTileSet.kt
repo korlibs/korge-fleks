@@ -7,18 +7,6 @@ import korlibs.image.tiles.TileShapeInfo
 import korlibs.math.geom.RectangleInt
 
 
-data class TileSetAnimationFrame(
-    val tileId: Int,
-    val duration: Float,
-)
-
-data class TileSetTileInfo(
-    val id: Int,  // Could be removed
-    val slice: BmpSlice,
-    val frames: List<TileSetAnimationFrame> = emptyList(),
-    val collision: TileShapeInfo? = null,
-)
-
 /**
  * A set of [BmpSlice] where all share a [width] and [height].
  * For performance’s sake, ideally, all the slices should be part of the same [Bitmap].
@@ -66,4 +54,16 @@ class SimpleTileSet private constructor(
                 height = tileHeight
             )
     }
+
+    data class TileSetAnimationFrame(
+        val tileId: Int,
+        val duration: Float,
+    )
+
+    data class TileSetTileInfo(
+        val id: Int,  // Could be removed
+        val slice: BmpSlice,
+        val frames: List<TileSetAnimationFrame> = emptyList(),
+        val collision: TileShapeInfo? = null,
+    )
 }

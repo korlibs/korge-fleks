@@ -2,7 +2,6 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.associateByInt
 import korlibs.datastructure.toIntMap
-import korlibs.image.atlas.Atlas
 import korlibs.image.bitmap.BmpSlice
 import korlibs.image.bitmap.NinePatchBmpSlice
 import korlibs.image.font.BitmapFont
@@ -21,7 +20,6 @@ import korlibs.korge.fleks.assets.TileSetsAssetType
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxPlane.*
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxLayer
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
-import korlibs.korge.fleks.components.data.TileMap.Companion.tileMap
 import korlibs.math.geom.RectangleInt
 import kotlinx.serialization.json.Json
 import kotlin.collections.component1
@@ -29,36 +27,6 @@ import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.math.absoluteValue
 
-
-/**
- * Iterate through all atlas entries and execute the given action for each entry
- * that starts with the given prefix. The action is provided with the entry and
- * the frameTag (entry name without prefix and animation index).
- */
-inline fun Iterable<Atlas.Entry>.forEachWith(prefix: String, action: (Atlas.Entry, String) -> Unit) {
-    val imagePrefixRegex = "^${prefix}".toRegex()
-    val frameTagRegex = "_\\d+$".toRegex()
-    for (entry in this) {
-        if (imagePrefixRegex.containsMatchIn(entry.name)) {
-            val imageName = entry.name.replace(imagePrefixRegex, "")
-            val frameTag = if (frameTagRegex.containsMatchIn(imageName)) {
-                imageName.replace(frameTagRegex, "")
-            } else imageName
-            action(entry, frameTag)
-        }
-    }
-}
-
-inline fun Iterable<Atlas.Entry>.forEach (action: (Atlas.Entry, String) -> Unit) {
-    val frameTagRegex = "_\\d+$".toRegex()
-    for (entry in this) {
-        val imageName = entry.name
-        val frameTag = if (frameTagRegex.containsMatchIn(imageName)) {
-            imageName.replace(frameTagRegex, "")
-        } else imageName
-        action(entry, frameTag)
-    }
-}
 
 suspend fun VfsFile.readKorgeFleksAssets(
     clusterName: String,
@@ -210,6 +178,8 @@ suspend fun VfsFile.readKorgeFleksAssets(
         if (tileMapInfo.stackedTileMapData.size > 4096)
             error("readKorgeFleksAssets - tile map '${name}' has more than 4096 chunks which is currently not supported!")
 
+        tileMaps[name] = Pair(clusterName, tileMapInfo)
+/*
         val chunkLevelMap = tileMap {
             tileMapInfo.stackedTileMapData.forEachIndexed { idx, tiles ->
                 tiles.forEachIndexed { stackIdx, tile ->
@@ -231,6 +201,7 @@ suspend fun VfsFile.readKorgeFleksAssets(
             tileSize = tileMapInfo.tileSize
         }
         tileMaps[name] = Pair(clusterName, chunkLevelMap)
+*/
     }
 }
 

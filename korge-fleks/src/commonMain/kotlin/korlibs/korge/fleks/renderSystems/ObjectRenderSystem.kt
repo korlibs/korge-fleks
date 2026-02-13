@@ -213,16 +213,14 @@ class ObjectRenderSystem(
                     val tileSet = assetStore.getTileSet(clusterName)
                     for (tx in xStart until xEnd) {
                         for (ty in yStart until yEnd) {
-                            val tiles = tileMap.stackedTiles[tx + ty * tileMapWidth]
+                            val tiles = tileMap.stackedTileMapData[tx + ty * tileMapWidth]
                             val px = (tx * tileSize) - tileMapPosX
                             val py = (ty * tileSize) - tileMapPosY
                             // Render all stacked tiles in the tile map
                             tiles.forEach { tile ->
                                 if (tile != -1) {
-                                    // Get bits 4-16 for tile position in the tileset atlas
-
-                                    // TODO check this
-                                    val tileIndex = tile shr 4
+                                    // ClusterIndex not needed (bits 0-3) because tile map object uses tile set from same cluster
+                                    val tileIndex = tile shr 4  // Get bits 4-16 for tile position in the tileset atlas
                                     tileSet[tileIndex]?.let { bmpSlice ->
                                         batch.drawQuad(
                                             tex = ctx.getTex(bmpSlice),

@@ -224,7 +224,7 @@ class LevelData {
             for (ty in yStart until yEnd) {
 
                 // TODO remove later
-                if (ty < 0 || tx < 0) return
+//                if (ty < 0 || tx < 0) return
 
                 val tiles = levelMap.stackedTileMapData[tx + ty * levelChunkWidth]
 
@@ -239,24 +239,6 @@ class LevelData {
                 }
             }
         }
-
-        // TODO
-/*
-            for (l in 0 until tileMap.maxLevel) {
-                for (tx in xStart until xEnd) {
-                    for (ty in yStart until yEnd) {
-                        val tile = tileMap[tx, ty, l]
-                        val tileInfo = tileSet.getInfo(tile.tile)
-                        if (tileInfo != null) {
-                            val px = (tx * tileWidth) + tile.offsetX + (gridX * levelWidth * tileWidth)
-                            val py = (ty * tileHeight) + tile.offsetY + (gridY * levelHeight * tileHeight)
-                            renderCall(tileInfo.slice, px.toFloat(), py.toFloat())
-                        }
-                    }
-                }
-            }
-        }
-*/
     }
 
     private fun processCollisionTiles(gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (Int, Float, Float) -> Unit) {
