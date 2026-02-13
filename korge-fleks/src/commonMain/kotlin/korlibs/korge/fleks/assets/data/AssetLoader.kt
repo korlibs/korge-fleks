@@ -45,8 +45,8 @@ class AssetLoader(
         // TODO Check later if asset version/build is compatible otherwise convert to new version
 
         assetStore.levelData.init(
-            worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth).toFloat(),
-            worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.gridVaniaHeight).toFloat(),
+            worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth * commonChunkInfo.tileSize).toFloat(),
+            worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.chunkHeight * commonChunkInfo.tileSize).toFloat(),
             levelChunkWidth = commonChunkInfo.chunkWidth,
             levelChunkHeight = commonChunkInfo.chunkHeight,
             tileSize = commonChunkInfo.tileSize

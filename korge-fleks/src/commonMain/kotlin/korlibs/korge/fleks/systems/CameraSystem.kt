@@ -25,10 +25,11 @@ class CameraSystem(
     private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
     private val parallaxFamily = world.family { all(ParallaxComponent, PositionComponent, MotionComponent) }
 
-    var worldWidth: Float = assetStore.levelData.worldWidth
-    var worldHeight: Float = assetStore.levelData.worldHeight
-
     override fun onTickEntity(entity: Entity) {
+        // Load world size from level data (always)
+        val worldWidth: Float = assetStore.levelData.worldWidth
+        val worldHeight: Float = assetStore.levelData.worldHeight
+
         // Get main camera position or exit if it does not exist
         val cameraPosition = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
@@ -36,7 +37,7 @@ class CameraSystem(
         val followPosition = entity[PositionComponent]
 
         val lastCameraPosX = cameraPosition.x
-        //val lastCameraPosY = cameraPosition.y
+        val lastCameraPosY = cameraPosition.y
 
         // Calculate the difference between the camera and the entity to follow
         val xDiff = followPosition.x - cameraPosition.x
@@ -61,7 +62,7 @@ class CameraSystem(
 
         // Move parallax layers if camera moves
         val cameraDistX = cameraPosition.x - lastCameraPosX
-        //val cameraDistY = cameraPosition.y - lastCameraPosY
+        val cameraDistY = cameraPosition.y - lastCameraPosY
 
         parallaxFamily.forEach { parallaxEntity ->
             val motion = parallaxEntity[MotionComponent]
@@ -83,7 +84,7 @@ class CameraSystem(
             // Get the global position of the parallax layer in screen coordinates
             val parallaxVerticalLength = AppConfig.VIEW_PORT_HEIGHT - parallaxHeight
             position.y = ratio * parallaxVerticalLength
-//            println("parallax y: $position.y")
+            //println("parallax y: ${position.y}")
         }
     }
 }

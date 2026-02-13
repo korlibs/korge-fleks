@@ -14,13 +14,16 @@ class LevelData {
 
     // Size of a level inside the grid vania array in tiles (all levels have the same size; in tiles)
     var levelChunkWidth: Int = 0
+        private set
     var levelChunkHeight: Int = 0
-
+        private set
     var worldWidth: Float = 0f  // Size of whole world in pixels
+        private set
     var worldHeight: Float = 0f
-
+        private set
     // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
     var tileSize: Int = 0
+        private set
 
     internal val chunkMeshes: MutableMap<Int, ChunkAssetInfo> = mutableMapOf()
     internal lateinit var levelGridVania: IntArray2
