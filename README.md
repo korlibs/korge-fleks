@@ -2,7 +2,7 @@
 
 This is the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) (ECS) integration for KorGE Game Engine.
 
-KorGE-Fleks is not just a simple wrapper around Fleks ECS but a specialized implementation containing a lot additional
+KorGE-Fleks is not just a simple wrapper around Fleks ECS but a specialized implementation containing a lot of additional
 useful stuff around an ECS for the KorGE Game Engine. Korge-fleks is dedicated to 2D platformer games. It is developed in
 the open with the hope that it will be useful for others, too.
 
@@ -180,7 +180,7 @@ KorGe-Fleks provides basic entity configuration objects and functions to easily 
 # Set up a new Game with KorGE-Fleks
 
 As a clean start the [KorGE-Fleks Hello World](https://github.com/korlibs/korge-fleks-hello-world) repository can be used.
-It contains the kproject and gradle setup to use Fleks, KorGE and KorGE addons _KorGE-Fleks and KorGE-LDtk in a project.
+It contains the kproject and gradle setup to use KorGe, Fleks and _KorGE-Fleks_ addon in a project.
 
 In detail the project setup looks like that:
 
@@ -270,12 +270,12 @@ dependencies:
 
 # Updating KorGE-Fleks to newer versions
 
-KorGE-Fleks depends on specific versions of KorGE, KorGE-Ldtk addon and Fleks ECS.
+Korge-Fleks depends on specific versions of KorGE and Fleks ECS.
 
 The current versions which are working together can be seen at the top of this readme in section
 "Supported Versions".
 
-KorGE, Fleks ECS and all KorGE Addon versions need to be updated in following places:
+KorGE and Fleks ECS need to be updated in following places:
 
 ## KorGE version
 
