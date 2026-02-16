@@ -1,5 +1,8 @@
 # Korge-fleks
 
+[![Build Main](https://img.shields.io/github/actions/workflow/status/korlibs/korge-fleks/gradle.yml?branch=main)](https://github.com/korlibs/korge-fleks/actions)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/korlibs/korge-fleks/blob/master/LICENSE)
+
 This is the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) (ECS) integration for Korge Game Engine.
 
 Korge-fleks is not just a simple wrapper around Fleks ECS but a specialized implementation containing a lot of additional
