@@ -2,12 +2,15 @@ package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
+import korlibs.korge.fleks.components.Position
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
-import korlibs.korge.view.*
-import korlibs.math.geom.*
 
 
 /**
@@ -18,18 +21,18 @@ import korlibs.math.geom.*
  * of an Aseprite file and ignored additional layers. Also, it does not sort the entities before rendering them.
  * This should be used for explosion and dust effects where the order of drawn textures is not significant.
  */
-inline fun Container.fastSpriteRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker FastSpriteRenderSystem.() -> Unit = {}) =
-    FastSpriteRenderSystem(world, layerTag).addTo(this, callback)
+
 
 class FastSpriteRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag
-) : View() {
-    private val family: Family
+) : RenderSystem {
+    private val family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent).none(LayerComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
+    private val position: Position = staticPositionComponent {}
 
-    override fun renderInternal(ctx: RenderContext) {
-        val camera: Entity = world.getMainCamera()
+    override fun render(ctx: RenderContext) {
+        val camera: Entity = world.getMainCameraOrNull() ?: return
 
         // Custom Render Code here
         ctx.useBatcher { batch ->
@@ -38,40 +41,27 @@ class FastSpriteRenderSystem(
             family.forEach { entity ->
                 val entityPosition = entity[PositionComponent]
 
-                val position: PositionComponent = if (entity has ScreenCoordinatesTag) {
-                    // Take over entity coordinates
-                    entityPosition
-                } else {
+                // Take over entity position
+                position.init(entityPosition)
+
+                if (entity hasNo ScreenCoordinatesTag) {
                     // Transform world coordinates to screen coordinates
-                    entityPosition.run {  world.convertToScreenCoordinates(camera) }
+                    position.run { world.convertToScreenCoordinates(camera) }
                 }
 
-                val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
-                val (rgba) = entity[RgbaComponent]
-                val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
-
-                // Just take the first layer of an Aseprite image file
-                val texture = imageFrame.first ?: return@forEach
+                val spriteComponent = entity[SpriteComponent]
+                val rgba = entity[RgbaComponent].rgba
+                val texture = assetStore.getSpriteTexture(spriteComponent.name)[spriteComponent.frameIndex]
 
                 batch.drawQuad(
-                    tex = ctx.getTex(texture.slice),
-                    x = position.x + texture.targetX - anchorX,
-                    y = position.y + texture.targetY - anchorY,
+                    tex = ctx.getTex(texture.bmpSlice),
+                    x = position.x + texture.targetX - spriteComponent.anchorX,
+                    y = position.y + texture.targetY - spriteComponent.anchorY,
                     filtering = false,
                     colorMul = rgba,
                     program = null
                 )
             }
         }
-    }
-
-    // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
-    }
-
-    init {
-        name = layerTag.toString()
-        family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent) }
     }
 }

@@ -1,11 +1,12 @@
 package korlibs.korge.fleks.assets
 
+import korlibs.korge.fleks.assets.data.ParallaxConfig
 import kotlinx.serialization.*
 
 
 /**
  * Asset model contains run time configuration for loading assets for the game.
- * This config could be also loaded later from YAML files.
+ * This config can be also loaded from YAML files.
  *
  * Hint: Make sure to use only basic types (Integer, String, Boolean).
  */
@@ -13,24 +14,58 @@ import kotlinx.serialization.*
 data class AssetModel(
     val folder: String = "",
     val hotReloading: Boolean = false,
-    val sounds: Map<String, String> = mapOf(),
-    val backgrounds: Map<String, ParallaxConfig> = mapOf(),
-    val images: Map<String, ImageDataConfig> = mapOf(),
-    val fonts: Map<String, String> = mapOf(),
+
+    val sounds: List<SoundConfig> = listOf(),
+    val textureAtlas: List<TextureConfig> = listOf(),
     val tileMaps: List<TileMapConfig> = listOf()
 ) {
-    @Serializable @SerialName("ImageDataConfig")
-    data class ImageDataConfig(
-        val fileName: String = "",
-        val layers: String? = null
+
+    @Serializable
+    @SerialName("soundConfig")
+    data class SoundConfig(
+        val name: String,
+        val fileName: String
     )
 
-    @Serializable @SerialName("TileMapConfig")
+    @Serializable
+    @SerialName("TileMapConfig")
     data class TileMapConfig(
+        val name: String,
         val fileName: String,
-        val levels: String? = null,
-        // Set this to "false" if this tile map is used outside the game world
-        // e.g. in intro without the need to dynamically control the parallax layer)
-        val hasParallax: Boolean = true
+        val collisionLayerName: String = "",  // Default is empty string - no collision layer or specific layer name for a tile map
     )
+
+    @Serializable
+    @SerialName("TextureConfig")
+    data class TextureConfig(
+        val fileName: String,
+        val frameDurations: Map<String, FrameDurationConfig> = mapOf(),
+        val nineSlices: Map<String, NineSlice> = mapOf(),
+        val fonts: List<String> = listOf(),
+        val parallaxBackgrounds: Map<String, ParallaxConfig> = mapOf(),
+        val tilesets: List<TilesetConfig> = listOf()
+    ) {
+        @Serializable
+        @SerialName("FrameDurationConfig")
+        data class FrameDurationConfig(
+            val default: Int = 0,          // default duration in milliseconds for all frames of the animation
+            val custom: List<Int>? = null  // [optional] custom frame duration in milliseconds for each frame of the animation
+        )
+
+        @Serializable
+        @SerialName("NineSlice")
+        data class NineSlice(
+            val x: Int,
+            val y: Int,
+            val width: Int,
+            val height: Int
+        )
+
+        @Serializable
+        @SerialName("TilesetConfig")
+        data class TilesetConfig(
+            val name: String,
+            val size: Int
+        )
+    }
 }

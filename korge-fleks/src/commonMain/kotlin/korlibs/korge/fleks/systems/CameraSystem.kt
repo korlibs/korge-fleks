@@ -2,9 +2,9 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.World.Companion.inject
-import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
+import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
 
@@ -12,21 +12,20 @@ import korlibs.korge.fleks.utils.*
 class CameraSystem(
     private val worldToPixelRatio: Float
 ) : IteratingSystem(
-    family = family { all(CameraFollowTag) },
+    family = family { all(CameraFollowTag, PositionComponent) },
     interval = EachFrame
 ) {
     private val worldToPixelRatioInv = 1f / worldToPixelRatio
     private val factor = 0.05f
 
-    private val assetStore: AssetStore = inject<AssetStore>("AssetStore")
+    private val parallaxFamily = world.family { all(ParallaxComponent, MotionComponent) }
 
-    // TODO how to get current world name?
-    private val worldHeight: Float = assetStore.getWorldData("").height
-    private val worldWidth: Float = assetStore.getWorldData("").width
+    // These properties need to be set by the entityConfigure function of the level map config
+    var worldHeight: Float = 0f
+    var worldWidth: Float = 0f
 
-    // These properties need to be set by the onAdd hook function of the ParallaxComponent
+    // This property needs to be set by the onAdd hook function of the ParallaxComponent
     var parallaxHeight: Float = 0f
-    var parallaxOffset: Float = 0f
 
     override fun onTickEntity(entity: Entity) {
 
@@ -64,10 +63,12 @@ class CameraSystem(
         val cameraDistX = cameraPosition.x - lastCameraPosX
         //val cameraDistY = cameraPosition.y - lastCameraPosY
 
-        val parallaxFamily = world.family { all(ParallaxComponent, MotionComponent) }
         parallaxFamily.forEach { parallaxEntity ->
             val motion = parallaxEntity[MotionComponent]
             val position = parallaxEntity[PositionComponent]
+
+            // Debugging parallax position at the end of the intro
+            //println("parallax y: ${position.y}")
 
             // Convert pixel distance of camera movement in the level to horizontal velocity for parallax layers
             val distanceInWorldUnits = cameraDistX * worldToPixelRatioInv  // (distance in pixel) / (world to pixel ratio)
@@ -79,9 +80,7 @@ class CameraSystem(
 
             // Get the global position of the parallax layer in screen coordinates
             val parallaxVerticalLength = AppConfig.VIEW_PORT_HEIGHT - parallaxHeight
-            val parallaxVerticalPosition = ratio * parallaxVerticalLength
-
-            position.y = parallaxVerticalPosition - parallaxOffset
+            position.y = ratio * parallaxVerticalLength
 //            println("parallax y: $position.y")
         }
     }

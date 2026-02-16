@@ -2,20 +2,18 @@ package korlibs.korge.fleks.renderSystems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
-import korlibs.event.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
+import korlibs.korge.fleks.components.LevelMap.Companion.LevelMapComponent
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.input.*
 import korlibs.korge.render.*
 import korlibs.korge.view.*
-import korlibs.math.*
 import korlibs.math.geom.*
 
-
-inline fun Container.levelMapRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker LevelMapRenderSystem.() -> Unit = {}) =
-    LevelMapRenderSystem(world, layerTag).addTo(this, callback)
 
 /**
  * RenderSystem to render level maps. It uses the [LevelMapComponent] to determine which level maps should be rendered
@@ -31,14 +29,12 @@ inline fun Container.levelMapRenderSystem(world: World, layerTag: RenderLayerTag
 class LevelMapRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag,
-    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
-) : View() {
+    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
+) : RenderSystem {
     private val family: Family = world.family { all(layerTag, LayerComponent, LevelMapComponent) }
 
-    private val assetStore: AssetStore = world.inject(name = "AssetStore")
-
-    override fun renderInternal(ctx: RenderContext) {
-        val camera: Entity = world.getMainCamera()
+    override fun render(ctx: RenderContext) {
+        val camera: Entity = world.getMainCameraOrNull() ?: return
         val cameraPosition = with(world) { camera[PositionComponent] }
 
         // Sort level maps by their layerIndex
@@ -46,27 +42,26 @@ class LevelMapRenderSystem(
 
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
-            val (rgba) = entity[RgbaComponent]
-            val (levelName, layerNames) = entity[LevelMapComponent]
-            val worldData = assetStore.getWorldData(levelName)
-            val tileSize = worldData.gridSize
+            val rgba = entity[RgbaComponent].rgba
+            val levelMap = entity[LevelMapComponent]
+            val worldData = Prefab.levelData ?: return@forEach
+            val tileSize = worldData.tileSize
 
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
             val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
             val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
 
-            layerNames.forEach { layerName ->
-                val levelMap = worldData.getLevelMap(layerName)
+            // Start and end indexes of viewport area (in tile coordinates)
+            val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
+            val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
 
-                // Start and end indexes of viewport area (in tile coordinates)
-                val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
-                val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
+            val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
+            val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
 
-                val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
-                val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
-
+            levelMap.layerNames.forEach { layerName ->
                 ctx.useBatcher { batch ->
-                    levelMap.forEachTile(xStart, yStart, xTiles, yTiles, worldData.levelWidth, worldData.levelHeight) { slice, px, py ->
+                    // Iterate over all tiles in the visible area of the view port
+                    worldData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
                         batch.drawQuad(
                             tex = ctx.getTex(slice),
                             x = px - viewPortPosX,
@@ -79,14 +74,5 @@ class LevelMapRenderSystem(
                 }
             }
         }
-    }
-
-    // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
-    }
-
-    init {
-        name = layerTag.toString()
     }
 }

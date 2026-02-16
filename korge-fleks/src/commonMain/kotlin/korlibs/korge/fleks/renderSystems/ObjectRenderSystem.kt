@@ -3,140 +3,138 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
 import korlibs.datastructure.iterators.*
+import korlibs.graphics.shader.Program
 import korlibs.image.bitmap.*
+import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
 import korlibs.image.font.*
 import korlibs.image.text.*
+import korlibs.korge.blend.BlendMode
 import korlibs.korge.annotations.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.*
+import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
+import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
+import korlibs.korge.fleks.components.Position
+import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
+import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
+import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
+import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
 import korlibs.korge.fleks.tags.*
-import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.utils.AppConfig
+import korlibs.korge.fleks.utils.getMainCameraOrNull
 import korlibs.korge.render.*
-import korlibs.korge.view.*
 import korlibs.math.geom.*
 
 
+interface RenderSystem {
+    fun render(ctx: RenderContext)
+}
+
 /**
- * Creates a new [ObjectRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
- * receiver "this".
+ * A [ObjectRenderSystem] extending [RenderSystem] is responsible for rendering all entities which have a [PositionComponent],
+ * [LayerComponent] and [RgbaComponent] and one of the following components:
+ * - [SpriteComponent]
+ * - [TextFieldComponent]
+ * - [SpriteLayersComponent]
+ * - [NinePatchComponent]
+ * - [TileMapComponent]
+ * This system is used to render all game objects which are not part of the level map or parallax background.
  *
- * HINT: This renderer is preliminary and does not use caching of geometry or vertices. It might be replaced by
- * renderers from KorGE 6.
+ * HINT: This renderer does not use caching of geometry or vertices.
  */
-inline fun Container.objectRenderSystem(world: World, layerTag: RenderLayerTag, callback: @ViewDslMarker ObjectRenderSystem.() -> Unit = {}) =
-    ObjectRenderSystem(world, layerTag).addTo(this, callback)
 
 class ObjectRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag,
-    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].layerIndex.compareTo(entB[LayerComponent].layerIndex) }
-) : View() {
+    private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
+) : RenderSystem {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
-        .any(PositionComponent, LayerComponent, SpriteComponent, LayeredSpriteComponent, TextFieldComponent, SpriteLayersComponent, NinePatchComponent)
+        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent,
+            NinePatchComponent, TileMapComponent) //, ParallaxLayerComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
+    private val position: Position = staticPositionComponent {}
 
     @OptIn(KorgeExperimental::class)
-    override fun renderInternal(ctx: RenderContext) {
-        val camera: Entity = world.getMainCamera()
+    override fun render(ctx: RenderContext) {
+        val camera: Entity = world.getMainCameraOrNull() ?: return
 
         // Sort sprite and text entities by their layerIndex
         family.sort(comparator)
 
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
-            val (rgba) = entity[RgbaComponent]
+            val rgba = entity[RgbaComponent].rgba
             val entityPosition = entity[PositionComponent]
 
-            val position: PositionComponent = if (entity has ScreenCoordinatesTag) {
-                // Take over entity coordinates
-                entityPosition
-            } else {
+            // Take over entity position
+            position.init(entityPosition)
+
+            if (entity hasNo ScreenCoordinatesTag) {
                 // Transform world coordinates to screen coordinates
-                entityPosition.run {  world.convertToScreenCoordinates(camera) }
+                position.run { world.convertToScreenCoordinates(camera) }
             }
 
             // Rendering path for sprites
-            if (entity has SpriteComponent) {
-                val (name, anchorX, anchorY, animation, frameIndex) = entity[SpriteComponent]
-                val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
-
-                if (entity has SpriteLayersComponent) {
-                    val (layerMap) = entity[SpriteLayersComponent]
-                    ctx.useBatcher { batch ->
-                        // Iterate over all layers of each sprite for the frame number
-                        imageFrame.layerData.fastForEach { layerData ->
-                            val layerName = layerData.layer.name ?: ""
-
-                            layerMap[layerName]?.let { layerProps ->
-
-                                batch.drawQuad(
-                                    tex = ctx.getTex(layerData.slice),
-                                    x = position.x + layerData.targetX - anchorX + layerProps.offsetX,
-                                    y = position.y + layerData.targetY - anchorY + layerProps.offsetY,
-                                    filtering = false,
-                                    colorMul = layerProps.rgba,
-                                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    ctx.useBatcher { batch ->
-                        // Iterate over all layers of each sprite for the frame number
-                        imageFrame.layerData.fastForEach { layerData ->
-                            val px = position.x + position.offsetX + layerData.targetX - anchorX
-                            val py = position.y + position.offsetY + layerData.targetY - anchorY
-                            batch.drawQuad(
-                                tex = ctx.getTex(layerData.slice),
-                                x = px,
-                                y = py,
-                                filtering = false,
-                                colorMul = rgba,
-                                program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                            )
-                        }
-                    }
-                }
-            }
-            else if (entity has LayeredSpriteComponent) {
-                val (name, anchorX, anchorY, animation, frameIndex, _, _, _, _, _, _, layerList) = entity[LayeredSpriteComponent]
-                val imageFrame = assetStore.getImageFrame(name, animation, frameIndex)
+            if (entity has SpriteComponent && entity[SpriteComponent].visible) {
+                val spriteComponent = entity[SpriteComponent]
+                val sprite = assetStore.getSpriteTexture(spriteComponent.name)
+                val texture = sprite[spriteComponent.frameIndex]
 
                 ctx.useBatcher { batch ->
-                    // Iterate over all layers of each sprite for the frame number
-                    layerList.fastForEachWithIndex { index, layer ->
-                        // Get image data for specific layer from asset store
-                        val image = imageFrame.layerData[index]
-                        batch.drawQuad(
-                            tex = ctx.getTex(image.slice),
-                            x = position.x + image.targetX - anchorX + layer.position.x + layer.position.offsetX,
-                            y = position.y + image.targetY - anchorY + layer.position.y + layer.position.offsetY,
+                    val px = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.anchorX
+                    val py = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.anchorY
+                    if (spriteComponent.flipX) {
+                        batch.drawQuadFlippedX(  // mirror texture horizontally
+                            tex = ctx.getTex(texture.bmpSlice),
+                            x = px,
+                            y = py,
                             filtering = false,
-                            colorMul = layer.rgba.rgba,
+                            colorMul = rgba,
                             program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                        )
+                    } else {
+                        batch.drawQuad(
+                            tex = ctx.getTex(texture.bmpSlice),
+                            x = px,
+                            y = py,
+                            filtering = false,
+                            colorMul = rgba,
+                            program = null
                         )
                     }
                 }
             }
             // Rendering path for text (not optimized - no caching)
             else if (entity has TextFieldComponent) {
-                val (text, fontName, textRangeStart, textRangeEnd, width, height, wordWrap,  horizontalAlign, verticalAlign) = entity[TextFieldComponent]
-                val offset: Point = Point(position.offsetX, position.offsetY)
+                val textFieldComponent = entity[TextFieldComponent]
+                val offset = Point(position.offsetX, position.offsetY)
 
-                renderCtx2d(ctx) { render ->
+                ctx.useCtx2d { render ->  //context ->
+//                    context.keep {
+//                        context.size = Size(this@renderCtx2d.width, this@renderCtx2d.height)
+//                        context.blendMode = renderBlendMode
+//                        context.multiplyColor = renderColorMul
+//                        context.setMatrix(globalMatrix)
+//                        block(context)
+//                    }
+
+//                renderCtx2d(ctx) { render ->
                     var n = 0
                     RichTextData(
-                        text = text,
-                        font = assetStore.getFont(fontName)
+                        text = textFieldComponent.text,
+                        font = assetStore.getFont(textFieldComponent.fontName)
                     ).place(
-                        bounds = Rectangle(position.x, position.y, width, height),
-                        wordWrap = wordWrap,
+                        bounds = Rectangle(position.x, position.y, textFieldComponent.width, textFieldComponent.height),
+                        wordWrap = textFieldComponent.wordWrap,
                         includePartialLines = false,
                         ellipsis = null,
                         fill = null,
                         stroke = null,
-                        align = TextAlignment(horizontalAlign, verticalAlign),
+                        align = TextAlignment(textFieldComponent.horizontalAlign, textFieldComponent.verticalAlign),
                         includeFirstLineAlways = true
                     ).fastForEach {
                         render.drawText(
@@ -146,8 +144,8 @@ class ObjectRenderSystem(
                             it.pos + offset,
                             color = rgba,
                             baseline = true,
-                            textRangeStart = textRangeStart - n,
-                            textRangeEnd = textRangeEnd - n,
+                            textRangeStart = textFieldComponent.textRangeStart - n,
+                            textRangeEnd = textFieldComponent.textRangeEnd - n,
                             filtering = false,
                         )
                         n += it.text.length
@@ -156,14 +154,14 @@ class ObjectRenderSystem(
             }
             // Rendering path for 9-patch graphic (not optimized - no caching)
             else if (entity has NinePatchComponent) {
-                val (name, width, height) = entity[NinePatchComponent]
-                val ninePatch = assetStore.getNinePatch(name)
+                val ninePatchComponent = entity[NinePatchComponent]
+                val ninePatch = assetStore.getNinePatchSlice(ninePatchComponent.name)
 
                 val numQuads = ninePatch.info.totalSegments
                 val indices = TexturedVertexArray.quadIndices(numQuads)
                 val tva = TexturedVertexArray(numQuads * 4, indices)
                 var index = 0
-                val viewBounds = RectangleInt(position.x.toInt(), position.y.toInt(), width.toInt(), height.toInt())
+                val viewBounds = RectangleInt(position.x.toInt(), position.y.toInt(), ninePatchComponent.width.toInt(), ninePatchComponent.height.toInt())
                 ninePatch.info.computeScale(viewBounds) { segment, xx, yy, ww, hh ->
                     val bmpSlice = ninePatch.getSegmentBmpSlice(segment)
                     tva.quad(index++ * 4,
@@ -174,18 +172,101 @@ class ObjectRenderSystem(
                 }
 
                 ctx.useBatcher { batch ->
-                    batch.drawVertices(tva, ctx.getTex(ninePatch.content.bmp), smoothing = false, blendMode)
+                    batch.drawVertices(tva, ctx.getTex(ninePatch.content.bmp), smoothing = false, BlendMode.NORMAL)
+                }
+            }
+            else if (entity has TileMapComponent) {
+                val tileMapComponent = entity[TileMapComponent]
+
+                tileMapComponent.layerNames.forEach { layerName ->
+                    val tileMap = assetStore.getTileMapData(tileMapComponent.levelName).getTileMapLayer(layerName)
+
+                    val tileSet = tileMap.tileSet
+                    val gridWidth = tileSet.width
+                    val gridHeight = tileSet.height
+                    val offsetScale = tileMap.offsetScale
+
+                    // Draw only visible tiles
+                    val tileMapPosX: Float = position.x + position.offsetX
+                    val tileMapPosY: Float = position.y + position.offsetY
+
+                    // Start and end indexes of viewport area
+                    val xStart: Int = tileMapPosX.toInt() / gridWidth - 1  // x in positive direction;  -1 = start one tile before
+                    val xTiles = AppConfig.VIEW_PORT_WIDTH / gridWidth + 3
+                    val xEnd: Int = xStart + xTiles
+
+                    val yStart: Int = tileMapPosY.toInt() / gridHeight - 1  // y in negative direction;  -1 = start one tile before
+                    val yTiles = AppConfig.VIEW_PORT_HEIGHT / gridHeight + 3
+                    val yEnd: Int = yStart + yTiles
+
+                    ctx.useBatcher { batch ->
+                        for (l in 0 until tileMap.maxLevel) {  // Render all stacked tiles in the tile map
+                            for (tx in xStart until xEnd) {
+                                for (ty in yStart until yEnd) {
+                                    val tile = tileMap[tx, ty, l]
+                                    val info = tileSet.getInfo(tile.tile)
+                                    if (info != null) {
+                                        val px = (tx * gridWidth) + (tile.offsetX * offsetScale) - tileMapPosX
+                                        val py = (ty * gridHeight) + (tile.offsetY * offsetScale) - tileMapPosY
+
+                                        batch.drawQuad(
+                                            tex = ctx.getTex(info.slice),
+                                            x = px,
+                                            y = py,
+                                            filtering = false,
+                                            colorMul = rgba,
+                                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-
-    // Set size of render view to display size
-    override fun getLocalBoundsInternal(): Rectangle = with (world) {
-        return Rectangle(0, 0, AppConfig.VIEW_PORT_WIDTH, AppConfig.VIEW_PORT_HEIGHT)
-    }
-
-    init {
-        name = layerTag.toString()
-    }
 }
+
+/**
+ * Draws a textured [tex] quad at [x], [y] with size [width]x[height] and flipped in X direction.
+ *
+ * It uses [m] transform matrix, an optional [filtering] and [colorMul], [blendMode] and [program] as state for drawing it.
+ *
+ * Note: To draw solid quads, you can use [Bitmaps.white] + [AgBitmapTextureManager] as texture and the [colorMul] as quad color.
+ */
+fun BatchBuilder2D.drawQuadFlippedX(
+    tex: TextureCoords,
+    x: Float,
+    y: Float,
+    width: Float = tex.width.toFloat(),
+    height: Float = tex.height.toFloat(),
+    m: Matrix = Matrix.IDENTITY,
+    filtering: Boolean = true,
+    colorMul: RGBA = Colors.WHITE,
+    blendMode: BlendMode = BlendMode.NORMAL,
+    program: Program? = null
+) {
+    setStateFast(tex.base, filtering, blendMode, program, icount = 6, vcount = 4)
+    drawQuadFlippedXFast(x, y, width, height, m, tex, colorMul)
+}
+
+fun BatchBuilder2D.drawQuadFlippedXFast(
+    x: Float, y: Float, width: Float, height: Float,
+    m: Matrix,
+    tex: BmpCoords,
+    colorMul: RGBA,
+) {
+    val x0 = (x + width)
+    val x1 = x
+    val y0 = y
+    val y1 = (y + height)
+    drawQuadFast(
+        m.transformX(x0, y0), m.transformY(x0, y0),
+        m.transformX(x1, y0), m.transformY(x1, y0),
+        m.transformX(x1, y1), m.transformY(x1, y1),
+        m.transformX(x0, y1), m.transformY(x0, y1),
+        tex, colorMul,
+    )
+}
+

@@ -1,62 +1,93 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
+import korlibs.korge.fleks.components.TweenSequence.Companion.tweenSequenceComponent
+import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity.Companion.deleteEntity
+import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens
+import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens.Companion.parallelTweens
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity.Companion.spawnEntity
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
+import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence.Companion.spawnNewTweenSequence
+import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition.Companion.tweenPosition
+import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba.Companion.tweenRgba
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSound.Companion.tweenSound
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSpawner.Companion.tweenSpawner
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite.Companion.tweenSprite
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchLayerVisibility.Companion.tweenSwitchLayerVisibility
+import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.EntityFactory
-import korlibs.korge.fleks.components.TweenSequenceComponent.*
+import korlibs.korge.fleks.gameState.GameStateManager
+import korlibs.korge.fleks.utils.Pool
+import korlibs.korge.fleks.utils.addKorgeFleksInjectables
+import korlibs.korge.fleks.utils.createEntity
 import korlibs.math.interpolation.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
 internal class TweenSequenceComponentTest {
+//*
+private val assetStore = AssetStore().also { it.testing = true }
+    private val gameState = GameStateManager()
 
-    private val expectedWorld = configureWorld {}
-    private val recreatedWorld = configureWorld {}
+    private val expectedWorld = configureWorld {
+        addKorgeFleksInjectables(assetStore, gameState)
+    }
+    private val recreatedWorld = configureWorld {
+        addKorgeFleksInjectables(assetStore, gameState)
+    }
+
+    @Test
+    fun testTweenSequenceComponentSnapshotting() {
+        println("TEST CASE: testTweenSequenceComponentSnapshotting")
+        // TODO
+    }
 
     @Test
     fun testTweenSequenceComponentSerialization() {
+        println("TEST CASE: testTweenSequenceComponentSerialization")
 
         val testEntityConfig = TestEntityConfig("testEntityConfig")
 
-        val compUnderTest = TweenSequenceComponent(
-            tweens = listOf(
-                SpawnNewTweenSequence(
-                    tweens = listOf(
-                        ParallelTweens(
-                            tweens = listOf(
-                                SpawnEntity(
-                                    entityConfig = testEntityConfig.name,
-                                    x = 10.2f,
-                                    y = 20.3f,
-                                    entity = Entity(43, 0u)
-                                ),
-                                DeleteEntity(entity = Entity(44, 0u)),
-                                TweenRgba(entity = Entity(45, 0u)),
-                                TweenPosition(entity = Entity(46, 0u)),
-                                TweenSprite(entity = Entity(48, 0u)),
-                                TweenSwitchLayerVisibility(entity = Entity(49, 0u)),
-                                TweenSpawner(entity = Entity(51, 0u)),
-                                TweenSound(entity = Entity(52, 0u))
-                            ),
-                            delay = 1.2f,
-                            duration = 3.4f,
-                            easing = Easing.EASE_CLAMP_END
-                        )
-                    ),
-                    delay = 1f,
-                    duration = 2f,
-                    easing = Easing.EASE_IN_BACK
-                ),
-                Wait(duration = 3.2f)
-            ),
-//            index = 42,
-            timeProgress = 3.4f,
-            waitTime = 5.6f,
-            executed = true
-        )
+        val compUnderTest = tweenSequenceComponent {
+            spawnNewTweenSequence {
+                delay = 1f
+                duration = 2f
+                easing = Easing.EASE_IN_BACK
 
-        val entity = expectedWorld.entity {
-            it += compUnderTest
+                parallelTweens {
+                    delay = 1.2f
+                    duration = 3.4f
+                    easing = Easing.EASE_CLAMP_END
+
+                    spawnEntity {
+                        entityConfig = testEntityConfig.name
+                        x = 10.2f
+                        y = 20.3f
+                        target = Entity(43, 0u)
+                    }
+                    deleteEntity { target = Entity(44, 0u) }
+                    tweenRgba { target = Entity(45, 0u) }
+                    tweenPosition { target = Entity(46, 0u) }
+                    tweenSprite { target = Entity(48, 0u) }
+                    tweenSwitchLayerVisibility { target = Entity(49, 0u) }
+                    tweenSpawner { target = Entity(51, 0u) }
+                    tweenSound { target = Entity(52, 0u) }
+                }
+            }
+            wait { duration = 3.2f }
+
+            index = 1
+            timeProgress = 3.4f
+            waitTime = 5.6f
+            executed = true
+        }
+
+        val entity = expectedWorld.createEntity(aName = "testEntity") {
+            it += compUnderTest  // Hint: Do not pass this component to more than one entity otherwise the component will be freed twice!
         }
 
         CommonTestEnv.serializeDeserialize(expectedWorld, recreatedWorld)
@@ -84,8 +115,14 @@ internal class TweenSequenceComponentTest {
         assertEquals(spawnEntity.entityConfig, newSpawnEntity.entityConfig, "spawnEntity.entityConfig' property to be equal")
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")
-        assertEquals(spawnEntity.entity, newSpawnEntity.entity, "Check 'spawnEntity.entity' property to be equal")
-        val spawnedEntity = EntityFactory.configure(spawnEntity.entityConfig, recreatedWorld, Entity.NONE)
+        assertEquals(spawnEntity.target, newSpawnEntity.target, "Check 'spawnEntity.target' property to be equal")
+        val spawnedEntity = EntityFactory.createAndConfigureEntity(expectedWorld, spawnEntity.entityConfig)
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
+
+        // Delete the entity with the component from the expected world -> put component back to the pool
+        expectedWorld.removeAll()
+
+        Pool.doPoolUsageCheckAfterUnloading()
     }
+// */
 }

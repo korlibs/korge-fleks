@@ -4,7 +4,7 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.audio.sound.paused
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.components.SoundComponent
+import korlibs.korge.fleks.components.Sound.Companion.SoundComponent
 import korlibs.time.*
 
 /**

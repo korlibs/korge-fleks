@@ -1,13 +1,14 @@
 package korlibs.korge.fleks.assets
 
-import korlibs.datastructure.*
-import korlibs.image.font.*
-import korlibs.image.format.*
 import korlibs.io.async.launchImmediately
 import korlibs.io.file.*
 import korlibs.io.file.std.resourcesVfs
-import korlibs.korge.ldtk.view.*
+import korlibs.korge.fleks.assets.data.AssetType
+import korlibs.korge.fleks.assets.data.LayerTileMaps
+import korlibs.korge.fleks.assets.data.ldtk.readLdtkWorld
+import korlibs.korge.fleks.prefab.Prefab
 import kotlinx.coroutines.*
+import kotlin.collections.set
 import kotlin.coroutines.*
 import kotlin.native.concurrent.*
 
@@ -32,6 +33,7 @@ class AssetUpdaterConfiguration(
     internal val ldtkLevelMapCallback: MutableList<() -> Unit> = mutableListOf(),
  ) {
 
+    // To be used in View code from Korge objects
     fun onImageChanged(callback: () -> Unit) { imageChangedCallback += callback }
     fun onFontChanged(callback: () -> Unit) { fontChangedCallback += callback }
     fun onBackgroundChanged(callback: () -> Unit) { backgroundCallback += callback }
@@ -113,92 +115,73 @@ class ResourceDirWatcherConfiguration(
 
     private suspend fun checkAssetFolders(assetStore: AssetStore, file: VfsFile, assetUpdater: AssetUpdaterConfiguration, assetConfig: AssetModel, assetReloadContext: CoroutineContext) {
 
-        // TODO: Currently only fonts, sprite images and parallax images are reloaded
+        // TODO: Currently only fonts, sprite images, background (parallax images) and tile maps are reloaded
         //       -> Implement reloading also for other asset types
+// TODO clean up
+//        assetConfig.images.forEach { config ->
+//            if (file.fullName.contains(config.value.fileName) && !reloading) {
+//                reloading = true
+//                println("Reloading ${file.fullName}... ")
+//
+//                launchImmediately(context = assetReloadContext) {
+//                    delay(500)
+//                    val assetName = config.key
+//                    assetStore.images[assetName] = Pair(assetUpdater.type,
+//                        if (config.value.layers == null) {
+//                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
+//                        } else {
+//                            val props = ASE.toProps()
+//                            props.setExtra("layers", config.value.layers)
+//                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
+//                        }
+//                    )
+//
+//                    delay(100)
+//                    reloading = false
+//                    println("Finished")
+//                    assetUpdater.imageChangedCallback.forEach { it.invoke() }
+//                }
+//            }
+//        }
+//        assetConfig.tileMaps.forEach { config ->
+//            // Check if LDTK json file was modified
+//            if (file.fullName.contains(config.value.fileName) && !reloading) {
+//                reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
+//            }
+//            // Check if any tileset was modified
+//            config.value.tileSetPaths.forEach { path ->
+//                if (file.fullName.contains(path) && !reloading) {
+//                    reloadLdtkWorld(assetStore, config.value.fileName, config.key, assetUpdater, assetConfig, assetReloadContext)
+//                }
+//            }
+//        }
+    }
 
-        assetConfig.fonts.forEach { config ->
-            // Check filename
-            if (file.fullName.contains(config.value.removeSuffix(".fnt")) && !reloading) {
-                reloading = true  // save that reloading is in progress
-                println("Reloading ${assetConfig.folder}/${config.value} for changes in ${file.fullName} ... ")
+    private fun reloadLdtkWorld(assetStore: AssetStore, fileName: String, levelName: String, assetUpdater: AssetUpdaterConfiguration, assetConfig: AssetModel, assetReloadContext: CoroutineContext) {
+        reloading = true  // save that reloading is in progress
+        print("Reloading ${assetConfig.folder + "/" + fileName}... ")
+        launchImmediately(context = assetReloadContext) {
+            // Give LDtk more time to finish writing the files
+            delay(500)
 
-                launchImmediately(context = assetReloadContext) {
-                    delay(500)
-                    val assetName = config.key
-                    assetStore.fonts[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value].readBitmapFont(atlas = null))
-                }
+// TODO            val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + fileName].readLdtkWorld()
+//            //println("\nTriggering asset change for LDtk: $fileName")
+//
+//            // Check if the name of the level is the one for the level chunks
+//            if (Prefab.levelName == levelName) {
+//                assetStore.assetLevelDataLoader.reloadAllLevelChunks(ldtkWorld)
+//            } else {
+//                // Reload all levels from ldtk world file
+//                ldtkWorld.ldtk.levels.forEach { ldtkLevel ->
+//                    assetStore.tileMaps[ldtkLevel.identifier] = Pair(assetUpdater.type, LayerTileMaps(levelName, ldtkWorld, ldtkLevel))
+//                }
+//            }
 
-                delay(100)
-                reloading = false
-                println("Finished")
-                assetUpdater.fontChangedCallback.forEach { it.invoke() }
-            }
-        }
-        assetConfig.images.forEach { config ->
-            if (file.fullName.contains(config.value.fileName) && !reloading) {
-                reloading = true
-                println("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    delay(500)
-                    val assetName = config.key
-                    assetStore.images[assetName] = Pair(assetUpdater.type,
-                        if (config.value.layers == null) {
-                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(ASE.toProps(), atlas = null)
-                        } else {
-                            val props = ASE.toProps()
-                            props.setExtra("layers", config.value.layers)
-                            resourcesVfs[assetConfig.folder + "/" + config.value.fileName].readImageDataContainer(props, atlas = null)
-                        }
-                    )
-
-                    delay(100)
-                    reloading = false
-                    println("Finished")
-                    assetUpdater.imageChangedCallback.forEach { it.invoke() }
-                }
-            }
-        }
-        assetConfig.backgrounds.forEach { config ->
-            if (file.fullName.contains(config.value.aseName) && !reloading) {
-                reloading = true  // save that reloading is in progress
-                println("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    // Give aseprite more time to finish writing the files
-                    delay(100)
-                    val assetName = config.key
-                    assetStore.backgrounds[assetName] = Pair(assetUpdater.type, resourcesVfs[assetConfig.folder + "/" + config.value.aseName].readParallaxDataContainer(config.value, ASE, atlas = null))
-
-                    println("\nTriggering asset change for: $assetName")
-                    // Guard period until reloading is activated again - this is used for debouncing watch messages
-                    delay(100)
-                    reloading = false
-                    println("Finished")
-                    assetUpdater.backgroundCallback.forEach { it.invoke() }
-                }
-            }
-        }
-        assetConfig.tileMaps.forEach { config ->
-            if (file.fullName.contains(config.fileName) && !reloading) {
-                reloading = true  // save that reloading is in progress
-                println("Reloading ${file.fullName}... ")
-
-                launchImmediately(context = assetReloadContext) {
-                    // Give LDtk more time to finish writing the files
-                    delay(500)
-
-                    val ldtkWorld = resourcesVfs[assetConfig.folder + "/" + config.fileName].readLDTKWorld(extrude = true)
-                    println("\nTriggering asset change for LDtk: ${config.fileName}")
-                    assetStore.assetLevelData.reloadAsset(ldtkWorld)
-
-                    // Guard period until reloading is activated again - this is used for debouncing watch messages
-                    delay(100)
-                    reloading = false
-                    println("Finished")
-                    assetUpdater.ldtkLevelMapCallback.forEach { it.invoke() }
-                }
-            }
+            // Guard period until reloading is activated again - this is used for debouncing watch messages
+            delay(100)
+            reloading = false
+            println("Finished")
+            assetUpdater.ldtkLevelMapCallback.forEach { it.invoke() }
         }
     }
 
