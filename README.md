@@ -3,7 +3,7 @@
 This is the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) (ECS) integration for KorGE Game Engine.
 
 KorGE-Fleks is not just a simple wrapper around Fleks ECS but a specialized implementation containing a lot additional
-usefull stuff around an ECS for the KorGE Game Engine. Korge-fleks is dedicated to 2D platformer games. It is developed in
+useful stuff around an ECS for the KorGE Game Engine. Korge-fleks is dedicated to 2D platformer games. It is developed in
 the open with the hope that it will be useful for others, too.
 
 Together with the [korge-fleks-hello-world](https://github.com/korlibs/korge-fleks-hello-world) example it
@@ -22,7 +22,7 @@ Korge-fleks offers the following features for building a game on top of KorGE:
 - Serialization of Entities and Components
 - Snapshot system for saving and restoring the game state
 - Save and load game state (world snapshot) as JSON string
-- Pooling of Components and data class objects used by components to prevent GC (garbage colletion) on JVM platforms
+- Pooling of Components and data class objects used by components to prevent GC (garbage collection) on JVM platforms
   with tight memory constraints (like Android)
 
 ## Asset management
@@ -35,7 +35,7 @@ Korge-fleks offers the following features for building a game on top of KorGE:
 
 ## Game Object configuration
 - Entity configuration objects (blueprints) for easy setup of complex Game Objects
-- Game objects are build via invoking a factor function which use free-to-define input directly from LDtk level map editor
+- Game objects are build via invoking a factory function which use free-to-define input directly from LDtk level map editor
 
 ## Rendering systems
 - Game object renderer for sprites, sprite animations, text, 9-patches, tile set objects, etc.
@@ -98,7 +98,7 @@ to the Entities which needs those objects to implement various behavior like e.g
 reacting to touch input.
 
 Execution time of systems in Fleks is very static and thus predictable. On the other side the core of KorGE makes
-a lot of use of coroutines and asyncronous execution of object's behavior in update functions. KorGE-Fleks
+a lot of use of coroutines and asynchronous execution of object's behavior in update functions. KorGE-Fleks
 tries to hide this complexity in its systems.
  
 In the end the actual game code outside KorGE-Fleks is just specialized configuration (Entity config) and individual
@@ -156,7 +156,7 @@ configurable way.
 
 ## AssetStore
 
-AssetStore implements loading of typical game asses like graphics images, sounds, level maps, game object configs, etc.
+AssetStore implements loading of typical game assets like graphics images, sounds, level maps, game object configs, etc.
 It uses clusters of loadable sets of asset which can have different lifetime in the game:
 - Common assets (used throughout the life-cycle of the game)
 - World chunk assets (used only in specific sections of a world level map)
@@ -245,7 +245,7 @@ from Fleks need to be serializable for saving the game state the `serialization`
 ```yaml
 # Get an external source project from GitHub which does not contain a kproject.yml file
 # loading git tag release (or commit) from GitHub repo (https://github.com/Quillraven/Fleks)
-src: git::Quillraven/Fleks::/src::2.9
+src: git::Quillraven/Fleks::/src::2.12
 
 plugins:
     - serialization
@@ -266,31 +266,7 @@ dependencies:
 #  - ../../fleks
 #
     - maven::common::com.soywiz.korlibs.korge2:korge
-    - https://github.com/korlibs/korge-ldtk/tree/v1.0.3/korge-ldtk
-# Use local copy of KorGE addons
-#    - ../../korge-ldtk/korge-ldtk
 ```
-
-## `korge-ldtk/kproject.yml`
-
-This is the kproject config for KorGE-LDtk sources. It basically contains only the dependency
-of KorGE-LDtk to KorGE.
-
-```yaml
-name: "korge-ldtk"
-plugins:
-    - serialization
-dependencies:
-    - "maven::common::com.soywiz.korlibs.korge2:korge"
-```
-
-There is also a kproject files for the other KorGE-addons. They look basically the same as that one for
-`korge-ldtk` and therefore is omitted here.
-
-When changes are needed in one of the kproject libs above than it is possible to use a local copy of the
-corresponding git repo in the `modules` folder. E.g. for KorGE-LDtk the `src:` line with git details can be
-commented out and the `src:` line with local folder under `../../korge-ldtk/korge-ldtk` can be
-uncommented.
 
 # Updating KorGE-Fleks to newer versions
 
@@ -307,7 +283,7 @@ KorGE version needs to be updated in `gradle/libs.versions.toml`:
 
 ```toml
 [plugins]
-korge = { id = "com.soywiz.korge", version = "5.4.0" }
+korge = { id = "com.soywiz.korge", version = "6.x.x" }
 ```
 
 ## Fleks version
@@ -317,18 +293,6 @@ Fleks ECS version needs to be updated in the kproject file under `fleks/kproject
 ```yaml
 [...]
 src: git::Quillraven/Fleks::/src::2.x
-```
-
-## KorGE Addon versions
-
-All versions of additionally used KorGE addons (KorGE-LDtk) needs to be updated
-in KorGE-Fleks kproject file under `korge-fleks/kproject.yml`:
-
-```yaml
-[...]
-dependencies:
-[...]
-- https://github.com/korlibs/korge-ldtk/tree/v1.0.x/korge-ldtk
 ```
 
 # Examples
