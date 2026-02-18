@@ -3,14 +3,15 @@
 [![Build Main](https://img.shields.io/github/actions/workflow/status/korlibs/korge-fleks/gradle.yml?branch=main)](https://github.com/korlibs/korge-fleks/actions)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/korlibs/korge-fleks/blob/master/LICENSE)
 
-This is the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) (ECS) integration for Korge Game Engine.
+Korge-fleks is a Game Framework dedicated for building games by strictly separating game object configuration from its implementation.
+It uses the [Fleks Entity Components System](https://github.com/Quillraven/Fleks) (ECS) and integrates it on top of the Korge Game Engine.
 
 Korge-fleks is not just a simple wrapper around Fleks ECS but a specialized implementation containing a lot of additional
-useful stuff around an ECS for the Korge Game Engine. Korge-fleks is dedicated to 2D platformer games. It is developed in
+useful stuff around an ECS for the Korge Game Engine. Korge-fleks is (currently) dedicated to 2D platformer games. It is developed in
 the open with the hope that it will be useful for others, too.
 
 Together with the [korge-fleks-hello-world](https://github.com/korlibs/korge-fleks-hello-world) example it
-can be used as a starting point for a new (2D platformer) game project.
+can be used as a starting point for a new game project.
 
 Upstream project for Fleks ECS can be found here: <https://github.com/Quillraven/Fleks>
 
@@ -48,7 +49,7 @@ Korge-fleks offers the following features for building a game on top of Korge:
 - Debug rectangle renderer (texture bounds, collision shapes, etc.)
 
 ## Level map management
-- Support for building huge worlds of seamlessly connected levels from LDtk
+- Support for building huge worlds of seamlessly connected levels from LDtk level map editor
 - Automatic spawning and despawning of game objects depending on its position in relation to the camera viewport
 - Collision detection system for level maps (static) and game objects (dynamic)
 
