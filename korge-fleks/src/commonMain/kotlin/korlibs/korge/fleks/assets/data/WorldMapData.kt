@@ -231,8 +231,9 @@ class WorldMapData {
             for (ty in yStart until yEnd) {
                 val tiles = levelMap.stackedTileMapData[tx + ty * levelChunkWidth]
                 tiles.forEach { tile ->
-                    val clusterIndex = tile and 0xf // Get bits 0-3 for cluster index
-                    val tileIndex = tile shr 4  // Get bits 4-16 for tile index in tileset
+                    val clusterIndex = tile and 0xf          // Get bits 0-3 for cluster index
+                    val tileIndex = (tile and 0xffff0) shr 4  // Get bits 4-16 for tile index in tileset
+// TODO                    val collisionIndex = (tile and 0xff00000) shr 20  // Get bits 20-24 for collision index
                     levelMap.listOfTileSets[clusterIndex][tileIndex]?.let { bmpSlice ->
                         val px = (tx * tileSize) + (chunkX * levelWidth * tileSize)
                         val py = (ty * tileSize) + (chunkY * levelHeight * tileSize)
