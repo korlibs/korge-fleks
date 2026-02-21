@@ -4,14 +4,16 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.*
+import korlibs.korge.fleks.components.Info.Companion.InfoComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.utils.deleteViaLifeCycle
 import korlibs.math.*
+import kotlin.text.contains
 
 
 class SpriteSystem : IteratingSystem(
     family = family { all(SpriteComponent) },
-    interval = EachFrame
+    interval = Fixed(1 / 60f)
 ) {
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
 
@@ -57,6 +59,14 @@ class SpriteSystem : IteratingSystem(
                     }
                 }
 
+                // For DEBUGGING start of animations at different point in time
+                val infoComponent = entity[InfoComponent]
+                if (infoComponent.name.contains("whiteFireA")) {
+//                    println("whiteFireA: frameIndex=${spriteComponent.frameIndex}, nextFrameIn=${spriteComponent.nextFrameIn}, increment=${spriteComponent.increment}" )
+                }
+                if (infoComponent.name.contains("whiteFireB")) {
+//                    println("whiteFireB: frameIndex=${spriteComponent.frameIndex}, nextFrameIn=${spriteComponent.nextFrameIn}, increment=${spriteComponent.increment}" )
+                }
             }
         }
     }

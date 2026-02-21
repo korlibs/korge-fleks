@@ -2,6 +2,8 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import com.github.quillraven.fleks.World.Companion.inject
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -18,25 +20,23 @@ class CameraSystem(
     private val worldToPixelRatioInv = 1f / worldToPixelRatio
     private val factor = 0.05f
 
-    private val parallaxFamily = world.family { all(ParallaxComponent, MotionComponent) }
-
-    // These properties need to be set by the entityConfigure function of the level map config
-    var worldHeight: Float = 0f
-    var worldWidth: Float = 0f
-
-    // This property needs to be set by the onAdd hook function of the ParallaxComponent
-    var parallaxHeight: Float = 0f
+    private val assetStore = inject<AssetStore>("AssetStore")
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
+    private val parallaxFamily = world.family { all(ParallaxComponent, PositionComponent, MotionComponent) }
 
     override fun onTickEntity(entity: Entity) {
+        // Load world size from level data (always)
+        val worldWidth: Float = assetStore.worldMapData.worldWidth
+        val worldHeight: Float = assetStore.worldMapData.worldHeight
+
+        // Get main camera position or exit if it does not exist
+        val cameraPosition = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         // Set camera position to entity with "CameraFollowTag" component
         val followPosition = entity[PositionComponent]
 
-        val camera: Entity = world.getMainCamera()
-        val cameraPosition = camera[PositionComponent]
-
         val lastCameraPosX = cameraPosition.x
-        //val lastCameraPosY = cameraPosition.y
+        val lastCameraPosY = cameraPosition.y
 
         // Calculate the difference between the camera and the entity to follow
         val xDiff = followPosition.x - cameraPosition.x
@@ -61,11 +61,13 @@ class CameraSystem(
 
         // Move parallax layers if camera moves
         val cameraDistX = cameraPosition.x - lastCameraPosX
-        //val cameraDistY = cameraPosition.y - lastCameraPosY
+        val cameraDistY = cameraPosition.y - lastCameraPosY
 
         parallaxFamily.forEach { parallaxEntity ->
             val motion = parallaxEntity[MotionComponent]
             val position = parallaxEntity[PositionComponent]
+            val parallax = parallaxEntity[ParallaxComponent]
+            val parallaxHeight = assetStore.getParallaxLayers(parallax.name).height.toFloat()
 
             // Debugging parallax position at the end of the intro
             //println("parallax y: ${position.y}")
@@ -81,7 +83,7 @@ class CameraSystem(
             // Get the global position of the parallax layer in screen coordinates
             val parallaxVerticalLength = AppConfig.VIEW_PORT_HEIGHT - parallaxHeight
             position.y = ratio * parallaxVerticalLength
-//            println("parallax y: $position.y")
+            //println("parallax y: ${position.y}")
         }
     }
 }

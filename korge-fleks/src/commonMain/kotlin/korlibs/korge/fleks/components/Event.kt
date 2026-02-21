@@ -2,13 +2,14 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.fleks.systems.MessagePassingSystem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 /**
- * Component which is used to implement a publish-subscribe event/message passing system.
- * It is used by [EventSystem].
+ * Component which is used to implement a publish-subscribe message passing system.
+ * It is used by [MessagePassingSystem].
  *
  * Hint: Not yet used in KorGE-Fleks.
  *

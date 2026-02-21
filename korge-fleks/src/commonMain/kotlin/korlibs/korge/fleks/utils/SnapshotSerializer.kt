@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.image.text.*
+import korlibs.image.tiles.Tile
 import korlibs.io.lang.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Collision
@@ -16,7 +17,7 @@ import korlibs.korge.fleks.components.Gravity
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Info
 import korlibs.korge.fleks.components.Layer
-import korlibs.korge.fleks.components.LevelMap
+import korlibs.korge.fleks.components.WorldMap
 import korlibs.korge.fleks.components.LifeCycle
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.NinePatch
@@ -33,12 +34,13 @@ import korlibs.korge.fleks.components.State
 import korlibs.korge.fleks.components.Spawner
 import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.SpriteLayers
-import korlibs.korge.fleks.components.SwitchLayerVisibility
+import korlibs.korge.fleks.components.SwitchVisibility
 import korlibs.korge.fleks.components.TextField
 import korlibs.korge.fleks.components.TileMap
 import korlibs.korge.fleks.components.TouchInput
 import korlibs.korge.fleks.components.TweenProperty
 import korlibs.korge.fleks.components.TweenSequence
+import korlibs.korge.fleks.components.data.ListOfPoints
 import korlibs.korge.fleks.components.data.ParallaxPlane
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.components.data.SpriteLayer
@@ -47,8 +49,6 @@ import korlibs.korge.fleks.components.data.tweenSequence.ExecuteConfigFunction
 import korlibs.korge.fleks.components.data.tweenSequence.Jump
 import korlibs.korge.fleks.components.data.tweenSequence.LoopTweens
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens
-import korlibs.korge.fleks.components.data.tweenSequence.ResetEvent
-import korlibs.korge.fleks.components.data.tweenSequence.SendEvent
 import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity
 import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
 import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
@@ -58,13 +58,21 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSound
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSpawner
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite
-import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchLayerVisibility
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchVisibility
 import korlibs.korge.fleks.components.data.tweenSequence.TweenTextField
 import korlibs.korge.fleks.components.data.tweenSequence.TweenTouchInput
 import korlibs.korge.fleks.components.data.tweenSequence.Wait
+import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig
+import korlibs.korge.fleks.components.messagePassing.PublishMessages
+import korlibs.korge.fleks.components.messagePassing.data.ListOfRxMsg
+import korlibs.korge.fleks.components.messagePassing.data.RxMsg
+import korlibs.korge.fleks.components.messagePassing.data.TxMsg
+import korlibs.korge.fleks.components.messagePassing.tweens.TweenPublishMessage
+import korlibs.korge.fleks.components.messagePassing.tweens.TweenSubscribeMessage
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.tags.*
 import korlibs.math.interpolation.*
+import korlibs.number.toInt53
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -178,8 +186,9 @@ class SnapshotSerializer {
             subclass(Grid::class)
             subclass(Info::class)
             subclass(Layer::class)
-            subclass(LevelMap::class)
+            subclass(WorldMap::class)
             subclass(LifeCycle::class)
+            subclass(MessagePassingConfig::class)
             subclass(Motion::class)
             subclass(NinePatch::class)
             subclass(OffsetByFrameIndex::class)
@@ -187,6 +196,7 @@ class SnapshotSerializer {
             subclass(Platformer::class)
             subclass(PlayerInput::class)
             subclass(Position::class)
+            subclass(PublishMessages::class)
             subclass(Rgba::class)
             subclass(Rigidbody::class)
             subclass(Size::class)
@@ -195,7 +205,7 @@ class SnapshotSerializer {
             subclass(Spawner::class)
             subclass(Sprite::class)
             subclass(SpriteLayers::class)
-            subclass(SwitchLayerVisibility::class)
+            subclass(SwitchVisibility::class)
             subclass(TextField::class)
             subclass(TileMap::class)
             subclass(TouchInput::class)
@@ -205,8 +215,12 @@ class SnapshotSerializer {
 
         // Register data classes used in components
         polymorphic(Poolable::class) {
+            subclass(ListOfPoints::class)
+            subclass(ListOfRxMsg::class)
             subclass(Point::class)
+            subclass(RxMsg::class)
             subclass(SpriteLayer::class)
+            subclass(TxMsg::class)
             subclass(ParallaxPlane::class)
         }
 
@@ -217,17 +231,17 @@ class SnapshotSerializer {
             subclass(Jump::class)
             subclass(LoopTweens::class)
             subclass(ParallelTweens::class)
-            subclass(ResetEvent::class)
-            subclass(SendEvent::class)
             subclass(SpawnEntity::class)
             subclass(SpawnNewTweenSequence::class)
             subclass(TweenMotion::class)
             subclass(TweenPosition::class)
+            subclass(TweenPublishMessage::class)
             subclass(TweenRgba::class)
             subclass(TweenSound::class)
             subclass(TweenSpawner::class)
             subclass(TweenSprite::class)
-            subclass(TweenSwitchLayerVisibility::class)
+            subclass(TweenSubscribeMessage::class)
+            subclass(TweenSwitchVisibility::class)
             subclass(TweenTextField::class)
             subclass(TweenTouchInput::class)
             subclass(Wait::class)
@@ -243,16 +257,6 @@ class SnapshotSerializer {
             subclass(EmptyInitialized::class)
         }
     }
-}
-
-/**
- * A special serializer to prohibit serialization of FloatArray in Parallax plane config.
- * For some reason @EncodeDefault(NEVER) does not work.
- */
-object ParallaxSpeedFactors : KSerializer<FloatArray> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ParallaxSpeedFactors", PrimitiveKind.INT)
-    override fun serialize(encoder: Encoder, value: FloatArray) = encoder.encodeInt(0)
-    override fun deserialize(decoder: Decoder): FloatArray = floatArrayOf()
 }
 
 /**
@@ -290,6 +294,15 @@ object RGBAAsInt : KSerializer<RGBA> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("RGBAAsInt", PrimitiveKind.INT)
     override fun serialize(encoder: Encoder, value: RGBA) = encoder.encodeInt(value.value)
     override fun deserialize(decoder: Decoder): RGBA = RGBA(decoder.decodeInt())
+}
+
+/**
+ * A serializer strategy for Korge [Tile] type. The tile's raw Int53 representation is saved as integer number.
+ */
+object TileAsInt : KSerializer<Tile> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("TileAsInt", PrimitiveKind.INT)
+    override fun serialize(encoder: Encoder, value: Tile) = encoder.encodeInt(value.raw.toInt())
+    override fun deserialize(decoder: Decoder): Tile = Tile(raw = decoder.decodeInt().toInt53())
 }
 
 /**

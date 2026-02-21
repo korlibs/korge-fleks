@@ -16,8 +16,8 @@ data class MainCameraConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
 
         entity.configure {
-            // Camera has position within the game world
-            // Offset can be used to "shake" the camera on explosions etc.
+            // Camera has position within the game world relative to active chunk
+            // Offset of position component can be used to "shake" the camera on explosions etc.
             it += positionComponent {}
 
             // Camera has a tag to make it easily accessible for other systems and entity configurations

@@ -3,10 +3,10 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import korlibs.image.color.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.assets.data.ParallaxConfig
-import korlibs.korge.fleks.assets.data.ParallaxConfig.Mode.*
-import korlibs.korge.fleks.assets.data.ParallaxConfig.ParallaxLayerConfig
-import korlibs.korge.fleks.assets.data.ParallaxPlaneTextures
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxLayer
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxPlane.LineTexture
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.Mode
+import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.Mode.*
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -39,30 +39,29 @@ class ParallaxRenderSystem(
             family.forEach { entity ->
                 val globalPositionComponent = entity[PositionComponent]
                 val parallaxComponent = entity[ParallaxComponent]
-                val parallaxConfig = assetStore.getParallaxConfig(parallaxComponent.name)
+                val parallaxConfig = assetStore.getParallaxLayers(parallaxComponent.name)
 
                 // Draw all background parallax layers
-                parallaxComponent.bgLayerEntities.forEach { (layerName, layerEntity) ->
-                    val layerTexture = assetStore.getParallaxTexture(layerName)
+                parallaxConfig.backgroundLayers.forEach { layer ->
+                    val layerEntity = parallaxComponent.getBgLayerEntity(layer.name)
                     val localPositionComponent = layerEntity[PositionComponent]
                     val localRgba = layerEntity[RgbaComponent].rgba
 
                     drawLayer(
                         global = globalPositionComponent,
                         local = localPositionComponent,
-                        parallaxTexture = layerTexture,
+                        parallaxLayer = layer,
                         localRgba, batch, ctx
                     )
                 }
 
                 // Draw 2.5 D parallax plane and all attached layers
-                if (parallaxComponent.parallaxPlane.name != "") {
-                    val parallaxPlane = assetStore.getParallaxPlane(parallaxComponent.parallaxPlane.name)
+                parallaxConfig.parallaxPlane?.let { parallaxPlane ->
                     val localPositionComponent = parallaxComponent.parallaxPlane.entity[PositionComponent]
                     val localRgba = parallaxComponent.parallaxPlane.entity[RgbaComponent].rgba
 
                     // Draw bottom-attached layers
-                    parallaxPlane.bottomAttachedLayerTextures.forEachIndexed { index, lineTexture ->
+                    parallaxPlane.bottomAttachedLayers.forEachIndexed { index, attachedLayerTexture ->
                         val localScroll = parallaxComponent.parallaxPlane.bottomAttachedLayerPositions[index]
                         drawParallaxPlaneLayer(
                             global = globalPositionComponent,
@@ -70,7 +69,7 @@ class ParallaxRenderSystem(
                             localScroll = localScroll,
                             parallaxMode = parallaxConfig.mode,
                             repeat = true,
-                            lineTexture,
+                            attachedLayerTexture,
                             localRgba, batch, ctx
                         )
                     }
@@ -90,7 +89,7 @@ class ParallaxRenderSystem(
                     }
 
                     // Draw top-attached layers
-                    parallaxPlane.topAttachedLayerTextures.forEachIndexed { index, lineTexture ->
+                    parallaxPlane.topAttachedLayers.forEachIndexed { index, attachedLayerTexture ->
                         val localScroll = parallaxComponent.parallaxPlane.topAttachedLayerPositions[index]
                         drawParallaxPlaneLayer(
                             global = globalPositionComponent,
@@ -98,52 +97,52 @@ class ParallaxRenderSystem(
                             localScroll = localScroll,
                             parallaxMode = parallaxConfig.mode,
                             repeat = true,
-                            lineTexture,
+                            attachedLayerTexture,
                             localRgba, batch, ctx
                         )
                     }
                 }
 
+
                 // Draw all foreground parallax layers
-                parallaxComponent.fgLayerEntities.forEach { (layerName, layerEntity) ->
-                    val layerTexture = assetStore.getParallaxTexture(layerName)
+                parallaxConfig.foregroundLayers.forEach { layer ->
+                    val layerEntity = parallaxComponent.getFgLayerEntity(layer.name)
                     val localPositionComponent = layerEntity[PositionComponent]
                     val localRgba = layerEntity[RgbaComponent].rgba
 
                     drawLayer(
                         global = globalPositionComponent,
                         local = localPositionComponent,
-                        parallaxTexture = layerTexture,
+                        parallaxLayer = layer,
                         localRgba, batch, ctx
                     )
                 }
             }
         }
     }
-
     private fun drawLayer(
         global: Position,
         local: Position,
-        parallaxTexture: ParallaxLayerConfig,
+        parallaxLayer: ParallaxLayer,
         rgba: RGBA,
         batch: BatchBuilder2D,
         ctx: RenderContext
     ) {
-        val countH = if (parallaxTexture.repeatX) AppConfig.VIEW_PORT_WIDTH / parallaxTexture.layerBmpSlice.width else 0
-        val countV = if (parallaxTexture.repeatY) AppConfig.VIEW_PORT_HEIGHT / parallaxTexture.layerBmpSlice.height else 0
+        val countH = if (parallaxLayer.repeatX) AppConfig.VIEW_PORT_WIDTH / parallaxLayer.bmpSlice.width else 0
+        val countV = if (parallaxLayer.repeatY) AppConfig.VIEW_PORT_HEIGHT / parallaxLayer.bmpSlice.height else 0
 
-        val x = if (countH != 0 && parallaxTexture.speedFactor != null) global.x else global.x + parallaxTexture.targetX
-        val y = if (countV != 0 && parallaxTexture.speedFactor != null) global.y else global.y + parallaxTexture.targetY
+        val x = if (countH != 0 && parallaxLayer.speedFactor != null) global.x else global.x + parallaxLayer.targetX
+        val y = if (countV != 0 && parallaxLayer.speedFactor != null) global.y else global.y + parallaxLayer.targetY
 
         val xStart = if (countH > 0) -1 else 0
         val yStart = if (countV > 0) -1 else 0
         for(xIndex in xStart until countH + 1) {  // +1 <== for right side of the view port when scrolling to the left
             for(yIndex in yStart until countV + 1) {
                 batch.drawQuad(
-                    tex = ctx.getTex(parallaxTexture.layerBmpSlice),
+                    tex = ctx.getTex(parallaxLayer.bmpSlice),
                     // global + target + (layer index) + local (used for scrolling the layer)
-                    x = x + xIndex * parallaxTexture.layerBmpSlice.width + local.x + local.offsetX,
-                    y = y + yIndex * parallaxTexture.layerBmpSlice.height + local.y + local.offsetY,
+                    x = x + xIndex * parallaxLayer.bmpSlice.width + local.x + local.offsetX,
+                    y = y + yIndex * parallaxLayer.bmpSlice.height + local.y + local.offsetY,
                     filtering = false,
                     colorMul = rgba
                 )
@@ -156,9 +155,9 @@ class ParallaxRenderSystem(
         global: Position,
         local: Position,
         localScroll: Float,
-        parallaxMode: ParallaxConfig.Mode,
+        parallaxMode: Mode,
         repeat: Boolean,
-        lineTexture: ParallaxPlaneTextures.LineTexture,
+        lineTexture: LineTexture,
         rgba: RGBA,
         batch: BatchBuilder2D,
         ctx: RenderContext

@@ -69,7 +69,11 @@ data class FireAndDustEffectConfig(
             }
             it += renderLayerTag
             if (layerIndex != null) it += layerComponent { index = this@FireAndDustEffectConfig.layerIndex }
-//            entity += RenderLayerTag.DEBUG
+
+            // Enable below debug render shapes
+            // it += RenderLayerTag.DEBUG
+            // it += DebugInfoTag.SPRITE_BOUNDS
+            // it += DebugInfoTag.POSITION
         }
         return entity
     }

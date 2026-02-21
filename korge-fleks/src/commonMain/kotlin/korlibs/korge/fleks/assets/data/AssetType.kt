@@ -1,3 +1,18 @@
 package korlibs.korge.fleks.assets.data
 
-enum class AssetType { COMMON, WORLD, LEVEL, SPECIAL }
+
+/**
+ * Enumeration of different asset types used in the asset management system.
+ *
+ * Each asset type corresponds to a specific lifetime of the asset within the game:
+ * - COMMON: Assets that are shared across multiple worlds or levels.
+ * - WORLD: Assets that are specific to a particular world but can be used across different levels within that world.
+ * - LEVEL: Assets that are specific to a particular level within a world.
+ * - SPECIAL: Assets that are loaded for specific chunks or sections of a level, often used for optimization.
+ * - UNKNOWN: Assets that could not be found in the asset store. They are created on the fly and act as placeholders.
+ */
+typealias AssetType = String
+
+const val UNKNOWN = "unknown"
+
+

@@ -5,19 +5,22 @@ import com.github.quillraven.fleks.World.Companion.family
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.tags.CameraFollowTag
-import korlibs.korge.fleks.utils.*
 import korlibs.math.geom.*
 
 
 /**
- * This system is used to move the POV-Drone or player sprite entity towards a specific position (touch input,
- * mouse input) on the screen.
+ * This system is used to move the entity which has the [CameraFollowTag] attached (usually POV-Drone or player sprite)
+ * towards a specific position (touch input, mouse input) on the screen.
+ * This is used for debugging purposes to quickly move the camera inside the game world.
+ *
+ * Usage:
+ * Call [moveDebugEntity] with the desired world position to move the debug entity to that
  */
 class DebugSystem: IteratingSystem(
-//    family { all(DebugComponent).any(PositionComponent, GridComponent) },  // Change to move debug entity only which has DebugComponent attached
     family { all(CameraFollowTag).any(PositionComponent, GridComponent) },
     interval = Fixed(1 / 60f)
 ) {
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
     private var positionTrigger = false
     private var xPos = 0f
     private var yPos = 0f
@@ -34,7 +37,8 @@ class DebugSystem: IteratingSystem(
     }
 
     override fun onTickEntity(entity: Entity) {
-        val camera: Entity = world.getMainCamera()
+        // Get main camera position or exit if it does not exist
+        val cameraPosition = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         if (positionTrigger) {
             positionTrigger = false
@@ -44,12 +48,12 @@ class DebugSystem: IteratingSystem(
                 val gridComponent = entity[GridComponent]
                 gridComponent.x = xPos
                 gridComponent.y = yPos
-                gridComponent.run { world.convertToWorldCoordinates(camera) }
+                gridComponent.convertToWorldCoordinates(cameraPosition)
             } else if (entity has PositionComponent) {
                 val positionComponent = entity[PositionComponent]
                 positionComponent.x = xPos
                 positionComponent.y = yPos
-                positionComponent.run { world.convertToWorldCoordinates(camera) }
+                positionComponent.convertToWorldCoordinates(cameraPosition)
             }
         }
     }

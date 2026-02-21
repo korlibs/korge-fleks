@@ -1,10 +1,11 @@
 package korlibs.korge.fleks.logic.collision.checker
 
+import com.github.quillraven.fleks.World.Companion.inject
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.gameObject.CollisionData
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.data.Point.Companion.point
 import korlibs.korge.fleks.logic.collision.GridPosition
-import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.fleks.utils.DebugPointPool
 import kotlin.math.ceil
@@ -13,7 +14,7 @@ class PlatformerCollisionChecker(
     private val debugPointPool: DebugPointPool
 ) : CollisionChecker() {
     private val grid = GridPosition()
-    private val level = Prefab.levelData
+    private val level = inject<AssetStore>("AssetStore").worldMapData
 
     override fun checkXCollision(
         cx: Int,

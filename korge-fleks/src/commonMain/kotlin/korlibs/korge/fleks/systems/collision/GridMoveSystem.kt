@@ -19,7 +19,6 @@ import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
 import korlibs.korge.fleks.logic.collision.resolver.PlatformerCollisionResolver
-import korlibs.korge.fleks.prefab.Prefab
 import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.fleks.utils.DebugPointPool
 import korlibs.math.isAlmostEquals
@@ -33,6 +32,8 @@ class GridMoveSystem : IteratingSystem(
     interval = Fixed(1 / 30f)
 ) {
     val assetStore = world.inject<AssetStore>("AssetStore")
+
+    private val levelData = assetStore.worldMapData
 
     var collisionChecker: CollisionChecker = PlatformerCollisionChecker(world.inject<DebugPointPool>("DebugPointPool"))
     var collisionResolver: CollisionResolver = PlatformerCollisionResolver()
@@ -252,10 +253,10 @@ class GridMoveSystem : IteratingSystem(
     private fun checkPlayfieldBoundaries(gridComponent: Grid) {
         // Keep the player sprite inside the level
         if (gridComponent.x <= 16f) gridComponent.x = 16f
-        else if (gridComponent.x >= Prefab.levelData.width - 16f) gridComponent.x = Prefab.levelData.width - 16f
+        else if (gridComponent.x >= levelData.worldWidth - 16f) gridComponent.x = levelData.worldWidth - 16f
 
         // Check if player falls off the playfield at the bottom
-        if (gridComponent.y > Prefab.levelData.height) {
+        if (gridComponent.y > levelData.worldHeight) {
             // TODO: handle death of object
             println("ERROR: PositionSystem - Player falls off the playfield!")
         }

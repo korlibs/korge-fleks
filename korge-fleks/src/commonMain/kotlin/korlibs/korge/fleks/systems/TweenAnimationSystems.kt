@@ -2,7 +2,6 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.collection.*
 import korlibs.image.color.RGBA
 import korlibs.image.format.*
 import korlibs.korge.fleks.assets.*
@@ -12,7 +11,7 @@ import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sound.Companion.SoundComponent
 import korlibs.korge.fleks.components.Spawner.Companion.SpawnerComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
-import korlibs.korge.fleks.components.SwitchLayerVisibility.Companion.SwitchLayerVisibilityComponent
+import korlibs.korge.fleks.components.SwitchVisibility.Companion.SwitchVisibilityComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TouchInput.Companion.TouchInputComponent
 import korlibs.korge.fleks.components.TweenProperty
@@ -22,9 +21,6 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionOffse
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenPositionOffsetYComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaAlphaComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaRedComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventPublishComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventResetComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventSubscribeComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenMotionVelocityXComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaBlueComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenRgbaGreenComponent
@@ -40,8 +36,8 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteAnimati
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteDestroyOnPlayingFinishedComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteDirectionComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteRunningComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchLayerVisibilityOffVarianceComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchLayerVisibilityOnVarianceComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchVisibilityOffVarianceComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchVisibilityOnVarianceComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeEndComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeStartComponent
@@ -143,16 +139,16 @@ class TweenSpriteSystem : IteratingSystem(
     }
 }
 
-class TweenSwitchLayerVisibilitySystem : IteratingSystem(
+class TweenSwitchVisibilitySystem : IteratingSystem(
     family {
-        all(SwitchLayerVisibilityComponent)
-            .any(TweenSwitchLayerVisibilityOnVarianceComponent, TweenSwitchLayerVisibilityOffVarianceComponent) },
+        all(SwitchVisibilityComponent)
+            .any(TweenSwitchVisibilityOnVarianceComponent, TweenSwitchVisibilityOffVarianceComponent) },
     interval = EachFrame
 ) {
     override fun onTickEntity(entity: Entity) {
-        val visibilityComponent = entity[SwitchLayerVisibilityComponent]
-        updateProperty(entity, TweenSwitchLayerVisibilityOffVarianceComponent, visibilityComponent::offVariance)
-        updateProperty(entity, TweenSwitchLayerVisibilityOnVarianceComponent, visibilityComponent::onVariance)
+        val visibilityComponent = entity[SwitchVisibilityComponent]
+        updateProperty(entity, TweenSwitchVisibilityOffVarianceComponent, visibilityComponent::offVariance)
+        updateProperty(entity, TweenSwitchVisibilityOnVarianceComponent, visibilityComponent::onVariance)
     }
 }
 
@@ -182,50 +178,6 @@ class TweenTextFieldSystem : IteratingSystem(
         updateProperty(entity, TweenTextFieldTextComponent, textFieldComponent::text)
         updateProperty(entity, TweenTextFieldTextRangeStartComponent, textFieldComponent::textRangeStart)
         updateProperty(entity, TweenTextFieldTextRangeEndComponent, textFieldComponent::textRangeEnd)
-    }
-}
-
-class TweenEventSystem : IteratingSystem(
-    family = family {
-        all(TweenSequenceComponent)
-            .any(TweenEventPublishComponent, TweenEventResetComponent, TweenEventSubscribeComponent) },
-    interval = EachFrame
-) {
-    // Event bitmap
-    private val eventMap: BitArray = BitArray()
-
-    fun setEvent(idx: Int) {
-        eventMap.set(idx)
-    }
-
-    override fun onTickEntity(entity: Entity) {
-        if (entity has TweenEventPublishComponent) {
-            // "event" is saved as value in TweenPropertyComponent
-            val event = entity[TweenEventPublishComponent].value
-            // Set event which we want to publish
-            eventMap.set(event as Int)
-            // Reset
-            entity.configure { it -= TweenEventPublishComponent }
-        } else if (entity has TweenEventResetComponent) {
-            val event = entity[TweenEventResetComponent].value
-            eventMap.clear(event as Int)
-            entity.configure { it -= TweenEventResetComponent }
-        }
-        if (entity has TweenEventSubscribeComponent) {
-            // "entityConfig" is saved as change in TweenPropertyComponent
-            // "event" is saved as value in TweenPropertyComponent
-            val event = entity[TweenEventSubscribeComponent].value
-            // Run the specific event config function on the entity which is subscribed to this event
-            if (eventMap[event as Int]) {
-                // TODO move this into EntityConfig configure function
-                // Unblock tween script
-                val tweenSequence = entity[TweenSequenceComponent]
-                tweenSequence.waitTime = 0f
-                // Reset event already
-//                eventMap.clear(event)
-                entity.configure { it -= TweenEventSubscribeComponent }
-            }
-        }
     }
 }
 
@@ -261,10 +213,9 @@ fun SystemConfiguration.addTweenEngineSystems() {
     add(TweenMotionSystem())
     add(TweenSpawnerSystem())
     add(TweenSpriteSystem())
-    add(TweenSwitchLayerVisibilitySystem())
+    add(TweenSwitchVisibilitySystem())
     add(TweenSoundSystem())
     add(TweenTextFieldSystem())
-    add(TweenEventSystem())
     add(TweenTouchInputSystem())
 }
 

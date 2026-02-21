@@ -8,8 +8,8 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
+import korlibs.korge.fleks.systems.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
-import korlibs.korge.fleks.utils.*
 import korlibs.korge.render.*
 
 
@@ -30,9 +30,11 @@ class FastSpriteRenderSystem(
     private val family = world.family { all(layerTag, PositionComponent, SpriteComponent, RgbaComponent).none(LayerComponent) }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
 
     override fun render(ctx: RenderContext) {
-        val camera: Entity = world.getMainCameraOrNull() ?: return
+        // Get main camera position or exit if it does not exist
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         // Custom Render Code here
         ctx.useBatcher { batch ->
@@ -46,7 +48,7 @@ class FastSpriteRenderSystem(
 
                 if (entity hasNo ScreenCoordinatesTag) {
                     // Transform world coordinates to screen coordinates
-                    position.run { world.convertToScreenCoordinates(camera) }
+                    position.convertToScreenCoordinates(cameraPosition)
                 }
 
                 val spriteComponent = entity[SpriteComponent]

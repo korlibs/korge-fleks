@@ -1,0 +1,282 @@
+package korlibs.korge.fleks.assets.data
+
+import korlibs.datastructure.IntArray2
+import korlibs.image.bitmap.BmpSlice
+
+/**
+ * Data class for storing world chunks and entities for a game world.
+ *
+ * We store the level data config in a 2D array depending on its gridvania position in the world
+ * Then later we will spawn the entities depending on the level which the player is currently in
+ */
+class WorldMapData {
+
+    // Size of a level inside the grid vania array in tiles (all levels have the same size; in tiles)
+    var levelChunkWidth: Int = 0  // Size of world chunk in grid cells
+        private set
+    var levelChunkHeight: Int = 0
+        private set
+    var worldWidth: Float = 0f  // Size of whole world in grid cells
+        private set
+    var worldHeight: Float = 0f
+        private set
+    var tileSize: Int = 0  // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
+        private set
+
+    internal val chunkMeshes: MutableMap<Int, ChunkAssetInfo> = mutableMapOf()
+    internal lateinit var levelGridVania: IntArray2
+    internal lateinit var collisionTileSet: CollisionTileSet
+
+    private val levelMidPointX: Int = levelChunkWidth / 2
+    private val levelMidPointY: Int = levelChunkHeight / 2
+
+    fun init(
+        worldWidth: Float,
+        worldHeight: Float,
+        levelChunkWidth: Int,
+        levelChunkHeight: Int,
+        tileSize: Int,
+        collisionTiles: List<List<Int>>,
+        collisionShapesBitmapSlice: BmpSlice
+    ) {
+        this.worldWidth = worldWidth
+        this.worldHeight = worldHeight
+        this.levelChunkWidth = levelChunkWidth
+        this.levelChunkHeight = levelChunkHeight
+        this.tileSize = tileSize
+
+        // Set up grid-vania array
+        levelGridVania = IntArray2(levelChunkWidth, levelChunkHeight) { -1 }
+        // Set up collision tile set
+        collisionTileSet = CollisionTileSet(collisionTiles, collisionShapesBitmapSlice, tileSize, tileSize)
+    }
+
+    /**
+     * Check collision at cell position
+     */
+    fun hasCollision(cx: Int, cy: Int): Boolean {
+/*
+                    val collisionMask = tile shr 16  //
+
+        // Get the chunk coordinates in the levelGridvainia array
+        val gridCx = cx / levelGridWidth
+        val gridCy = cy / levelGridHeight
+        return if (levelGridVania.inside(gridCx, gridCy)) {
+            // Get the local coordinates within the chunk
+            val localCx = cx % levelGridWidth
+            val localCy = cy % levelGridHeight
+            // Check if the collision map exists and if the tile is not empty
+            levelGridVania[gridCx, gridCy].collisionMap?.let { collisionMap ->
+                // Local coordinates are within the bounds of the collision map because we used modulo
+                // with levelGridWidth and levelGridHeight
+                collisionMap[localCx, localCy] != 0
+            } ?: false  // No collision map exists for this chunk --> no collision
+        } else true  // Outside levelGridVania bounds
+*/
+        return false
+    }
+
+    /**
+     * Iterate over all entities within the chunk, where the camera is currently located, and all
+     * adjacent chunks. Call the callback function for each entity config.
+     *
+     * @param viewPortMiddlePosX Horizontal position of view port in world grid cells
+     * @param viewPortMiddlePosY Vertical position of view port in world grid cells
+     */
+    fun forEachEntityInChunk(viewPortMiddlePosX: Int, viewPortMiddlePosY: Int, activatedChunks: MutableSet<Int>, callback: (String) -> Unit) {
+        // Calculate the grid position of the view port middle position
+        val gridX: Int = viewPortMiddlePosX / levelChunkWidth
+        val gridY: Int = viewPortMiddlePosY / levelChunkHeight
+
+        // Check in which quadrant of the grid the view port is located
+        // and iterate over the adjacent chunks (2x2 grid)
+        val localViewPortPosX: Int = viewPortMiddlePosX % levelChunkWidth
+        val localViewPortPosY: Int = viewPortMiddlePosY % levelChunkHeight
+
+        var startGridX: Int
+        var startGridY: Int
+        var endGridX: Int
+        var endGridY: Int
+
+        if (localViewPortPosX < levelMidPointX) {
+            if (localViewPortPosY < levelMidPointY) {
+                // Top-left quadrant
+                startGridX = gridX - 1
+                endGridX = gridX
+                startGridY = gridY - 1
+                endGridY = gridY
+            } else {
+                // Bottom-left quadrant
+                startGridX = gridX - 1
+                endGridX = gridX
+                startGridY = gridY
+                endGridY = gridY + 1
+            }
+        } else {
+            if (localViewPortPosY < levelMidPointY) {
+                // Top-right quadrant
+                startGridX = gridX
+                endGridX = gridX + 1
+                startGridY = gridY - 1
+                endGridY = gridY
+            } else {
+                // Bottom-right quadrant
+                startGridX = gridX
+                endGridX = gridX + 1
+                startGridY = gridY
+                endGridY = gridY + 1
+            }
+        }
+
+        for(x in startGridX .. endGridX) {
+            for (y in startGridY .. endGridY) {
+                // Check if the chunk is already spawned
+                if (levelGridVania.inside(x, y)) {
+                    // Get chunk from levelGridVania at grid cell coordinates
+                    val chunk = levelGridVania[x, y]
+                    if (!activatedChunks.contains(chunk)) {
+                        activatedChunks.add(chunk)
+                        // Now spawn the entities by providing each name to the callback lambda
+                        chunkMeshes[chunk]?.entitiesToBeSpawned?.forEach { entityConfigName ->
+                            callback(entityConfigName)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Iterate over all tiles within the given view port area and call the renderCall function for each tile.
+     *
+     * @param cx - horizontal position of top-left corner of view port in cell coordinates (tiles)
+     * @param cy - vertical position of top-left corner of view port in cell coordinates (tiles)
+     * @param width - width of view port in tiles
+     * @param height - height of view port in tiles
+     */
+    fun forEachTile(layer: String, cx: Int, cy: Int, width: Int, height: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+        // Calculate the view port corners (top-left, top-right, bottom-left and bottom-right positions) in grid-vania indexes
+        // and check if the corners are in different level chunks
+        val gridX = cx / levelChunkWidth
+        val gridY = cy / levelChunkHeight
+        val gridX2 = (cx + width) / levelChunkWidth
+        val gridY2 = (cy + height) / levelChunkHeight
+        val xStart = cx % levelChunkWidth
+        val yStart = cy % levelChunkHeight
+        // Check if the view port area overlaps multiple level chunks
+        if (gridX == gridX2) {
+            // We have only one chunk in horizontal direction
+            if (gridY == gridY2) {
+                // We have only one chunk in vertical direction
+                processTiles(layer, gridX, gridY, xStart, yStart, xStart + width, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+            } else {
+                // We have vertically two chunks
+                processTiles(layer, gridX, gridY, xStart, yStart, xStart + width, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX, gridY2, xStart, 0, xStart + width, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+            }
+        } else {
+            // We have horizontally two chunks
+            if (gridY == gridY2) {
+                // We have only one chunk in vertical direction
+                processTiles(layer, gridX, gridY, xStart, yStart, levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+            } else {
+                // We have vertical two levels
+                processTiles(layer, gridX, gridY, xStart, yStart, levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX, gridY2, xStart, 0, levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processTiles(layer, gridX2, gridY2, 0, 0, (xStart + width) % levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+            }
+        }
+    }
+
+    /**
+     * Iterate over all collision tiles within the given view port area and call the renderCall function for each tile.
+     *
+     * @param cx - horizontal position of top-left corner of view port in cell coordinates (tiles)
+     * @param cy - vertical position of top-left corner of view port in cell coordinates (tiles)
+     * @param width - width of view port in tiles
+     * @param height - height of view port in tiles
+     * @param renderCall - callback function to call for each collision tile; parameters: collision index, x position in pixels, y position in pixels
+     */
+    fun forEachCollisionTile(layer: String, cx: Int, cy: Int, width: Int, height: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+        // Calculate the view port corners (top-left, top-right, bottom-left and bottom-right positions) in gridvania indexes
+        // and check if the corners are in different level maps (tileMapData)
+        val gridX = cx / levelChunkWidth
+        val gridY = cy / levelChunkHeight
+        val gridX2 = (cx + width) / levelChunkWidth
+        val gridY2 = (cy + height) / levelChunkHeight
+        val xStart = cx % levelChunkWidth
+        val yStart = cy % levelChunkHeight
+        // Check if the view port area overlaps multiple levels
+        if (gridX == gridX2) {
+            // We have only one level in horizontal direction
+            if (gridY == gridY2) {
+                // We have only one level in vertical direction
+                processCollisionTiles(layer, gridX, gridY, xStart, yStart, xStart + width, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+            } else {
+                // We have vertically two levels
+                processCollisionTiles(layer, gridX, gridY, xStart, yStart, xStart + width, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX, gridY2, xStart, 0, xStart + width, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+            }
+        } else {
+            // We have horizontal two levels
+            if (gridY == gridY2) {
+                // We have only one level in vertical direction
+                processCollisionTiles(layer, gridX, gridY, xStart, yStart, levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+            } else {
+                // We have vertical two levels
+                processCollisionTiles(layer, gridX, gridY, xStart, yStart, levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX, gridY2, xStart, 0, levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX2, gridY2, 0, 0, (xStart + width) % levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+            }
+        }
+    }
+
+    private fun processTiles(layer: String, gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+        val chunkIndex = levelGridVania[gridX, gridY]
+        val chunk = chunkMeshes[chunkIndex] ?: error("LevelData - processTiles: No chunk mesh found for chunk index '$chunkIndex' in grid position ($gridX, $gridY)!")
+        val levelMap = chunk.levelMaps[layer] ?: error("LevelData - processTiles: No level map found for layer '$layer' in chunk index '$chunkIndex'!")
+        val chunkX = chunk.chunkX
+        val chunkY = chunk.chunkY
+        for (tx in xStart until xEnd) {
+            for (ty in yStart until yEnd) {
+                val tiles = levelMap.stackedTileMapData[tx + ty * levelChunkWidth]
+                tiles.forEach { tile ->
+                    val clusterIndex = tile and 0xf          // Get bits 0-3 for cluster index
+                    val tileIndex = (tile and 0xffff0) shr 4  // Get bits 4-16 for tile index in tileset
+// TODO                    val collisionIndex = (tile and 0xff00000) shr 20  // Get bits 20-24 for collision index
+                    levelMap.listOfTileSets[clusterIndex][tileIndex]?.let { bmpSlice ->
+                        val px = (tx * tileSize) + (chunkX * levelWidth * tileSize)
+                        val py = (ty * tileSize) + (chunkY * levelHeight * tileSize)
+                        renderCall(bmpSlice, px.toFloat(), py.toFloat())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun processCollisionTiles(layer: String, gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+        val chunkIndex = levelGridVania[gridX, gridY]
+        val chunk = chunkMeshes[chunkIndex] ?: error("LevelData - processTiles: No chunk mesh found for chunk index '$chunkIndex' in grid position ($gridX, $gridY)!")
+        val levelMap = chunk.levelMaps[layer] ?: error("LevelData - processTiles: No level map found for layer '$layer' in chunk index '$chunkIndex'!")
+        val chunkX = chunk.chunkX
+        val chunkY = chunk.chunkY
+        for (tx in xStart until xEnd) {
+            for (ty in yStart until yEnd) {
+                levelMap.stackedTileMapData[tx + ty * levelChunkWidth].firstOrNull()?.let { tile ->
+                    val collisionIndex = (tile and 0xff00000) shr 20  // Get bits 20-24 for collision index
+                    if (collisionIndex != 0) {
+                        // Get collision tile from collision tileset using collisionIndex and call renderCall with it
+                        val collisionTile = collisionTileSet[collisionIndex]
+                        val px = (tx * tileSize) + (chunkX * levelWidth * tileSize)
+                        val py = (ty * tileSize) + (chunkY * levelHeight * tileSize)
+                        renderCall(collisionTile, px.toFloat(), py.toFloat())
+                    }
+                }
+            }
+        }
+    }
+}

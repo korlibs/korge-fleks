@@ -22,7 +22,7 @@ class EntityRefsByName private constructor(
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: EntityRefsByName) {
-        entities.putAll(from.entities)
+        entities.init(from.entities)
         moveLinked = from.moveLinked
         deleteLinked = from.deleteLinked
     }
@@ -30,7 +30,7 @@ class EntityRefsByName private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        entities.clear()
+        entities.cleanup()
         moveLinked = false
         deleteLinked = false
     }

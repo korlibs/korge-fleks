@@ -1,11 +1,12 @@
 package korlibs.korge.fleks.assets.data
 
+import korlibs.image.bitmap.slice
+import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
-import korlibs.korge.fleks.assets.AssetModel
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.gameState.GameStateConfig
 import korlibs.korge.fleks.utils.EntityConfigSerializer
-import kotlinx.serialization.decodeFromString
+import korlibs.time.Stopwatch
 import kotlinx.serialization.modules.SerializersModule
 
 
@@ -25,18 +26,7 @@ class AssetLoader(
      * Function for loading common game assets.
      */
     suspend fun loadCommonAssets() {
-
-        val vfs = resourcesVfs["common/config.yaml"]
-//        if (vfs.exists()) {
-        // TODO Check why exists() function does not work on Android
-
-        val gameConfigString = vfs.readString()
-        try {
-            val commonConfig = configSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
-            // Enable / disable hot reloading of common assets here
-            assetStore.loadAssets(AssetType.COMMON, assetConfig = commonConfig)
-        } catch (e: Throwable) { println("ERROR: Loading common assets - $e") }
-//        } else println("WARNING: Cannot find common entity config file 'common/config.yaml'!")
+        assetStore.loadClusterAssets(clusterName = "common")
     }
 
     /**
@@ -45,53 +35,64 @@ class AssetLoader(
      * be loaded/reloaded.
      */
     suspend fun loadAssets(gameStateConfig: GameStateConfig) {
-        // Sanity check - world needs to be always present
-        if (gameStateConfig.world.isEmpty() || gameStateConfig.level.isEmpty()) {
-            println("ERROR: World or level string is empty in game config! Cannot load game data!")
-            return
-        }
+        val worldName = gameStateConfig.worldName
+        val chunkNumber  = gameStateConfig.chunk
 
-        // Start loading world assets
-        val worldVfs = resourcesVfs[gameStateConfig.world + "/config.yaml"]
-//        if (worldVfs.exists()) {
-        // TODO Check why exits() function does not work on Android
+        val sw = Stopwatch().start()
+        print("INFO: AssetStore - Start loading world chunk '${worldName}/level_data/common'... ")
 
-        var gameConfigString = worldVfs.readString()
-        try {
-            val worldConfig = configSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
-            // Enable / disable hot reloading of common assets here
-            assetStore.loadAssets(AssetType.WORLD, assetConfig = worldConfig)
-        } catch (e: Throwable) {
-            println("ERROR: Loading world assets - $e")
-        }
-//        } else println("WARNING: Cannot find world game config file '${gameStateConfig.world}/config.yaml'!")
+        val commonChunkInfo: CommonChunkInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/common.json"].readString())
 
-        // Start loading level assets
-        val levelVfs = resourcesVfs[gameStateConfig.world + "/" + gameStateConfig.level + "/config.yaml"]
-//        if (levelVfs.exists()) {
-        gameConfigString = levelVfs.readString()
-        try {
-            val worldConfig = configSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
-            // Enable / disable hot reloading of common assets here
-            assetStore.loadAssets(AssetType.LEVEL, assetConfig = worldConfig)
-        } catch (e: Throwable) {
-            println("ERROR: Loading level assets - $e")
-        }
-//        } else println("WARNING: Cannot find level game config file '${gameStateConfig.world}/${gameStateConfig.level}/config.yaml'!")
+        // Get version info
+        val major: Int = commonChunkInfo.version[0]
+        val minor: Int = commonChunkInfo.version[1]
+        val build: Int = commonChunkInfo.version[2]
+        // TODO Check later if asset version/build is compatible otherwise convert to new version
 
-        // Start loading special assets
-        if (gameStateConfig.level.isNotEmpty()) {
-            val vfs = resourcesVfs[gameStateConfig.world + "/" + gameStateConfig.level + "/" + gameStateConfig.special + "/config.yaml"]
-//            if (vfs.exists()) {
-            gameConfigString = vfs.readString()
-            try {
-                val specialConfig = configSerializer.yaml().decodeFromString<AssetModel>(gameConfigString)
-                // Enable / disable hot reloading of common assets here
-                assetStore.loadAssets(AssetType.SPECIAL, assetConfig = specialConfig)
-            } catch (e: Throwable) {
-                println("ERROR: Loading special assets - $e")
+        // Load collision shapes for the world chunks
+        val collisionShapes = resourcesVfs["${worldName}/level_data/collision_shapes.png"].readBitmap().slice()
+
+        assetStore.worldMapData.init(
+            worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth * commonChunkInfo.tileSize).toFloat(),
+            worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.chunkHeight * commonChunkInfo.tileSize).toFloat(),
+            levelChunkWidth = commonChunkInfo.chunkWidth,
+            levelChunkHeight = commonChunkInfo.chunkHeight,
+            tileSize = commonChunkInfo.tileSize,
+            collisionTiles = commonChunkInfo.collisionTiles,
+            collisionShapesBitmapSlice = collisionShapes
+        )
+        println("- Resources loaded in ${sw.elapsed}")
+
+        // First load chunks and get list of asset clusters which need to be loaded.
+        loadChunkAssets(worldName, chunkNumber)
+        // TODO hardcoded for now
+        loadChunkAssets(worldName, 2)
+        loadChunkAssets(worldName, 3)
+        loadChunkAssets(worldName, 4)
+        loadChunkAssets(worldName, 5)
+        loadChunkAssets(worldName, 6)
+        loadChunkAssets(worldName, 7)
+    }
+
+    private suspend fun loadChunkAssets(worldName: String, chunk: Int) {
+        val sw = Stopwatch().start()
+        print("INFO: AssetStore - Start loading world chunk '${worldName}/level_data/chunk_${chunk}'... ")
+
+        // By deserializing the chunk JSON file the EntityConfig objects for the chunk will be created and registered in the EntityFactory.
+        // The chunk asset info will be used to load the tile map and other assets for the chunk and to check if the chunk asset version is
+        // compatible with the current version of the game.
+        val chunkAssetInfo: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/chunk_${chunk}.json"].readString())
+        assetStore.addWorldChunk(chunk, chunkAssetInfo)
+
+        println("- Resources loaded in ${sw.elapsed}")
+
+        // Create list of tile sets for each level map in the chunk - this is needed for the renderer to get the correct tile set objects for rendering the tile maps of the chunk.
+        chunkAssetInfo.levelMaps.forEach { (_, layer) ->
+            // Load cluster assets for the tile map of the chunk if it was not loaded already
+            layer.clusterList.forEach { clusterName ->
+                assetStore.loadClusterAssets(worldName, clusterName)
             }
-//            } else println("WARNING: Cannot find special game config file '${gameStateConfig.special}/${gameStateConfig.special}/config.yaml'!")
+            layer.listOfTileSets = layer.clusterList.map { assetStore.getTileSet(it) }
         }
     }
 }

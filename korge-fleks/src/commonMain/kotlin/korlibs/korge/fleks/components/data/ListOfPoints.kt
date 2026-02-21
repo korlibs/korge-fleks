@@ -21,7 +21,7 @@ class ListOfPoints private constructor(
     // Cleanup data instance manually
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
-        points.freeAndClear()
+        points.cleanup()
     }
 
     // Clone a new data instance from the pool
@@ -43,6 +43,27 @@ class ListOfPoints private constructor(
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "ListOfPoints") { ListOfPoints() }
+
+        /**
+         * Init function (deep copy) for [MutableList] of [Point] elements.
+         * This will clone each point and add it to the list.
+         */
+        fun MutableList<Point>.init(from: List<Point>) {
+            from.forEach { point ->
+                this.add(point.clone())
+            }
+        }
+
+        /**
+         * Free all points in the list and clear the list.
+         * This will free each point and clear the list.
+         */
+        fun MutableList<Point>.cleanup() {
+            this.forEach { point ->
+                point.free()
+            }
+            this.clear()
+        }
     }
 
     /**

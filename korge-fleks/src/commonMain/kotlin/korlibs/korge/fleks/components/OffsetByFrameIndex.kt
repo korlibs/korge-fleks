@@ -34,7 +34,7 @@ class OffsetByFrameIndex private constructor(
     fun cleanup() {
         entity = Entity.NONE
         // Lists of Points are static and will be freed to the pool in cleanupComponent function when entity is destroyed
-        mapOfOffsetLists.freeAndClear()
+        mapOfOffsetLists.cleanup()
     }
 
     override fun type() = OffsetByFrameIndexComponent
@@ -66,13 +66,12 @@ class OffsetByFrameIndex private constructor(
          * Free all lists of points in the map and clear the map.
          * This will free each list of points and clear the map.
          */
-        fun MutableMap<String, ListOfPoints>.freeAndClear() {
+        fun MutableMap<String, ListOfPoints>.cleanup() {
             this.forEach { (_, list) ->
                 list.free()
             }
             this.clear()
         }
-
     }
 
     // Clone a new instance of the component from the pool

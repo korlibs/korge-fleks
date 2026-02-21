@@ -84,7 +84,7 @@ class SnapshotSerializerSystem(
     fun traceEntitySnapshot(entity: Entity) : String =
         snapshotSerializer.json(pretty = true).encodeToString(world.snapshotOf(entity))
 
-    fun loadGameState(world: World, coroutineContext: CoroutineContext) {
+    fun loadGameState(coroutineContext: CoroutineContext) {
         launchImmediately(context = coroutineContext) {
             val vfs = resourcesVfs["save_game.json"]
             if (vfs.exists()) {
@@ -99,7 +99,7 @@ class SnapshotSerializerSystem(
         }
     }
 
-    fun saveGameState(world: World, coroutineContext: CoroutineContext, fileName: String = "save_game.json") {
+    fun saveGameState(coroutineContext: CoroutineContext, fileName: String = "save_game.json") {
         val worldSnapshot = snapshotSerializer.json(pretty = true).encodeToString(world.snapshot())
         launchImmediately(context = coroutineContext) {
             val vfs = resourcesVfs[fileName]

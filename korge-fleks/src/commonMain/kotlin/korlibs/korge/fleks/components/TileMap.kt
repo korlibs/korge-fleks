@@ -15,21 +15,18 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("TileMap")
 class TileMap private constructor(
-    var levelName: String = "",
-    val layerNames: MutableList<String> = mutableListOf(),
+    var name: String = ""
 ) : PoolableComponent<TileMap>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
     fun init(from: TileMap) {
-        levelName = from.levelName
-        layerNames.addAll(from.layerNames)
+        name = from.name
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are a value property of another component
     fun cleanup() {
-        levelName = ""
-        layerNames.clear()  // Make list empty for reuse
+        name = ""
     }
 
     override fun type() = TileMapComponent

@@ -2,16 +2,13 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.EntityRef.Companion.EntityRefComponent
-import korlibs.korge.fleks.components.EntityRefs.Companion.EntityRefsComponent
-import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNameComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sound.Companion.SoundComponent
 import korlibs.korge.fleks.components.Spawner.Companion.SpawnerComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
-import korlibs.korge.fleks.components.SwitchLayerVisibility.Companion.SwitchLayerVisibilityComponent
+import korlibs.korge.fleks.components.SwitchVisibility.Companion.SwitchVisibilityComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TouchInput.Companion.TouchInputComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.tweenPropertyComponent
@@ -26,27 +23,27 @@ import korlibs.korge.fleks.components.data.tweenSequence.Jump
 import korlibs.korge.fleks.components.data.tweenSequence.LoopTweens
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens
 import korlibs.korge.fleks.components.data.tweenSequence.ParallelTweens.Companion.staticParallelTweens
-import korlibs.korge.fleks.components.data.tweenSequence.ResetEvent
-import korlibs.korge.fleks.components.data.tweenSequence.SendEvent
 import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity
 import korlibs.korge.fleks.components.data.tweenSequence.SpawnNewTweenSequence
 import korlibs.korge.fleks.components.data.tweenSequence.TweenBase
 import korlibs.korge.fleks.components.data.tweenSequence.TweenMotion
 import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition
+import korlibs.korge.fleks.components.messagePassing.tweens.TweenPublishMessage
 import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSound
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSpawner
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite
-import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchLayerVisibility
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchVisibility
 import korlibs.korge.fleks.components.data.tweenSequence.TweenTextField
 import korlibs.korge.fleks.components.data.tweenSequence.TweenTouchInput
 import korlibs.korge.fleks.components.data.tweenSequence.Wait
 import korlibs.korge.fleks.components.data.tweenSequence.init
+import korlibs.korge.fleks.components.messagePassing.data.RxMsg.Companion.rxMsg
+import korlibs.korge.fleks.components.messagePassing.tweens.TweenPublishMessage.Companion.createMsgPublishEntity
+import korlibs.korge.fleks.components.messagePassing.tweens.TweenSubscribeMessage
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.Easing
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 /**
  * This system creates Animate... components on entities which should be animated according to the game config.
@@ -56,6 +53,7 @@ class TweenSequenceSystem : IteratingSystem(
     // Make this fixed to not waste time if more frames are drawn per second than objects generated (from SpawnerSystem)
     interval = Fixed(1f / 60f)
 ) {
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
     // Internally used variables in createAnimateComponent function
     private val defaultTweenValues: ParallelTweens = staticParallelTweens { // <-- gives default values for delay, duration and easing
         delay = 0f
@@ -192,7 +190,7 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.direction?.let { value -> createTweenPropertyComponent(tween, parentTween, SpriteDirection, value) }
                 tween.destroyOnPlayingFinished?.let { value -> createTweenPropertyComponent(tween, parentTween, SpriteDestroyOnPlayingFinished, value) }
             }
-            is TweenSwitchLayerVisibility -> tween.target.getOrWarning(SwitchLayerVisibilityComponent)?.let { start ->
+            is TweenSwitchVisibility -> tween.target.getOrWarning(SwitchVisibilityComponent)?.let { start ->
                 tween.offVariance?.let { end -> createTweenPropertyComponent(tween, parentTween, SwitchLayerVisibilityOffVariance, value = start.offVariance, change = end - start.offVariance) }
                 tween.onVariance?.let { end -> createTweenPropertyComponent(tween, parentTween, SwitchLayerVisibilityOnVariance, start.onVariance, end - start.onVariance) }
             }
@@ -229,20 +227,31 @@ class TweenSequenceSystem : IteratingSystem(
             is ExecuteConfigFunction -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)
             // Process Wait tween only for event here - wait time was already set above from tween.duration
             is Wait -> tween.event?.let { event ->
-                // Wait for event, SendEvent and ResetEvent need the current entity which comes in via onTickEntity
-                tween.target = baseEntity
-                createTweenPropertyComponent(tween, parentTween, EventSubscribe, value = event)
-                tween.target = Entity.NONE  // Reset target again since it is marked as not used
+                // Get subscribed messages info from runtime config
+                val messagePassingConfigComponent = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
+                messagePassingConfigComponent.add(
+                    msgEvent = event,
+                    rxMsg {
+                        entity = baseEntity  // the entity which wants to receive the message
+                        entityConfig = null  // no entityConfig on wait - maybe in future?
+                        releaseWait = true   // release wait on message arrival
+                        remainingMsgs = 1    // only need one message to release the wait - unsubscribe afterward
+                    })
+                tween.event = null // reset event to avoid adding multiple times
             }
-            is SendEvent -> {
-                tween.target = baseEntity
-                createTweenPropertyComponent(tween, parentTween, EventPublish, value = tween.event)
-                tween.target = Entity.NONE
-            }
-            is ResetEvent -> {
-                tween.target = baseEntity
-                createTweenPropertyComponent(tween, parentTween, EventReset, value = tween.event)
-                tween.target = Entity.NONE
+            // Create new entity for publishing messages
+            is TweenPublishMessage -> world.createMsgPublishEntity(tween.event, tween.entityConfig)
+            // Subscribe entity to receive messages
+            is TweenSubscribeMessage -> {
+                // Get subscribed messages info from runtime config
+                val messagePassingConfig = systemRuntimeConfigs.getMessagePassingConfig(world) ?: return
+                messagePassingConfig.add(
+                    msgEvent = tween.event,
+                    rxMsg {
+                        entity = baseEntity  // the entity which wants to receive the message
+                        entityConfig = tween.entityConfig
+                        remainingMsgs = tween.remainingMsgs
+                    })
             }
             else -> {
                 when (tween) {

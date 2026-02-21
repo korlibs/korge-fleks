@@ -9,6 +9,7 @@ import korlibs.korge.fleks.components.data.ParallaxPlane.Companion.staticParalla
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.fleks.utils.createEntity
+import korlibs.korge.fleks.utils.cleanup
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -24,6 +25,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Parallax")
 class Parallax private constructor(
+    /**
+     * Name of the parallax asset info in the [AssetStore].
+     */
     var name: String = "",
 
     // Do not set below properties directly - they will be set by the initComponent hook function
@@ -46,9 +50,9 @@ class Parallax private constructor(
     fun cleanup() {
         name = ""
         // Entities are freed in the cleanupComponent function because of world scope
-        bgLayerEntities.clear()
+        bgLayerEntities.cleanup()
         parallaxPlane.cleanup()
-        fgLayerEntities.clear()
+        fgLayerEntities.cleanup()
     }
 
     override fun type() = ParallaxComponent
@@ -72,67 +76,40 @@ class Parallax private constructor(
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
-/*
-        val world = this
+        // Prepare all layer entities according to the parallax config
         val assetStore: AssetStore = inject(name = "AssetStore")
+        val parallaxConfig = assetStore.getParallaxLayers(name)
 
-        // Get size for all layer lists to make sure that they fit to the parallax configuration
-        // Same list sizes are also assumed in ParallaxRenderSystem
-        val numberBackgroundLayers = assetStore.getBackground(name).config.backgroundLayers?.size ?: 0
-        val numberAttachedRearLayers = assetStore.getBackground(name).config.parallaxPlane?.attachedLayersRear?.size ?: 0
-        val numberParallaxPlaneLines = assetStore.getBackground(name).parallaxPlane?.imageDatas?.size ?: 0
-        val numberAttachedFrontLayers = assetStore.getBackground(name).config.parallaxPlane?.attachedLayersFront?.size ?: 0
-        val numberForegroundLayers = assetStore.getBackground(name).config.foregroundLayers?.size ?: 0
-
-        // Initialize all layer lists on component creation
-        repeat(numberBackgroundLayers) { index ->
-            val name = assetStore.getBackground(name).config.backgroundLayers?.get(index)?.name ?: "No layer name"
-            // Create new entities for controlling position and color of each layer e.g. by the TweenEngineSystem
-            bgLayerEntities.add(
-                world.createEntity("Parallax BG layer '$index' ($name) of entity '${entity.id}'") {
-                    it += positionComponent {}
-                    it += rgbaComponent {}
-                }
-            )
-        }
-        repeat(numberForegroundLayers) { index ->
-            val name = assetStore.getBackground(name).config.foregroundLayers?.get(index)?.name ?: "No layer name"
-            fgLayerEntities.add(
-                world.createEntity("Parallax FG layer '$index' ($name) of entity '${entity.id}'") {
-                    it += positionComponent {}
-                    it += rgbaComponent {}
-                }
-            )
+        parallaxConfig.backgroundLayers.forEach { layer ->
+            bgLayerEntities[layer.name] = createEntity("Parallax BG layer '${layer.name}' of entity '${entity.id}'") {
+                it += positionComponent {}
+                it += rgbaComponent {}
+            }
         }
 
-        repeat(numberAttachedRearLayers) { attachedLayersRearPositions.add(0f) }
-        repeat(numberParallaxPlaneLines) { linePositions.add(0f) }
-        repeat(numberAttachedFrontLayers) { attachedLayersFrontPositions.add(0f) }
-
-        parallaxPlaneEntity = world.createEntity("Parallax plane of entity '${entity.id}'") {
-            it += positionComponent {}
-            it += rgbaComponent {}
+        parallaxConfig.foregroundLayers.forEach { layer ->
+            fgLayerEntities[layer.name] = createEntity("Parallax FG layer '${layer.name}' of entity '${entity.id}'") {
+                it += positionComponent {}
+                it += rgbaComponent {}
+            }
         }
 
-        // Initialize an external prefab when the component is added to an entity
-        // Get height of the parallax background
-        val parallaxDataContainer = assetStore.getBackground(name)
-        val imageHeight: Float = (parallaxDataContainer.backgroundLayers?.height
-            ?: parallaxDataContainer.foregroundLayers?.height
-            ?: parallaxDataContainer.parallaxPlane?.default?.height
-            ?: throw Error("ParallaxComponent: Parallax image data has no height!")).toFloat()
-        val parallaxLayerHeight: Float = imageHeight
-        // Set parallax height and offset in the camera system
-        system<CameraSystem>().parallaxHeight = parallaxLayerHeight - parallaxDataContainer.config.offset.toFloat()
-        system<CameraSystem>().parallaxOffset = parallaxDataContainer.config.offset.toFloat()
-*/
+        parallaxConfig.parallaxPlane?.let { plane ->
+            parallaxPlane.entity = createEntity("Parallax plane of entity '${entity.id}'") {
+                it += positionComponent {}
+                it += rgbaComponent {}
+            }
+            repeat(plane.lineTextures.size) { parallaxPlane.linePositions.add(0f) }
+            repeat(plane.topAttachedLayers.size) { parallaxPlane.topAttachedLayerPositions.add(0f) }
+            repeat(plane.bottomAttachedLayers.size) { parallaxPlane.bottomAttachedLayerPositions.add(0f) }
+        }
     }
 
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)
     override fun World.cleanupComponent(entity: Entity) {
         // Remove all layer entities when we are in scope of the world
-        bgLayerEntities.free(this)
-        fgLayerEntities.free(this)
+        bgLayerEntities.removeFromWorld(this)
+        fgLayerEntities.removeFromWorld(this)
         if (parallaxPlane.entity != Entity.NONE) this -= parallaxPlane.entity
         // Lists will be cleared in the cleanup function
         cleanup()
@@ -152,4 +129,16 @@ class Parallax private constructor(
         cleanup()
         pool.free(this)
     }
+
+    /**
+     * Return background layer entity if it exists.
+     */
+    fun getBgLayerEntity(name: String): Entity =
+        bgLayerEntities[name] ?: error("ParallaxComponent: bgLayerEntity '$name' not found!")
+
+    /**
+     * Return foreground layer entity if it exists.
+     */
+    fun getFgLayerEntity(name: String): Entity =
+        fgLayerEntities[name] ?: error("ParallaxComponent: fgLayerEntity '$name' not found!")
 }

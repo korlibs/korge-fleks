@@ -3,9 +3,6 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventPublishComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventResetComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventSubscribeComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenMotionVelocityXComponent
 import kotlin.test.*
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.*
@@ -29,8 +26,8 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteAnimati
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteDestroyOnPlayingFinishedComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteDirectionComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSpriteRunningComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchLayerVisibilityOffVarianceComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchLayerVisibilityOnVarianceComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchVisibilityOffVarianceComponent
+import korlibs.korge.fleks.components.TweenProperty.Companion.TweenSwitchVisibilityOnVarianceComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeEndComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeStartComponent
@@ -77,8 +74,8 @@ private val assetStore = AssetStore().also { it.testing = true }
             Pair(SpriteDirection, TweenSpriteDirectionComponent),
             Pair(SpriteDestroyOnPlayingFinished, TweenSpriteDestroyOnPlayingFinishedComponent),
             Pair(SpriteAnimation, TweenSpriteAnimationComponent),
-            Pair(SwitchLayerVisibilityOnVariance, TweenSwitchLayerVisibilityOnVarianceComponent),
-            Pair(SwitchLayerVisibilityOffVariance, TweenSwitchLayerVisibilityOffVarianceComponent),
+            Pair(SwitchLayerVisibilityOnVariance, TweenSwitchVisibilityOnVarianceComponent),
+            Pair(SwitchLayerVisibilityOffVariance, TweenSwitchVisibilityOffVarianceComponent),
             Pair(SoundStartTrigger, TweenSoundStartTriggerComponent),
             Pair(SoundStopTrigger, TweenSoundStopTriggerComponent),
             Pair(SoundPosition, TweenSoundPositionComponent),
@@ -86,9 +83,6 @@ private val assetStore = AssetStore().also { it.testing = true }
             Pair(TextFieldText, TweenTextFieldTextComponent),
             Pair(TextFieldTextRangeStart, TweenTextFieldTextRangeStartComponent),
             Pair(TextFieldTextRangeEnd, TweenTextFieldTextRangeEndComponent),
-            Pair(EventPublish, TweenEventPublishComponent),
-            Pair(EventReset, TweenEventResetComponent),
-            Pair(EventSubscribe, TweenEventSubscribeComponent),
             Pair(TouchInputEnable, TweenTouchInputEnableComponent),
         )
 

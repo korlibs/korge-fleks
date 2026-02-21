@@ -17,21 +17,12 @@ class GameStateManager {
 
     suspend fun loadGameConfig() {
         // Check for game config file
-        val gameStateConfigVfs = resourcesVfs["game_config.yaml"]
-
-//        if (gameStateConfigVfs.exists()) {
-        // TODO Check why exits() function does not work on Android
-
-        val gameStateConfigString = gameStateConfigVfs.readString()
         config = try {
+            val gameStateConfigString = resourcesVfs["game_config.yaml"].readString()
             Yaml().decodeFromString<GameStateConfig>(gameStateConfigString)
         } catch (e: Throwable) {
             println("ERROR: Loading game state config - $e")
-            GameStateConfig("jobesLegacy", 0, true, "world_1", "level_1", "intro", "start_intro")
+            GameStateConfig("jobesLegacy", 0, true, "world_1", 1, "start_intro")
         }
-//        } else {
-//            return GameStateConfig("jobesLegacy", 0, true, "", "", "")
-//        }
-
     }
 }

@@ -19,13 +19,13 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.RgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
-import korlibs.korge.fleks.components.SpriteLayers.Companion.SpriteLayersComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.TileMap.Companion.TileMapComponent
+import korlibs.korge.fleks.systems.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
 import korlibs.korge.fleks.utils.AppConfig
-import korlibs.korge.fleks.utils.getMainCameraOrNull
 import korlibs.korge.render.*
+import korlibs.math.clamp
 import korlibs.math.geom.*
 
 
@@ -38,7 +38,6 @@ interface RenderSystem {
  * [LayerComponent] and [RgbaComponent] and one of the following components:
  * - [SpriteComponent]
  * - [TextFieldComponent]
- * - [SpriteLayersComponent]
  * - [NinePatchComponent]
  * - [TileMapComponent]
  * This system is used to render all game objects which are not part of the level map or parallax background.
@@ -52,15 +51,17 @@ class ObjectRenderSystem(
     private val comparator: EntityComparator = compareEntity(world) { entA, entB -> entA[LayerComponent].index.compareTo(entB[LayerComponent].index) }
 ) : RenderSystem {
     private val family: Family = world.family { all(layerTag, PositionComponent, LayerComponent, RgbaComponent)
-        .any(PositionComponent, LayerComponent, SpriteComponent, TextFieldComponent, SpriteLayersComponent,
-            NinePatchComponent, TileMapComponent) //, ParallaxLayerComponent)
+        .any(PositionComponent, SpriteComponent, TextFieldComponent,
+            NinePatchComponent, TileMapComponent)
     }
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
+    private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
 
     @OptIn(KorgeExperimental::class)
     override fun render(ctx: RenderContext) {
-        val camera: Entity = world.getMainCameraOrNull() ?: return
+        // Get main camera position or exit if it does not exist
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
         // Sort sprite and text entities by their layerIndex
         family.sort(comparator)
@@ -68,6 +69,7 @@ class ObjectRenderSystem(
         // Iterate over all entities which should be rendered in this view
         family.forEach { entity ->
             val rgba = entity[RgbaComponent].rgba
+
             val entityPosition = entity[PositionComponent]
 
             // Take over entity position
@@ -75,7 +77,7 @@ class ObjectRenderSystem(
 
             if (entity hasNo ScreenCoordinatesTag) {
                 // Transform world coordinates to screen coordinates
-                position.run { world.convertToScreenCoordinates(camera) }
+                position.convertToScreenCoordinates(cameraPosition)
             }
 
             // Rendering path for sprites
@@ -85,8 +87,10 @@ class ObjectRenderSystem(
                 val texture = sprite[spriteComponent.frameIndex]
 
                 ctx.useBatcher { batch ->
-                    val px = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.anchorX
-                    val py = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.anchorY
+                    val px =
+                        position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.anchorX
+                    val py =
+                        position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.anchorY
                     if (spriteComponent.flipX) {
                         batch.drawQuadFlippedX(  // mirror texture horizontally
                             tex = ctx.getTex(texture.bmpSlice),
@@ -161,10 +165,16 @@ class ObjectRenderSystem(
                 val indices = TexturedVertexArray.quadIndices(numQuads)
                 val tva = TexturedVertexArray(numQuads * 4, indices)
                 var index = 0
-                val viewBounds = RectangleInt(position.x.toInt(), position.y.toInt(), ninePatchComponent.width.toInt(), ninePatchComponent.height.toInt())
+                val viewBounds = RectangleInt(
+                    position.x.toInt(),
+                    position.y.toInt(),
+                    ninePatchComponent.width.toInt(),
+                    ninePatchComponent.height.toInt()
+                )
                 ninePatch.info.computeScale(viewBounds) { segment, xx, yy, ww, hh ->
                     val bmpSlice = ninePatch.getSegmentBmpSlice(segment)
-                    tva.quad(index++ * 4,
+                    tva.quad(
+                        index++ * 4,
                         xx.toFloat(), yy.toFloat(),
                         ww.toFloat(), hh.toFloat(),
                         Matrix.IDENTITY, bmpSlice, rgba
@@ -174,43 +184,45 @@ class ObjectRenderSystem(
                 ctx.useBatcher { batch ->
                     batch.drawVertices(tva, ctx.getTex(ninePatch.content.bmp), smoothing = false, BlendMode.NORMAL)
                 }
-            }
-            else if (entity has TileMapComponent) {
+            } else if (entity has TileMapComponent) {
                 val tileMapComponent = entity[TileMapComponent]
 
-                tileMapComponent.layerNames.forEach { layerName ->
-                    val tileMap = assetStore.getTileMapData(tileMapComponent.levelName).getTileMapLayer(layerName)
+                val tileMap = assetStore.getTileMap(tileMapComponent.name)
+                val clusterName = tileMap.clusterList[0]  // Tile map object has only one cluster
 
-                    val tileSet = tileMap.tileSet
-                    val gridWidth = tileSet.width
-                    val gridHeight = tileSet.height
-                    val offsetScale = tileMap.offsetScale
+                val tileMapWidth = tileMap.tileMapWidth
+                val tileSize = tileMap.tileSize
 
-                    // Draw only visible tiles
-                    val tileMapPosX: Float = position.x + position.offsetX
-                    val tileMapPosY: Float = position.y + position.offsetY
+                // Draw only visible tiles
+                val tileMapPosX: Float = position.x + position.offsetX
+                val tileMapPosY: Float = position.y + position.offsetY
 
-                    // Start and end indexes of viewport area
-                    val xStart: Int = tileMapPosX.toInt() / gridWidth - 1  // x in positive direction;  -1 = start one tile before
-                    val xTiles = AppConfig.VIEW_PORT_WIDTH / gridWidth + 3
-                    val xEnd: Int = xStart + xTiles
+                // Start and end indexes of viewport area
+                val xStart: Int = (tileMapPosX.toInt() / tileSize - 1).clamp(0, tileMap.tileMapWidth)  // TODO check if clamp is really needed
+                                  // x in positive direction;  -1 = start one tile before
+                val xTiles = AppConfig.VIEW_PORT_WIDTH / tileSize + 3
+                val xEnd: Int = (xStart + xTiles).clamp(0, tileMap.tileMapWidth)
 
-                    val yStart: Int = tileMapPosY.toInt() / gridHeight - 1  // y in negative direction;  -1 = start one tile before
-                    val yTiles = AppConfig.VIEW_PORT_HEIGHT / gridHeight + 3
-                    val yEnd: Int = yStart + yTiles
+                val yStart: Int = (tileMapPosY.toInt() / tileSize - 1).clamp(0, tileMap.tileMapHeight)
+                                  // y in negative direction;  -1 = start one tile before
+                val yTiles = AppConfig.VIEW_PORT_HEIGHT / tileSize + 3
+                val yEnd: Int = (yStart + yTiles).clamp(0, tileMap.tileMapHeight)
 
-                    ctx.useBatcher { batch ->
-                        for (l in 0 until tileMap.maxLevel) {  // Render all stacked tiles in the tile map
-                            for (tx in xStart until xEnd) {
-                                for (ty in yStart until yEnd) {
-                                    val tile = tileMap[tx, ty, l]
-                                    val info = tileSet.getInfo(tile.tile)
-                                    if (info != null) {
-                                        val px = (tx * gridWidth) + (tile.offsetX * offsetScale) - tileMapPosX
-                                        val py = (ty * gridHeight) + (tile.offsetY * offsetScale) - tileMapPosY
-
+                ctx.useBatcher { batch ->
+                    val tileSet = assetStore.getTileSet(clusterName)
+                    for (tx in xStart until xEnd) {
+                        for (ty in yStart until yEnd) {
+                            val tiles = tileMap.stackedTileMapData[tx + ty * tileMapWidth]
+                            val px = (tx * tileSize) - tileMapPosX
+                            val py = (ty * tileSize) - tileMapPosY
+                            // Render all stacked tiles in the tile map
+                            tiles.forEach { tile ->
+                                if (tile != -1) {
+                                    // ClusterIndex not needed (bits 0-3) because tile map object uses tile set from same cluster
+                                    val tileIndex = tile shr 4  // Get bits 4-16 for tile position in the tileset atlas
+                                    tileSet[tileIndex]?.let { bmpSlice ->
                                         batch.drawQuad(
-                                            tex = ctx.getTex(info.slice),
+                                            tex = ctx.getTex(bmpSlice),
                                             x = px,
                                             y = py,
                                             filtering = false,
@@ -218,7 +230,7 @@ class ObjectRenderSystem(
                                             program = null // Possibility to use a custom shader - add ShaderComponent or similar
                                         )
                                     }
-                                }
+                                } else return@forEach
                             }
                         }
                     }

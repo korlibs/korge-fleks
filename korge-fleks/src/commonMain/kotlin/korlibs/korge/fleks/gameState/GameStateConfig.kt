@@ -9,8 +9,7 @@ data class GameStateConfig(
     val name: String,
     val version: Int = 0,
     var firstStart: Boolean = true,
-    var world: String,
-    var level: String,
-    var special: String,  // Introduce array of special assets
+    var worldName: String,
+    var chunk: Int,
     var startScript: String
 )
