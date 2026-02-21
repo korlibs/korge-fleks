@@ -5,7 +5,7 @@ import kotlin.test.*
 
 class GameStateManagerTest {
 //*
-    private val gameStateConfig = GameStateConfig("TestGame", 0, true, "world_1", "level_1", "special", "startScript")
+    private val gameStateConfig = GameStateConfig("TestGame", 0, true, "world_1", 1, "startScript")
 
     @BeforeTest
     fun setup() {

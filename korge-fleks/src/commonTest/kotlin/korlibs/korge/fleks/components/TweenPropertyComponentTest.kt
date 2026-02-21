@@ -3,9 +3,6 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventPublishComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventResetComponent
-import korlibs.korge.fleks.components.TweenProperty.Companion.TweenEventSubscribeComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenMotionVelocityXComponent
 import kotlin.test.*
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.*
@@ -86,9 +83,6 @@ private val assetStore = AssetStore().also { it.testing = true }
             Pair(TextFieldText, TweenTextFieldTextComponent),
             Pair(TextFieldTextRangeStart, TweenTextFieldTextRangeStartComponent),
             Pair(TextFieldTextRangeEnd, TweenTextFieldTextRangeEndComponent),
-            Pair(EventPublish, TweenEventPublishComponent),
-            Pair(EventReset, TweenEventResetComponent),
-            Pair(EventSubscribe, TweenEventSubscribeComponent),
             Pair(TouchInputEnable, TweenTouchInputEnableComponent),
         )
 

@@ -16,6 +16,7 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenRgba.Companion.twe
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSound.Companion.tweenSound
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSpawner.Companion.tweenSpawner
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite.Companion.tweenSprite
+import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchVisibility.Companion.tweenSwitchVisibility
 import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.gameState.GameStateManager
@@ -28,8 +29,7 @@ import kotlin.test.assertEquals
 
 
 internal class TweenSequenceComponentTest {
-//*
-private val assetStore = AssetStore().also { it.testing = true }
+    private val assetStore = AssetStore().also { it.testing = true }
     private val gameState = GameStateManager()
 
     private val expectedWorld = configureWorld {
@@ -72,7 +72,7 @@ private val assetStore = AssetStore().also { it.testing = true }
                     tweenRgba { target = Entity(45, 0u) }
                     tweenPosition { target = Entity(46, 0u) }
                     tweenSprite { target = Entity(48, 0u) }
-                    tweenSwitchLayerVisibility { target = Entity(49, 0u) }
+                    tweenSwitchVisibility { target = Entity(49, 0u) }
                     tweenSpawner { target = Entity(51, 0u) }
                     tweenSound { target = Entity(52, 0u) }
                 }
@@ -123,5 +123,4 @@ private val assetStore = AssetStore().also { it.testing = true }
 
         Pool.doPoolUsageCheckAfterUnloading()
     }
-// */
 }
