@@ -23,10 +23,6 @@ data class WorldMapConfig(
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             it += worldMapComponent {}
-
-            // Enable debug rendering for collision layer
-//            it += RenderLayerTag.DEBUG
-//            it += DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS
         }
         return entity
     }

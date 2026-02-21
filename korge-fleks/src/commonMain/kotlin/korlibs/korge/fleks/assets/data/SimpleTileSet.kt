@@ -63,7 +63,6 @@ class SimpleTileSet private constructor(
     data class TileSetTileInfo(
         val id: Int,  // Could be removed
         val slice: BmpSlice,
-        val frames: List<TileSetAnimationFrame> = emptyList(),
-        val collision: TileShapeInfo? = null,
+        val frames: List<TileSetAnimationFrame> = emptyList()
     )
 }

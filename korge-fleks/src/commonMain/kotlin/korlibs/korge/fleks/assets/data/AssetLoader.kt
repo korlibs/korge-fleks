@@ -1,5 +1,7 @@
 package korlibs.korge.fleks.assets.data
 
+import korlibs.image.bitmap.slice
+import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.gameState.GameStateConfig
@@ -36,6 +38,9 @@ class AssetLoader(
         val worldName = gameStateConfig.worldName
         val chunkNumber  = gameStateConfig.chunk
 
+        val sw = Stopwatch().start()
+        print("INFO: AssetStore - Start loading world chunk '${worldName}/level_data/common'... ")
+
         val commonChunkInfo: CommonChunkInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/common.json"].readString())
 
         // Get version info
@@ -44,13 +49,19 @@ class AssetLoader(
         val build: Int = commonChunkInfo.version[2]
         // TODO Check later if asset version/build is compatible otherwise convert to new version
 
+        // Load collision shapes for the world chunks
+        val collisionShapes = resourcesVfs["${worldName}/level_data/collision_shapes.png"].readBitmap().slice()
+
         assetStore.worldMapData.init(
             worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth * commonChunkInfo.tileSize).toFloat(),
             worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.chunkHeight * commonChunkInfo.tileSize).toFloat(),
             levelChunkWidth = commonChunkInfo.chunkWidth,
             levelChunkHeight = commonChunkInfo.chunkHeight,
-            tileSize = commonChunkInfo.tileSize
+            tileSize = commonChunkInfo.tileSize,
+            collisionTiles = commonChunkInfo.collisionTiles,
+            collisionShapesBitmapSlice = collisionShapes
         )
+        println("- Resources loaded in ${sw.elapsed}")
 
         // First load chunks and get list of asset clusters which need to be loaded.
         loadChunkAssets(worldName, chunkNumber)

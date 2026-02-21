@@ -28,13 +28,15 @@ import korlibs.korge.render.*
 
 class DebugRenderSystem(
     private val world: World,
-    private val layerTag: RenderLayerTag
+    private val layerTag: RenderLayerTag,
+    private val layerName: String
 ) : RenderSystem {
     private val family: Family = world.family {
         all(layerTag)
             .any(layerTag, PositionComponent, CollisionComponent, SpriteComponent, TextFieldComponent,
-                NinePatchComponent, WorldMapComponent, GridComponent, DebugCollisionShapesComponent)
+                NinePatchComponent, GridComponent, DebugCollisionShapesComponent)
     }
+
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
     private val gridPosition: Position = staticPositionComponent {}
@@ -46,7 +48,15 @@ class DebugRenderSystem(
 
     private val levelData = world.inject<AssetStore>("AssetStore").worldMapData
 
+    private var debugRenderingEnabled = false
+
+    fun toggleDebugRendering() {
+        debugRenderingEnabled = !debugRenderingEnabled
+    }
+
     override fun render(ctx: RenderContext) {
+        if (!debugRenderingEnabled) return
+
         // Get main camera position or exit if it does not exist
         val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
 
@@ -170,36 +180,31 @@ class DebugRenderSystem(
                         line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
                     }
                 }
+            }
+        }
 
+        ctx.useBatcher { batch ->
+            val tileSize = levelData.tileSize
+            // Calculate viewport position in world coordinates from Camera position (x,y) + offset
+            val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
+            val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
+            // Start and end indexes of viewport area (in tile coordinates)
+            val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
+            val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
+            val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
+            val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
 
-                if (entity has WorldMapComponent && entity has DebugInfoTag.LEVEL_MAP_COLLISION_BOUNDS) {
-                    val tileSize = levelData.tileSize
-
-                    // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-                    val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
-                    val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
-
-                    // Start and end indexes of viewport area (in tile coordinates)
-                    val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
-                    val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
-
-                    val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
-                    val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
-
-                    // Draw collision tiles
-                    levelData.forEachCollisionTile(xStart, yStart, xTiles, yTiles) { collisionTile, px, py ->
-                        if (collisionTile == 1) {
-                            batch.drawVector(Colors.RED) {
-                                rect(px - viewPortPosX, py - viewPortPosY, tileSize.toFloat(), tileSize.toFloat())
-                            }
-                        }
-                        if (collisionTile == 4) {
-                            batch.drawVector(Colors.YELLOW) {
-                                rect(px - viewPortPosX, py - viewPortPosY, tileSize.toFloat(), tileSize.toFloat())
-                            }
-                        }
-                    }
-                }
+            // Draw collision tiles
+            val rgba = Colors.WHITE.withAf(0.42f)
+            levelData.forEachCollisionTile(layerName, xStart, yStart, xTiles, yTiles) { collisionTile, px, py ->
+                batch.drawQuad(
+                    tex = ctx.getTex(collisionTile),
+                    x = px - viewPortPosX,
+                    y = py - viewPortPosY,
+                    filtering = false,
+                    colorMul = rgba,
+                    program = null // Possibility to use a custom shader - add ShaderComponent or similar
+                )
             }
         }
     }

@@ -19,11 +19,11 @@ class SystemRuntimeConfigs {
     var worldChunk: Entity? = null
 
     fun getCameraPosition(world: World): Position? =
-        if (camera != null) world.run { camera!![Position.Companion.PositionComponent] } else null
+        if (camera != null) world.run { camera!![Position.PositionComponent] } else null
 
     fun getMessagePassingConfig(world: World): MessagePassingConfig? =
-        if (messagePassing != null) world.run { messagePassing!![MessagePassingConfig.Companion.MessagePassingConfigComponent] } else null
+        if (messagePassing != null) world.run { messagePassing!![MessagePassingConfig.MessagePassingConfigComponent] } else null
 
     fun getWorldChunkConfig(world: World): WorldMap? =
-        if (worldChunk != null) world.run { worldChunk!![WorldMap.Companion.WorldMapComponent] } else null
+        if (worldChunk != null) world.run { worldChunk!![WorldMap.WorldMapComponent] } else null
 }

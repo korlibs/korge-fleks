@@ -25,6 +25,7 @@ class WorldMapData {
 
     internal val chunkMeshes: MutableMap<Int, ChunkAssetInfo> = mutableMapOf()
     internal lateinit var levelGridVania: IntArray2
+    internal lateinit var collisionTileSet: CollisionTileSet
 
     private val levelMidPointX: Int = levelChunkWidth / 2
     private val levelMidPointY: Int = levelChunkHeight / 2
@@ -34,7 +35,9 @@ class WorldMapData {
         worldHeight: Float,
         levelChunkWidth: Int,
         levelChunkHeight: Int,
-        tileSize: Int
+        tileSize: Int,
+        collisionTiles: List<List<Int>>,
+        collisionShapesBitmapSlice: BmpSlice
     ) {
         this.worldWidth = worldWidth
         this.worldHeight = worldHeight
@@ -43,7 +46,9 @@ class WorldMapData {
         this.tileSize = tileSize
 
         // Set up grid-vania array
-        levelGridVania = IntArray2.Companion(levelChunkWidth, levelChunkHeight) { -1 }
+        levelGridVania = IntArray2(levelChunkWidth, levelChunkHeight) { -1 }
+        // Set up collision tile set
+        collisionTileSet = CollisionTileSet(collisionTiles, collisionShapesBitmapSlice, tileSize, tileSize)
     }
 
     /**
@@ -185,38 +190,47 @@ class WorldMapData {
         }
     }
 
-    fun forEachCollisionTile(x: Int, y: Int, width: Int, height: Int, renderCall: (Int, Float, Float) -> Unit) {
+    /**
+     * Iterate over all collision tiles within the given view port area and call the renderCall function for each tile.
+     *
+     * @param cx - horizontal position of top-left corner of view port in cell coordinates (tiles)
+     * @param cy - vertical position of top-left corner of view port in cell coordinates (tiles)
+     * @param width - width of view port in tiles
+     * @param height - height of view port in tiles
+     * @param renderCall - callback function to call for each collision tile; parameters: collision index, x position in pixels, y position in pixels
+     */
+    fun forEachCollisionTile(layer: String, cx: Int, cy: Int, width: Int, height: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
         // Calculate the view port corners (top-left, top-right, bottom-left and bottom-right positions) in gridvania indexes
         // and check if the corners are in different level maps (tileMapData)
-        val gridX = x / levelChunkWidth
-        val gridY = y / levelChunkHeight
-        val gridX2 = (x + width) / levelChunkWidth
-        val gridY2 = (y + height) / levelChunkHeight
-        val xStart = x % levelChunkWidth
-        val yStart = y % levelChunkHeight
+        val gridX = cx / levelChunkWidth
+        val gridY = cy / levelChunkHeight
+        val gridX2 = (cx + width) / levelChunkWidth
+        val gridY2 = (cy + height) / levelChunkHeight
+        val xStart = cx % levelChunkWidth
+        val yStart = cy % levelChunkHeight
         // Check if the view port area overlaps multiple levels
         if (gridX == gridX2) {
             // We have only one level in horizontal direction
             if (gridY == gridY2) {
                 // We have only one level in vertical direction
-                processCollisionTiles(gridX, gridY, xStart, yStart, xStart + width, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX, gridY, xStart, yStart, xStart + width, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
             } else {
                 // We have vertically two levels
-                processCollisionTiles(gridX, gridY, xStart, yStart, xStart + width, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
-                processCollisionTiles(gridX, gridY2, xStart, 0, xStart + width, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX, gridY, xStart, yStart, xStart + width, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX, gridY2, xStart, 0, xStart + width, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
             }
         } else {
             // We have horizontal two levels
             if (gridY == gridY2) {
                 // We have only one level in vertical direction
-                processCollisionTiles(gridX, gridY, xStart, yStart, levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
-                processCollisionTiles(gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX, gridY, xStart, yStart, levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, yStart + height, levelChunkWidth, levelChunkHeight, renderCall)
             } else {
                 // We have vertical two levels
-                processCollisionTiles(gridX, gridY, xStart, yStart, levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
-                processCollisionTiles(gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
-                processCollisionTiles(gridX, gridY2, xStart, 0, levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
-                processCollisionTiles(gridX2, gridY2, 0, 0, (xStart + width) % levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX, gridY, xStart, yStart, levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX2, gridY, 0, yStart, (xStart + width) % levelChunkWidth, levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX, gridY2, xStart, 0, levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
+                processCollisionTiles(layer, gridX2, gridY2, 0, 0, (xStart + width) % levelChunkWidth, (yStart + height) % levelChunkHeight, levelChunkWidth, levelChunkHeight, renderCall)
             }
         }
     }
@@ -244,22 +258,25 @@ class WorldMapData {
         }
     }
 
-    private fun processCollisionTiles(gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (Int, Float, Float) -> Unit) {
-/*
-                    val collisionMask = tile shr 16  //
-
-        levelGridVania[gridX, gridY].collisionMap?.let { collisionMap ->
-            for (tx in xStart until xEnd) {
-                for (ty in yStart until yEnd) {
-                    val tile = collisionMap[tx, ty]
-                    if (tile != 0) {
-                        val px = tx * tileSize + (gridX * levelWidth * tileSize)
-                        val py = ty * tileSize + (gridY * levelHeight * tileSize)
-                        renderCall(tile, px.toFloat(), py.toFloat())
+    private fun processCollisionTiles(layer: String, gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
+        val chunkIndex = levelGridVania[gridX, gridY]
+        val chunk = chunkMeshes[chunkIndex] ?: error("LevelData - processTiles: No chunk mesh found for chunk index '$chunkIndex' in grid position ($gridX, $gridY)!")
+        val levelMap = chunk.levelMaps[layer] ?: error("LevelData - processTiles: No level map found for layer '$layer' in chunk index '$chunkIndex'!")
+        val chunkX = chunk.chunkX
+        val chunkY = chunk.chunkY
+        for (tx in xStart until xEnd) {
+            for (ty in yStart until yEnd) {
+                levelMap.stackedTileMapData[tx + ty * levelChunkWidth].firstOrNull()?.let { tile ->
+                    val collisionIndex = (tile and 0xff00000) shr 20  // Get bits 20-24 for collision index
+                    if (collisionIndex != 0) {
+                        // Get collision tile from collision tileset using collisionIndex and call renderCall with it
+                        val collisionTile = collisionTileSet[collisionIndex]
+                        val px = (tx * tileSize) + (chunkX * levelWidth * tileSize)
+                        val py = (ty * tileSize) + (chunkY * levelHeight * tileSize)
+                        renderCall(collisionTile, px.toFloat(), py.toFloat())
                     }
                 }
             }
         }
-*/
     }
 }
