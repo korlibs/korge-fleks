@@ -1,7 +1,5 @@
 package korlibs.korge.fleks.logic.collision
 
-import korlibs.korge.fleks.utils.AppConfig
-
 
 data class GridPosition(
     var cx: Int = 0,  // Cell index
@@ -9,72 +7,69 @@ data class GridPosition(
     var xr: Float = 0f,  // "Relative" position in the cell
     var yr: Float = 0f
 ) {
-    var x
-        get() = (cx + xr) * AppConfig.GRID_CELL_SIZE
-        set(value) {
-            cx = (value / AppConfig.GRID_CELL_SIZE).toInt()
-            xr = (value - cx * AppConfig.GRID_CELL_SIZE) / AppConfig.GRID_CELL_SIZE
-        }
+    // TODO remove var x,y if not needed
+//    var x
+//        get() = (cx + xr) * AppConfig.GRID_CELL_SIZE
+//        set(value) {
+//            cx = (value / AppConfig.GRID_CELL_SIZE).toInt()
+//            xr = (value - cx * AppConfig.GRID_CELL_SIZE) / AppConfig.GRID_CELL_SIZE
+//        }
+//
+//    var y
+//        get() = (cy + yr) * AppConfig.GRID_CELL_SIZE
+//        set(value) {
+//            cy = (value / AppConfig.GRID_CELL_SIZE).toInt()
+//            yr = (value - cy * AppConfig.GRID_CELL_SIZE) / AppConfig.GRID_CELL_SIZE
+//
+//        }
 
-    var y
-        get() = (cy + yr) * AppConfig.GRID_CELL_SIZE
-        set(value) {
-            cy = (value / AppConfig.GRID_CELL_SIZE).toInt()
-            yr = (value - cy * AppConfig.GRID_CELL_SIZE) / AppConfig.GRID_CELL_SIZE
-
-        }
-
-    fun applyOnX(x : Int) {applyOnX(x.toFloat()) }
-    fun applyOnY(y : Int) {applyOnY(y.toFloat()) }
-
-    fun applyOnX(x: Float) {
-        xr += x / AppConfig.GRID_CELL_SIZE
+    fun applyOnX(x: Float, gridSize: Float) {
+        xr += x / gridSize
         if (xr > 0) while (xr > 1) {
-            xr--
-            cx++
+            xr -= 1f
+            cx += 1
         }
         else if (xr < 0 ) while (xr < 0) {
-            xr++
-            cx--
+            xr += 1f
+            cx -= 1
         }
     }
 
-    fun applyOnY(y: Float) {
-        yr += y / AppConfig.GRID_CELL_SIZE
+    fun applyOnY(y: Float, gridSize: Float) {
+        yr += y / gridSize
         if (yr > 0) while (yr > 1) {
-            yr--
-            cy++
+            yr -= 1f
+            cy += 1
         }
         else if (yr < 0 ) while (yr < 0) {
-            yr++
-            cy--
+            yr += 1f
+            cy -= 1
         }
     }
 
     fun setAndNormalizeX(ccx: Int, xxr: Float) {
         cx = ccx
         xr = xxr
-        while (xr > 1) {
-            xr--
-            cx++
+        while (xr > 1f) {
+            xr -= 1f
+            cx += 1
         }
-        while (xr < 0) {
-            xr++
-            cx--
+        while (xr < 0f) {
+            xr += 1f
+            cx -= 1
         }
     }
 
     fun setAndNormalizeY(ccy: Int, yyr: Float) {
         cy = ccy
         yr = yyr
-        while (yr > 1) {
-            yr--
-            cy++
+        while (yr > 1f) {
+            yr -= 1f
+            cy += 1
         }
-        while (yr < 0) {
-            yr++
-            cy--
+        while (yr < 0f) {
+            yr += 1f
+            cy -= 1
         }
     }
-
 }
