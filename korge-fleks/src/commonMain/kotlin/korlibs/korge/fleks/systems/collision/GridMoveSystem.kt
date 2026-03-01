@@ -251,13 +251,15 @@ class GridMoveSystem : IteratingSystem(
      */
     private fun checkPlayfieldBoundaries(gridComponent: Grid) {
         // Keep the player sprite inside the level
-        if (gridComponent.x <= 16f) gridComponent.x = 16f
-        else if (gridComponent.x >= worldMapData.worldWidth - 16f) gridComponent.x = worldMapData.worldWidth - 16f
+        val guardBorder = worldMapData.tileSize.toFloat()
+        // Check left and right boundaries with a guard border to prevent the playfield to render outside of the visible area, e.g. if the camera "shakes" on explosions etc.
+        if (gridComponent.x <= guardBorder) gridComponent.x = guardBorder
+        else if (gridComponent.x >= worldMapData.worldWidth - guardBorder) gridComponent.x = worldMapData.worldWidth - guardBorder
 
         // Check if player falls off the playfield at the bottom
-        if (gridComponent.y > worldMapData.worldHeight - 16f) {
+        if (gridComponent.y > worldMapData.worldHeight - guardBorder) {
             // TODO: handle death of object
-            gridComponent.y = worldMapData.worldHeight - 16f // Move the player back to the bottom boundary (can be removed when death is implemented)
+            gridComponent.y = worldMapData.worldHeight - guardBorder // Move the player back to the bottom boundary (can be removed when death is implemented)
             //println("ERROR: PositionSystem - Player falls off the playfield!")
         }
     }
