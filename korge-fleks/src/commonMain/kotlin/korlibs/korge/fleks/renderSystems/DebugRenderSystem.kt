@@ -63,8 +63,6 @@ class DebugRenderSystem(
         // Custom Render Code here
         ctx.useLineBatcher { batch ->
             family.forEach { entity ->
-
-
                 if (entity has PositionComponent) {
                     // Take over entity position
                     position.init(entity[PositionComponent])

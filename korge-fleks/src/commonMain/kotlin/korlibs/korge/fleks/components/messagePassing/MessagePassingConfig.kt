@@ -73,7 +73,8 @@ class MessagePassingConfig private constructor(
          */
         fun MutableMap<Int, ListOfRxMsg>.cleanup() {
             this.forEach { (_, listOfRxMessages) ->
-                listOfRxMessages.cleanup()
+                // We need to free the list elements in order to return them to the pool, otherwise they will be leaked and not reusable anymore.
+                listOfRxMessages.free()
             }
             this.clear()
         }

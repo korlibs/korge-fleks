@@ -40,11 +40,6 @@ object AppConfig {
     var VIEW_PORT_HEIGHT_HALF: Float = (VIEW_PORT_HEIGHT / 2).toFloat()
         private set
 
-    // Debug switches to enable drawing of invisible collision objects and moving raycasts
-    var drawLevelMapColliders = false
-    var drawDebugObjects = false
-    var watchForAssetChanges = true
-
     var deltaPerFrame = 1.0
 
     // Config used by collison system

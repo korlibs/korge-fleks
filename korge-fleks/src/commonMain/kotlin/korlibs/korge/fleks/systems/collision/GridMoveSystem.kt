@@ -19,7 +19,6 @@ import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
 import korlibs.korge.fleks.logic.collision.resolver.PlatformerCollisionResolver
-import korlibs.korge.fleks.utils.AppConfig
 import korlibs.korge.fleks.utils.DebugPointPool
 import korlibs.math.isAlmostEquals
 import kotlin.math.abs
@@ -27,13 +26,13 @@ import kotlin.math.ceil
 
 
 class GridMoveSystem : IteratingSystem(
-    family = World.family { all(MotionComponent, GridComponent, CollisionComponent, StateComponent)
-        .any(DebugCollisionShapesComponent) },
+    family = World.family { all(GridComponent, MotionComponent, CollisionComponent, StateComponent)
+        .any(GridComponent, DebugCollisionShapesComponent) },
     interval = Fixed(1 / 30f)
 ) {
     val assetStore = world.inject<AssetStore>("AssetStore")
 
-    private val levelData = assetStore.worldMapData
+    private val worldMapData = assetStore.worldMapData
 
     var collisionChecker: CollisionChecker = PlatformerCollisionChecker(world.inject<DebugPointPool>("DebugPointPool"))
     var collisionResolver: CollisionResolver = PlatformerCollisionResolver()
@@ -69,7 +68,7 @@ class GridMoveSystem : IteratingSystem(
         val overallMovementX = motionComponent.velocityX * deltaTime
         val overallMovementY = motionComponent.velocityY * deltaTime  // We need to invert the Y velocity because the Y axis is inverted in the grid system
         // Calculate the number of steps needed to move the entity in relation to the grid size (here 16x16 pixels)
-        val steps = ceil((abs(overallMovementX) + abs(overallMovementY)) / AppConfig.GRID_CELL_SIZE)  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
+        val steps = ceil((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize)  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
         if (steps > 0) {
             var i = 0
             while (i < steps) {
@@ -155,7 +154,7 @@ class GridMoveSystem : IteratingSystem(
         debugShapesComponent: DebugCollisionShapes?
     ) {
         // Move the entity in the X direction
-        gridComponent.xr += movement / AppConfig.GRID_CELL_SIZE
+        gridComponent.xr += movement / worldMapData.tileSize
 
         if (motionComponent.velocityX != 0f) {
             // Check if collision happens within the next grid cell where the entity is moving
@@ -212,7 +211,7 @@ class GridMoveSystem : IteratingSystem(
         debugShapesComponent: DebugCollisionShapes?
     ) {
         // Move the entity in the Y direction
-        gridComponent.yr += movement / AppConfig.GRID_CELL_SIZE
+        gridComponent.yr += movement / worldMapData.tileSize
 
         if (motionComponent.velocityY != 0f) {
             // Check if collision happens within the next grid cell where the entity is moving
@@ -252,13 +251,16 @@ class GridMoveSystem : IteratingSystem(
      */
     private fun checkPlayfieldBoundaries(gridComponent: Grid) {
         // Keep the player sprite inside the level
-        if (gridComponent.x <= 16f) gridComponent.x = 16f
-        else if (gridComponent.x >= levelData.worldWidth - 16f) gridComponent.x = levelData.worldWidth - 16f
+        val guardBorder = worldMapData.tileSize.toFloat()
+        // Check left and right boundaries with a guard border to prevent the playfield to render outside of the visible area, e.g. if the camera "shakes" on explosions etc.
+        if (gridComponent.x <= guardBorder) gridComponent.x = guardBorder
+        else if (gridComponent.x >= worldMapData.worldWidth - guardBorder) gridComponent.x = worldMapData.worldWidth - guardBorder
 
         // Check if player falls off the playfield at the bottom
-        if (gridComponent.y > levelData.worldHeight) {
+        if (gridComponent.y > worldMapData.worldHeight - guardBorder) {
             // TODO: handle death of object
-            println("ERROR: PositionSystem - Player falls off the playfield!")
+            gridComponent.y = worldMapData.worldHeight - guardBorder // Move the player back to the bottom boundary (can be removed when death is implemented)
+            //println("ERROR: PositionSystem - Player falls off the playfield!")
         }
     }
 }
