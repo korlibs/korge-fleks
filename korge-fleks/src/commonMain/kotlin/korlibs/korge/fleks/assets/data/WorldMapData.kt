@@ -2,25 +2,27 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
+import kotlin.math.abs
 
 /**
  * Data class for storing world chunks and entities for a game world.
  *
- * We store the level data config in a 2D array depending on its gridvania position in the world
+ * We store the level data config in a 2D array depending on its grid-vania position in the world
  * Then later we will spawn the entities depending on the level which the player is currently in
  */
 class WorldMapData {
-    // Size of whole world in grid cells
-    var worldWidth: Float = 0f
+    // Size of whole world in pixel - init with size of one chunk, but will be set to actual world size in init function
+    var worldWidth: Float = 1024f
         private set
-    var worldHeight: Float = 0f
+    var worldHeight: Float = 1024f
         private set
-    // Size of a world chunk inside the grid vania array in tiles (all levels have the same size; in tiles)
-    var levelChunkWidth: Int = 0
+    // Size of a world chunk inside the grid vania array in tiles (all levels have the same size)
+    var levelChunkWidth: Int = 64
         private set
-    var levelChunkHeight: Int = 0
+    var levelChunkHeight: Int = 64
         private set
-    var tileSize: Int = 0  // Size of a tile cell in pixels (e.g. 16 for 16x16 tile size)
+    // Size of a tile cell in pixels (all tiles have the same size) - default is 16x16 pixels
+    var tileSize: Int = 16
         private set
 
     internal val chunkMeshes: MutableMap<Int, ChunkAssetInfo> = mutableMapOf()
@@ -56,8 +58,8 @@ class WorldMapData {
      */
     fun hasCollision(cx: Int, cy: Int): Boolean {
         // Get the chunk coordinates in the chunk Grid-vania array
-        val gridCx = cx / levelChunkWidth
-        val gridCy = cy / levelChunkHeight
+        val gridCx =  abs(cx / levelChunkWidth)
+        val gridCy = abs(cy / levelChunkHeight)
         return if (levelGridVania.inside(gridCx, gridCy)) {
             // Get the local coordinates within the chunk
             val localCx = cx % levelChunkWidth
