@@ -54,12 +54,18 @@ class WorldMapData {
     }
 
     /**
-     * Check collision at cell position
+     * Check collision at cell position.
+     * Position cannot get negative.
+     *
+     * @param cx Horizontal position in positive x direction (in pixel)
+     * @param cy Vertical positon in positive y direction (in pixel)
+     *
+     * @return Returns true if position has a collision tile/cell attached otherwise false.
      */
     fun hasCollision(cx: Int, cy: Int): Boolean {
         // Get the chunk coordinates in the chunk Grid-vania array
-        val gridCx =  abs(cx / levelChunkWidth)
-        val gridCy = abs(cy / levelChunkHeight)
+        val gridCx =  cx / levelChunkWidth
+        val gridCy = cy / levelChunkHeight
         return if (levelGridVania.inside(gridCx, gridCy)) {
             // Get the local coordinates within the chunk
             val localCx = cx % levelChunkWidth
