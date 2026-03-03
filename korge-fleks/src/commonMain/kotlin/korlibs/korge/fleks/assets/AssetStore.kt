@@ -4,7 +4,6 @@ import korlibs.audio.sound.*
 import korlibs.image.bitmap.*
 import korlibs.image.font.BitmapFont
 import korlibs.image.font.Font
-import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.*
 import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
@@ -12,10 +11,8 @@ import korlibs.korge.fleks.assets.data.ChunkAssetInfo
 import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.SimpleTileSet
-import korlibs.korge.fleks.assets.data.readKorgeFleksClusterAssetJson
 import korlibs.korge.fleks.assets.data.UNKNOWN
 import korlibs.korge.fleks.assets.data.WorldMapData
-import korlibs.time.Stopwatch
 import kotlin.collections.set
 
 
@@ -47,8 +44,6 @@ class AssetStore {
     val loader = AssetLoader(this)  // TODO check if we should put the loader into an extra class
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
-
-    internal val loadedClusterAssets: MutableSet<String> = mutableSetOf()
 
     internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
 
@@ -126,49 +121,6 @@ class AssetStore {
             tileMaps[name]!!.second
         }
         else error("AssetStore: Chunk tile map '$name' not found!")
-
-    suspend fun loadClusterAssets(world: String? = null, clusterName: String, hotReloading: Boolean = false) {
-        // Keep track was loaded already to avoid reloading of assets which are already in memory.
-        val clusterPath = world?.let { "${world}/${clusterName}" } ?: clusterName
-        if (loadedClusterAssets.contains(clusterPath)) {
-            //println("INFO: Asset cluster '$clusterPath' already loaded! No reload is happening!")
-            return
-        } else {
-            loadedClusterAssets.add(clusterPath)
-        }
-
-        val sw = Stopwatch().start()
-        print("INFO: AssetStore - Start loading asset cluster '$clusterPath'... ")
-
-// TODO load sounds and music
-//            // Update maps of music, images, ...
-//            if (!testing) {
-//                assetConfig.sounds.forEach { sound ->
-//                    val soundFile = resourcesVfs[assetConfig.folder + "/" + sound.fileName].readSound(  //readMusic(
-//                        props = AudioDecodingProps(exactTimings = true),
-//                        streaming = true
-//                    )
-////                    val soundChannel = soundFile.decode().toWav().readMusic().play()  // -- convert to WAV
-//                    val soundChannel = soundFile.play()
-////                    val soundChannel2 = resourcesVfs[assetConfig.folder + "/" + sound.value].readSound().play()
-//
-//                    soundChannel.pause()
-//                    sounds[sound.name] = Pair(type, soundChannel)
-//                }
-//            }
-
-        resourcesVfs["${clusterPath}/assets.json"].readKorgeFleksClusterAssetJson(
-            clusterName, textures, ninePatchSlices, bitMapFonts, parallaxLayers, tileSets, tileMaps)
-
-        println("- Resources loaded in ${sw.elapsed}")
-
-        // TODO hot reloading needs rework!!!
-        if (hotReloading) {
-            configureResourceDirWatcher {
-                addAssetWatcher(clusterName) {}
-            }
-        }
-    }
 
     /**
      * Remove all assets which have a specific given [AssetType] string.
