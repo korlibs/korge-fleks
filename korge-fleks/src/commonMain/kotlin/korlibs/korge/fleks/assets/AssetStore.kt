@@ -28,20 +28,37 @@ typealias TileSetsAssetType = MutableMap<String, Pair<AssetType, SimpleTileSet>>
 
 
 /**
- * This class is responsible to load all kind of game data and make it usable / consumable by entities of Korge-Fleks.
+ * This class is responsible to store all kind of game data and make it usable / consumable by entities of a Korge-fleks game.
  *
- * TODO below description section needs rework
- * Assets are separated into [Common][korlibs.korge.fleks.assets.data.AssetType.COMMON], [World][korlibs.korge.fleks.assets.data.AssetType.WORLD], [Level][korlibs.korge.fleks.assets.data.AssetType.LEVEL] and
- * [Special][korlibs.korge.fleks.assets.data.AssetType.SPECIAL] types. The 'Common' type means that the asset is used throughout
- * the game. So it makes sense to not reload those assets on every level or world. The same applies also for 'World' type.
- * It means a world-asset is used in all levels of a world. An asset of type 'Level' means that it is really only used in
- * one level (e.g. level specific graphics or music). The 'Special' type of assets is meant to be used for loading assets
- * during a level which should be unloaded also within the level. This can be used for extensive graphics for a mid-level
- * boss. After the boss has been beaten the graphics can be unloaded since they are not needed anymore.
+ * Assets are separated by two types:
+ *   - CommonAssets
+ *   - WorldClusterAssets
+ *
+ * CommonAssets are assets which are used throughout the whole game. They are not specific to a world or level.
+ * Examples for common assets are the player character's sprite frames, the player character's sound effects, the font for the UI, ...
+ *
+ * WorldClusterAssets are assets which are specific to a world and a cluster/section within a world. A world cluster can be
+ * seen as a section of a world which has its own specific assets. For example, a world cluster can be a part of the world map
+ * which has its own specific graphics (e.g. background, foreground, tilesets) and music. A world cluster can be used for example to
+ * separate the intro part of a world from the rest of the world. The intro part can have its own specific graphics and
+ * music which are not needed for the rest of the world. So it makes sense to load those assets only for the intro part
+ * and unload them after the intro part is finished. This can help to save memory and loading times for the rest of the world.
+ *
+ * Good practices for world cluster assets are:
+ * - Define a "common" cluster for each world which contains assets which are likely used in most clusters of the world.
+ *   This can help to avoid loading and unloading of assets which are used in most clusters of the world and to keep the
+ *   loading and unloading of assets for the specific clusters more efficient. For example, the common cluster can contain the
+ *   tilesets for the level maps of the world and the parallax background images for the world. The specific clusters can then contain
+ *   the specific assets for the different sections of the world (e.g. intro, boss fight section, ...).
+ * - Take care to use specific asset clusters in an area of chunks and mark this area by color in LDtk or the used
+ *   level editor. This can help to keep an overview of which assets are used in which area of the world and to avoid loading
+ *   and unloading of assets.
  */
 class AssetStore {
-    // Handles loading of various asset types
-    val loader = AssetLoader(this)  // TODO check if we should put the loader into an extra class
+    // Handles loading of common and world cluster assets
+    val loader = AssetLoader(this)
+    // Data structure to keep track of loaded world map data (e.g. chunk meshes, level maps, grid vania, ...)
+    val worldMapData = WorldMapData()
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 
@@ -59,13 +76,6 @@ class AssetStore {
     // tiles (tileset and tilemap) related assets
     internal val tileMaps: TileMapsAssetType = mutableMapOf()
     internal val tileSets: TileSetsAssetType = mutableMapOf()
-
-    val worldMapData = WorldMapData()
-
-    fun addWorldChunk(chunkIndex: Int, worldChunk: ChunkAssetInfo) {
-        worldMapData.chunkMeshes[chunkIndex] = worldChunk
-        worldMapData.levelGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex
-    }
 
     fun addGameObjectConfig(name: String, config: GameObjectConfig) {
         if (gameObjectConfig.containsKey(name)) {

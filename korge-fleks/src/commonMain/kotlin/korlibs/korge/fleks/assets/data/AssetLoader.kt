@@ -78,20 +78,22 @@ class AssetLoader(
         loadChunkAssets(worldName, 7)
     }
 
-    private suspend fun loadChunkAssets(worldName: String, chunk: Int) {
+    private suspend fun loadChunkAssets(worldName: String, chunkIndex: Int) {
         val sw = Stopwatch().start()
-        print("INFO: AssetStore - Start loading world chunk '${worldName}/level_data/chunk_${chunk}'... ")
+        print("INFO: AssetStore - Start loading world chunk '${worldName}/level_data/chunk_${chunkIndex}'... ")
 
         // By deserializing the chunk JSON file the EntityConfig objects for the chunk will be created and registered in the EntityFactory.
         // The chunk asset info will be used to load the tile map and other assets for the chunk and to check if the chunk asset version is
         // compatible with the current version of the game.
-        val chunkAssetInfo: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/chunk_${chunk}.json"].readString())
-        assetStore.addWorldChunk(chunk, chunkAssetInfo)
+        val worldChunk: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/chunk_${chunkIndex}.json"].readString())
+        // Add world chunk
+        assetStore.worldMapData.chunkMeshes[chunkIndex] = worldChunk
+        assetStore.worldMapData.levelGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex
 
         println("- Resources loaded in ${sw.elapsed}")
 
         // Create list of tile sets for each level map in the chunk - this is needed for the renderer to get the correct tile set objects for rendering the tile maps of the chunk.
-        chunkAssetInfo.levelMaps.forEach { (_, layer) ->
+        worldChunk.levelMaps.forEach { (_, layer) ->
             // Load cluster assets for the tile map of the chunk if it was not loaded already
             layer.clusterList.forEach { clusterName ->
                 loadClusterAssets(worldName, clusterName)
