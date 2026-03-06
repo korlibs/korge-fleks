@@ -26,11 +26,13 @@ import korlibs.korge.fleks.systems.collision.GridMoveSystem
 import korlibs.korge.fleks.systems.collision.PlayerInputSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveSystem
+import korlibs.korge.fleks.systems.collision.VirtualGamePad
 
 
 fun WorldConfiguration.addKorgeFleksInjectables(
     assetStore: AssetStore,
-    gameState: GameStateManager
+    gameState: GameStateManager,
+    inputState: VirtualGamePad
 ) {
 
     // Register external objects which are used by systems and in component and family hook functions
@@ -39,6 +41,7 @@ fun WorldConfiguration.addKorgeFleksInjectables(
         add("DebugPointPool", DebugPointPool())
         add("GameState", gameState)
         add("SystemRuntimeConfigs", SystemRuntimeConfigs())
+        add("InputState", inputState)
     }
 }
 
