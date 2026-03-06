@@ -4,7 +4,7 @@ import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Info.Companion.InfoComponent
 import korlibs.korge.fleks.components.Info.Companion.infoComponent
-import korlibs.korge.fleks.gameState.GameStateManager
+import korlibs.korge.fleks.state.GameStateManager
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.addKorgeFleksInjectables
 import kotlin.test.Test
@@ -14,12 +14,13 @@ internal class DebugInfoTest {
 //*
     private val assetStore = AssetStore().also { it.testing = true }
     private val gameState = GameStateManager()
+    private val playerInputState = ConcretePlayerInputState()
 
     private val expectedWorld = configureWorld {
-        addKorgeFleksInjectables(assetStore, gameState)
+        addKorgeFleksInjectables(assetStore, gameState, playerInputState)
     }
     private val recreatedWorld = configureWorld {
-        addKorgeFleksInjectables(assetStore, gameState)
+        addKorgeFleksInjectables(assetStore, gameState, playerInputState)
     }
 
     @Test

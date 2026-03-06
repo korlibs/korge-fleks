@@ -8,16 +8,15 @@ import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.data.StateType
+import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.utils.Geometry
 
 
-class PlayerMoveAfterCollisionSystem(
-    private val inputSystemOld: PlayerInputSystem
-) : IteratingSystem(
+class PlayerMoveAfterCollisionSystem : IteratingSystem(
     family = World.family { all(CollisionComponent, MotionComponent, StateComponent) },
     interval = Fixed(1 / 60f)
 ) {
-    private val inputState by lazy { world.inject<VirtualGamePad>("InputState") }
+    private val inputState by lazy { world.inject<PlayerInputState>("InputState") }
 
     override fun onTickEntity(entity: Entity) {
         val collisionComponent = entity[CollisionComponent]

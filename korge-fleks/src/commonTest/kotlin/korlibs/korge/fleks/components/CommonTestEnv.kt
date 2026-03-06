@@ -2,9 +2,12 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.utils.*
+import korlibs.korge.view.Container
 import kotlinx.serialization.encodeToString
 import kotlin.test.assertFalse
+import kotlin.time.Duration
 
 
 data class TestEntityConfig(
@@ -40,4 +43,30 @@ object CommonTestEnv {
             println("decoded object:  ${worldOut.snapshot()}\n")
         }
     }
+}
+
+class ConcretePlayerInputState : Container(), PlayerInputState {
+    // directions of digital joystick
+    override var up = false
+    override var down = false
+    override var right = false
+    override var left = false
+    override var justUp = false
+    override var justDown = false
+    override var justRight = false
+    override var justLeft = false
+    override var lx = 0f
+    override var ly = 0f
+    override var rx = 0f
+    override var ry = 0f
+    override var attack = false
+    override var justReleasedAttack = false
+    override var attackDirection = 0.0f
+    override var attackIndex = 0
+
+    override fun onTouchStart() {}
+    override fun onTouchMove(fingerId: Int, x: Float, y: Float) {}
+    override fun onTouchEnd() {}
+    override fun fadeIn(delay: Duration) {}
+    override fun fadeOut(delay: Duration) {}
 }

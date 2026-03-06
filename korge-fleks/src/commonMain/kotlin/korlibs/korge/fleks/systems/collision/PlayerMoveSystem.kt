@@ -10,19 +10,18 @@ import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.data.StateType
+import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.utils.Geometry
 import kotlin.math.abs
 import korlibs.math.interpolation.interpolate
 
 
-class PlayerMoveSystem(
-    private val inputSystemOld: PlayerInputSystem
-) : IteratingSystem(
+class PlayerMoveSystem : IteratingSystem(
     family = World.family { all(MotionComponent, CollisionComponent, StateComponent) },
     interval = Fixed(1 / 60f)  // TODO check if we use here 30 or 60 Hz/FPS
 ) {
     private val assetStore = world.inject<AssetStore>("AssetStore")
-    private val inputState = world.inject<VirtualGamePad>("InputState")
+    private val inputState = world.inject<PlayerInputState>("InputState")
 
     override fun onTickEntity(entity: Entity) {
         val collisionComponent = entity[CollisionComponent]
@@ -183,6 +182,13 @@ class PlayerMoveSystem(
         // of the player sprite according to collisions with walls, etc.
         motionComponent.velocityX = velocityX
         motionComponent.velocityY = -velocityY  // invert Y velocity because the Y axis is inverted in the grid system
+
+        // Reset just triggers
+        inputState.justUp = false
+        inputState.justDown = false
+        inputState.justRight = false
+        inputState.justLeft = false
+
     }
 
     private fun setHorizontalVelocity(lastHorizontalVelocity: Float, motionConfig: MotionConfig, wasRunningInOppositeDirection: Boolean, direction: Int): Float {

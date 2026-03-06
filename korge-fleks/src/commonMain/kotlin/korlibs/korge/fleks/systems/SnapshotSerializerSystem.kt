@@ -4,7 +4,7 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.io.async.*
 import korlibs.io.file.std.*
-import korlibs.korge.fleks.gameState.*
+import korlibs.korge.fleks.state.*
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 import kotlinx.serialization.modules.*

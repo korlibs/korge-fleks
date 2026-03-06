@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.gameState
+package korlibs.korge.fleks.state
 
 import com.charleskorn.kaml.Yaml
 import korlibs.io.file.std.resourcesVfs
