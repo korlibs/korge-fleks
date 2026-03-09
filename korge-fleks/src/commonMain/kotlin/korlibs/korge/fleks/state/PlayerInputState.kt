@@ -24,10 +24,4 @@ interface PlayerInputState {
     var justReleasedAttack: Boolean
     var attackDirection: Float
     var attackIndex: Int
-
-    fun onTouchStart()
-    fun onTouchMove(fingerId: Int, x: Float, y: Float)
-    fun onTouchEnd()
-    fun fadeIn(delay: Duration = Duration.NIL)
-    fun fadeOut(delay: Duration = Duration.NIL)
 }
