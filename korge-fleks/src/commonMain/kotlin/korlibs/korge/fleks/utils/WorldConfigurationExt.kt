@@ -64,7 +64,6 @@ fun WorldConfiguration.addKorgeFleksSystems() {
 //        add(GridCollisionCleanupSystem())  ??? check why this is needed
         add(GameObjectStateSystem())
 
-        add(TouchInputSystem())
         add(SpawnerSystem())
         add(MessagePassingSystem())
 
