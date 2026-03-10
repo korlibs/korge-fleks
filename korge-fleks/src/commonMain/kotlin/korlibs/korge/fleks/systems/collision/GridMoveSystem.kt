@@ -68,17 +68,17 @@ class GridMoveSystem : IteratingSystem(
         val overallMovementX = motionComponent.velocityX * deltaTime
         val overallMovementY = motionComponent.velocityY * deltaTime  // We need to invert the Y velocity because the Y axis is inverted in the grid system
         // Calculate the number of steps needed to move the entity in relation to the grid size (here 16x16 pixels)
-        val steps = ceil((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize)  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
+        val steps = ceil((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize.toFloat())  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
         if (steps > 0) {
             var i = 0
-            while (i < steps) {
-                // Reset collision flags
-                collisionComponent.right = false
-                collisionComponent.left = false
-                collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
-                collisionComponent.isGrounded = false
-                collisionComponent.isCollidingAbove = false
+            // Reset collision flags
+            collisionComponent.right = false
+            collisionComponent.left = false
+            collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
+            collisionComponent.isGrounded = false
+            collisionComponent.isCollidingAbove = false
 
+            while (i < steps) {
                 checkCollisionHorizontally(overallMovementX / steps, gridComponent, motionComponent, collisionComponent, collisionBox, debugShapesComponent)
                 checkCollisionVertically(overallMovementY / steps, gridComponent, motionComponent, collisionComponent, collisionBox, debugShapesComponent)
 
