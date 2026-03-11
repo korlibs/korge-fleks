@@ -11,6 +11,8 @@ import korlibs.korge.fleks.utils.*
  * System for handling touch input on entities with [TouchInputComponent].
  * The system checks if the touch input area is enabled and if the touch input is within the bounds of the entity.
  *
+ * HINT: Currently not used
+ *
  * Touch behavior can be controlled via [TouchInputComponent.continuousTouch]. If this flag is set to true then the
  * touch input will be processed as long as the touch input is within the bounds of the entity. Otherwise. touch
  * behaves like a button and the touch input will only be processed if the touch is released.
@@ -27,6 +29,16 @@ import korlibs.korge.fleks.utils.*
  * @property upY The y coordinate of the touch input when it was released
  * @property isJustUp Flag to indicate if display touch was just released
  * @property isTouchActive Flag to indicate if touch input is active (i.e. touch is pressed, mouse button is hold)
+ *
+ * If this system is used add the following to the game scene:
+ *
+ * ```kotlin
+ *     // Pass full screen touch input to TouchInputSystem
+ *     val touchInputSystem = gameWorld.system<TouchInputSystem>()
+ *     onDown { touchInputSystem.onTouchDown(it.currentPosLocal.x.toFloat(), it.currentPosLocal.y.toFloat()) }
+ *     onMove { touchInputSystem.onTouchMove(it.currentPosLocal.x.toFloat(), it.currentPosLocal.y.toFloat()) }
+ *     onUp { touchInputSystem.onTouchUp(it.currentPosLocal.x.toFloat(), it.currentPosLocal.y.toFloat()) }
+ * ```
  */
 class TouchInputSystem : IteratingSystem(
     family {

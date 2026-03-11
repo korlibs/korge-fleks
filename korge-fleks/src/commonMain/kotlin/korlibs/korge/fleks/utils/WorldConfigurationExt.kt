@@ -3,7 +3,8 @@ package korlibs.korge.fleks.utils
 import com.github.quillraven.fleks.WorldConfiguration
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.entity.config.registerCommonEntityConfigs
-import korlibs.korge.fleks.gameState.GameStateManager
+import korlibs.korge.fleks.state.GameStateManager
+import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.systems.SystemRuntimeConfigs
 import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
@@ -23,14 +24,14 @@ import korlibs.korge.fleks.systems.SpriteSystem
 import korlibs.korge.fleks.systems.TouchInputSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
 import korlibs.korge.fleks.systems.collision.GridMoveSystem
-import korlibs.korge.fleks.systems.collision.PlayerInputSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveSystem
 
 
 fun WorldConfiguration.addKorgeFleksInjectables(
     assetStore: AssetStore,
-    gameState: GameStateManager
+    gameState: GameStateManager,
+    inputState: PlayerInputState
 ) {
 
     // Register external objects which are used by systems and in component and family hook functions
@@ -39,6 +40,7 @@ fun WorldConfiguration.addKorgeFleksInjectables(
         add("DebugPointPool", DebugPointPool())
         add("GameState", gameState)
         add("SystemRuntimeConfigs", SystemRuntimeConfigs())
+        add("InputState", inputState)
     }
 }
 
@@ -53,19 +55,15 @@ fun WorldConfiguration.addKorgeFleksSystems() {
 //        add(PlatformerGravitySystem())
 //        add(PlatformerGroundSystem())  TODO check if we need this system - isGrounded is set in the GridMoveSystem
 
-        val playerInputSystem = PlayerInputSystem()
-        add(playerInputSystem)
-        add(PlayerMoveSystem(playerInputSystem))
+        add(PlayerMoveSystem())
         add(GridMoveSystem())
-        add(PlayerMoveAfterCollisionSystem(playerInputSystem))
+        add(PlayerMoveAfterCollisionSystem())
         // Debug system to move player entity to a specific position on the map overwriting player input data
         add(DebugSystem())
-
 
 //        add(GridCollisionCleanupSystem())  ??? check why this is needed
         add(GameObjectStateSystem())
 
-        add(TouchInputSystem())
         add(SpawnerSystem())
         add(MessagePassingSystem())
 

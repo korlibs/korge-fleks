@@ -8,21 +8,20 @@ import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.gameObject.MotionConfig
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
-import korlibs.korge.fleks.components.State
 import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.data.StateType
+import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.utils.Geometry
 import kotlin.math.abs
 import korlibs.math.interpolation.interpolate
 
 
-class PlayerMoveSystem(
-    private val inputSystem: PlayerInputSystem
-) : IteratingSystem(
+class PlayerMoveSystem : IteratingSystem(
     family = World.family { all(MotionComponent, CollisionComponent, StateComponent) },
     interval = Fixed(1 / 60f)  // TODO check if we use here 30 or 60 Hz/FPS
 ) {
-    val assetStore = world.inject<AssetStore>("AssetStore")
+    private val assetStore = world.inject<AssetStore>("AssetStore")
+    private val inputState = world.inject<PlayerInputState>("InputState")
 
     override fun onTickEntity(entity: Entity) {
         val collisionComponent = entity[CollisionComponent]
@@ -66,7 +65,7 @@ class PlayerMoveSystem(
         // Enable next jump when player is grounded and joystick is pressed up again.
         // This prevents that the player sprite jumps around like crazy when joystick "Up" is keeping
         // pressed.
-        if (collisionComponent.isGrounded && inputSystem.justUp) {
+        if (collisionComponent.isGrounded && inputState.justUp) {
             collisionComponent.jumpVelocity = motionConfig.maxJumpVelocity
         }
 
@@ -76,10 +75,10 @@ class PlayerMoveSystem(
         // If the player is squat down then ignore here new left and right presses.
         // If the player is running left or right and squats down the squat down animation should start from
         // the beginning
-        stateComponent.resetAnimFrameCounter = (!collisionComponent.squatDown && (inputSystem.justLeft || inputSystem.justRight || inputSystem.justDown))
+        stateComponent.resetAnimFrameCounter = (!collisionComponent.squatDown && (inputState.justLeft || inputState.justRight || inputState.justDown))
 
         // Check if player should squat down
-        if (inputSystem.down && collisionComponent.isGrounded) {
+        if (inputState.down && collisionComponent.isGrounded) {
             collisionComponent.squatDown = true
             stateComponent.current = StateType.SQUAT
             // Slow down any horizontal movement
@@ -89,13 +88,13 @@ class PlayerMoveSystem(
             collisionComponent.squatDown = false
         }
         // Check if player is not squat down and add velocity to player
-        if (!inputSystem.down && collisionComponent.isGrounded) {
+        if (!inputState.down && collisionComponent.isGrounded) {
             // Process horizontal sprite movement
-            if (inputSystem.right) {
+            if (inputState.right) {
                 // Sprite moves to right direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningLeft, Geometry.RIGHT_DIRECTION)
                 stateComponent.current = StateType.RUN
-            } else if (inputSystem.left) {
+            } else if (inputState.left) {
                 // Sprite moves to left direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningRight, Geometry.LEFT_DIRECTION)
                 stateComponent.current = StateType.RUN
@@ -105,10 +104,10 @@ class PlayerMoveSystem(
             }
         } else if (!collisionComponent.isGrounded) {
             // This handles pressing joystick left or right while player is not grounded (that means player is jumping or falling)
-            if (inputSystem.right) {
+            if (inputState.right) {
                 // Sprite moves to right direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningLeft, Geometry.RIGHT_DIRECTION)
-            } else if (inputSystem.left) {
+            } else if (inputState.left) {
                 // Sprite moves to left direction
                 velocityX = setHorizontalVelocity(motionComponent.lastHorizontalVelocity, motionConfig, wasRunningRight, Geometry.LEFT_DIRECTION)
             }
@@ -116,7 +115,7 @@ class PlayerMoveSystem(
             stateComponent.resetAnimFrameCounter = wasFalling == true
         }
         // check if player is jumping
-        if (inputSystem.up && !collisionComponent.isCollidingAbove) {
+        if (inputState.up && !collisionComponent.isCollidingAbove) {
             // during jumping
             if (!wasFalling) {
                 // use only a fraction of the initial jump velocity in every frame
@@ -148,14 +147,14 @@ class PlayerMoveSystem(
         }
 
         // Finally check the attack status and adapt the state accordingly
-        if (inputSystem.attack) {
+        if (inputState.attack) {
             // Check if player is attacking
             when (stateComponent.current) {
                 StateType.STAND, StateType.IDLE -> stateComponent.current = StateType.STAND_ATTACK
                 StateType.JUMP -> stateComponent.current = StateType.JUMP_ATTACK
                 StateType.FALL -> stateComponent.current = StateType.FALL_ATTACK
                 StateType.SQUAT -> {
-                    stateComponent.current = if (inputSystem.attackIndex > Geometry.DIRECTION_DIAGONAL_RIGHT_DOWN) StateType.ON_FLOOR_ATTACK
+                    stateComponent.current = if (inputState.attackIndex > Geometry.DIRECTION_DIAGONAL_RIGHT_DOWN) StateType.ON_FLOOR_ATTACK
                     else StateType.SQUAT_ATTACK
                 }
                 StateType.RUN -> stateComponent.current = StateType.RUN_ATTACK
@@ -164,7 +163,7 @@ class PlayerMoveSystem(
                 else -> println("ERROR: PlayerMoveSystem - Unknown state \"${stateComponent.current}\" on attack!")
             }
         } else if ((stateComponent.last == StateType.RUN_ATTACK || stateComponent.last == StateType.RUN_HIT)
-            && stateComponent.current == StateType.RUN && !inputSystem.attack
+            && stateComponent.current == StateType.RUN && !inputState.attack
 // TODO            && !(app.animationHandler.isAnimationKeyframeInRunAttackState(gameObject) && gameObject.animData.directionIndex == Geometry.DIRECTION_RIGHT)
             ) {
             // Keep state run_attack after attack button release until the gun is in a position

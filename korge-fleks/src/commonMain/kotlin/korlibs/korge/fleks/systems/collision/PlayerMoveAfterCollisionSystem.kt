@@ -8,15 +8,16 @@ import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.data.StateType
+import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.utils.Geometry
 
 
-class PlayerMoveAfterCollisionSystem(
-    private val inputSystem: PlayerInputSystem
-) : IteratingSystem(
+class PlayerMoveAfterCollisionSystem : IteratingSystem(
     family = World.family { all(CollisionComponent, MotionComponent, StateComponent) },
     interval = Fixed(1 / 60f)
 ) {
+    private val inputState by lazy { world.inject<PlayerInputState>("InputState") }
+
     override fun onTickEntity(entity: Entity) {
         val collisionComponent = entity[CollisionComponent]
         val motionComponent = entity[MotionComponent]
@@ -31,7 +32,7 @@ class PlayerMoveAfterCollisionSystem(
         if (collisionComponent.isGrounded
             && collisionComponent.isInFrontOfWall()
             && !collisionComponent.squatDown) {
-            stateComponent.current = if (!inputSystem.attack) StateType.STAND else StateType.STAND_ATTACK
+            stateComponent.current = if (!inputState.attack) StateType.STAND else StateType.STAND_ATTACK
             // Reset animation timer first time when player is in front of wall - otherwise
             // the breath animation will not play
             if (!collisionComponent.wasInFrontOfWall) {
@@ -39,9 +40,9 @@ class PlayerMoveAfterCollisionSystem(
             }
         }
         // flip sprite as needed
-        if (inputSystem.right) {
+        if (inputState.right) {
             stateComponent.direction = Geometry.RIGHT_DIRECTION
-        } else if (inputSystem.left) {
+        } else if (inputState.left) {
             stateComponent.direction = Geometry.LEFT_DIRECTION
         }
 

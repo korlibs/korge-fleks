@@ -9,11 +9,11 @@ import kotlinx.serialization.Serializable
 /**
  * A component to define movement for an entity.
  *
- * @param velocityX in "world units" per delta time
- * @param velocityY in "world units" per delta time
- *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
+ *
+ * @param velocityX Move horizontally in "world units" per delta time.
+ * @param velocityY Move vertically in "world units" per delta time.
  */
 @Serializable @SerialName("Motion")
 class Motion private constructor(

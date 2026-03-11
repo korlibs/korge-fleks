@@ -1,7 +1,7 @@
 package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.gameState.*
+import korlibs.korge.fleks.state.*
 
 
 /**

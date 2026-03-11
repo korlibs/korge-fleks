@@ -11,12 +11,7 @@ import korlibs.io.dynamic.dyn
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
 import korlibs.io.util.unquote
-import korlibs.korge.fleks.assets.BitMapFontsAssetType
-import korlibs.korge.fleks.assets.NinePatchBmpSlicesAssetType
-import korlibs.korge.fleks.assets.ParallaxLayersAssetType
-import korlibs.korge.fleks.assets.SpriteFramesAssetType
-import korlibs.korge.fleks.assets.TileMapsAssetType
-import korlibs.korge.fleks.assets.TileSetsAssetType
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxPlane.*
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.ParallaxLayersInfo.ParallaxLayer
 import korlibs.korge.fleks.assets.data.SpriteFrames.*
@@ -30,13 +25,15 @@ import kotlin.math.absoluteValue
 
 suspend fun VfsFile.readKorgeFleksClusterAssetJson(
     clusterName: String,
-    textures: SpriteFramesAssetType,
-    ninePatchSlices: NinePatchBmpSlicesAssetType,
-    bitMapFonts: BitMapFontsAssetType,
-    parallaxLayers: ParallaxLayersAssetType,
-    tileSets: TileSetsAssetType,
-    tileMaps: TileMapsAssetType
+    assetStore: AssetStore
 ) {
+    val textures = assetStore.textures
+    val ninePatchSlices = assetStore.ninePatchSlices
+    val bitMapFonts = assetStore.bitMapFonts
+    val parallaxLayers = assetStore.parallaxLayers
+    val tileSets = assetStore.tileSets
+    val tileMaps = assetStore.tileMaps
+
     val clusterName: AssetType = clusterName
     // Enable ignoreUnknownKeys for testing when needed
     //val assetConfig: AssetConfig = Json { ignoreUnknownKeys = true }.decodeFromString(this.readString())
