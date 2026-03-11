@@ -182,13 +182,6 @@ class PlayerMoveSystem : IteratingSystem(
         // of the player sprite according to collisions with walls, etc.
         motionComponent.velocityX = velocityX
         motionComponent.velocityY = -velocityY  // invert Y velocity because the Y axis is inverted in the grid system
-
-        // Reset just triggers
-        inputState.justUp = false
-        inputState.justDown = false
-        inputState.justRight = false
-        inputState.justLeft = false
-
     }
 
     private fun setHorizontalVelocity(lastHorizontalVelocity: Float, motionConfig: MotionConfig, wasRunningInOppositeDirection: Boolean, direction: Int): Float {
