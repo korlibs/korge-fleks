@@ -63,10 +63,4 @@ class ConcretePlayerInputState : Container(), PlayerInputState {
     override var justReleasedAttack = false
     override var attackDirection = 0.0f
     override var attackIndex = 0
-
-    override fun onTouchStart() {}
-    override fun onTouchMove(fingerId: Int, x: Float, y: Float) {}
-    override fun onTouchEnd() {}
-    override fun fadeIn(delay: Duration) {}
-    override fun fadeOut(delay: Duration) {}
 }
