@@ -4,61 +4,24 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
+import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.gameObject.MotionConfig
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
+import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNameComponent
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
+import korlibs.korge.fleks.components.Sprite
+import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.components.State
 import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.data.StateType
-import korlibs.korge.fleks.state.PlayerInputState
+import korlibs.korge.fleks.state.*
 import korlibs.korge.fleks.utils.Geometry
 import korlibs.math.interpolation.interpolate
 
 
-// ---------- Lightweight Behavior Tree primitives (kept local to this file) ----------
-
-enum class BTStatus { Success, Failure, Running }
-
-interface BTNode {
-    fun tick(bb: Blackboard): BTStatus
-}
-
-class Sequence(private val children: List<BTNode>) : BTNode {
-    override fun tick(bb: Blackboard): BTStatus {
-        for (child in children) {
-            when (child.tick(bb)) {
-                BTStatus.Success -> continue
-                BTStatus.Failure -> return BTStatus.Failure
-                BTStatus.Running -> return BTStatus.Running
-            }
-        }
-        return BTStatus.Success
-    }
-}
-
-class Selector(private val children: List<BTNode>) : BTNode {
-    override fun tick(bb: Blackboard): BTStatus {
-        for (child in children) {
-            when (child.tick(bb)) {
-                BTStatus.Success -> return BTStatus.Success
-                BTStatus.Running -> return BTStatus.Running
-                BTStatus.Failure -> continue
-            }
-        }
-        return BTStatus.Failure
-    }
-}
-
-class ConditionNode(private val cond: (Blackboard) -> Boolean) : BTNode {
-    override fun tick(bb: Blackboard): BTStatus = if (cond(bb)) BTStatus.Success else BTStatus.Failure
-}
-
-class ActionNode(private val action: (Blackboard) -> BTStatus) : BTNode {
-    override fun tick(bb: Blackboard): BTStatus = action(bb)
-}
 
 // ---------- Blackboard holding references for the BT ----------
 
@@ -68,6 +31,8 @@ class Blackboard(
     val collision: Collision,
     val motion: Motion,
     val state: State,
+    val playerBodySpriteComponent: Sprite,
+    val playerLegsSpriteComponent: Sprite,
     val input: PlayerInputState,
     val motionConfig: MotionConfig
 ) {
@@ -95,6 +60,7 @@ class PlayerMoveSystem : IteratingSystem(
         val collisionComponent = entity[CollisionComponent]
         val motionComponent = entity[MotionComponent]
         val stateComponent = entity[StateComponent]
+        val entityRefsByName = entity[EntityRefsByNameComponent]
 
         // Prepare blackboard
         val motionConfig = assetStore.getGameObjectStateConfig(stateComponent.name).getMotionConfig()
@@ -104,6 +70,8 @@ class PlayerMoveSystem : IteratingSystem(
             collision = collisionComponent,
             motion = motionComponent,
             state = stateComponent,
+            playerBodySpriteComponent = entityRefsByName.getSubEntity("player_body")[SpriteComponent],
+            playerLegsSpriteComponent = entityRefsByName.getSubEntity("player_legs")[SpriteComponent],
             input = inputState,
             motionConfig = motionConfig
         )
@@ -129,6 +97,43 @@ class PlayerMoveSystem : IteratingSystem(
 
     private fun buildPlayerTree(): BTNode {
         // Sequence of high-level actions that roughly correspond to the original algorithm
+
+        // 1) Damage
+
+        // 2) isGrounded
+        val isGrounded = ConditionNode { bb ->
+            bb.collision.isGrounded
+        }
+        val inputJustUp = ConditionNode { bb -> bb.input.justUp }
+        val startJumping = ActionNode { bb ->
+            bb.collision.jumpVelocity = bb.motionConfig.maxJumpVelocity
+            BTStatus.Success
+        }
+
+        val isJumping = ConditionNode { bb -> bb.collision.jumpVelocity > 0f }
+        val idleAction = ActionNode { bb ->
+            bb.playerBodySpriteComponent.setAnimation("player_jobe_body_idle", assetStore = assetStore)
+            bb.playerLegsSpriteComponent.setAnimation(disable = true, assetStore = assetStore)
+            BTStatus.Success
+        }
+        val fallingAction = ActionNode { bb ->
+            bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
+            bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_fall", assetStore = assetStore)
+            BTStatus.Success
+        }
+        val jumpingAction = ActionNode { bb ->
+            bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
+            bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_jump", assetStore = assetStore)
+            BTStatus.Success
+        }
+
+        return Selector(
+            listOf(
+                Sequence(listOf(isGrounded, inputJustUp, startJumping)),
+                Sequence(listOf(isJumping, jumpingAction)),
+                fallingAction
+            )
+        )
 
         // 1) Update grounded/falling/jump-availability and reset animation triggers
         val updateState = ActionNode { bb ->
