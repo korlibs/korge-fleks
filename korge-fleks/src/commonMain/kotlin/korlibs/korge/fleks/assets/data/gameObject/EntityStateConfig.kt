@@ -11,5 +11,4 @@ data class EntityStateConfig(
     val destroyOnAnimationFinished: Boolean = false,    // Delete entity when direction is [ONCE_FORWARD] or [ONCE_REVERSE] and animation is finished
 
     val disable: Boolean = false,        // Set to true if entity shall be invisible in this state
-
 )

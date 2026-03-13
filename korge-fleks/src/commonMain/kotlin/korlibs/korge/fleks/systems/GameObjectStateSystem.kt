@@ -30,6 +30,10 @@ class GameObjectStateSystem : IteratingSystem(
                 // Set the sprite animation based on the current state
                 state.entities.forEach { (entityName, config) ->
                     val subEntity = entityRefsByNameComponent.getSubEntity(entityName)
+                    if (subEntity hasNo SpriteComponent) {
+                        println("ERROR: GameObjectStateSystem - Entity '$entityName' does not have a SpriteComponent in entity '${world.nameOf(entity)}'!")
+                        return@forEach
+                    }
                     val spriteComponent = subEntity[SpriteComponent]
                     // Check if there is currently a state switch
                     if (stateComponent.current != stateComponent.last) {
