@@ -135,4 +135,18 @@ class Collision private constructor(
         return isGrounded || right || left || isCollidingAbove
     }
 
+    var right2: Boolean = false
+    var left2: Boolean = false
+    var isCollidingAbove2: Boolean = false
+    var isGrounded2: Boolean = false
+
+    fun printCollisionInfo() {
+        if (right != right2 || left != left2 || isCollidingAbove != isCollidingAbove2 || isGrounded != isGrounded2) {
+            println("Collision Info - right: $right, left: $left, isCollidingAbove: $isCollidingAbove, isGrounded: $isGrounded")
+            right2 = right
+            left2 = left
+            isCollidingAbove2 = isCollidingAbove
+            isGrounded2 = isGrounded
+        }
+    }
 }

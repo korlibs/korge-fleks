@@ -123,6 +123,7 @@ class PlatformerCollisionChecker(
 
                 if (worldMapData.hasCollision(cxLeft + i, cy + checkDistance) && yrBottom >= checkBottom) {  // Check the next Y cell
                     dir = 1
+                    return@repeat
                 }
             }
             // Cell coordinates of right corner of the collision box

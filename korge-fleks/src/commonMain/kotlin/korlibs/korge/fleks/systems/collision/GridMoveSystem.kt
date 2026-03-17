@@ -10,6 +10,7 @@ import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
+import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.Motion
@@ -49,13 +50,13 @@ class GridMoveSystem : IteratingSystem(
         // Free debug points before we create new ones
         debugShapesComponent?.cleanup()
 
-//        val gravityComponent = entity.getOrNull(GravityComponent)
+        val gravityComponent = entity.getOrNull(GravityComponent)
         // Apply gravity to the entity if it has a GravityComponent
-//        if (gravityComponent != null) {
+        if (gravityComponent != null) {
 // TODO enable gravity again
 //            motionComponent.velocityX += gravityComponent.calculateDeltaXGravity()
-//            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity()
-//        }
+            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity()
+        }
 
         // Set the last pixel position to the current grid position
         gridComponent.lastPx = gridComponent.attachX
@@ -67,8 +68,9 @@ class GridMoveSystem : IteratingSystem(
          */
         val overallMovementX = motionComponent.velocityX * deltaTime
         val overallMovementY = motionComponent.velocityY * deltaTime  // We need to invert the Y velocity because the Y axis is inverted in the grid system
+
         // Calculate the number of steps needed to move the entity in relation to the grid size (here 16x16 pixels)
-        val steps = ceil((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize.toFloat())  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
+        val steps: Int = ceil((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize.toFloat() + 0.1f).toInt()  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
         if (steps > 0) {
             var i = 0
             // Reset collision flags
@@ -121,6 +123,8 @@ class GridMoveSystem : IteratingSystem(
 //        println("GridMoveSystem: cx, cy: ${gridComponent.cx}, ${gridComponent.cy} xr, yr: ${gridComponent.xr}, ${gridComponent.yr}")
 
         checkPlayfieldBoundaries(gridComponent)
+
+        collisionComponent.printCollisionInfo()
     }
 
     override fun onAlphaEntity(entity: Entity, alpha: Float) {

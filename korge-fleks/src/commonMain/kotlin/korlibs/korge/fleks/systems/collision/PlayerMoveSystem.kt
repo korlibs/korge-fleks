@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
+import korlibs.image.format.ImageAnimation
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.gameObject.MotionConfig
@@ -101,23 +102,47 @@ class PlayerMoveSystem : IteratingSystem(
         // 1) Damage
 
         // 2) isGrounded
-        val isGrounded = ConditionNode { bb ->
-            bb.collision.isGrounded
-        }
+        val isGrounded = ConditionNode { bb -> bb.collision.isGrounded }
         val inputJustUp = ConditionNode { bb -> bb.input.justUp }
-        val startJumping = ActionNode { bb ->
-            bb.collision.jumpVelocity = bb.motionConfig.maxJumpVelocity
+
+        val squatAction = ActionNode { bb ->
+            if (bb.input.justDown) {
+                // Start squatting: set flag and trigger squat animation
+                bb.collision.squatDown = true
+                bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
+                bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_squat", true, ONCE_FORWARD, assetStore = assetStore)
+                BTStatus.Success
+            } else if (bb.input.down) {
+                // Continue squatting: keep flag and animation running
+
+                // Slow down horizontal movement by interpolating towards 0
+                val lastH = bb.motion.velocityX
+                bb.motion.velocityX = bb.motionConfig.horizontalProgress.interpolate(lastH, 0f)
+                BTStatus.Success
+            } else {
+                // Stop squatting: reset flag and return failure to try other grounded actions
+                bb.collision.squatDown = false
+                BTStatus.Failure
+            }
+        }
+
+        val jumpStartAction = ActionNode { bb ->
+            if (bb.input.justUp) {
+                // Enable jump by setting the jump velocity to the maximum value from motion config
+                bb.collision.jumpVelocity = bb.motionConfig.maxJumpVelocity
+            }
+
             BTStatus.Success
         }
 
         val isJumping = ConditionNode { bb -> bb.collision.jumpVelocity > 0f }
         val idleAction = ActionNode { bb ->
-            bb.playerBodySpriteComponent.setAnimation("player_jobe_body_idle", assetStore = assetStore)
-            bb.playerLegsSpriteComponent.setAnimation(disable = true, assetStore = assetStore)
+            bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
+            bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_stand", assetStore = assetStore)  //, disable = true, assetStore = assetStore)
             BTStatus.Success
         }
         val fallingAction = ActionNode { bb ->
-            bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
+             bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
             bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_fall", assetStore = assetStore)
             BTStatus.Success
         }
@@ -127,13 +152,19 @@ class PlayerMoveSystem : IteratingSystem(
             BTStatus.Success
         }
 
-        return Selector(
-            listOf(
-                Sequence(listOf(isGrounded, inputJustUp, startJumping)),
-                Sequence(listOf(isJumping, jumpingAction)),
-                fallingAction
-            )
-        )
+//        return
+        Selector(listOf(
+            Sequence(listOf(
+                isGrounded,
+                Selector(listOf(
+                    squatAction,
+                    jumpStartAction,
+                    idleAction
+                ))
+            )),
+            Sequence(listOf(isJumping, jumpingAction)),
+            fallingAction
+        ))
 
         // 1) Update grounded/falling/jump-availability and reset animation triggers
         val updateState = ActionNode { bb ->
@@ -151,9 +182,9 @@ class PlayerMoveSystem : IteratingSystem(
             }
 
             // Enable next jump when grounded and joystick was just pressed up
-            if (collision.isGrounded && input.justUp) {
-                collision.jumpVelocity = bb.motionConfig.maxJumpVelocity
-            }
+//            if (collision.isGrounded && input.justUp) {
+//                collision.jumpVelocity = bb.motionConfig.maxJumpVelocity
+//            }
 
             // Reset animation frame counter when appropriate (as originally)
             state.resetAnimFrameCounter = (!collision.squatDown && (input.justLeft || input.justRight || input.justDown))
@@ -163,16 +194,16 @@ class PlayerMoveSystem : IteratingSystem(
 
         // 2) Squat handling (if down and grounded)
         val squatCondition = ConditionNode { bb -> bb.input.down && bb.collision.isGrounded }
-        val squatAction = ActionNode { bb ->
-            bb.collision.squatDown = true
-            bb.state.current = StateType.SQUAT
+        val squatAction2 = ActionNode { bb ->
+//            bb.collision.squatDown = true
+//            bb.state.current = StateType.SQUAT
             // Slow down horizontal movement by interpolating towards 0
-            val lastH = bb.lastHorizontalVelocity
-            bb.computedVelocityX = bb.motionConfig.horizontalProgress.interpolate(lastH, 0f)
+//            val lastH = bb.lastHorizontalVelocity
+//            bb.computedVelocityX = bb.motionConfig.horizontalProgress.interpolate(lastH, 0f)
             BTStatus.Success
         }
 
-        val squatSeq = Sequence(listOf(squatCondition, squatAction))
+        val squatSeq = Sequence(listOf(squatCondition, squatAction2))
 
         // 3) Horizontal movement handling when not squatting
         val horizontalAction = ActionNode { bb ->
@@ -209,7 +240,7 @@ class PlayerMoveSystem : IteratingSystem(
         }
 
         // 4) Jump handling
-        val jumpAction = ActionNode { bb ->
+        val jumpAction2 = ActionNode { bb ->
             val input = bb.input
             val collision = bb.collision
             val mc = bb.motionConfig
@@ -281,7 +312,7 @@ class PlayerMoveSystem : IteratingSystem(
             listOf(
                 updateState,
                 Selector(listOf(squatSeq, horizontalAction)),
-                jumpAction,
+                jumpAction2,
                 finalizeAction
             )
         )
