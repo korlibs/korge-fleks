@@ -165,12 +165,16 @@ class Sprite private constructor(
         isAnimation: Boolean = false,
         direction: Direction = FORWARD,
         disable: Boolean = false,
+        flipX: Boolean = false,
+        flipY: Boolean = false,
         assetStore: AssetStore
     ) {
         name = frameTag
         running = isAnimation
         this.direction = direction
         visible = !disable
+        this.flipX = flipX
+        this.flipY = flipY
         resetAnimation(assetStore)
     }
 }

@@ -21,18 +21,18 @@ class PlayerMoveAfterCollisionSystem : IteratingSystem(
     override fun onTickEntity(entity: Entity) {
         val collisionComponent = entity[CollisionComponent]
         val motionComponent = entity[MotionComponent]
-        val stateComponent = entity[StateComponent]
+//        val stateComponent = entity[StateComponent]
 
         // WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!
         // Do not change game object state any more after moving
-        // Otherwise the collider might change and lead to unexpected behaviour
+        // Otherwise the collider might change and lead to unexpected behavior
         // WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!
 
         // Update animation state after moving if the player is in front of wall
         if (collisionComponent.isGrounded
             && collisionComponent.isInFrontOfWall()
             && !collisionComponent.squatDown) {
-            stateComponent.current = if (!inputState.attack) StateType.STAND else StateType.STAND_ATTACK
+//            stateComponent.current = if (!inputState.attack) StateType.STAND else StateType.STAND_ATTACK
             // Reset animation timer first time when player is in front of wall - otherwise
             // the breath animation will not play
             if (!collisionComponent.wasInFrontOfWall) {
@@ -41,11 +41,25 @@ class PlayerMoveAfterCollisionSystem : IteratingSystem(
         }
         // flip sprite as needed
         if (inputState.right) {
-            stateComponent.direction = Geometry.RIGHT_DIRECTION
+//            stateComponent.direction = Geometry.RIGHT_DIRECTION
         } else if (inputState.left) {
-            stateComponent.direction = Geometry.LEFT_DIRECTION
+//            stateComponent.direction = Geometry.LEFT_DIRECTION
         }
 
-        collisionComponent.isFalling = -(motionComponent.velocityY) < 0f  // invert Y velocity because the Y axis is inverted in the grid system
+        if (collisionComponent.isGrounded) {
+            collisionComponent.isFalling = false
+        } else {
+            // Set isFalling to true if the player is moving downwards and not grounded
+            collisionComponent.isFalling = motionComponent.velocityY > 0f  // Y velocity is positive when moving downwards in the grid system
+            if (collisionComponent.isFalling) {
+//                println("Player is falling with velocity ${motionComponent.velocityY}")
+            }
+        }
+
+//        collisionComponent.isFalling = -(motionComponent.velocityY) < 0f  // invert Y velocity because the Y axis is inverted in the grid system
+//        if (collisionComponent.isFalling) {
+//            println("Player is falling with velocity ${motionComponent.velocityY}")
+//        }
+
     }
 }

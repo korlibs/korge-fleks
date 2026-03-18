@@ -50,12 +50,15 @@ class GridMoveSystem : IteratingSystem(
         // Free debug points before we create new ones
         debugShapesComponent?.cleanup()
 
+//        if (motionComponent.velocityY < -0.01f || motionComponent.velocityY > 0.01f) {
+//            println("GridMoveSystem: '${world.nameOf(entity)}' velocityY before gravity: ${motionComponent.velocityY}")
+//        }
+
         val gravityComponent = entity.getOrNull(GravityComponent)
         // Apply gravity to the entity if it has a GravityComponent
         if (gravityComponent != null) {
-// TODO enable gravity again
-//            motionComponent.velocityX += gravityComponent.calculateDeltaXGravity()
-            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity()
+            motionComponent.velocityX += gravityComponent.calculateDeltaXGravity() * deltaTime
+            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity() * deltaTime
         }
 
         // Set the last pixel position to the current grid position

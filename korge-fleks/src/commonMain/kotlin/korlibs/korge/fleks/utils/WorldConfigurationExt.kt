@@ -10,7 +10,6 @@ import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
 import korlibs.korge.fleks.systems.EntityLinkSystem
 import korlibs.korge.fleks.systems.MessagePassingSystem
-import korlibs.korge.fleks.systems.GameObjectStateSystem
 import korlibs.korge.fleks.systems.HealthMonitorSystem
 import korlibs.korge.fleks.systems.WorldChunkSystem
 import korlibs.korge.fleks.systems.LifeCycleSystem
@@ -21,11 +20,10 @@ import korlibs.korge.fleks.systems.SoundSystem
 import korlibs.korge.fleks.systems.SpawnerSystem
 import korlibs.korge.fleks.systems.SpriteVisibilitySystem
 import korlibs.korge.fleks.systems.SpriteSystem
-import korlibs.korge.fleks.systems.TouchInputSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
 import korlibs.korge.fleks.systems.collision.GridMoveSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
-import korlibs.korge.fleks.systems.collision.PlayerMoveSystem
+import korlibs.korge.fleks.systems.collision.BTreeTickSystem
 
 
 fun WorldConfiguration.addKorgeFleksInjectables(
@@ -55,14 +53,15 @@ fun WorldConfiguration.addKorgeFleksSystems() {
 //        add(PlatformerGravitySystem())
 //        add(PlatformerGroundSystem())  TODO check if we need this system - isGrounded is set in the GridMoveSystem
 
-        add(PlayerMoveSystem())
+        add(BTreeTickSystem())
+
         add(GridMoveSystem())
         add(PlayerMoveAfterCollisionSystem())
         // Debug system to move player entity to a specific position on the map overwriting player input data
         add(DebugSystem())
 
 //        add(GridCollisionCleanupSystem())  ??? check why this is needed
-//        add(GameObjectStateSystem())
+//        add(GameObjectStateSystem())  // not needed anymore with BTreeTickSystem
 
         add(SpawnerSystem())
         add(MessagePassingSystem())

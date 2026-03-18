@@ -100,7 +100,7 @@ class Gravity private constructor(
 
     fun calculateDeltaYGravity(): Float {
         return if (enableGravityY) {
-            gravityMultiplier * gravityY
+            -gravityMultiplier * gravityY
         } else {
             0f
         }
