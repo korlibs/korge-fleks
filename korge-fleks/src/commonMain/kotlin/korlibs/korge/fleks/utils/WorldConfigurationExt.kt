@@ -23,7 +23,7 @@ import korlibs.korge.fleks.systems.SpriteSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
 import korlibs.korge.fleks.systems.collision.GridMoveSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
-import korlibs.korge.fleks.systems.collision.BTreeTickSystem
+import korlibs.korge.fleks.systems.collision.BehaviorTreeSystem
 
 
 fun WorldConfiguration.addKorgeFleksInjectables(
@@ -51,9 +51,10 @@ fun WorldConfiguration.addKorgeFleksSystems() {
 
         // Collision and player input systems
 //        add(PlatformerGravitySystem())
-//        add(PlatformerGroundSystem())  TODO check if we need this system - isGrounded is set in the GridMoveSystem
+        // TODO we need this system (running at 60Hz) if GridMoveSystem is running with 30Hz
+        //add(PlatformerGroundSystem())
 
-        add(BTreeTickSystem())
+        add(BehaviorTreeSystem())
 
         add(GridMoveSystem())
         add(PlayerMoveAfterCollisionSystem())

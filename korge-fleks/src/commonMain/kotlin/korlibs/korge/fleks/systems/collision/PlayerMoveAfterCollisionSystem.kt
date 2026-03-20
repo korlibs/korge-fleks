@@ -6,14 +6,11 @@ import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
-import korlibs.korge.fleks.components.State.Companion.StateComponent
-import korlibs.korge.fleks.components.data.StateType
 import korlibs.korge.fleks.state.PlayerInputState
-import korlibs.korge.fleks.utils.Geometry
 
 
 class PlayerMoveAfterCollisionSystem : IteratingSystem(
-    family = World.family { all(CollisionComponent, MotionComponent, StateComponent) },
+    family = World.family { all(CollisionComponent, MotionComponent) },
     interval = Fixed(1 / 60f)
 ) {
     private val inputState by lazy { world.inject<PlayerInputState>("InputState") }
@@ -44,6 +41,12 @@ class PlayerMoveAfterCollisionSystem : IteratingSystem(
 //            stateComponent.direction = Geometry.RIGHT_DIRECTION
         } else if (inputState.left) {
 //            stateComponent.direction = Geometry.LEFT_DIRECTION
+        }
+
+        if (inputState.justUp) {
+            collisionComponent.canJump = false
+        } else if (inputState.justReleasedUp) {
+            collisionComponent.canJump = true
         }
 
         if (collisionComponent.isGrounded) {

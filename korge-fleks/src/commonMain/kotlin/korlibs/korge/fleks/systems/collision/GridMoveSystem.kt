@@ -29,7 +29,7 @@ import kotlin.math.ceil
 class GridMoveSystem : IteratingSystem(
     family = World.family { all(GridComponent, MotionComponent, CollisionComponent, StateComponent)
         .any(GridComponent, DebugCollisionShapesComponent) },
-    interval = Fixed(1 / 30f)
+    interval = Fixed(1 / 60f)
 ) {
     val assetStore = world.inject<AssetStore>("AssetStore")
 
@@ -127,7 +127,7 @@ class GridMoveSystem : IteratingSystem(
 
         checkPlayfieldBoundaries(gridComponent)
 
-        collisionComponent.printCollisionInfo()
+        //collisionComponent.printCollisionInfo()
     }
 
     override fun onAlphaEntity(entity: Entity, alpha: Float) {

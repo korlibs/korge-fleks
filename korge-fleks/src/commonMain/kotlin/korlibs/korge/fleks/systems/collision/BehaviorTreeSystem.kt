@@ -46,7 +46,7 @@ class Blackboard(
 
 // ---------- PlayerMoveSystem rewritten to use a small Hybrid BT ----------
 
-class BTreeTickSystem : IteratingSystem(
+class BehaviorTreeSystem : IteratingSystem(
     family = World.family { all(MotionComponent, CollisionComponent, StateComponent) },
     interval = Fixed(1 / 60f)
 ) {
@@ -101,95 +101,172 @@ class BTreeTickSystem : IteratingSystem(
         // 1) Damage
 
         // 2) isGrounded
-        val isGrounded = ConditionNode { bb -> bb.collision.isGrounded }
+        val onGrounded = ConditionNode { bb -> bb.collision.isGrounded && !bb.input.up && !bb.input.down }
         val inputJustUp = ConditionNode { bb -> bb.input.justUp }
         val isJumping = ConditionNode { bb -> bb.collision.jumpVelocity > 0f }
 
         val runStartAction = ActionNode { bb ->
-            if (!(bb.collision.isGrounded && bb.input.justRight || bb.input.justLeft)) return@ActionNode BTStatus.Failure
+            // First check if we can start running from standstill: must be grounded, not pressing up or down, and just started pressing left or right
+            if (!((bb.collision.isGrounded && !bb.input.up && !bb.input.down && (bb.input.justRight || bb.input.justLeft))
+                    // OR if we were jumping and kept pressing up
+                    || (bb.collision.isGrounded && bb.input.up && !bb.collision.canJump && (bb.input.right || bb.input.left))
+                    // OR if we were squatting and just released down while kept pressing left or right
+                    || (bb.collision.isGrounded && bb.input.justReleasedDown && (bb.input.right || bb.input.left))
+                    // OR if we were falling and just got grounded while kept pressing left or right
+                    || (bb.collision.isGrounded && !bb.collision.wasGroundedLastFrame && (bb.input.right || bb.input.left))
+                    )
+            ) return@ActionNode BTStatus.Failure
 
+            bb.collision.canJump = true  // allow jumping again when starting to run after landing from a jump
+
+            // Flip sprites according to horizontal input
+            if (bb.input.justLeft) {
+                bb.playerBodySpriteComponent.flipX = true
+                bb.playerLegsSpriteComponent.flipX = true
+            } else if (bb.input.justRight) {
+                bb.playerBodySpriteComponent.flipX = false
+                bb.playerLegsSpriteComponent.flipX = false
+            }
             bb.playerBodySpriteComponent.setAnimation("player_jobe_body_run", true, assetStore = assetStore)
             bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_run", true, assetStore = assetStore)
+            println("runStartAction")
+            BTStatus.Success
+        }
+
+        val runningAction = ActionNode { bb ->
+            // Check if we can continue running: must be grounded, not pressing down, and pressing left or right
+            if (!(bb.collision.isGrounded && !bb.input.down && (bb.input.right || bb.input.left)))
+                return@ActionNode BTStatus.Failure
+/*
+            // Flip sprites according to horizontal input and start running animation
+            if (bb.input.justLeft) {
+                bb.playerBodySpriteComponent.flipX = true
+                bb.playerLegsSpriteComponent.flipX = true
+                bb.playerBodySpriteComponent.setAnimation("player_jobe_body_run", true, assetStore = assetStore)
+                bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_run", true, assetStore = assetStore)
+            } else if (bb.input.justRight) {
+                bb.playerBodySpriteComponent.flipX = false
+                bb.playerLegsSpriteComponent.flipX = false
+                bb.playerBodySpriteComponent.setAnimation("player_jobe_body_run", true, assetStore = assetStore)
+                bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_run", true, assetStore = assetStore)
+            }
+*/
+            val direction = sign(bb.motion.velocityX)
+            bb.motion.velocityX = bb.motionConfig.horizontalProgress.interpolate(bb.motion.velocityX, direction * bb.motionConfig.maxHorizontalVelocity)
 
             BTStatus.Success
         }
 
-        val horizontalMoveAction = ActionNode { bb ->
-            if (!(bb.input.right || bb.input.left)) return@ActionNode BTStatus.Failure
-            val wasRunningInOppositeDirection = (bb.input.right && bb.motion.velocityX < 0f) || (bb.input.left && bb.motion.velocityX > 0f)
-            bb.motion.velocityX = setHorizontalVelocity(bb.motion.velocityX, bb.motionConfig, wasRunningInOppositeDirection)
-
-//            bb.lastHorizontalVelocity = motionComponent.velocityX
-//            if (input.right) {
-//                velX = setHorizontalVelocity(lastH, mc, lastH < 0f, Geometry.RIGHT_DIRECTION)
-//                bb.state.current = StateType.RUN
-//            } else if (input.left) {
-//                velX = setHorizontalVelocity(lastH, mc, lastH > 0f, Geometry.LEFT_DIRECTION)
-
-            BTStatus.Running
-        }
-
         val jumpStartAction = ActionNode { bb ->
-            if (!bb.collision.isGrounded || !bb.input.justUp) return@ActionNode BTStatus.Failure
+            // Check if we can start jumping: must be grounded and just started pressing up
+            if (!(bb.collision.isGrounded && bb.input.justUp))
+                return@ActionNode BTStatus.Failure
 
             // Enable jump by setting the jump velocity to the maximum value from motion config
             bb.collision.jumpVelocity = bb.motionConfig.maxJumpVelocity
             bb.motion.velocityY = -bb.collision.jumpVelocity * bb.motionConfig.initJumpVelocityFactor  // store inverted again for grid system
-            println("jumpStartAction: jumpVel: ${bb.collision.jumpVelocity} velocityY: ${bb.motion.velocityY}")
+//            println("jumpStartAction: jumpVel: ${bb.collision.jumpVelocity} velocityY: ${bb.motion.velocityY}")
+
+            // Flip sprites according to horizontal input
+            if (bb.input.justLeft) {
+                bb.playerBodySpriteComponent.flipX = true
+                bb.playerLegsSpriteComponent.flipX = true
+            } else if (bb.input.justRight) {
+                bb.playerBodySpriteComponent.flipX = false
+                bb.playerLegsSpriteComponent.flipX = false
+            }
 
             bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
             bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_jump", assetStore = assetStore)
+
+            println("jumpStartAction")
             BTStatus.Success
         }
 
         val jumpingAction = ActionNode { bb ->
-            if (bb.collision.isGrounded || bb.collision.jumpVelocity == 0f) return@ActionNode BTStatus.Failure
+            // Check if we can continue jumping: must not be grounded and still have jump velocity left, pressing up and not colliding above
+            if (!(!bb.collision.isGrounded && bb.collision.jumpVelocity != 0f))
+                return@ActionNode BTStatus.Failure
+
+            // Flip sprites according to horizontal input
+            if (bb.input.justLeft) {
+                bb.playerBodySpriteComponent.flipX = true
+                bb.playerLegsSpriteComponent.flipX = true
+            } else if (bb.input.justRight) {
+                bb.playerBodySpriteComponent.flipX = false
+                bb.playerLegsSpriteComponent.flipX = false
+            }
 
             if (bb.input.up && !bb.collision.isCollidingAbove) {
                 val velY = bb.collision.jumpVelocity * bb.motionConfig.initJumpVelocityFactor
                 bb.collision.jumpVelocity -= velY
                 bb.motion.velocityY = -velY
-                println("jumpingAction: jumpVel: ${bb.collision.jumpVelocity} velocityY: ${bb.motion.velocityY}")
+//                println("jumpingAction: jumpVel: ${bb.collision.jumpVelocity} velocityY: ${bb.motion.velocityY}")
 
                 BTStatus.Running
             } else {
+                // Jumping is aborted or finished: reset jump velocity and vertical velocity
                 bb.collision.jumpVelocity = 0f
                 bb.motion.velocityY = 0f
-                println("jumpingAction: jumpVel: ${bb.collision.jumpVelocity} velocityY: ${bb.motion.velocityY}")
+//                println("jumpingAction: jumpVel: ${bb.collision.jumpVelocity} velocityY: ${bb.motion.velocityY}")
+
+                bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_fall", assetStore = assetStore)
 
                 BTStatus.Success
             }
         }
 
         val fallingAction = ActionNode { bb ->
-            if (bb.collision.isGrounded) return@ActionNode BTStatus.Failure
+            // Check if we are falling: must not be grounded and have negative vertical velocity (moving downwards)
+            if (!(!bb.collision.isGrounded && bb.collision.jumpVelocity == 0f)) //bb.motion.velocityY > 0f))  // Y velocity is positive when moving downwards in the grid system, so we check for > 0f here
+                return@ActionNode BTStatus.Failure
+
+            // Flip sprites according to horizontal input
+            if (bb.input.justLeft) {
+                bb.playerBodySpriteComponent.flipX = true
+                bb.playerLegsSpriteComponent.flipX = true
+            } else if (bb.input.justRight) {
+                bb.playerBodySpriteComponent.flipX = false
+                bb.playerLegsSpriteComponent.flipX = false
+            }
 
             bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
             bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_fall", assetStore = assetStore)
+
+            println("fallingAction")
             BTStatus.Success
         }
 
         val squatAction = ActionNode { bb ->
+            // Check if we can squat: must be grounded and pressing down
+            if (!(bb.collision.isGrounded && bb.input.down))
+                return@ActionNode BTStatus.Failure
+
+            // Flip sprites according to horizontal input
+            if (bb.input.justLeft) {
+                bb.playerBodySpriteComponent.flipX = true
+                bb.playerLegsSpriteComponent.flipX = true
+            } else if (bb.input.justRight) {
+                bb.playerBodySpriteComponent.flipX = false
+                bb.playerLegsSpriteComponent.flipX = false
+            }
+
             if (bb.input.justDown) {
                 // Start squatting: trigger squat animation
                 bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
                 bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_squat", true, ONCE_FORWARD, assetStore = assetStore)
 
-                BTStatus.Running
-            } else if (bb.input.down) {
+                BTStatus.Success
+            } else {  // is input.down
                 // Continue squatting: Slow down horizontal movement by interpolating towards 0
                 val lastH = bb.motion.velocityX
                 bb.motion.velocityX = bb.motionConfig.horizontalProgress.interpolate(lastH, 0f)
 
                 BTStatus.Running
-            } else {
-                // Stop squatting: reset flag and return failure to try other grounded actions
-                BTStatus.Failure
             }
         }
 
         val idleAction = ActionNode { bb ->
-            if (bb.input.right || bb.input.left) return@ActionNode BTStatus.Failure
 
             bb.playerBodySpriteComponent.setAnimation("player_jobe_body_stand", assetStore = assetStore)
             bb.playerLegsSpriteComponent.setAnimation("player_jobe_legs_stand", assetStore = assetStore)
@@ -205,9 +282,9 @@ class BTreeTickSystem : IteratingSystem(
 //        }
 
         return Selector(listOf(
-            runStartAction,
-            horizontalMoveAction,
             jumpStartAction,
+            runStartAction,
+            runningAction,
             jumpingAction,
             fallingAction,
             squatAction,

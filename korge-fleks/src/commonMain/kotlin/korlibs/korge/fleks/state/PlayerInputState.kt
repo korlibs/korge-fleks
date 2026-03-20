@@ -1,8 +1,5 @@
 package korlibs.korge.fleks.state
 
-import korlibs.time.NIL
-import kotlin.time.Duration
-
 
 /** * The player input state is responsible for storing the current state of the player's input.
  * It is used to determine the player's movement and actions in the game.
@@ -16,6 +13,10 @@ interface PlayerInputState {
     var justDown: Boolean
     var justRight: Boolean
     var justLeft: Boolean
+    var justReleasedUp: Boolean
+    var justReleasedDown: Boolean
+    var justReleasedRight: Boolean
+    var justReleasedLeft: Boolean
     var lx: Float
     var ly: Float
     var rx: Float
