@@ -7,8 +7,6 @@ import korlibs.image.font.Font
 import korlibs.korge.fleks.assets.data.ClusterAssetInfo.*
 import korlibs.korge.fleks.assets.data.AssetLoader
 import korlibs.korge.fleks.assets.data.AssetType
-import korlibs.korge.fleks.assets.data.ChunkAssetInfo
-import korlibs.korge.fleks.assets.data.GameObjectConfig
 import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.SimpleTileSet
 import korlibs.korge.fleks.assets.data.UNKNOWN
@@ -62,8 +60,6 @@ class AssetStore {
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 
-    internal val gameObjectConfig: MutableMap<String, GameObjectConfig> = mutableMapOf()
-
     // Sound related assets
     internal val sounds: SoundsAssetType = mutableMapOf()
 
@@ -76,18 +72,6 @@ class AssetStore {
     // tiles (tileset and tilemap) related assets
     internal val tileMaps: TileMapsAssetType = mutableMapOf()
     internal val tileSets: TileSetsAssetType = mutableMapOf()
-
-    fun addGameObjectConfig(name: String, config: GameObjectConfig) {
-        if (gameObjectConfig.containsKey(name)) {
-            println("WARNING - AssetStore: Game object config for '$name' already exists! Overwriting it!")
-        }
-        gameObjectConfig[name] = config
-    }
-
-    fun getGameObjectStateConfig(name: String) : GameObjectConfig =
-        if (gameObjectConfig.containsKey(name)) {
-            gameObjectConfig[name]!!
-        } else error("AssetStore: Game object state config for '$name' not found!")
 
     fun getSound(name: String) : SoundChannel =
         if (sounds.contains(name)) sounds[name]!!.second

@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.components.data.Point.Companion.staticPoint
 import korlibs.korge.fleks.utils.*
@@ -41,12 +42,8 @@ class Collision private constructor(
 
     val hitPosition: Point = staticPoint {},
 
-    // Anchor point of the collision rectangle to the pivot point of the entity
-    var colRectX: Int = 0,
-    var colRectY: Int = 0,
-    // Size of the collision rectangle
-    var colRectWidth: Float = 0f,
-    var colRectHeight: Float = 0f
+    // Collision rectangle which contains size and anchor point to the pivot point of the entity
+    @Serializable(with = CollisionRectAsString::class) var rect: CollisionRect = CollisionRect.EMPTY
 
 ) : PoolableComponent<Collision>() {
     // Init an existing component data instance with data from another component
@@ -70,12 +67,8 @@ class Collision private constructor(
         isHit = from.isHit
         squatDown = from.squatDown
         hitPosition.init(from = from.hitPosition)
-
         // Collision rectangle data
-        colRectX = from.colRectX
-        colRectY = from.colRectY
-        colRectWidth = from.colRectWidth
-        colRectHeight = from.colRectHeight
+        rect = from.rect
     }
 
     // Cleanup the component data instance manually
@@ -100,12 +93,8 @@ class Collision private constructor(
         squatDown = false
         // Deep init of hit position - reuse object
         hitPosition.cleanup()
-
         // Collision rectangle data
-        colRectX = 0
-        colRectY = 0
-        colRectWidth = 0f
-        colRectHeight = 0f
+        rect = CollisionRect.EMPTY
     }
 
     override fun type() = CollisionComponent

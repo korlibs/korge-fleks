@@ -5,7 +5,7 @@ import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.assets.data.gameObject.CollisionData
+import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.DebugCollisionShapes
@@ -15,7 +15,6 @@ import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
-import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
@@ -27,7 +26,7 @@ import kotlin.math.ceil
 
 
 class GridMoveSystem : IteratingSystem(
-    family = World.family { all(GridComponent, MotionComponent, CollisionComponent, StateComponent)
+    family = World.family { all(GridComponent, MotionComponent, CollisionComponent)
         .any(GridComponent, DebugCollisionShapesComponent) },
     interval = Fixed(1 / 60f)
 ) {
@@ -43,8 +42,7 @@ class GridMoveSystem : IteratingSystem(
         val motionComponent = entity[MotionComponent]
         val gridComponent = entity[GridComponent]
         val collisionComponent = entity[CollisionComponent]
-        val stateComponent = entity[StateComponent]
-        val collisionBox = assetStore.getGameObjectStateConfig(stateComponent.name).getCollisionData(stateComponent.current)
+        val collisionBox = collisionComponent.rect
 
         val debugShapesComponent: DebugCollisionShapes? = entity.getOrNull(DebugCollisionShapesComponent)
         // Free debug points before we create new ones
@@ -157,7 +155,7 @@ class GridMoveSystem : IteratingSystem(
         gridComponent: Grid,
         motionComponent: Motion,
         collisionComponent: Collision,
-        collisionBox: CollisionData,
+        collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ) {
         // Move the entity in the X direction
@@ -214,7 +212,7 @@ class GridMoveSystem : IteratingSystem(
         gridComponent: Grid,
         motionComponent: Motion,
         collisionComponent: Collision,
-        collisionBox: CollisionData,
+        collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ) {
         // Move the entity in the Y direction

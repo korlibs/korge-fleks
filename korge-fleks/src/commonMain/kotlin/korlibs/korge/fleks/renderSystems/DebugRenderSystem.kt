@@ -6,13 +6,11 @@ import korlibs.korge.fleks.assets.*
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
-import korlibs.korge.fleks.components.WorldMap.Companion.WorldMapComponent
 import korlibs.korge.fleks.components.NinePatch.Companion.NinePatchComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
-import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.components.TextField.Companion.TextFieldComponent
 import korlibs.korge.fleks.components.data.Point
 import korlibs.korge.fleks.logic.collision.GridPosition
@@ -130,9 +128,7 @@ class DebugRenderSystem(
 
                     if (entity has DebugInfoTag.COLLISION_BOX && entity has CollisionComponent && entity has GridComponent) {
                         val gridComponent = entity[GridComponent]
-                        val stateComponent = entity[StateComponent]
-                        val gameObjectStateConfig = assetStore.getGameObjectStateConfig(stateComponent.name)
-                        val collisionBox = gameObjectStateConfig.getCollisionData(stateComponent.current)
+                        val collisionComponent = entity[CollisionComponent]
 
                         // Take over entity grid position and convert to screen coordinates
                         gridPosition.x = gridComponent.x
@@ -142,10 +138,10 @@ class DebugRenderSystem(
                         // Draw collision bounds
                         batch.drawVector(Colors.LIGHTBLUE) {
                             rect(
-                                x = gridPosition.x + collisionBox.x.toFloat(),
-                                y = gridPosition.y + collisionBox.y.toFloat(),
-                                width = collisionBox.width,
-                                height = collisionBox.height
+                                x = gridPosition.x + collisionComponent.rect.x.toFloat(),
+                                y = gridPosition.y + collisionComponent.rect.y.toFloat(),
+                                width = collisionComponent.rect.width,
+                                height = collisionComponent.rect.height
                             )
                         }
                     }
