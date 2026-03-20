@@ -33,13 +33,21 @@ class Collision private constructor(
     var slopeAngle: Float = 0f,
     var isFalling: Boolean = false,
     var collisionWithStaticObject: Boolean = false,  // used currently e.g. by shoot objects
-    var jumpVelocity: Float = 0f,  // Used to store the maximum jump velocity of the player which is then decreased over time
+    var jumpEnergy: Float = 0f,  // Used to store the maximum jump velocity of the player which is then decreased over time
 
     var justHit: Boolean = false,
     var isHit: Boolean = false,
     var squatDown: Boolean = false,  // true if the player is squatting down
 
-    val hitPosition: Point = staticPoint {}
+    val hitPosition: Point = staticPoint {},
+
+    // Anchor point of the collision rectangle to the pivot point of the entity
+    var colRectX: Int = 0,
+    var colRectY: Int = 0,
+    // Size of the collision rectangle
+    var colRectWidth: Float = 0f,
+    var colRectHeight: Float = 0f
+
 ) : PoolableComponent<Collision>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -57,11 +65,17 @@ class Collision private constructor(
         slopeAngle = from.slopeAngle
         isFalling = from.isFalling
         collisionWithStaticObject = from.collisionWithStaticObject
-        jumpVelocity = from.jumpVelocity
+        jumpEnergy = from.jumpEnergy
         justHit = from.justHit
         isHit = from.isHit
         squatDown = from.squatDown
         hitPosition.init(from = from.hitPosition)
+
+        // Collision rectangle data
+        colRectX = from.colRectX
+        colRectY = from.colRectY
+        colRectWidth = from.colRectWidth
+        colRectHeight = from.colRectHeight
     }
 
     // Cleanup the component data instance manually
@@ -80,12 +94,18 @@ class Collision private constructor(
         slopeAngle = 0f
         isFalling = false
         collisionWithStaticObject = false
-        jumpVelocity = 0f
+        jumpEnergy = 0f
         justHit = false
         isHit = false
         squatDown = false
         // Deep init of hit position - reuse object
         hitPosition.cleanup()
+
+        // Collision rectangle data
+        colRectX = 0
+        colRectY = 0
+        colRectWidth = 0f
+        colRectHeight = 0f
     }
 
     override fun type() = CollisionComponent

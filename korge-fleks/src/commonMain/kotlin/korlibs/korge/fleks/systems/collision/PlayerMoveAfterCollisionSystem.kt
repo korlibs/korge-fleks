@@ -43,11 +43,12 @@ class PlayerMoveAfterCollisionSystem : IteratingSystem(
 //            stateComponent.direction = Geometry.LEFT_DIRECTION
         }
 
-        if (inputState.justUp) {
-            collisionComponent.canJump = false
-        } else if (inputState.justReleasedUp) {
-            collisionComponent.canJump = true
-        }
+// TODO cleanup
+//        if (inputState.justUp) {
+//            collisionComponent.canJump = false
+//        } else if (inputState.justReleasedUp) {
+//            collisionComponent.canJump = true
+//        }
 
         if (collisionComponent.isGrounded) {
             collisionComponent.isFalling = false
