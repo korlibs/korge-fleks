@@ -14,7 +14,7 @@ import korlibs.korge.fleks.entity.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 
-@Serializable @SerialName("TestGameEntityConfig")
+@Serializable @SerialName("TestGameEntityBlueprint")
 data class TestGameEntityBlueprint(
     override val name: String
 ) : EntityBlueprint {
@@ -33,7 +33,7 @@ data class TestGameEntityBlueprint(
                     tweenPosition { target = it; x = 5000f; delay = 1f; duration = 60f; easing = Easing.EASE_IN }
                 }
                 wait { duration = 0.5f }
-                spawnEntity { entityConfig = "test_game_object_config" }
+                spawnEntity { entityBlueprint = "test_game_object_config" }
                 wait { duration = 60f }
                 deleteEntity { target = it }
             }
@@ -46,11 +46,11 @@ data class TestGameEntityBlueprint(
         // Register entity config into entity factory for lookup by its name
         EntityFactory.register(this)
 
-        GameObjectBlueprint(name = "test_game_object_config")
+        GameObjectBlueprint(name = "test_game_object_Blueprint")
     }
 }
 
-@Serializable @SerialName("GameObjectConfig")
+@Serializable @SerialName("GameObjectBlueprint")
 data class GameObjectBlueprint(
     override val name: String
 ) : EntityBlueprint {

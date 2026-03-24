@@ -32,10 +32,10 @@ internal class SnapshotSerializerSystemTest {
         // First create entity config for camera
         MainCameraBlueprint(name = commonMainCamera)
         // Then create camera entity from entity config
-        gameWorld.createAndConfigureEntity(entityConfig = commonMainCamera)
+        gameWorld.createAndConfigureEntity(entityBlueprint = commonMainCamera)
 
         TestGameEntityBlueprint(name = "test_game_entity_config")
-        gameWorld.createAndConfigureEntity(entityConfig = "test_game_entity_config")
+        gameWorld.createAndConfigureEntity(entityBlueprint = "test_game_entity_Blueprint")
 
         val frameTime = (1f / 60f)
 

@@ -50,7 +50,7 @@ data class LayeredSpriteBlueprint(
         val entityRefsByNameComponent = entity[EntityRefsByNameComponent]
 
         listOfImages.forEach { image ->
-            val layerEntity = createAndConfigureEntity(entityConfig = "${name}_${image}" )
+            val layerEntity = createAndConfigureEntity(entityBlueprint = "${name}_${image}" )
             entityRefsByNameComponent.add(image, layerEntity)
         }
 

@@ -15,7 +15,7 @@ import kotlinx.serialization.*
  *
  * This class creates a world map entity which is used to store chunk config like spawnedEntities.
  */
-@Serializable @SerialName("WorldMapConfig")
+@Serializable @SerialName("WorldMapBlueprint")
 data class WorldMapBlueprint(
     override val name: String
 ) : EntityBlueprint {

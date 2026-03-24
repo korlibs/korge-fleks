@@ -9,11 +9,11 @@ import kotlinx.serialization.Serializable
 
 /**
  * This Tween is used to spawn a new entity in the world.
- * The entity will be created with the given entity configuration and positioned at the given coordinates.
+ * The entity will be created with the given entity blueprint and positioned at the given coordinates.
  */
 @Serializable @SerialName("SpawnEntity")
 class SpawnEntity private constructor(
-    var entityConfig: String = "",      // name of the entity configuration which creates and configures the spawned entity
+    var entityBlueprint: String = "",   // name of the entity blueprint which creates and configures the spawned entity
     var x: Float = 0f,                  // position where entity will be spawned
     var y: Float = 0f,
 
@@ -24,7 +24,7 @@ class SpawnEntity private constructor(
 ) : TweenBase, Poolable<SpawnEntity> {
     // Init an existing data instance with data from another one
     override fun init(from: SpawnEntity) {
-        entityConfig = from.entityConfig
+        entityBlueprint = from.entityBlueprint
         x = from.x
         y = from.y
 
@@ -37,7 +37,7 @@ class SpawnEntity private constructor(
     // Cleanup data instance manually
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
-        entityConfig = ""
+        entityBlueprint = ""
         x = 0f
         y = 0f
 

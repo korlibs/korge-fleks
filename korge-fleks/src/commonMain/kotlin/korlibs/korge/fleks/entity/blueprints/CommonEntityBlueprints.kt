@@ -19,7 +19,7 @@ fun registerCommonEntityBlueprints() {
 
 fun World.createCommonEntities() {
     // Then create entities from entity config
-    createAndConfigureEntity(entityConfig = commonMainCamera)
-    createAndConfigureEntity(entityConfig = commonMessagePassingSystem)
-    createAndConfigureEntity(entityConfig = commonWorldMap)
+    createAndConfigureEntity(entityBlueprint = commonMainCamera)
+    createAndConfigureEntity(entityBlueprint = commonMessagePassingSystem)
+    createAndConfigureEntity(entityBlueprint = commonWorldMap)
 }
