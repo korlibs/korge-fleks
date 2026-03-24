@@ -1,18 +1,17 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig.Companion.messagePassingConfigComponent
 import korlibs.korge.fleks.entity.*
-import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 /**
  * Entity configuration for the [MessagePassingSystem][korlibs.korge.fleks.systems.MessagePassingSystem].
  */
-@Serializable @SerialName("MessagePassingSystemConfig")
-data class MessagePassingSystemConfig(
+@Serializable @SerialName("MessagePassingSystemBlueprint")
+data class MessagePassingSystemBlueprint(
     override val name: String
-) : EntityConfig {
+) : EntityBlueprint {
 
     // Function for adding components to this entity
     override fun World.entityConfigure(entity: Entity) : Entity {

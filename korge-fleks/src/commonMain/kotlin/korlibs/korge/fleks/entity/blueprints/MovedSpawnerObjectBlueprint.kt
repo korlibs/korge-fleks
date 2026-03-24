@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
@@ -14,8 +14,8 @@ import kotlinx.serialization.*
  * This object prototype can be used to create objects which are moving and spawn a trail.
  *
  */
-@Serializable @SerialName("MovedSpawnerObjectConfig")
-data class MovedSpawnerObjectConfig(
+@Serializable @SerialName("MovedSpawnerObjectBlueprint")
+data class MovedSpawnerObjectBlueprint(
     override val name: String,
 
     // SpawnerComponent for creating the fire trail
@@ -38,7 +38,7 @@ data class MovedSpawnerObjectConfig(
     val velocityY: Float = 0f,
     val velocityVariationX: Float = 0f,
     val velocityVariationY: Float = 0f
-) : EntityConfig {
+) : EntityBlueprint {
 
     // Configure function which applies the config to the entity's components
     override fun World.entityConfigure(entity: Entity) : Entity {

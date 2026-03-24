@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.utils.createAndConfigureEntity
@@ -10,11 +10,11 @@ const val commonMessagePassingSystem = "common_message_passing_system"
 const val commonAttachCameraToEntity = "common_attach_camera"
 const val commonWorldMap = "common_world_map"
 
-fun registerCommonEntityConfigs() {
-    AttachCameraToEntityConfig(name = commonAttachCameraToEntity)
-    MainCameraConfig(name = commonMainCamera)
-    MessagePassingSystemConfig(name = commonMessagePassingSystem)
-    WorldMapConfig(name = commonWorldMap)
+fun registerCommonEntityBlueprints() {
+    AttachCameraToEntityBlueprint(name = commonAttachCameraToEntity)
+    MainCameraBlueprint(name = commonMainCamera)
+    MessagePassingSystemBlueprint(name = commonMessagePassingSystem)
+    WorldMapBlueprint(name = commonWorldMap)
 }
 
 fun World.createCommonEntities() {

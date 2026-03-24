@@ -1,27 +1,10 @@
 package korlibs.korge.fleks.utils
 
-import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.entity.config.*
+import korlibs.korge.fleks.entity.EntityBlueprint
+import korlibs.korge.fleks.entity.blueprints.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.*
 
-
-/**
- * This interface maps the string [name] to a specific game object creation process.
- * The game object entity will be created by the [entityConfigure] function which can be configured through additional
- * config properties in the derived class.
- *
- * Hint:
- * Deriving the configuration for an entity from this interface keeps the configuration details (config properties)
- * together with the creation/configuration process of a complex game object which can consist of multiple entities.
- * Also, the creation process of the game object can involve multiple steps of [entityConfigure] calls. Thus,
- * it is possible to use a "layered" creation process for entities where each layer adds global, common or more
- * specific components or sub-entities to a game object.
- */
-interface EntityConfig {
-    val name: String
-    fun World.entityConfigure(entity: Entity) : Entity
-}
 
 /**
  * This class manages the JSON serializer for deserializing entity configs from LDtk levels. It allows to register
@@ -68,14 +51,14 @@ class EntityConfigSerializer {
      */
     private val internalModule = SerializersModule {
         // Register common entity config classes
-        polymorphic(EntityConfig::class) {
-            subclass(DialogBoxConfig::class)
-            subclass(RichTextConfig::class)
-            subclass(ParallaxEffectConfig::class)
-            subclass(LayeredSpriteConfig::class)
-            subclass(WorldMapConfig::class)
-            subclass(MovedSpawnerObjectConfig::class)
-            subclass(MainCameraConfig::class)
+        polymorphic(EntityBlueprint::class) {
+            subclass(DialogBoxBlueprint::class)
+            subclass(RichTextBlueprint::class)
+            subclass(ParallaxEffectBlueprint::class)
+            subclass(LayeredSpriteBlueprint::class)
+            subclass(WorldMapBlueprint::class)
+            subclass(MovedSpawnerObjectBlueprint::class)
+            subclass(MainCameraBlueprint::class)
         }
     }
 }

@@ -7,12 +7,11 @@ import korlibs.korge.fleks.utils.*
 import korlibs.korge.view.Container
 import kotlinx.serialization.encodeToString
 import kotlin.test.assertFalse
-import kotlin.time.Duration
 
 
-data class TestEntityConfig(
+data class TestEntityBlueprint(
     override val name: String
-) : EntityConfig {
+) : EntityBlueprint {
     override fun World.entityConfigure(entity: Entity) : Entity {
         return Entity(id = 8080, version = 0u)
     }
@@ -45,7 +44,7 @@ object CommonTestEnv {
     }
 }
 
-class ConcretePlayerInputState : Container(), PlayerInputState {
+class ConcretePlayerInputState: Container(), PlayerInputState {
     // directions of digital joystick
     override var up = false
     override var down = false
@@ -55,6 +54,10 @@ class ConcretePlayerInputState : Container(), PlayerInputState {
     override var justDown = false
     override var justRight = false
     override var justLeft = false
+    override var justReleasedUp = false
+    override var justReleasedDown = false
+    override var justReleasedRight = false
+    override var justReleasedLeft = false
     override var lx = 0f
     override var ly = 0f
     override var rx = 0f

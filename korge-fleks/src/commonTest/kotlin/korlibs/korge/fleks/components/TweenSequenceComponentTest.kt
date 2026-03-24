@@ -50,7 +50,7 @@ internal class TweenSequenceComponentTest {
     fun testTweenSequenceComponentSerialization() {
         println("TEST CASE: testTweenSequenceComponentSerialization")
 
-        val testEntityConfig = TestEntityConfig("testEntityConfig")
+        val testEntityConfig = TestEntityBlueprint("testEntityConfig")
 
         val compUnderTest = tweenSequenceComponent {
             spawnNewTweenSequence {

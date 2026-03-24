@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.Colors
@@ -14,8 +14,8 @@ import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
 
-@Serializable @SerialName("RichTextConfig")
-data class RichTextConfig(
+@Serializable @SerialName("RichTextBlueprint")
+data class RichTextBlueprint(
     override val name: String,
 
     private val text: String,
@@ -39,30 +39,30 @@ data class RichTextConfig(
     // Text alignment
     @Serializable(with = HorizontalAlignAsDouble::class) private val horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VerticalAlignAsDouble::class) private val verticalAlign: VerticalAlign = VerticalAlign.TOP
-) : EntityConfig {
+) : EntityBlueprint {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {
             if (screenCoordinates) it += ScreenCoordinatesTag
             it += positionComponent {
-                x = this@RichTextConfig.x
-                y = this@RichTextConfig.y
+                x = this@RichTextBlueprint.x
+                y = this@RichTextBlueprint.y
             }
             it += textFieldComponent {
-                text = this@RichTextConfig.text
-                fontName = this@RichTextConfig.fontName
-                textRangeEnd = this@RichTextConfig.textRangeEnd
-                width = this@RichTextConfig.width
-                height = this@RichTextConfig.height
-                horizontalAlign = this@RichTextConfig.horizontalAlign
-                verticalAlign = this@RichTextConfig.verticalAlign
+                text = this@RichTextBlueprint.text
+                fontName = this@RichTextBlueprint.fontName
+                textRangeEnd = this@RichTextBlueprint.textRangeEnd
+                width = this@RichTextBlueprint.width
+                height = this@RichTextBlueprint.height
+                horizontalAlign = this@RichTextBlueprint.horizontalAlign
+                verticalAlign = this@RichTextBlueprint.verticalAlign
             }
             it += layerComponent {
-                index = this@RichTextConfig.layerIndex
+                index = this@RichTextBlueprint.layerIndex
             }
             it += rgbaComponent {
                 rgba = tint
-                alpha = this@RichTextConfig.alpha
+                alpha = this@RichTextBlueprint.alpha
             }
             it += layerTag
 //            it += RenderLayerTag.DEBUG

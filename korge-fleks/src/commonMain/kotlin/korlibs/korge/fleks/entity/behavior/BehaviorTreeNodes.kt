@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.state
+package korlibs.korge.fleks.entity.behavior
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
@@ -10,6 +10,13 @@ enum class BTStatus { Success, Failure, Running }
 
 interface BTNode {
     fun World.tick(entity: Entity): BTStatus
+}
+
+/**
+ * A simple leaf node that always returns success. This can be used as a placeholder or a default node in the behavior tree.
+ */
+class EmptyTree : BTNode {
+    override fun World.tick(entity: Entity): BTStatus = BTStatus.Success
 }
 
 /**

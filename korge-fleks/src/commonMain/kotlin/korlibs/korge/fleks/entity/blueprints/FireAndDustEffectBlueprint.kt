@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 import com.github.quillraven.fleks.*
 import korlibs.image.format.*
@@ -19,8 +19,8 @@ import kotlinx.serialization.*
  * Function to generate effect objects like explosions, shoots, dust, etc.
  *
  */
-@Serializable @SerialName("FireAndDustEffectConfig")
-data class FireAndDustEffectConfig(
+@Serializable @SerialName("FireAndDustEffectBlueprint")
+data class FireAndDustEffectBlueprint(
     override val name: String,
 
     private val spriteName: String,
@@ -37,7 +37,7 @@ data class FireAndDustEffectConfig(
     private val layerIndex: Int? = null,
     private val fadeOutDuration: Float = 0f,
     private val screenCoordinates: Boolean = false
-) : EntityConfig {
+) : EntityBlueprint {
 
     // Configure function which applies the config to the entity's components
     override fun World.entityConfigure(entity: Entity) : Entity {
@@ -45,11 +45,11 @@ data class FireAndDustEffectConfig(
             if (screenCoordinates) it += ScreenCoordinatesTag
             it += motionComponent {
                 velocityX =
-                    if (velocityVariationX != 0f) this@FireAndDustEffectConfig.velocityX + (-velocityVariationX..velocityVariationX).random()
-                    else this@FireAndDustEffectConfig.velocityX
+                    if (velocityVariationX != 0f) this@FireAndDustEffectBlueprint.velocityX + (-velocityVariationX..velocityVariationX).random()
+                    else this@FireAndDustEffectBlueprint.velocityX
                 velocityY =
-                    if (velocityVariationY != 0f) this@FireAndDustEffectConfig.velocityY + (-velocityVariationY..velocityVariationY).random()
-                    else this@FireAndDustEffectConfig.velocityY
+                    if (velocityVariationY != 0f) this@FireAndDustEffectBlueprint.velocityY + (-velocityVariationY..velocityVariationY).random()
+                    else this@FireAndDustEffectBlueprint.velocityY
             }
             it += spriteComponent {
                 name = spriteName
@@ -68,7 +68,7 @@ data class FireAndDustEffectConfig(
                 }
             }
             it += renderLayerTag
-            if (layerIndex != null) it += layerComponent { index = this@FireAndDustEffectConfig.layerIndex }
+            if (layerIndex != null) it += layerComponent { index = this@FireAndDustEffectBlueprint.layerIndex }
 
             // Enable below debug render shapes
             // it += RenderLayerTag.DEBUG

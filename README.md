@@ -144,7 +144,7 @@ _Animation system_.
 ## Entity Configuration (Game Object Blueprints)
 
 Korge-fleks contains some generic configuration assets which can be used to build up more complex game objects.
-The existing config objects can be found in `korlibs.korge.fleks.entity.config`.
+The existing config objects can be found in `korlibs.korge.fleks.entity.blueprints`.
 These object classes contain 4 sections:
 
 - Config data classes

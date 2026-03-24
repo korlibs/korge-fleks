@@ -1,6 +1,6 @@
 package korlibs.korge.fleks.assets.data
 
-import korlibs.korge.fleks.utils.EntityConfig
+import korlibs.korge.fleks.entity.EntityBlueprint
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -48,7 +48,7 @@ data class CommonChunkInfo(
  */
 @Serializable
 data class ChunkAssetInfo(
-    @SerialName("e") val entities: List<EntityConfig> = emptyList(),
+    @SerialName("e") val entities: List<EntityBlueprint> = emptyList(),
     @SerialName("s") val entitiesToBeSpawned: List<String> = emptyList(),
 
     @SerialName("x") val chunkX: Int,  // in grid coordinates

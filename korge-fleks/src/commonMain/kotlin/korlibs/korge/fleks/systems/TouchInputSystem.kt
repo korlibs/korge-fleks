@@ -18,7 +18,7 @@ import korlibs.korge.fleks.utils.*
  * behaves like a button and the touch input will only be processed if the touch is released.
  *
  * In any way [TouchInputComponent.entityConfig] will be executed on the entity is touch input is detected.
- * The [TouchInputComponent.entityConfig] is a string that represents the name of an [EntityConfig] that will be executed on the entity.
+ * The [TouchInputComponent.entityConfig] is a string that represents the name of an [korlibs.korge.fleks.entity.EntityBlueprint] that will be executed on the entity.
  * The [TouchInputComponent.entity] is the entity that will be affected by the [TouchInputComponent.entityConfig].
  *
  * Internal touch input handling is done via following properties:

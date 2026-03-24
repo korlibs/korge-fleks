@@ -2,7 +2,7 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.WorldConfiguration
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.entity.config.registerCommonEntityConfigs
+import korlibs.korge.fleks.entity.blueprints.registerCommonEntityBlueprints
 import korlibs.korge.fleks.state.GameStateManager
 import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.systems.SystemRuntimeConfigs
@@ -87,5 +87,5 @@ fun WorldConfiguration.addKorgeFleksSystems() {
     }
 
     // Make sure we have all common entity configs registered which comes with Korge-fleks
-    registerCommonEntityConfigs()
+    registerCommonEntityBlueprints()
 }

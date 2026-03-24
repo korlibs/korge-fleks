@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.Colors
@@ -8,7 +8,6 @@ import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
 import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
 import korlibs.korge.fleks.entity.*
-import korlibs.korge.fleks.tags.DebugInfoTag
 import korlibs.korge.fleks.tags.RenderLayerTag
 import korlibs.korge.fleks.tags.ScreenCoordinatesTag
 import korlibs.korge.fleks.utils.*
@@ -20,8 +19,8 @@ import kotlinx.serialization.*
  * position, texture, color/visibility, layer index and to be used renderer layer.
  * All needed components are added so that the sprite will be rendered by the [object render system][korlibs.korge.fleks.renderSystems.ObjectRenderSystem].
  */
-@Serializable @SerialName("SpriteConfig")
-data class SpriteConfig(
+@Serializable @SerialName("SpriteBlueprint")
+data class SpriteBlueprint(
     override val name: String,
 
     private val x: Float = 0f,
@@ -32,21 +31,21 @@ data class SpriteConfig(
     private val alpha: Float = 1f,
     private val renderLayerTag: RenderLayerTag,
     private val screenCoordinates: Boolean = false
-) : EntityConfig {
+) : EntityBlueprint {
 
     // Function for adding components to this entity
     override fun World.entityConfigure(entity: Entity) : Entity {
 
         entity.configure {
             it += positionComponent {
-                x = this@SpriteConfig.x
-                y = this@SpriteConfig.y
+                x = this@SpriteBlueprint.x
+                y = this@SpriteBlueprint.y
             }
             it += spriteComponent {
                 name = assetName
             }
             it += rgbaComponent {
-                alpha = this@SpriteConfig.alpha
+                alpha = this@SpriteBlueprint.alpha
             }
             it += layerComponent {
                 index = layerIndex

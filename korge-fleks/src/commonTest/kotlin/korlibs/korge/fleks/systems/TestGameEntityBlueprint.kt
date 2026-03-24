@@ -11,14 +11,13 @@ import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity.Companion.s
 import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition.Companion.tweenPosition
 import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.*
-import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 
 @Serializable @SerialName("TestGameEntityConfig")
-data class TestGameEntityConfig(
+data class TestGameEntityBlueprint(
     override val name: String
-) : EntityConfig {
+) : EntityBlueprint {
 
     // Function for adding components to this entity
     override fun World.entityConfigure(entity: Entity) : Entity {
@@ -47,14 +46,14 @@ data class TestGameEntityConfig(
         // Register entity config into entity factory for lookup by its name
         EntityFactory.register(this)
 
-        GameObjectConfig(name = "test_game_object_config")
+        GameObjectBlueprint(name = "test_game_object_config")
     }
 }
 
 @Serializable @SerialName("GameObjectConfig")
-data class GameObjectConfig(
+data class GameObjectBlueprint(
     override val name: String
-) : EntityConfig {
+) : EntityBlueprint {
 
     // Function for adding components to this entity
     override fun World.entityConfigure(entity: Entity) : Entity {
