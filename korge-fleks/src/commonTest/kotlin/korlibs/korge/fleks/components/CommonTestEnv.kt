@@ -2,6 +2,8 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.entity.*
+import korlibs.korge.fleks.state.DigitalHorDir
+import korlibs.korge.fleks.state.DigitalVerDir
 import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.view.Container
@@ -46,22 +48,14 @@ object CommonTestEnv {
 
 class ConcretePlayerInputState: Container(), PlayerInputState {
     // directions of digital joystick
-    override var up = false
-    override var down = false
-    override var right = false
-    override var left = false
-    override var justUp = false
-    override var justDown = false
-    override var justRight = false
-    override var justLeft = false
-    override var justReleasedUp = false
-    override var justReleasedDown = false
-    override var justReleasedRight = false
-    override var justReleasedLeft = false
     override var lx = 0f
     override var ly = 0f
     override var rx = 0f
     override var ry = 0f
+
+    override var ldx = DigitalHorDir.H_NEUTRAL
+    override var ldy = DigitalVerDir.V_NEUTRAL
+
     override var attack = false
     override var justReleasedAttack = false
     override var attackDirection = 0.0f
