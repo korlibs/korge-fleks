@@ -1,17 +1,16 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.components.Position.Companion.positionComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.*
-import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
-@Serializable @SerialName("MainCameraConfig")
-data class MainCameraConfig(
+@Serializable @SerialName("MainCameraBlueprint")
+data class MainCameraBlueprint(
     override val name: String
-) : EntityConfig {
+) : EntityBlueprint {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
 

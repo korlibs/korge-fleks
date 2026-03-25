@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.Colors
@@ -27,8 +27,8 @@ import kotlinx.serialization.*
  * Entity config for a dialog box which appears on the dialog layer in front of any game play.
  * Dialog Box is rendered on indexLayer 100 - 102 in foreground on [FG_DIALOGS][RenderLayerTag.FG_OBJECT_DIALOGS] layer.
  */
-@Serializable @SerialName("DialogBoxConfig")
-data class DialogBoxConfig(
+@Serializable @SerialName("DialogBoxBlueprint")
+data class DialogBoxBlueprint(
     override val name: String,
 
     private val duration: Float,
@@ -58,7 +58,7 @@ data class DialogBoxConfig(
     private val textWritingFactor: Float = 0.025f,  // factor to calculate the time for writing the text into the dialog box
     @Serializable(with = HAlignAsString::class) private val textHAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VAlignAsString::class) private val textVAlign: VerticalAlign = VerticalAlign.TOP,
-) : EntityConfig {
+) : EntityBlueprint {
 
     enum class AvatarPosition { LEFT_TOP, RIGHT_TOP /*, LEFT_BOTTOM, RIGHT_BOTTOM*/ }
 
@@ -114,7 +114,7 @@ data class DialogBoxConfig(
             it += spriteComponent { name = avatarName }
             it += rgbaComponent {
                 rgba = tint
-                alpha = this@DialogBoxConfig.alpha
+                alpha = this@DialogBoxBlueprint.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
             it += layerComponent { index = 102 }
@@ -133,7 +133,7 @@ data class DialogBoxConfig(
             }
             it += rgbaComponent {
                 rgba = tint
-                alpha = this@DialogBoxConfig.alpha
+                alpha = this@DialogBoxBlueprint.alpha
             }
             it += RenderLayerTag.FG_OBJECT_DIALOGS
             it += layerComponent { index = 100 }
@@ -147,9 +147,9 @@ data class DialogBoxConfig(
                 y = textFieldY
             }
             it += textFieldComponent {
-                text = this@DialogBoxConfig.text
+                text = this@DialogBoxBlueprint.text
                 fontName = textFontName
-                textRangeEnd = this@DialogBoxConfig.textRangeEnd
+                textRangeEnd = this@DialogBoxBlueprint.textRangeEnd
                 width = textFieldWidth
                 height = textFieldHeight
                 horizontalAlign = textHAlign
@@ -172,10 +172,10 @@ data class DialogBoxConfig(
                     tweenPosition { target = avatar; x = avatarTweenX; duration = 0.5f; easing = Easing.EASE_OUT_QUAD }
                     tweenRgba { target = dialogBox; alpha = 1f; delay = 0.3f; duration = 0.3f; easing = Easing.EASE_OUT_QUAD }
                     // Type write text into the dialog
-                    tweenTextField { target = textField; textRangeEnd = this@DialogBoxConfig.text.length; delay = 0.3f + 0.8f; duration = this@DialogBoxConfig.text.length * textWritingFactor }
+                    tweenTextField { target = textField; textRangeEnd = this@DialogBoxBlueprint.text.length; delay = 0.3f + 0.8f; duration = this@DialogBoxBlueprint.text.length * textWritingFactor }
                 }
                 // TODO wait in addition to an event that the player pressed a button to fast-forward the dialog
-                wait { duration = this@DialogBoxConfig.duration }
+                wait { duration = this@DialogBoxBlueprint.duration }
                 parallelTweens {
                     duration = 1f
                     // Fade out of Dialog with avatar

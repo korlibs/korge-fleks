@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 import com.github.quillraven.fleks.*
 import korlibs.image.color.Colors
@@ -20,8 +20,8 @@ import kotlinx.serialization.*
  *
  * Logo can be centered on the screen and additionally an offset can be specified.
  */
-@Serializable @SerialName("LogoEntityConfig")
-data class LayeredSpriteConfig(
+@Serializable @SerialName("LayeredSpriteBlueprint")
+data class LayeredSpriteBlueprint(
     override val name: String,
 
     private val listOfImages: List<String>,
@@ -32,7 +32,7 @@ data class LayeredSpriteConfig(
     private val renderLayerTag: RenderLayerTag,
     private val createEntityPerLayer: Boolean = true, // If true, creates an entity for each layer in the sprite for tween animation
     private val screenCoordinates: Boolean = false
-) : EntityConfig {
+) : EntityBlueprint {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         // Base entity
@@ -50,7 +50,7 @@ data class LayeredSpriteConfig(
         val entityRefsByNameComponent = entity[EntityRefsByNameComponent]
 
         listOfImages.forEach { image ->
-            val layerEntity = createAndConfigureEntity(entityConfig = "${name}_${image}" )
+            val layerEntity = createAndConfigureEntity(entityBlueprint = "${name}_${image}" )
             entityRefsByNameComponent.add(image, layerEntity)
         }
 
@@ -67,7 +67,7 @@ data class LayeredSpriteConfig(
 
         listOfImages.forEachIndexed { idx, image ->
             val layerIndex = if (listOfLayerIndexes.size > idx) listOfLayerIndexes[idx] else 0
-            SpriteConfig(
+            SpriteBlueprint(
                 name = "${name}_${image}",
                 // Specify the layer index together with the image name
                 assetName = image,

@@ -1,4 +1,4 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
@@ -10,15 +10,15 @@ import kotlinx.serialization.*
 
 /**
  * This class contains the config for a specific level map with give.
- * The function implementation [configureEntity] creates a new [WorldMapConfig] entity and configures it
+ * The function implementation [entityConfigure] creates a new [WorldMapBlueprint] entity and configures it
  * with the specified config details.
  *
  * This class creates a world map entity which is used to store chunk config like spawnedEntities.
  */
-@Serializable @SerialName("WorldMapConfig")
-data class WorldMapConfig(
+@Serializable @SerialName("WorldMapBlueprint")
+data class WorldMapBlueprint(
     override val name: String
-) : EntityConfig {
+) : EntityBlueprint {
 
     override fun World.entityConfigure(entity: Entity) : Entity {
         entity.configure {

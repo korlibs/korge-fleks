@@ -5,9 +5,6 @@ import korlibs.korge.fleks.components.Info.Companion.InfoComponent
 import korlibs.korge.fleks.components.Info.Companion.infoComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.lifeCycleComponent
-import korlibs.korge.fleks.components.Position
-import korlibs.korge.fleks.components.Position.Companion.PositionComponent
-import korlibs.korge.fleks.components.messagePassing.MessagePassingConfig.Companion.MessagePassingConfigComponent
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.systems.*
 import korlibs.korge.fleks.tags.*
@@ -37,25 +34,25 @@ fun World.deleteViaLifeCycle(entity: Entity) {
 }
 
 /**
- * Create and configure a new [Entity] by applying the [EntityConfig][EntityFactory.EntityConfig] which is specified
+ * Create and configure a new [Entity] by applying the [EntityBlueprint] which is specified
  * by entityConfig string parameter.
  */
-fun World.createAndConfigureEntity(entityConfig: String) : Entity =
-    EntityFactory.createAndConfigureEntity(this, entityConfig)
+fun World.createAndConfigureEntity(entityBlueprint: String) : Entity =
+    EntityFactory.createAndConfigureEntity(this, entityBlueprint)
 
 /**
- * Configure existing [Entity] by applying the [EntityConfig][EntityFactory.EntityConfig] which is specified
+ * Configure existing [Entity] by applying the [EntityBlueprint] which is specified
  * by entityConfig string parameter.
  */
-fun World.configureEntity(entityConfig: String, entity: Entity) : Entity =
-    EntityFactory.configureEntity(this, entityConfig, entity)
+fun World.configureEntity(entityBlueprint: String, entity: Entity) : Entity =
+    EntityFactory.configureEntity(this, entityBlueprint, entity)
 
 /**
- * Execute-function which takes an [EntityConfig][EntityFactory.EntityConfig] and an [Entity] to execute the desired
- * behaviour on the given entity. Basically the same as configureEntity, but defined for better code readability.
+ * Execute-function which takes an [EntityBlueprint] and an [Entity] to execute the desired
+ * behavior on the given entity. Basically the same as configureEntity, but defined for better code readability.
  */
-fun World.execute(entityConfig: String, entity: Entity) : Entity =
-    configureEntity(entityConfig, entity)
+fun World.execute(entityBlueprint: String, entity: Entity) : Entity =
+    configureEntity(entityBlueprint, entity)
 
 /**
  * Get name of entity if entity has InfoComponent

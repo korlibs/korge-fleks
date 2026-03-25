@@ -3,8 +3,8 @@ package korlibs.korge.fleks.systems
 import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.ConcretePlayerInputState
-import korlibs.korge.fleks.entity.config.MainCameraConfig
-import korlibs.korge.fleks.entity.config.commonMainCamera
+import korlibs.korge.fleks.entity.blueprints.MainCameraBlueprint
+import korlibs.korge.fleks.entity.blueprints.commonMainCamera
 import korlibs.korge.fleks.state.GameStateManager
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.addKorgeFleksInjectables
@@ -30,12 +30,12 @@ internal class SnapshotSerializerSystemTest {
         println("\n\nUNIT TEST: testSnapshotSystem")
 
         // First create entity config for camera
-        MainCameraConfig(name = commonMainCamera)
+        MainCameraBlueprint(name = commonMainCamera)
         // Then create camera entity from entity config
-        gameWorld.createAndConfigureEntity(entityConfig = commonMainCamera)
+        gameWorld.createAndConfigureEntity(entityBlueprint = commonMainCamera)
 
-        TestGameEntityConfig(name = "test_game_entity_config")
-        gameWorld.createAndConfigureEntity(entityConfig = "test_game_entity_config")
+        TestGameEntityBlueprint(name = "test_game_entity_Blueprint")
+        gameWorld.createAndConfigureEntity(entityBlueprint = "test_game_entity_Blueprint")
 
         val frameTime = (1f / 60f)
 

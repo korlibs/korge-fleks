@@ -2,7 +2,7 @@ package korlibs.korge.fleks.utils
 
 import com.github.quillraven.fleks.WorldConfiguration
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.entity.config.registerCommonEntityConfigs
+import korlibs.korge.fleks.entity.blueprints.registerCommonEntityBlueprints
 import korlibs.korge.fleks.state.GameStateManager
 import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.systems.SystemRuntimeConfigs
@@ -10,7 +10,6 @@ import korlibs.korge.fleks.systems.CameraSystem
 import korlibs.korge.fleks.systems.DebugSystem
 import korlibs.korge.fleks.systems.EntityLinkSystem
 import korlibs.korge.fleks.systems.MessagePassingSystem
-import korlibs.korge.fleks.systems.GameObjectStateSystem
 import korlibs.korge.fleks.systems.HealthMonitorSystem
 import korlibs.korge.fleks.systems.WorldChunkSystem
 import korlibs.korge.fleks.systems.LifeCycleSystem
@@ -21,11 +20,10 @@ import korlibs.korge.fleks.systems.SoundSystem
 import korlibs.korge.fleks.systems.SpawnerSystem
 import korlibs.korge.fleks.systems.SpriteVisibilitySystem
 import korlibs.korge.fleks.systems.SpriteSystem
-import korlibs.korge.fleks.systems.TouchInputSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
 import korlibs.korge.fleks.systems.collision.GridMoveSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
-import korlibs.korge.fleks.systems.collision.PlayerMoveSystem
+import korlibs.korge.fleks.systems.collision.BehaviorTreeSystem
 
 
 fun WorldConfiguration.addKorgeFleksInjectables(
@@ -53,16 +51,18 @@ fun WorldConfiguration.addKorgeFleksSystems() {
 
         // Collision and player input systems
 //        add(PlatformerGravitySystem())
-//        add(PlatformerGroundSystem())  TODO check if we need this system - isGrounded is set in the GridMoveSystem
+        // TODO we need this system (running at 60Hz) if GridMoveSystem is running with 30Hz
+        //add(PlatformerGroundSystem())
 
-        add(PlayerMoveSystem())
+        add(BehaviorTreeSystem())
+
         add(GridMoveSystem())
         add(PlayerMoveAfterCollisionSystem())
         // Debug system to move player entity to a specific position on the map overwriting player input data
         add(DebugSystem())
 
 //        add(GridCollisionCleanupSystem())  ??? check why this is needed
-        add(GameObjectStateSystem())
+//        add(GameObjectStateSystem())  // not needed anymore with BTreeTickSystem
 
         add(SpawnerSystem())
         add(MessagePassingSystem())
@@ -87,5 +87,5 @@ fun WorldConfiguration.addKorgeFleksSystems() {
     }
 
     // Make sure we have all common entity configs registered which comes with Korge-fleks
-    registerCommonEntityConfigs()
+    registerCommonEntityBlueprints()
 }

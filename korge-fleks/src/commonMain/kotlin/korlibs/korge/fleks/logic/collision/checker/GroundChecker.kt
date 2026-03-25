@@ -1,6 +1,6 @@
 package korlibs.korge.fleks.logic.collision.checker
 
-import korlibs.korge.fleks.assets.data.gameObject.CollisionData
+import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 
 
 abstract class GroundChecker {
@@ -10,6 +10,6 @@ abstract class GroundChecker {
         xr: Float,
         yr: Float,
         velocityY: Float,
-        collisionBox: CollisionData
+        collisionBox: CollisionRect
     ): Boolean
 }

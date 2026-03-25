@@ -2,7 +2,7 @@ package korlibs.korge.fleks.logic.collision.checker
 
 import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.assets.data.gameObject.CollisionData
+import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.data.Point.Companion.point
 import korlibs.korge.fleks.logic.collision.GridPosition
@@ -22,7 +22,7 @@ class PlatformerCollisionChecker(
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        collisionBox: CollisionData,
+        collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ): Int {
         val gridSize: Float = worldMapData.tileSize.toFloat()
@@ -96,7 +96,7 @@ class PlatformerCollisionChecker(
         yr: Float,
         velocityX: Float,
         velocityY: Float,
-        collisionBox: CollisionData,
+        collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ): Int {
         val gridSize: Float = worldMapData.tileSize.toFloat()
@@ -123,6 +123,7 @@ class PlatformerCollisionChecker(
 
                 if (worldMapData.hasCollision(cxLeft + i, cy + checkDistance) && yrBottom >= checkBottom) {  // Check the next Y cell
                     dir = 1
+                    return@repeat
                 }
             }
             // Cell coordinates of right corner of the collision box

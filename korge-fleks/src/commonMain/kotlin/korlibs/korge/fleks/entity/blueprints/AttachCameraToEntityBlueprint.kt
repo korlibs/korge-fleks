@@ -1,16 +1,15 @@
-package korlibs.korge.fleks.entity.config
+package korlibs.korge.fleks.entity.blueprints
 
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.tags.CameraFollowTag
-import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.*
 
-@Serializable @SerialName("AttachCameraToEntityConfig")
-data class AttachCameraToEntityConfig(
+@Serializable @SerialName("AttachCameraToEntityBlueprint")
+data class AttachCameraToEntityBlueprint(
     override val name: String
-) : EntityConfig {
+) : EntityBlueprint {
 
     // Function for adding components to this entity
     override fun World.entityConfigure(entity: Entity) : Entity {

@@ -1,67 +1,56 @@
 package korlibs.korge.fleks.components
 
+
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.components.data.StateType
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 /**
- * This component is used to store a state value, which can be used for various purposes,
- * such as game settings, player preferences, or any other data that needs to be stored
- * and accessed throughout the game.
+ * This component is used to store the name of the behavior tree configuration file for a game object and the name
+ * of the behavior tree configuration file that should be used after the collision system has run.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
-@Serializable @SerialName("State")
-class State private constructor(
-    var name: String = "",  // Name of the game object - currently we do not save it anywhere else
-    var current: StateType = StateType.ILLEGAL,
-    var last: StateType = StateType.ILLEGAL,
-
-    var direction: Int = Geometry.RIGHT_DIRECTION,
-    var resetAnimFrameCounter: Boolean = false
-) : PoolableComponent<State>() {
+@Serializable @SerialName("BehaviorTree")
+class BehaviorTree private constructor(
+    var characterConfig: String = "",
+    var configAfterCollisionSystem: String = ""
+) : PoolableComponent<BehaviorTree>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
-    fun init(from: State) {
-        name = from.name
-        current = from.current
-        last = from.last
-        direction = from.direction
-        resetAnimFrameCounter = from.resetAnimFrameCounter
+    fun init(from: BehaviorTree) {
+        characterConfig = from.characterConfig
+        configAfterCollisionSystem = from.configAfterCollisionSystem
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are a value property of another component
     fun cleanup() {
-        name = ""
-        current = StateType.ILLEGAL
-        last = StateType.ILLEGAL
-        direction = Geometry.RIGHT_DIRECTION
-        resetAnimFrameCounter = false
+        characterConfig = ""
+        configAfterCollisionSystem = ""
     }
 
-    override fun type() = StateComponent
+    override fun type() = BehaviorTreeComponent
 
     companion object {
-        val StateComponent = componentTypeOf<State>()
+        val BehaviorTreeComponent = componentTypeOf<BehaviorTree>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticStateComponent(config: State.() -> Unit ): State =
-            State().apply(config)
+        fun staticBehaviorTreeComponent(config: BehaviorTree.() -> Unit): BehaviorTree =
+            BehaviorTree().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun stateComponent(config: State.() -> Unit ): State =
+        fun behaviorTreeComponent(config: BehaviorTree.() -> Unit): BehaviorTree =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "State") { State() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "BehaviorTree") { BehaviorTree() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): State = stateComponent { init(from = this@State ) }
+    override fun clone(): BehaviorTree = behaviorTreeComponent { init(from = this@BehaviorTree) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

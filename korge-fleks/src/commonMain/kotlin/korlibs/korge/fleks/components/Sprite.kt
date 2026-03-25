@@ -159,4 +159,18 @@ class Sprite private constructor(
             ONCE_REVERSE -> -1  // starting reverse
         }
     }
+
+    fun setAnimation(
+        frameTag: String = "",
+        isAnimation: Boolean = false,
+        direction: Direction = FORWARD,
+        disable: Boolean = false,
+        assetStore: AssetStore
+    ) {
+        name = frameTag
+        running = isAnimation
+        this.direction = direction
+        visible = !disable
+        resetAnimation(assetStore)
+    }
 }

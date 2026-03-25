@@ -215,7 +215,7 @@ class TweenSequenceSystem : IteratingSystem(
                 tween.enabled?.let { value -> createTweenPropertyComponent(tween, parentTween, TouchInputEnable, value) }
             }
             // Creates a new entity (or uses the given entity from the tween) and configures it by running the config-function
-            is SpawnEntity -> EntityFactory.configureEntity(world, tween.entityConfig, tween.target)
+            is SpawnEntity -> EntityFactory.configureEntity(world, tween.entityBlueprint, tween.target)
             // Directly deletes the given entity from the tween
             is DeleteEntity -> {
                 //println("INFO - TweenSequenceSystem: Deleting '${tween.target}' (name: ${world.nameOf(tween.target)}) via life cycle from base '$baseEntity' (name: ${world.nameOf(baseEntity)}).")

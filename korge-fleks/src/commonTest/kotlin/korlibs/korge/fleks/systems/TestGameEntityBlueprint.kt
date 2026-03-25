@@ -11,14 +11,13 @@ import korlibs.korge.fleks.components.data.tweenSequence.SpawnEntity.Companion.s
 import korlibs.korge.fleks.components.data.tweenSequence.TweenPosition.Companion.tweenPosition
 import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.*
-import korlibs.korge.fleks.utils.*
 import korlibs.math.interpolation.*
 import kotlinx.serialization.*
 
-@Serializable @SerialName("TestGameEntityConfig")
-data class TestGameEntityConfig(
+@Serializable @SerialName("TestGameEntityBlueprint")
+data class TestGameEntityBlueprint(
     override val name: String
-) : EntityConfig {
+) : EntityBlueprint {
 
     // Function for adding components to this entity
     override fun World.entityConfigure(entity: Entity) : Entity {
@@ -34,7 +33,7 @@ data class TestGameEntityConfig(
                     tweenPosition { target = it; x = 5000f; delay = 1f; duration = 60f; easing = Easing.EASE_IN }
                 }
                 wait { duration = 0.5f }
-                spawnEntity { entityConfig = "test_game_object_config" }
+                spawnEntity { entityBlueprint = "test_game_object_Blueprint" }
                 wait { duration = 60f }
                 deleteEntity { target = it }
             }
@@ -47,14 +46,14 @@ data class TestGameEntityConfig(
         // Register entity config into entity factory for lookup by its name
         EntityFactory.register(this)
 
-        GameObjectConfig(name = "test_game_object_config")
+        GameObjectBlueprint(name = "test_game_object_Blueprint")
     }
 }
 
-@Serializable @SerialName("GameObjectConfig")
-data class GameObjectConfig(
+@Serializable @SerialName("GameObjectBlueprint")
+data class GameObjectBlueprint(
     override val name: String
-) : EntityConfig {
+) : EntityBlueprint {
 
     // Function for adding components to this entity
     override fun World.entityConfigure(entity: Entity) : Entity {

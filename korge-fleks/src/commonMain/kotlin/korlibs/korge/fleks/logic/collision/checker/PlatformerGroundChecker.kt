@@ -2,7 +2,7 @@ package korlibs.korge.fleks.logic.collision.checker
 
 import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.assets.data.gameObject.CollisionData
+import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.logic.collision.GridPosition
 import korlibs.korge.fleks.utils.AppConfig
 import kotlin.math.abs
@@ -19,7 +19,7 @@ class PlatformerGroundChecker : GroundChecker() {
         xr: Float,
         yr: Float,
         velocityY: Float,
-        collisionBox: CollisionData
+        collisionBox: CollisionRect
     ): Boolean {
         val xrLeft = xr + collisionBox.x / AppConfig.GRID_CELL_SIZE
         val xrRight = xr + (collisionBox.x + collisionBox.width) / AppConfig.GRID_CELL_SIZE

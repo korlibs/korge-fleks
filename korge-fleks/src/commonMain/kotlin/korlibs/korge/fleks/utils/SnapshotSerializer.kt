@@ -7,6 +7,8 @@ import korlibs.image.text.*
 import korlibs.image.tiles.Tile
 import korlibs.io.lang.*
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
+import korlibs.korge.fleks.components.BehaviorTree
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Debug
 import korlibs.korge.fleks.components.DebugCollisionShapes
@@ -30,7 +32,6 @@ import korlibs.korge.fleks.components.Rgba
 import korlibs.korge.fleks.components.Rigidbody
 import korlibs.korge.fleks.components.Size
 import korlibs.korge.fleks.components.Sound
-import korlibs.korge.fleks.components.State
 import korlibs.korge.fleks.components.Spawner
 import korlibs.korge.fleks.components.Sprite
 import korlibs.korge.fleks.components.SpriteLayers
@@ -176,6 +177,7 @@ class SnapshotSerializer {
     private val internalModule = SerializersModule {
         // Register component and data classes
         polymorphic(Component::class) {
+            subclass(BehaviorTree::class)
             subclass(Collision::class)
             subclass(Debug::class)
             subclass(DebugCollisionShapes::class)
@@ -201,7 +203,6 @@ class SnapshotSerializer {
             subclass(Rigidbody::class)
             subclass(Size::class)
             subclass(Sound::class)
-            subclass(State::class)
             subclass(Spawner::class)
             subclass(Sprite::class)
             subclass(SpriteLayers::class)
@@ -330,6 +331,31 @@ object EasingAsString : KSerializer<Easing> {
 
     override fun deserialize(decoder: Decoder): Easing = Easing.ALL[decoder.decodeString()] ?:
         throw SerializationException("EasingAsString: No Easing type for '${decoder.decodeString()}' found in decoder!")
+}
+
+/**
+ * A serializer strategy for CollisionRect type.
+ */
+object CollisionRectAsString : KSerializer<CollisionRect> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("CollisionRectAsString", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: CollisionRect) =
+        encoder.encodeString("${value.x},${value.y},${value.width},${value.height}")
+
+    override fun deserialize(decoder: Decoder): CollisionRect {
+        val parts = decoder.decodeString().split(",")
+        if (parts.size != 4) throw SerializationException("CollisionRectAsString: Invalid format for CollisionRect string! Expected format: 'x,x,width,height'")
+        return CollisionRect(
+            x = parts[0].toIntOrNull()
+                ?: throw SerializationException("CollisionRectAsString: Invalid x value '${parts[0]}'!"),
+            y = parts[1].toIntOrNull()
+                ?: throw SerializationException("CollisionRectAsString: Invalid y value '${parts[1]}'!"),
+            width = parts[2].toFloatOrNull()
+                ?: throw SerializationException("CollisionRectAsString: Invalid width value '${parts[2]}'!"),
+            height = parts[3].toFloatOrNull()
+                ?: throw SerializationException("CollisionRectAsString: Invalid height value '${parts[3]}'!")
+        )
+    }
 }
 
 /**

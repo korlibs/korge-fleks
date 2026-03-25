@@ -50,7 +50,7 @@ internal class TweenSequenceComponentTest {
     fun testTweenSequenceComponentSerialization() {
         println("TEST CASE: testTweenSequenceComponentSerialization")
 
-        val testEntityConfig = TestEntityConfig("testEntityConfig")
+        val testEntityConfig = TestEntityBlueprint("testEntityBlueprint")
 
         val compUnderTest = tweenSequenceComponent {
             spawnNewTweenSequence {
@@ -64,7 +64,7 @@ internal class TweenSequenceComponentTest {
                     easing = Easing.EASE_CLAMP_END
 
                     spawnEntity {
-                        entityConfig = testEntityConfig.name
+                        entityBlueprint = testEntityConfig.name
                         x = 10.2f
                         y = 20.3f
                         target = Entity(43, 0u)
@@ -112,11 +112,11 @@ internal class TweenSequenceComponentTest {
         assertEquals(parallelTweens.easing, newParallelTweens.easing, "Check 'parallelTweens.easing' property to be equal")
         val spawnEntity = parallelTweens.tweens.first() as SpawnEntity
         val newSpawnEntity = newParallelTweens.tweens.first() as SpawnEntity
-        assertEquals(spawnEntity.entityConfig, newSpawnEntity.entityConfig, "spawnEntity.entityConfig' property to be equal")
+        assertEquals(spawnEntity.entityBlueprint, newSpawnEntity.entityBlueprint, "spawnEntity.entityConfig' property to be equal")
         assertEquals(spawnEntity.x, newSpawnEntity.x, "Check 'spawnEntity.x' property to be equal")
         assertEquals(spawnEntity.y, newSpawnEntity.y, "Check 'spawnEntity.y' property to be equal")
         assertEquals(spawnEntity.target, newSpawnEntity.target, "Check 'spawnEntity.target' property to be equal")
-        val spawnedEntity = EntityFactory.createAndConfigureEntity(expectedWorld, spawnEntity.entityConfig)
+        val spawnedEntity = EntityFactory.createAndConfigureEntity(expectedWorld, spawnEntity.entityBlueprint)
         assertEquals(spawnedEntity.id, 8080, "Check that configure function is invoked correctly")
 
         // Delete the entity with the component from the expected world -> put component back to the pool

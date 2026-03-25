@@ -5,16 +5,16 @@ import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
 import korlibs.korge.fleks.assets.AssetStore
-import korlibs.korge.fleks.assets.data.gameObject.CollisionData
+import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
+import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
-import korlibs.korge.fleks.components.State.Companion.StateComponent
 import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
 import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
 import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
@@ -26,9 +26,9 @@ import kotlin.math.ceil
 
 
 class GridMoveSystem : IteratingSystem(
-    family = World.family { all(GridComponent, MotionComponent, CollisionComponent, StateComponent)
+    family = World.family { all(GridComponent, MotionComponent, CollisionComponent)
         .any(GridComponent, DebugCollisionShapesComponent) },
-    interval = Fixed(1 / 30f)
+    interval = Fixed(1 / 60f)
 ) {
     val assetStore = world.inject<AssetStore>("AssetStore")
 
@@ -42,20 +42,22 @@ class GridMoveSystem : IteratingSystem(
         val motionComponent = entity[MotionComponent]
         val gridComponent = entity[GridComponent]
         val collisionComponent = entity[CollisionComponent]
-        val stateComponent = entity[StateComponent]
-        val collisionBox = assetStore.getGameObjectStateConfig(stateComponent.name).getCollisionData(stateComponent.current)
+        val collisionBox = collisionComponent.rect
 
         val debugShapesComponent: DebugCollisionShapes? = entity.getOrNull(DebugCollisionShapesComponent)
         // Free debug points before we create new ones
         debugShapesComponent?.cleanup()
 
-//        val gravityComponent = entity.getOrNull(GravityComponent)
-        // Apply gravity to the entity if it has a GravityComponent
-//        if (gravityComponent != null) {
-// TODO enable gravity again
-//            motionComponent.velocityX += gravityComponent.calculateDeltaXGravity()
-//            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity()
+//        if (motionComponent.velocityY < -0.01f || motionComponent.velocityY > 0.01f) {
+//            println("GridMoveSystem: '${world.nameOf(entity)}' velocityY before gravity: ${motionComponent.velocityY}")
 //        }
+
+        val gravityComponent = entity.getOrNull(GravityComponent)
+        // Apply gravity to the entity if it has a GravityComponent
+        if (gravityComponent != null) {
+            motionComponent.velocityX += gravityComponent.calculateDeltaXGravity() * deltaTime
+            motionComponent.velocityY += gravityComponent.calculateDeltaYGravity() * deltaTime
+        }
 
         // Set the last pixel position to the current grid position
         gridComponent.lastPx = gridComponent.attachX
@@ -67,14 +69,14 @@ class GridMoveSystem : IteratingSystem(
          */
         val overallMovementX = motionComponent.velocityX * deltaTime
         val overallMovementY = motionComponent.velocityY * deltaTime  // We need to invert the Y velocity because the Y axis is inverted in the grid system
+
         // Calculate the number of steps needed to move the entity in relation to the grid size (here 16x16 pixels)
-        val steps = ceil((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize.toFloat())  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
+        val steps: Int = ceil((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize.toFloat() + 0.1f).toInt()  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
         if (steps > 0) {
             var i = 0
             // Reset collision flags
             collisionComponent.right = false
             collisionComponent.left = false
-            collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
             collisionComponent.isGrounded = false
             collisionComponent.isCollidingAbove = false
 
@@ -121,6 +123,8 @@ class GridMoveSystem : IteratingSystem(
 //        println("GridMoveSystem: cx, cy: ${gridComponent.cx}, ${gridComponent.cy} xr, yr: ${gridComponent.xr}, ${gridComponent.yr}")
 
         checkPlayfieldBoundaries(gridComponent)
+
+        //collisionComponent.printCollisionInfo()
     }
 
     override fun onAlphaEntity(entity: Entity, alpha: Float) {
@@ -150,7 +154,7 @@ class GridMoveSystem : IteratingSystem(
         gridComponent: Grid,
         motionComponent: Motion,
         collisionComponent: Collision,
-        collisionBox: CollisionData,
+        collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ) {
         // Move the entity in the X direction
@@ -207,7 +211,7 @@ class GridMoveSystem : IteratingSystem(
         gridComponent: Grid,
         motionComponent: Motion,
         collisionComponent: Collision,
-        collisionBox: CollisionData,
+        collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ) {
         // Move the entity in the Y direction
