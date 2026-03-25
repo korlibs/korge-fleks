@@ -77,7 +77,6 @@ class GridMoveSystem : IteratingSystem(
             // Reset collision flags
             collisionComponent.right = false
             collisionComponent.left = false
-            collisionComponent.wasGroundedLastFrame = collisionComponent.isGrounded
             collisionComponent.isGrounded = false
             collisionComponent.isCollidingAbove = false
 

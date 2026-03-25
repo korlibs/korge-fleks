@@ -16,4 +16,3 @@ interface BehaviorTreeBlueprint {
     val name: String
     val btree: BTNode
 }
-

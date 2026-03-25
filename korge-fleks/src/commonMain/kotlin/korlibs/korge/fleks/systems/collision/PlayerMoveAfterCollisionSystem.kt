@@ -37,11 +37,11 @@ class PlayerMoveAfterCollisionSystem : IteratingSystem(
             }
         }
         // flip sprite as needed
-        if (inputState.right) {
+//        if (inputState.right) {
 //            stateComponent.direction = Geometry.RIGHT_DIRECTION
-        } else if (inputState.left) {
+//        } else if (inputState.left) {
 //            stateComponent.direction = Geometry.LEFT_DIRECTION
-        }
+//        }
 
 // TODO cleanup
 //        if (inputState.justUp) {
