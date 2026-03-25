@@ -33,7 +33,7 @@ data class TestGameEntityBlueprint(
                     tweenPosition { target = it; x = 5000f; delay = 1f; duration = 60f; easing = Easing.EASE_IN }
                 }
                 wait { duration = 0.5f }
-                spawnEntity { entityBlueprint = "test_game_object_config" }
+                spawnEntity { entityBlueprint = "test_game_object_Blueprint" }
                 wait { duration = 60f }
                 deleteEntity { target = it }
             }
