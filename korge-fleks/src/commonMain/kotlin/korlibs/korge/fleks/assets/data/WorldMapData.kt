@@ -33,8 +33,8 @@ class WorldMapData {
     internal lateinit var levelGridVania: IntArray2
     internal lateinit var collisionTileSet: CollisionTileSet
 
-    private val levelMidPointX: Int = levelChunkWidth / 2
-    private val levelMidPointY: Int = levelChunkHeight / 2
+    private var levelMidPointX: Int = levelChunkWidth / 2
+    private var levelMidPointY: Int = levelChunkHeight / 2
 
     fun init(
         worldWidth: Float,
@@ -54,6 +54,8 @@ class WorldMapData {
         this.levelChunkWidth = levelChunkWidth
         this.levelChunkHeight = levelChunkHeight
         this.tileSize = tileSize
+        this.levelMidPointX = levelChunkWidth / 2
+        this.levelMidPointY = levelChunkHeight / 2
 
         // Set up grid-vania array
         levelGridVania = IntArray2(gridVaniaWidth, gridVaniaHeight) { -1 }
