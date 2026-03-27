@@ -11,8 +11,8 @@ import kotlinx.serialization.Transient
  * This is done to avoid redundant storage of this information for each world chunk.
  *
  * @param version The version of the chunk asset info format. This is used for compatibility checks when loading chunk assets.
- * @param gridVaniaWidth The width of the Grid-vania world map in overall tiles.
- * @param gridVaniaHeight The height of the Grid-vania world map in overall tiles.
+ * @param gridVaniaWidth The width of the Grid-vania world map in chunks.
+ * @param gridVaniaHeight The height of the Grid-vania world map in chunks.
  * @param chunkWidth The width of a world chunk in tiles.
  * @param chunkHeight The height of a world chunk in tiles.
  * @param tileSize The size of a tile in pixels. Usually 16 pixels.
@@ -23,11 +23,11 @@ import kotlinx.serialization.Transient
 @Serializable
 data class CommonChunkInfo(
     @SerialName("v") val version: List<Int> = emptyList(),
-    @SerialName("x") val gridVaniaWidth: Int = 0,   // in tiles
-    @SerialName("y") val gridVaniaHeight: Int = 0,  // in tiles
-    @SerialName("w") val chunkWidth: Int = 0,   // in tiles
-    @SerialName("h") val chunkHeight: Int = 0,  // in tiles
-    @SerialName("t") val tileSize: Int = 0,      // in pixels
+    @SerialName("x") val gridVaniaWidth: Int = 0,   // in chunks
+    @SerialName("y") val gridVaniaHeight: Int = 0,  // in chunks
+    @SerialName("w") val chunkWidth: Int = 0,       // in tiles
+    @SerialName("h") val chunkHeight: Int = 0,      // in tiles
+    @SerialName("t") val tileSize: Int = 0,         // in pixels
     @SerialName("c") val collisionTiles: List<List<Int>> = emptyList()  // Collision tiles for each collision index from world chunk map (tiles)
 )
 
@@ -37,12 +37,12 @@ data class CommonChunkInfo(
  *
  * @param entities List of entity configurations which are used to create entities in the world chunk.
  * @param entitiesToBeSpawned List of entity names which shall be spawned automatically by the WorldChunkSystem.
- * @param chunkX The x coordinate of the chunk in grid coordinates (in tiles) within the Grid-vania world map.
- * @param chunkY The y coordinate of the chunk in grid coordinates (in tiles) within the Grid-vania world map.
- * @param chunkTop The id of the neighbor chunk at the top of the chunk. 0 if there is no neighbor chunk at the top.
- * @param chunkBottom The id of the neighbor chunk at the bottom of the chunk. 0 if there is no neighbor chunk at the bottom.
- * @param chunkLeft The id of the neighbor chunk at the left of the chunk. 0 if there is no neighbor chunk at the left.
- * @param chunkRight The id of the neighbor chunk at the right of the chunk. 0 if there is no neighbor chunk at the right.
+ * @param chunkX The x coordinate of the chunk within the Grid-vania world map.
+ * @param chunkY The y coordinate of the chunk within the Grid-vania world map.
+ * @param chunkTop The id of the neighbor chunk at the top of the chunk. -1 if there is no neighbor chunk at the top.
+ * @param chunkBottom The id of the neighbor chunk at the bottom of the chunk. -1 if there is no neighbor chunk at the bottom.
+ * @param chunkLeft The id of the neighbor chunk at the left of the chunk. -1 if there is no neighbor chunk at the left.
+ * @param chunkRight The id of the neighbor chunk at the right of the chunk. -1 if there is no neighbor chunk at the right.
  * @param levelMaps A map of tile maps for the world chunk. The key is the name of the layer of the tile map
  *                  (e.g. "background", "main", "foreground") and the value is the tile map info for that layer.
  */
