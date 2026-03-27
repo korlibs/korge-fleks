@@ -16,6 +16,10 @@ class WorldMapData {
         private set
     var worldHeight: Float = 1024f
         private set
+    var gridVaniaWidth: Int = 1
+        private set
+    var gridVaniaHeight: Int = 1
+        private set
     // Size of a world chunk inside the grid vania array in tiles (all levels have the same size)
     var levelChunkWidth: Int = 64
         private set
@@ -35,6 +39,8 @@ class WorldMapData {
     fun init(
         worldWidth: Float,
         worldHeight: Float,
+        gridVaniaWidth: Int,
+        gridVaniaHeight: Int,
         levelChunkWidth: Int,
         levelChunkHeight: Int,
         tileSize: Int,
@@ -43,12 +49,14 @@ class WorldMapData {
     ) {
         this.worldWidth = worldWidth
         this.worldHeight = worldHeight
+        this.gridVaniaWidth = gridVaniaWidth
+        this.gridVaniaHeight = gridVaniaHeight
         this.levelChunkWidth = levelChunkWidth
         this.levelChunkHeight = levelChunkHeight
         this.tileSize = tileSize
 
         // Set up grid-vania array
-        levelGridVania = IntArray2(levelChunkWidth, levelChunkHeight) { -1 }
+        levelGridVania = IntArray2(gridVaniaWidth, gridVaniaHeight) { -1 }
         // Set up collision tile set
         collisionTileSet = CollisionTileSet(collisionTiles, collisionShapesBitmapSlice, tileSize, tileSize)
     }

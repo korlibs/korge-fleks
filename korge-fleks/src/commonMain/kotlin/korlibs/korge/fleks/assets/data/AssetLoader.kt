@@ -50,8 +50,11 @@ class AssetLoader(
         val collisionShapes = resourcesVfs["${worldName}/level_data/collision_shapes.png"].readBitmap().slice()
 
         assetStore.worldMapData.init(
+            //    size = (Number of chunks * Number of tiles * Size of tile)
             worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth * commonChunkInfo.tileSize).toFloat(),
             worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.chunkHeight * commonChunkInfo.tileSize).toFloat(),
+            gridVaniaWidth = commonChunkInfo.gridVaniaWidth,
+            gridVaniaHeight = commonChunkInfo.gridVaniaHeight,
             levelChunkWidth = commonChunkInfo.chunkWidth,
             levelChunkHeight = commonChunkInfo.chunkHeight,
             tileSize = commonChunkInfo.tileSize,
