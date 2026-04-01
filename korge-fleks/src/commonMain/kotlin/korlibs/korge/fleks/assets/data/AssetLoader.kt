@@ -71,14 +71,11 @@ class AssetLoader(
      */
     suspend fun loadWorldChunkAssets(worldName: String, chunkNumber: Int) {
         // First load chunks and get list of asset clusters which need to be loaded.
-        loadChunkAssets(worldName, chunkNumber)
+//        loadChunkAssets(worldName, chunkNumber)
         // TODO hardcoded for now
-        loadChunkAssets(worldName, 2)
-        loadChunkAssets(worldName, 3)
-        loadChunkAssets(worldName, 4)
-        loadChunkAssets(worldName, 5)
-        loadChunkAssets(worldName, 6)
-        loadChunkAssets(worldName, 7)
+        repeat(19) {
+            loadChunkAssets(worldName, it + 1)
+        }
     }
 
     private suspend fun loadChunkAssets(worldName: String, chunkIndex: Int) {
