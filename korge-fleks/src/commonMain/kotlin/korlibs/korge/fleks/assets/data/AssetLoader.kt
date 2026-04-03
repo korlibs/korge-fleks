@@ -69,12 +69,10 @@ class AssetLoader(
      * Function for loading all assets which are needed for a world chunk. This includes the tile maps and tile sets for
      * the chunk and all assets which are needed for the entities of the chunk.
      */
-    suspend fun loadWorldChunkAssets(worldName: String, chunkNumber: Int) {
+    suspend fun loadWorldChunkAssets(worldName: String, chunkList: List<Int>) {
         // First load chunks and get list of asset clusters which need to be loaded.
-//        loadChunkAssets(worldName, chunkNumber)
-        // TODO hardcoded for now
-        repeat(19) {
-            loadChunkAssets(worldName, it + 1)
+        chunkList.forEach { chunk ->
+            loadChunkAssets(worldName, chunk)
         }
     }
 

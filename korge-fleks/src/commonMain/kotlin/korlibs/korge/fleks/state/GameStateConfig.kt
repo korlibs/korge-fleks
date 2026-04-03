@@ -10,6 +10,6 @@ data class GameStateConfig(
     val version: Int = 0,
     var firstStart: Boolean = true,
     var worldName: String,
-    var chunk: Int,
+    var initialChunkList: List<Int>,
     var startScript: String
 )

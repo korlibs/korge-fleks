@@ -24,6 +24,7 @@ import korlibs.korge.fleks.systems.addTweenEngineSystems
 import korlibs.korge.fleks.systems.collision.GridMoveSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
 import korlibs.korge.fleks.systems.collision.BehaviorTreeSystem
+import kotlin.coroutines.CoroutineContext
 
 
 fun WorldConfiguration.addKorgeFleksInjectables(
@@ -42,12 +43,14 @@ fun WorldConfiguration.addKorgeFleksInjectables(
     }
 }
 
-fun WorldConfiguration.addKorgeFleksSystems() {
+fun WorldConfiguration.addKorgeFleksSystems(
+    coroutineContext: CoroutineContext
+) {
     // Register all needed systems of the entity component system
     // The order of systems here also define the order in which the systems are called inside Fleks ECS
     systems {
         // Spawn new entities if we enter a new level chunk
-        add(WorldChunkSystem())
+        add(WorldChunkSystem(coroutineContext))
 
         // Collision and player input systems
 //        add(PlatformerGravitySystem())

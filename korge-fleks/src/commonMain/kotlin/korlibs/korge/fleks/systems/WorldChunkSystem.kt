@@ -6,6 +6,7 @@ import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.WorldMap
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.utils.createAndConfigureEntity
+import kotlin.coroutines.CoroutineContext
 
 
 /**
@@ -13,7 +14,9 @@ import korlibs.korge.fleks.utils.createAndConfigureEntity
  * This system needs to be invoked with the same interval as the [PositionSystem] which moves
  * the entities.
  */
-class WorldChunkSystem : IntervalSystem(
+class WorldChunkSystem(
+    private val coroutineContext: CoroutineContext
+) : IntervalSystem(
     // Same interval as the game object move/position system
     interval = Fixed(1 / 60f)
 ) {
@@ -35,7 +38,7 @@ class WorldChunkSystem : IntervalSystem(
         val viewPortMiddlePosX: Int = viewPortPosX.toInt() / tileSize  // x in positive direction, in world grid
         val viewPortMiddlePosY: Int = viewPortPosY.toInt() / tileSize  // y in negative direction, in world grid
 
-        levelData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, activatedChunks) { entityConfig ->
+        levelData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, activatedChunks, coroutineContext) { entityConfig ->
             println("Chunk entity to create: $entityConfig")
             createAndConfigureEntity(entityConfig)
         }

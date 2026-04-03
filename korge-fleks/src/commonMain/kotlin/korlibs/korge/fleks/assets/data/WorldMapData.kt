@@ -2,7 +2,10 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
-import kotlin.math.abs
+import korlibs.io.async.launchAsap
+import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.state.GameStateManager
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Data class for storing world chunks and entities for a game world.
@@ -10,7 +13,10 @@ import kotlin.math.abs
  * We store the level data config in a 2D array depending on its grid-vania position in the world
  * Then later we will spawn the entities depending on the level which the player is currently in
  */
-class WorldMapData {
+class WorldMapData(
+    private val assetStore: AssetStore,
+    private val gameStateManager: GameStateManager
+) {
     // Size of whole world in pixel - init with size of one chunk, but will be set to actual world size in init function
     var worldWidth: Float = 1024f
         private set
@@ -104,7 +110,13 @@ class WorldMapData {
      *        player is moving within the same chunks
      * @param callback Callback function to call for each entity config name - parameter: entity config name
      */
-    fun forEachEntityInChunk(viewPortMiddlePosX: Int, viewPortMiddlePosY: Int, activatedChunks: MutableSet<Int>, callback: (String) -> Unit) {
+    fun forEachEntityInChunk(
+        viewPortMiddlePosX: Int,
+        viewPortMiddlePosY: Int,
+        activatedChunks: MutableSet<Int>,
+        coroutineContext: CoroutineContext,
+        callback: (String) -> Unit
+    ) {
         // Calculate the grid position of the view port middle position
         val gridX: Int = viewPortMiddlePosX / levelChunkWidth
         val gridY: Int = viewPortMiddlePosY / levelChunkHeight
@@ -118,10 +130,18 @@ class WorldMapData {
         var startGridY: Int
         var endGridX: Int
         var endGridY: Int
+        var chunk1: Int
+        var chunk2: Int
+        var chunk3: Int
 
         if (localViewPortPosX < levelMidPointX) {
             if (localViewPortPosY < levelMidPointY) {
                 // Top-left quadrant
+
+                // TODO load top, left and top-left chunk
+//                chunk1 =   // top chunk
+
+
                 startGridX = gridX - 1
                 endGridX = gridX
                 startGridY = gridY - 1
@@ -151,10 +171,27 @@ class WorldMapData {
 
         for(x in startGridX .. endGridX) {
             for (y in startGridY .. endGridY) {
-                // Check if the chunk is already spawned
+                // Keep checking chunk only inside world bounds
                 if (levelGridVania.inside(x, y)) {
                     // Get chunk from levelGridVania at grid cell coordinates
                     val chunk = levelGridVania[x, y]
+                    // Check if chunk needs to be loaded
+                    if (chunk == -1) {
+                        val world = gameStateManager.config.worldName
+                        val newChunk = 0
+//                        CoroutineScope(coroutineContext).asyncAsap {
+//                            assetStore.loader.loadWorldChunkAssets(world, newChunk)
+//                        }
+                        launchAsap(coroutineContext) {
+//                            assetStore.loader.loadWorldChunkAssets(world, newChunk)
+                        }
+                    }
+
+
+                    // Skip if no chunk is assigned to the grid cell
+                    if (chunk == -1) continue
+                    // Check if chunk is not already activated to avoid spawning entities multiple times when the player
+                    // is moving within the same chunks and add chunk to activated chunks if not already activated
                     if (!activatedChunks.contains(chunk)) {
                         activatedChunks.add(chunk)
                         // Now spawn the entities by providing each name to the callback lambda
@@ -162,6 +199,8 @@ class WorldMapData {
                             callback(entityConfigName)
                         }
                     }
+
+
                 }
             }
         }

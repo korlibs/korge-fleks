@@ -11,6 +11,7 @@ import korlibs.korge.fleks.assets.data.SpriteFrames
 import korlibs.korge.fleks.assets.data.SimpleTileSet
 import korlibs.korge.fleks.assets.data.UNKNOWN
 import korlibs.korge.fleks.assets.data.WorldMapData
+import korlibs.korge.fleks.state.GameStateManager
 import kotlin.collections.set
 
 
@@ -52,11 +53,13 @@ typealias TileSetsAssetType = MutableMap<String, Pair<AssetType, SimpleTileSet>>
  *   level editor. This can help to keep an overview of which assets are used in which area of the world and to avoid loading
  *   and unloading of assets.
  */
-class AssetStore {
+class AssetStore(
+    gameStateManager: GameStateManager
+) {
     // Handles loading of common and world cluster assets
     val loader = AssetLoader(this)
     // Data structure to keep track of loaded world map data (e.g. chunk meshes, level maps, grid vania, ...)
-    val worldMapData = WorldMapData()
+    val worldMapData = WorldMapData(this, gameStateManager)
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 

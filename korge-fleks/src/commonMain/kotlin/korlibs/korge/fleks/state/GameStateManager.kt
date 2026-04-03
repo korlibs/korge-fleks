@@ -22,7 +22,7 @@ class GameStateManager {
             Yaml().decodeFromString<GameStateConfig>(gameStateConfigString)
         } catch (e: Throwable) {
             println("ERROR: Loading game state config - $e")
-            GameStateConfig("jobesLegacy", 0, true, "world_1", 1, "start_intro")
+            GameStateConfig("jobesLegacy", 0, true, "world_1", listOf(1,3), "start_intro")
         }
     }
 }
