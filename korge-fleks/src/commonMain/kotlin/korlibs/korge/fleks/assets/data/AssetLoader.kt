@@ -62,21 +62,24 @@ class AssetLoader(
             collisionShapesBitmapSlice = collisionShapes
         )
         println("- Resources loaded in ${sw.elapsed}")
-
     }
 
     /**
-     * Function for loading all assets which are needed for a world chunk. This includes the tile maps and tile sets for
-     * the chunk and all assets which are needed for the entities of the chunk.
+     * Function for loading all assets which are needed for a list of world chunks. This includes the JSON file for the
+     * chunk data itself and any tile sets and other assets which are needed for the tile maps and game objects of the chunk.
      */
     suspend fun loadWorldChunkAssets(worldName: String, chunkList: List<Int>) {
         // First load chunks and get list of asset clusters which need to be loaded.
         chunkList.forEach { chunk ->
-            loadChunkAssets(worldName, chunk)
+            loadWorldChunkAssets(worldName, chunk)
         }
     }
 
-    private suspend fun loadChunkAssets(worldName: String, chunkIndex: Int) {
+    /**
+     * Function for loading all assets which are needed for a world chunk. This includes the JSON file for the chunk data
+     * itself and any tile sets and other assets which are needed for the tile maps and game objects of the chunk.
+     */
+    suspend fun loadWorldChunkAssets(worldName: String, chunkIndex: Int) {
         val sw = Stopwatch().start()
         print("INFO: AssetStore - Start loading world chunk '${worldName}/level_data/chunk_${chunkIndex}'... ")
 
@@ -86,7 +89,7 @@ class AssetLoader(
         val worldChunk: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/chunk_${chunkIndex}.json"].readString())
         // Add world chunk
         assetStore.worldMapData.chunkMeshes[chunkIndex] = worldChunk
-        assetStore.worldMapData.levelGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex
+        assetStore.worldMapData.levelGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex  // TODO remove
 
         println("- Resources loaded in ${sw.elapsed}")
 

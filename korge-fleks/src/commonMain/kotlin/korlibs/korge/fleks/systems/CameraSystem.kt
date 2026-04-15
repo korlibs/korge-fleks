@@ -59,6 +59,9 @@ class CameraSystem(
             else if (newCameraPositionY > bottomBound) bottomBound
             else newCameraPositionY
 
+        // Update chunk position of camera in runtime configs
+        // TODO
+
         // Move parallax layers if camera moves
         val cameraDistX = cameraPosition.x - lastCameraPosX
         val cameraDistY = cameraPosition.y - lastCameraPosY

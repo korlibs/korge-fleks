@@ -27,8 +27,6 @@ class WorldChunkSystem(
         // Get main camera position or exit if it does not exist
         val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
         val worldMapComponent: WorldMap = systemRuntimeConfigs.getWorldChunkConfig(world) ?: return
-
-        val activatedChunks = worldMapComponent.activatedChunks
         val tileSize = levelData.tileSize
 
         // Calculate viewport position in world coordinates from Camera position (x,y) + offset
@@ -38,7 +36,9 @@ class WorldChunkSystem(
         val viewPortMiddlePosX: Int = viewPortPosX.toInt() / tileSize  // x in positive direction, in world grid
         val viewPortMiddlePosY: Int = viewPortPosY.toInt() / tileSize  // y in negative direction, in world grid
 
-        levelData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, activatedChunks, coroutineContext) { entityConfig ->
+        // Check if we need to load new chunks depending on the camera position
+        // Check if we need to spawn new entities
+        levelData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, worldMapComponent, coroutineContext) { entityConfig ->
             println("Chunk entity to create: $entityConfig")
             createAndConfigureEntity(entityConfig)
         }

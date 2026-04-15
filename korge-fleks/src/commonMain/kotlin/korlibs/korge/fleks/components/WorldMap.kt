@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("WorldMap")
 class WorldMap private constructor(
     var currentChunk: Int = 0,  // Current chunk number where the camera is located
-    // List of chunk number which entities were spawned
+    // List of chunk numbers which entities were spawned
     val activatedChunks: MutableSet<Int> = mutableSetOf()
 ) : PoolableComponent<WorldMap>() {
     // Init an existing component data instance with data from another component

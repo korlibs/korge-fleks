@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
-/*
+
 @Serializable @SerialName("WorldChunk")
 class WorldChunk private constructor(
     var chunk: Int = 0
@@ -75,4 +75,3 @@ class WorldChunk private constructor(
         pool.free(this)
     }
 }
-*/

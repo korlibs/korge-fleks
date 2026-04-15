@@ -2,10 +2,14 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
+import korlibs.io.async.ResourceDecoder
 import korlibs.io.async.launchAsap
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.components.WorldMap
 import korlibs.korge.fleks.state.GameStateManager
+import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
+
 
 /**
  * Data class for storing world chunks and entities for a game world.
@@ -15,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
  */
 class WorldMapData(
     private val assetStore: AssetStore,
-    private val gameStateManager: GameStateManager
+    gameStateManager: GameStateManager
 ) {
     // Size of whole world in pixel - init with size of one chunk, but will be set to actual world size in init function
     var worldWidth: Float = 1024f
@@ -36,11 +40,13 @@ class WorldMapData(
         private set
 
     internal val chunkMeshes: MutableMap<Int, ChunkAssetInfo> = mutableMapOf()
-    internal lateinit var levelGridVania: IntArray2
+    internal lateinit var levelGridVania: IntArray2  // TODO delete this
     internal lateinit var collisionTileSet: CollisionTileSet
 
     private var levelMidPointX: Int = levelChunkWidth / 2
     private var levelMidPointY: Int = levelChunkHeight / 2
+
+    private val worldName = gameStateManager.config.worldName
 
     fun init(
         worldWidth: Float,
@@ -69,6 +75,10 @@ class WorldMapData(
         collisionTileSet = CollisionTileSet(collisionTiles, collisionShapesBitmapSlice, tileSize, tileSize)
     }
 
+    private enum class ViewPortPosition {
+        TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
+    }
+
     /**
      * Check collision at cell position.
      * Position cannot get negative.
@@ -82,6 +92,9 @@ class WorldMapData(
         // Get the chunk coordinates in the chunk Grid-vania array
         val gridCx =  cx / levelChunkWidth
         val gridCy = cy / levelChunkHeight
+
+        // TODO refactor collision check and remove need for level Grid Array
+        //      -> we can directly check the chunk mesh for the chunk which contains the cell position and check if the tile at the cell position has a collision index (bits 20-27) that is not 0
         return if (levelGridVania.inside(gridCx, gridCy)) {
             // Get the local coordinates within the chunk
             val localCx = cx % levelChunkWidth
@@ -106,14 +119,14 @@ class WorldMapData(
      *
      * @param viewPortMiddlePosX Horizontal (middle) position of view port in world grid cells
      * @param viewPortMiddlePosY Vertical (middle) position of view port in world grid cells
-     * @param activatedChunks Set of already activated chunk indices to avoid spawning entities multiple times when the
-     *        player is moving within the same chunks
+     * @param worldMapComponent WorldMap component of the current world which contains the set of already activated chunk indices
+     *        to avoid spawning entities multiple times when the player is moving within the same chunks
      * @param callback Callback function to call for each entity config name - parameter: entity config name
      */
     fun forEachEntityInChunk(
         viewPortMiddlePosX: Int,
         viewPortMiddlePosY: Int,
-        activatedChunks: MutableSet<Int>,
+        worldMapComponent: WorldMap,
         coroutineContext: CoroutineContext,
         callback: (String) -> Unit
     ) {
@@ -121,90 +134,100 @@ class WorldMapData(
         val gridX: Int = viewPortMiddlePosX / levelChunkWidth
         val gridY: Int = viewPortMiddlePosY / levelChunkHeight
 
+        // Set of already activated chunk indices to avoid spawning entities multiple times when the
+        // player is moving within the same chunks
+        val activatedChunks = worldMapComponent.activatedChunks
+        val currentChunk = worldMapComponent.currentChunk
+
         // Check in which quadrant of the grid the view port is located
         // and iterate over the adjacent chunks (2x2 grid)
         val localViewPortPosX: Int = viewPortMiddlePosX % levelChunkWidth
         val localViewPortPosY: Int = viewPortMiddlePosY % levelChunkHeight
 
-        var startGridX: Int
-        var startGridY: Int
-        var endGridX: Int
-        var endGridY: Int
-        var chunk1: Int
-        var chunk2: Int
-        var chunk3: Int
+        // Number of chunks which needs to be loaded (if not already loaded) depending on the quadrant of the view port
+        // Chunk -1 means no chunk assigned to the grid cell, so we can ignore it when checking if the chunk needs to be loaded
+        // TODO what does chunk == 0 mean ???
 
-        if (localViewPortPosX < levelMidPointX) {
-            if (localViewPortPosY < levelMidPointY) {
-                // Top-left quadrant
+        // Sanity check - we should always have a chunk mesh for the current chunk index, otherwise we cannot determine the adjacent chunks and load them if needed
+        if (!chunkMeshes.containsKey(currentChunk)) {
+            println("ERROR: WorldMapData - No chunk mesh found for current chunk index '$currentChunk' in grid position ($gridX, $gridY)!")
+            return
+        }
+        val currentChunkInfo = chunkMeshes[currentChunk]!!
 
-                // TODO load top, left and top-left chunk
-//                chunk1 =   // top chunk
-
-
-                startGridX = gridX - 1
-                endGridX = gridX
-                startGridY = gridY - 1
-                endGridY = gridY
-            } else {
-                // Bottom-left quadrant
-                startGridX = gridX - 1
-                endGridX = gridX
-                startGridY = gridY
-                endGridY = gridY + 1
-            }
+        // Check in which quadrant of the grid-vania the view port middle position is located
+        val viewPortPosition: ViewPortPosition = if (localViewPortPosX < levelMidPointX) {
+            if (localViewPortPosY < levelMidPointY) ViewPortPosition.TOP_LEFT else ViewPortPosition.BOTTOM_LEFT
         } else {
-            if (localViewPortPosY < levelMidPointY) {
-                // Top-right quadrant
-                startGridX = gridX
-                endGridX = gridX + 1
-                startGridY = gridY - 1
-                endGridY = gridY
-            } else {
-                // Bottom-right quadrant
-                startGridX = gridX
-                endGridX = gridX + 1
-                startGridY = gridY
-                endGridY = gridY + 1
-            }
+            if (localViewPortPosY < levelMidPointY) ViewPortPosition.TOP_RIGHT else ViewPortPosition.BOTTOM_RIGHT
         }
 
-        for(x in startGridX .. endGridX) {
-            for (y in startGridY .. endGridY) {
-                // Keep checking chunk only inside world bounds
-                if (levelGridVania.inside(x, y)) {
-                    // Get chunk from levelGridVania at grid cell coordinates
-                    val chunk = levelGridVania[x, y]
-                    // Check if chunk needs to be loaded
-                    if (chunk == -1) {
-                        val world = gameStateManager.config.worldName
-                        val newChunk = 0
-//                        CoroutineScope(coroutineContext).asyncAsap {
-//                            assetStore.loader.loadWorldChunkAssets(world, newChunk)
-//                        }
-                        launchAsap(coroutineContext) {
-//                            assetStore.loader.loadWorldChunkAssets(world, newChunk)
-                        }
+//        launch(Dispatchers.ResourceDecoder) {  TODO check what is working
+//        launchAsap(coroutineContext) {
+        launchAsap(Dispatchers.ResourceDecoder) {
+            when (viewPortPosition) {
+                // Check if any of the first 2 chunks needs to be loaded and if its entities needs to be spawned
+                // Then check if the third chunk needs to be loaded and if its entities needs to be spawned
+                ViewPortPosition.TOP_LEFT -> {
+                    val topChunk = currentChunkInfo.chunkTop
+                    val leftChunk = currentChunkInfo.chunkLeft
+                    if (checkAndLoadChunk(topChunk, activatedChunks, callback)) {
+                        chunkMeshes[topChunk]?.let { topChunkInfo -> checkAndLoadChunk(topChunkInfo.chunkLeft, activatedChunks, callback) }
                     }
-
-
-                    // Skip if no chunk is assigned to the grid cell
-                    if (chunk == -1) continue
-                    // Check if chunk is not already activated to avoid spawning entities multiple times when the player
-                    // is moving within the same chunks and add chunk to activated chunks if not already activated
-                    if (!activatedChunks.contains(chunk)) {
-                        activatedChunks.add(chunk)
-                        // Now spawn the entities by providing each name to the callback lambda
-                        chunkMeshes[chunk]?.entitiesToBeSpawned?.forEach { entityConfigName ->
-                            callback(entityConfigName)
-                        }
+                    if (checkAndLoadChunk(leftChunk, activatedChunks, callback)) {
+                        chunkMeshes[leftChunk]?.let { leftChunkInfo -> checkAndLoadChunk(leftChunkInfo.chunkTop, activatedChunks, callback) }
                     }
+                }
 
+                ViewPortPosition.TOP_RIGHT -> {
+                    val topChunk = currentChunkInfo.chunkTop
+                    val rightChunk = currentChunkInfo.chunkRight
+                    if (checkAndLoadChunk(topChunk, activatedChunks, callback)) {
+                        chunkMeshes[topChunk]?.let { topChunkInfo -> checkAndLoadChunk(topChunkInfo.chunkRight, activatedChunks, callback) }
+                    }
+                    if (checkAndLoadChunk(rightChunk, activatedChunks, callback)) {
+                        chunkMeshes[rightChunk]?.let { rightChunkInfo -> checkAndLoadChunk(rightChunkInfo.chunkTop, activatedChunks, callback) }
+                    }
+                }
 
+                ViewPortPosition.BOTTOM_LEFT -> {
+                    val bottomChunk = currentChunkInfo.chunkBottom
+                    val leftChunk = currentChunkInfo.chunkLeft
+                    if (checkAndLoadChunk(bottomChunk, activatedChunks, callback)) {
+                        chunkMeshes[bottomChunk]?.let { bottomChunkInfo -> checkAndLoadChunk(bottomChunkInfo.chunkLeft, activatedChunks, callback) }
+                    }
+                    if (checkAndLoadChunk(leftChunk, activatedChunks, callback)) {
+                        chunkMeshes[leftChunk]?.let { leftChunkInfo -> checkAndLoadChunk(leftChunkInfo.chunkBottom, activatedChunks, callback) }
+                    }
+                }
+
+                ViewPortPosition.BOTTOM_RIGHT -> {
+                    val bottomChunk = currentChunkInfo.chunkBottom
+                    val rightChunk = currentChunkInfo.chunkRight
+                    if (checkAndLoadChunk(bottomChunk, activatedChunks, callback)) {
+                        chunkMeshes[bottomChunk]?.let { bottomChunkInfo -> checkAndLoadChunk(bottomChunkInfo.chunkRight, activatedChunks, callback) }
+                    }
+                    if (checkAndLoadChunk(rightChunk, activatedChunks, callback)) {
+                        chunkMeshes[rightChunk]?.let { rightChunkInfo -> checkAndLoadChunk(rightChunkInfo.chunkBottom, activatedChunks, callback) }
+                    }
                 }
             }
         }
     }
+
+    private suspend fun checkAndLoadChunk(chunk: Int, activatedChunks: MutableSet<Int>, callback: (String) -> Unit) : Boolean =
+        if (chunk > 0) {
+            if (!chunkMeshes.contains(chunk)) {
+                println("WorldMapData - Loading chunk assets for world '$worldName' and chunk index '$chunk'...")
+                assetStore.loader.loadWorldChunkAssets(worldName, chunk)
+                // Spawn entities
+                activatedChunks.add(chunk)
+                chunkMeshes[chunk]?.let { chunkInfo ->
+                    chunkInfo.entitiesToBeSpawned.forEach { entityConfigName -> callback(entityConfigName) }
+                } ?: println("ERROR: WorldMapData - No chunk mesh found for chunk index '$chunk' for spawning entities!")
+            }
+            true
+        } else false
 
     /**
      * Iterate over all tiles within the given view port area and call the renderCall function for each tile.
