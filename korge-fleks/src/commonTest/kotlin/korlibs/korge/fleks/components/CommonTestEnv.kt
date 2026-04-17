@@ -1,15 +1,21 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
+import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.entity.*
 import korlibs.korge.fleks.state.DigitalHorDir
 import korlibs.korge.fleks.state.DigitalVerDir
+import korlibs.korge.fleks.state.GameStateConfig
+import korlibs.korge.fleks.state.GameStateManager
 import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.utils.*
 import korlibs.korge.view.Container
 import kotlinx.serialization.encodeToString
 import kotlin.test.assertFalse
 
+val testGameStateConfig = GameStateConfig("TestGame", 0, true, "world_1", listOf(1), "startScript")
+val gameState = GameStateManager().also { it.config = testGameStateConfig }
+val assetStore = AssetStore(gameState).also { it.testing = true }
 
 data class TestEntityBlueprint(
     override val name: String
