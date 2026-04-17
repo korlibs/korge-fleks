@@ -1,5 +1,6 @@
 package korlibs.korge.fleks.assets.data
 
+import com.github.quillraven.fleks.World
 import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
 import korlibs.io.async.ResourceDecoder
@@ -7,8 +8,8 @@ import korlibs.io.async.launchAsap
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.WorldMap
 import korlibs.korge.fleks.state.GameStateManager
+import korlibs.korge.fleks.utils.createAndConfigureEntity
 import kotlinx.coroutines.Dispatchers
-import kotlin.coroutines.CoroutineContext
 
 
 /**
@@ -139,12 +140,11 @@ class WorldMapData(
      *        to avoid spawning entities multiple times when the player is moving within the same chunks
      * @param callback Callback function to call for each entity config name - parameter: entity config name
      */
-    fun forEachEntityInChunk(
+    fun World.loadNewChunksAndEntities(
         viewPortMiddlePosX: Int,
         viewPortMiddlePosY: Int,
         currentChunk: Int,
-        worldMapComponent: WorldMap,
-        callback: (String) -> Unit
+        worldMapComponent: WorldMap
     ) {
         // Calculate the grid position of the view port middle position
         val gridX: Int = viewPortMiddlePosX / chunkWidth
@@ -185,11 +185,11 @@ class WorldMapData(
                 launchAsap(Dispatchers.ResourceDecoder) {
                     val topChunk = currentChunkInfo.chunkTop
                     val leftChunk = currentChunkInfo.chunkLeft
-                    if (checkAndLoadChunk(topChunk, activatedChunks, callback)) {
-                        chunkLookUpTable[topChunk]?.let { topChunkInfo -> checkAndLoadChunk(topChunkInfo.chunkLeft, activatedChunks, callback) }
+                    if (checkAndLoadChunk(topChunk, activatedChunks)) {
+                        chunkLookUpTable[topChunk]?.let { topChunkInfo -> checkAndLoadChunk(topChunkInfo.chunkLeft, activatedChunks) }
                     }
-                    if (checkAndLoadChunk(leftChunk, activatedChunks, callback)) {
-                        chunkLookUpTable[leftChunk]?.let { leftChunkInfo -> checkAndLoadChunk(leftChunkInfo.chunkTop, activatedChunks, callback) }
+                    if (checkAndLoadChunk(leftChunk, activatedChunks)) {
+                        chunkLookUpTable[leftChunk]?.let { leftChunkInfo -> checkAndLoadChunk(leftChunkInfo.chunkTop, activatedChunks) }
                     }
                     loadingTopLeftChunk = false
                 }
@@ -199,11 +199,11 @@ class WorldMapData(
                 launchAsap(Dispatchers.ResourceDecoder) {
                     val topChunk = currentChunkInfo.chunkTop
                     val rightChunk = currentChunkInfo.chunkRight
-                    if (checkAndLoadChunk(topChunk, activatedChunks, callback)) {
-                        chunkLookUpTable[topChunk]?.let { topChunkInfo -> checkAndLoadChunk(topChunkInfo.chunkRight, activatedChunks, callback) }
+                    if (checkAndLoadChunk(topChunk, activatedChunks)) {
+                        chunkLookUpTable[topChunk]?.let { topChunkInfo -> checkAndLoadChunk(topChunkInfo.chunkRight, activatedChunks) }
                     }
-                    if (checkAndLoadChunk(rightChunk, activatedChunks, callback)) {
-                        chunkLookUpTable[rightChunk]?.let { rightChunkInfo -> checkAndLoadChunk(rightChunkInfo.chunkTop, activatedChunks, callback) }
+                    if (checkAndLoadChunk(rightChunk, activatedChunks)) {
+                        chunkLookUpTable[rightChunk]?.let { rightChunkInfo -> checkAndLoadChunk(rightChunkInfo.chunkTop, activatedChunks) }
                     }
                     loadingTopRightChunk = false
                 }
@@ -213,11 +213,11 @@ class WorldMapData(
                 launchAsap(Dispatchers.ResourceDecoder) {
                     val bottomChunk = currentChunkInfo.chunkBottom
                     val leftChunk = currentChunkInfo.chunkLeft
-                    if (checkAndLoadChunk(bottomChunk, activatedChunks, callback)) {
-                        chunkLookUpTable[bottomChunk]?.let { bottomChunkInfo -> checkAndLoadChunk(bottomChunkInfo.chunkLeft, activatedChunks, callback) }
+                    if (checkAndLoadChunk(bottomChunk, activatedChunks)) {
+                        chunkLookUpTable[bottomChunk]?.let { bottomChunkInfo -> checkAndLoadChunk(bottomChunkInfo.chunkLeft, activatedChunks) }
                     }
-                    if (checkAndLoadChunk(leftChunk, activatedChunks, callback)) {
-                        chunkLookUpTable[leftChunk]?.let { leftChunkInfo -> checkAndLoadChunk(leftChunkInfo.chunkBottom, activatedChunks, callback) }
+                    if (checkAndLoadChunk(leftChunk, activatedChunks)) {
+                        chunkLookUpTable[leftChunk]?.let { leftChunkInfo -> checkAndLoadChunk(leftChunkInfo.chunkBottom, activatedChunks) }
                     }
                     loadingBottomLeftChunk = false
                 }
@@ -227,11 +227,11 @@ class WorldMapData(
                 launchAsap(Dispatchers.ResourceDecoder) {
                     val bottomChunk = currentChunkInfo.chunkBottom
                     val rightChunk = currentChunkInfo.chunkRight
-                    if (checkAndLoadChunk(bottomChunk, activatedChunks, callback)) {
-                        chunkLookUpTable[bottomChunk]?.let { bottomChunkInfo -> checkAndLoadChunk(bottomChunkInfo.chunkRight, activatedChunks, callback) }
+                    if (checkAndLoadChunk(bottomChunk, activatedChunks)) {
+                        chunkLookUpTable[bottomChunk]?.let { bottomChunkInfo -> checkAndLoadChunk(bottomChunkInfo.chunkRight, activatedChunks) }
                     }
-                    if (checkAndLoadChunk(rightChunk, activatedChunks, callback)) {
-                        chunkLookUpTable[rightChunk]?.let { rightChunkInfo -> checkAndLoadChunk(rightChunkInfo.chunkBottom, activatedChunks, callback) }
+                    if (checkAndLoadChunk(rightChunk, activatedChunks)) {
+                        chunkLookUpTable[rightChunk]?.let { rightChunkInfo -> checkAndLoadChunk(rightChunkInfo.chunkBottom, activatedChunks) }
                     }
                     loadingBottomRightChunk = false
                 }
@@ -239,14 +239,17 @@ class WorldMapData(
         }
     }
 
-    private suspend fun checkAndLoadChunk(chunk: Int, activatedChunks: MutableSet<Int>, callback: (String) -> Unit) : Boolean =
+    private suspend fun World.checkAndLoadChunk(chunk: Int, activatedChunks: MutableSet<Int>) : Boolean =
         if (chunk > 0) {
             if (!chunkLookUpTable.contains(chunk)) {
                 assetStore.loader.loadWorldChunkAssets(worldName, chunk)
                 // Spawn entities
                 activatedChunks.add(chunk)
                 chunkLookUpTable[chunk]?.let { chunkInfo ->
-                    chunkInfo.entitiesToBeSpawned.forEach { entityConfigName -> callback(entityConfigName) }
+                    chunkInfo.entitiesToBeSpawned.forEach { entityConfigName ->
+                        println("Chunk entity to create: $entityConfigName")
+                        createAndConfigureEntity(entityConfigName)
+                    }
                 } ?: println("ERROR: WorldMapData - No chunk mesh found for chunk index '$chunk' for spawning entities!")
             }
             true

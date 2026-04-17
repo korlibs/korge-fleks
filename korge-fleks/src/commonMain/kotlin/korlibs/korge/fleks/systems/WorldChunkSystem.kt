@@ -6,7 +6,6 @@ import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.WorldMap
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.WorldChunk.Companion.WorldChunkComponent
-import korlibs.korge.fleks.utils.createAndConfigureEntity
 
 
 /**
@@ -47,11 +46,8 @@ class WorldChunkSystem : IntervalSystem(
         val viewPortMiddlePosY: Int = viewPortPosY.toInt() / tileSize  // y in negative direction, in world grid
 
         // Check if we need to load new chunks depending on the camera position
-        // and if we need to spawn new entities (normally yes)
-        worldMapData.forEachEntityInChunk(viewPortMiddlePosX, viewPortMiddlePosY, cameraWorldChunkComponent.chunk, worldMapComponent) { entityConfig ->
-            println("Chunk entity to create: $entityConfig")
-            createAndConfigureEntity(entityConfig)
-        }
+        // and if we need to spawn any new entities from those chunks
+        worldMapData.run { world.loadNewChunksAndEntities(viewPortMiddlePosX, viewPortMiddlePosY, cameraWorldChunkComponent.chunk, worldMapComponent) }
 
         // TODO: Deactivate entities which are too far away from the camera
 
