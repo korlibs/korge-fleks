@@ -96,14 +96,14 @@ class MessagePassingConfig private constructor(
     override fun World.initPrefabs(entity: Entity) {
         // Register this entity as message passing config in the system runtime configs when component is added
         val systemRuntimeConfigs = inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
-        systemRuntimeConfigs.messagePassing = entity
+        systemRuntimeConfigs.messagePassingEntity = entity
     }
 
     // Cleanup/Reset an external prefab when the component is removed from an entity
     override fun World.cleanupPrefabs(entity: Entity) {
         // Unregister this entity as message passing config in the system runtime configs when component is removed
         val systemRuntimeConfigs = inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
-        systemRuntimeConfigs.messagePassing = null
+        systemRuntimeConfigs.messagePassingEntity = null
     }
 
     // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem

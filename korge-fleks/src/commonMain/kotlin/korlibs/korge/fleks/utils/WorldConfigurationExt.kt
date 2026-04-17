@@ -43,14 +43,12 @@ fun WorldConfiguration.addKorgeFleksInjectables(
     }
 }
 
-fun WorldConfiguration.addKorgeFleksSystems(
-    coroutineContext: CoroutineContext
-) {
+fun WorldConfiguration.addKorgeFleksSystems() {
     // Register all needed systems of the entity component system
     // The order of systems here also define the order in which the systems are called inside Fleks ECS
     systems {
         // Spawn new entities if we enter a new level chunk
-        add(WorldChunkSystem(coroutineContext))
+        add(WorldChunkSystem())
 
         // Collision and player input systems
 //        add(PlatformerGravitySystem())

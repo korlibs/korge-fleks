@@ -34,7 +34,7 @@ class FastSpriteRenderSystem(
 
     override fun render(ctx: RenderContext) {
         // Get main camera position or exit if it does not exist
-        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPositionComponent(world) ?: return
 
         // Custom Render Code here
         ctx.useBatcher { batch ->

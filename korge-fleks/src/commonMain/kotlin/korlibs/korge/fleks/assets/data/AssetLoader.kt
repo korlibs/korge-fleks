@@ -55,8 +55,8 @@ class AssetLoader(
             worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.chunkHeight * commonChunkInfo.tileSize).toFloat(),
             gridVaniaWidth = commonChunkInfo.gridVaniaWidth,
             gridVaniaHeight = commonChunkInfo.gridVaniaHeight,
-            levelChunkWidth = commonChunkInfo.chunkWidth,
-            levelChunkHeight = commonChunkInfo.chunkHeight,
+            chunkWidth = commonChunkInfo.chunkWidth,
+            chunkHeight = commonChunkInfo.chunkHeight,
             tileSize = commonChunkInfo.tileSize,
             collisionTiles = commonChunkInfo.collisionTiles,
             collisionShapesBitmapSlice = collisionShapes
@@ -88,8 +88,8 @@ class AssetLoader(
         // compatible with the current version of the game.
         val worldChunk: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/chunk_${chunkIndex}.json"].readString())
         // Add world chunk
-        assetStore.worldMapData.chunkMeshes[chunkIndex] = worldChunk
-        assetStore.worldMapData.levelGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex  // TODO remove
+        assetStore.worldMapData.chunkLookUpTable[chunkIndex] = worldChunk
+        assetStore.worldMapData.chunkGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex
 
         println("- Resources loaded in ${sw.elapsed}")
 
@@ -104,7 +104,7 @@ class AssetLoader(
     }
 
     internal suspend fun loadClusterAssets(world: String? = null, clusterName: String, hotReloading: Boolean = false) {
-        // Keep track was loaded already to avoid reloading of assets which are already in memory.
+        // Keep track of already loaded assets to avoid reloading of assets which are already in memory
         val clusterPath = world?.let { "${world}/${clusterName}" } ?: clusterName
         if (loadedClusterAssets.contains(clusterPath)) {
             //println("INFO: Asset cluster '$clusterPath' already loaded! No reload is happening!")

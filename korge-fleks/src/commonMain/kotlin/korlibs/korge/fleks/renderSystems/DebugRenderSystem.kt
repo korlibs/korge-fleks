@@ -56,7 +56,7 @@ class DebugRenderSystem(
         if (!debugRenderingEnabled) return
 
         // Get main camera position or exit if it does not exist
-        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPositionComponent(world) ?: return
 
         // Custom Render Code here
         ctx.useLineBatcher { batch ->

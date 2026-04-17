@@ -37,8 +37,8 @@ data class CommonChunkInfo(
  *
  * @param entities List of entity configurations which are used to create entities in the world chunk.
  * @param entitiesToBeSpawned List of entity names which shall be spawned automatically by the WorldChunkSystem.
- * @param chunkX The x coordinate of the chunk within the Grid-vania world map.
- * @param chunkY The y coordinate of the chunk within the Grid-vania world map.
+ * @param chunkX The x coordinate of the chunk within the grid-vania world map.
+ * @param chunkY The y coordinate of the chunk within the grid-vania world map.
  * @param chunkTop The id of the neighbor chunk at the top of the chunk. -1 if there is no neighbor chunk at the top.
  * @param chunkBottom The id of the neighbor chunk at the bottom of the chunk. -1 if there is no neighbor chunk at the bottom.
  * @param chunkLeft The id of the neighbor chunk at the left of the chunk. -1 if there is no neighbor chunk at the left.
