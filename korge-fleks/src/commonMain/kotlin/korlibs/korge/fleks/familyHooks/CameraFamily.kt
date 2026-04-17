@@ -8,10 +8,10 @@ import korlibs.korge.fleks.systems.SystemRuntimeConfigs
  */
 val onMainCameraAdded: FamilyHook = { entity ->
     val systemRuntimeConfigs = inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
-    systemRuntimeConfigs.camera = entity
+    systemRuntimeConfigs.cameraEntity = entity
 }
 
 val onMainCameraRemoved: FamilyHook = { _ ->
     val systemRuntimeConfigs = inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
-    systemRuntimeConfigs.camera = null
+    systemRuntimeConfigs.cameraEntity = null
 }

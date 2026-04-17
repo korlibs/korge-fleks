@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("WorldMap")
 class WorldMap private constructor(
-    // List of chunk number which entities were spawned
+    // List of chunk numbers which entities were spawned
     val activatedChunks: MutableSet<Int> = mutableSetOf()
 ) : PoolableComponent<WorldMap>() {
     // Init an existing component data instance with data from another component
@@ -69,13 +69,13 @@ class WorldMap private constructor(
     // Initialize an external prefab when the component is added to an entity
     override fun World.initPrefabs(entity: Entity) {
         val systemRuntimeConfigs = inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
-        systemRuntimeConfigs.worldChunk = entity
+        systemRuntimeConfigs.worldMapEntity = entity
     }
 
     // Cleanup/Reset an external prefab when the component is removed from an entity
     override fun World.cleanupPrefabs(entity: Entity) {
         val systemRuntimeConfigs = inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
-        systemRuntimeConfigs.worldChunk = null
+        systemRuntimeConfigs.worldMapEntity = null
     }
 
     // Free the component and return it to the pool - this is called directly by the SnapshotSerializerSystem

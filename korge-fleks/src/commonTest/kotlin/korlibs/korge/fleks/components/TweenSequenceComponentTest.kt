@@ -1,7 +1,6 @@
 package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
-import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.TweenSequence.Companion.TweenSequenceComponent
 import korlibs.korge.fleks.components.TweenSequence.Companion.tweenSequenceComponent
 import korlibs.korge.fleks.components.data.tweenSequence.DeleteEntity.Companion.deleteEntity
@@ -19,7 +18,6 @@ import korlibs.korge.fleks.components.data.tweenSequence.TweenSprite.Companion.t
 import korlibs.korge.fleks.components.data.tweenSequence.TweenSwitchVisibility.Companion.tweenSwitchVisibility
 import korlibs.korge.fleks.components.data.tweenSequence.Wait.Companion.wait
 import korlibs.korge.fleks.entity.EntityFactory
-import korlibs.korge.fleks.state.GameStateManager
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.addKorgeFleksInjectables
 import korlibs.korge.fleks.utils.createEntity
@@ -29,8 +27,6 @@ import kotlin.test.assertEquals
 
 
 internal class TweenSequenceComponentTest {
-    private val assetStore = AssetStore().also { it.testing = true }
-    private val gameState = GameStateManager()
     private val playerInputState = ConcretePlayerInputState()
 
     private val expectedWorld = configureWorld {

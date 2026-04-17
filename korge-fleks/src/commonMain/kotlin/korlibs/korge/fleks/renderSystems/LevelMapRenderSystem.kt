@@ -31,7 +31,7 @@ class LevelMapRenderSystem(
 
     override fun render(ctx: RenderContext) {
         // Get main camera position or exit if it does not exist
-        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPositionComponent(world) ?: return
 
         val tileSize = assetStore.worldMapData.tileSize
 

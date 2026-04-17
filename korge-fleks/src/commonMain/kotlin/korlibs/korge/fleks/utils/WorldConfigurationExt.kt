@@ -24,6 +24,7 @@ import korlibs.korge.fleks.systems.addTweenEngineSystems
 import korlibs.korge.fleks.systems.collision.GridMoveSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
 import korlibs.korge.fleks.systems.collision.BehaviorTreeSystem
+import kotlin.coroutines.CoroutineContext
 
 
 fun WorldConfiguration.addKorgeFleksInjectables(

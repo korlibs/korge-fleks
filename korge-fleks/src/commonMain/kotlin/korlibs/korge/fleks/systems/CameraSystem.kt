@@ -30,7 +30,7 @@ class CameraSystem(
         val worldHeight: Float = assetStore.worldMapData.worldHeight
 
         // Get main camera position or exit if it does not exist
-        val cameraPosition = systemRuntimeConfigs.getCameraPosition(world) ?: return
+        val cameraPosition = systemRuntimeConfigs.getCameraPositionComponent(world) ?: return
 
         // Set camera position to entity with "CameraFollowTag" component
         val followPosition = entity[PositionComponent]
@@ -58,6 +58,9 @@ class CameraSystem(
             if (newCameraPositionY < topBound) topBound
             else if (newCameraPositionY > bottomBound) bottomBound
             else newCameraPositionY
+
+        // Update chunk position of camera in runtime configs
+        // TODO
 
         // Move parallax layers if camera moves
         val cameraDistX = cameraPosition.x - lastCameraPosX

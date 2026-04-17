@@ -4,8 +4,6 @@ import kotlin.test.*
 
 
 class GameStateManagerTest {
-//*
-    private val gameStateConfig = GameStateConfig("TestGame", 0, true, "world_1", 1, "startScript")
 
     @BeforeTest
     fun setup() {

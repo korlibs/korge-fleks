@@ -41,6 +41,7 @@ import korlibs.korge.fleks.components.TileMap
 import korlibs.korge.fleks.components.TouchInput
 import korlibs.korge.fleks.components.TweenProperty
 import korlibs.korge.fleks.components.TweenSequence
+import korlibs.korge.fleks.components.WorldChunk
 import korlibs.korge.fleks.components.data.ListOfPoints
 import korlibs.korge.fleks.components.data.ParallaxPlane
 import korlibs.korge.fleks.components.data.Point
@@ -188,7 +189,6 @@ class SnapshotSerializer {
             subclass(Grid::class)
             subclass(Info::class)
             subclass(Layer::class)
-            subclass(WorldMap::class)
             subclass(LifeCycle::class)
             subclass(MessagePassingConfig::class)
             subclass(Motion::class)
@@ -212,17 +212,19 @@ class SnapshotSerializer {
             subclass(TouchInput::class)
             subclass(TweenProperty::class)
             subclass(TweenSequence::class)
+            subclass(WorldChunk::class)
+            subclass(WorldMap::class)
         }
 
         // Register data classes used in components
         polymorphic(Poolable::class) {
             subclass(ListOfPoints::class)
             subclass(ListOfRxMsg::class)
+            subclass(ParallaxPlane::class)
             subclass(Point::class)
             subclass(RxMsg::class)
             subclass(SpriteLayer::class)
             subclass(TxMsg::class)
-            subclass(ParallaxPlane::class)
         }
 
         // Register Tween data classes used in TweenSequence
@@ -252,10 +254,10 @@ class SnapshotSerializer {
         polymorphic(UniqueId::class) {
             subclass(CameraFollowTag::class)
             subclass(DebugInfoTag::class, PolymorphicEnumSerializer(DebugInfoTag.serializer()))
+            subclass(EmptyInitialized::class)
             subclass(MainCameraTag::class)
             subclass(RenderLayerTag::class, PolymorphicEnumSerializer( RenderLayerTag.serializer()))
             subclass(ScreenCoordinatesTag::class)
-            subclass(EmptyInitialized::class)
         }
     }
 }

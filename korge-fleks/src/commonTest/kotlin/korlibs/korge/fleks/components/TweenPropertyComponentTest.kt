@@ -2,7 +2,6 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.configureWorld
-import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenMotionVelocityXComponent
 import kotlin.test.*
 import korlibs.korge.fleks.components.TweenProperty.TweenPropertyType.*
@@ -33,16 +32,12 @@ import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldText
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTextFieldTextRangeStartComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.TweenTouchInputEnableComponent
 import korlibs.korge.fleks.components.TweenProperty.Companion.tweenPropertyComponent
-import korlibs.korge.fleks.state.GameStateManager
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.addKorgeFleksInjectables
 import korlibs.korge.fleks.utils.createEntity
 
 
 internal class TweenPropertyComponentTest {
-//*
-private val assetStore = AssetStore().also { it.testing = true }
-    private val gameState = GameStateManager()
     private val playerInputState = ConcretePlayerInputState()
 
     private val expectedWorld = configureWorld {
@@ -169,5 +164,4 @@ private val assetStore = AssetStore().also { it.testing = true }
 
         Pool.doPoolUsageCheckAfterUnloading()
     }
-//*/
 }

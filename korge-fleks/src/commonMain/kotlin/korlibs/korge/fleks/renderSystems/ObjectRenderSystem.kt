@@ -61,7 +61,7 @@ class ObjectRenderSystem(
     @OptIn(KorgeExperimental::class)
     override fun render(ctx: RenderContext) {
         // Get main camera position or exit if it does not exist
-        val cameraPosition: Position = systemRuntimeConfigs.getCameraPosition(world) ?: return
+        val cameraPosition: Position = systemRuntimeConfigs.getCameraPositionComponent(world) ?: return
 
         // Sort sprite and text entities by their layerIndex
         family.sort(comparator)

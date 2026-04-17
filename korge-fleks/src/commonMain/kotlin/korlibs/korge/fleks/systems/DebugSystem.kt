@@ -38,7 +38,7 @@ class DebugSystem: IteratingSystem(
 
     override fun onTickEntity(entity: Entity) {
         // Get main camera position or exit if it does not exist
-        val cameraPosition = systemRuntimeConfigs.getCameraPosition(world) ?: return
+        val cameraPosition = systemRuntimeConfigs.getCameraPositionComponent(world) ?: return
 
         if (positionTrigger) {
             positionTrigger = false

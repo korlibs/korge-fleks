@@ -55,33 +55,31 @@ class AssetLoader(
             worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.chunkHeight * commonChunkInfo.tileSize).toFloat(),
             gridVaniaWidth = commonChunkInfo.gridVaniaWidth,
             gridVaniaHeight = commonChunkInfo.gridVaniaHeight,
-            levelChunkWidth = commonChunkInfo.chunkWidth,
-            levelChunkHeight = commonChunkInfo.chunkHeight,
+            chunkWidth = commonChunkInfo.chunkWidth,
+            chunkHeight = commonChunkInfo.chunkHeight,
             tileSize = commonChunkInfo.tileSize,
             collisionTiles = commonChunkInfo.collisionTiles,
             collisionShapesBitmapSlice = collisionShapes
         )
         println("- Resources loaded in ${sw.elapsed}")
-
     }
 
     /**
-     * Function for loading all assets which are needed for a world chunk. This includes the tile maps and tile sets for
-     * the chunk and all assets which are needed for the entities of the chunk.
+     * Function for loading all assets which are needed for a list of world chunks. This includes the JSON file for the
+     * chunk data itself and any tile sets and other assets which are needed for the tile maps and game objects of the chunk.
      */
-    suspend fun loadWorldChunkAssets(worldName: String, chunkNumber: Int) {
+    suspend fun loadWorldChunkAssets(worldName: String, chunkList: List<Int>) {
         // First load chunks and get list of asset clusters which need to be loaded.
-        loadChunkAssets(worldName, chunkNumber)
-        // TODO hardcoded for now
-        loadChunkAssets(worldName, 2)
-        loadChunkAssets(worldName, 3)
-        loadChunkAssets(worldName, 4)
-        loadChunkAssets(worldName, 5)
-        loadChunkAssets(worldName, 6)
-        loadChunkAssets(worldName, 7)
+        chunkList.forEach { chunk ->
+            loadWorldChunkAssets(worldName, chunk)
+        }
     }
 
-    private suspend fun loadChunkAssets(worldName: String, chunkIndex: Int) {
+    /**
+     * Function for loading all assets which are needed for a world chunk. This includes the JSON file for the chunk data
+     * itself and any tile sets and other assets which are needed for the tile maps and game objects of the chunk.
+     */
+    suspend fun loadWorldChunkAssets(worldName: String, chunkIndex: Int) {
         val sw = Stopwatch().start()
         print("INFO: AssetStore - Start loading world chunk '${worldName}/level_data/chunk_${chunkIndex}'... ")
 
@@ -90,8 +88,8 @@ class AssetLoader(
         // compatible with the current version of the game.
         val worldChunk: ChunkAssetInfo = configSerializer.json().decodeFromString(resourcesVfs["${worldName}/level_data/chunk_${chunkIndex}.json"].readString())
         // Add world chunk
-        assetStore.worldMapData.chunkMeshes[chunkIndex] = worldChunk
-        assetStore.worldMapData.levelGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex
+        assetStore.worldMapData.chunkLookUpTable[chunkIndex] = worldChunk
+        assetStore.worldMapData.chunkGridVania[worldChunk.chunkX, worldChunk.chunkY] = chunkIndex
 
         println("- Resources loaded in ${sw.elapsed}")
 
@@ -106,7 +104,7 @@ class AssetLoader(
     }
 
     internal suspend fun loadClusterAssets(world: String? = null, clusterName: String, hotReloading: Boolean = false) {
-        // Keep track was loaded already to avoid reloading of assets which are already in memory.
+        // Keep track of already loaded assets to avoid reloading of assets which are already in memory
         val clusterPath = world?.let { "${world}/${clusterName}" } ?: clusterName
         if (loadedClusterAssets.contains(clusterPath)) {
             //println("INFO: Asset cluster '$clusterPath' already loaded! No reload is happening!")

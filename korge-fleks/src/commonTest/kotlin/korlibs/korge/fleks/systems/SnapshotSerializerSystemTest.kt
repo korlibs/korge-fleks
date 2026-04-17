@@ -1,11 +1,11 @@
 package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.configureWorld
-import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.ConcretePlayerInputState
+import korlibs.korge.fleks.components.assetStore
+import korlibs.korge.fleks.components.gameState
 import korlibs.korge.fleks.entity.blueprints.MainCameraBlueprint
 import korlibs.korge.fleks.entity.blueprints.commonMainCamera
-import korlibs.korge.fleks.state.GameStateManager
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.addKorgeFleksInjectables
 import korlibs.korge.fleks.utils.addKorgeFleksSystems
@@ -15,9 +15,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class SnapshotSerializerSystemTest {
-//*
-    private val assetStore = AssetStore().also { it.testing = true }
-    private val gameState = GameStateManager()
     private val playerInputState = ConcretePlayerInputState()
 
     private val gameWorld = configureWorld {
@@ -77,5 +74,4 @@ internal class SnapshotSerializerSystemTest {
             )
         }
     }
-//*/
 }
