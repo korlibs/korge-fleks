@@ -61,7 +61,7 @@ class WorldChunkSystem : IntervalSystem(
             val entityChunkPositionY = positionComponent.y.toInt() / chunkHeight
 
             // Force overwriting chunk with possible new chunk if entity is outside of current chunk in any direction (including diagonals)
-            val currentChunk = worldMapData.chunkGridVania[entityChunkPositionX, entityChunkPositionY]
+            val currentChunk = worldMapData.getChunkIndex(entityChunkPositionX, entityChunkPositionY)
             if (currentChunk > 0) worldChunkComponent.chunk = currentChunk
         }
     }

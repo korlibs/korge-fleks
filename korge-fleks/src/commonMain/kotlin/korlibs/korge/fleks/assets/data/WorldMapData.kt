@@ -95,6 +95,10 @@ class WorldMapData(
         TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
     }
 
+    fun getChunkIndex(cx: Int, cy: Int): Int =
+        if (chunkGridVania.inside(cx, cy)) chunkGridVania[cx, cy]
+        else -1  // Outside levelGridVania bounds
+
     /**
      * Check collision at cell position.
      * Position cannot get negative.
@@ -361,7 +365,7 @@ class WorldMapData(
     }
 
     private fun processTiles(layer: String, gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
-        val chunkIndex = chunkGridVania[gridX, gridY]
+        val chunkIndex = getChunkIndex(gridX, gridY)
         val chunk = chunkLookUpTable[chunkIndex] ?: return  // error("LevelData - processTiles: No chunk mesh found for chunk index '$chunkIndex' in grid position ($gridX, $gridY)!")
         val levelMap = chunk.levelMaps[layer] ?: error("LevelData - processTiles: No level map found for layer '$layer' in chunk index '$chunkIndex'!")
         val chunkX = chunk.chunkX
@@ -383,7 +387,7 @@ class WorldMapData(
     }
 
     private fun processCollisionTiles(layer: String, gridX: Int, gridY: Int, xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, levelWidth: Int, levelHeight: Int, renderCall: (BmpSlice, Float, Float) -> Unit) {
-        val chunkIndex = chunkGridVania[gridX, gridY]
+        val chunkIndex = getChunkIndex(gridX, gridY)
         val chunk = chunkLookUpTable[chunkIndex] ?: return  // error("LevelData - processTiles: No chunk mesh found for chunk index '$chunkIndex' in grid position ($gridX, $gridY)!")
         val levelMap = chunk.levelMaps[layer] ?: error("LevelData - processTiles: No level map found for layer '$layer' in chunk index '$chunkIndex'!")
         val chunkX = chunk.chunkX
