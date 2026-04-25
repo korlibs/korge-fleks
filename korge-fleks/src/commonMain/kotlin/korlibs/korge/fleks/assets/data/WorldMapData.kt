@@ -169,7 +169,7 @@ class WorldMapData(
 
         // Sanity check - we should always have a chunk mesh for the current chunk index, otherwise we cannot determine the adjacent chunks and load them if needed
         if (!chunkLookUpTable.containsKey(currentChunk)) {
-            println("ERROR: WorldMapData - No chunk mesh found for current chunk index '$currentChunk' in grid position ($gridX, $gridY)!")
+            println("WARNING: WorldMapData - No chunk mesh found for current chunk index '$currentChunk' in grid position ($gridX, $gridY)!")
             return
         }
         val currentChunkInfo = chunkLookUpTable[currentChunk]!!

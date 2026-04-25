@@ -9,14 +9,14 @@ import com.github.quillraven.fleks.World
 enum class BTStatus { Success, Failure, Running }
 
 interface BTNode {
-    fun World.tick(entity: Entity): BTStatus
+    fun World.tick(entity: Entity, deltaTime: Float): BTStatus
 }
 
 /**
  * A simple leaf node that always returns success. This can be used as a placeholder or a default node in the behavior tree.
  */
 class EmptyTree : BTNode {
-    override fun World.tick(entity: Entity): BTStatus = BTStatus.Success
+    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus = BTStatus.Success
 }
 
 /**
@@ -24,9 +24,9 @@ class EmptyTree : BTNode {
  * first child that succeeds, failure if all children failed, and running if any child is still running.
  */
 class Selector(private val children: List<BTNode>) : BTNode {
-    override fun World.tick(entity: Entity): BTStatus {
+    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus {
         children.forEach { child ->
-            when (child.run { tick(entity) }) {
+            when (child.run { tick(entity, deltaTime) }) {
                 BTStatus.Success -> return BTStatus.Success
                 BTStatus.Running -> return BTStatus.Running
                 BTStatus.Failure ->  {}
@@ -41,9 +41,9 @@ class Selector(private val children: List<BTNode>) : BTNode {
  * first child that fails, success if all children succeed, and running if any child is still running.
  */
 class Sequence(private val children: List<BTNode>) : BTNode {
-    override fun World.tick(entity: Entity): BTStatus {
+    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus {
         children.forEach { child ->
-            when (child.run { tick(entity) }) {
+            when (child.run { tick(entity, deltaTime) }) {
                 BTStatus.Success -> {}
                 BTStatus.Failure -> return BTStatus.Failure
                 BTStatus.Running -> return BTStatus.Running
@@ -67,8 +67,8 @@ class Sequence(private val children: List<BTNode>) : BTNode {
  * the condition is still being evaluated (e.g., waiting for a timer or an event). These nodes will directly
  * manipulate the blackboard to read/write values needed for the behavior tree logic.
  */
-class ActionNode(private val action: World.(Entity) -> BTStatus) : BTNode {
-    override fun World.tick(entity: Entity): BTStatus = action(entity)
+class ActionNode(private val action: World.(Entity, Float) -> BTStatus) : BTNode {
+    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus = action(entity, deltaTime)
 }
 
 /**
@@ -76,6 +76,6 @@ class ActionNode(private val action: World.(Entity) -> BTStatus) : BTNode {
  * For simplicity, we assume conditions are evaluated instantly and do not return Running.
  * The condition is a function that takes the blackboard as input and returns a boolean.
  */
-class ConditionNode(private val cond: World.(Entity) -> Boolean) : BTNode {
-    override fun World.tick(entity: Entity): BTStatus = if (cond(entity)) BTStatus.Success else BTStatus.Failure
+class ConditionNode(private val cond: World.(Entity, Float) -> Boolean) : BTNode {
+    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus = if (cond(entity, deltaTime)) BTStatus.Success else BTStatus.Failure
 }

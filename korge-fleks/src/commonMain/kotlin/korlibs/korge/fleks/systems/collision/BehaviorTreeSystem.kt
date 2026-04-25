@@ -20,6 +20,6 @@ class BehaviorTreeSystem : IteratingSystem(
         val bTreeComponent = entity[BehaviorTreeComponent]
         // Tick the behavior tree
         val behaviorTree = BehaviorTreeStorage.get(bTreeComponent.characterConfig)
-        behaviorTree.run { world.tick(entity) }
+        behaviorTree.run { world.tick(entity, deltaTime) }  // deltaTime in seconds
     }
 }
