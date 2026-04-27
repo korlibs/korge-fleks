@@ -234,11 +234,11 @@ buildscript {
     repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() }
 
     dependencies {
-        classpath("com.soywiz.korge.settings:com.soywiz.korge.settings.gradle.plugin:$version")
+        classpath("org.korge.engine.settings:org.korge.engine.settings.gradle.plugin:$version")
     }
 }
 
-apply(plugin = "com.soywiz.korge.settings")
+apply(plugin = "org.korge.engine.settings")
 ```
 
 ## `fleks/kproject.yml`
@@ -269,7 +269,7 @@ dependencies:
 # Or use fleks locally
 #  - ../../fleks
 #
-    - maven::common::com.soywiz.korlibs.korge2:korge
+    - maven::common::org.korge.engine:korge
 ```
 
 # Updating Korge-fleks to newer versions
@@ -287,7 +287,7 @@ Korge version needs to be updated in `gradle/libs.versions.toml`:
 
 ```toml
 [plugins]
-korge = { id = "com.soywiz.korge", version = "6.x.x" }
+korge = { id = "org.korge.engine", version = "6.x.x" }
 ```
 
 ## Fleks Version

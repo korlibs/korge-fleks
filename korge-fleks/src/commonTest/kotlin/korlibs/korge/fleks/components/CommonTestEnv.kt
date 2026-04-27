@@ -42,7 +42,7 @@ object CommonTestEnv {
         // Check if there is any component not having short SerialName set
         assertFalse(
             compactJson.contains("korlibs"), "serializeDeserialize: json string should not contain full class" +
-                    "names like 'com.soywiz.korgeFleks.components...'. Please add @SerialName(...) to the Component class! json: \n\n$compactJson\n"
+                    "names like 'org.korge.korgeFleks.components...'. Please add @SerialName(...) to the Component class! json: \n\n$compactJson\n"
         )
 
         if (printout) {

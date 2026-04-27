@@ -16,8 +16,8 @@ buildscript {
     repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() }
 
     dependencies {
-        classpath("com.soywiz.korge.settings:com.soywiz.korge.settings.gradle.plugin:$version")
+        classpath("corg.korge.engine.settings:org.korge.engine.settings.gradle.plugin:$version")
     }
 }
 
-apply(plugin = "com.soywiz.korge.settings")
+apply(plugin = "org.korge.engine.settings")
