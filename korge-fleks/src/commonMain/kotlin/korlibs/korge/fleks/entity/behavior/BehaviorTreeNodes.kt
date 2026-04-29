@@ -76,6 +76,6 @@ class ActionNode(private val action: World.(Entity, Float) -> BTStatus) : BTNode
  * For simplicity, we assume conditions are evaluated instantly and do not return Running.
  * The condition is a function that takes the blackboard as input and returns a boolean.
  */
-class ConditionNode(private val cond: World.(Entity, Float) -> Boolean) : BTNode {
-    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus = if (cond(entity, deltaTime)) BTStatus.Success else BTStatus.Failure
+class ConditionNode(private val cond: World.(Entity, Float) -> BTStatus) : BTNode {
+    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus = cond(entity, deltaTime)
 }
