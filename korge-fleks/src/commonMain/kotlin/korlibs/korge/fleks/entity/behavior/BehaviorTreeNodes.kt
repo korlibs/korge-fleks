@@ -15,32 +15,43 @@ interface BTNode {
 /**
  * A simple leaf node that always returns success. This can be used as a placeholder or a default node in the behavior tree.
  */
-class EmptyTree : BTNode {
+class EmptyTreeNode : BTNode {
     override fun World.tick(entity: Entity, deltaTime: Float): BTStatus = BTStatus.Success
 }
 
 /**
  * First Composite Node: A selector node (symbol: [?]) that ticks its children in order and returns success on the
  * first child that succeeds, failure if all children failed, and running if any child is still running.
+ *
+ * Optionally it can take a "message" function to be invoked when all children fail. This can be used to log
+ * or perform some action when the selector fails, which can be helpful for debugging or for triggering certain
+ * behaviors in the game when a certain branch of the behavior tree fails.
  */
-class Selector(private val children: List<BTNode>) : BTNode {
+class SelectorNode(
+    private val children: List<BTNode>,
+    private val failureCall: () -> Unit = {}
+) : BTNode {
+
     override fun World.tick(entity: Entity, deltaTime: Float): BTStatus {
         children.forEach { child ->
             when (child.run { tick(entity, deltaTime) }) {
                 BTStatus.Success -> return BTStatus.Success
                 BTStatus.Running -> return BTStatus.Running
-                BTStatus.Failure ->  {}
+                BTStatus.Failure -> {}
             }
         }
+        failureCall.invoke()
+
         return BTStatus.Failure
     }
 }
+
 
 /**
  * Second Composite Node: A sequence node (symbol: [->]) that ticks its children in order and returns failure on the
  * first child that fails, success if all children succeed, and running if any child is still running.
  */
-class Sequence(private val children: List<BTNode>) : BTNode {
+class SequenceNode(private val children: List<BTNode>) : BTNode {
     override fun World.tick(entity: Entity, deltaTime: Float): BTStatus {
         children.forEach { child ->
             when (child.run { tick(entity, deltaTime) }) {
