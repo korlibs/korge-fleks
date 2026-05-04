@@ -76,6 +76,6 @@ data class ChunkAssetInfo(
         @SerialName("c") val clusterList: List<String> = emptyList()  // Needed by renderer for offsets of tilesets in clusters
     ) {
         @Transient
-        lateinit var listOfTileSets: List<SimpleTileSet>
+        var listOfTileSets: List<SimpleTileSet> = emptyList()
     }
 }
