@@ -213,11 +213,17 @@ dependencies:
 
 ## `settings.gradle.kts`
 
-Needed settings for gradle to make kproject usable in the project.
+Needed settings for Gradle to make kproject usable in the project.
 
 ```kotlin
 pluginManagement {
-    repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() }
+    repositories {
+        mavenCentral()
+        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }
+        mavenLocal()
+        google()
+        gradlePluginPortal()
+    }
 }
 
 buildscript {
@@ -231,14 +237,20 @@ buildscript {
     }
     if (version.isEmpty()) error("Can't find korge version in $libsTomlFile")
 
-    repositories { mavenLocal(); mavenCentral(); google(); gradlePluginPortal() }
+    repositories {
+        mavenCentral()
+        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }
+        mavenLocal()
+        google()
+        gradlePluginPortal()
+    }
 
     dependencies {
-        classpath("com.soywiz.korge.settings:com.soywiz.korge.settings.gradle.plugin:$version")
+        classpath("org.korge.engine.settings:org.korge.engine.settings.gradle.plugin:$version")
     }
 }
 
-apply(plugin = "com.soywiz.korge.settings")
+apply(plugin = "org.korge.engine.settings")
 ```
 
 ## `fleks/kproject.yml`
@@ -269,7 +281,7 @@ dependencies:
 # Or use fleks locally
 #  - ../../fleks
 #
-    - maven::common::com.soywiz.korlibs.korge2:korge
+    - maven::common::org.korge.engine:korge
 ```
 
 # Updating Korge-fleks to newer versions
@@ -287,7 +299,7 @@ Korge version needs to be updated in `gradle/libs.versions.toml`:
 
 ```toml
 [plugins]
-korge = { id = "com.soywiz.korge", version = "6.x.x" }
+korge = { id = "org.korge.engine", version = "7.0.x" }
 ```
 
 ## Fleks Version
