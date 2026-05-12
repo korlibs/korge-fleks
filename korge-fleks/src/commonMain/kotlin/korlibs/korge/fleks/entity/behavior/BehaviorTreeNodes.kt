@@ -27,10 +27,10 @@ class EmptyTreeNode : BTNode {
  * or perform some action when the selector fails, which can be helpful for debugging or for triggering certain
  * behaviors in the game when a certain branch of the behavior tree fails.
  */
-class SelectorNode private constructor() : BTNode {
-    private lateinit var children: List<BTNode>
+class SelectorNode(vararg children: BTNode) : BTNode {
+    private val children: List<BTNode>
 
-    constructor(vararg children: BTNode) : this() {
+    init {
         if (children.isEmpty()) throw IllegalArgumentException("SelectorNode must have at least one child")
         // Create a list of children from the vararg parameter. We use a vararg parameter for convenience when constructing the behavior tree.
         this.children = children.toList()
@@ -55,10 +55,10 @@ class SelectorNode private constructor() : BTNode {
  * Second Composite Node: A sequence node (symbol: [->]) that ticks its children in order and returns failure on the
  * first child that fails, success if all children succeed, and running if any child is still running.
  */
-class SequenceNode private constructor() : BTNode {
-    private lateinit var children: List<BTNode>
+class SequenceNode(vararg children: BTNode) : BTNode {
+    private val children: List<BTNode>
 
-    constructor(vararg children: BTNode) : this() {
+    init {
         if (children.isEmpty()) throw IllegalArgumentException("SequenceNode must have at least one child")
         // Create a list of children from the vararg parameter. We use a vararg parameter for convenience when constructing the behavior tree.
         this.children = children.toList()
