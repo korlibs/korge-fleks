@@ -24,13 +24,14 @@ import korlibs.korge.fleks.systems.addTweenEngineSystems
 import korlibs.korge.fleks.systems.collision.GridMoveSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
 import korlibs.korge.fleks.systems.collision.BehaviorTreeSystem
-import kotlin.coroutines.CoroutineContext
+import korlibs.korge.view.Views
 
 
 fun WorldConfiguration.addKorgeFleksInjectables(
     assetStore: AssetStore,
     gameState: GameStateManager,
-    inputState: PlayerInputState
+    inputState: PlayerInputState,
+    views: Views
 ) {
 
     // Register external objects which are used by systems and in component and family hook functions
@@ -40,6 +41,7 @@ fun WorldConfiguration.addKorgeFleksInjectables(
         add("GameState", gameState)
         add("SystemRuntimeConfigs", SystemRuntimeConfigs())
         add("InputState", inputState)
+        add("Views", views)
     }
 }
 

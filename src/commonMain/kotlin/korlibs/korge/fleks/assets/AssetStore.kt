@@ -53,13 +53,11 @@ typealias TileSetsAssetType = MutableMap<String, Pair<AssetType, SimpleTileSet>>
  *   level editor. This can help to keep an overview of which assets are used in which area of the world and to avoid loading
  *   and unloading of assets.
  */
-class AssetStore(
-    gameStateManager: GameStateManager
-) {
+class AssetStore {
     // Handles loading of common and world cluster assets
     val loader = AssetLoader(this)
     // Data structure to keep track of loaded world map data (e.g. chunk meshes, level maps, grid vania, ...)
-    val worldMapData = WorldMapData(this, gameStateManager)
+    val worldMapData = WorldMapData()
 
     var testing: Boolean = false  // Set to true for unit tests on headless linux nodes on GitHub Actions runner
 
