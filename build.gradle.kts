@@ -1,13 +1,7 @@
 plugins {
-    alias(libs.plugins.korge)
+    kotlin("multiplatform")
     alias(libs.plugins.kotlin.serialization)
 }
-
-// Seems to be not needed
-//korge {
-//    // Mark this module as library so that Korge does not search for a main.kt entry point
-//    id = "korge.fleks.library"
-//}
 
 buildscript {
     repositories {
@@ -24,6 +18,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.korge)
             implementation(libs.kaml)
             implementation(libs.fleks)
             implementation(libs.kotlinx.serialization.json)
