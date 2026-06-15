@@ -173,6 +173,16 @@ class Sprite private constructor(
         resetAnimation(assetStore)
     }
 
+    fun setAnimationFrame(
+        frameTag: String,
+        frameIndex: Int
+    ) {
+        name = frameTag
+        this.frameIndex = frameIndex
+        running = false
+        visible = true
+    }
+
     fun disable() {
         visible = false
     }
