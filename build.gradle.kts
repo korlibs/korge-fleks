@@ -23,5 +23,8 @@ kotlin {
             implementation(libs.fleks)
             implementation(libs.kotlinx.serialization.json)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

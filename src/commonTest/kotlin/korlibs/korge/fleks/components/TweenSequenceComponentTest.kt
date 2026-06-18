@@ -21,19 +21,22 @@ import korlibs.korge.fleks.entity.EntityFactory
 import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.addKorgeFleksInjectables
 import korlibs.korge.fleks.utils.createEntity
+import korlibs.korge.view.Views
 import korlibs.math.interpolation.*
+import korlibs.render.GameWindow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
 internal class TweenSequenceComponentTest {
     private val playerInputState = ConcretePlayerInputState()
+    private val views = Views(GameWindow())
 
     private val expectedWorld = configureWorld {
-        addKorgeFleksInjectables(assetStore, gameState, playerInputState)
+        addKorgeFleksInjectables(assetStore, gameState, playerInputState, views)
     }
     private val recreatedWorld = configureWorld {
-        addKorgeFleksInjectables(assetStore, gameState, playerInputState)
+        addKorgeFleksInjectables(assetStore, gameState, playerInputState, views)
     }
 
     @Test

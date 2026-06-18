@@ -15,7 +15,7 @@ import kotlin.test.assertFalse
 
 val testGameStateConfig = GameStateConfig("TestGame", 0, true, "world_1", listOf(1), "startScript")
 val gameState = GameStateManager().also { it.config = testGameStateConfig }
-val assetStore = AssetStore(gameState).also { it.testing = true }
+val assetStore = AssetStore().also { it.testing = true }
 
 data class TestEntityBlueprint(
     override val name: String
@@ -53,7 +53,6 @@ object CommonTestEnv {
 }
 
 class ConcretePlayerInputState: Container(), PlayerInputState {
-    // directions of digital joystick
     override var lx = 0f
     override var ly = 0f
     override var rx = 0f
@@ -61,9 +60,6 @@ class ConcretePlayerInputState: Container(), PlayerInputState {
 
     override var ldx = DigitalHorDir.H_NEUTRAL
     override var ldy = DigitalVerDir.V_NEUTRAL
-
-    override var attack = false
-    override var justReleasedAttack = false
-    override var attackDirection = 0.0f
-    override var attackIndex = 0
+    override var rdx = DigitalHorDir.H_NEUTRAL
+    override var rdy = DigitalVerDir.V_NEUTRAL
 }

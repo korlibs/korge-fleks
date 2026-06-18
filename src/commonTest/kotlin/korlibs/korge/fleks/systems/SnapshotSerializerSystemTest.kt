@@ -10,15 +10,18 @@ import korlibs.korge.fleks.utils.Pool
 import korlibs.korge.fleks.utils.addKorgeFleksInjectables
 import korlibs.korge.fleks.utils.addKorgeFleksSystems
 import korlibs.korge.fleks.utils.createAndConfigureEntity
+import korlibs.korge.view.Views
+import korlibs.render.GameWindow
 import korlibs.time.seconds
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class SnapshotSerializerSystemTest {
     private val playerInputState = ConcretePlayerInputState()
+    private val views = Views(GameWindow())
 
     private val gameWorld = configureWorld {
-        addKorgeFleksInjectables(assetStore, gameState, playerInputState)
+        addKorgeFleksInjectables(assetStore, gameState, playerInputState, views)
         addKorgeFleksSystems()
     }
 
