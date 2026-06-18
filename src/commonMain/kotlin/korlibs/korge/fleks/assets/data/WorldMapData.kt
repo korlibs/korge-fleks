@@ -49,6 +49,9 @@ class WorldMapData {
     internal var loadingBottomLeftChunk = false
     internal var loadingBottomRightChunk = false
 
+    // Internal tracing variables
+    private var listOfEmptyTilesetErrorsLogged: MutableSet<Pair<String, Int>> = mutableSetOf()
+
     fun init(
         worldWidth: Float,
         worldHeight: Float,
@@ -231,7 +234,10 @@ class WorldMapData {
         val levelMap = chunk.levelMaps[layer] ?: error("LevelData - processTiles: No level map found for layer '$layer' in chunk index '$chunkIndex'!")
         if (levelMap.listOfTileSets.isEmpty()) {
             // No tileset assigned to level map, so we cannot render any tiles
-            println("ERROR: LevelData - processTiles: No tileset assigned to level map for layer '$layer' in chunk index '$chunkIndex'!")
+            if (!listOfEmptyTilesetErrorsLogged.contains(layer to chunkIndex)) {
+                println("ERROR: LevelData - processTiles: No tileset assigned to level map for layer '$layer' in chunk index '$chunkIndex'!")
+                listOfEmptyTilesetErrorsLogged.add(layer to chunkIndex)
+            }
             return
         }
         val chunkX = chunk.chunkX

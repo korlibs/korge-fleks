@@ -22,18 +22,18 @@ class EmptyTreeNode : BTNode {
 /**
  * First Composite Node: A selector node (symbol: [?]) that ticks its children in order and returns success on the
  * first child that succeeds, failure if all children failed, and running if any child is still running.
- *
- * Optionally it can take a "message" function to be invoked when all children fail. This can be used to log
- * or perform some action when the selector fails, which can be helpful for debugging or for triggering certain
- * behaviors in the game when a certain branch of the behavior tree fails.
  */
 class SelectorNode(vararg children: BTNode) : BTNode {
     private val children: List<BTNode>
 
     init {
-        if (children.isEmpty()) throw IllegalArgumentException("SelectorNode must have at least one child")
-        // Create a list of children from the vararg parameter. We use a vararg parameter for convenience when constructing the behavior tree.
-        this.children = children.toList()
+        if (children.isEmpty()) {
+            println("ERROR: BTree - SelectorNode must have at least one child")
+            this.children = emptyList()
+        } else {
+            // Create a list of children from the vararg parameter. We use a vararg parameter for convenience when constructing the behavior tree.
+            this.children = children.toList()
+        }
     }
 
     override fun World.tick(entity: Entity, deltaTime: Float): BTStatus {
@@ -59,9 +59,13 @@ class SequenceNode(vararg children: BTNode) : BTNode {
     private val children: List<BTNode>
 
     init {
-        if (children.isEmpty()) throw IllegalArgumentException("SequenceNode must have at least one child")
-        // Create a list of children from the vararg parameter. We use a vararg parameter for convenience when constructing the behavior tree.
-        this.children = children.toList()
+        if (children.isEmpty()) {
+            println("ERROR: BTree - SequenceNode must have at least one child")
+            this.children = emptyList()
+        } else {
+            // Create a list of children from the vararg parameter. We use a vararg parameter for convenience when constructing the behavior tree.
+            this.children = children.toList()
+        }
     }
 
     override fun World.tick(entity: Entity, deltaTime: Float): BTStatus {
@@ -86,20 +90,25 @@ class SequenceNode(vararg children: BTNode) : BTNode {
  */
 
 /**
- * First Leaf Nodes: Action nodes that perform an action and return success/failure/running based on the outcome, and
+ * First Leaf Nodes: An action node that perform an action and return always success, and
  * Condition nodes that evaluate a condition and return success if true, failure if false, and possibly running if
  * the condition is still being evaluated (e.g., waiting for a timer or an event). These nodes will directly
  * manipulate the blackboard to read/write values needed for the behavior tree logic.
  */
-class ActionNode(private val action: World.(Entity, Float) -> BTStatus) : BTNode {
-    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus = action(entity, deltaTime)
+class ActionNode(private val action: World.(Entity, Float) -> Unit) : BTNode {
+    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus {
+        action(entity, deltaTime)
+        return BTStatus.Success
+    }
 }
 
 /**
- * Second Leaf Node: A condition node that evaluates a condition and returns success if true, failure if false.
- * For simplicity, we assume conditions are evaluated instantly and do not return Running.
- * The condition is a function that takes the blackboard as input and returns a boolean.
+ * Second Leaf Node: A condition node that runs an action, evaluates a condition within it and returns success if true, failure if false.
+ *
+ * Note: For simplicity, we assume conditions are evaluated instantly and do not return Running.
  */
-class ConditionNode(private val cond: World.(Entity, Float) -> BTStatus) : BTNode {
-    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus = cond(entity, deltaTime)
+class ConditionNode(private val condAction: World.(Entity, Float) -> Boolean) : BTNode {
+    override fun World.tick(entity: Entity, deltaTime: Float): BTStatus {
+        return if (condAction(entity, deltaTime)) BTStatus.Success else BTStatus.Failure
+    }
 }
