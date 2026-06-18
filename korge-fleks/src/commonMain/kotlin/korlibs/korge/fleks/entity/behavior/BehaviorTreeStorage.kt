@@ -16,7 +16,7 @@ object BehaviorTreeStorage {
     // Internal storage for behavior tree blueprint objects
     private val behaviorTreeBlueprints: MutableMap<String, BehaviorTreeBlueprint> = mutableMapOf()
 
-    private val emptyTree = EmptyTree()
+    private val emptyTreeNode = EmptyTreeNode()
 
     /**
      * Adds a [BehaviorTreeBlueprint] to the internal storage.
@@ -52,7 +52,7 @@ object BehaviorTreeStorage {
             blueprint.btree
         } else {
             println("ERROR: BehaviorTreeBlueprint with name '$name' not registered in BehaviorTreeStorage!")
-            emptyTree
+            emptyTreeNode
         }
     }
 }

@@ -161,16 +161,19 @@ class Sprite private constructor(
     }
 
     fun setAnimation(
-        frameTag: String = "",
-        isAnimation: Boolean = false,
+        frameTag: String,
+        startAnimation: Boolean = false,
         direction: Direction = FORWARD,
-        disable: Boolean = false,
         assetStore: AssetStore
     ) {
         name = frameTag
-        running = isAnimation
+        running = startAnimation
         this.direction = direction
-        visible = !disable
+        visible = true
         resetAnimation(assetStore)
+    }
+
+    fun disable() {
+        visible = false
     }
 }

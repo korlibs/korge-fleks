@@ -12,16 +12,13 @@ interface PlayerInputState {
     var rx: Float
     var ry : Float
 
-    // Left joystick digital directions, which are triggered when the left knob is moved beyond a certain threshold in each direction
-    // can be used to allow the player to use the virtual joystick like a D-pad if they prefer that over analog input
+    // Left and right joystick digital directions, which are triggered when the left or right knob is moved beyond a certain
+    // threshold in each direction can be used to allow the player to use the virtual joystick like a D-pad if they prefer
+    // that over analog input
     var ldx: DigitalHorDir  // [-1, 0, 1]
     var ldy: DigitalVerDir  // [-1, 0, 1]
-
-    // TODO Cleanup this
-    var attack: Boolean
-    var justReleasedAttack: Boolean
-    var attackDirection: Float
-    var attackIndex: Int
+    var rdx: DigitalHorDir  // [-1, 0, 1]
+    var rdy: DigitalVerDir  // [-1, 0, 1]
 }
 
 /**

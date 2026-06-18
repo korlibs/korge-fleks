@@ -45,10 +45,6 @@ class SpriteSystem : IteratingSystem(
                         -spriteComponent.increment else spriteComponent.increment
                     ONCE_FORWARD -> if (spriteComponent.frameIndex < numFrames - 1) +1 else 0
                     ONCE_REVERSE -> if (spriteComponent.frameIndex == 0) 0 else -1
-                    null -> {
-                        println("WARNING -- SpriteAnimationSystem: direction in SpriteAnimationComponent shall not be null!")
-                        0
-                    }
                 }
 
                 // Check if animation should be played only once and if we need to delete the entity afterward

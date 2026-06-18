@@ -368,6 +368,11 @@ class WorldMapData(
         val chunkIndex = getChunkIndex(gridX, gridY)
         val chunk = chunkLookUpTable[chunkIndex] ?: return  // error("LevelData - processTiles: No chunk mesh found for chunk index '$chunkIndex' in grid position ($gridX, $gridY)!")
         val levelMap = chunk.levelMaps[layer] ?: error("LevelData - processTiles: No level map found for layer '$layer' in chunk index '$chunkIndex'!")
+        if (levelMap.listOfTileSets.isEmpty()) {
+            // No tileset assigned to level map, so we cannot render any tiles
+            println("ERROR: LevelData - processTiles: No tileset assigned to level map for layer '$layer' in chunk index '$chunkIndex'!")
+            return
+        }
         val chunkX = chunk.chunkX
         val chunkY = chunk.chunkY
         for (tx in xStart until xEnd) {
