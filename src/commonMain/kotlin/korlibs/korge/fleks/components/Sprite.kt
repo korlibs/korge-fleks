@@ -133,13 +133,13 @@ class Sprite private constructor(
 
     // When changing animation state the component's properties need to be reset
     fun resetAnimation(assetStore: AssetStore) {
-        setFrameIndex(assetStore)
+        resetFrameIndex(assetStore)
         setNextFrameIn(assetStore)
         setIncrement()
     }
 
     // Set frameIndex for starting animation
-    fun setFrameIndex(assetStore: AssetStore) {
+    fun resetFrameIndex(assetStore: AssetStore) {
         frameIndex = if (direction == REVERSE || direction == ONCE_REVERSE)
             assetStore.getSpriteTexture(name).numberOfFrames - 1 else 0
     }

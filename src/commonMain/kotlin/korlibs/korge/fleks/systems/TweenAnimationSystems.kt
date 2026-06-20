@@ -125,11 +125,11 @@ class TweenSpriteSystem : IteratingSystem(
     override fun onTickEntity(entity: Entity) {
         val spriteComponent = entity[SpriteComponent]
         updateProperty(entity, TweenSpriteAnimationComponent, spriteComponent::name) {
-            spriteComponent.setFrameIndex(assetStore)
+            spriteComponent.resetFrameIndex(assetStore)
             spriteComponent.setNextFrameIn(assetStore)
         }
         updateProperty(entity, TweenSpriteDirectionComponent, spriteComponent::direction) {
-            spriteComponent.setFrameIndex(assetStore)
+            spriteComponent.resetFrameIndex(assetStore)
             spriteComponent.setIncrement()
         }
         updateProperty(entity, TweenSpriteRunningComponent, spriteComponent::running) {

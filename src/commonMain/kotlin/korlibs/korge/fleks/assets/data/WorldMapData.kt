@@ -79,6 +79,8 @@ class WorldMapData {
         chunkGridVania = IntArray2(gridVaniaWidth, gridVaniaHeight) { -1 }
         // Set up collision tile set
         collisionTileSet = CollisionTileSet(collisionTiles, collisionShapesBitmapSlice, tileSize, tileSize)
+        // Reset tracing variables
+        listOfEmptyTilesetErrorsLogged.clear()
     }
 
     internal enum class ViewPortPosition {

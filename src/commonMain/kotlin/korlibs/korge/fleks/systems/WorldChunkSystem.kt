@@ -126,6 +126,7 @@ class WorldChunkSystem : IntervalSystem(
             ViewPortPosition.TOP_LEFT -> if (!worldMapData.loadingTopLeftChunk) {
                 worldMapData.loadingTopLeftChunk = true
                 views.launchAsap {
+                    worldMapData.loadingTopLeftChunk = false
                     val topChunk = currentChunkInfo.chunkTop
                     val leftChunk = currentChunkInfo.chunkLeft
                     if (checkAndLoadChunk(topChunk, activatedChunks)) {
@@ -134,12 +135,12 @@ class WorldChunkSystem : IntervalSystem(
                     if (checkAndLoadChunk(leftChunk, activatedChunks)) {
                         worldMapData.chunkLookUpTable[leftChunk]?.let { leftChunkInfo -> checkAndLoadChunk(leftChunkInfo.chunkTop, activatedChunks) }
                     }
-                    worldMapData.loadingTopLeftChunk = false
                 }
             }
             ViewPortPosition.TOP_RIGHT -> if (!worldMapData.loadingTopRightChunk) {
                 worldMapData.loadingTopRightChunk = true
                 views.launchAsap {
+                    worldMapData.loadingTopRightChunk = false
                     val topChunk = currentChunkInfo.chunkTop
                     val rightChunk = currentChunkInfo.chunkRight
                     if (checkAndLoadChunk(topChunk, activatedChunks)) {
@@ -148,12 +149,12 @@ class WorldChunkSystem : IntervalSystem(
                     if (checkAndLoadChunk(rightChunk, activatedChunks)) {
                         worldMapData.chunkLookUpTable[rightChunk]?.let { rightChunkInfo -> checkAndLoadChunk(rightChunkInfo.chunkTop, activatedChunks) }
                     }
-                    worldMapData.loadingTopRightChunk = false
                 }
             }
             ViewPortPosition.BOTTOM_LEFT -> if (!worldMapData.loadingBottomLeftChunk) {
                 worldMapData.loadingBottomLeftChunk = true
                 views.launchAsap {
+                    worldMapData.loadingBottomLeftChunk = false
                     val bottomChunk = currentChunkInfo.chunkBottom
                     val leftChunk = currentChunkInfo.chunkLeft
                     if (checkAndLoadChunk(bottomChunk, activatedChunks)) {
@@ -162,12 +163,12 @@ class WorldChunkSystem : IntervalSystem(
                     if (checkAndLoadChunk(leftChunk, activatedChunks)) {
                         worldMapData.chunkLookUpTable[leftChunk]?.let { leftChunkInfo -> checkAndLoadChunk(leftChunkInfo.chunkBottom, activatedChunks) }
                     }
-                    worldMapData.loadingBottomLeftChunk = false
                 }
             }
             ViewPortPosition.BOTTOM_RIGHT -> if (!worldMapData.loadingBottomRightChunk) {
                 worldMapData.loadingBottomRightChunk = true
                 views.launchAsap {
+                    worldMapData.loadingBottomRightChunk = false
                     val bottomChunk = currentChunkInfo.chunkBottom
                     val rightChunk = currentChunkInfo.chunkRight
                     if (checkAndLoadChunk(bottomChunk, activatedChunks)) {
@@ -176,7 +177,6 @@ class WorldChunkSystem : IntervalSystem(
                     if (checkAndLoadChunk(rightChunk, activatedChunks)) {
                         worldMapData.chunkLookUpTable[rightChunk]?.let { rightChunkInfo -> checkAndLoadChunk(rightChunkInfo.chunkBottom, activatedChunks) }
                     }
-                    worldMapData.loadingBottomRightChunk = false
                 }
             }
         }
