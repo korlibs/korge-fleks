@@ -1,30 +1,30 @@
-import korlibs.korge.gradle.*
-
-
 plugins {
-    alias(libs.plugins.korge)
+    kotlin("multiplatform")
+    alias(libs.plugins.kotlin.serialization)
 }
 
-korge {
-    id = "korge.fleks.testing"
-
-// To enable all targets at once
-
-    //targetAll()
-
-// To enable targets based on properties/environment variables
-    //targetDefault()
-
-// To selectively enable targets
-
-    targetJvm()
-    targetJs()
-//	targetIos()
-    targetAndroid()
-
-    serializationJson()
+buildscript {
+    repositories {
+        mavenLocal()
+        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
+        mavenCentral()
+        google()
+        gradlePluginPortal()
+    }
 }
 
-dependencies {
-    add("commonMainApi", project(":deps"))
+kotlin {
+    jvm {}
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.korge)
+            implementation(libs.kaml)
+            implementation(libs.fleks)
+            implementation(libs.kotlinx.serialization.json)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+    }
 }
