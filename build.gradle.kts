@@ -3,6 +3,7 @@ import korlibs.korge.gradle.*
 
 plugins {
     kotlin("multiplatform")
+//    alias(libs.plugins.kotlin.multiplatform) apply false  -- TODO: check if this works with Gradle 9
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -17,11 +18,13 @@ buildscript {
 }
 
 kotlin {
+    applyDefaultHierarchyTemplate()
     jvm {}
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.korge)
+            api(libs.korge)
+
             implementation(libs.kaml)
             implementation(libs.fleks)
             implementation(libs.kotlinx.serialization.json)
