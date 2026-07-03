@@ -1,6 +1,5 @@
 plugins {
     kotlin("multiplatform")
-//    alias(libs.plugins.kotlin.multiplatform) apply false  -- TODO: check if this works with Gradle 9
     alias(libs.plugins.kotlin.serialization)
 }
 
