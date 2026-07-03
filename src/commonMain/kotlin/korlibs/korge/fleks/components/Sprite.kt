@@ -107,8 +107,7 @@ class Sprite private constructor(
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
         // Initialize animation properties with data from [AssetStore].
-        val assetStore: AssetStore = this.inject(name = "AssetStore")
-        resetAnimation(assetStore)
+        resetAnimation()
         //println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
     }
 
@@ -132,7 +131,8 @@ class Sprite private constructor(
     }
 
     // When changing animation state the component's properties need to be reset
-    fun resetAnimation(assetStore: AssetStore) {
+    fun World.resetAnimation() {
+        val assetStore: AssetStore = this.inject(name = "AssetStore")
         resetFrameIndex(assetStore)
         setNextFrameIn(assetStore)
         setIncrement()
@@ -160,17 +160,56 @@ class Sprite private constructor(
         }
     }
 
-    fun setAnimation(
-        frameTag: String,
-        startAnimation: Boolean = false,
-        direction: Direction = FORWARD,
-        assetStore: AssetStore
-    ) {
+    // Set animation but do not start it yet
+    fun World.prepareAnimation(frameTag: String) {
         name = frameTag
-        running = startAnimation
-        this.direction = direction
+        running = false
+        direction = FORWARD
         visible = true
-        resetAnimation(assetStore)
+        resetAnimation()
+    }
+
+    fun World.prepareAnimationReverse(frameTag: String) {
+        name = frameTag
+        running = false
+        direction = REVERSE
+        visible = true
+        resetAnimation()
+    }
+
+    // Set animation and start it immediately
+    fun World.startAnimation(frameTag: String) {
+        name = frameTag
+        running = true
+        direction = FORWARD
+        visible = true
+        resetAnimation()
+    }
+
+    fun World.startAnimationOnce(frameTag: String) {
+        name = frameTag
+        running = true
+        direction = ONCE_FORWARD
+        visible = true
+        resetAnimation()
+    }
+
+    fun startAnimation(frameTag: String, frameIndex: Int, nextFrameIn: Float) {
+        name = frameTag
+        this@Sprite.frameIndex = frameIndex
+        this@Sprite.nextFrameIn = nextFrameIn
+        running = true
+        direction = FORWARD
+        visible = true
+        setIncrement()
+    }
+
+    fun World.startAnimationReverse(frameTag: String) {
+        name = frameTag
+        running = true
+        direction = REVERSE
+        visible = true
+        resetAnimation()
     }
 
     fun setAnimationFrame(
