@@ -57,8 +57,6 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         // TODO we need this system (running at 60Hz) if GridMoveSystem is running with 30Hz
         //add(PlatformerGroundSystem())
 
-        add(BehaviorTreeSystem())
-
         add(GridMoveSystem())
         add(PlayerMoveAfterCollisionSystem())
         // Debug system to move player entity to a specific position on the map overwriting player input data
@@ -80,6 +78,10 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         add(SpriteVisibilitySystem())
         add(EntityLinkSystem())
         add(SpriteSystem())
+
+        // Behavior tree system needs to be called after all other systems which can change the state (components)
+        // of an entity (with BehaviorTree component)
+        add(BehaviorTreeSystem())
 
         add(SoundSystem())
         add(CameraSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))

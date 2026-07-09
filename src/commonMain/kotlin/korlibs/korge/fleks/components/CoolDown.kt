@@ -7,25 +7,25 @@ import kotlinx.serialization.Serializable
 
 
 /**
- * This component is used to store the cooldown time/value of a game object.
+ * This component is used to store the cooldown time of a game object.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
 @Serializable @SerialName("CoolDown")
 class CoolDown private constructor(
-    var value: Float = 0f
+    var time: Float = 0f
 ) : PoolableComponent<CoolDown>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: CoolDown) {
-        value = from.value
+        time = from.time
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        value = 0f
+        time = 0f
     }
 
     override fun type() = CoolDownComponent
