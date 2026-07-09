@@ -17,7 +17,8 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("BehaviorTree")
 class BehaviorTree private constructor(
     var characterConfig: String = "",
-    var configAfterCollisionSystem: String = ""
+    var configAfterCollisionSystem: String = "",
+    var state: Int = 0
 ) : PoolableComponent<BehaviorTree>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
