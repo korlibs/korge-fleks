@@ -6,16 +6,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-buildscript {
-    repositories {
-        mavenLocal()
-        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
-        mavenCentral()
-        google()
-        gradlePluginPortal()
-    }
-}
-
 kotlin {
     applyDefaultHierarchyTemplate()
     jvm {}
