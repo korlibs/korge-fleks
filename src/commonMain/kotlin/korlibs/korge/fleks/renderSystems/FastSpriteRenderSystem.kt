@@ -57,8 +57,8 @@ class FastSpriteRenderSystem(
 
                 batch.drawQuad(
                     tex = ctx.getTex(texture.bmpSlice),
-                    x = position.x + texture.targetX - spriteComponent.anchorX,
-                    y = position.y + texture.targetY - spriteComponent.anchorY,
+                    x = position.x + texture.targetX - spriteComponent.pivotX,
+                    y = position.y + texture.targetY - spriteComponent.pivotY,
                     filtering = false,
                     colorMul = rgba,
                     program = null
