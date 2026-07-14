@@ -14,8 +14,8 @@ import kotlinx.serialization.Serializable
  * By adding [SpriteComponent] to an entity the entity will be able to handle textures and animations.
  *
  * @param [name] is the identifier for getting the sprite graphic from the [AssetStore].
- * @param [anchorX] X offset of the sprite graphic to the zero-point of the sprite (pivot-point).
- * @param [anchorY] Y offset of the sprite graphic to the zero-point of the sprite (pivot-point).
+ * @param [pivotX] X offset of the sprite graphic to the zero-point of the sprite (pivot-point).
+ * @param [pivotY] Y offset of the sprite graphic to the zero-point of the sprite (pivot-point).
  *
  * @param [frameIndex] is the frame number which will be displayed by the [ObjectRenderSystem] for the sprite.
  *        The number can be also set directly to start the animation at a specific frame. Make sure the index
@@ -37,8 +37,8 @@ import kotlinx.serialization.Serializable
 class Sprite private constructor(
     var name: String = "",  // TODO rename to animation (?)
     var visible: Boolean = true,
-    var anchorX: Float = 0f,                          // x,y position of the pivot point within the sprite
-    var anchorY: Float = 0f,
+    var pivotX: Float = 0f,                          // x,y position of the pivot point within the sprite which comes from LDtk level map
+    var pivotY: Float = 0f,
 
     var frameIndex: Int = 0,                          // frame number of animation which is currently drawn
     var running: Boolean = false,                     // Switch animation on and off
@@ -56,8 +56,8 @@ class Sprite private constructor(
     fun init(from: Sprite) {
         name = from.name
         visible = from.visible
-        anchorX = from.anchorX
-        anchorY = from.anchorY
+        pivotX = from.pivotX
+        pivotY = from.pivotY
         frameIndex = from.frameIndex
         running = from.running
         direction = from.direction  // normal ordinary enum - no deep copy needed
@@ -73,8 +73,8 @@ class Sprite private constructor(
     fun cleanup() {
         name = ""
         visible = true
-        anchorX = 0f
-        anchorY = 0f
+        pivotX = 0f
+        pivotY = 0f
         frameIndex = 0
         running = false
         direction = FORWARD
