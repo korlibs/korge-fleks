@@ -1,14 +1,10 @@
-import korlibs.korge.gradle.*
-
-
 plugins {
     kotlin("multiplatform")
     alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
-    applyDefaultHierarchyTemplate()
-    jvm {}
+    jvm()
 
     sourceSets {
         commonMain.dependencies {
