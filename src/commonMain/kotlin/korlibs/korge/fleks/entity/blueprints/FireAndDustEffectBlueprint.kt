@@ -53,8 +53,8 @@ data class FireAndDustEffectBlueprint(
             }
             it += spriteComponent {
                 name = spriteName
-                anchorX = offsetX
-                anchorY = offsetY
+                pivotX = offsetX
+                pivotY = offsetY
                 running = true
                 direction = ImageAnimation.Direction.ONCE_FORWARD
                 destroyOnAnimationFinished = true

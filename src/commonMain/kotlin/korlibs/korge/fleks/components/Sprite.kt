@@ -14,8 +14,8 @@ import kotlinx.serialization.Serializable
  * By adding [SpriteComponent] to an entity the entity will be able to handle textures and animations.
  *
  * @param [name] is the identifier for getting the sprite graphic from the [AssetStore].
- * @param [anchorX] X offset of the sprite graphic to the zero-point of the sprite (pivot-point).
- * @param [anchorY] Y offset of the sprite graphic to the zero-point of the sprite (pivot-point).
+ * @param [pivotX] X offset of the sprite graphic to the zero-point of the sprite (pivot-point).
+ * @param [pivotY] Y offset of the sprite graphic to the zero-point of the sprite (pivot-point).
  *
  * @param [frameIndex] is the frame number which will be displayed by the [ObjectRenderSystem] for the sprite.
  *        The number can be also set directly to start the animation at a specific frame. Make sure the index
@@ -37,8 +37,8 @@ import kotlinx.serialization.Serializable
 class Sprite private constructor(
     var name: String = "",  // TODO rename to animation (?)
     var visible: Boolean = true,
-    var anchorX: Float = 0f,                          // x,y position of the pivot point within the sprite
-    var anchorY: Float = 0f,
+    var pivotX: Float = 0f,                          // x,y position of the pivot point within the sprite which comes from LDtk level map
+    var pivotY: Float = 0f,
 
     var frameIndex: Int = 0,                          // frame number of animation which is currently drawn
     var running: Boolean = false,                     // Switch animation on and off
@@ -56,8 +56,8 @@ class Sprite private constructor(
     fun init(from: Sprite) {
         name = from.name
         visible = from.visible
-        anchorX = from.anchorX
-        anchorY = from.anchorY
+        pivotX = from.pivotX
+        pivotY = from.pivotY
         frameIndex = from.frameIndex
         running = from.running
         direction = from.direction  // normal ordinary enum - no deep copy needed
@@ -73,8 +73,8 @@ class Sprite private constructor(
     fun cleanup() {
         name = ""
         visible = true
-        anchorX = 0f
-        anchorY = 0f
+        pivotX = 0f
+        pivotY = 0f
         frameIndex = 0
         running = false
         direction = FORWARD
@@ -107,8 +107,7 @@ class Sprite private constructor(
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
         // Initialize animation properties with data from [AssetStore].
-        val assetStore: AssetStore = this.inject(name = "AssetStore")
-        resetAnimation(assetStore)
+        resetAnimation()
         //println("\nSpriteAnimationComponent:\n    entity: ${entity.id}\n    numFrames: $numFrames\n    increment: ${spriteAnimationComponent.increment}\n    direction: ${spriteAnimationComponent.direction}\n")
     }
 
@@ -132,7 +131,8 @@ class Sprite private constructor(
     }
 
     // When changing animation state the component's properties need to be reset
-    fun resetAnimation(assetStore: AssetStore) {
+    fun World.resetAnimation() {
+        val assetStore: AssetStore = this.inject(name = "AssetStore")
         resetFrameIndex(assetStore)
         setNextFrameIn(assetStore)
         setIncrement()
@@ -160,17 +160,56 @@ class Sprite private constructor(
         }
     }
 
-    fun setAnimation(
-        frameTag: String,
-        startAnimation: Boolean = false,
-        direction: Direction = FORWARD,
-        assetStore: AssetStore
-    ) {
+    // Set animation but do not start it yet
+    fun World.prepareAnimation(frameTag: String) {
         name = frameTag
-        running = startAnimation
-        this.direction = direction
+        running = false
+        direction = FORWARD
         visible = true
-        resetAnimation(assetStore)
+        resetAnimation()
+    }
+
+    fun World.prepareAnimationReverse(frameTag: String) {
+        name = frameTag
+        running = false
+        direction = REVERSE
+        visible = true
+        resetAnimation()
+    }
+
+    // Set animation and start it immediately
+    fun World.startAnimation(frameTag: String) {
+        name = frameTag
+        running = true
+        direction = FORWARD
+        visible = true
+        resetAnimation()
+    }
+
+    fun World.startAnimationOnce(frameTag: String) {
+        name = frameTag
+        running = true
+        direction = ONCE_FORWARD
+        visible = true
+        resetAnimation()
+    }
+
+    fun startAnimation(frameTag: String, frameIndex: Int, nextFrameIn: Float) {
+        name = frameTag
+        this@Sprite.frameIndex = frameIndex
+        this@Sprite.nextFrameIn = nextFrameIn
+        running = true
+        direction = FORWARD
+        visible = true
+        setIncrement()
+    }
+
+    fun World.startAnimationReverse(frameTag: String) {
+        name = frameTag
+        running = true
+        direction = REVERSE
+        visible = true
+        resetAnimation()
     }
 
     fun setAnimationFrame(

@@ -1,5 +1,7 @@
 package korlibs.korge.fleks.entity.behavior
 
+import com.github.quillraven.fleks.World
+
 /**
  * This interface maps the string [name] to a specific behavior tree configuration.
  * The behavior tree root node [btree] is created at build time and can be configured
@@ -13,6 +15,7 @@ package korlibs.korge.fleks.entity.behavior
  * [characterConfig][korlibs.korge.fleks.components.BehaviorTree.characterConfig] field.
  */
 interface BehaviorTreeBlueprint {
+    val world: World
     val name: String
     val btree: BTNode
 }

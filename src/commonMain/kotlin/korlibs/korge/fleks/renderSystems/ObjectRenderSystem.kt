@@ -88,9 +88,9 @@ class ObjectRenderSystem(
 
                 ctx.useBatcher { batch ->
                     val px =
-                        position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.anchorX
+                        position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.pivotX
                     val py =
-                        position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.anchorY
+                        position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.pivotY
                     if (spriteComponent.flipX) {
                         batch.drawQuadFlippedX(  // mirror texture horizontally
                             tex = ctx.getTex(texture.bmpSlice),
