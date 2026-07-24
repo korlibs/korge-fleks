@@ -87,29 +87,18 @@ class ObjectRenderSystem(
                 val texture = sprite[spriteComponent.frameIndex]
 
                 ctx.useBatcher { batch ->
-                    val px =
-                        position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.pivotX
-                    val py =
-                        position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.pivotY
-                    if (spriteComponent.flipX) {
-                        batch.drawQuadFlippedX(  // mirror texture horizontally
-                            tex = ctx.getTex(texture.bmpSlice),
-                            x = px,
-                            y = py,
-                            filtering = false,
-                            colorMul = rgba,
-                            program = null // Possibility to use a custom shader - add ShaderComponent or similar
-                        )
-                    } else {
-                        batch.drawQuad(
-                            tex = ctx.getTex(texture.bmpSlice),
-                            x = px,
-                            y = py,
-                            filtering = false,
-                            colorMul = rgba,
-                            program = null
-                        )
-                    }
+                    val px = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.pivotX
+                    val py = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.pivotY
+                    batch.drawQuad(
+                        flipX = spriteComponent.flipX,
+                        flipY = spriteComponent.flipY,
+                        tex = ctx.getTex(texture.bmpSlice),
+                        x = px,
+                        y = py,
+                        filtering = false,
+                        colorMul = rgba,
+                        program = null
+                    )
                 }
             }
             // Rendering path for text (not optimized - no caching)
@@ -241,44 +230,66 @@ class ObjectRenderSystem(
 }
 
 /**
- * Draws a textured [tex] quad at [x], [y] with size [width]x[height] and flipped in X direction.
- *
- * It uses [m] transform matrix, an optional [filtering] and [colorMul], [blendMode] and [program] as state for drawing it.
- *
- * Note: To draw solid quads, you can use [Bitmaps.white] + [AgBitmapTextureManager] as texture and the [colorMul] as quad color.
+ * Draws a textured [tex] quad at [x], [y] with size [width]x[height] and flipped in X and/or Y direction.
+ * It uses an optional [filtering] and [colorMul], [blendMode] and [program] as state for drawing it.
  */
-fun BatchBuilder2D.drawQuadFlippedX(
+fun BatchBuilder2D.drawQuad(
+    flipX: Boolean,
+    flipY: Boolean,
     tex: TextureCoords,
     x: Float,
     y: Float,
-    width: Float = tex.width.toFloat(),
-    height: Float = tex.height.toFloat(),
-    m: Matrix = Matrix.IDENTITY,
     filtering: Boolean = true,
     colorMul: RGBA = Colors.WHITE,
     blendMode: BlendMode = BlendMode.NORMAL,
     program: Program? = null
 ) {
     setStateFast(tex.base, filtering, blendMode, program, icount = 6, vcount = 4)
-    drawQuadFlippedXFast(x, y, width, height, m, tex, colorMul)
-}
 
-fun BatchBuilder2D.drawQuadFlippedXFast(
-    x: Float, y: Float, width: Float, height: Float,
-    m: Matrix,
-    tex: BmpCoords,
-    colorMul: RGBA,
-) {
-    val x0 = (x + width)
-    val x1 = x
-    val y0 = y
-    val y1 = (y + height)
-    drawQuadFast(
-        m.transformX(x0, y0), m.transformY(x0, y0),
-        m.transformX(x1, y0), m.transformY(x1, y0),
-        m.transformX(x1, y1), m.transformY(x1, y1),
-        m.transformX(x0, y1), m.transformY(x0, y1),
-        tex, colorMul,
-    )
+    val width: Float = tex.width.toFloat()
+    val height: Float = tex.height.toFloat()
+    val x0: Float; val y0: Float
+    val x1: Float; val y1: Float
+    val x2: Float; val y2: Float
+    val x3: Float; val y3: Float
+    if (flipX) {
+        if (flipY) {
+            // Flip in X and Y direction:
+            // 2..3
+            // :  :
+            // 1..0
+            x0 = x + width; y0 = y + height
+            x1 = x;         y1 = y + height
+            x2 = x;         y2 = y
+            x3 = x + width; y3 = y
+        } else {
+            // Flip in X direction:
+            // 1..0
+            // :  :
+            // 2..3
+            x0 = x + width; y0 = y
+            x1 = x;         y1 = y
+            x2 = x;         y2 = y + height
+            x3 = x + width; y3 = y + height
+        }
+    } else if (flipY) {
+        // Flip in Y direction:
+        // 3..2
+        // :  :
+        // 0..1
+        x0 = x;         y0 = y + height
+        x1 = x + width; y1 = y + height
+        x2 = x + width; y2 = y
+        x3 = x;         y3 = y
+    } else {
+        // Normal, not flipped:
+        // 0..1
+        // :  :
+        // 3..2
+        x0 = x;         y0 = y
+        x1 = x + width; y1 = y
+        x2 = x + width; y2 = y + height
+        x3 = x;         y3 = y + height
+    }
+    drawQuadFast(x0, y0 , x1 , y1, x2, y2, x3, y3, tex, colorMul)
 }
-
