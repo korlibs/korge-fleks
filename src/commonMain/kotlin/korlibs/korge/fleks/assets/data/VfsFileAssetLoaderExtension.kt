@@ -61,8 +61,8 @@ suspend fun VfsFile.readKorgeFleksClusterAssetJson(
             SpriteFrame(
                 bmpSlice = textureAtlases.getOrElse(index) { error("readKorgeFleksAssets - texture atlas index '$index' for image '$name' not found!") }
                     .slice(RectangleInt(x, y, width, height)),
-                targetX = frames.xOffset,
-                targetY = frames.yOffset,
+                cropOffsetX = frames.xOffset,
+                cripOffsetY = frames.yOffset,
                 duration = frames.duration.toFloat() / 1000f
             )
         }
@@ -70,8 +70,8 @@ suspend fun VfsFile.readKorgeFleksClusterAssetJson(
         textures[name] = Pair(
             clusterName, SpriteFrames(
                 frames = frames.toMutableList(),
-                width = image.width,
-                height = image.height
+                originalWidth = image.width,
+                originalHeight = image.height
             )
         )
     }
