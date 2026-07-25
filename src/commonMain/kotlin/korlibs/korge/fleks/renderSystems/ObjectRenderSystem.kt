@@ -87,8 +87,10 @@ class ObjectRenderSystem(
                 val texture = sprite[spriteComponent.frameIndex]
 
                 ctx.useBatcher { batch ->
-                    val px = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.width - texture.targetX - texture.bmpSlice.width) else texture.targetX) - spriteComponent.pivotX
-                    val py = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.height - texture.targetY - texture.bmpSlice.height) else texture.targetY) - spriteComponent.pivotY
+                    val px = position.x + position.offsetX - spriteComponent.pivotX +
+                        (if (spriteComponent.flipX) (sprite.originalWidth - texture.cropOffsetX - texture.bmpSlice.width) else texture.cropOffsetX)
+                    val py = position.y + position.offsetY - spriteComponent.pivotY +
+                        (if (spriteComponent.flipY) (sprite.originalHeight - texture.cripOffsetY - texture.bmpSlice.height) else texture.cripOffsetY)
                     batch.drawQuad(
                         flipX = spriteComponent.flipX,
                         flipY = spriteComponent.flipY,
@@ -230,8 +232,17 @@ class ObjectRenderSystem(
 }
 
 /**
- * Draws a textured [tex] quad at [x], [y] with size [width]x[height] and flipped in X and/or Y direction.
- * It uses an optional [filtering] and [colorMul], [blendMode] and [program] as state for drawing it.
+ * Draws a textured quad at the specified position with optional horizontal and vertical flipping.
+ *
+ * @param flipX Whether to flip the quad horizontally
+ * @param flipY Whether to flip the quad vertically
+ * @param tex The texture coordinates to use for the quad
+ * @param x The x-coordinate of the quad's top-left position
+ * @param y The y-coordinate of the quad's top-left position
+ * @param filtering Whether to apply texture filtering (default: true)
+ * @param colorMul The color multiplier to apply (default: Colors.WHITE)
+ * @param blendMode The blend mode to use for rendering (default: BlendMode.NORMAL)
+ * @param program The optional custom shader program to use (default: null)
  */
 fun BatchBuilder2D.drawQuad(
     flipX: Boolean,

@@ -2,13 +2,14 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.image.bitmap.Bitmaps
 import korlibs.image.bitmap.BmpSlice
+import java.util.function.IntFunction
 
 
 class SpriteFrames(
     private val frames: MutableList<SpriteFrame> = mutableListOf(),
-    val width: Int = 0,  // virtual size of the sprite (can be different from bmpSlice.width if cropped)
-    val height: Int = 0
-) : MutableList<SpriteFrames.SpriteFrame> by frames {
+    val originalWidth: Int = 0,  // virtual size of the sprite (can be different from bmpSlice.width if cropped)
+    val originalHeight: Int = 0
+) : MutableList<SpriteFrames.SpriteFrame> by frames {  // Use all MutableList implementation from frames object
     val numberOfFrames: Int get() = frames.size
     val firstFrameSlice: BmpSlice get() = frames.first().bmpSlice
     val firstFrame: SpriteFrame get() = frames.first()
@@ -35,8 +36,8 @@ class SpriteFrames(
 
     data class SpriteFrame(
         val bmpSlice: BmpSlice,
-        val targetX: Int = 0,  // offset from the top-left corner of the original sprite if cropped
-        val targetY: Int = 0,
+        val cropOffsetX: Int = 0,  // offset from the top-left corner of the original sprite if cropped
+        val cripOffsetY: Int = 0,
         // Duration in seconds will be set later after all frames have been loaded from texture atlas
         var duration: Float = 0f
     )
