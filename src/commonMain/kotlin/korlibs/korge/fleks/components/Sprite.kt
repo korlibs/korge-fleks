@@ -4,6 +4,9 @@ import com.github.quillraven.fleks.*
 import korlibs.image.format.ImageAnimation.Direction
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.data.SpriteFrames
+import korlibs.korge.fleks.renderSystems.ObjectRenderSystem
+import korlibs.korge.fleks.systems.SpriteSystem
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -91,6 +94,7 @@ class Sprite private constructor(
         val SpriteComponent = componentTypeOf<Sprite>()
 
         // Use this function to create a new instance of component data as val inside another component
+        @Suppress("UNUSED")
         fun staticSpriteComponent(config: Sprite.() -> Unit): Sprite =
             Sprite().apply(config)
 
@@ -204,12 +208,18 @@ class Sprite private constructor(
         setIncrement()
     }
 
+    @Suppress("UNUSED")
     fun World.startAnimationReverse(frameTag: String) {
         name = frameTag
         running = true
         direction = REVERSE
         visible = true
         resetAnimation()
+    }
+
+    fun World.getSpriteFrames() : SpriteFrames {
+        val assetStore: AssetStore = this.inject(name = "AssetStore")
+        return assetStore.getSpriteTexture(name)
     }
 
     fun setAnimationFrame(

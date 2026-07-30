@@ -2,10 +2,10 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
+import korlibs.korge.fleks.components.CoolDown.Companion.CoolDownComponent
 import korlibs.korge.fleks.components.EntityRef.Companion.EntityRefComponent
 import korlibs.korge.fleks.components.EntityRefs.Companion.EntityRefsComponent
 import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNameComponent
-import korlibs.korge.fleks.components.Info.Companion.InfoComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 
 class LifeCycleSystem : IteratingSystem(
@@ -20,10 +20,20 @@ class LifeCycleSystem : IteratingSystem(
             deleteEntity(entity)
             debugPrint(entity, "base")
         }
+
+        if (entity has CoolDownComponent) {
+            val coolDownComponent = entity[CoolDownComponent]
+            coolDownComponent.value -= deltaTime
+            if (coolDownComponent.value < 0f) {
+                // Trigger deletion of entity in next cycle when cool down has finished
+                lifeCycle.healthCounter = 0
+            }
+        }
     }
 
+    @Suppress("UNUSED")
     private fun debugPrint(entity: Entity, type: String) {
-        val name: String = entity.getOrNull(InfoComponent)?.name ?: "no name"
+        //val name: String = entity.getOrNull(InfoComponent)?.name ?: "no name"
         //println("INFO: LifeCycleSystem: Remove $type-entity '${entity.id}' ($name)")
     }
 

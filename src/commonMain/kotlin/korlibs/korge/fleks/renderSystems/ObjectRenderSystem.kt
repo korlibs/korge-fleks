@@ -83,18 +83,19 @@ class ObjectRenderSystem(
             // Rendering path for sprites
             if (entity has SpriteComponent && entity[SpriteComponent].visible) {
                 val spriteComponent = entity[SpriteComponent]
-                val sprite = assetStore.getSpriteTexture(spriteComponent.name)
-                val texture = sprite[spriteComponent.frameIndex]
+                val spriteFrames = assetStore.getSpriteTexture(spriteComponent.name)
+                val spriteFrame = spriteFrames[spriteComponent.frameIndex]
 
                 ctx.useBatcher { batch ->
+                    // The quad is possibly a cropped texture for the sprite texture, thus we need to add the cropOffset to get the final position for drawing
                     val px = position.x + position.offsetX - spriteComponent.pivotX +
-                        (if (spriteComponent.flipX) (sprite.originalWidth - texture.cropOffsetX - texture.bmpSlice.width) else texture.cropOffsetX)
+                        (if (spriteComponent.flipX) (spriteFrames.originalWidth - spriteFrame.cropOffsetX - spriteFrame.bmpSlice.width) else spriteFrame.cropOffsetX)
                     val py = position.y + position.offsetY - spriteComponent.pivotY +
-                        (if (spriteComponent.flipY) (sprite.originalHeight - texture.cripOffsetY - texture.bmpSlice.height) else texture.cripOffsetY)
+                        (if (spriteComponent.flipY) (spriteFrames.originalHeight - spriteFrame.cripOffsetY - spriteFrame.bmpSlice.height) else spriteFrame.cripOffsetY)
                     batch.drawQuad(
                         flipX = spriteComponent.flipX,
                         flipY = spriteComponent.flipY,
-                        tex = ctx.getTex(texture.bmpSlice),
+                        tex = ctx.getTex(spriteFrame.bmpSlice),
                         x = px,
                         y = py,
                         filtering = false,
