@@ -1,6 +1,7 @@
 package korlibs.korge.fleks.entity.behavior
 
 import com.github.quillraven.fleks.World
+import com.github.quillraven.fleks.Entity
 
 /**
  * This interface maps the string [name] to a specific behavior tree configuration.
@@ -18,4 +19,6 @@ interface BehaviorTreeBlueprint {
     val world: World
     val name: String
     val btree: BTNode
+
+    fun init(entity: Entity)
 }
