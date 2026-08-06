@@ -1,5 +1,7 @@
 package korlibs.korge.fleks.entity.behavior
 
+import com.github.quillraven.fleks.Entity
+
 
 /**
  * This storage contains [BehaviorTreeBlueprint]'s for creating [BTNode] trees which define the AI behavior
@@ -46,13 +48,22 @@ object BehaviorTreeStorage {
      * @return the root [BTNode] created by [BehaviorTreeBlueprint.createBehaviorTree], or `emtpyTree` if
      *         no blueprint with that name was registered.
      */
-    fun get(name: String): BTNode {
+    operator fun get(name: String): BTNode {
         val blueprint = behaviorTreeBlueprints[name]
         return if (blueprint != null) {
             blueprint.btree
         } else {
             println("ERROR: BehaviorTreeBlueprint with name '$name' not registered in BehaviorTreeStorage!")
             emptyTreeNode
+        }
+    }
+
+    fun init(name: String, entity: Entity) {
+        val blueprint = behaviorTreeBlueprints[name]
+        if (blueprint != null) {
+            blueprint.init(entity)
+        } else {
+            println("ERROR: BehaviorTreeBlueprint with name '$name' not registered in BehaviorTreeStorage! Cannot call init for it!")
         }
     }
 }
