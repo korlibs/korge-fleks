@@ -8,7 +8,7 @@ import korlibs.image.tiles.Tile
 import korlibs.io.lang.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
-import korlibs.korge.fleks.components.BehaviorTree
+import korlibs.korge.fleks.components.Behavior
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Debug
 import korlibs.korge.fleks.components.DebugCollisionShapes
@@ -178,7 +178,7 @@ class SnapshotSerializer {
     private val internalModule = SerializersModule {
         // Register component and data classes
         polymorphic(Component::class) {
-            subclass(BehaviorTree::class)
+            subclass(Behavior::class)
             subclass(Collision::class)
             subclass(Debug::class)
             subclass(DebugCollisionShapes::class)

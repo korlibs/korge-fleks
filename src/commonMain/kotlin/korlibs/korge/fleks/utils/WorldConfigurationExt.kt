@@ -23,7 +23,7 @@ import korlibs.korge.fleks.systems.SpriteSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
 import korlibs.korge.fleks.systems.collision.GridMoveSystem
 import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
-import korlibs.korge.fleks.systems.collision.BehaviorTreeSystem
+import korlibs.korge.fleks.systems.collision.BehaviorSystem
 import korlibs.korge.view.Views
 
 
@@ -63,7 +63,6 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         add(DebugSystem())
 
 //        add(GridCollisionCleanupSystem())  ??? check why this is needed
-//        add(GameObjectStateSystem())  // not needed anymore with BTreeTickSystem
 
         add(SpawnerSystem())
         add(MessagePassingSystem())
@@ -79,9 +78,9 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         add(EntityLinkSystem())
         add(SpriteSystem())
 
-        // Behavior tree system needs to be called after all other systems which can change the state (components)
-        // of an entity (with BehaviorTree component)
-        add(BehaviorTreeSystem())
+        // Behavior system needs to be called after all other systems which can change the state (components)
+        // of an entity (with Behavior component)
+        add(BehaviorSystem())
 
         add(SoundSystem())
         add(CameraSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))
