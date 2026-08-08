@@ -8,50 +8,46 @@ import kotlinx.serialization.Serializable
 
 
 /**
- * This component is used to store the name of the behavior tree configuration file for a game object and the name
- * of the behavior tree configuration file that should be used after the collision system has run.
+ * This component is used to store the name of the behavior configuration object for a game object.
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
-@Serializable @SerialName("BehaviorTree")
-class BehaviorTree private constructor(
-    var characterConfig: String = "",
-    var configAfterCollisionSystem: String = "",
+@Serializable @SerialName("Behavior")
+class Behavior private constructor(
+    var name: String = "",
     var state: Int = 0
-) : PoolableComponent<BehaviorTree>() {
+) : PoolableComponent<Behavior>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
-    fun init(from: BehaviorTree) {
-        characterConfig = from.characterConfig
-        configAfterCollisionSystem = from.configAfterCollisionSystem
+    fun init(from: Behavior) {
+        name = from.name
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are a value property of another component
     fun cleanup() {
-        characterConfig = ""
-        configAfterCollisionSystem = ""
+        name = ""
     }
 
-    override fun type() = BehaviorTreeComponent
+    override fun type() = BehaviorComponent
 
     companion object {
-        val BehaviorTreeComponent = componentTypeOf<BehaviorTree>()
+        val BehaviorComponent = componentTypeOf<Behavior>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticBehaviorTreeComponent(config: BehaviorTree.() -> Unit): BehaviorTree =
-            BehaviorTree().apply(config)
+        fun staticBehaviorComponent(config: Behavior.() -> Unit): Behavior =
+            Behavior().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun behaviorTreeComponent(config: BehaviorTree.() -> Unit): BehaviorTree =
+        fun behaviorComponent(config: Behavior.() -> Unit): Behavior =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "BehaviorTree") { BehaviorTree() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Behavior") { Behavior() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): BehaviorTree = behaviorTreeComponent { init(from = this@BehaviorTree) }
+    override fun clone(): Behavior = behaviorComponent { init(from = this@Behavior) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
