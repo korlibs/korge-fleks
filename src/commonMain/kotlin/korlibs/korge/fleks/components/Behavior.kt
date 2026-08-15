@@ -12,22 +12,33 @@ import kotlinx.serialization.Serializable
  *
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
+ *
+ * @param name The name of the behavior configuration object for the game object. This name is used
+ *             to look up the corresponding behavior object in the [BehaviorStorage].
+ * @param state The current state of the behavior for the entity. This can be used to track the progress
+ *              of the behavior or to store additional information about the behavior's execution.
+ * @param index The index of the behavior component to ensure a consistent update order in the BehaviorSystem.
  */
 @Serializable @SerialName("Behavior")
 class Behavior private constructor(
     var name: String = "",
-    var state: Int = 0
+    var state: Int = 0,
+    var index: Int = 0
 ) : PoolableComponent<Behavior>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
     fun init(from: Behavior) {
         name = from.name
+        state = from.state
+        index = from.index
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are a value property of another component
     fun cleanup() {
         name = ""
+        state = 0
+        index = 0
     }
 
     override fun type() = BehaviorComponent
