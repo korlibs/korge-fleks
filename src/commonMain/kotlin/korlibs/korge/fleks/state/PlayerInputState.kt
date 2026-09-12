@@ -7,18 +7,34 @@ package korlibs.korge.fleks.state
 interface PlayerInputState {
     // Left and right joystick analog values, which can be used for more precise movement and aiming. These values are
     // typically in the range of [-1.0, 1.0], where (0, 0) represents the neutral position of the joystick.
-    var lx: Float
-    var ly: Float
+//    var lx: Float
+//    var ly: Float
     var rx: Float
     var ry : Float
 
     // Left and right joystick digital directions, which are triggered when the left or right knob is moved beyond a certain
     // threshold in each direction can be used to allow the player to use the virtual joystick like a D-pad if they prefer
     // that over analog input
-    var ldx: DigitalHorDir  // [-1, 0, 1]
-    var ldy: DigitalVerDir  // [-1, 0, 1]
+//    var ldx: DigitalHorDir  // [-1, 0, 1]
+//    var ldy: DigitalVerDir  // [-1, 0, 1]
     var rdx: DigitalHorDir  // [-1, 0, 1]
     var rdy: DigitalVerDir  // [-1, 0, 1]
+
+    var jump: Boolean
+    var justJump: Boolean
+    var moveLeft: Boolean
+    var moveRight: Boolean
+    var justMoveLeft: Boolean
+    var justMoveRight: Boolean
+    var squat: Boolean
+
+    var shoot: Boolean
+    var shootDirection: Int
+    var layDown: Boolean
+
+    companion object {
+        const val NEUTRAL_DIRECTION: Int = 7  // shoot horizontal
+    }
 }
 
 /**
