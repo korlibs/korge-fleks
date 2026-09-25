@@ -19,15 +19,15 @@ import kotlinx.serialization.Serializable
  * Author's hint: When adding new properties to the component, make sure to reset them in the
  *                [cleanup] function and initialize them in the [init] function.
  */
-@Serializable @SerialName("RotationPixel2D")
-class RotationPixel2D private constructor(
+@Serializable @SerialName("FakeRotation")
+class FakeRotation private constructor(
     var direction: Int = NEUTRAL_DIRECTION,  // [0..32]
     var flipX: Boolean = false,
     var flipY: Boolean = false
-) : PoolableComponent<RotationPixel2D>() {
+) : PoolableComponent<FakeRotation>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
-    fun init(from: RotationPixel2D) {
+    fun init(from: FakeRotation) {
         direction = from.direction
         flipX = from.flipX
         flipY = from.flipY
@@ -41,24 +41,24 @@ class RotationPixel2D private constructor(
         flipY = false
     }
 
-    override fun type() = RotationPixel2DComponent
+    override fun type() = FakeRotationComponent
 
     companion object {
-        val RotationPixel2DComponent = componentTypeOf<RotationPixel2D>()
+        val FakeRotationComponent = componentTypeOf<FakeRotation>()
 
         // Use this function to create a new instance of component data as val inside another component
-        fun staticDirectionComponent(config: RotationPixel2D.() -> Unit): RotationPixel2D =
-            RotationPixel2D().apply(config)
+        fun staticDirectionComponent(config: FakeRotation.() -> Unit): FakeRotation =
+            FakeRotation().apply(config)
 
         // Use this function to get a new instance of a component from the pool and add it to an entity
-        fun rotationPixel2DComponent(config: RotationPixel2D.() -> Unit): RotationPixel2D =
+        fun fakeRotationComponent(config: FakeRotation.() -> Unit): FakeRotation =
             pool.alloc().apply(config)
 
-        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Direction") { RotationPixel2D() }
+        private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Direction") { FakeRotation() }
     }
 
     // Clone a new instance of the component from the pool
-    override fun clone(): RotationPixel2D = rotationPixel2DComponent { init(from = this@RotationPixel2D) }
+    override fun clone(): FakeRotation = fakeRotationComponent { init(from = this@FakeRotation) }
 
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {

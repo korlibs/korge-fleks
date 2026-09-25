@@ -18,7 +18,7 @@ import kotlin.coroutines.*
  * Please make sure you are not deriving any additional components from [Component].
  */
 class SnapshotSerializerSystem(
-    val timesPerSecond: Int = 30,
+    val timesPerSecond: Int = 60,
     private val snapshotBufferInSeconds: Int = 30  // How many seconds of recordings should be kept in memory
 ) : IntervalSystem(
     interval = Fixed(step = 1f / timesPerSecond.toFloat())

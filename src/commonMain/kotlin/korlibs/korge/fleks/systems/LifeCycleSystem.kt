@@ -9,7 +9,7 @@ import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNam
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 
 class LifeCycleSystem : IteratingSystem(
-    family { all(LifeCycleComponent) },
+    family { all(LifeCycleComponent).any(LifeCycleComponent, CoolDownComponent) },
     interval =  Fixed(1f / 60f)
 ) {
     override fun onTickEntity(entity: Entity) {

@@ -33,7 +33,7 @@ data class FireAndDustEffectBlueprint(
     private val velocityVariationX: Float = 0f,
     private val velocityVariationY: Float = 0f,
 
-    private val renderLayerTag: RenderLayerTag = RenderLayerTag.MAIN_EFFECTS,
+    private val renderLayerTag: RenderLayerTag = RenderLayerTag.MAIN_EFFECT_LAYER,
     private val layerIndex: Int? = null,
     private val fadeOutDuration: Float = 0f,
     private val screenCoordinates: Boolean = false

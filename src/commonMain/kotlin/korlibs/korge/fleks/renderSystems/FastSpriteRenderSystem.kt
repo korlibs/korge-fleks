@@ -17,12 +17,12 @@ import korlibs.korge.render.*
  * Creates a new [FastSpriteRenderSystem], allowing to configure with [callback], and attaches the newly created view to the
  * receiver "this".
  *
- * The [FastSpriteRenderSystem] is rendering one texture per sprite to make it faster. It just takes the first layer
- * of an Aseprite file and ignored additional layers. Also, it does not sort the entities before rendering them.
- * This should be used for explosion and dust effects where the order of drawn textures is not significant.
+ * The [FastSpriteRenderSystem] is rendering a sprite texture without flipping it. Also, it does not
+ * sort the entities before rendering them. This should be used for explosion and dust effects where
+ * the order of drawn textures is not significant.
+ *
+ * TODO We could check if it is feasible to use a special entity spawner which does not reuse entity IDs
  */
-
-
 class FastSpriteRenderSystem(
     private val world: World,
     layerTag: RenderLayerTag
