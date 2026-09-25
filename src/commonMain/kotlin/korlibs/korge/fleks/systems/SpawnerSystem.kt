@@ -79,7 +79,7 @@ class SpawnerSystem : IteratingSystem(
                     var xx = x
                     var yy = y
                     val newEntity =
-                        if (spawnerComponent.newEntity == Entity.NONE) world.createEntity("SpawnerSystem: ${spawnerComponent.entityConfig}") {}  // create new entity
+                        if (spawnerComponent.newEntity == Entity.NONE) world.createEntity("SpawnerSystem: ${spawnerComponent.entityBlueprint}") {}  // create new entity
                         else spawnerComponent.newEntity  // use given entity
                     if (spawnerComponent.positionVariation != 0f) {
                         xx += (-spawnerComponent.positionVariation..spawnerComponent.positionVariation).random()
@@ -94,7 +94,7 @@ class SpawnerSystem : IteratingSystem(
                     }
 
                     // Call the configured spawner function for configuring new objects
-                    world.configureEntity(spawnerComponent.entityConfig, newEntity)
+                    world.configureEntity(spawnerComponent.entityBlueprint, newEntity)
 
 // DEBUGGING
 //                    println("Spawned entity: ${newEntity.id} with config: '${spawnerComponent.entityConfig}'")

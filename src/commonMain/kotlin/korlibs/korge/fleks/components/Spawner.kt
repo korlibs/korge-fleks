@@ -19,7 +19,7 @@ class Spawner private constructor(
     var timeVariation: Int = 0,           // 0 - no variation, 1 - one frame variation, 2 - two frames variation, ...
     var positionVariation: Float = 0f,    // variation radius where objects will be spawned - 0.0 = no variation
     var newEntity: Entity = Entity.NONE,  // If spawner shall take a specific entity for spawning it can be set here
-    var entityConfig: String = "",        // Name of entity configuration which is used to create and configure the new entity
+    var entityBlueprint: String = "",     // Name of entity blueprint (configuration) which is used to create and configure the new entity
     var totalNumberOfObjects: Int = -1,   // -1 - unlimited number of objects spawned, x = x-number of objects spawned in total
     // internal state
     var nextSpawnIn: Int = 0,
@@ -33,7 +33,7 @@ class Spawner private constructor(
         timeVariation = from.timeVariation
         positionVariation = from.positionVariation
         newEntity = from.newEntity
-        entityConfig = from.entityConfig
+        entityBlueprint = from.entityBlueprint
         totalNumberOfObjects = from.totalNumberOfObjects
         nextSpawnIn = from.nextSpawnIn
         numberOfObjectsSpawned = from.numberOfObjectsSpawned
@@ -47,7 +47,7 @@ class Spawner private constructor(
         timeVariation = 0
         positionVariation = 0f
         newEntity = Entity.NONE
-        entityConfig = ""
+        entityBlueprint = ""
         totalNumberOfObjects = -1
         nextSpawnIn = 0
         numberOfObjectsSpawned = 0

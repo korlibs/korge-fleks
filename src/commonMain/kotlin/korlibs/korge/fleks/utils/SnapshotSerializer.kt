@@ -12,6 +12,7 @@ import korlibs.korge.fleks.components.Behavior
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Debug
 import korlibs.korge.fleks.components.DebugCollisionShapes
+import korlibs.korge.fleks.components.RotationPixel2D
 import korlibs.korge.fleks.components.EntityRef
 import korlibs.korge.fleks.components.EntityRefs
 import korlibs.korge.fleks.components.EntityRefsByName
@@ -182,6 +183,7 @@ class SnapshotSerializer {
             subclass(Collision::class)
             subclass(Debug::class)
             subclass(DebugCollisionShapes::class)
+            subclass(RotationPixel2D::class)
             subclass(EntityRef::class)
             subclass(EntityRefs::class)
             subclass(EntityRefsByName::class)
