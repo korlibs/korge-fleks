@@ -149,7 +149,9 @@ class DebugRenderSystem(
                     if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS && entity has DebugCollisionShapesComponent) {
                         val debugCollisionShapesComponent = entity[DebugCollisionShapesComponent]
                         debugCollisionShapesComponent.gridCells.forEach { cell -> drawGridCell(batch, cell, Colors.GREEN, cameraPosition) }
-                        debugCollisionShapesComponent.ratioPositions.forEach { point -> drawRatioPoint(batch, point, Colors.RED, cameraPosition) }
+                        debugCollisionShapesComponent.ratioPositionsX.forEach { point -> drawRatioPoint(batch, point, Colors.RED, cameraPosition) }
+                        debugCollisionShapesComponent.ratioPositionsY.forEach { point -> drawRatioPoint(batch, point, Colors.ORANGE, cameraPosition) }
+                        debugCollisionShapesComponent.collisionBoxLeftPositionsY.forEach { point -> drawRatioPoint(batch, point, Colors.PURPLE, cameraPosition) }
                     }
 
                     // Draw pivot point (zero-point for game object)

@@ -18,20 +18,26 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("DebugCollisionShapes")
 class DebugCollisionShapes private constructor(
     val gridCells: MutableList<Point> = mutableListOf(),
-    val ratioPositions: MutableList<Point> = mutableListOf()
+    val ratioPositionsX: MutableList<Point> = mutableListOf(),
+    val ratioPositionsY: MutableList<Point> = mutableListOf(),
+    val collisionBoxLeftPositionsY: MutableList<Point> = mutableListOf()
 ) : PoolableComponent<DebugCollisionShapes>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
     fun init(from: DebugCollisionShapes) {
         gridCells.init(from.gridCells)
-        ratioPositions.init(from.ratioPositions)
+        ratioPositionsX.init(from.ratioPositionsX)
+        ratioPositionsY.init(from.ratioPositionsY)
+        collisionBoxLeftPositionsY.init(from.collisionBoxLeftPositionsY)
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are a value property of another component
     fun cleanup() {
         gridCells.cleanup()
-        ratioPositions.cleanup()
+        ratioPositionsX.cleanup()
+        ratioPositionsY.cleanup()
+        collisionBoxLeftPositionsY.cleanup()
     }
 
     override fun type() = DebugCollisionShapesComponent

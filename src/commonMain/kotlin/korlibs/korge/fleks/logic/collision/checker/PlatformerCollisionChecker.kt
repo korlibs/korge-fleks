@@ -38,14 +38,14 @@ class PlatformerCollisionChecker(
             val checkDistance = grid.cx - cx  // Check distance between pivot point cell and right corner cell
             val checkRight: Float = checkDistance.toFloat() - 0.0001f  // To avoid floating point precision issues
 
-            debugShapesComponent?.let { debugSaveRatioPoint(it, cx, cy, xrRight, yr) }
+//            debugShapesComponent?.let { debugSaveRatioPointX(it, cx, cy, xrRight, yr) }
 
             // Cell coordinates of top corner of the collision box
             grid.setAndNormalizeY(cy, yrTop)  // Top corner of the collision box
             val cyTop = grid.cy
             // Check collision in bottom cell and if yr is greater than 1 (yr is over cell bounds)
             repeat( ceil(collisionBox.height / gridSize).toInt()) { i ->
-                debugShapesComponent?.let { debugSaveGridCell(it, cx + checkDistance, cyTop + i) }
+//                debugShapesComponent?.let { debugSaveGridCell(it, cx + checkDistance, cyTop + i) }
 
                 if (worldMapData.hasCollision(cx + checkDistance, cyTop + i) && xrRight >= checkRight) {  // Check the next X cell
                     dir = 1
@@ -54,7 +54,7 @@ class PlatformerCollisionChecker(
             // Cell coordinates of bottom corner of the collision box
             grid.setAndNormalizeY(cy, yrBottom)  // Bottom corner of the collision box
             val cyBottom = grid.cy
-            debugShapesComponent?.let { debugSaveGridCell(it, cx + checkDistance, cyBottom) }
+//            debugShapesComponent?.let { debugSaveGridCell(it, cx + checkDistance, cyBottom) }
             if (worldMapData.hasCollision(cx + checkDistance, cyBottom) && xrRight >= checkRight) {
                 dir = 1
             }
@@ -65,14 +65,14 @@ class PlatformerCollisionChecker(
             val checkDistance = cx - grid.cx  // Check distance between pivot point cell and left corner cell
             val checkLeft: Float = (1 - checkDistance).toFloat() + 0.0001f  // To avoid floating point precision issues
 
-            debugShapesComponent?.let { debugSaveRatioPoint(it, cx, cy, xrLeft, yr) }
+//            debugShapesComponent?.let { debugSaveRatioPointX(it, cx, cy, xrLeft, yr) }
 
             // Cell coordinates of top corner of the collision box
             grid.setAndNormalizeY(cy, yrTop)  // Top corner of the collision box
             val cyTop = grid.cy
             // Check collision in bottom cell and if yr is greater than 1 (yr is over cell bounds)
             repeat( ceil(collisionBox.height / gridSize).toInt()) { i ->
-                debugShapesComponent?.let { debugSaveGridCell(it, cx - checkDistance, cyTop + i) }
+//                debugShapesComponent?.let { debugSaveGridCell(it, cx - checkDistance, cyTop + i) }
 
                 if (worldMapData.hasCollision(cx - checkDistance, cyTop + i) && xrLeft <= checkLeft) {  // Check the next X cell
                     dir = -1
@@ -81,7 +81,7 @@ class PlatformerCollisionChecker(
             // Cell coordinates of bottom corner of the collision box
             grid.setAndNormalizeY(cy, yrBottom)  // Bottom corner of the collision box
             val cyBottom = grid.cy
-            debugShapesComponent?.let { debugSaveGridCell(debugShapesComponent, cx - checkDistance, cyBottom) }
+//            debugShapesComponent?.let { debugSaveGridCell(debugShapesComponent, cx - checkDistance, cyBottom) }
             if (worldMapData.hasCollision(cx - checkDistance, cyBottom) && xrLeft <= checkLeft) {
                 dir = -1
             }
@@ -90,9 +90,9 @@ class PlatformerCollisionChecker(
     }
 
     override fun checkYCollision(
-        cx: Int,
+        cx: Int,  // (cx, cy) cell where the pivot point is located
         cy: Int,
-        xr: Float,
+        xr: Float,  // ratio of the pivot point inside the cell
         yr: Float,
         velocityX: Float,
         velocityY: Float,
@@ -100,19 +100,22 @@ class PlatformerCollisionChecker(
         debugShapesComponent: DebugCollisionShapes?
     ): Int {
         val gridSize: Float = worldMapData.tileSize.toFloat()
-        var dir = 0
-        val xrLeft: Float = xr + (collisionBox.x.toFloat() / gridSize)
+        var dir = 0  // colliding in direction (-1 = up, 1 = down, 0 = no collision)
+
+        // left and right X-coordinates of the collision rect
+        val xrLeft: Float = xr + (collisionBox.x.toFloat() / gridSize)  // collisionBox.x is X-offset to the pivot point of the object
         val xrRight: Float = xr + ((collisionBox.x + collisionBox.width) / gridSize)
 
         // Check direction of movement
         if (velocityY > 0f) {  // Moving down
-            val yrBottom: Float = yr + ((collisionBox.y + collisionBox.height) / gridSize)
+            val yrBottom: Float = yr + ((collisionBox.y + collisionBox.height) / gridSize)  // bottom corner of the collision box
 
             grid.setAndNormalizeY(cy, yrBottom)  // Get cell of bottom corner of the collision box
             val checkDistance = grid.cy - cy  // Check distance between pivot point cell and bottom corner cell
             val checkBottom: Float = checkDistance.toFloat() - 0.0001f  // To avoid floating point precision issues
 
-            debugShapesComponent?.let { debugSaveRatioPoint(debugShapesComponent, cx, cy, xr, yrBottom) }
+            debugShapesComponent?.let { debugSaveRatioPointY(debugShapesComponent, cx, cy, xrLeft, yrBottom) }
+            debugShapesComponent?.let { debugSaveCollisionBoxLeftPointY(debugShapesComponent, cx, cy, xrRight, yrBottom) }
 
             // Cell coordinates of left corner of the collision box
             grid.setAndNormalizeX(cx, xrLeft)  // Left corner of the collision box
@@ -120,8 +123,10 @@ class PlatformerCollisionChecker(
             // Check collision in bottom cell and if yr is greater than 1 (yr is over cell bounds)
             repeat( ceil(collisionBox.width / gridSize).toInt()) { i ->
                 debugShapesComponent?.let { debugSaveGridCell(debugShapesComponent, cxLeft + i, cy + checkDistance) }
+//                debugShapesComponent?.let { debugSaveGridCell(debugShapesComponent, cxLeft + i, grid.cy) }
 
                 if (worldMapData.hasCollision(cxLeft + i, cy + checkDistance) && yrBottom >= checkBottom) {  // Check the next Y cell
+//                if (worldMapData.hasCollision(cxLeft + i, grid.cy) && yrBottom >= checkBottom) {  // Check the next Y cell
                     dir = 1
                     return@repeat
                 }
@@ -140,7 +145,7 @@ class PlatformerCollisionChecker(
             val checkDistance = cy - grid.cy  // Check distance between pivot point cell and top corner cell
             val checkTop: Float = (1 - checkDistance).toFloat() + 0.0001f  // To avoid floating point precision issues
 
-            debugShapesComponent?.let { debugSaveRatioPoint(debugShapesComponent, cx, cy, xr, yrTop) }
+            debugShapesComponent?.let { debugSaveRatioPointY(debugShapesComponent, cx, cy, xr, yrTop) }
 
             // Cell coordinates of left corner of the collision box
             grid.setAndNormalizeX(cx, xrLeft)  // Left corner of the collision box
@@ -173,8 +178,26 @@ class PlatformerCollisionChecker(
         )
     }
 
-    private fun debugSaveRatioPoint(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Float, yr: Float) {
-        debugShapesComponent.ratioPositions.add(
+    private fun debugSaveRatioPointX(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Float, yr: Float) {
+        debugShapesComponent.ratioPositionsX.add(
+            point {
+                x = (cx.toFloat() + xr) * worldMapData.tileSize
+                y = (cy.toFloat() + yr) * worldMapData.tileSize
+            }
+        )
+    }
+
+    private fun debugSaveRatioPointY(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Float, yr: Float) {
+        debugShapesComponent.ratioPositionsY.add(
+            point {
+                x = (cx.toFloat() + xr) * worldMapData.tileSize
+                y = (cy.toFloat() + yr) * worldMapData.tileSize
+            }
+        )
+    }
+
+    private fun debugSaveCollisionBoxLeftPointY(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Float, yr: Float) {
+        debugShapesComponent.collisionBoxLeftPositionsY.add(
             point {
                 x = (cx.toFloat() + xr) * worldMapData.tileSize
                 y = (cy.toFloat() + yr) * worldMapData.tileSize

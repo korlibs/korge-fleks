@@ -31,6 +31,7 @@ class PositionSystem : IteratingSystem(
 //            // TODO implement more sophisticated movement with rigidbody taking damping and friction into account
 //        }
 
+        // Calculate the position of the entity from the grid position - this is used for entities which are dynamically moving
         if (entity has GridComponent) {
             // Take over the position from the grid component (interpolation used for smooth movement)
             val gridComponent = entity[GridComponent]

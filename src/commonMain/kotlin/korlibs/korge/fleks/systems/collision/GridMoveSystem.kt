@@ -21,6 +21,7 @@ import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
 import korlibs.korge.fleks.logic.collision.resolver.PlatformerCollisionResolver
 import korlibs.korge.fleks.utils.DebugPointPool
 import korlibs.math.isAlmostEquals
+import korlibs.math.toIntCeil
 import kotlin.math.abs
 import kotlin.math.ceil
 
@@ -71,7 +72,13 @@ class GridMoveSystem : IteratingSystem(
         val overallMovementY = motionComponent.velocityY * deltaTime  // We need to invert the Y velocity because the Y axis is inverted in the grid system
 
         // Calculate the number of steps needed to move the entity in relation to the grid size (here 16x16 pixels)
-        val steps: Int = ceil((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize.toFloat() + 0.1f).toInt()  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
+//        val steps: Int = ceil((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize.toFloat() + 0.1f).toInt()  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
+        val steps = ((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize.toFloat() + 0.1f).toIntCeil()  // TODO for more steps within one grid cell:   / AppConfig.maxGridMovementPercent)
+
+        if (steps == 0 && ((abs(overallMovementX) + abs(overallMovementY)) / worldMapData.tileSize.toFloat() + 0.1f) > 0f) {
+            error("Collision steps is zero!")
+        }
+
         if (steps > 0) {
             var i = 0
             // Reset collision flags
@@ -214,7 +221,7 @@ class GridMoveSystem : IteratingSystem(
         collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ) {
-        // Move the entity in the Y direction
+        // Move the entity in the Y direction even if it moves inside another object like a wall
         gridComponent.yr += movement / worldMapData.tileSize
 
         if (motionComponent.velocityY != 0f) {
@@ -230,6 +237,7 @@ class GridMoveSystem : IteratingSystem(
                 debugShapesComponent
             )
             if (result != 0) {
+                // Move the entity out of another object if it collides with it
                 collisionResolver.resolveYCollision(gridComponent, motionComponent, collisionBox, result)
                 if (result == 1) collisionComponent.isGrounded = true
                 else if (result == -1) collisionComponent.isCollidingAbove = true
