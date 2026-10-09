@@ -14,7 +14,7 @@ import korlibs.korge.fleks.components.Rigidbody.Companion.RigidbodyComponent
 class PositionSystem : IteratingSystem(
     family {
         all(PositionComponent)  // Position component absolutely needed for movement of entity objects
-        .any(MotionComponent, RigidbodyComponent, GridComponent)  // Motion, Rigidbody, ect. not necessarily needed for movement
+        .any(MotionComponent, RigidbodyComponent)  // Motion, Rigidbody, ect. not necessarily needed for movement
         .none(ParallaxComponent)
     },
     interval = EachFrame
@@ -32,12 +32,13 @@ class PositionSystem : IteratingSystem(
 //        }
 
         // Calculate the position of the entity from the grid position - this is used for entities which are dynamically moving
-        if (entity has GridComponent) {
-            // Take over the position from the grid component (interpolation used for smooth movement)
-            val gridComponent = entity[GridComponent]
-            positionComponent.x = gridComponent.x
-            positionComponent.y = gridComponent.y
-        } else if (entity has MotionComponent) {
+//        if (entity has GridComponent) {
+//            // Take over the position from the grid component (interpolation used for smooth movement)
+//            val gridComponent = entity[GridComponent]
+//            positionComponent.x = gridComponent.x
+//            positionComponent.y = gridComponent.y
+//        } else
+        if (entity has MotionComponent) {
             // If no grid component is present then we use the motion component to calculate the position
             // This is used for entities which are statically moving like in the intro sequence
             val motion = entity[MotionComponent]

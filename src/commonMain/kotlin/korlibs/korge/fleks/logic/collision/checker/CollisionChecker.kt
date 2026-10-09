@@ -75,10 +75,8 @@ open class CollisionChecker {
      * @param xr The relative X position of the entity inside a grid cell.
      * @param yr The relative Y position of the entity inside a grid cell.
      * @param velocityX The velocity in the X direction.
-     * @param velocityY The velocity in the Y direction.
-     * @param width The width of the entity.
-     * @param height The height of the entity.
-     * @param cellSize The size of each cell in the grid.
+     * @param collisionBox The collision box of the entity.
+     * @param debugShapesComponent (optional) The debug collision shapes component.
      * @return An integer indicating the collision result (e.g., 0 for no collision, 1 for right collision, -1 for left collision).
      */
     open fun checkXCollision(
@@ -87,7 +85,6 @@ open class CollisionChecker {
         xr: Float,
         yr: Float,
         velocityX: Float,
-        velocityY: Float,
         collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ): Int = 0
@@ -101,11 +98,9 @@ open class CollisionChecker {
      * @param cy The current Y coordinate in the grid.
      * @param xr The relative X position of the entity inside a grid cell.
      * @param yr The relative Y position of the entity inside a grid cell.
-     * @param velocityX The velocity in the X direction.
      * @param velocityY The velocity in the Y direction.
-     * @param width The width of the entity.
-     * @param height The height of the entity.
-     * @param cellSize The size of each cell in the grid.
+     * @param collisionBox The collision box of the entity.
+     * @param debugShapesComponent (optional) The debug collision shapes component.
      * @return An integer indicating the collision result (e.g., 0 for no collision, 1 for bottom collision, -1 for top collision).
      */
     open fun checkYCollision(
@@ -113,7 +108,6 @@ open class CollisionChecker {
         cy: Int,
         xr: Float,
         yr: Float,
-        velocityX: Float,
         velocityY: Float,
         collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?

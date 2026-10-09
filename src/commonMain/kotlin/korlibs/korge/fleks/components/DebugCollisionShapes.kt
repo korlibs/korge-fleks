@@ -17,6 +17,17 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("DebugCollisionShapes")
 class DebugCollisionShapes private constructor(
+
+    // For debugging collision check points
+    var hy: Float = 0f,   // horizontal y
+    var hxl: Float = 0f,  // horizontal x left + right
+    var hxr: Float = 0f,
+
+    var vx: Float = 0f,   // vertical x
+    var vyt: Float = 0f,  // vertical y top + bottom
+    var vyb: Float = 0f,
+
+
     val gridCells: MutableList<Point> = mutableListOf(),
     val ratioPositionsX: MutableList<Point> = mutableListOf(),
     val ratioPositionsY: MutableList<Point> = mutableListOf(),
@@ -25,6 +36,12 @@ class DebugCollisionShapes private constructor(
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
     fun init(from: DebugCollisionShapes) {
+        hy = from.hy
+        hxl = from.hxl
+        hxr = from.hxr
+        vx = from.vx
+        vyt = from.vyt
+        vyb = from.vyb
         gridCells.init(from.gridCells)
         ratioPositionsX.init(from.ratioPositionsX)
         ratioPositionsY.init(from.ratioPositionsY)
@@ -34,6 +51,12 @@ class DebugCollisionShapes private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are a value property of another component
     fun cleanup() {
+        hy = 0f
+        hxl = 0f
+        hxr = 0f
+        vx = 0f
+        vyt = 0f
+        vyb = 0f
         gridCells.cleanup()
         ratioPositionsX.cleanup()
         ratioPositionsY.cleanup()

@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.World.Companion.inject
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.DebugCollisionShapes
+import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.data.Point.Companion.point
 import korlibs.korge.fleks.logic.collision.GridPosition
 import korlibs.korge.fleks.utils.DebugPointPool
@@ -21,7 +22,6 @@ class PlatformerCollisionChecker(
         xr: Float,
         yr: Float,
         velocityX: Float,
-        velocityY: Float,
         collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ): Int {
@@ -94,7 +94,6 @@ class PlatformerCollisionChecker(
         cy: Int,
         xr: Float,  // ratio of the pivot point inside the cell
         yr: Float,
-        velocityX: Float,
         velocityY: Float,
         collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?

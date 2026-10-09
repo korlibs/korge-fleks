@@ -14,6 +14,6 @@ class PlatformerGravitySystem : IteratingSystem(
         val platformerComponent = entity[PlatformerComponent]
         val gravityComponent = entity[GravityComponent]
 
-        gravityComponent.enableGravityY = !platformerComponent.onGround
+        gravityComponent.enableGravity = !platformerComponent.onGround
     }
 }

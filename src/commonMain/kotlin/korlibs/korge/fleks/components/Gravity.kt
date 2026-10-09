@@ -14,38 +14,24 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Gravity")
 class Gravity private constructor(
-    var gravityX: Float = 0f,
-    var gravityY: Float = 0f,
-    var gravityZ: Float = 0f,
-
+    var gravity: Float = 0f,
     var gravityMultiplier: Float = 0f,
-
-    var enableGravityX: Boolean = false,
-    var enableGravityY: Boolean = false,
-    var enableGravityZ: Boolean = false
+    var enableGravity: Boolean = false
 ) : PoolableComponent<Gravity>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
     fun init(from: Gravity) {
-        gravityX = from.gravityX
-        gravityY = from.gravityY
-        gravityZ = from.gravityZ
+        gravity = from.gravity
         gravityMultiplier = from.gravityMultiplier
-        enableGravityX = from.enableGravityX
-        enableGravityY = from.enableGravityY
-        enableGravityZ = from.enableGravityZ
+        enableGravity = from.enableGravity
     }
 
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        gravityX = 0f
-        gravityY = 0f
-        gravityZ = 0f
+        gravity = 0f
         gravityMultiplier = 0f
-        enableGravityX = false
-        enableGravityY = false
-        enableGravityZ = false
+        enableGravity = false
     }
 
     override fun type() = GravityComponent
@@ -90,33 +76,11 @@ class Gravity private constructor(
         pool.free(this)
     }
 
-    fun calculateDeltaXGravity(): Float {
-        return if (enableGravityX) {
-            gravityMultiplier * gravityX
+    fun calculateDeltaGravity(): Float {
+        return if (enableGravity) {
+            gravityMultiplier * gravity
         } else {
             0f
         }
-    }
-
-    fun calculateDeltaYGravity(): Float {
-        return if (enableGravityY) {
-            -gravityMultiplier * gravityY
-        } else {
-            0f
-        }
-    }
-
-    fun calculateDeltaZGravity(): Float {
-        return if (enableGravityZ) {
-            gravityMultiplier * gravityZ
-        } else {
-            0f
-        }
-    }
-
-    fun enableAll(enable: Boolean) {
-        enableGravityX = enable
-        enableGravityY = enable
-        enableGravityZ = enable
     }
 }
