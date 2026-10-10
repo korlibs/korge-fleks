@@ -114,7 +114,6 @@ class PlatformerCollisionChecker(
             val checkBottom: Float = checkDistance.toFloat() - 0.0001f  // To avoid floating point precision issues
 
             debugShapesComponent?.let { debugSaveRatioPointY(debugShapesComponent, cx, cy, xrLeft, yrBottom) }
-            debugShapesComponent?.let { debugSaveCollisionBoxLeftPointY(debugShapesComponent, cx, cy, xrRight, yrBottom) }
 
             // Cell coordinates of left corner of the collision box
             grid.setAndNormalizeX(cx, xrLeft)  // Left corner of the collision box
@@ -188,15 +187,6 @@ class PlatformerCollisionChecker(
 
     private fun debugSaveRatioPointY(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Float, yr: Float) {
         debugShapesComponent.ratioPositionsY.add(
-            point {
-                x = (cx.toFloat() + xr) * worldMapData.tileSize
-                y = (cy.toFloat() + yr) * worldMapData.tileSize
-            }
-        )
-    }
-
-    private fun debugSaveCollisionBoxLeftPointY(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Float, yr: Float) {
-        debugShapesComponent.collisionBoxLeftPositionsY.add(
             point {
                 x = (cx.toFloat() + xr) * worldMapData.tileSize
                 y = (cy.toFloat() + yr) * worldMapData.tileSize

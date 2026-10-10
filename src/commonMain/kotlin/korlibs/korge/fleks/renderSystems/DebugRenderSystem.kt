@@ -140,28 +140,27 @@ class DebugRenderSystem(
                         }
                     }
 
-                    if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS && entity has DebugCollisionShapesComponent) {
-                        val debugCollisionShapesComponent = entity[DebugCollisionShapesComponent]
-
-                        // vertical active collision edges of collision cell
-                        positionOnScreen.x = debugCollisionShapesComponent.vx
-                        positionOnScreen.y = debugCollisionShapesComponent.vyt  // top of cell edge
-                        positionOnScreen.convertToScreenCoordinates(cameraPosition)
-                        drawPoint(batch, positionOnScreen.x, positionOnScreen.y, Colors.RED)
-                        positionOnScreen.x = debugCollisionShapesComponent.vx
-                        positionOnScreen.y = debugCollisionShapesComponent.vyb  // bottom of cell edge
-                        positionOnScreen.convertToScreenCoordinates(cameraPosition)
-                        drawPoint(batch, positionOnScreen.x, positionOnScreen.y, Colors.RED)
-
-                    }
-
 //                    if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS && entity has DebugCollisionShapesComponent) {
 //                        val debugCollisionShapesComponent = entity[DebugCollisionShapesComponent]
-//                        debugCollisionShapesComponent.gridCells.forEach { cell -> drawGridCell(batch, cell, Colors.GREEN, cameraPosition) }
-//                        debugCollisionShapesComponent.ratioPositionsX.forEach { point -> drawRatioPoint(batch, point, Colors.RED, cameraPosition) }
-//                        debugCollisionShapesComponent.ratioPositionsY.forEach { point -> drawRatioPoint(batch, point, Colors.ORANGE, cameraPosition) }
-////                        debugCollisionShapesComponent.collisionBoxLeftPositionsY.forEach { point -> drawRatioPoint(batch, point, Colors.PURPLE, cameraPosition) }
+//
+//                        // vertical active collision edges of collision cell
+//                        positionOnScreen.x = debugCollisionShapesComponent.vx
+//                        positionOnScreen.y = debugCollisionShapesComponent.vyt  // top of cell edge
+//                        positionOnScreen.convertToScreenCoordinates(cameraPosition)
+//                        drawPoint(batch, positionOnScreen.x, positionOnScreen.y, Colors.RED)
+//                        positionOnScreen.x = debugCollisionShapesComponent.vx
+//                        positionOnScreen.y = debugCollisionShapesComponent.vyb  // bottom of cell edge
+//                        positionOnScreen.convertToScreenCoordinates(cameraPosition)
+//                        drawPoint(batch, positionOnScreen.x, positionOnScreen.y, Colors.RED)
+//
 //                    }
+
+                    if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS && entity has DebugCollisionShapesComponent) {
+                        val debugCollisionShapesComponent = entity[DebugCollisionShapesComponent]
+                        debugCollisionShapesComponent.gridCells.forEach { cell -> drawGridCell(batch, cell, Colors.GREEN, cameraPosition) }
+                        debugCollisionShapesComponent.ratioPositionsX.forEach { point -> drawRatioPoint(batch, point, Colors.RED, cameraPosition) }
+                        debugCollisionShapesComponent.ratioPositionsY.forEach { point -> drawRatioPoint(batch, point, Colors.ORANGE, cameraPosition) }
+                    }
 
                     // Draw pivot point (zero-point for game object)
                     if (entity has DebugInfoTag.POSITION) {

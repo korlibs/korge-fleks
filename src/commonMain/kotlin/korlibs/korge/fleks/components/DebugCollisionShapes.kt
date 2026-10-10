@@ -30,8 +30,7 @@ class DebugCollisionShapes private constructor(
 
     val gridCells: MutableList<Point> = mutableListOf(),
     val ratioPositionsX: MutableList<Point> = mutableListOf(),
-    val ratioPositionsY: MutableList<Point> = mutableListOf(),
-    val collisionBoxLeftPositionsY: MutableList<Point> = mutableListOf()
+    val ratioPositionsY: MutableList<Point> = mutableListOf()
 ) : PoolableComponent<DebugCollisionShapes>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are a value property of another component
@@ -45,7 +44,6 @@ class DebugCollisionShapes private constructor(
         gridCells.init(from.gridCells)
         ratioPositionsX.init(from.ratioPositionsX)
         ratioPositionsY.init(from.ratioPositionsY)
-        collisionBoxLeftPositionsY.init(from.collisionBoxLeftPositionsY)
     }
 
     // Cleanup the component data instance manually
@@ -60,7 +58,6 @@ class DebugCollisionShapes private constructor(
         gridCells.cleanup()
         ratioPositionsX.cleanup()
         ratioPositionsY.cleanup()
-        collisionBoxLeftPositionsY.cleanup()
     }
 
     override fun type() = DebugCollisionShapesComponent
