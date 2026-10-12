@@ -12,14 +12,14 @@ import kotlin.test.assertEquals
 
 
 internal class PositionTest {
-    private val playerInputState = ConcretePlayerInputState()
+//    private val playerInputState = ConcretePlayerInputState()
     private val views = Views(GameWindow())
 
     private val expectedWorld = configureWorld {
-        addKorgeFleksInjectables(assetStore, gameState, playerInputState, views)
+//        addKorgeFleksInjectables(assetStore, gameState, playerInputState, views)
     }
     private val recreatedWorld = configureWorld {
-        addKorgeFleksInjectables(assetStore, gameState, playerInputState, views)
+//        addKorgeFleksInjectables(assetStore, gameState, playerInputState, views)
     }
 
     @Test

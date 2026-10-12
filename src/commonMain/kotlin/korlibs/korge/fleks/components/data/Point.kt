@@ -56,7 +56,7 @@ class Point private constructor(
      */
     fun World.convertToScreenCoordinates(camera: Entity) {
         val cameraPosition = camera[PositionComponent]
-        x = x  - cameraPosition.x + cameraPosition.offsetX + AppConfig.VIEW_PORT_WIDTH_HALF
+        x = x - cameraPosition.x + cameraPosition.offsetX + AppConfig.VIEW_PORT_WIDTH_HALF
         y = y - cameraPosition.y + cameraPosition.offsetY + AppConfig.VIEW_PORT_HEIGHT_HALF
     }
 }

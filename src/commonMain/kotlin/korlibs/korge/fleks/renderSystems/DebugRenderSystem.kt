@@ -37,7 +37,7 @@ class DebugRenderSystem(
 
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
     private val position: Position = staticPositionComponent {}
-    private val gridPosition: Position = staticPositionComponent {}
+    private val positionOnScreen: Position = staticPositionComponent {}
     private val grid2Position: Position = staticPositionComponent {}
     private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
 
@@ -126,54 +126,64 @@ class DebugRenderSystem(
                         }
                     }
 
-                    if (entity has DebugInfoTag.COLLISION_BOX && entity has CollisionComponent && entity has GridComponent) {
-                        val gridComponent = entity[GridComponent]
+                    if (entity has DebugInfoTag.COLLISION_BOX && entity has CollisionComponent) {
                         val collisionComponent = entity[CollisionComponent]
-
-                        // Take over entity grid position and convert to screen coordinates
-                        gridPosition.x = gridComponent.x
-                        gridPosition.y = gridComponent.y
-                        gridPosition.convertToScreenCoordinates(cameraPosition)
 
                         // Draw collision bounds
                         batch.drawVector(Colors.LIGHTBLUE) {
                             rect(
-                                x = gridPosition.x + collisionComponent.rect.x.toFloat(),
-                                y = gridPosition.y + collisionComponent.rect.y.toFloat(),
+                                x = position.x + collisionComponent.rect.x.toFloat(),
+                                y = position.y + collisionComponent.rect.y.toFloat(),
                                 width = collisionComponent.rect.width,
                                 height = collisionComponent.rect.height
                             )
                         }
                     }
 
+//                    if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS && entity has DebugCollisionShapesComponent) {
+//                        val debugCollisionShapesComponent = entity[DebugCollisionShapesComponent]
+//
+//                        // vertical active collision edges of collision cell
+//                        positionOnScreen.x = debugCollisionShapesComponent.vx
+//                        positionOnScreen.y = debugCollisionShapesComponent.vyt  // top of cell edge
+//                        positionOnScreen.convertToScreenCoordinates(cameraPosition)
+//                        drawPoint(batch, positionOnScreen.x, positionOnScreen.y, Colors.RED)
+//                        positionOnScreen.x = debugCollisionShapesComponent.vx
+//                        positionOnScreen.y = debugCollisionShapesComponent.vyb  // bottom of cell edge
+//                        positionOnScreen.convertToScreenCoordinates(cameraPosition)
+//                        drawPoint(batch, positionOnScreen.x, positionOnScreen.y, Colors.RED)
+//
+//                    }
+
                     if (entity has DebugInfoTag.COLLISION_CELL_AND_RATIO_POINTS && entity has DebugCollisionShapesComponent) {
                         val debugCollisionShapesComponent = entity[DebugCollisionShapesComponent]
                         debugCollisionShapesComponent.gridCells.forEach { cell -> drawGridCell(batch, cell, Colors.GREEN, cameraPosition) }
-                        debugCollisionShapesComponent.ratioPositions.forEach { point -> drawRatioPoint(batch, point, Colors.RED, cameraPosition) }
+                        debugCollisionShapesComponent.ratioPositionsX.forEach { point -> drawRatioPoint(batch, point, Colors.RED, cameraPosition) }
+                        debugCollisionShapesComponent.ratioPositionsY.forEach { point -> drawRatioPoint(batch, point, Colors.ORANGE, cameraPosition) }
                     }
 
                     // Draw pivot point (zero-point for game object)
                     if (entity has DebugInfoTag.POSITION) {
-                        drawPoint(batch, position.x + position.offsetX, position.y + position.offsetY, Colors.YELLOW)
+                        drawPoint(batch, position.x + position.offsetX, position.y + position.offsetY, Colors.MAGENTA)
                     }
                 }
 
-                // Draw grid position (used in collision system)
-                if(entity has GridComponent && entity has DebugInfoTag.GRID_POSITION) {
-                    val gridComponent = entity[GridComponent]
-                    // Take over entity grid position and convert to screen coordinates
-                    gridPosition.x = gridComponent.x
-                    gridPosition.y = gridComponent.y
-                    gridPosition.convertToScreenCoordinates(cameraPosition)
-
-                    batch.drawVector(Colors.GREEN) {
-                        val x = gridPosition.x
-                        val y = gridPosition.y
-                        circle(korlibs.math.geom.Point(x, y), 2)
-                        line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
-                        line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
-                    }
-                }
+//                // Draw grid position (used in collision system)
+//                if(entity has GridComponent && entity has DebugInfoTag.GRID_POSITION) {
+//                    val gridComponent = entity[GridComponent]
+//                    // Take over entity grid position and convert to screen coordinates
+//                    positionOnScreen.x = gridComponent.x
+//                    positionOnScreen.y = gridComponent.y
+//                    positionOnScreen.convertToScreenCoordinates(cameraPosition)
+//
+//                    batch.drawVector(Colors.GREEN) {
+//                        val x = positionOnScreen.x
+//                        val y = positionOnScreen.y
+//                        circle(korlibs.math.geom.Point(x, y), 2)
+//                        line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
+//                        line(korlibs.math.geom.Point(x, y - 3), korlibs.math.geom.Point(x, y + 3))
+//                    }
+//                }
             }
         }
 
@@ -212,18 +222,18 @@ class DebugRenderSystem(
     }
 
     private fun drawGridCell(batch: LineRenderBatcher, cell: Point, color: RGBA, cameraPosition: Position) {
-        gridPosition.x = cell.x
-        gridPosition.y = cell.y
-        gridPosition.convertToScreenCoordinates(cameraPosition)
+        positionOnScreen.x = cell.x
+        positionOnScreen.y = cell.y
+        positionOnScreen.convertToScreenCoordinates(cameraPosition)
         batch.drawVector(color) {
-            rect(gridPosition.x, gridPosition.y, AppConfig.GRID_CELL_SIZE, AppConfig.GRID_CELL_SIZE)
+            rect(positionOnScreen.x, positionOnScreen.y, AppConfig.GRID_CELL_SIZE, AppConfig.GRID_CELL_SIZE)
         }
     }
 
     private fun drawRatioPoint(batch: LineRenderBatcher, point: Point, color: RGBA, cameraPosition: Position) {
-        gridPosition.x = point.x
-        gridPosition.y = point.y
-        gridPosition.convertToScreenCoordinates(cameraPosition)
-        drawPoint(batch, gridPosition.x, gridPosition.y, color)
+        positionOnScreen.x = point.x
+        positionOnScreen.y = point.y
+        positionOnScreen.convertToScreenCoordinates(cameraPosition)
+        drawPoint(batch, positionOnScreen.x, positionOnScreen.y, color)
     }
 }

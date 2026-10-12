@@ -25,7 +25,7 @@ import kotlinx.serialization.*
 
 /**
  * Entity config for a dialog box which appears on the dialog layer in front of any game play.
- * Dialog Box is rendered on indexLayer 100 - 102 in foreground on [FG_DIALOGS][RenderLayerTag.FG_OBJECT_DIALOGS] layer.
+ * Dialog Box is rendered on indexLayer 100 - 102 in foreground on [FG_DIALOGS][RenderLayerTag.FG_DIALOGS_LAYER] layer.
  */
 @Serializable @SerialName("DialogBoxBlueprint")
 data class DialogBoxBlueprint(
@@ -116,7 +116,7 @@ data class DialogBoxBlueprint(
                 rgba = tint
                 alpha = this@DialogBoxBlueprint.alpha
             }
-            it += RenderLayerTag.FG_OBJECT_DIALOGS
+            it += RenderLayerTag.FG_DIALOGS_LAYER
             it += layerComponent { index = 102 }
 //            it += RenderLayerTag.DEBUG
         }
@@ -135,7 +135,7 @@ data class DialogBoxBlueprint(
                 rgba = tint
                 alpha = this@DialogBoxBlueprint.alpha
             }
-            it += RenderLayerTag.FG_OBJECT_DIALOGS
+            it += RenderLayerTag.FG_DIALOGS_LAYER
             it += layerComponent { index = 100 }
 //            it += RenderLayerTag.DEBUG
 //            it += DebugInfoTag.NINE_PATCH_BOUNDS
@@ -160,7 +160,7 @@ data class DialogBoxBlueprint(
                 rgba = tint
                 alpha = 1f
             }
-            it += RenderLayerTag.FG_OBJECT_DIALOGS
+            it += RenderLayerTag.FG_DIALOGS_LAYER
 //            it += RenderLayerTag.DEBUG
 //            it += DebugInfoTag.TEXT_FIELD_BOUNDS
         }

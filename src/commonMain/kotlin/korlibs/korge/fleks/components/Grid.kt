@@ -114,7 +114,7 @@ class Grid private constructor() : PoolableComponent<Grid>() {
 //            dirty = true
         }
 
-    var interpolatePixelPosition: Boolean = true
+    var interpolatePixelPosition: Boolean = false
 
     /**
      * The ratio to interpolate the last position to the new position.

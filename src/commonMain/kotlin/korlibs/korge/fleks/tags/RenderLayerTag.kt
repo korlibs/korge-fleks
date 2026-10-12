@@ -12,16 +12,16 @@ import kotlinx.serialization.*
 enum class RenderLayerTag : EntityTags by entityTagOf() {
     // Background layers
     BG_OBJECT_LAYER,
-    BG_PARALLAX,
+    BG_PARALLAX_LAYER,
     // Main layers
     MAIN_LEVELMAP,
     MAIN_OBJECT_LAYER,
-    MAIN_EFFECTS,
-    MAIN_OBJECT_LAYER_FG,
+    MAIN_EFFECT_LAYER,
+    MAIN_FG_OBJECT_LAYER,
     // Foreground layers
     FG_LEVELMAP,
-    FG_PARALLAX,
-    FG_OBJECT_DIALOGS,
+    FG_PARALLAX_LAYER,
+    FG_DIALOGS_LAYER,
     // Debug shape layers
     DEBUG
 }

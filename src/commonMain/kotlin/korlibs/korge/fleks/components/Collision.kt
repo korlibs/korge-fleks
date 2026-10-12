@@ -24,27 +24,23 @@ class Collision private constructor(
     var left: Boolean = false,
     var isCollidingAbove: Boolean = false,
     var isGrounded: Boolean = false,
-
-    var becameGroundedThisFrame: Boolean = false,
-    var wasGroundedLastFrame: Boolean = false,
-    var wasInFrontOfWall: Boolean = false,  // used to check if the player was in front of a wall last frame
-
-    var canJump: Boolean = true,
-    var movingDownSlope: Boolean = false,
-    var slopeAngle: Float = 0f,
-    var isFalling: Boolean = false,
-    var collisionWithStaticObject: Boolean = false,  // used currently e.g. by shoot objects
     var jumpEnergy: Float = 0f,  // Used to store the maximum jump velocity of the player which is then decreased over time
-
-    var justHit: Boolean = false,
-    var isHit: Boolean = false,
-    var squatDown: Boolean = false,  // true if the player is squatting down
-
-    val hitPosition: Point = staticPoint {},
-
     // Collision rectangle which contains size and anchor point to the pivot point of the entity
+    // This is threat as a static immutable object
     @Serializable(with = CollisionRectAsString::class) var rect: CollisionRect = CollisionRect.EMPTY
 
+//    var becameGroundedThisFrame: Boolean = false,
+//    var wasGroundedLastFrame: Boolean = false,
+//    var wasInFrontOfWall: Boolean = false,  // used to check if the player was in front of a wall last frame
+//    var canJump: Boolean = true,
+//    var movingDownSlope: Boolean = false,
+//    var slopeAngle: Float = 0f,
+//    var isFalling: Boolean = false,
+//    var collisionWithStaticObject: Boolean = false,  // used currently e.g. by shoot objects
+//    var justHit: Boolean = false,
+//    var isHit: Boolean = false,
+//    var squatDown: Boolean = false,  // true if the player is squatting down
+//    val hitPosition: Point = staticPoint {}
 ) : PoolableComponent<Collision>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -54,21 +50,21 @@ class Collision private constructor(
         left = from.left
         isCollidingAbove = from.isCollidingAbove
         isGrounded = from.isGrounded
-        becameGroundedThisFrame = from.becameGroundedThisFrame
-        wasGroundedLastFrame = from.wasGroundedLastFrame
-        wasInFrontOfWall = from.wasInFrontOfWall
-        canJump = from.canJump
-        movingDownSlope = from.movingDownSlope
-        slopeAngle = from.slopeAngle
-        isFalling = from.isFalling
-        collisionWithStaticObject = from.collisionWithStaticObject
         jumpEnergy = from.jumpEnergy
-        justHit = from.justHit
-        isHit = from.isHit
-        squatDown = from.squatDown
-        hitPosition.init(from = from.hitPosition)
         // Collision rectangle data
         rect = from.rect
+//        becameGroundedThisFrame = from.becameGroundedThisFrame
+//        wasGroundedLastFrame = from.wasGroundedLastFrame
+//        wasInFrontOfWall = from.wasInFrontOfWall
+//        canJump = from.canJump
+//        movingDownSlope = from.movingDownSlope
+//        slopeAngle = from.slopeAngle
+//        isFalling = from.isFalling
+//        collisionWithStaticObject = from.collisionWithStaticObject
+//        justHit = from.justHit
+//        isHit = from.isHit
+//        squatDown = from.squatDown
+//        hitPosition.init(from = from.hitPosition)
     }
 
     // Cleanup the component data instance manually
@@ -79,22 +75,22 @@ class Collision private constructor(
         left = false
         isCollidingAbove = false
         isGrounded = false
-        becameGroundedThisFrame = false
-        wasGroundedLastFrame = false
-        wasInFrontOfWall = false
-        canJump = true
-        movingDownSlope = false
-        slopeAngle = 0f
-        isFalling = false
-        collisionWithStaticObject = false
         jumpEnergy = 0f
-        justHit = false
-        isHit = false
-        squatDown = false
-        // Deep init of hit position - reuse object
-        hitPosition.cleanup()
         // Collision rectangle data
         rect = CollisionRect.EMPTY
+//        becameGroundedThisFrame = false
+//        wasGroundedLastFrame = false
+//        wasInFrontOfWall = false
+//        canJump = true
+//        movingDownSlope = false
+//        slopeAngle = 0f
+//        isFalling = false
+//        collisionWithStaticObject = false
+//        justHit = false
+//        isHit = false
+//        squatDown = false
+//        // Deep init of hit position - reuse object
+//        hitPosition.cleanup()
     }
 
     override fun type() = CollisionComponent
@@ -147,18 +143,18 @@ class Collision private constructor(
         return isGrounded || right || left || isCollidingAbove
     }
 
-    var right2: Boolean = false
-    var left2: Boolean = false
-    var isCollidingAbove2: Boolean = false
-    var isGrounded2: Boolean = false
-
-    fun printCollisionInfo() {
-        if (right != right2 || left != left2 || isCollidingAbove != isCollidingAbove2 || isGrounded != isGrounded2) {
-            println("Collision Info - right: $right, left: $left, isCollidingAbove: $isCollidingAbove, isGrounded: $isGrounded")
-            right2 = right
-            left2 = left
-            isCollidingAbove2 = isCollidingAbove
-            isGrounded2 = isGrounded
-        }
-    }
+    // for DEBUGING
+    //var right2: Boolean = false
+    //var left2: Boolean = false
+    //var isCollidingAbove2: Boolean = false
+    //var isGrounded2: Boolean = false
+    //fun printCollisionInfo() {
+    //    if (right != right2 || left != left2 || isCollidingAbove != isCollidingAbove2 || isGrounded != isGrounded2) {
+    //        println("Collision Info - right: $right, left: $left, isCollidingAbove: $isCollidingAbove, isGrounded: $isGrounded")
+    //        right2 = right
+    //        left2 = left
+    //        isCollidingAbove2 = isCollidingAbove
+    //        isGrounded2 = isGrounded
+    //    }
+    //}
 }

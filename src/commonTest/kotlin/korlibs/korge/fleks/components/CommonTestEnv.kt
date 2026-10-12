@@ -3,14 +3,9 @@ package korlibs.korge.fleks.components
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.entity.*
-import korlibs.korge.fleks.state.DigitalHorDir
-import korlibs.korge.fleks.state.DigitalVerDir
 import korlibs.korge.fleks.state.GameStateConfig
 import korlibs.korge.fleks.state.GameStateManager
-import korlibs.korge.fleks.state.PlayerInputState
 import korlibs.korge.fleks.utils.*
-import korlibs.korge.view.Container
-import kotlinx.serialization.encodeToString
 import kotlin.test.assertFalse
 
 val testGameStateConfig = GameStateConfig("TestGame", 0, true, "world_1", listOf(1), "startScript")
@@ -52,14 +47,3 @@ object CommonTestEnv {
     }
 }
 
-class ConcretePlayerInputState: Container(), PlayerInputState {
-    override var lx = 0f
-    override var ly = 0f
-    override var rx = 0f
-    override var ry = 0f
-
-    override var ldx = DigitalHorDir.H_NEUTRAL
-    override var ldy = DigitalVerDir.V_NEUTRAL
-    override var rdx = DigitalHorDir.H_NEUTRAL
-    override var rdy = DigitalVerDir.V_NEUTRAL
-}

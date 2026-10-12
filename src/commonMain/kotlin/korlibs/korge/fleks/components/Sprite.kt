@@ -49,7 +49,7 @@ class Sprite private constructor(
     var destroyOnAnimationFinished: Boolean = false,  // Delete entity when direction is [ONCE_FORWARD] or [ONCE_REVERSE]
 
     // internal, do not set directly
-    var flipX: Boolean = false,
+    var flipX: Boolean = false,                       // flip sprite on demand if needed (e.g. flipX = tue; flipY = false; for player character when looking left or right)
     var flipY: Boolean = false,
     var increment: Int = -2,                          // out of [-1, 0, 1]; will be added to frameIndex each new frame
     var nextFrameIn: Float = 0f                       // time in seconds until next frame of animation shall be shown
