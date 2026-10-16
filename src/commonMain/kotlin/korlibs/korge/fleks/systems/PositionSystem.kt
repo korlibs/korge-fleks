@@ -22,22 +22,6 @@ class PositionSystem : IteratingSystem(
     override fun onTickEntity(entity: Entity) {
         val positionComponent = entity[PositionComponent]
 
-// TODO move into GridMoveSystem
-//        if (entity has RigidbodyComponent && entity has MotionComponent) {
-//            // Entity has a rigidbody - that means the movement will be calculated depending on it
-//            val rigidbody = entity[RigidbodyComponent]
-//            // Currently we just add gravity to the entity
-//            entity[MotionComponent].accelY += rigidbody.mass * 9.81f
-//            // TODO implement more sophisticated movement with rigidbody taking damping and friction into account
-//        }
-
-        // Calculate the position of the entity from the grid position - this is used for entities which are dynamically moving
-//        if (entity has GridComponent) {
-//            // Take over the position from the grid component (interpolation used for smooth movement)
-//            val gridComponent = entity[GridComponent]
-//            positionComponent.x = gridComponent.x
-//            positionComponent.y = gridComponent.y
-//        } else
         if (entity has MotionComponent) {
             // If no grid component is present then we use the motion component to calculate the position
             // This is used for entities which are statically moving like in the intro sequence

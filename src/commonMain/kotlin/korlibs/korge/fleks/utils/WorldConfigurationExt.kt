@@ -21,8 +21,7 @@ import korlibs.korge.fleks.systems.SpawnerSystem
 import korlibs.korge.fleks.systems.SpriteVisibilitySystem
 import korlibs.korge.fleks.systems.SpriteSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
-import korlibs.korge.fleks.systems.collision.GridMoveSystem
-import korlibs.korge.fleks.systems.collision.PlayerMoveAfterCollisionSystem
+import korlibs.korge.fleks.systems.collision.CollisionSystem
 import korlibs.korge.fleks.systems.collision.BehaviorSystem
 import korlibs.korge.view.Views
 
@@ -52,17 +51,8 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         // Spawn new entities if we enter a new level chunk
         add(WorldChunkSystem())
 
-        // Collision and player input systems
-//        add(PlatformerGravitySystem())
-        // TODO we need this system (running at 60Hz) if GridMoveSystem is running with 30Hz
-        //add(PlatformerGroundSystem())
-
-        add(GridMoveSystem())
-        add(PlayerMoveAfterCollisionSystem())
         // Debug system to move player entity to a specific position on the map overwriting player input data
         add(DebugSystem())
-
-//        add(GridCollisionCleanupSystem())  ??? check why this is needed
 
         add(SpawnerSystem())
         add(MessagePassingSystem())
@@ -73,14 +63,17 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         // Systems below depend on changes of above tween engine systems
         add(LifeCycleSystem())
         add(ParallaxSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))
-        add(PositionSystem())
-        add(SpriteVisibilitySystem())
-        add(EntityLinkSystem())
-        add(SpriteSystem())
 
         // Behavior system needs to be called after all other systems which can change the state (components)
         // of an entity (with Behavior component)
-        add(BehaviorSystem())
+        add(BehaviorSystem())  // --> set motionComponent of entity
+
+        add(CollisionSystem())  // --> modify motionComponent of entity in case of collision
+
+        add(PositionSystem())  // take over movement from motionComponent
+        add(SpriteVisibilitySystem())
+        add(EntityLinkSystem())
+        add(SpriteSystem())
 
         add(SoundSystem())
         add(CameraSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))

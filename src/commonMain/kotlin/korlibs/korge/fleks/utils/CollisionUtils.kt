@@ -70,14 +70,15 @@ object CollisionUtils {
      *        direction as parameters and returns a boolean value indicating whether to stop processing
      *        the steps. If the callback returns `true`, the processing is stopped.
      *
+     * @return `true` if the callback returned `true` for any step, `false` otherwise.
      * @see getCollisionSteps
      */
     fun processCollisionSteps(
         steps: Int,
         overallMovementX: Float,
         overallMovementY: Float,
-        callback: (movementX: Float, movementY: Float) -> Boolean)
-    {
+        callback: (movementX: Float, movementY: Float) -> Boolean
+    ): Boolean {
         if (steps > 0) {
             // Init movement and take into account that overall movement can be negative
             val movementX: Float = overallMovementX / steps
@@ -86,9 +87,10 @@ object CollisionUtils {
 
             while (i < steps) {
                 val result = callback(movementX, movementY)
-                if (result) break
+                if (result) return true
                 i++
             }
         }
+        return false
     }
 }
