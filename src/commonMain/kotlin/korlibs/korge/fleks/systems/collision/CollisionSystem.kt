@@ -9,9 +9,6 @@ import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
-import korlibs.korge.fleks.components.EntityRef.Companion.EntityRefComponent
-import korlibs.korge.fleks.components.EntityRefs.Companion.EntityRefsComponent
-import korlibs.korge.fleks.components.EntityRefsByName.Companion.EntityRefsByNameComponent
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
@@ -159,127 +156,12 @@ class CollisionSystem : IteratingSystem(
         gridSize: Float,
         debugShapesComponent: DebugCollisionShapes?
     ): Boolean {
-        // (1) Check first if horizontal or vertical movement is going over a cell border and process
-        // only the direction in which the cell border is crossed
-        // (2) Or if both movement directions are crossing cell borders then check which distance to
-        // the cell border is smaller and process only that direction
-        // (3) In either way if no cell borders are crossed, there is no need to check for collisions,
-        // because that particular cell was already checked in one of the previous frames
-/*
-        // (1.1) Check if the entity is moving into a new cell horizontally or vertically
-        val (xPos, xPosMoved, cxMoved, movedIntoNewCellHorizontally) =
-            checkCellBorderCrossing(movementX, positionComponent.x, positionComponent.offsetX,
-                collisionComponent.rect.x.toFloat(), collisionComponent.rect.width, gridSize)
+        // Define position of moved collision box edges
+        val xPosMovedLeft = positionComponent.x + positionComponent.offsetX + collisionComponent.rect.x + movementX
+        val xPosMovedRight = positionComponent.x + positionComponent.offsetX + collisionComponent.rect.x + collisionComponent.rect.width + movementX
+        val yPosMovedTop = positionComponent.y + positionComponent.offsetY + collisionComponent.rect.y + movementY
+        val yPosMovedBottom = positionComponent.y + positionComponent.offsetY + collisionComponent.rect.y + collisionComponent.rect.height + movementY
 
-        val (yPos, yPosMoved, cyMoved, movedIntoNewCellVertically) =
-            checkCellBorderCrossing(movementY, positionComponent.y, positionComponent.offsetY,
-                collisionComponent.rect.y.toFloat(), collisionComponent.rect.height, gridSize)
-
-        // (1.2) Check if the entity is moving across one cell border
-        val isColliding: Boolean
-        if (movedIntoNewCellHorizontally && !movedIntoNewCellVertically) {
-            // Horizontal cell border crossing
-            isColliding = isCollidingHorizontally(movementY, xPosMoved, cxMoved, positionComponent, collisionComponent, gridSize, debugShapesComponent)
-            if (isColliding)
-                resolveCollisionHorizontally(movementX, movementY, xPos, cxMoved, positionComponent, motionComponent, collisionComponent, gridSize)
-        } else if (!movedIntoNewCellHorizontally && movedIntoNewCellVertically) {
-            // Vertical cell border crossing
-            isColliding = isCollidingVertically(movementX, yPosMoved, cyMoved, positionComponent, collisionComponent, gridSize, debugShapesComponent)
-            if (isColliding)
-                resolveCollisionVertically(movementX, movementY, yPos, cyMoved, positionComponent, motionComponent, collisionComponent, gridSize)
-
-        // (2) Check if the entity is moving across two cell borders
-        } else if (movedIntoNewCellHorizontally) {
-            // Check which distance to cell border is shorter and process only that direction
-            val xDistance = xPosMoved - (cxMoved * gridSize)
-            val yDistance = yPosMoved - (cyMoved * gridSize)
-//            val collidingDir = if (xDistance < yDistance) {
-
-            val collidingDir = isCollidingDiagonal(movementX, movementY, cxMoved, cyMoved, positionComponent, collisionComponent, gridSize, debugShapesComponent)
-
-//            when (collidingDir) {
-//                1 -> {
-//                    resolveCollisionHorizontally(movementX, movementY, xPos, cxMoved, positionComponent, motionComponent, collisionComponent, gridSize)
-//                    true
-//                }
-//                -1 -> {
-//                    resolveCollisionVertically(movementX, movementY, yPos, cxMoved, positionComponent, motionComponent, collisionComponent, gridSize)
-//                    true
-//                }
-//                else -> false
-//            }
-            isColliding = true
-
-        // (3) No cell borders are crossed - no collision
-        } else isColliding = false
-*/
-//        val collisionRectOffset: Float = if (movementX > 0f) collisionComponent.rect.x + collisionComponent.rect.width else collisionComponent.rect.x
-//        val xPivot = positionComponent.x + positionComponent.offsetX + collisionRectOffset
-//        val xPivotMoved = xPivot + movementX
-//        val cxMoved = (xPivotMoved / gridSize).toIntFloor()
-        val isColliding = isCollidingDiagonal(movementX, movementY, positionComponent, motionComponent, collisionComponent, gridSize, debugShapesComponent)
-        return isColliding
-    }
-
-    private fun checkCellBorderCrossing(
-        movement: Float,
-        position: Float,
-        offset: Float,
-        colBoxOffset: Float,
-        colBoxSize: Float,
-        gridSize: Float
-    ): CellBoderCheckProps {
-        val collisionRectOffset: Float = if (movement > 0f) colBoxOffset + colBoxSize else colBoxOffset
-        val xPivot = position + offset + collisionRectOffset
-        val xPivotMoved = xPivot + movement
-        if (movement != 0f) {
-            val xPos: Float
-            val xPosMoved: Float
-            // Add guard regions depending on the move direction
-            if (movement > 0f) {
-                xPos = xPivot - guardRegion
-                xPosMoved = xPivotMoved + guardRegion
-            } else {
-                xPosMoved = xPivotMoved - guardRegion
-                xPos = xPivot + guardRegion
-            }
-
-            // Check if the cell indices are different --> we have moved into a new cell
-            val cx = (xPos / gridSize).toIntFloor()
-            val cxMoved = (xPosMoved / gridSize).toIntFloor()
-            with (cellBorderCheckProps) {
-                this.xPos = xPivot
-                this.xPosMoved = xPivotMoved
-                this.cxMoved = cxMoved
-                this.movedIntoNewCell = (cx != cxMoved)
-            }
-        } else {
-            with (cellBorderCheckProps) {
-                this.xPos = xPivot
-                this.xPosMoved = xPivotMoved
-                this.cxMoved = (xPivotMoved / gridSize).toIntFloor()
-                this.movedIntoNewCell = false
-            }
-        }
-        return cellBorderCheckProps
-    }
-
-    fun isCollidingDiagonal(
-        movementX: Float,
-        movementY: Float,
-//        cxMoved: Int,
-//        cyMoved: Int,
-        positionComponent: Position,
-        motionComponent: Motion,
-        collisionComponent: Collision,
-        gridSize: Float,
-        debugShapesComponent: DebugCollisionShapes?
-    ): Boolean {
-        // Define the top-left edge of the collision box for checking horizontally X and vertically Y
-        val collisionRectOffsetX: Float = collisionComponent.rect.x.toFloat()
-        val collisionRectOffsetY: Float = collisionComponent.rect.y.toFloat()
-        val xPosMoved = positionComponent.x + positionComponent.offsetX + collisionRectOffsetX + movementX
-        val yPosMoved = positionComponent.y + positionComponent.offsetY + collisionRectOffsetY + movementY
 
         // Position of the top-left corner of the collision box: (xPosMoved, yPosMoved)
 
@@ -289,9 +171,13 @@ class CollisionSystem : IteratingSystem(
         val steps = (longEdge / gridSize).toIntCeil()
         for (i in 0..steps) {
             // Horizontal check - get position for the collision check depending on which direction we are moving
-            val yPosMovedStepHor = yPosMoved + if (i == steps) collisionComponent.rect.height else i * gridSize
+            val yPosMovedStepHor =
+                // Moving in the bottom direction - Check horizontal collision edge from the top or bottom
+                if (movementY > 0f) yPosMovedTop + if (i == steps) collisionComponent.rect.height else i * gridSize
+                // Moving in the top direction - Check horizontal collision edge from the bottom or top
+                else yPosMovedBottom - if (i == steps) collisionComponent.rect.height else i * gridSize
             val cyMovedStepHor = (yPosMovedStepHor / gridSize).toIntFloor()
-            val xPosMovedStepHor = if (movementX > 0f) xPosMoved + collisionComponent.rect.width else xPosMoved
+            val xPosMovedStepHor = if (movementX > 0f) xPosMovedLeft + collisionComponent.rect.width else xPosMovedLeft
             val cxMovedStepHor = (xPosMovedStepHor / gridSize).toIntFloor()
 
             // Do collision check at position (xPosMovedStepHor, yPosMovedStepHor) in the level map
@@ -300,9 +186,13 @@ class CollisionSystem : IteratingSystem(
             val isCollidingHor = worldMapData.hasCollision(cxMovedStepHor, cyMovedStepHor)
 
             // Vertical check - get position for the collision check depending on which direction we are moving
-            val xPosMovedStepVer = xPosMoved + if (i == steps) collisionComponent.rect.width else i * gridSize
+            val xPosMovedStepVer =
+                // Moving in the right direction - Check horizontal collision edge from the left or right
+                if (movementX > 0f) xPosMovedLeft + if (i == steps) collisionComponent.rect.width else i * gridSize
+                // Moving in the left direction - Check horizontal collision edge from the right or left
+                else xPosMovedRight - if (i == steps) collisionComponent.rect.width else i * gridSize
             val cxMovedStepVer = (xPosMovedStepVer / gridSize).toIntFloor()
-            val yPosMovedStepVer = if (movementY > 0f) yPosMoved + collisionComponent.rect.height else yPosMoved
+            val yPosMovedStepVer = if (movementY > 0f) yPosMovedTop + collisionComponent.rect.height else yPosMovedTop
             val cyMovedStepVer = (yPosMovedStepVer / gridSize).toIntFloor()
 
             // Do collision check at position (xPosMovedStepVer, yPosMovedStepVer) in the leve map
@@ -332,89 +222,28 @@ class CollisionSystem : IteratingSystem(
                 val xDistance = if (movementX > 0f) xPosMovedStepHor - (cxMovedStepHor * gridSize) else ((cxMovedStepHor + 1) * gridSize) - xPosMovedStepHor
                 val yDistance = if (movementY > 0f) yPosMovedStepHor - (cyMovedStepHor * gridSize) else ((cyMovedStepHor + 1) * gridSize) - yPosMovedStepHor
 
-                if (xDistance < yDistance) {
+                if (xDistance > yDistance) {
                     // Resolve collision only horizontally
-                    resolveCollisionHorizontally(movementX, movementY, xPosMovedStepHor, cxMovedStepHor, positionComponent, motionComponent, collisionComponent, gridSize)
+                    // x position of the collision box edge - not moved
+                    val xPos = positionComponent.x + positionComponent.offsetX +
+                        if (movementX > 0f) collisionComponent.rect.x + collisionComponent.rect.width else collisionComponent.rect.x.toFloat()
+                    val cxMoved = cxMovedStepHor
+                    resolveCollisionHorizontally(movementX, movementY, xPos, cxMoved, positionComponent, motionComponent, collisionComponent, gridSize)
                 } else {
                     // Resolve collision only vertically
-                    resolveCollisionVertically(movementX, movementY, yPosMovedStepHor, cyMovedStepHor, positionComponent, motionComponent, collisionComponent, gridSize)
+                    // y position of the collision box edge - not moved
+                    val yPos = positionComponent.y + positionComponent.offsetY +
+                        if (movementY > 0f) collisionComponent.rect.y + collisionComponent.rect.height else collisionComponent.rect.y.toFloat()
+                    val cyMoved = cyMovedStepVer
+                    resolveCollisionVertically(movementX, movementY, yPos, cyMoved, positionComponent, motionComponent, collisionComponent, gridSize)
                 }
                 return true
             }
-
-
-
-//            // Top edge of collision box and going down by gridSize until bottom edge
-//            val yCheckPos = yPosMoved + if (i == steps) collisionComponent.rect.height else i * gridSize
-//            val cyEdge = (yCheckPos / gridSize).toIntFloor()
-//
-//            if (worldMapData.hasCollision(cxMovedStep, cyMoved) || worldMapData.hasCollision(cxMoved, cyEdge)) return true
-
-            // Das wird so nicht klappen...
-            // Wenn wir uns nach links und oben bewegen, dann müssen wir die obere kante der collision box von rechts nach links testen
-            // BESSER: wir testen den schnittpunkt beider collisionsebenen (oben-links Kante der Collisionsbox) nicht! Sondern nur die anderen Punkte der kanten testen!
-
         }
         return false
     }
 
-    fun isCollidingHorizontally(
-        movementY: Float,
-        xMoved: Float,
-        cxMoved: Int,
-        positionComponent: Position,
-        collisionComponent: Collision,
-        gridSize: Float,
-        debugShapesComponent: DebugCollisionShapes?
-    ): Boolean {
-        // Define the edges of the collision box for checking horizontally X and vertically Y
-        val collisionRectOffsetY: Float = collisionComponent.rect.y.toFloat()  // DO NOT take size of box into account
-        val yPosMoved = positionComponent.y + positionComponent.offsetY + collisionRectOffsetY + movementY
-
-        // Run the collision check for the entire height of the collision rect
-        // Set Y positions of the collision box edge in gridSize steps (at least bottom and top edges)
-        val steps = (collisionComponent.rect.height / gridSize).toIntCeil()
-        for (i in 0..steps) {
-            // Top edge of collision box and going down by gridSize until bottom edge
-            val yPosMovedStep = yPosMoved + if (i == steps) collisionComponent.rect.height else i * gridSize
-            val cyMovedStep = (yPosMovedStep / gridSize).toIntFloor()
-
-            debugShapesComponent?.let { debugSaveRatioPointX(it, xMoved, yPosMovedStep) }  // Visualize the collider point
-            debugShapesComponent?.let { debugSaveGridCell(it, cxMoved, cyMovedStep) }  // Visualize the collider cell
-            if (worldMapData.hasCollision(cxMoved, cyMovedStep)) return true
-        }
-        return false
-    }
-
-    fun isCollidingVertically(
-        movementX: Float,
-        yPosMoved: Float,
-        cyMoved: Int,
-        positionComponent: Position,
-        collisionComponent: Collision,
-        gridSize: Float,
-        debugShapesComponent: DebugCollisionShapes?
-    ): Boolean {
-        // Define the edges of the collision box for checking horizontally X and vertically Y
-        val collisionRectOffsetX: Float = collisionComponent.rect.x.toFloat()  // DO NOT take size of box into account
-        val xPosMoved = positionComponent.x + positionComponent.offsetX + collisionRectOffsetX + movementX
-
-        // Run the collision check for the entire height of the collision rect
-        // Set Y positions of the collision box edge in gridSize steps (at least bottom and top edges)
-        val steps = (collisionComponent.rect.width / gridSize).toIntCeil()
-        for (i in 0..steps) {
-            // Left edge of collision box and going right by gridSize until right edge
-            val xPosMovedStep = xPosMoved + if (i == steps) collisionComponent.rect.width else i * gridSize
-            val cxMovedStep = (xPosMovedStep / gridSize).toIntFloor()
-
-            debugShapesComponent?.let { debugSaveRatioPointY(it, xPosMovedStep, yPosMoved) }  // Visualize the collider point
-            debugShapesComponent?.let { debugSaveGridCell(it, cxMovedStep, cyMoved) }  // Visualize the collider cell
-            if (worldMapData.hasCollision(cxMovedStep, cyMoved)) return true
-        }
-        return false
-    }
-
-    fun resolveCollisionHorizontally(
+    private fun resolveCollisionHorizontally(
         xMovement: Float,
         yMovement: Float,
         xPos: Float,
