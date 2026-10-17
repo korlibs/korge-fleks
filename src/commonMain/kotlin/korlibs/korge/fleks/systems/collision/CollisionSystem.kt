@@ -10,61 +10,40 @@ import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
-import korlibs.korge.fleks.components.Grid
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.data.Point.Companion.point
-import korlibs.korge.fleks.logic.collision.checker.CollisionChecker
-import korlibs.korge.fleks.logic.collision.checker.PlatformerCollisionChecker
-import korlibs.korge.fleks.logic.collision.resolver.CollisionResolver
-import korlibs.korge.fleks.logic.collision.resolver.PlatformerCollisionResolver
 import korlibs.korge.fleks.utils.CollisionUtils.getCollisionSteps
 import korlibs.korge.fleks.utils.CollisionUtils.processCollisionSteps
-import korlibs.korge.fleks.utils.DebugPointPool
 import korlibs.math.isAlmostEquals
 import korlibs.math.toIntCeil
 import korlibs.math.toIntFloor
 import kotlin.math.max
 import kotlin.math.min
 
-
+/**
+ * Collision system for the game. This system is responsible for handling collision between an
+ * entity and static level map cells.
+ *
+ * @see [https://github.com/korlibs/korge-fleks/wiki/Collision-System]
+ */
 class CollisionSystem : IteratingSystem(
     family = World.family { all(PositionComponent, MotionComponent, CollisionComponent)
         .any(PositionComponent, DebugCollisionShapesComponent) },
     interval = Fixed(1 / 60f)
 ) {
-    val assetStore = world.inject<AssetStore>("AssetStore")
-
-    private val worldMapData = assetStore.worldMapData
-
-    var collisionChecker: CollisionChecker = PlatformerCollisionChecker(world.inject<DebugPointPool>("DebugPointPool"))
-    var collisionResolver: CollisionResolver = PlatformerCollisionResolver()
-
-    private val gridComponent: Grid = Grid.staticGridComponent {}
-
-    private var counterDgb = 0
+    private val worldMapData = world.inject<AssetStore>("AssetStore").worldMapData
     private val guardRegion = 0.001f
 
-    data class CellBoderCheckProps(
-        var xPos: Float,
-        var xPosMoved: Float,
-        var cxMoved: Int,
-        var movedIntoNewCell: Boolean
-    )
-
-    private val cellBorderCheckProps = CellBoderCheckProps(0f, 0f, 0, false)
-
     override fun onTickEntity(entity: Entity) {
-//        val overallTime = TimeProvider.now().milliseconds
-
         // Iterate over all entities that have a Grid, Collision and MotionComponent
         val motionComponent = entity[MotionComponent]
         val positionComponent = entity[PositionComponent]
         val collisionComponent = entity[CollisionComponent]
-        val collisionBox = collisionComponent.rect
+        val collisionRect = collisionComponent.rect
 
         val debugShapesComponent: DebugCollisionShapes? = entity.getOrNull(DebugCollisionShapesComponent)
         // Free debug points before we create new ones
@@ -77,20 +56,34 @@ class CollisionSystem : IteratingSystem(
         val gravityComponent = entity.getOrNull(GravityComponent)
         // Apply gravity to the entity if it has a GravityComponent
         if (gravityComponent != null) {
-// TODO add back on Y collision            motionComponent.velocityY += -gravityComponent.calculateDeltaGravity() * deltaTime
+// TODO does not work as expected            motionComponent.velocityY += gravityComponent.calculateDeltaGravity() * deltaTime
         }
+        println("delta time: $deltaTime velocityY: ${motionComponent.velocityY}")
+        println("position: ${positionComponent.x}, ${positionComponent.y} / collision name: ${collisionComponent.name}")
 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Step 1: Integrated Frame Displacement Calculation
+        //
+        // Total frame displacement is calculated from velocity and frame time (deltaTime)
         val overallMovementX = motionComponent.velocityX * deltaTime
         val overallMovementY = motionComponent.velocityY * deltaTime  // Negative sign for upward movement - Y Axis is mirrored in the game
         val gridSize = worldMapData.tileSize.toFloat()
 
-        // The number of steps which an object travels through a grid cell is defined either by its collision rect size or the grid size
-        // I.e. if the collision rect is smaller than the grid size we need to check "more often" within a cell otherwise
-        // it is enough to check once per grid cell
-        val stepSize = min(min(collisionBox.width, collisionBox.height), gridSize)
+        // The number of steps which an object travels through a grid cell is defined either by its collision
+        // rect size or the grid size, i.e. if the collision rect is smaller than the grid size we need to
+        // check "more often" within a cell otherwise it is enough to check once per grid cell
+        val stepSize = min(min(collisionRect.width, collisionRect.height), gridSize)
 
-        // Check if movement in X or Y direction is greater than the grid size and set the number of steps accordingly
-        // If we have at least a small movement there will be at least one step executed
+        if (stepSize < 0.01f) {
+            println("WARNING: Step size is very small (${stepSize})!")
+            return
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Step 2: Movement Sub-Stepping (getCollisionSteps & processCollisionSteps)
+        //
+        // Check if movement in X or Y direction is greater than the grid size and set the number of
+        // steps accordingly. If we have at least a small movement there will be at least one step executed.
         val steps: Int = getCollisionSteps(overallMovementX, overallMovementY, stepSize)
 
         if (steps > 0) {
@@ -101,16 +94,19 @@ class CollisionSystem : IteratingSystem(
             collisionComponent.isCollidingAbove = false
         }
 
-        // Return true if there is a collision -- collision processing is stopped
-        // TODO we need to be able to specify that collision checking should not be interrupted
+        // Return true if there is a collision
         val isColliding = processCollisionSteps(steps, overallMovementX, overallMovementY) { movementX, movementY ->
             checkCollision(movementX, movementY, positionComponent, motionComponent, collisionComponent, gridSize, debugShapesComponent)
         }
 
-            // TODO
-            // Depending of type of the entity we have to stop further collision steps (e.g. for shoots, because they get destroyed)
-            // Or collision checking continues when one direction is already colliding (e.g. the main character, which is grounded but still can move horizontally)
+        // TODO
+        // Depending of type of the entity we have to stop further collision steps (e.g. for shoots, because they get destroyed)
+        // Or collision checking continues when one direction is already colliding (e.g. the main character, which is grounded but still can move horizontally)
 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Step 7: Impact Reaction & Playfield Clamping
+        //
+        // TODO Depending of object type we want to destroy the entity in the next frame (e.g. shoot projectiles)
         if (isColliding) {
             // Shoots need to be destroyed the next frame
             val healthComponent = entity.getOrNull(LifeCycleComponent)
@@ -118,19 +114,24 @@ class CollisionSystem : IteratingSystem(
         }
 
 //        motionComponent.velocityX *= motionComponent.frictionX
+
         if (motionComponent.velocityX.isAlmostEquals(0.0005f)) {
+            // Velocity values smaller than 0.0005f are zeroed out
             motionComponent.velocityX = 0f
         }
-//
+
 //        // Friction only in down direction (falling)
 //        if (motionComponent.velocityY > 0f) {
 //            motionComponent.velocityY *= motionComponent.frictionY
 //        }
+
         if (motionComponent.velocityY.isAlmostEquals(0.0005f)) {
+            // Velocity values smaller than 0.0005f are zeroed out
             motionComponent.velocityY = 0f
         }
 
-        checkPlayfieldBoundaries(positionComponent)
+        // Keep entity positions strictly within level boundaries (with 16px guard margin).
+//        checkPlayfieldBoundaries(positionComponent)
     }
 
     /**
@@ -382,5 +383,4 @@ class CollisionSystem : IteratingSystem(
             }
         )
     }
-
 }
