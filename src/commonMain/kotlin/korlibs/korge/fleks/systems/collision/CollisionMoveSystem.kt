@@ -152,7 +152,7 @@ open class CollisionMoveSystem : IteratingSystem(
      *
      * @return `true` if a collision was detected, `false` otherwise.
      */
-    private fun checkCollision(
+    protected fun checkCollision(
         movementX: Float,
         movementY: Float,
         positionComponent: Position,
@@ -245,7 +245,7 @@ open class CollisionMoveSystem : IteratingSystem(
         return false
     }
 
-    private fun resolveCollisionHorizontally(
+    protected fun resolveCollisionHorizontally(
         xMovement: Float,
         yMovement: Float,
         xPos: Float,
@@ -291,7 +291,7 @@ open class CollisionMoveSystem : IteratingSystem(
         if (xMovement.isNotAlmostZero()) positionComponent.y += yMovement * xRatio
     }
 
-    fun resolveCollisionVertically(
+    protected fun resolveCollisionVertically(
         xMovement: Float,
         yMovement: Float,
         yPos: Float,
@@ -343,7 +343,7 @@ open class CollisionMoveSystem : IteratingSystem(
      *
      * @param positionComponent The grid component of the entity to check.
      */
-    private fun checkPlayfieldBoundaries(positionComponent: Position) {
+    protected fun checkPlayfieldBoundaries(positionComponent: Position) {
         // Keep the player sprite inside the level
         val guardBorder = worldMapData.tileSize.toFloat()
         // Check left and right boundaries with a guard border to prevent the playfield to render outside of the visible area, e.g. if the camera "shakes" on explosions etc.
