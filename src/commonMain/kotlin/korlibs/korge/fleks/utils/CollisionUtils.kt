@@ -13,43 +13,6 @@ import kotlin.math.min
  */
 object CollisionUtils {
     /**
-     * Check if the object stays inside the current grid cell after applying movement.
-     *
-     * Not used, because mostly irrelevant.
-     *
-     * @param positionComponent The position component of the object.
-     * @param overallMovementX The overall movement in the X direction.
-     * @param overallMovementY The overall movement in the Y direction.
-     * @param collisionComponent The collision component of the object. It contains the collision rect.
-     * @param gridSize The size of the grid.
-     *
-     * @return `true` if the object stays inside the current grid cell, `false` otherwise.
-     */
-//    fun staysInsideCurrentCell(
-//        positionComponent: Position,
-//        overallMovementX: Float,
-//        overallMovementY: Float,
-//        collisionComponent: Collision,
-//        gridSize: Int
-//    ): Boolean {
-//        // Calculate X position of the collision box edge which is moving in positive direction
-//        val x =
-//            if (overallMovementX > 0f) positionComponent.x + collisionComponent.rect.x + collisionComponent.rect.width
-//            else positionComponent.x + collisionComponent.rect.x
-//        val currentCellX = (x / gridSize).toIntFloor()
-//        val nextCellX = ((x + overallMovementX) / gridSize).toIntFloor()
-//        if (nextCellX != currentCellX) return false
-//
-//        // Calculate Y position of the collision box edge which is moving in positive direction
-//        val y =
-//            if (overallMovementY > 0f) positionComponent.y + collisionComponent.rect.y + collisionComponent.rect.height
-//            else positionComponent.y + collisionComponent.rect.y
-//        val currentCellY = (y / gridSize).toIntFloor()
-//        val nextCellY = ((y + overallMovementY) / gridSize).toIntFloor()
-//        return nextCellY == currentCellY
-//    }
-
-    /**
      * Calculate the number of steps needed to move the entity in relation to the step size (usually 16x16 pixels or smaller).
      *
      * @param horizontalMovement The horizontal movement of the entity.
@@ -57,8 +20,18 @@ object CollisionUtils {
      * @param gridSize The size of a step. Can be smaller than the grid size.
      * @return The number of steps needed for collision checking.
      */
-    fun getCollisionSteps(horizontalMovement: Float, verticalMovement: Float, gridSize: Float): Int =
-        (max(abs(horizontalMovement), abs(verticalMovement)) / gridSize).toIntCeil()
+    fun getCollisionSteps(horizontalMovement: Float, verticalMovement: Float, gridSize: Float): Int {
+        if (gridSize < 1f && gridSize > -1f) {
+            println("ERROR: Step denominator is very small (${gridSize})!")
+            return 0
+        }
+        val steps = (max(abs(horizontalMovement), abs(verticalMovement)) / gridSize).toIntCeil()
+        if (steps > 100) {
+            println("ERROR: Steps number is very high (${steps})!")
+            return 100
+        }
+        return steps
+    }
 
     /**
      * Process the collision steps and call the callback function for each step.

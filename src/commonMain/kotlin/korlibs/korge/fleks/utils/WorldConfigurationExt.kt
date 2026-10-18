@@ -14,14 +14,14 @@ import korlibs.korge.fleks.systems.HealthMonitorSystem
 import korlibs.korge.fleks.systems.WorldChunkSystem
 import korlibs.korge.fleks.systems.LifeCycleSystem
 import korlibs.korge.fleks.systems.ParallaxSystem
-import korlibs.korge.fleks.systems.PositionSystem
+import korlibs.korge.fleks.systems.StaticMoveSystem
 import korlibs.korge.fleks.systems.SnapshotSerializerSystem
 import korlibs.korge.fleks.systems.SoundSystem
 import korlibs.korge.fleks.systems.SpawnerSystem
 import korlibs.korge.fleks.systems.SpriteVisibilitySystem
 import korlibs.korge.fleks.systems.SpriteSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
-import korlibs.korge.fleks.systems.collision.CollisionSystem
+import korlibs.korge.fleks.systems.collision.CollisionMoveSystem
 import korlibs.korge.fleks.systems.collision.BehaviorSystem
 import korlibs.korge.view.Views
 
@@ -63,17 +63,15 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         // Systems below depend on changes of above tween engine systems
         add(LifeCycleSystem())
         add(ParallaxSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))
+        add(StaticMoveSystem())
+        add(SpriteVisibilitySystem())
+        add(EntityLinkSystem())
+        add(SpriteSystem())
 
         // Behavior system needs to be called after all other systems which can change the state (components)
         // of an entity (with Behavior component)
         add(BehaviorSystem())  // --> set motionComponent of entity
-
-        add(CollisionSystem())  // --> modify motionComponent of entity in case of collision
-
-        add(PositionSystem())  // take over movement from motionComponent
-        add(SpriteVisibilitySystem())
-        add(EntityLinkSystem())
-        add(SpriteSystem())
+        add(CollisionMoveSystem())  // --> modify motionComponent of entity in case of collision and set positionComponent of entity
 
         add(SoundSystem())
         add(CameraSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))

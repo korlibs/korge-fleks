@@ -20,9 +20,9 @@ import korlibs.korge.view.Views
  * - deactivates entities which are too far away from the camera (TODO)
  * - checks if all entities with a [WorldChunkComponent] have the correct chunk assigned depending on the entities position
  *
- * Hint: This system needs to be invoked with the same interval as the [PositionSystem] which moves the entities.
+ * Hint: This system needs to be invoked with the same interval as the [StaticMoveSystem] which moves the entities.
  *
- * This system needs to be invoked with the same interval as the [PositionSystem] which moves
+ * This system needs to be invoked with the same interval as the [StaticMoveSystem] which moves
  * the entities.
  */
 class WorldChunkSystem : IntervalSystem(

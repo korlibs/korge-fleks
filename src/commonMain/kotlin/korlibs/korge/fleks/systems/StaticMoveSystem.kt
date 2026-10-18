@@ -2,20 +2,20 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.Grid.Companion.GridComponent
+import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Parallax.Companion.ParallaxComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.Rigidbody.Companion.RigidbodyComponent
 
 /**
- * A system which moves entities independent of gravity and collision.
+ * A system which moves entities independently of gravity and collision.
  */
-class PositionSystem : IteratingSystem(
+class StaticMoveSystem : IteratingSystem(
     family {
         all(PositionComponent)  // Position component absolutely needed for movement of entity objects
         .any(MotionComponent, RigidbodyComponent)  // Motion, Rigidbody, ect. not necessarily needed for movement
-        .none(ParallaxComponent)
+        .none(ParallaxComponent, CollisionComponent)
     },
     interval = EachFrame
 ) {

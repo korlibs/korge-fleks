@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Collision")
 class Collision private constructor(
-    var name: String = "",
+    var name: String = "",  // Not used yet
 
     // Identifiers for collision directions
     var right: Boolean = false,
@@ -70,6 +70,7 @@ class Collision private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
+        name = ""
         // TODO: Cleanup properties which does not need a reset because they will be overwritten anyway at the beginning of the frame cycle
         right = false
         left = false
