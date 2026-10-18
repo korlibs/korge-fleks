@@ -1,17 +1,42 @@
 package korlibs.korge.fleks.utils
 
-import korlibs.korge.fleks.components.Collision
-import korlibs.korge.fleks.components.Position
+import korlibs.korge.fleks.assets.data.WorldMapData
+import korlibs.korge.fleks.components.DebugCollisionShapes
+import korlibs.korge.fleks.components.data.Point.Companion.point
 import korlibs.math.toIntCeil
-import korlibs.math.toIntFloor
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Utility functions for collision system.
  */
 object CollisionUtils {
+    fun debugSaveGridCell(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, worldMapData: WorldMapData) {
+        debugShapesComponent.gridCells.add(
+            point {
+                x = cx.toFloat() * worldMapData.tileSize
+                y = cy.toFloat() * worldMapData.tileSize
+            }
+        )
+    }
+
+    fun debugSaveRatioPointX(debugShapesComponent: DebugCollisionShapes, x: Float, y: Float) {
+        debugShapesComponent.ratioPositionsX.add(
+            point {
+                this.x = x
+                this.y = y
+            }
+        )
+    }
+    fun debugSaveRatioPointY(debugShapesComponent: DebugCollisionShapes, x: Float, y: Float) {
+        debugShapesComponent.ratioPositionsY.add(
+            point {
+                this.x = x
+                this.y = y
+            }
+        )
+    }
+
     /**
      * Calculate the number of steps needed to move the entity in relation to the step size (usually 16x16 pixels or smaller).
      *

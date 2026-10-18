@@ -16,6 +16,9 @@ import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.components.data.Point.Companion.point
+import korlibs.korge.fleks.utils.CollisionUtils.debugSaveGridCell
+import korlibs.korge.fleks.utils.CollisionUtils.debugSaveRatioPointX
+import korlibs.korge.fleks.utils.CollisionUtils.debugSaveRatioPointY
 import korlibs.korge.fleks.utils.CollisionUtils.getCollisionSteps
 import korlibs.korge.fleks.utils.CollisionUtils.processCollisionSteps
 import korlibs.math.isAlmostEquals
@@ -192,7 +195,7 @@ open class CollisionMoveSystem : IteratingSystem(
                 val cyProbe = (yProbe / gridSize).toIntFloor()
 
                 debugShapesComponent?.let { debugSaveRatioPointX(it, xLeadingEdge, yProbe) }
-                debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe) }
+                debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData) }
                 worldMapData.hasCollision(cxProbe, cyProbe)
             } else false
 
@@ -207,7 +210,7 @@ open class CollisionMoveSystem : IteratingSystem(
                 val cyProbe = (yLeadingEdge / gridSize).toIntFloor()
 
                 debugShapesComponent?.let { debugSaveRatioPointY(it, xProbe, yLeadingEdge) }
-                debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe) }
+                debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData) }
                 worldMapData.hasCollision(cxProbe, cyProbe)
             } else false
 
@@ -355,31 +358,5 @@ open class CollisionMoveSystem : IteratingSystem(
             positionComponent.y = worldMapData.worldHeight - guardBorder - positionComponent.offsetY  // Move the player back to the bottom boundary (can be removed when death is implemented)
             //println("ERROR: PositionSystem - Player falls off the playfield!")
         }
-    }
-
-    private fun debugSaveGridCell(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int) {
-        debugShapesComponent.gridCells.add(
-            point {
-                x = cx.toFloat() * worldMapData.tileSize
-                y = cy.toFloat() * worldMapData.tileSize
-            }
-        )
-    }
-
-    private fun debugSaveRatioPointX(debugShapesComponent: DebugCollisionShapes, x: Float, y: Float) {
-        debugShapesComponent.ratioPositionsX.add(
-            point {
-                this.x = x
-                this.y = y
-            }
-        )
-    }
-    private fun debugSaveRatioPointY(debugShapesComponent: DebugCollisionShapes, x: Float, y: Float) {
-        debugShapesComponent.ratioPositionsY.add(
-            point {
-                this.x = x
-                this.y = y
-            }
-        )
     }
 }
