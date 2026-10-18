@@ -183,7 +183,11 @@ open class CollisionMoveSystem : IteratingSystem(
         for (i in 0..steps) {
             // Horizontal movement probe: sample y along the vertical leading edge (xLeadingEdge)
             val isCollidingHor = if (movementX.isNotAlmostZero() && i <= vertSteps) {
-                val yProbe = min(yPosMovedTop + i * gridSize, yPosMovedTop + vertSpan)
+                val yProbe = if (movementY < 0f) {
+                    max(yPosMovedTop, yPosMovedTop + vertSpan - i * gridSize)
+                } else {
+                    min(yPosMovedTop + i * gridSize, yPosMovedTop + vertSpan)
+                }
                 val cxProbe = (xLeadingEdge / gridSize).toIntFloor()
                 val cyProbe = (yProbe / gridSize).toIntFloor()
 
@@ -194,7 +198,11 @@ open class CollisionMoveSystem : IteratingSystem(
 
             // Vertical movement probe: sample x along the horizontal leading edge (yLeadingEdge)
             val isCollidingVer = if (movementY.isNotAlmostZero() && i <= horizSteps) {
-                val xProbe = min(xPosMovedLeft + i * gridSize, xPosMovedLeft + horizSpan)
+                val xProbe = if (movementX < 0f) {
+                    max(xPosMovedLeft, xPosMovedLeft + horizSpan - i * gridSize)
+                } else {
+                    min(xPosMovedLeft + i * gridSize, xPosMovedLeft + horizSpan)
+                }
                 val cxProbe = (xProbe / gridSize).toIntFloor()
                 val cyProbe = (yLeadingEdge / gridSize).toIntFloor()
 
