@@ -448,11 +448,48 @@ class CollisionMoveSystemTest {
             gridSize = 16f,
         )
 
-        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out on collision")
-        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out on collision")
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out on horizontal collision")
+        assertEquals(50f, motion.velocityY, "velocityY should remain unchanged when frictionY is 0f (allowing wall sliding)")
         assertTrue(collision.right, "collision.right should be set to true")
         // Position x = cxCell * 16 - 0.001 - (17 + -8) = 48 - 0.001 - 9 = 38.999f
         assertEquals(38.999f, pos.x, 0.001f, "Position X should snap left of cell 3")
+    }
+
+    /**
+     * Test: Verify horizontal collision resolution when frictionY >= HIGH_FRICTION (e.g. for high-friction shoot projectiles).
+     *
+     * Inputs:
+     * - `xMovement = 10f`, `yMovement = 5f`, `cxMoved = 3`
+     * - `pos`: `x = 30f, y = 100f`
+     * - `motion`: `velocityX = 100f, velocityY = 50f, frictionY = HIGH_FRICTION`
+     * - `collision.rect`: `(-8, -28, 17f, 29f)`
+     * - `gridSize = 16f`
+     *
+     * Expected Output:
+     * - `velocityX = 0f`
+     * - `velocityY = 0f` (both horizontal and vertical motion stopped due to high friction)
+     */
+    @Test
+    fun testResolveCollisionHorizontallyHighFrictionStopsVerticalMotion() {
+        val pos = staticPositionComponent { x = 30f; y = 100f }
+        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = CollisionMoveSystem.HIGH_FRICTION }
+        val collision = staticCollisionComponent {
+            rect = CollisionRect(-8, -28, 17f, 29f)
+        }
+
+        collisionMoveSystem.testResolveCollisionHorizontally(
+            xMovement = 10f,
+            yMovement = 5f,
+            xPos = 30f + (-8f) + 17f,
+            cxMoved = 3,
+            positionComponent = pos,
+            motionComponent = motion,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out")
+        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out when frictionY >= HIGH_FRICTION")
     }
 
     /**
@@ -537,6 +574,43 @@ class CollisionMoveSystemTest {
         assertTrue(collision.isGrounded, "collision.isGrounded should be set to true")
         // Position y = cyCell * 16 - 0.001 - (29 + -28) = 2784 - 0.001 - 1 = 2782.999f
         assertEquals(2782.999f, pos.y, 0.001f, "Position Y should snap on top of ground cell 174")
+    }
+
+    /**
+     * Test: Verify vertical collision resolution when frictionX >= HIGH_FRICTION (e.g. for high-friction shoot projectiles striking a surface).
+     *
+     * Inputs:
+     * - `xMovement = 5f`, `yMovement = 10f`, `cyMoved = 174`
+     * - `pos`: `x = 100f, y = 2771f`
+     * - `motion`: `velocityX = 50f, velocityY = 100f, frictionX = HIGH_FRICTION`
+     * - `collision.rect`: `(-8, -28, 17f, 29f)`
+     * - `gridSize = 16f`
+     *
+     * Expected Output:
+     * - `velocityY = 0f`
+     * - `velocityX = 0f` (both vertical and horizontal motion stopped due to high friction)
+     */
+    @Test
+    fun testResolveCollisionVerticallyHighFrictionStopsHorizontalMotion() {
+        val pos = staticPositionComponent { x = 100f; y = 2771f }
+        val motion = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = CollisionMoveSystem.HIGH_FRICTION }
+        val collision = staticCollisionComponent {
+            rect = CollisionRect(-8, -28, 17f, 29f)
+        }
+
+        collisionMoveSystem.testResolveCollisionVertically(
+            xMovement = 5f,
+            yMovement = 10f,
+            yPos = 2771f + (-28f) + 29f,
+            cyMoved = 174,
+            positionComponent = pos,
+            motionComponent = motion,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out")
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out when frictionX >= HIGH_FRICTION")
     }
 
     /**

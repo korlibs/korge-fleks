@@ -23,8 +23,12 @@ class Motion private constructor(
     var velocityX: Float = 0f,  // in world units (grid size e.g. 16 pixels) per second
     var velocityY: Float = 0f,
 
-    var frictionX: Float = 0f,
-    var frictionY: Float = 0f,
+    // Friction handles surface-to-surface contact (e.g. walking on ground)
+    var frictionX: Float = 0f,  // [0..1]  0 - no friction, 1 - full friction
+    var frictionY: Float = 0f,  // TODO check if we need different friction for X and Y direction
+
+    // Damping handles energy dissipation over time or through space (e.g. when going through water basin)
+    var damping: Float = 0f,  // [0..1]  0 - no damping, 1 - full damping
 
     var lastHorizontalVelocity: Float = 0f,
 ) : PoolableComponent<Motion>() {
@@ -37,6 +41,7 @@ class Motion private constructor(
         velocityY = from.velocityY
         frictionX = from.frictionX
         frictionY = from.frictionY
+        damping = from.damping
         lastHorizontalVelocity = from.lastHorizontalVelocity
     }
 
@@ -49,6 +54,7 @@ class Motion private constructor(
         velocityY = 0f
         frictionX = 0f
         frictionY = 0f
+        damping = 0f
         lastHorizontalVelocity = 0f
     }
 
@@ -66,6 +72,12 @@ class Motion private constructor(
             pool.alloc().apply(config)
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Motion") { Motion() }
+
+        const val NO_FRICTION = 0f
+        const val LOW_FRICTION = 0.2f
+        const val MEDIUM_FRICTION = 0.5f
+        const val HIGH_FRICTION = 0.8f
+        const val INFINITE_FRICTION = 1f
     }
 
     // Clone a new instance of the component from the pool

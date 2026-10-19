@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
+import korlibs.image.format.ImageAnimation
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
@@ -12,12 +13,18 @@ import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollis
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 import korlibs.korge.fleks.components.Motion
+import korlibs.korge.fleks.components.Motion.Companion.HIGH_FRICTION
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
+import korlibs.korge.fleks.components.Position.Companion.positionComponent
+import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
+import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
+import korlibs.korge.fleks.tags.RenderLayerTag
 import korlibs.korge.fleks.utils.CollisionUtils.debugSaveGridCell
 import korlibs.korge.fleks.utils.CollisionUtils.debugSaveRatioPointX
 import korlibs.korge.fleks.utils.CollisionUtils.debugSaveRatioPointY
+import korlibs.korge.fleks.utils.createEntity
 import korlibs.math.isAlmostEquals
 import korlibs.math.toIntCeil
 import korlibs.math.toIntFloor
@@ -104,11 +111,15 @@ open class CollisionMoveSystem : IteratingSystem(
         ////////////////////////////////////////////////////////////////////////////////////////////
         // Step 7: Impact Reaction & Playfield Clamping
         //
-        // TODO Depending of object type we want to destroy the entity in the next frame (e.g. shoot projectiles)
         if (isColliding) {
-            // Shoots need to be destroyed the next frame
-            val healthComponent = entity.getOrNull(LifeCycleComponent)
-            healthComponent?.healthCounter = 0
+            val isHighFriction = motionComponent.frictionX >= HIGH_FRICTION || motionComponent.frictionY >= HIGH_FRICTION
+            if (isHighFriction) {
+                // High friction entities (e.g. shoot projectiles) are destroyed on impact and spawn an explosion
+                val healthComponent = entity.getOrNull(LifeCycleComponent)
+                healthComponent?.healthCounter = 0
+
+                spawnExplosion(positionComponent)
+            }
         }
 
 //        motionComponent.velocityX *= motionComponent.frictionX
@@ -255,10 +266,15 @@ open class CollisionMoveSystem : IteratingSystem(
         collisionComponent: Collision,
         gridSize: Float
     ) {
-
-        // We are in front of a collider cell (wall) - thus we stop the motion
+        // Stop movement along the collision axis (X)
         motionComponent.velocityX = 0f
-        motionComponent.velocityY = 0f
+
+        // Apply frictionY along the orthogonal axis (Y)
+        if (motionComponent.frictionY >= HIGH_FRICTION) {
+            motionComponent.velocityY = 0f
+        } else if (motionComponent.frictionY > 0f) {
+            motionComponent.velocityY *= max(0f, 1f - motionComponent.frictionY)  // ????
+        }
 
         // Resolve the collision - move the entity out of the collider cell horizontally and
         // move the entity vertically only by ratio of the horizontal movement
@@ -301,9 +317,15 @@ open class CollisionMoveSystem : IteratingSystem(
         collisionComponent: Collision,
         gridSize: Float
     ) {
-        // We are in front of a collider cell (wall) - thus we stop the motion
-        motionComponent.velocityX = 0f
+        // Stop movement along the collision axis (Y)
         motionComponent.velocityY = 0f
+
+        // Apply frictionX along the orthogonal axis (X)
+        if (motionComponent.frictionX >= HIGH_FRICTION) {
+            motionComponent.velocityX = 0f
+        } else if (motionComponent.frictionX > 0f) {
+            motionComponent.velocityX *= max(0f, 1f - motionComponent.frictionX)  // ???? maybe set HIGH_FRICTION to 1f
+        }
 
         // Resolve the collision - move the entity out of the collider cell vertically and
         // move the entity horizontally only by ratio of the vertical movement
@@ -334,6 +356,25 @@ open class CollisionMoveSystem : IteratingSystem(
         // Move the entity horizontally to the correct position by applying only ratio of the movement
         // Ratio is always positive because above yDistance and movementY has always same sign
         if (yMovement.isNotAlmostZero()) positionComponent.x += xMovement * yRatio
+    }
+
+    protected open fun spawnExplosion(positionComponent: Position) {
+        world.createEntity("player_shoot_explosion") {
+            it += positionComponent {
+                x = positionComponent.x + positionComponent.offsetX
+                y = positionComponent.y + positionComponent.offsetY
+            }
+            it += spriteComponent {
+                name = "explosion_magma_01"
+                pivotX = 8f
+                pivotY = 8f
+                running = true
+                direction = ImageAnimation.Direction.ONCE_FORWARD
+                destroyOnAnimationFinished = true
+            }
+            it += rgbaComponent { alpha = 1f }
+            it += RenderLayerTag.MAIN_EFFECT_LAYER
+        }
     }
 
     /**
