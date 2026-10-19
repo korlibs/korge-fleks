@@ -4,27 +4,19 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.Fixed
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
-import korlibs.image.format.ImageAnimation
 import korlibs.korge.fleks.assets.AssetStore
 import korlibs.korge.fleks.components.Collision
 import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
-import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 import korlibs.korge.fleks.components.Motion
-import korlibs.korge.fleks.components.Motion.Companion.HIGH_FRICTION
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
-import korlibs.korge.fleks.components.Position.Companion.positionComponent
-import korlibs.korge.fleks.components.Rgba.Companion.rgbaComponent
-import korlibs.korge.fleks.components.Sprite.Companion.spriteComponent
-import korlibs.korge.fleks.tags.RenderLayerTag
 import korlibs.korge.fleks.utils.CollisionUtils.debugSaveGridCell
 import korlibs.korge.fleks.utils.CollisionUtils.debugSaveRatioPointX
 import korlibs.korge.fleks.utils.CollisionUtils.debugSaveRatioPointY
-import korlibs.korge.fleks.utils.createEntity
 import korlibs.math.isAlmostEquals
 import korlibs.math.toIntCeil
 import korlibs.math.toIntFloor
@@ -47,6 +39,7 @@ open class CollisionMoveSystem : IteratingSystem(
     private val worldMapData = world.inject<AssetStore>("AssetStore").worldMapData
 
     // Check for divider of movement in X and Y direction
+    private val guardMove = 0f // 0.001f  TODO check if we can keep this zero
     private val guard = 0.01f
     protected fun Float.isNotAlmostZero(): Boolean = this.absoluteValue > guard
 
@@ -100,27 +93,13 @@ open class CollisionMoveSystem : IteratingSystem(
         }
 
         // Return true if there is a collision
-        val isColliding = processCollisionSteps(steps, overallMovementX, overallMovementY) { movementX, movementY ->
+        val isColliding = processCollisionSteps(steps, overallMovementX, overallMovementY, motionComponent.frictionX) { movementX, movementY ->
             checkCollision(movementX, movementY, positionComponent, motionComponent, collisionComponent, gridSize, debugShapesComponent)
         }
 
         // TODO
         // Depending of type of the entity we have to stop further collision steps (e.g. for shoots, because they get destroyed)
         // Or collision checking continues when one direction is already colliding (e.g. the main character, which is grounded but still can move horizontally)
-
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        // Step 7: Impact Reaction & Playfield Clamping
-        //
-        if (isColliding) {
-            val isHighFriction = motionComponent.frictionX >= HIGH_FRICTION || motionComponent.frictionY >= HIGH_FRICTION
-            if (isHighFriction) {
-                // High friction entities (e.g. shoot projectiles) are destroyed on impact and spawn an explosion
-                val healthComponent = entity.getOrNull(LifeCycleComponent)
-                healthComponent?.healthCounter = 0
-
-                spawnExplosion(positionComponent)
-            }
-        }
 
 //        motionComponent.velocityX *= motionComponent.frictionX
 
@@ -139,14 +118,17 @@ open class CollisionMoveSystem : IteratingSystem(
             motionComponent.velocityY = 0f
         }
 
-        // Keep entity positions strictly within level boundaries (with 16px guard margin).
-        checkPlayfieldBoundaries(positionComponent)
-
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Step 7: Impact Reaction & Playfield Clamping
+        //
         // Now finally we can move our entity normally when there was no collision
         if (!isColliding) {
             positionComponent.x += overallMovementX
             positionComponent.y += overallMovementY
         }
+
+        // Keep entity positions strictly within level boundaries (with 16px guard margin).
+        checkPlayfieldBoundaries(positionComponent)
     }
 
     /**
@@ -172,7 +154,7 @@ open class CollisionMoveSystem : IteratingSystem(
         gridSize: Float,
         debugShapesComponent: DebugCollisionShapes?
     ): Boolean {
-        val guard = 0.001f
+        val guard = 0f // 0.001f
 
         // Define position of moved collision box edges
         val xPosMovedLeft = positionComponent.x + positionComponent.offsetX + collisionComponent.rect.x + movementX
@@ -270,11 +252,12 @@ open class CollisionMoveSystem : IteratingSystem(
         motionComponent.velocityX = 0f
 
         // Apply frictionY along the orthogonal axis (Y)
-        if (motionComponent.frictionY >= HIGH_FRICTION) {
-            motionComponent.velocityY = 0f
-        } else if (motionComponent.frictionY > 0f) {
-            motionComponent.velocityY *= max(0f, 1f - motionComponent.frictionY)  // ????
-        }
+        motionComponent.velocityY *= motionComponent.frictionY
+//        if (motionComponent.frictionY >= HIGH_FRICTION) {
+//            motionComponent.velocityY = 0f
+//        } else if (motionComponent.frictionY > 0f) {
+//            motionComponent.velocityY *= max(0f, 1f - motionComponent.frictionY)  // ????
+//        }
 
         // Resolve the collision - move the entity out of the collider cell horizontally and
         // move the entity vertically only by ratio of the horizontal movement
@@ -285,7 +268,7 @@ open class CollisionMoveSystem : IteratingSystem(
             val collisionRectOffsetX = collisionComponent.rect.width + collisionComponent.rect.x
             val cxCell = cxMoved
             // New position left to the collider cell
-            positionComponent.x = cxCell * gridSize - 0.001f - collisionRectOffsetX
+            positionComponent.x = cxCell * gridSize - guardMove - collisionRectOffsetX
             collisionComponent.right = true
             // Ratio to the left edge of the collider cell
             val xDistance = cxCell * gridSize - xPos
@@ -296,7 +279,7 @@ open class CollisionMoveSystem : IteratingSystem(
             val collisionRectOffsetX = -collisionComponent.rect.x
             val cxCell = cxMoved + 1
             // New position right to the collider cell
-            positionComponent.x = cxCell * gridSize + 0.001f + collisionRectOffsetX
+            positionComponent.x = cxCell * gridSize + guardMove + collisionRectOffsetX
             collisionComponent.left = true
             // Ratio to the right edge of the collider cell
             val xDistance = cxCell * gridSize - xPos
@@ -321,11 +304,12 @@ open class CollisionMoveSystem : IteratingSystem(
         motionComponent.velocityY = 0f
 
         // Apply frictionX along the orthogonal axis (X)
-        if (motionComponent.frictionX >= HIGH_FRICTION) {
-            motionComponent.velocityX = 0f
-        } else if (motionComponent.frictionX > 0f) {
-            motionComponent.velocityX *= max(0f, 1f - motionComponent.frictionX)  // ???? maybe set HIGH_FRICTION to 1f
-        }
+        motionComponent.velocityX *= motionComponent.frictionX
+//        if (motionComponent.frictionX >= HIGH_FRICTION) {
+//            motionComponent.velocityX = 0f
+//        } else if (motionComponent.frictionX > 0f) {
+//            motionComponent.velocityX *= max(0f, 1f - motionComponent.frictionX)  // ???? maybe set HIGH_FRICTION to 1f
+//        }
 
         // Resolve the collision - move the entity out of the collider cell vertically and
         // move the entity horizontally only by ratio of the vertical movement
@@ -336,7 +320,7 @@ open class CollisionMoveSystem : IteratingSystem(
             val collisionRectOffsetY = collisionComponent.rect.height + collisionComponent.rect.y
             val cyCell = cyMoved
             // New Position on top of the collider cell
-            positionComponent.y = cyCell * gridSize - 0.001f - collisionRectOffsetY
+            positionComponent.y = cyCell * gridSize - guardMove - collisionRectOffsetY
             collisionComponent.isGrounded = true
             // Ratio to the top edge of the collider cell
             val yDistance = cyCell * gridSize - yPos
@@ -347,7 +331,7 @@ open class CollisionMoveSystem : IteratingSystem(
             val collisionRectOffsetY = -collisionComponent.rect.y  // Y Axis inverted - move the object downwards
             val cyCell = cyMoved + 1
             // New position bottom below the collider cell
-            positionComponent.y = cyCell * gridSize + 0.001f + collisionRectOffsetY
+            positionComponent.y = cyCell * gridSize + guardMove + collisionRectOffsetY
             collisionComponent.isCollidingAbove = true
             // Ratio to the bottom edge of the collider cell
             val yDistance = cyCell * gridSize - yPos
@@ -356,25 +340,6 @@ open class CollisionMoveSystem : IteratingSystem(
         // Move the entity horizontally to the correct position by applying only ratio of the movement
         // Ratio is always positive because above yDistance and movementY has always same sign
         if (yMovement.isNotAlmostZero()) positionComponent.x += xMovement * yRatio
-    }
-
-    protected open fun spawnExplosion(positionComponent: Position) {
-        world.createEntity("player_shoot_explosion") {
-            it += positionComponent {
-                x = positionComponent.x + positionComponent.offsetX
-                y = positionComponent.y + positionComponent.offsetY
-            }
-            it += spriteComponent {
-                name = "explosion_magma_01"
-                pivotX = 8f
-                pivotY = 8f
-                running = true
-                direction = ImageAnimation.Direction.ONCE_FORWARD
-                destroyOnAnimationFinished = true
-            }
-            it += rgbaComponent { alpha = 1f }
-            it += RenderLayerTag.MAIN_EFFECT_LAYER
-        }
     }
 
     /**
@@ -423,6 +388,9 @@ open class CollisionMoveSystem : IteratingSystem(
     /**
      * Process the collision steps and call the callback function for each step.
      *
+     * In case of friction set to INFINITE_FRICTION the callback function can return true.
+     * This is used for collision handling of objects which are destroyed on collision.
+     *
      * @param steps The number of steps to process.
      * @param overallMovementX The overall movement in the X direction.
      * @param overallMovementY The overall movement in the Y direction.
@@ -437,6 +405,7 @@ open class CollisionMoveSystem : IteratingSystem(
         steps: Int,
         overallMovementX: Float,
         overallMovementY: Float,
+        friction: Float,
         callback: (movementX: Float, movementY: Float) -> Boolean
     ): Boolean {
         if (steps > 0) {
@@ -447,11 +416,11 @@ open class CollisionMoveSystem : IteratingSystem(
 
             while (i < steps) {
                 val result = callback(movementX, movementY)
+//                if (result && friction == INFINITE_FRICTION) return true
                 if (result) return true
                 i++
             }
         }
         return false
     }
-
 }

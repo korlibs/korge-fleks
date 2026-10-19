@@ -3,6 +3,8 @@ package korlibs.korge.fleks.systems.collision
 import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.Collision.Companion.staticCollisionComponent
+import korlibs.korge.fleks.components.Motion.Companion.HIGH_FRICTION
+import korlibs.korge.fleks.components.Motion.Companion.INFINITE_FRICTION
 import korlibs.korge.fleks.components.Motion.Companion.staticMotionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.assetStore
@@ -25,7 +27,7 @@ class CollisionMoveSystemTest {
             overallMovementX: Float,
             overallMovementY: Float,
             callback: (movementX: Float, movementY: Float) -> Boolean,
-        ): Boolean = processCollisionSteps(steps, overallMovementX, overallMovementY, callback)
+        ): Boolean = processCollisionSteps(steps, overallMovementX, overallMovementY, INFINITE_FRICTION, callback)
 
         fun testResolveCollisionHorizontally(
             xMovement: Float,
@@ -472,7 +474,7 @@ class CollisionMoveSystemTest {
     @Test
     fun testResolveCollisionHorizontallyHighFrictionStopsVerticalMotion() {
         val pos = staticPositionComponent { x = 30f; y = 100f }
-        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = CollisionMoveSystem.HIGH_FRICTION }
+        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = HIGH_FRICTION }
         val collision = staticCollisionComponent {
             rect = CollisionRect(-8, -28, 17f, 29f)
         }
@@ -593,7 +595,7 @@ class CollisionMoveSystemTest {
     @Test
     fun testResolveCollisionVerticallyHighFrictionStopsHorizontalMotion() {
         val pos = staticPositionComponent { x = 100f; y = 2771f }
-        val motion = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = CollisionMoveSystem.HIGH_FRICTION }
+        val motion = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = HIGH_FRICTION }
         val collision = staticCollisionComponent {
             rect = CollisionRect(-8, -28, 17f, 29f)
         }
