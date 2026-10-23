@@ -39,7 +39,7 @@ open class CollisionMoveSystem : IteratingSystem(
     private val worldMapData = world.inject<AssetStore>("AssetStore").worldMapData
 
     // Check for divider of movement in X and Y direction
-    private val guardMove = 0f // 0.001f  TODO check if we can keep this zero
+    private val guardMove = 0.001f  // TODO check if we can keep this zero
     private val guard = 0.01f
     protected fun Float.isNotAlmostZero(): Boolean = this.absoluteValue > guard
 
@@ -122,10 +122,10 @@ open class CollisionMoveSystem : IteratingSystem(
         // Step 7: Impact Reaction & Playfield Clamping
         //
         // Now finally we can move our entity normally when there was no collision
-        if (!isColliding) {
-            positionComponent.x += overallMovementX
-            positionComponent.y += overallMovementY
-        }
+//        if (!isColliding) {
+//            positionComponent.x += overallMovementX
+//            positionComponent.y += overallMovementY
+//        }
 
         // Keep entity positions strictly within level boundaries (with 16px guard margin).
         checkPlayfieldBoundaries(positionComponent)
@@ -235,9 +235,23 @@ open class CollisionMoveSystem : IteratingSystem(
                 return true
             }
         }
+
+        // No collision detected so we can move the entity for the given distance
+        positionComponent.x += movementX
+        positionComponent.y += movementY
+
         return false
     }
 
+    /**
+     * Behavior Summary
+     *   - frictionX = 0f (Full Surface Friction): xImpact + (xMovement - xImpact) * 0f = xImpact (xMovement × yRatio).
+     *     Horizontal movement stops at the exact impact point on the surface.
+     *   - frictionX = 1f (No Surface Friction): xImpact + (xMovement - xImpact) * 1f = xMovement.
+     *     Unimpeded full horizontal displacement.
+     *   - 0f < frictionX < 1f: Linearly interpolates horizontal displacement between impact ratio
+     *     (xMovement × yRatio) and full movement (xMovement).
+     */
     protected fun resolveCollisionHorizontally(
         xMovement: Float,
         yMovement: Float,
@@ -285,9 +299,10 @@ open class CollisionMoveSystem : IteratingSystem(
             val xDistance = cxCell * gridSize - xPos
             xRatio = if (xMovement.isNotAlmostZero()) xDistance / xMovement else 0f
         }
-        // Move the entity vertically to the correct position by applying only ratio of the movement
-        // Ratio is always positive because above xDistance and movementX has always same sign
-        if (xMovement.isNotAlmostZero()) positionComponent.y += yMovement * xRatio
+        // Apply friction to the horizontal movement:
+        // NO_FRICTION (1f) == full movement (xMovement), INFINITE_FRICTION (0f) == only ratio of movement (xMovement * yRatio)
+        val yImpact = yMovement * xRatio
+        positionComponent.y += yImpact + (yMovement - yImpact) * motionComponent.frictionY
     }
 
     protected fun resolveCollisionVertically(
@@ -337,9 +352,10 @@ open class CollisionMoveSystem : IteratingSystem(
             val yDistance = cyCell * gridSize - yPos
             yRatio = if (yMovement.isNotAlmostZero()) yDistance / yMovement else 0f
         }
-        // Move the entity horizontally to the correct position by applying only ratio of the movement
-        // Ratio is always positive because above yDistance and movementY has always same sign
-        if (yMovement.isNotAlmostZero()) positionComponent.x += xMovement * yRatio
+        // Apply friction to the horizontal movement:
+        // NO_FRICTION (1f) == full movement (xMovement), INFINITE_FRICTION (0f) == only ratio of movement (xMovement * yRatio)
+        val xImpact = xMovement * yRatio
+        positionComponent.x += xImpact + (xMovement - xImpact) * motionComponent.frictionX
     }
 
     /**

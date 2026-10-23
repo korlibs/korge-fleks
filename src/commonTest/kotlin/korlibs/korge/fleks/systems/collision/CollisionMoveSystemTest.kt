@@ -616,6 +616,57 @@ class CollisionMoveSystemTest {
     }
 
     /**
+     * Test: Verify horizontal displacement interpolation in vertical collision resolution depending on frictionX.
+     *
+     * Inputs:
+     * - `xMovement = 10f`, `yMovement = 10f`, `yPos = 2780f`, `cyMoved = 174` (top of cell 174 at 2784px)
+     * - `yDistance = 2784f - 2780f = 4f`, `yRatio = 4f / 10f = 0.4f`
+     * - `xImpact = xMovement * yRatio = 10f * 0.4f = 4f`
+     *
+     * Expected Output:
+     * - `frictionX = 0f` (full friction): `pos.x` increases by `xImpact` (4f) -> `104f`
+     * - `frictionX = 1f` (no friction): `pos.x` increases by `xMovement` (10f) -> `110f`
+     */
+    @Test
+    fun testResolveCollisionVerticallyFrictionInterpolation() {
+        // Test frictionX = 0f (full surface friction -> only ratio displacement)
+        val posZeroFriction = staticPositionComponent { x = 100f; y = 2771f }
+        val motionZeroFriction = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = 0f }
+        val collision = staticCollisionComponent { rect = CollisionRect(-8, -28, 17f, 29f) }
+
+        collisionMoveSystem.testResolveCollisionVertically(
+            xMovement = 10f,
+            yMovement = 10f,
+            yPos = 2780f,
+            cyMoved = 174,
+            positionComponent = posZeroFriction,
+            motionComponent = motionZeroFriction,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        // yDistance = 2784 - 2780 = 4f. yRatio = 4 / 10 = 0.4f. xImpact = 10 * 0.4 = 4f.
+        assertEquals(104f, posZeroFriction.x, 0.001f, "With frictionX = 0f, X should move by xImpact (4f)")
+
+        // Test frictionX = 1f (no surface friction -> full horizontal displacement)
+        val posNoFriction = staticPositionComponent { x = 100f; y = 2771f }
+        val motionNoFriction = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = 1f }
+
+        collisionMoveSystem.testResolveCollisionVertically(
+            xMovement = 10f,
+            yMovement = 10f,
+            yPos = 2780f,
+            cyMoved = 174,
+            positionComponent = posNoFriction,
+            motionComponent = motionNoFriction,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        assertEquals(110f, posNoFriction.x, 0.001f, "With frictionX = 1f, X should move by full xMovement (10f)")
+    }
+
+    /**
      * Test: Verify vertical collision resolution when hitting a ceiling cell above.
      *
      * Inputs:
