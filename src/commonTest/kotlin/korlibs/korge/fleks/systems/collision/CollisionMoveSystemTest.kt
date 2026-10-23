@@ -3,7 +3,6 @@ package korlibs.korge.fleks.systems.collision
 import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.Collision.Companion.staticCollisionComponent
-import korlibs.korge.fleks.components.Motion.Companion.HIGH_FRICTION
 import korlibs.korge.fleks.components.Motion.Companion.INFINITE_FRICTION
 import korlibs.korge.fleks.components.Motion.Companion.staticMotionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
@@ -474,7 +473,7 @@ class CollisionMoveSystemTest {
     @Test
     fun testResolveCollisionHorizontallyHighFrictionStopsVerticalMotion() {
         val pos = staticPositionComponent { x = 30f; y = 100f }
-        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = HIGH_FRICTION }
+        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = 0f }
         val collision = staticCollisionComponent {
             rect = CollisionRect(-8, -28, 17f, 29f)
         }
@@ -491,7 +490,7 @@ class CollisionMoveSystemTest {
         )
 
         assertEquals(0f, motion.velocityX, "velocityX should be zeroed out")
-        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out when frictionY >= HIGH_FRICTION")
+        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out when frictionY = 0f")
     }
 
     /**
@@ -595,7 +594,7 @@ class CollisionMoveSystemTest {
     @Test
     fun testResolveCollisionVerticallyHighFrictionStopsHorizontalMotion() {
         val pos = staticPositionComponent { x = 100f; y = 2771f }
-        val motion = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = HIGH_FRICTION }
+        val motion = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = 0f }
         val collision = staticCollisionComponent {
             rect = CollisionRect(-8, -28, 17f, 29f)
         }
@@ -612,7 +611,7 @@ class CollisionMoveSystemTest {
         )
 
         assertEquals(0f, motion.velocityY, "velocityY should be zeroed out")
-        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out when frictionX >= HIGH_FRICTION")
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out when frictionX = 0f")
     }
 
     /**
