@@ -3,6 +3,7 @@ package korlibs.korge.fleks.systems.collision
 import com.github.quillraven.fleks.configureWorld
 import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.Collision.Companion.staticCollisionComponent
+import korlibs.korge.fleks.components.Motion.Companion.INFINITE_FRICTION
 import korlibs.korge.fleks.components.Motion.Companion.staticMotionComponent
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.assetStore
@@ -25,7 +26,7 @@ class CollisionMoveSystemTest {
             overallMovementX: Float,
             overallMovementY: Float,
             callback: (movementX: Float, movementY: Float) -> Boolean,
-        ): Boolean = processCollisionSteps(steps, overallMovementX, overallMovementY, callback)
+        ): Boolean = processCollisionSteps(steps, overallMovementX, overallMovementY, INFINITE_FRICTION, callback)
 
         fun testResolveCollisionHorizontally(
             xMovement: Float,
@@ -448,11 +449,48 @@ class CollisionMoveSystemTest {
             gridSize = 16f,
         )
 
-        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out on collision")
-        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out on collision")
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out on horizontal collision")
+        assertEquals(50f, motion.velocityY, "velocityY should remain unchanged when frictionY is 0f (allowing wall sliding)")
         assertTrue(collision.right, "collision.right should be set to true")
         // Position x = cxCell * 16 - 0.001 - (17 + -8) = 48 - 0.001 - 9 = 38.999f
         assertEquals(38.999f, pos.x, 0.001f, "Position X should snap left of cell 3")
+    }
+
+    /**
+     * Test: Verify horizontal collision resolution when frictionY >= HIGH_FRICTION (e.g. for high-friction shoot projectiles).
+     *
+     * Inputs:
+     * - `xMovement = 10f`, `yMovement = 5f`, `cxMoved = 3`
+     * - `pos`: `x = 30f, y = 100f`
+     * - `motion`: `velocityX = 100f, velocityY = 50f, frictionY = HIGH_FRICTION`
+     * - `collision.rect`: `(-8, -28, 17f, 29f)`
+     * - `gridSize = 16f`
+     *
+     * Expected Output:
+     * - `velocityX = 0f`
+     * - `velocityY = 0f` (both horizontal and vertical motion stopped due to high friction)
+     */
+    @Test
+    fun testResolveCollisionHorizontallyHighFrictionStopsVerticalMotion() {
+        val pos = staticPositionComponent { x = 30f; y = 100f }
+        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = 0f }
+        val collision = staticCollisionComponent {
+            rect = CollisionRect(-8, -28, 17f, 29f)
+        }
+
+        collisionMoveSystem.testResolveCollisionHorizontally(
+            xMovement = 10f,
+            yMovement = 5f,
+            xPos = 30f + (-8f) + 17f,
+            cxMoved = 3,
+            positionComponent = pos,
+            motionComponent = motion,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out")
+        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out when frictionY = 0f")
     }
 
     /**
@@ -537,6 +575,94 @@ class CollisionMoveSystemTest {
         assertTrue(collision.isGrounded, "collision.isGrounded should be set to true")
         // Position y = cyCell * 16 - 0.001 - (29 + -28) = 2784 - 0.001 - 1 = 2782.999f
         assertEquals(2782.999f, pos.y, 0.001f, "Position Y should snap on top of ground cell 174")
+    }
+
+    /**
+     * Test: Verify vertical collision resolution when frictionX >= HIGH_FRICTION (e.g. for high-friction shoot projectiles striking a surface).
+     *
+     * Inputs:
+     * - `xMovement = 5f`, `yMovement = 10f`, `cyMoved = 174`
+     * - `pos`: `x = 100f, y = 2771f`
+     * - `motion`: `velocityX = 50f, velocityY = 100f, frictionX = HIGH_FRICTION`
+     * - `collision.rect`: `(-8, -28, 17f, 29f)`
+     * - `gridSize = 16f`
+     *
+     * Expected Output:
+     * - `velocityY = 0f`
+     * - `velocityX = 0f` (both vertical and horizontal motion stopped due to high friction)
+     */
+    @Test
+    fun testResolveCollisionVerticallyHighFrictionStopsHorizontalMotion() {
+        val pos = staticPositionComponent { x = 100f; y = 2771f }
+        val motion = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = 0f }
+        val collision = staticCollisionComponent {
+            rect = CollisionRect(-8, -28, 17f, 29f)
+        }
+
+        collisionMoveSystem.testResolveCollisionVertically(
+            xMovement = 5f,
+            yMovement = 10f,
+            yPos = 2771f + (-28f) + 29f,
+            cyMoved = 174,
+            positionComponent = pos,
+            motionComponent = motion,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out")
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out when frictionX = 0f")
+    }
+
+    /**
+     * Test: Verify horizontal displacement interpolation in vertical collision resolution depending on frictionX.
+     *
+     * Inputs:
+     * - `xMovement = 10f`, `yMovement = 10f`, `yPos = 2780f`, `cyMoved = 174` (top of cell 174 at 2784px)
+     * - `yDistance = 2784f - 2780f = 4f`, `yRatio = 4f / 10f = 0.4f`
+     * - `xImpact = xMovement * yRatio = 10f * 0.4f = 4f`
+     *
+     * Expected Output:
+     * - `frictionX = 0f` (full friction): `pos.x` increases by `xImpact` (4f) -> `104f`
+     * - `frictionX = 1f` (no friction): `pos.x` increases by `xMovement` (10f) -> `110f`
+     */
+    @Test
+    fun testResolveCollisionVerticallyFrictionInterpolation() {
+        // Test frictionX = 0f (full surface friction -> only ratio displacement)
+        val posZeroFriction = staticPositionComponent { x = 100f; y = 2771f }
+        val motionZeroFriction = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = 0f }
+        val collision = staticCollisionComponent { rect = CollisionRect(-8, -28, 17f, 29f) }
+
+        collisionMoveSystem.testResolveCollisionVertically(
+            xMovement = 10f,
+            yMovement = 10f,
+            yPos = 2780f,
+            cyMoved = 174,
+            positionComponent = posZeroFriction,
+            motionComponent = motionZeroFriction,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        // yDistance = 2784 - 2780 = 4f. yRatio = 4 / 10 = 0.4f. xImpact = 10 * 0.4 = 4f.
+        assertEquals(104f, posZeroFriction.x, 0.001f, "With frictionX = 0f, X should move by xImpact (4f)")
+
+        // Test frictionX = 1f (no surface friction -> full horizontal displacement)
+        val posNoFriction = staticPositionComponent { x = 100f; y = 2771f }
+        val motionNoFriction = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = 1f }
+
+        collisionMoveSystem.testResolveCollisionVertically(
+            xMovement = 10f,
+            yMovement = 10f,
+            yPos = 2780f,
+            cyMoved = 174,
+            positionComponent = posNoFriction,
+            motionComponent = motionNoFriction,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        assertEquals(110f, posNoFriction.x, 0.001f, "With frictionX = 1f, X should move by full xMovement (10f)")
     }
 
     /**
