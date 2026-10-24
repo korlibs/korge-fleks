@@ -1,9 +1,13 @@
 package korlibs.korge.fleks.systems.collision
 
 import com.github.quillraven.fleks.configureWorld
+import korlibs.image.bitmap.Bitmap32
+import korlibs.image.bitmap.slice
 import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.Collision.Companion.staticCollisionComponent
+import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.Motion.Companion.staticMotionComponent
+import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.staticPositionComponent
 import korlibs.korge.fleks.components.assetStore
 import kotlin.test.Test
@@ -25,36 +29,77 @@ class CollisionMoveSystemTest {
             overallMovementX: Float,
             overallMovementY: Float,
             callback: (movementX: Float, movementY: Float) -> Boolean,
-        ): Boolean = processCollisionSteps(steps, overallMovementX, overallMovementY, callback)
+        ) = processCollisionSteps(steps, overallMovementX, overallMovementY, callback)
+
+        fun testCalculateRatio(
+            movement: Float,
+            posInitialLeadingEdge: Float,
+            posMovedLeadingEdge: Float,
+            gridSize: Float,
+        ): Float = calculateRatio(movement, posInitialLeadingEdge, posMovedLeadingEdge, gridSize)
+
+        fun testProbeCollisionHorizontally(
+            xMovement: Float,
+            yMovement: Float,
+            yPosTop: Float,
+            yPosBottom: Float,
+            xPosMovedLeadingEdge: Float,
+            verticalSteps: Int,
+            gridSize: Float,
+            debugShapesComponent: DebugCollisionShapes? = null,
+        ): Boolean = probeCollisionHorizontally(
+            xMovement, yMovement, yPosTop, yPosBottom, xPosMovedLeadingEdge, verticalSteps, gridSize, debugShapesComponent
+        )
+
+        fun testProbeCollisionVertically(
+            xMovement: Float,
+            yMovement: Float,
+            xPosMovedLeft: Float,
+            xPosMovedRight: Float,
+            yPosMovedLeadingEdge: Float,
+            horizontalSteps: Int,
+            gridSize: Float,
+            debugShapesComponent: DebugCollisionShapes? = null,
+        ): Boolean = probeCollisionVertically(
+            xMovement, yMovement, xPosMovedLeft, xPosMovedRight, yPosMovedLeadingEdge, horizontalSteps, gridSize, debugShapesComponent
+        )
 
         fun testResolveCollisionHorizontally(
             xMovement: Float,
-            yMovement: Float,
-            xPos: Float,
-            cxMoved: Int,
-            positionComponent: korlibs.korge.fleks.components.Position,
+            xPosMovedLeadingEdge: Float,
+            positionComponent: Position,
             motionComponent: korlibs.korge.fleks.components.Motion,
             collisionComponent: korlibs.korge.fleks.components.Collision,
             gridSize: Float,
         ) = resolveCollisionHorizontally(
-            xMovement, yMovement, xPos, cxMoved, positionComponent, motionComponent, collisionComponent, gridSize
+            xMovement, xPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize
         )
 
         fun testResolveCollisionVertically(
-            xMovement: Float,
             yMovement: Float,
-            yPos: Float,
-            cyMoved: Int,
-            positionComponent: korlibs.korge.fleks.components.Position,
+            yPosMovedLeadingEdge: Float,
+            positionComponent: Position,
             motionComponent: korlibs.korge.fleks.components.Motion,
             collisionComponent: korlibs.korge.fleks.components.Collision,
             gridSize: Float,
         ) = resolveCollisionVertically(
-            xMovement, yMovement, yPos, cyMoved, positionComponent, motionComponent, collisionComponent, gridSize
+            yMovement, yPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize
         )
 
-        fun testCheckPlayfieldBoundaries(positionComponent: korlibs.korge.fleks.components.Position) =
+        fun testCheckPlayfieldBoundaries(positionComponent: Position) =
             checkPlayfieldBoundaries(positionComponent)
+
+        fun testCheckCollision(
+            xMovement: Float,
+            yMovement: Float,
+            positionComponent: Position,
+            motionComponent: korlibs.korge.fleks.components.Motion,
+            collisionComponent: korlibs.korge.fleks.components.Collision,
+            gridSize: Float,
+            debugShapesComponent: DebugCollisionShapes? = null,
+        ): Boolean = checkCollision(
+            xMovement, yMovement, positionComponent, motionComponent, collisionComponent, gridSize, debugShapesComponent
+        )
     }
 
     private lateinit var collisionMoveSystem: TestCollisionMoveSystem
@@ -62,6 +107,17 @@ class CollisionMoveSystemTest {
     @Suppress("unused")
     private val world = configureWorld {
         injectables {
+            assetStore.worldMapData.init(
+                worldWidth = 512f,
+                worldHeight = 512f,
+                gridVaniaWidth = 4,
+                gridVaniaHeight = 4,
+                chunkWidth = 16,
+                chunkHeight = 16,
+                tileSize = 16,
+                collisionTiles = emptyList(),
+                collisionShapesBitmapSlice = Bitmap32(1, 1).slice()
+            )
             add("AssetStore", assetStore)
         }
         systems {
@@ -317,31 +373,29 @@ class CollisionMoveSystemTest {
     // -------------------------------------------------------------------------
 
     /**
-     * Test: Verify that `processCollisionSteps()` does not execute callback and returns `false` when step count is <= 0.
+     * Test: Verify that `processCollisionSteps()` does not execute callback when step count is <= 0.
      *
      * Inputs:
      * - `steps = 0` or `steps = -5`
      * - `overallMovementX = 10f`, `overallMovementY = 10f`
      *
-     * Expected Output: Callback count = 0, returns `false`.
+     * Expected Output: Callback count = 0.
      */
     @Test
     fun testProcessCollisionStepsZeroOrNegativeStepsDoesNotInvokeCallback() {
         var callCount = 0
-        val resultZero = collisionMoveSystem.testProcessCollisionSteps(0, 10f, 10f) { _, _ ->
+        collisionMoveSystem.testProcessCollisionSteps(0, 10f, 10f) { _, _ ->
             callCount++
             true
         }
         assertEquals(0, callCount, "Callback should not be invoked when steps is 0")
-        assertFalse(resultZero, "processCollisionSteps should return false when steps is 0")
 
         callCount = 0
-        val resultNeg = collisionMoveSystem.testProcessCollisionSteps(-5, 10f, 10f) { _, _ ->
+        collisionMoveSystem.testProcessCollisionSteps(-5, 10f, 10f) { _, _ ->
             callCount++
             true
         }
         assertEquals(0, callCount, "Callback should not be invoked when steps is negative")
-        assertFalse(resultNeg, "processCollisionSteps should return false when steps is negative")
     }
 
     /**
@@ -350,17 +404,16 @@ class CollisionMoveSystemTest {
      * Inputs:
      * - `steps = 1`, `overallMovementX = 10f`, `overallMovementY = 5f`
      *
-     * Expected Output: Callback invoked 1 time with `(10f, 5f)`, returns `false`.
+     * Expected Output: Callback invoked 1 time with `(10f, 5f)`.
      */
     @Test
     fun testProcessCollisionStepsSingleStepCalculation() {
         val invocations = mutableListOf<Pair<Float, Float>>()
-        val result = collisionMoveSystem.testProcessCollisionSteps(1, 10f, 5f) { moveX, moveY ->
+        collisionMoveSystem.testProcessCollisionSteps(1, 10f, 5f) { moveX, moveY ->
             invocations.add(Pair(moveX, moveY))
             false
         }
 
-        assertFalse(result, "Should return false when callback returns false")
         assertEquals(1, invocations.size, "Callback should be invoked exactly once for 1 step")
         assertEquals(10f, invocations[0].first, "movementX should equal overallMovementX / 1")
         assertEquals(5f, invocations[0].second, "movementY should equal overallMovementY / 1")
@@ -372,17 +425,16 @@ class CollisionMoveSystemTest {
      * Inputs:
      * - `steps = 2`, `overallMovementX = 20f`, `overallMovementY = -10f`
      *
-     * Expected Output: Callback invoked twice, both with `(10f, -5f)`. Returns `false`.
+     * Expected Output: Callback invoked twice, both with `(10f, -5f)`.
      */
     @Test
     fun testProcessCollisionStepsSplitsMovementEquallyAcrossSteps() {
         val invocations = mutableListOf<Pair<Float, Float>>()
-        val result = collisionMoveSystem.testProcessCollisionSteps(2, 20f, -10f) { moveX, moveY ->
+        collisionMoveSystem.testProcessCollisionSteps(2, 20f, -10f) { moveX, moveY ->
             invocations.add(Pair(moveX, moveY))
             false
         }
 
-        assertFalse(result)
         assertEquals(2, invocations.size, "Callback should be invoked twice for 2 steps")
         assertEquals(10f, invocations[0].first, "Step 1 movementX should be 20f / 2 = 10f")
         assertEquals(-5f, invocations[0].second, "Step 1 movementY should be -10f / 2 = -5f")
@@ -397,18 +449,124 @@ class CollisionMoveSystemTest {
      * - `steps = 3`, `overallMovementX = 30f`, `overallMovementY = 15f`
      * - Callback returns `true` on iteration 1.
      *
-     * Expected Output: Callback invoked 1 time only, `processCollisionSteps()` returns `true`.
+     * Expected Output: Callback invoked 1 time only.
      */
     @Test
     fun testProcessCollisionStepsStopsImmediatelyOnCallbackTrue() {
         val invocations = mutableListOf<Pair<Float, Float>>()
-        val result = collisionMoveSystem.testProcessCollisionSteps(3, 30f, 15f) { moveX, moveY ->
+        collisionMoveSystem.testProcessCollisionSteps(3, 30f, 15f) { moveX, moveY ->
             invocations.add(Pair(moveX, moveY))
             invocations.size == 1 // Return true on first step
         }
 
-        assertTrue(result, "processCollisionSteps should return true when callback returns true")
         assertEquals(1, invocations.size, "Callback should stop after first step when returning true")
+    }
+
+    // -------------------------------------------------------------------------
+    // Tests for calculateRatio()
+    // -------------------------------------------------------------------------
+
+    /**
+     * Test: Verify `calculateRatio()` for rightward movement towards a cell boundary.
+     *
+     * Inputs:
+     * - `movement = 10f`, `posInitialLeadingEdge = 39f`, `posMovedLeadingEdge = 49f` (cell 3 at 48px), `gridSize = 16f`
+     *
+     * Expected Output: `0.9f` (`(3 * 16 - 39) / 10 = 9 / 10`)
+     */
+    @Test
+    fun testCalculateRatioRightwardMovement() {
+        val ratio = collisionMoveSystem.testCalculateRatio(
+            movement = 10f,
+            posInitialLeadingEdge = 39f,
+            posMovedLeadingEdge = 49f,
+            gridSize = 16f,
+        )
+        assertEquals(0.9f, ratio, 0.001f, "Ratio for 9px distance over 10px movement should be 0.9f")
+    }
+
+    /**
+     * Test: Verify `calculateRatio()` for leftward movement towards a cell boundary.
+     *
+     * Inputs:
+     * - `movement = -10f`, `posInitialLeadingEdge = 36f`, `posMovedLeadingEdge = 26f` (cell 1 ends at 32px), `gridSize = 16f`
+     *
+     * Expected Output: `0.4f` (`((1 + 1) * 16 - 36) / -10 = -4 / -10`)
+     */
+    @Test
+    fun testCalculateRatioLeftwardMovement() {
+        val ratio = collisionMoveSystem.testCalculateRatio(
+            movement = -10f,
+            posInitialLeadingEdge = 36f,
+            posMovedLeadingEdge = 26f,
+            gridSize = 16f,
+        )
+        assertEquals(0.4f, ratio, 0.001f, "Ratio for 4px distance over -10px movement should be 0.4f")
+    }
+
+    /**
+     * Test: Verify `calculateRatio()` returns `0f` when movement is zero.
+     *
+     * Inputs:
+     * - `movement = 0f`, `posInitialLeadingEdge = 30f`, `posMovedLeadingEdge = 30f`, `gridSize = 16f`
+     *
+     * Expected Output: `0f`
+     */
+    @Test
+    fun testCalculateRatioZeroMovementReturnsZero() {
+        val ratio = collisionMoveSystem.testCalculateRatio(
+            movement = 0f,
+            posInitialLeadingEdge = 30f,
+            posMovedLeadingEdge = 30f,
+            gridSize = 16f,
+        )
+        assertEquals(0f, ratio, "Zero movement should produce 0 ratio")
+    }
+
+    // -------------------------------------------------------------------------
+    // Tests for probeCollisionHorizontally() & probeCollisionVertically()
+    // -------------------------------------------------------------------------
+
+    /**
+     * Test: Verify `probeCollisionHorizontally()` returns `false` when xMovement is almost zero.
+     *
+     * Inputs: `xMovement = 0f`, `yMovement = 5f`, `yPosTop = 100f`, `yPosBottom = 129f`, `xPosMovedLeadingEdge = 50f`
+     *
+     * Expected Output: `false`
+     */
+    @Test
+    fun testProbeCollisionHorizontallyZeroMovementReturnsFalse() {
+        val result = collisionMoveSystem.testProbeCollisionHorizontally(
+            xMovement = 0f,
+            yMovement = 5f,
+            yPosTop = 100f,
+            yPosBottom = 129f,
+            xPosMovedLeadingEdge = 50f,
+            verticalSteps = 2,
+            gridSize = 16f,
+        )
+        assertFalse(result, "probeCollisionHorizontally should return false when xMovement is zero")
+    }
+
+    /**
+     * Test: Verify `probeCollisionVertically()` returns `false` when yMovement is almost zero.
+     *
+     * Inputs: `xMovement = 5f`, `yMovement = 0f`, `xPosMovedLeft = 100f`, `xPosMovedRight = 117f`, `yPosMovedLeadingEdge = 2785f`
+     *
+     * Expected Output: `false`
+     */
+    @Test
+    fun testProbeCollisionVerticallyZeroMovementReturnsFalse() {
+        val result = collisionMoveSystem.testProbeCollisionVertically(
+            xMovement = 5f,
+            yMovement = 0f,
+            xPosMovedLeft = 100f,
+            xPosMovedRight = 117f,
+            yPosMovedLeadingEdge = 2785f,
+            horizontalSteps = 1,
+            gridSize = 16f,
+        )
+        assertFalse(result, "probeCollisionVertically should return false when yMovement is zero")
     }
 
     // -------------------------------------------------------------------------
@@ -419,47 +577,78 @@ class CollisionMoveSystemTest {
      * Test: Verify horizontal collision resolution when moving right into a wall cell.
      *
      * Inputs:
-     * - `xMovement = 10f`, `yMovement = 5f`, `cxMoved = 3` (cell 3 starts at 48px)
+     * - `xMovement = 10f`, `xPosMovedLeadingEdge = 49f` (cell 3 at 48px)
      * - `pos`: `x = 30f, y = 100f`
      * - `collision.rect`: `(-8, -28, 17f, 29f)`
      * - `gridSize = 16f`
      *
      * Expected Output:
-     * - `velocityX = 0f`, `velocityY = 0f`
+     * - `velocityX = 0f`, `velocityY = 50f`
      * - `collision.right = true`
      * - `pos.x` snapped to `38.999f` (`48.0 - 0.001 - (17 + -8)`).
      */
     @Test
     fun testResolveCollisionHorizontallyMovingRight() {
         val pos = staticPositionComponent { x = 30f; y = 100f }
-        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f }
+        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = 1f }
         val collision = staticCollisionComponent {
             rect = CollisionRect(-8, -28, 17f, 29f)
         }
 
         collisionMoveSystem.testResolveCollisionHorizontally(
             xMovement = 10f,
-            yMovement = 5f,
-            xPos = 30f + (-8f) + 17f, // 39f
-            cxMoved = 3, // cell 3 starts at 48px
+            xPosMovedLeadingEdge = 49f, // cell 3 starts at 48px
             positionComponent = pos,
             motionComponent = motion,
             collisionComponent = collision,
             gridSize = 16f,
         )
 
-        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out on collision")
-        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out on collision")
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out on horizontal collision")
+        assertEquals(50f, motion.velocityY, "velocityY should remain unchanged when frictionY is 1f")
         assertTrue(collision.right, "collision.right should be set to true")
         // Position x = cxCell * 16 - 0.001 - (17 + -8) = 48 - 0.001 - 9 = 38.999f
         assertEquals(38.999f, pos.x, 0.001f, "Position X should snap left of cell 3")
     }
 
     /**
+     * Test: Verify horizontal collision resolution when frictionY = 0f (stopping vertical motion).
+     *
+     * Inputs:
+     * - `xMovement = 10f`, `xPosMovedLeadingEdge = 49f`
+     * - `pos`: `x = 30f, y = 100f`
+     * - `motion`: `velocityX = 100f, velocityY = 50f, frictionY = 0f`
+     *
+     * Expected Output:
+     * - `velocityX = 0f`
+     * - `velocityY = 0f` (stopped due to 0f frictionY)
+     */
+    @Test
+    fun testResolveCollisionHorizontallyZeroFrictionStopsVerticalMotion() {
+        val pos = staticPositionComponent { x = 30f; y = 100f }
+        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = 0f }
+        val collision = staticCollisionComponent {
+            rect = CollisionRect(-8, -28, 17f, 29f)
+        }
+
+        collisionMoveSystem.testResolveCollisionHorizontally(
+            xMovement = 10f,
+            xPosMovedLeadingEdge = 49f,
+            positionComponent = pos,
+            motionComponent = motion,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out")
+        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out when frictionY = 0f")
+    }
+
+    /**
      * Test: Verify horizontal collision resolution when moving left into a wall cell.
      *
      * Inputs:
-     * - `xMovement = -10f`, `yMovement = 0f`, `cxMoved = 1`
+     * - `xMovement = -10f`, `xPosMovedLeadingEdge = 31f` (cell 1 at 16..32px)
      * - `pos`: `x = 50f, y = 100f`
      * - `collision.rect`: `(-8, -28, 17f, 29f)`
      * - `gridSize = 16f`
@@ -479,9 +668,7 @@ class CollisionMoveSystemTest {
 
         collisionMoveSystem.testResolveCollisionHorizontally(
             xMovement = -10f,
-            yMovement = 0f,
-            xPos = 50f + (-8f), // 42f
-            cxMoved = 1, // cell 1
+            xPosMovedLeadingEdge = 31f, // cell 1
             positionComponent = pos,
             motionComponent = motion,
             collisionComponent = collision,
@@ -503,7 +690,7 @@ class CollisionMoveSystemTest {
      * Test: Verify vertical collision resolution when landing on top of a ground cell.
      *
      * Inputs:
-     * - `xMovement = 0f`, `yMovement = 10f`, `cyMoved = 174` (cell 174 starts at 2784px)
+     * - `yMovement = 10f`, `yPosMovedLeadingEdge = 2785f` (cell 174 starts at 2784px)
      * - `pos`: `x = 100f, y = 2771f`
      * - `collision.rect`: `(-8, -28, 17f, 29f)`
      * - `gridSize = 16f`
@@ -522,10 +709,8 @@ class CollisionMoveSystemTest {
         }
 
         collisionMoveSystem.testResolveCollisionVertically(
-            xMovement = 0f,
             yMovement = 10f,
-            yPos = 2771f + (-28f) + 29f, // 2772f
-            cyMoved = 174, // cell 174 starts at 2784px
+            yPosMovedLeadingEdge = 2785f, // cell 174
             positionComponent = pos,
             motionComponent = motion,
             collisionComponent = collision,
@@ -540,10 +725,43 @@ class CollisionMoveSystemTest {
     }
 
     /**
+     * Test: Verify vertical collision resolution when frictionX = 0f (stopping horizontal motion).
+     *
+     * Inputs:
+     * - `yMovement = 10f`, `yPosMovedLeadingEdge = 2785f`
+     * - `pos`: `x = 100f, y = 2771f`
+     * - `motion`: `velocityX = 50f, velocityY = 100f, frictionX = 0f`
+     *
+     * Expected Output:
+     * - `velocityY = 0f`
+     * - `velocityX = 0f` (stopped due to 0f frictionX)
+     */
+    @Test
+    fun testResolveCollisionVerticallyZeroFrictionStopsHorizontalMotion() {
+        val pos = staticPositionComponent { x = 100f; y = 2771f }
+        val motion = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = 0f }
+        val collision = staticCollisionComponent {
+            rect = CollisionRect(-8, -28, 17f, 29f)
+        }
+
+        collisionMoveSystem.testResolveCollisionVertically(
+            yMovement = 10f,
+            yPosMovedLeadingEdge = 2785f,
+            positionComponent = pos,
+            motionComponent = motion,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        assertEquals(0f, motion.velocityY, "velocityY should be zeroed out")
+        assertEquals(0f, motion.velocityX, "velocityX should be zeroed out when frictionX = 0f")
+    }
+
+    /**
      * Test: Verify vertical collision resolution when hitting a ceiling cell above.
      *
      * Inputs:
-     * - `xMovement = 0f`, `yMovement = -10f`, `cyMoved = 2` (cell 2)
+     * - `yMovement = -10f`, `yPosMovedLeadingEdge = 40f` (cell 2 at 32px)
      * - `pos`: `x = 100f, y = 100f`
      * - `collision.rect`: `(-8, -28, 17f, 29f)`
      * - `gridSize = 16f`
@@ -562,10 +780,8 @@ class CollisionMoveSystemTest {
         }
 
         collisionMoveSystem.testResolveCollisionVertically(
-            xMovement = 0f,
             yMovement = -10f,
-            yPos = 100f + (-28f), // 72f
-            cyMoved = 2, // cell 2
+            yPosMovedLeadingEdge = 40f, // cell 2
             positionComponent = pos,
             motionComponent = motion,
             collisionComponent = collision,
@@ -613,5 +829,42 @@ class CollisionMoveSystemTest {
 
         assertEquals(100f, pos.x, "Position X inside level should remain unchanged")
         assertEquals(100f, pos.y, "Position Y inside level should remain unchanged")
+    }
+
+    // -------------------------------------------------------------------------
+    // Tests for checkCollision()
+    // -------------------------------------------------------------------------
+
+    /**
+     * Test: Verify that `checkCollision()` moves entity directly when no collision is detected.
+     *
+     * Inputs:
+     * - `xMovement = 10f`, `yMovement = 5f`
+     * - `pos`: `x = 100f, y = 100f`
+     *
+     * Expected Output:
+     * - Returns `false`.
+     * - `pos.x` increased by `10f` (110f), `pos.y` increased by `5f` (105f).
+     */
+    @Test
+    fun testCheckCollisionNoCollision() {
+        val pos = staticPositionComponent { x = 100f; y = 100f }
+        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f }
+        val collision = staticCollisionComponent {
+            rect = CollisionRect(-8, -28, 17f, 29f)
+        }
+
+        val isColliding = collisionMoveSystem.testCheckCollision(
+            xMovement = 10f,
+            yMovement = 5f,
+            positionComponent = pos,
+            motionComponent = motion,
+            collisionComponent = collision,
+            gridSize = 16f,
+        )
+
+        assertFalse(isColliding, "checkCollision should return false when no collision is detected")
+        assertEquals(110f, pos.x, 0.001f, "Position X should be moved by xMovement")
+        assertEquals(105f, pos.y, 0.001f, "Position Y should be moved by yMovement")
     }
 }

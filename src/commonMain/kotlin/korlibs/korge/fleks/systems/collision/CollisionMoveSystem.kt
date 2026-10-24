@@ -10,7 +10,6 @@ import korlibs.korge.fleks.components.Collision.Companion.CollisionComponent
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
-import korlibs.korge.fleks.components.LifeCycle.Companion.LifeCycleComponent
 import korlibs.korge.fleks.components.Motion
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Position
@@ -40,6 +39,7 @@ open class CollisionMoveSystem : IteratingSystem(
     private val worldMapData = world.inject<AssetStore>("AssetStore").worldMapData
 
     // Check for divider of movement in X and Y direction
+    private val guardMove = 0.001f  // TODO check if we can keep this zero
     private val guard = 0.01f
     protected fun Float.isNotAlmostZero(): Boolean = this.absoluteValue > guard
 
@@ -53,10 +53,6 @@ open class CollisionMoveSystem : IteratingSystem(
         val debugShapesComponent: DebugCollisionShapes? = entity.getOrNull(DebugCollisionShapesComponent)
         // Free debug points before we create new ones
         debugShapesComponent?.cleanup()
-
-//        if (motionComponent.velocityY < -0.01f || motionComponent.velocityY > 0.01f) {
-//            println("GridMoveSystem: '${world.nameOf(entity)}' velocityY before gravity: ${motionComponent.velocityY}")
-//        }
 
         val gravityComponent = entity.getOrNull(GravityComponent)
         // Apply gravity to the entity if it has a GravityComponent
@@ -92,50 +88,25 @@ open class CollisionMoveSystem : IteratingSystem(
             collisionComponent.isCollidingAbove = false
         }
 
-        // Return true if there is a collision
-        val isColliding = processCollisionSteps(steps, overallMovementX, overallMovementY) { movementX, movementY ->
+        processCollisionSteps(steps, overallMovementX, overallMovementY) { movementX, movementY ->
             checkCollision(movementX, movementY, positionComponent, motionComponent, collisionComponent, gridSize, debugShapesComponent)
         }
-
-        // TODO
-        // Depending of type of the entity we have to stop further collision steps (e.g. for shoots, because they get destroyed)
-        // Or collision checking continues when one direction is already colliding (e.g. the main character, which is grounded but still can move horizontally)
-
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        // Step 7: Impact Reaction & Playfield Clamping
-        //
-        // TODO Depending of object type we want to destroy the entity in the next frame (e.g. shoot projectiles)
-        if (isColliding) {
-            // Shoots need to be destroyed the next frame
-            val healthComponent = entity.getOrNull(LifeCycleComponent)
-            healthComponent?.healthCounter = 0
-        }
-
-//        motionComponent.velocityX *= motionComponent.frictionX
 
         if (motionComponent.velocityX.isAlmostEquals(0.0005f)) {
             // Velocity values smaller than 0.0005f are zeroed out
             motionComponent.velocityX = 0f
         }
 
-//        // Friction only in down direction (falling)
-//        if (motionComponent.velocityY > 0f) {
-//            motionComponent.velocityY *= motionComponent.frictionY
-//        }
-
         if (motionComponent.velocityY.isAlmostEquals(0.0005f)) {
             // Velocity values smaller than 0.0005f are zeroed out
             motionComponent.velocityY = 0f
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Step 7: Playfield Clamping
+        //
         // Keep entity positions strictly within level boundaries (with 16px guard margin).
         checkPlayfieldBoundaries(positionComponent)
-
-        // Now finally we can move our entity normally when there was no collision
-        if (!isColliding) {
-            positionComponent.x += overallMovementX
-            positionComponent.y += overallMovementY
-        }
     }
 
     /**
@@ -143,7 +114,7 @@ open class CollisionMoveSystem : IteratingSystem(
      * The entity is moved in the X direction and the collision is checked.
      * If a collision is detected, it is resolved and the collision flags are set accordingly.
      *
-     * @param movementX The amount of movement in pixels to check for collisions.
+     * @param xMovement The amount of movement in pixels to check for collisions.
      * @param positionComponent The position component of the entity. It contains the position (pivot point) of the entity.
      * @param motionComponent The motion component of the entity.
      * @param collisionComponent The collision component of the entity.
@@ -153,187 +124,252 @@ open class CollisionMoveSystem : IteratingSystem(
      * @return `true` if a collision was detected, `false` otherwise.
      */
     protected fun checkCollision(
-        movementX: Float,
-        movementY: Float,
+        xMovement: Float,
+        yMovement: Float,
         positionComponent: Position,
         motionComponent: Motion,
         collisionComponent: Collision,
         gridSize: Float,
         debugShapesComponent: DebugCollisionShapes?
     ): Boolean {
-        val guard = 0.001f
+        val xPositionSaved = positionComponent.x
 
-        // Define position of moved collision box edges
-        val xPosMovedLeft = positionComponent.x + positionComponent.offsetX + collisionComponent.rect.x + movementX
-        val yPosMovedTop = positionComponent.y + positionComponent.offsetY + collisionComponent.rect.y + movementY
+        // Set collision rect size with a small guard distance
+        val collisionRectSizeGuard = 0f  //0.001f
+        val collisionRectWidthGuarded = collisionComponent.rect.width - collisionRectSizeGuard
+        val collisionRectHeightGuarded = collisionComponent.rect.height - collisionRectSizeGuard
 
-        // Leading edge coordinates for probing
-        val xLeadingEdge = if (movementX > 0f) xPosMovedLeft + collisionComponent.rect.width - guard else xPosMovedLeft
-        val yLeadingEdge = if (movementY > 0f) yPosMovedTop + collisionComponent.rect.height - guard else yPosMovedTop
+        // Define initial (not moved) position of the entity collision box edges
+        val xPosInitialLeft = positionComponent.x + positionComponent.offsetX + collisionComponent.rect.x
+        val xPosInitialRight = xPosInitialLeft + collisionComponent.rect.width
+        val yPosInitialTop = positionComponent.y + positionComponent.offsetY + collisionComponent.rect.y
+        val yPosInitialBottom = yPosInitialTop + collisionComponent.rect.height
+
+        // Initial position of the leading edge of the collision box
+        val xPosInitialLeadingEdge = if (xMovement > 0f) xPosInitialRight else xPosInitialLeft
 
         // Span lengths along active edges (guarded to stay strictly within collider bounds)
-        val horizSpan = max(0f, collisionComponent.rect.width - guard)
-        val vertSpan = max(0f, collisionComponent.rect.height - guard)
+        val horizontalSpan = max(0f, collisionRectWidthGuarded)
+        val verticalSpan = max(0f, collisionRectHeightGuarded)
 
-        val horizSteps = (horizSpan / gridSize).toIntCeil()
-        val vertSteps = (vertSpan / gridSize).toIntCeil()
+        val horizontalSteps = (horizontalSpan / gridSize).toIntCeil()
+        val verticalSteps = (verticalSpan / gridSize).toIntCeil()
 
-        // Maximum steps needed to cover the longest edge
-        val steps = max(horizSteps, vertSteps)
+        var isCollidingHor: Boolean
+        var isCollidingVer: Boolean
 
-        for (i in 0..steps) {
-            // Horizontal movement probe: sample y along the vertical leading edge (xLeadingEdge)
-            val isCollidingHor = if (movementX.isNotAlmostZero() && i <= vertSteps) {
-                val yProbe = if (movementY < 0f) {
-                    max(yPosMovedTop, yPosMovedTop + vertSpan - i * gridSize)
-                } else {
-                    min(yPosMovedTop + i * gridSize, yPosMovedTop + vertSpan)
-                }
-                val cxProbe = (xLeadingEdge / gridSize).toIntFloor()
-                val cyProbe = (yProbe / gridSize).toIntFloor()
+        // Define position of moved collision box edges
+        val xPosMoveProbeLeft = xPosInitialLeft + xMovement
+        val xPosMoveProbeRight = xPosMoveProbeLeft + collisionRectWidthGuarded
+        // Leading collision box edge coordinates for probing
+        val xPosMovedLeadingEdge = if (xMovement > 0f) xPosMoveProbeRight else xPosMoveProbeLeft
 
-                debugShapesComponent?.let { debugSaveRatioPointX(it, xLeadingEdge, yProbe) }
-                debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData) }
-                worldMapData.hasCollision(cxProbe, cyProbe)
-            } else false
+        // Probe first horizontally and then vertically
+        isCollidingHor = probeCollisionHorizontally(xMovement, yMovement, yPosInitialTop, yPosInitialBottom, xPosMovedLeadingEdge, verticalSteps, gridSize, debugShapesComponent)
+        // Set horizontal position depending on collision
+        if (isCollidingHor) {
+            resolveCollisionHorizontally(xMovement, xPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize)
+        } else {  // No collision horizontally - we don't need to resolve
+            positionComponent.x += xMovement
+        }
 
-            // Vertical movement probe: sample x along the horizontal leading edge (yLeadingEdge)
-            val isCollidingVer = if (movementY.isNotAlmostZero() && i <= horizSteps) {
-                val xProbe = if (movementX < 0f) {
-                    max(xPosMovedLeft, xPosMovedLeft + horizSpan - i * gridSize)
-                } else {
-                    min(xPosMovedLeft + i * gridSize, xPosMovedLeft + horizSpan)
-                }
-                val cxProbe = (xProbe / gridSize).toIntFloor()
-                val cyProbe = (yLeadingEdge / gridSize).toIntFloor()
+        // Define position of moved collision box edges
+        val yPosMovedTop = yPosInitialTop + yMovement
+        val yPosMovedBottom = yPosMovedTop + collisionRectHeightGuarded
+        // Leading collision box edge coordinates for probing
+        val yPosMovedLeadingEdge = if (yMovement > 0f) yPosMovedBottom else yPosMovedTop
 
-                debugShapesComponent?.let { debugSaveRatioPointY(it, xProbe, yLeadingEdge) }
-                debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData) }
-                worldMapData.hasCollision(cxProbe, cyProbe)
-            } else false
+        val xPosMovedLeft = positionComponent.x + positionComponent.offsetX + collisionComponent.rect.x
+        val xPosMovedRight = xPosMovedLeft + collisionComponent.rect.width
 
-            if (isCollidingHor && !isCollidingVer) {
-                val xPos = positionComponent.x + positionComponent.offsetX +
-                    if (movementX > 0f) collisionComponent.rect.x + collisionComponent.rect.width else collisionComponent.rect.x.toFloat()
-                val cxMoved = (xLeadingEdge / gridSize).toIntFloor()
-                resolveCollisionHorizontally(movementX, movementY, xPos, cxMoved, positionComponent, motionComponent, collisionComponent, gridSize)
-                return true
-            } else if (!isCollidingHor && isCollidingVer) {
-                val yPos = positionComponent.y + positionComponent.offsetY +
-                    if (movementY > 0f) collisionComponent.rect.y + collisionComponent.rect.height else collisionComponent.rect.y.toFloat()
-                val cyMoved = (yLeadingEdge / gridSize).toIntFloor()
-                resolveCollisionVertically(movementX, movementY, yPos, cyMoved, positionComponent, motionComponent, collisionComponent, gridSize)
-                return true
-            } else if (isCollidingHor) {
-                val cxMoved = (xLeadingEdge / gridSize).toIntFloor()
-                val cyMoved = (yLeadingEdge / gridSize).toIntFloor()
-                val xDistance = if (movementX > 0f) xLeadingEdge - (cxMoved * gridSize) else ((cxMoved + 1) * gridSize) - xLeadingEdge
-                val yDistance = if (movementY > 0f) yLeadingEdge - (cyMoved * gridSize) else ((cyMoved + 1) * gridSize) - yLeadingEdge
 
-                if (xDistance > yDistance) {
-                    val xPos = positionComponent.x + positionComponent.offsetX +
-                        if (movementX > 0f) collisionComponent.rect.x + collisionComponent.rect.width else collisionComponent.rect.x.toFloat()
-                    resolveCollisionHorizontally(movementX, movementY, xPos, cxMoved, positionComponent, motionComponent, collisionComponent, gridSize)
-                } else {
-                    val yPos = positionComponent.y + positionComponent.offsetY +
-                        if (movementY > 0f) collisionComponent.rect.y + collisionComponent.rect.height else collisionComponent.rect.y.toFloat()
-                    resolveCollisionVertically(movementX, movementY, yPos, cyMoved, positionComponent, motionComponent, collisionComponent, gridSize)
-                }
-                return true
+        isCollidingVer = probeCollisionVertically(xMovement, yMovement, xPosMovedLeft, xPosMovedRight, yPosMovedLeadingEdge, horizontalSteps, gridSize, debugShapesComponent)
+        if (isCollidingVer) {
+            resolveCollisionVertically(yMovement, yPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize)
+
+            // Apply friction to the horizontal movement - possibly correct the horizontal movement with only a fraction of the total movement based on frictionX
+            val yPosInitialLeadingEdge = if (yMovement > 0f) yPosInitialBottom else yPosInitialTop
+            val yRatio = calculateRatio(yMovement, yPosInitialLeadingEdge, yPosMovedLeadingEdge, gridSize)
+            val xImpact = xMovement * yRatio
+            positionComponent.x = xPositionSaved + xImpact + (xMovement - xImpact) * motionComponent.frictionX
+
+        } else {  // No collision vertically
+            if (isCollidingHor) {
+                // Apply friction to the horizontal movement - Ratio to the left edge of the collider cell
+                val xRatio = calculateRatio(xMovement, xPosInitialLeadingEdge, xPosMovedLeadingEdge, gridSize)
+                val yImpact = yMovement * xRatio
+                positionComponent.y += yImpact + (yMovement - yImpact) * motionComponent.frictionY
+            } else {  // No collision horizontally - we don't need to resolve
+                positionComponent.y += yMovement
             }
         }
-        return false
+
+        return isCollidingHor || isCollidingVer
     }
 
-    protected fun resolveCollisionHorizontally(
+    /**
+     * Calculate the ratio between the initial and moved leading edge of the collision box when the
+     * entity collides. In that case the entity does not do the total movement but only a fraction.
+     */
+    protected fun calculateRatio(
+        movement: Float,
+        posInitialLeadingEdge: Float,
+        posMovedLeadingEdge: Float,
+        gridSize: Float
+    ): Float {
+        val cellMovedLeadingEdge = (posMovedLeadingEdge / gridSize).toIntFloor()
+        return if (movement > 0f) {  // Move to right side
+            val xDistance = cellMovedLeadingEdge * gridSize - posInitialLeadingEdge
+            if (movement.isNotAlmostZero()) xDistance / movement else 0f
+        } else {  // Move to left side
+            val xDistance = (cellMovedLeadingEdge + 1) * gridSize - posInitialLeadingEdge
+            if (movement.isNotAlmostZero()) xDistance / movement else 0f
+        }
+    }
+
+    /**
+     * This function probes the collision for a given entity when it moves horizontally.
+     */
+    protected fun probeCollisionHorizontally(
         xMovement: Float,
         yMovement: Float,
-        xPos: Float,
-        cxMoved: Int,
+        yPosTop: Float,
+        yPosBottom: Float,
+        xPosMovedLeadingEdge: Float,
+        verticalSteps: Int,
+        gridSize: Float,
+        debugShapesComponent: DebugCollisionShapes?
+    ): Boolean {
+        var isCollidingHor = false
+        for (i in 0..verticalSteps) {
+            // Horizontal movement probe: sample y along the vertical leading edge (xLeadingEdge)
+            isCollidingHor = if (!isCollidingHor && xMovement.isNotAlmostZero()) {
+                val yPosMovedProbe = if (yMovement < 0f) {  // Moving up - Y Axis inverted
+                    val xPosMovedProbeFromBottom = yPosBottom - i * gridSize
+                    max(xPosMovedProbeFromBottom, yPosTop)
+                } else {  // Moving down - Y Axis inverted
+                    val xPosMovedProbeFromTop = yPosTop + i * gridSize
+                    min(xPosMovedProbeFromTop, yPosBottom)
+                }
+                // Calculate the cell index and probe the cell for collision
+                val cxProbe = (xPosMovedLeadingEdge / gridSize).toIntFloor()
+                val cyProbe = (yPosMovedProbe / gridSize).toIntFloor()
+                debugShapesComponent?.let { debugSaveRatioPointX(it, xPosMovedLeadingEdge, yPosMovedProbe) }
+                debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData) }
+                worldMapData.hasCollision(cxProbe, cyProbe)
+            } else isCollidingHor
+        }
+        return isCollidingHor
+    }
+
+    /**
+     * This function probes the collision for a given entity when it moves vertically.
+     */
+    protected fun probeCollisionVertically(
+        xMovement: Float,
+        yMovement: Float,
+        xPosMovedLeft: Float,
+        xPosMovedRight: Float,
+        yPosMovedLeadingEdge: Float,
+        horizontalSteps: Int,
+        gridSize: Float,
+        debugShapesComponent: DebugCollisionShapes?
+    ): Boolean {
+        var isCollidingVer = false
+        for (i in 0..horizontalSteps) {
+            // Vertical movement probe: sample x along the horizontal leading edge (yLeadingEdge)
+            // e.g. when the player is standing on a platform --> we collide here
+            isCollidingVer = if (!isCollidingVer && yMovement.isNotAlmostZero()) {
+                val xPosMovedProbe = if (xMovement < 0f) {  // Move to left side
+                    val xPosMovedProbeFromRight = xPosMovedRight - i * gridSize
+                    max(xPosMovedProbeFromRight, xPosMovedLeft)
+                } else {  // Move to right side
+                    val xPosMovedProbeFromLeft = xPosMovedLeft + i * gridSize
+                    min(xPosMovedProbeFromLeft, xPosMovedRight)
+                }
+                // Calculate the cell index and probe the cell for collision
+                val cxProbe = (xPosMovedProbe / gridSize).toIntFloor()
+                val cyProbe = (yPosMovedLeadingEdge / gridSize).toIntFloor()
+                debugShapesComponent?.let { debugSaveRatioPointY(it, xPosMovedProbe, yPosMovedLeadingEdge) }
+                debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData) }
+                worldMapData.hasCollision(cxProbe, cyProbe)
+            } else isCollidingVer
+        }
+        return isCollidingVer
+    }
+
+    /**
+     * This function resolves the collision for a given entity when it collides horizontally.
+     */
+    protected fun resolveCollisionHorizontally(
+        xMovement: Float,
+        xPosMovedLeadingEdge: Float,
         positionComponent: Position,
         motionComponent: Motion,
         collisionComponent: Collision,
         gridSize: Float
     ) {
-
-        // We are in front of a collider cell (wall) - thus we stop the motion
+        // Stop movement along the collision axis (X)
         motionComponent.velocityX = 0f
-        motionComponent.velocityY = 0f
+
+        // Apply frictionY along the orthogonal axis (Y)
+        motionComponent.velocityY *= motionComponent.frictionY  // [0..1]
+        val cxMovedLeadingEdge = (xPosMovedLeadingEdge / gridSize).toIntFloor()
 
         // Resolve the collision - move the entity out of the collider cell horizontally and
         // move the entity vertically only by ratio of the horizontal movement
-        val xRatio: Float
         val isMovingRight = xMovement > 0f
         if (isMovingRight) {
             // Movement in right direction
             val collisionRectOffsetX = collisionComponent.rect.width + collisionComponent.rect.x
-            val cxCell = cxMoved
+            val cxCell = cxMovedLeadingEdge
             // New position left to the collider cell
-            positionComponent.x = cxCell * gridSize - 0.001f - collisionRectOffsetX
+            positionComponent.x = cxCell * gridSize - guardMove - collisionRectOffsetX
             collisionComponent.right = true
-            // Ratio to the left edge of the collider cell
-            val xDistance = cxCell * gridSize - xPos
-            xRatio = if (xMovement.isNotAlmostZero()) xDistance / xMovement else 0f
-
         } else {
             // Movement in left direction
             val collisionRectOffsetX = -collisionComponent.rect.x
-            val cxCell = cxMoved + 1
+            val cxCell = cxMovedLeadingEdge + 1
             // New position right to the collider cell
-            positionComponent.x = cxCell * gridSize + 0.001f + collisionRectOffsetX
+            positionComponent.x = cxCell * gridSize + guardMove + collisionRectOffsetX
             collisionComponent.left = true
-            // Ratio to the right edge of the collider cell
-            val xDistance = cxCell * gridSize - xPos
-            xRatio = if (xMovement.isNotAlmostZero()) xDistance / xMovement else 0f
         }
-        // Move the entity vertically to the correct position by applying only ratio of the movement
-        // Ratio is always positive because above xDistance and movementX has always same sign
-        if (xMovement.isNotAlmostZero()) positionComponent.y += yMovement * xRatio
     }
 
+    /**
+     * This function resolves the collision for a given entity when it collides vertically.
+     */
     protected fun resolveCollisionVertically(
-        xMovement: Float,
         yMovement: Float,
-        yPos: Float,
-        cyMoved: Int,
+        yPosMovedLeadingEdge: Float,
         positionComponent: Position,
         motionComponent: Motion,
         collisionComponent: Collision,
         gridSize: Float
     ) {
-        // We are in front of a collider cell (wall) - thus we stop the motion
-        motionComponent.velocityX = 0f
+        // Stop movement along the collision axis (Y)
         motionComponent.velocityY = 0f
+
+        // Apply frictionX along the orthogonal axis (X)
+        motionComponent.velocityX *= motionComponent.frictionX
+        val cyMovedLeadingEdge = (yPosMovedLeadingEdge / gridSize).toIntFloor()
 
         // Resolve the collision - move the entity out of the collider cell vertically and
         // move the entity horizontally only by ratio of the vertical movement
-        val yRatio: Float
         val isMovingDown = yMovement > 0f
-        if (isMovingDown) {
-            // Movement in bottom direction - Y Axis inverted !!!
+        if (isMovingDown) {  // Movement in bottom direction - Y Axis inverted !!!
             val collisionRectOffsetY = collisionComponent.rect.height + collisionComponent.rect.y
-            val cyCell = cyMoved
+            val cyCell = cyMovedLeadingEdge
             // New Position on top of the collider cell
-            positionComponent.y = cyCell * gridSize - 0.001f - collisionRectOffsetY
+            positionComponent.y = cyCell * gridSize - guardMove - collisionRectOffsetY
             collisionComponent.isGrounded = true
-            // Ratio to the top edge of the collider cell
-            val yDistance = cyCell * gridSize - yPos
-            yRatio = if (yMovement.isNotAlmostZero()) yDistance / yMovement else 0f
-
-        } else {
-            // Movement in top direction
+        } else {  // Movement in top direction
             val collisionRectOffsetY = -collisionComponent.rect.y  // Y Axis inverted - move the object downwards
-            val cyCell = cyMoved + 1
+            val cyCell = cyMovedLeadingEdge + 1
             // New position bottom below the collider cell
-            positionComponent.y = cyCell * gridSize + 0.001f + collisionRectOffsetY
+            positionComponent.y = cyCell * gridSize + guardMove + collisionRectOffsetY
             collisionComponent.isCollidingAbove = true
-            // Ratio to the bottom edge of the collider cell
-            val yDistance = cyCell * gridSize - yPos
-            yRatio = if (yMovement.isNotAlmostZero()) yDistance / yMovement else 0f
         }
-        // Move the entity horizontally to the correct position by applying only ratio of the movement
-        // Ratio is always positive because above yDistance and movementY has always same sign
-        if (yMovement.isNotAlmostZero()) positionComponent.x += xMovement * yRatio
     }
 
     /**
@@ -382,6 +418,9 @@ open class CollisionMoveSystem : IteratingSystem(
     /**
      * Process the collision steps and call the callback function for each step.
      *
+     * In case of friction set to INFINITE_FRICTION the callback function can return true.
+     * This is used for collision handling of objects which are destroyed on collision.
+     *
      * @param steps The number of steps to process.
      * @param overallMovementX The overall movement in the X direction.
      * @param overallMovementY The overall movement in the Y direction.
@@ -397,7 +436,7 @@ open class CollisionMoveSystem : IteratingSystem(
         overallMovementX: Float,
         overallMovementY: Float,
         callback: (movementX: Float, movementY: Float) -> Boolean
-    ): Boolean {
+    ) {
         if (steps > 0) {
             // Init movement and take into account that overall movement can be negative
             val movementX: Float = overallMovementX / steps
@@ -406,11 +445,10 @@ open class CollisionMoveSystem : IteratingSystem(
 
             while (i < steps) {
                 val result = callback(movementX, movementY)
-                if (result) return true
+                if (result) return
                 i++
             }
         }
-        return false
+        return
     }
-
 }
