@@ -590,7 +590,7 @@ class CollisionMoveSystemTest {
     @Test
     fun testResolveCollisionHorizontallyMovingRight() {
         val pos = staticPositionComponent { x = 30f; y = 100f }
-        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = 1f }
+        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; surfaceReactionY = 1f }
         val collision = staticCollisionComponent {
             rect = CollisionRect(-8, -28, 17f, 29f)
         }
@@ -626,7 +626,7 @@ class CollisionMoveSystemTest {
     @Test
     fun testResolveCollisionHorizontallyZeroFrictionStopsVerticalMotion() {
         val pos = staticPositionComponent { x = 30f; y = 100f }
-        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; frictionY = 0f }
+        val motion = staticMotionComponent { velocityX = 100f; velocityY = 50f; surfaceReactionY = 0f }
         val collision = staticCollisionComponent {
             rect = CollisionRect(-8, -28, 17f, 29f)
         }
@@ -739,7 +739,7 @@ class CollisionMoveSystemTest {
     @Test
     fun testResolveCollisionVerticallyZeroFrictionStopsHorizontalMotion() {
         val pos = staticPositionComponent { x = 100f; y = 2771f }
-        val motion = staticMotionComponent { velocityX = 50f; velocityY = 100f; frictionX = 0f }
+        val motion = staticMotionComponent { velocityX = 50f; velocityY = 100f; surfaceReactionX = 0f }
         val collision = staticCollisionComponent {
             rect = CollisionRect(-8, -28, 17f, 29f)
         }

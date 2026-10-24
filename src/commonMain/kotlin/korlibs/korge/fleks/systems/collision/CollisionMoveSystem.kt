@@ -11,6 +11,9 @@ import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Motion
+import korlibs.korge.fleks.components.Motion.Companion.GROUND_WALKING
+import korlibs.korge.fleks.components.Motion.Companion.EXPLOSION_SLIDING
+import korlibs.korge.fleks.components.Motion.Companion.BOUNCE
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -182,23 +185,33 @@ open class CollisionMoveSystem : IteratingSystem(
         val xPosMovedLeft = positionComponent.x + positionComponent.offsetX + collisionComponent.rect.x
         val xPosMovedRight = xPosMovedLeft + collisionComponent.rect.width
 
-
+        // Now probe vertically
         isCollidingVer = probeCollisionVertically(xMovement, yMovement, xPosMovedLeft, xPosMovedRight, yPosMovedLeadingEdge, horizontalSteps, gridSize, debugShapesComponent)
         if (isCollidingVer) {
             resolveCollisionVertically(yMovement, yPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize)
 
             // Apply friction to the horizontal movement - possibly correct the horizontal movement with only a fraction of the total movement based on frictionX
-            val yPosInitialLeadingEdge = if (yMovement > 0f) yPosInitialBottom else yPosInitialTop
-            val yRatio = calculateRatio(yMovement, yPosInitialLeadingEdge, yPosMovedLeadingEdge, gridSize)
-            val xImpact = xMovement * yRatio
-            positionComponent.x = xPositionSaved + xImpact + (xMovement - xImpact) * motionComponent.frictionX
+            if (motionComponent.surfaceReactionX != GROUND_WALKING) {
+                val yPosInitialLeadingEdge = if (yMovement > 0f) yPosInitialBottom else yPosInitialTop
+                val yRatio = calculateRatio(yMovement, yPosInitialLeadingEdge, yPosMovedLeadingEdge, gridSize)
+//                val xImpact = xMovement * yRatio
+//                positionComponent.x = xPositionSaved + xImpact + (xMovement - xImpact) * motionComponent.surfaceReactionX
+                val xDeltaMove = xMovement * yRatio
+                positionComponent.x = xPositionSaved + xDeltaMove
+            }
 
         } else {  // No collision vertically
             if (isCollidingHor) {
-                // Apply friction to the horizontal movement - Ratio to the left edge of the collider cell
-                val xRatio = calculateRatio(xMovement, xPosInitialLeadingEdge, xPosMovedLeadingEdge, gridSize)
-                val yImpact = yMovement * xRatio
-                positionComponent.y += yImpact + (yMovement - yImpact) * motionComponent.frictionY
+                if (motionComponent.surfaceReactionY == GROUND_WALKING) {
+                    positionComponent.y += yMovement
+                } else {
+                    // Apply friction to the horizontal movement - Ratio to the left edge of the collider cell
+                    val xRatio = calculateRatio(xMovement, xPosInitialLeadingEdge, xPosMovedLeadingEdge, gridSize)
+//                    val yImpact = yMovement * xRatio
+//                    positionComponent.y += yImpact + (yMovement - yImpact) * motionComponent.surfaceReactionY
+                    val yDeltaMove = yMovement * xRatio
+                    positionComponent.y += yDeltaMove
+                }
             } else {  // No collision horizontally - we don't need to resolve
                 positionComponent.y += yMovement
             }
@@ -309,11 +322,21 @@ open class CollisionMoveSystem : IteratingSystem(
         collisionComponent: Collision,
         gridSize: Float
     ) {
-        // Stop movement along the collision axis (X)
-        motionComponent.velocityX = 0f
+        // Stop movement along the collision axis (X) or bounce off the surface
+        when (motionComponent.surfaceReactionX) {
+            GROUND_WALKING -> {
+                motionComponent.velocityX = 0f
+                // velocityY not changed
+            }
+            EXPLOSION_SLIDING -> {
+                motionComponent.velocityX *= 0.07f  // Let the explosions move a bit into the wall
+                motionComponent.velocityY *= 0.1f   // and slide faster on the wall
+            }
+            BOUNCE -> {
+                motionComponent.velocityX *= -1f  // Bounce off the surface
+            }
+        }
 
-        // Apply frictionY along the orthogonal axis (Y)
-        motionComponent.velocityY *= motionComponent.frictionY  // [0..1]
         val cxMovedLeadingEdge = (xPosMovedLeadingEdge / gridSize).toIntFloor()
 
         // Resolve the collision - move the entity out of the collider cell horizontally and
@@ -347,11 +370,21 @@ open class CollisionMoveSystem : IteratingSystem(
         collisionComponent: Collision,
         gridSize: Float
     ) {
-        // Stop movement along the collision axis (Y)
-        motionComponent.velocityY = 0f
+        // Stop movement along the collision axis (Y) or bounce off the surface
+        when (motionComponent.surfaceReactionY) {
+            GROUND_WALKING -> {
+                // velocityX not changed
+                motionComponent.velocityY = 0f
+            }
+            EXPLOSION_SLIDING -> {
+                motionComponent.velocityX *= 0.1f   // Let the explosions slide on the ground (or ceiling)
+                motionComponent.velocityY *= 0.07f  // and move them a bit into the ground
+            }
+            BOUNCE -> {
+                motionComponent.velocityY *= -1f  // Bounce off the surface
+            }
+        }
 
-        // Apply frictionX along the orthogonal axis (X)
-        motionComponent.velocityX *= motionComponent.frictionX
         val cyMovedLeadingEdge = (yPosMovedLeadingEdge / gridSize).toIntFloor()
 
         // Resolve the collision - move the entity out of the collider cell vertically and

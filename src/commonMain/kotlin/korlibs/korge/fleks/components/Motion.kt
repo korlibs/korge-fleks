@@ -23,9 +23,9 @@ class Motion private constructor(
     var velocityX: Float = 0f,  // in world units (grid size e.g. 16 pixels) per second
     var velocityY: Float = 0f,
 
-    // Friction handles surface-to-surface contact (e.g. walking on ground)
-    var frictionX: Float = NO_FRICTION,  // [0..1]  1 - no friction, 0 - full friction
-    var frictionY: Float = NO_FRICTION,  // TODO Check if we need different friction for X and Y direction
+    // Surface reaction surface-to-surface contact (e.g. walking on ground)
+    var surfaceReactionX: Int = GROUND_WALKING,
+    var surfaceReactionY: Int = GROUND_WALKING,
 
     // Damping handles energy dissipation over time or through space (e.g. when going through water basin)
     var damping: Float = 1f,  // [0..1]  1 - no damping, 0 - full damping  // TODO Not used yet
@@ -39,8 +39,8 @@ class Motion private constructor(
         accelerationY = from.accelerationY
         velocityX = from.velocityX
         velocityY = from.velocityY
-        frictionX = from.frictionX
-        frictionY = from.frictionY
+        surfaceReactionX = from.surfaceReactionX
+        surfaceReactionY = from.surfaceReactionY
         damping = from.damping
         lastHorizontalVelocity = from.lastHorizontalVelocity
     }
@@ -52,8 +52,8 @@ class Motion private constructor(
         accelerationY = 0f
         velocityX = 0f
         velocityY = 0f
-        frictionX = 0f
-        frictionY = 0f
+        surfaceReactionX = GROUND_WALKING
+        surfaceReactionY = GROUND_WALKING
         damping = 0f
         lastHorizontalVelocity = 0f
     }
@@ -73,11 +73,10 @@ class Motion private constructor(
 
         private val pool = Pool(AppConfig.POOL_PREALLOCATE, "Motion") { Motion() }
 
-        const val NO_FRICTION = 1f
-        const val LOW_FRICTION = 0.8f
-        const val MEDIUM_FRICTION = 0.5f
-        const val HIGH_FRICTION = 0.2f
-        const val INFINITE_FRICTION = 0f
+        const val GROUND_WALKING = 0
+        const val EXPLOSION_SLIDING = 1
+        const val BOUNCE = 2
+        const val DESTROY = 3
     }
 
     // Clone a new instance of the component from the pool
