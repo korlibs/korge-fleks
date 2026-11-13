@@ -141,8 +141,8 @@ class ParallaxRenderSystem(
                 batch.drawQuad(
                     tex = ctx.getTex(parallaxLayer.bmpSlice),
                     // global + target + (layer index) + local (used for scrolling the layer)
-                    x = x + xIndex * parallaxLayer.bmpSlice.width + local.x + local.offsetX,
-                    y = y + yIndex * parallaxLayer.bmpSlice.height + local.y + local.offsetY,
+                    x = (x + xIndex * parallaxLayer.bmpSlice.width + local.x + local.offsetX).toFloat(),
+                    y = (y + yIndex * parallaxLayer.bmpSlice.height + local.y + local.offsetY).toFloat(),
                     filtering = false,
                     colorMul = rgba
                 )
@@ -154,7 +154,7 @@ class ParallaxRenderSystem(
     private fun drawParallaxPlaneLayer(
         global: Position,
         local: Position,
-        localScroll: Float,
+        localScroll: Double,
         parallaxMode: Mode,
         repeat: Boolean,
         lineTexture: LineTexture,
@@ -173,8 +173,8 @@ class ParallaxRenderSystem(
                 for(xIndex in -1 - countH until countH + 1) {
                     batch.drawQuad(
                         tex = ctx.getTex(lineTexture.bmpSlice),
-                        x = x + xIndex * lineTexture.bmpSlice.width + AppConfig.VIEW_PORT_WIDTH * 0.5f + localScroll,
-                        y = y + local.offsetY,
+                        x = (x + xIndex * lineTexture.bmpSlice.width + AppConfig.VIEW_PORT_WIDTH * 0.5f + localScroll).toFloat(),
+                        y = (y + local.offsetY).toFloat(),
                         filtering = false,
                         colorMul = rgba
                     )
@@ -189,8 +189,8 @@ class ParallaxRenderSystem(
                 for(yIndex in -1 - countV until countV + 1) {
                     batch.drawQuad(
                         tex = ctx.getTex(lineTexture.bmpSlice),
-                        x = global.x + targetX + local.offsetX,
-                        y = y + yIndex * lineTexture.bmpSlice.height + AppConfig.VIEW_PORT_HEIGHT * 0.5f + localScroll,
+                        x = (global.x + targetX + local.offsetX).toFloat(),
+                        y = (y + yIndex * lineTexture.bmpSlice.height + AppConfig.VIEW_PORT_HEIGHT * 0.5f + localScroll).toFloat(),
                         filtering = false,
                         colorMul = rgba
                     )

@@ -14,8 +14,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Gravity")
 class Gravity private constructor(
-    var gravity: Float = 0f,
-    var gravityMultiplier: Float = 0f,
+    var gravity: Double = 0.0,
+    var gravityMultiplier: Double = 0.0,
     var enableGravity: Boolean = false
 ) : PoolableComponent<Gravity>() {
     // Init an existing component data instance with data from another component
@@ -29,8 +29,8 @@ class Gravity private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        gravity = 0f
-        gravityMultiplier = 0f
+        gravity = 0.0
+        gravityMultiplier = 0.0
         enableGravity = false
     }
 
@@ -76,11 +76,11 @@ class Gravity private constructor(
         pool.free(this)
     }
 
-    fun calculateDeltaGravity(): Float {
+    fun calculateDeltaGravity(): Double {
         return if (enableGravity) {
             gravityMultiplier * gravity
         } else {
-            0f
+            0.0
         }
     }
 }

@@ -45,16 +45,16 @@ data class FireAndDustEffectBlueprint(
             if (screenCoordinates) it += ScreenCoordinatesTag
             it += motionComponent {
                 velocityX =
-                    if (velocityVariationX != 0f) this@FireAndDustEffectBlueprint.velocityX + (-velocityVariationX..velocityVariationX).random()
-                    else this@FireAndDustEffectBlueprint.velocityX
+                    (if (velocityVariationX != 0f) this@FireAndDustEffectBlueprint.velocityX + (-velocityVariationX..velocityVariationX).random()
+                    else this@FireAndDustEffectBlueprint.velocityX).toDouble()
                 velocityY =
-                    if (velocityVariationY != 0f) this@FireAndDustEffectBlueprint.velocityY + (-velocityVariationY..velocityVariationY).random()
-                    else this@FireAndDustEffectBlueprint.velocityY
+                    (if (velocityVariationY != 0f) this@FireAndDustEffectBlueprint.velocityY + (-velocityVariationY..velocityVariationY).random()
+                    else this@FireAndDustEffectBlueprint.velocityY).toDouble()
             }
             it += spriteComponent {
                 name = spriteName
-                pivotX = offsetX
-                pivotY = offsetY
+                pivotX = offsetX.toDouble()
+                pivotY = offsetY.toDouble()
                 running = true
                 direction = ImageAnimation.Direction.ONCE_FORWARD
                 destroyOnAnimationFinished = true
@@ -63,7 +63,7 @@ data class FireAndDustEffectBlueprint(
             if (fadeOutDuration > 0f) {
                 it += tweenSequenceComponent {
                     // Fade out effect objects
-                    tweenRgba { target = it; alpha = 0f; duration = fadeOutDuration }
+                    tweenRgba { target = it; alpha = 0.0; duration = fadeOutDuration.toDouble() }
                     deleteEntity { target = it }
                 }
             }

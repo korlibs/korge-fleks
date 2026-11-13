@@ -63,7 +63,7 @@ fun WorldConfiguration.addKorgeFleksSystems() {
 
         // Systems below depend on changes of above tween engine systems
         add(LifeCycleSystem())
-        add(ParallaxSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))
+        add(ParallaxSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO.toDouble()))
         add(StaticMoveSystem())
         add(SpriteVisibilitySystem())
         add(EntityLinkSystem())

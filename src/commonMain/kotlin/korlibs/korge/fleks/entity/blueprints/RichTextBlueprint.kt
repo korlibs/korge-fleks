@@ -45,15 +45,15 @@ data class RichTextBlueprint(
         entity.configure {
             if (screenCoordinates) it += ScreenCoordinatesTag
             it += positionComponent {
-                x = this@RichTextBlueprint.x
-                y = this@RichTextBlueprint.y
+                x = this@RichTextBlueprint.x.toDouble()
+                y = this@RichTextBlueprint.y.toDouble()
             }
             it += textFieldComponent {
                 text = this@RichTextBlueprint.text
                 fontName = this@RichTextBlueprint.fontName
                 textRangeEnd = this@RichTextBlueprint.textRangeEnd
-                width = this@RichTextBlueprint.width
-                height = this@RichTextBlueprint.height
+                width = this@RichTextBlueprint.width.toDouble()
+                height = this@RichTextBlueprint.height.toDouble()
                 horizontalAlign = this@RichTextBlueprint.horizontalAlign
                 verticalAlign = this@RichTextBlueprint.verticalAlign
             }

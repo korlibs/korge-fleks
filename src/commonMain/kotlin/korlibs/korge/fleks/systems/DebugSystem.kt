@@ -22,14 +22,14 @@ class DebugSystem: IteratingSystem(
 ) {
     private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
     private var positionTrigger = false
-    private var xPos = 0f
-    private var yPos = 0f
+    private var xPos = 0.0
+    private var yPos = 0.0
 
     /**
      * This function is used to move the debug entity to the given position. This is useful for quickly
      * moving inside the game world to a specific position for debugging purposes.
      */
-    fun moveDebugEntity(position: Vector2F) {
+    fun moveDebugEntity(position: Vector2D) {
         // Use up position to store current touch position
         xPos = position.x
         yPos = position.y

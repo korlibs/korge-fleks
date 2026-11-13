@@ -12,9 +12,9 @@ import korlibs.image.bitmap.BmpSlice
  */
 class WorldMapData {
     // Size of whole world in pixel - init with size of one chunk, but will be set to actual world size in init function
-    var worldWidth: Float = 1024f
+    var worldWidth: Double = 1024.0
         private set
-    var worldHeight: Float = 1024f
+    var worldHeight: Double = 1024.0
         private set
     // Size of the world in chunks in horizontal and vertical direction (grid-vania) - init with 1x1, but will be set to actual grid-vania size in init function
     var gridVaniaWidth: Int = 1
@@ -53,8 +53,8 @@ class WorldMapData {
     private var listOfEmptyTilesetErrorsLogged: MutableSet<Pair<String, Int>> = mutableSetOf()
 
     fun init(
-        worldWidth: Float,
-        worldHeight: Float,
+        worldWidth: Double,
+        worldHeight: Double,
         gridVaniaWidth: Int,
         gridVaniaHeight: Int,
         chunkWidth: Int,

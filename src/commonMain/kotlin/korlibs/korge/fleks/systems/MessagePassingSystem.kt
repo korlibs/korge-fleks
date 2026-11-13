@@ -56,7 +56,7 @@ class MessagePassingSystem : IteratingSystem(
                     // Release wait state if required - this is used in tween sequences to wait for a message
                     if (message.releaseWait && receiverEntity has TweenSequenceComponent) {
                         val tweenSequenceComponent = receiverEntity[TweenSequenceComponent]
-                        tweenSequenceComponent.waitTime = 0f
+                        tweenSequenceComponent.waitTime = 0.0
                     }
                     // If not unlimited messages, decrease counter - cleanup must be done OUTSIDE of this loop
                     if (message.remainingMsgs > 0) {

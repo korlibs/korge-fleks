@@ -37,7 +37,7 @@ class SpriteSystem : IteratingSystem(
 
 
                 val frame = spriteFrames[spriteComponent.frameIndex]  // frameIndex is within list bounds
-                spriteComponent.nextFrameIn = frame.duration
+                spriteComponent.nextFrameIn = frame.duration.toDouble()
                 spriteComponent.increment = when (spriteComponent.direction) {
                     FORWARD -> +1
                     REVERSE -> -1

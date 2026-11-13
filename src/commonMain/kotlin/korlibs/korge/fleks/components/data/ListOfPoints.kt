@@ -71,7 +71,11 @@ class ListOfPoints private constructor(
      * @param x The x-coordinate of the point.
      * @param y The y-coordinate of the point.
      */
-    fun addPoint(x: Float, y: Float) {
+    fun addPoint(x: Double, y: Double) {
         points.add( point { this.x = x; this.y = y } )
+    }
+
+    fun addPoint(x: Number, y: Number) {
+        points.add( point { this.x = x.toDouble(); this.y = y.toDouble() } )
     }
 }

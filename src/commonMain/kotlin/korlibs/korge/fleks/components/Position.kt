@@ -15,10 +15,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Position")
 class Position private constructor(
-    var x: Float = 0f,
-    var y: Float = 0f,
-    var offsetX: Float = 0f,
-    var offsetY: Float = 0f
+    var x: Double = 0.0,
+    var y: Double = 0.0,
+    var offsetX: Double = 0.0,
+    var offsetY: Double = 0.0
 ) : PoolableComponent<Position>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -32,10 +32,10 @@ class Position private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        x = 0f
-        y = 0f
-        offsetX = 0f
-        offsetY = 0f
+        x = 0.0
+        y = 0.0
+        offsetX = 0.0
+        offsetY = 0.0
     }
 
     override fun type() = PositionComponent
@@ -99,18 +99,30 @@ class Position private constructor(
     /**
      * Set the position of the entity to the specified x and y coordinates.
      */
-    fun set(x: Float, y: Float)
+    fun set(x: Double, y: Double)
     {
         this.x = x
         this.y = y
     }
 
+    fun set(x: Number, y: Number)
+    {
+        this.x = x.toDouble()
+        this.y = y.toDouble()
+    }
+
     /**
      * Set the offset of the entity to the specified x and y coordinates.
      */
-    fun setOffset(x: Float, y: Float)
+    fun setOffset(x: Double, y: Double)
     {
         this.offsetX = x
         this.offsetY = y
+    }
+
+    fun setOffset(x: Number, y: Number)
+    {
+        this.offsetX = x.toDouble()
+        this.offsetY = y.toDouble()
     }
 }

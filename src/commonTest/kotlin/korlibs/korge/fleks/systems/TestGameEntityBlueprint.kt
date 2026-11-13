@@ -24,17 +24,17 @@ data class TestGameEntityBlueprint(
 
         entity.configure {
             it += positionComponent {
-                x = 100f
-                y = 200f
+                x = 100.0
+                y = 200.0
             }
 
             it += tweenSequenceComponent {
                 parallelTweens {
-                    tweenPosition { target = it; x = 5000f; delay = 1f; duration = 60f; easing = Easing.EASE_IN }
+                    tweenPosition { target = it; x = 5000.0; delay = 1.0; duration = 60.0; easing = Easing.EASE_IN }
                 }
-                wait { duration = 0.5f }
+                wait { duration = 0.5 }
                 spawnEntity { entityBlueprint = "test_game_object_Blueprint" }
-                wait { duration = 60f }
+                wait { duration = 60.0 }
                 deleteEntity { target = it }
             }
 
@@ -60,18 +60,18 @@ data class GameObjectBlueprint(
 
         entity.configure {
             it += positionComponent {
-                x = 100f
-                y = 200f
+                x = 100.0
+                y = 200.0
             }
 
             it += sizeComponent {
-                width = 100f
-                height = 100f
+                width = 100.0
+                height = 100.0
             }
 
             it += tweenSequenceComponent {
-                tweenPosition { target = it; x = 500f; y = 1000f; duration = 50f; easing = Easing.EASE_OUT }
-                wait { duration = 1f }
+                tweenPosition { target = it; x = 500.0; y = 1000.0; duration = 50.0; easing = Easing.EASE_OUT }
+                wait { duration = 1.0 }
                 deleteEntity { target = it }
             }
         }

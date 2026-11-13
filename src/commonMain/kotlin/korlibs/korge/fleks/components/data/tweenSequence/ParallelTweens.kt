@@ -16,8 +16,8 @@ class ParallelTweens private constructor(
     // We have List with static tweens and pass ownership to TweenSequenceComponent for deleting the tweens of a list when the component is removed from an entity
 
     override var target: Entity = Entity.NONE,    // not used
-    override var delay: Float? = null,
-    override var duration: Float? = null,
+    override var delay: Double? = null,
+    override var duration: Double? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
 ) : TweenBase, TweenListBase, Poolable<ParallelTweens> {
     // Init an existing data instance with data from another one

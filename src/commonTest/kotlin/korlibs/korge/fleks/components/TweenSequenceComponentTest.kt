@@ -53,19 +53,19 @@ internal class TweenSequenceComponentTest {
 
         val compUnderTest = tweenSequenceComponent {
             spawnNewTweenSequence {
-                delay = 1f
-                duration = 2f
+                delay = 1.0
+                duration = 2.0
                 easing = Easing.EASE_IN_BACK
 
                 parallelTweens {
-                    delay = 1.2f
-                    duration = 3.4f
+                    delay = 1.2
+                    duration = 3.4
                     easing = Easing.EASE_CLAMP_END
 
                     spawnEntity {
                         entityBlueprint = testEntityConfig.name
-                        x = 10.2f
-                        y = 20.3f
+                        x = 10.2
+                        y = 20.3
                         target = Entity(43, 0u)
                     }
                     deleteEntity { target = Entity(44, 0u) }
@@ -77,11 +77,11 @@ internal class TweenSequenceComponentTest {
                     tweenSound { target = Entity(52, 0u) }
                 }
             }
-            wait { duration = 3.2f }
+            wait { duration = 3.2 }
 
             index = 1
-            timeProgress = 3.4f
-            waitTime = 5.6f
+            timeProgress = 3.4
+            waitTime = 5.6
             executed = true
         }
 

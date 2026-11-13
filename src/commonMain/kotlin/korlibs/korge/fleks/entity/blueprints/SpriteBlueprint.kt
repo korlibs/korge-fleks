@@ -38,8 +38,8 @@ data class SpriteBlueprint(
 
         entity.configure {
             it += positionComponent {
-                x = this@SpriteBlueprint.x
-                y = this@SpriteBlueprint.y
+                x = this@SpriteBlueprint.x.toDouble()
+                y = this@SpriteBlueprint.y.toDouble()
             }
             it += spriteComponent {
                 name = assetName

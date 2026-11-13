@@ -13,8 +13,8 @@ import kotlinx.serialization.Serializable
 */
 @Serializable @SerialName("Point")
 class Point private constructor(
-    var x: Float = 0f,
-    var y: Float = 0f
+    var x: Double = 0.0,
+    var y: Double = 0.0
 ) : Poolable<Point> {
     // Init an existing data instance with data from another one
     override fun init(from: Point) {
@@ -25,8 +25,8 @@ class Point private constructor(
     // Cleanup data instance manually
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
-        x = 0f
-        y = 0f
+        x = 0.0
+        y = 0.0
     }
 
     // Clone a new data instance from the pool

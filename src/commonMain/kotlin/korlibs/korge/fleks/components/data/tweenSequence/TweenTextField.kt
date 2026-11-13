@@ -17,8 +17,8 @@ class TweenTextField private constructor(
     var textRangeEnd: Int? = null,
 
     override var target: Entity = Entity.NONE,
-    override var delay: Float? = null,
-    override var duration: Float? = null,
+    override var delay: Double? = null,
+    override var duration: Double? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null
 ) : TweenBase, Poolable<TweenTextField> {
     // Init an existing data instance with data from another one

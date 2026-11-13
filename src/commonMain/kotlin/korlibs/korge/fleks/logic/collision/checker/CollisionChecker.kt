@@ -12,14 +12,14 @@ import korlibs.korge.fleks.components.DebugCollisionShapes
  */
 open class CollisionChecker {
     /**
-     * Pre-checks for X direction collision.#
+     * Pre-checks for X direction collision.
      *
      * This method can be overridden to perform any necessary pre-checks before the actual X collision check.
      *
      * @param cx The current X coordinate in the grid.
      * @param cy The current Y coordinate in the grid.
      * @param xr The relative X position of the entity inside a grid cell.
-     * @param yr The relative Y position of the entity insdie a grid cell.
+     * @param yr The relative Y position of the entity inside a grid cell.
      * @param velocityX The velocity in the X direction.
      * @param velocityY The velocity in the Y direction.
      * @param width The width of the entity.
@@ -29,13 +29,13 @@ open class CollisionChecker {
     open fun preXCheck(
         cx: Int,
         cy: Int,
-        xr: Float,
-        yr: Float,
-        velocityX: Float,
-        velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
+        xr: Double,
+        yr: Double,
+        velocityX: Double,
+        velocityY: Double,
+        width: Double,
+        height: Double,
+        cellSize: Double
     ) = Unit
 
     /**
@@ -56,13 +56,13 @@ open class CollisionChecker {
     open fun preYCheck(
         cx: Int,
         cy: Int,
-        xr: Float,
-        yr: Float,
-        velocityX: Float,
-        velocityY: Float,
-        width: Float,
-        height: Float,
-        cellSize: Float
+        xr: Double,
+        yr: Double,
+        velocityX: Double,
+        velocityY: Double,
+        width: Double,
+        height: Double,
+        cellSize: Double
     ) = Unit
 
     /**
@@ -82,9 +82,9 @@ open class CollisionChecker {
     open fun checkXCollision(
         cx: Int,
         cy: Int,
-        xr: Float,
-        yr: Float,
-        velocityX: Float,
+        xr: Double,
+        yr: Double,
+        velocityX: Double,
         collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ): Int = 0
@@ -106,9 +106,9 @@ open class CollisionChecker {
     open fun checkYCollision(
         cx: Int,
         cy: Int,
-        xr: Float,
-        yr: Float,
-        velocityY: Float,
+        xr: Double,
+        yr: Double,
+        velocityY: Double,
         collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ): Int = 0

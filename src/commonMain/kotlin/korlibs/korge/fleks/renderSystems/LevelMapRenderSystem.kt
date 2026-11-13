@@ -36,8 +36,8 @@ class LevelMapRenderSystem(
         val tileSize = assetStore.worldMapData.tileSize
 
         // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-        val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
-        val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
+        val viewPortPosX: Double = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
+        val viewPortPosY: Double = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
         // Start and end indexes of viewport area (in tile coordinates)
         val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
         val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
@@ -49,8 +49,8 @@ class LevelMapRenderSystem(
             assetStore.worldMapData.forEachTile(layerName, xStart, yStart, xTiles, yTiles) { slice, px, py ->
                 batch.drawQuad(
                     tex = ctx.getTex(slice),
-                    x = px - viewPortPosX,
-                    y = py - viewPortPosY,
+                    x = (px - viewPortPosX).toFloat(),
+                    y = (py - viewPortPosY).toFloat(),
                     filtering = false,
                     // colorMul = rgba,
                     program = null // Possibility to use a custom shader - add ShaderComponent or similar

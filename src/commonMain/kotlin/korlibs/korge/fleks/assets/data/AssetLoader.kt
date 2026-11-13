@@ -51,8 +51,8 @@ class AssetLoader(
 
         assetStore.worldMapData.init(
             //    size = (Number of chunks * Number of tiles * Size of tile)
-            worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth * commonChunkInfo.tileSize).toFloat(),
-            worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.chunkHeight * commonChunkInfo.tileSize).toFloat(),
+            worldWidth = (commonChunkInfo.gridVaniaWidth * commonChunkInfo.chunkWidth * commonChunkInfo.tileSize).toDouble(),
+            worldHeight = (commonChunkInfo.gridVaniaHeight * commonChunkInfo.chunkHeight * commonChunkInfo.tileSize).toDouble(),
             gridVaniaWidth = commonChunkInfo.gridVaniaWidth,
             gridVaniaHeight = commonChunkInfo.gridVaniaHeight,
             chunkWidth = commonChunkInfo.chunkWidth,

@@ -354,9 +354,9 @@ object CollisionRectAsString : KSerializer<CollisionRect> {
                 ?: throw SerializationException("CollisionRectAsString: Invalid x value '${parts[0]}'!"),
             y = parts[1].toIntOrNull()
                 ?: throw SerializationException("CollisionRectAsString: Invalid y value '${parts[1]}'!"),
-            width = parts[2].toFloatOrNull()
+            width = parts[2].toDoubleOrNull()
                 ?: throw SerializationException("CollisionRectAsString: Invalid width value '${parts[2]}'!"),
-            height = parts[3].toFloatOrNull()
+            height = parts[3].toDoubleOrNull()
                 ?: throw SerializationException("CollisionRectAsString: Invalid height value '${parts[3]}'!")
         )
     }

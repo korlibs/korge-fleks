@@ -94,20 +94,20 @@ class Grid private constructor() : PoolableComponent<Grid>() {
             field = value
 //            dirty = true
         }
-    var xr: Float = 0f
+    var xr: Double = 0.0
         set(value) {
             if (field == value) return
             field = value
 //            dirty = true
         }
-    var yr: Float = 0f
+    var yr: Double = 0.0
         set(value) {
             if (field == value) return
             field = value
 //            dirty = true
         }
     // Z ordering index for the entity in the grid -- not used
-    var zr: Float = 0f
+    var zr: Double = 0.0
         set(value) {
             if (field == value) return
             field = value
@@ -120,8 +120,8 @@ class Grid private constructor() : PoolableComponent<Grid>() {
      * The ratio to interpolate the last position to the new position.
      * This will need updated before each update.
      */
-    var interpolationAlpha: Float = 1f
-    var x: Float
+    var interpolationAlpha: Double = 1.0
+    var x: Double
         get() {
             return if (interpolatePixelPosition) {
                 interpolationAlpha.toRatio().interpolate(lastPx, attachX)
@@ -135,7 +135,7 @@ class Grid private constructor() : PoolableComponent<Grid>() {
             onPositionManuallyChanged()
         }
 
-    var y: Float
+    var y: Double
         get() {
             return if (interpolatePixelPosition) {
                 interpolationAlpha.toRatio().interpolate(lastPy, attachY)
@@ -149,8 +149,8 @@ class Grid private constructor() : PoolableComponent<Grid>() {
             onPositionManuallyChanged()
         }
 
-    var lastPx: Float = 0f
-    var lastPy: Float = 0f
+    var lastPx: Double = 0.0
+    var lastPy: Double = 0.0
 
     // The position of the entity in level coordinates.
     val attachX get() = (cx + xr) * AppConfig.GRID_CELL_SIZE

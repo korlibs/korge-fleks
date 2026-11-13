@@ -16,8 +16,8 @@ class TweenSwitchVisibility private constructor(
     var onVariance: Float? = null,
 
     override var target: Entity = Entity.NONE,
-    override var delay: Float? = null,
-    override var duration: Float? = null,
+    override var delay: Double? = null,
+    override var duration: Double? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null
 ) : TweenBase, Poolable<TweenSwitchVisibility> {
     // Init an existing data instance with data from another one

@@ -58,8 +58,8 @@ data class MovedSpawnerObjectBlueprint(
                 if (velocityVariationY != 0f) {
                     velocityYY += (-velocityVariationY..velocityVariationY).random()
                 }
-                motion.velocityX = velocityXX
-                motion.velocityY = velocityYY
+                motion.velocityX = velocityXX.toDouble()
+                motion.velocityY = velocityYY.toDouble()
             }
             it.getOrAdd(SpawnerComponent) { spawnerComponent {} }.also {
 

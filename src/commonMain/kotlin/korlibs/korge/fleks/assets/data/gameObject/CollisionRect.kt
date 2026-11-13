@@ -16,10 +16,10 @@ data class CollisionRect(
     val x: Int,
     val y: Int,
     // Size of the collision rectangle
-    val width: Float,
-    val height: Float
+    val width: Double,
+    val height: Double
 ) {
     companion object {
-        val EMPTY = CollisionRect(0, 0, 0f, 0f)
+        val EMPTY = CollisionRect(0, 0, 0.0, 0.0)
     }
 }

@@ -25,8 +25,8 @@ data class ParallaxEffectBlueprint(
         entity.configure {
             // Gobal position of parallax background in screen coordinates
             it += positionComponent {
-                x = this@ParallaxEffectBlueprint.x  // global position in screen coordinates
-                y = this@ParallaxEffectBlueprint.y
+                x = this@ParallaxEffectBlueprint.x.toDouble()  // global position in screen coordinates
+                y = this@ParallaxEffectBlueprint.y.toDouble()
             }
             it += motionComponent {}
             it += parallaxComponent {

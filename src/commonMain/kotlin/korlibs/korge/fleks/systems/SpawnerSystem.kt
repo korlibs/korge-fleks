@@ -24,8 +24,8 @@ class SpawnerSystem : IteratingSystem(
         val spawnerComponent = entity[SpawnerComponent]
         if (spawnerComponent.interval > 0) {
             if (spawnerComponent.nextSpawnIn <= 0) {
-                var x = 0f
-                var y = 0f
+                var x = 0.0
+                var y = 0.0
 // DEBUGGING
 //                var spx = 0f
 //                var spy = 0f
@@ -81,7 +81,7 @@ class SpawnerSystem : IteratingSystem(
                     val newEntity =
                         if (spawnerComponent.newEntity == Entity.NONE) world.createEntity("SpawnerSystem: ${spawnerComponent.entityBlueprint}") {}  // create new entity
                         else spawnerComponent.newEntity  // use given entity
-                    if (spawnerComponent.positionVariation != 0f) {
+                    if (spawnerComponent.positionVariation != 0.0) {
                         xx += (-spawnerComponent.positionVariation..spawnerComponent.positionVariation).random()
                         yy += (-spawnerComponent.positionVariation..spawnerComponent.positionVariation).random()
                     }

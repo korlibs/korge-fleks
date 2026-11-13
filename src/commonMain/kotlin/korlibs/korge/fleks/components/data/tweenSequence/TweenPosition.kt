@@ -12,14 +12,14 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("TweenPosition")
 class TweenPosition private constructor(
-    var x: Float? = null,
-    var y: Float? = null,
-    var offsetX: Float? = null,
-    var offsetY: Float? = null,
+    var x: Double? = null,
+    var y: Double? = null,
+    var offsetX: Double? = null,
+    var offsetY: Double? = null,
 
     override var target: Entity = Entity.NONE,
-    override var delay: Float? = null,
-    override var duration: Float? = null,
+    override var delay: Double? = null,
+    override var duration: Double? = null,
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null
 ) : TweenBase, Poolable<TweenPosition> {
     // Init an existing data instance with data from another one

@@ -14,9 +14,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Rigidbody")
 class Rigidbody private constructor(
-    var mass: Float = 0f,      // mass to calculate inertia of the object
-    var damping: Float = 0f,   // e.g. air resistance of the object when falling
-    var friction: Float = 0f,  // e.g. friction of the object when it moves over surfaces
+    var mass: Double = 0.0,      // mass to calculate inertia of the object
+    var damping: Double = 0.0,   // e.g. air resistance of the object when falling
+    var friction: Double = 0.0,  // e.g. friction of the object when it moves over surfaces
 ) : PoolableComponent<Rigidbody>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -29,9 +29,9 @@ class Rigidbody private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        mass = 0f
-        damping = 0f
-        friction = 0f
+        mass = 0.0
+        damping = 0.0
+        friction = 0.0
     }
 
     override fun type() = RigidbodyComponent

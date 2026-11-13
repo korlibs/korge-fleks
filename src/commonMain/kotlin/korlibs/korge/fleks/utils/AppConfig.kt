@@ -7,8 +7,8 @@ object AppConfig {
 
     // World to pixel ratio (# of pixels representing 1 meter)
     // = Pixel per unit
-    var WORLD_TO_PIXEL_RATIO = 16f
-    var WORLD_TO_PIXEL_RATIO_INV = 1f / WORLD_TO_PIXEL_RATIO
+    var WORLD_TO_PIXEL_RATIO: Double = 16.0
+    var WORLD_TO_PIXEL_RATIO_INV: Double = 1.0 / WORLD_TO_PIXEL_RATIO
         private set
     var TITLE = "jobe's Legacy"
 

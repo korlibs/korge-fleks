@@ -58,7 +58,7 @@ class TouchInputSystem : IteratingSystem(
     /**
      * Check if the touch input is inside the bounds of the entity. Bounds are in screen coordinates.
      */
-    private fun checkTouchInputInsideBounds(left: Float, top: Float, right: Float, bottom: Float): Boolean =
+    private fun checkTouchInputInsideBounds(left: Double, top: Double, right: Double, bottom: Double): Boolean =
          (downX in left..right) && (downY in top..bottom) &&
              (upX in left..right) && (upY in top..bottom)
 
@@ -118,8 +118,8 @@ class TouchInputSystem : IteratingSystem(
                     // Pass touch position to entity if needed
                     inputTouch.entity.configure { toBeChangedEntity ->
                         val position = toBeChangedEntity[PositionComponent]
-                        position.x = upX
-                        position.y = upY
+                        position.x = upX.toDouble()
+                        position.y = upY.toDouble()
                     }
                 }
                 //println("TouchInputSystem: Execute '${inputTouch.entityConfig}' config on entity '${inputTouch.entity.id}'.")

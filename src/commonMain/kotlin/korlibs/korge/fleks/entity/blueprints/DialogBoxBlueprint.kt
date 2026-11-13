@@ -108,8 +108,8 @@ data class DialogBoxBlueprint(
         val avatar = entity {
             it += ScreenCoordinatesTag
             it += positionComponent {
-                x = avatarInitialX
-                y = textBoxY - 24f
+                x = avatarInitialX.toDouble()
+                y = (textBoxY - 24f).toDouble()
             }
             it += spriteComponent { name = avatarName }
             it += rgbaComponent {
@@ -123,8 +123,8 @@ data class DialogBoxBlueprint(
         val dialogBox = entity {
             it += ScreenCoordinatesTag
             it += positionComponent {
-                x = textBoxX
-                y = textBoxY
+                x = textBoxX.toDouble()
+                y = textBoxY.toDouble()
             }
             it += ninePatchComponent {
                 name = textFieldName
@@ -143,15 +143,15 @@ data class DialogBoxBlueprint(
         val textField = entity {
             it += ScreenCoordinatesTag
             it += positionComponent {
-                x = textFieldX
-                y = textFieldY
+                x = textFieldX.toDouble()
+                y = textFieldY.toDouble()
             }
             it += textFieldComponent {
                 text = this@DialogBoxBlueprint.text
                 fontName = textFontName
                 textRangeEnd = this@DialogBoxBlueprint.textRangeEnd
-                width = textFieldWidth
-                height = textFieldHeight
+                width = textFieldWidth.toDouble()
+                height = textFieldHeight.toDouble()
                 horizontalAlign = textHAlign
                 verticalAlign = textVAlign
             }
@@ -168,21 +168,21 @@ data class DialogBoxBlueprint(
             it += tweenSequenceComponent {
                 parallelTweens {
                     // Fade in of Dialog with avatar
-                    tweenRgba { target = avatar; alpha = 1f; duration = 0.5f; easing = Easing.EASE_OUT_QUAD }
-                    tweenPosition { target = avatar; x = avatarTweenX; duration = 0.5f; easing = Easing.EASE_OUT_QUAD }
-                    tweenRgba { target = dialogBox; alpha = 1f; delay = 0.3f; duration = 0.3f; easing = Easing.EASE_OUT_QUAD }
+                    tweenRgba { target = avatar; alpha = 1f; duration = 0.5; easing = Easing.EASE_OUT_QUAD }
+                    tweenPosition { target = avatar; x = avatarTweenX.toDouble(); duration = 0.5; easing = Easing.EASE_OUT_QUAD }
+                    tweenRgba { target = dialogBox; alpha = 1f; delay = 0.3; duration = 0.3; easing = Easing.EASE_OUT_QUAD }
                     // Type write text into the dialog
-                    tweenTextField { target = textField; textRangeEnd = this@DialogBoxBlueprint.text.length; delay = 0.3f + 0.8f; duration = this@DialogBoxBlueprint.text.length * textWritingFactor }
+                    tweenTextField { target = textField; textRangeEnd = this@DialogBoxBlueprint.text.length; delay = 0.3 + 0.8; duration = (this@DialogBoxBlueprint.text.length * textWritingFactor).toDouble() }
                 }
                 // TODO wait in addition to an event that the player pressed a button to fast-forward the dialog
-                wait { duration = this@DialogBoxBlueprint.duration }
+                wait { duration = this@DialogBoxBlueprint.duration.toDouble() }
                 parallelTweens {
-                    duration = 1f
+                    duration = 1.0
                     // Fade out of Dialog with avatar
-                    tweenRgba { target = avatar; alpha = 0f; duration = 0.5f; easing = Easing.EASE_IN_QUAD }
-                    tweenPosition { target = avatar; x = avatarInitialX; duration = 0.5f; easing = Easing.EASE_IN_QUAD }
-                    tweenRgba { target = dialogBox; alpha = 0f; duration = 0.3f; easing = Easing.EASE_IN_QUAD }
-                    tweenRgba { target = textField; alpha = 0f; duration = 0.3f; easing = Easing.EASE_IN_QUAD }
+                    tweenRgba { target = avatar; alpha = 0f; duration = 0.5; easing = Easing.EASE_IN_QUAD }
+                    tweenPosition { target = avatar; x = avatarInitialX.toDouble(); duration = 0.5; easing = Easing.EASE_IN_QUAD }
+                    tweenRgba { target = dialogBox; alpha = 0f; duration = 0.3; easing = Easing.EASE_IN_QUAD }
+                    tweenRgba { target = textField; alpha = 0f; duration = 0.3; easing = Easing.EASE_IN_QUAD }
                 }
                 parallelTweens {
                     deleteEntity { target = avatar }

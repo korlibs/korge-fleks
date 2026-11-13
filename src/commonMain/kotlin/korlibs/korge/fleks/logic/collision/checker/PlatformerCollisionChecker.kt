@@ -1,42 +1,39 @@
 package korlibs.korge.fleks.logic.collision.checker
 
-import com.github.quillraven.fleks.World.Companion.inject
-import korlibs.korge.fleks.assets.AssetStore
+import korlibs.korge.fleks.assets.data.WorldMapData
 import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
 import korlibs.korge.fleks.components.DebugCollisionShapes
-import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.data.Point.Companion.point
 import korlibs.korge.fleks.logic.collision.GridPosition
-import korlibs.korge.fleks.utils.DebugPointPool
 import kotlin.math.ceil
 
 class PlatformerCollisionChecker(
-    private val debugPointPool: DebugPointPool
+    private val worldMapData: WorldMapData
 ) : CollisionChecker() {
+
     private val grid = GridPosition()
-    private val worldMapData = inject<AssetStore>("AssetStore").worldMapData
 
     override fun checkXCollision(
-        cx: Int,
+        cx: Int,  // (cx, cy) cell where the pivot point is located
         cy: Int,
-        xr: Float,
-        yr: Float,
-        velocityX: Float,
+        xr: Double,  // ratio of the pivot point inside the cell
+        yr: Double,
+        velocityX: Double,
         collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ): Int {
-        val gridSize: Float = worldMapData.tileSize.toFloat()
+        val gridSize: Double = worldMapData.tileSize.toDouble()
         var dir = 0
-        val yrTop: Float = yr + (collisionBox.y.toFloat() / gridSize)
-        val yrBottom: Float = yr + ((collisionBox.y + collisionBox.height) / gridSize)
+        val yrTop: Double = yr + (collisionBox.y.toDouble() / gridSize)
+        val yrBottom: Double = yr + ((collisionBox.y + collisionBox.height) / gridSize)
 
         // Check direction of movement
-        if (velocityX > 0f) {  // Moving right
-            val xrRight: Float = xr + ((collisionBox.x + collisionBox.width) / gridSize)
+        if (velocityX > 0.0) {  // Moving right
+            val xrRight: Double = xr + ((collisionBox.x + collisionBox.width) / gridSize)
 
             grid.setAndNormalizeX(cx, xrRight)  // Get cell of right corner of the collision box
             val checkDistance = grid.cx - cx  // Check distance between pivot point cell and right corner cell
-            val checkRight: Float = checkDistance.toFloat() - 0.0001f  // To avoid floating point precision issues
+            val checkRight: Double = checkDistance.toDouble() - 0.0001  // To avoid floating point precision issues
 
 //            debugShapesComponent?.let { debugSaveRatioPointX(it, cx, cy, xrRight, yr) }
 
@@ -58,12 +55,12 @@ class PlatformerCollisionChecker(
             if (worldMapData.hasCollision(cx + checkDistance, cyBottom) && xrRight >= checkRight) {
                 dir = 1
             }
-        } else if (velocityX < 0f) {  // Moving left
-            val xrLeft: Float = xr + (collisionBox.x / gridSize)
+        } else if (velocityX < 0.0) {  // Moving left
+            val xrLeft: Double = xr + (collisionBox.x.toDouble() / gridSize)
 
             grid.setAndNormalizeX(cx, xrLeft)  // Get cell of left corner of the collision box
             val checkDistance = cx - grid.cx  // Check distance between pivot point cell and left corner cell
-            val checkLeft: Float = (1 - checkDistance).toFloat() + 0.0001f  // To avoid floating point precision issues
+            val checkLeft: Double = (1.0 - checkDistance) + 0.0001  // To avoid floating point precision issues
 
 //            debugShapesComponent?.let { debugSaveRatioPointX(it, cx, cy, xrLeft, yr) }
 
@@ -92,26 +89,26 @@ class PlatformerCollisionChecker(
     override fun checkYCollision(
         cx: Int,  // (cx, cy) cell where the pivot point is located
         cy: Int,
-        xr: Float,  // ratio of the pivot point inside the cell
-        yr: Float,
-        velocityY: Float,
+        xr: Double,  // ratio of the pivot point inside the cell
+        yr: Double,
+        velocityY: Double,
         collisionBox: CollisionRect,
         debugShapesComponent: DebugCollisionShapes?
     ): Int {
-        val gridSize: Float = worldMapData.tileSize.toFloat()
+        val gridSize: Double = worldMapData.tileSize.toDouble()
         var dir = 0  // colliding in direction (-1 = up, 1 = down, 0 = no collision)
 
         // left and right X-coordinates of the collision rect
-        val xrLeft: Float = xr + (collisionBox.x.toFloat() / gridSize)  // collisionBox.x is X-offset to the pivot point of the object
-        val xrRight: Float = xr + ((collisionBox.x + collisionBox.width) / gridSize)
+        val xrLeft: Double = xr + (collisionBox.x.toDouble() / gridSize)  // collisionBox.x is X-offset to the pivot point of the object
+        val xrRight: Double = xr + ((collisionBox.x + collisionBox.width) / gridSize)
 
         // Check direction of movement
-        if (velocityY > 0f) {  // Moving down
-            val yrBottom: Float = yr + ((collisionBox.y + collisionBox.height) / gridSize)  // bottom corner of the collision box
+        if (velocityY > 0.0) {  // Moving down
+            val yrBottom: Double = yr + ((collisionBox.y + collisionBox.height) / gridSize)  // bottom corner of the collision box
 
             grid.setAndNormalizeY(cy, yrBottom)  // Get cell of bottom corner of the collision box
             val checkDistance = grid.cy - cy  // Check distance between pivot point cell and bottom corner cell
-            val checkBottom: Float = checkDistance.toFloat() - 0.0001f  // To avoid floating point precision issues
+            val checkBottom: Double = checkDistance.toDouble() - 0.0001  // To avoid floating point precision issues
 
             debugShapesComponent?.let { debugSaveRatioPointY(debugShapesComponent, cx, cy, xrLeft, yrBottom) }
 
@@ -136,12 +133,12 @@ class PlatformerCollisionChecker(
             if (worldMapData.hasCollision(cxRight, cy + checkDistance) && yrBottom >= checkBottom) {
                 dir = 1
             }
-        } else if (velocityY < 0f) {  // Moving up
-            val yrTop: Float = yr + (collisionBox.y.toFloat() / gridSize)
+        } else if (velocityY < 0.0) {  // Moving up
+            val yrTop: Double = yr + (collisionBox.y.toDouble() / gridSize)
 
             grid.setAndNormalizeY(cy, yrTop)  // Get cell of top corner of the collision box
             val checkDistance = cy - grid.cy  // Check distance between pivot point cell and top corner cell
-            val checkTop: Float = (1 - checkDistance).toFloat() + 0.0001f  // To avoid floating point precision issues
+            val checkTop: Double = (1.0 - checkDistance) + 0.0001  // To avoid floating point precision issues
 
             debugShapesComponent?.let { debugSaveRatioPointY(debugShapesComponent, cx, cy, xr, yrTop) }
 
@@ -170,26 +167,26 @@ class PlatformerCollisionChecker(
     private fun debugSaveGridCell(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int) {
         debugShapesComponent.gridCells.add(
             point {
-                x = cx.toFloat() * worldMapData.tileSize
-                y = cy.toFloat() * worldMapData.tileSize
+                x = cx.toDouble() * worldMapData.tileSize
+                y = cy.toDouble() * worldMapData.tileSize
             }
         )
     }
 
-    private fun debugSaveRatioPointX(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Float, yr: Float) {
+    private fun debugSaveRatioPointX(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Double, yr: Double) {
         debugShapesComponent.ratioPositionsX.add(
             point {
-                x = (cx.toFloat() + xr) * worldMapData.tileSize
-                y = (cy.toFloat() + yr) * worldMapData.tileSize
+                x = (cx.toDouble() + xr) * worldMapData.tileSize
+                y = (cy.toDouble() + yr) * worldMapData.tileSize
             }
         )
     }
 
-    private fun debugSaveRatioPointY(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Float, yr: Float) {
+    private fun debugSaveRatioPointY(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, xr: Double, yr: Double) {
         debugShapesComponent.ratioPositionsY.add(
             point {
-                x = (cx.toFloat() + xr) * worldMapData.tileSize
-                y = (cy.toFloat() + yr) * worldMapData.tileSize
+                x = (cx.toDouble() + xr) * worldMapData.tileSize
+                y = (cy.toDouble() + yr) * worldMapData.tileSize
             }
         )
     }
