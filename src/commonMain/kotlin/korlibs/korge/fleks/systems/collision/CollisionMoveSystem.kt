@@ -11,6 +11,9 @@ import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.DebugCollisionShapes.Companion.DebugCollisionShapesComponent
 import korlibs.korge.fleks.components.Gravity.Companion.GravityComponent
 import korlibs.korge.fleks.components.Motion
+import korlibs.korge.fleks.components.Motion.Companion.GROUND_WALKING
+import korlibs.korge.fleks.components.Motion.Companion.EXPLOSION_SLIDING
+import korlibs.korge.fleks.components.Motion.Companion.BOUNCE
 import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
@@ -41,8 +44,20 @@ open class CollisionMoveSystem : IteratingSystem(
     // Check for divider of movement in X and Y direction
     private val guardMove = 0.001f  // TODO check if we can keep this zero
     private val guard = 0.01f
+
+    /**
+     * Checks if a floating point value exceeds the deadzone threshold (`guard = 0.01f`).
+     *
+     * @return `true` if the absolute value is greater than `0.01f`, `false` otherwise.
+     */
     protected fun Float.isNotAlmostZero(): Boolean = this.absoluteValue > guard
 
+    /**
+     * Iterates over all entities with [PositionComponent], [MotionComponent], and [CollisionComponent] to calculate frame displacement,
+     * apply gravity, execute sub-sampled collision checks against level geometry, and clamp positions within map boundaries.
+     *
+     * @param entity The entity currently being processed by the system.
+     */
     override fun onTickEntity(entity: Entity) {
         // Iterate over all entities that have a Grid, Collision and MotionComponent
         val motionComponent = entity[MotionComponent]
@@ -110,18 +125,20 @@ open class CollisionMoveSystem : IteratingSystem(
     }
 
     /**
-     * Check for horizontal collisions and resolve them if necessary.
-     * The entity is moved in the X direction and the collision is checked.
-     * If a collision is detected, it is resolved and the collision flags are set accordingly.
+     * Orchestrates two-phase horizontal and vertical probing and resolution for a single sub-step displacement.
      *
-     * @param xMovement The amount of movement in pixels to check for collisions.
-     * @param positionComponent The position component of the entity. It contains the position (pivot point) of the entity.
-     * @param motionComponent The motion component of the entity.
-     * @param collisionComponent The collision component of the entity.
-     * @param gridSize The size of the grid.
-     * @param debugShapesComponent Optional debug shapes component for visual debugging.
+     * Probes horizontal movement first and resolves horizontal position snapping if colliding, or applies [xMovement] directly.
+     * Then probes vertical movement using updated positions and resolves vertical position snapping if colliding.
+     * If non-walking surface reactions are configured, partial displacement ratio is calculated and applied to the non-colliding axis.
      *
-     * @return `true` if a collision was detected, `false` otherwise.
+     * @param xMovement Horizontal movement delta for the sub-step in pixels.
+     * @param yMovement Vertical movement delta for the sub-step in pixels.
+     * @param positionComponent The position component containing entity world coordinates and offsets.
+     * @param motionComponent The motion component containing velocities and surface reaction modes.
+     * @param collisionComponent The collision component containing the bounding box rect and collision flags.
+     * @param gridSize Size of a tile grid cell in pixels (e.g., 16.0f).
+     * @param debugShapesComponent Optional component for rendering debug collision probe points and cells.
+     * @return `true` if either a horizontal or vertical collision was detected and resolved; `false` otherwise.
      */
     protected fun checkCollision(
         xMovement: Float,
@@ -182,23 +199,29 @@ open class CollisionMoveSystem : IteratingSystem(
         val xPosMovedLeft = positionComponent.x + positionComponent.offsetX + collisionComponent.rect.x
         val xPosMovedRight = xPosMovedLeft + collisionComponent.rect.width
 
-
+        // Now probe vertically
         isCollidingVer = probeCollisionVertically(xMovement, yMovement, xPosMovedLeft, xPosMovedRight, yPosMovedLeadingEdge, horizontalSteps, gridSize, debugShapesComponent)
         if (isCollidingVer) {
             resolveCollisionVertically(yMovement, yPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize)
 
             // Apply friction to the horizontal movement - possibly correct the horizontal movement with only a fraction of the total movement based on frictionX
-            val yPosInitialLeadingEdge = if (yMovement > 0f) yPosInitialBottom else yPosInitialTop
-            val yRatio = calculateRatio(yMovement, yPosInitialLeadingEdge, yPosMovedLeadingEdge, gridSize)
-            val xImpact = xMovement * yRatio
-            positionComponent.x = xPositionSaved + xImpact + (xMovement - xImpact) * motionComponent.frictionX
+            if (motionComponent.surfaceReactionX != GROUND_WALKING) {
+                val yPosInitialLeadingEdge = if (yMovement > 0f) yPosInitialBottom else yPosInitialTop
+                val yRatio = calculateRatio(yMovement, yPosInitialLeadingEdge, yPosMovedLeadingEdge, gridSize)
+                val xDeltaMove = xMovement * yRatio
+                positionComponent.x = xPositionSaved + xDeltaMove
+            }
 
         } else {  // No collision vertically
             if (isCollidingHor) {
-                // Apply friction to the horizontal movement - Ratio to the left edge of the collider cell
-                val xRatio = calculateRatio(xMovement, xPosInitialLeadingEdge, xPosMovedLeadingEdge, gridSize)
-                val yImpact = yMovement * xRatio
-                positionComponent.y += yImpact + (yMovement - yImpact) * motionComponent.frictionY
+                if (motionComponent.surfaceReactionY == GROUND_WALKING) {
+                    positionComponent.y += yMovement
+                } else {
+                    // Apply friction to the horizontal movement - Ratio to the left edge of the collider cell
+                    val xRatio = calculateRatio(xMovement, xPosInitialLeadingEdge, xPosMovedLeadingEdge, gridSize)
+                    val yDeltaMove = yMovement * xRatio
+                    positionComponent.y += yDeltaMove
+                }
             } else {  // No collision horizontally - we don't need to resolve
                 positionComponent.y += yMovement
             }
@@ -208,8 +231,15 @@ open class CollisionMoveSystem : IteratingSystem(
     }
 
     /**
-     * Calculate the ratio between the initial and moved leading edge of the collision box when the
-     * entity collides. In that case the entity does not do the total movement but only a fraction.
+     * Calculates the fractional entry ratio ($ratio \in [0..1]$) traversed along an axis before the leading edge hits a target cell boundary.
+     *
+     * Used to compute partial movement deltas for non-colliding axes when an impact occurs mid-step.
+     *
+     * @param movement Displacement delta in pixels along the axis.
+     * @param posInitialLeadingEdge Unmoved coordinate of the leading collision box edge.
+     * @param posMovedLeadingEdge Target coordinate of the leading edge after sub-step movement.
+     * @param gridSize Size of a tile grid cell in pixels.
+     * @return Fractional ratio in $[0..1]$ representing progress before impact, or `0f` if movement is zero.
      */
     protected fun calculateRatio(
         movement: Float,
@@ -228,7 +258,20 @@ open class CollisionMoveSystem : IteratingSystem(
     }
 
     /**
-     * This function probes the collision for a given entity when it moves horizontally.
+     * Probes the vertical leading edge of the moved collision box across [verticalSteps] sample points against static level geometry.
+     *
+     * Samples along the $Y$-axis from top-to-bottom (when moving down or stationary) or bottom-to-top (when moving up)
+     * to check if any probed point intersects a solid tile cell in `worldMapData`.
+     *
+     * @param xMovement Horizontal movement delta for the sub-step in pixels.
+     * @param yMovement Vertical movement delta for the sub-step in pixels.
+     * @param yPosTop Top boundary coordinate of the collision box.
+     * @param yPosBottom Bottom boundary coordinate of the collision box.
+     * @param xPosMovedLeadingEdge Target $X$-coordinate of the leading vertical edge after horizontal movement.
+     * @param verticalSteps Number of vertical sub-step sample points along the leading edge.
+     * @param gridSize Size of a tile grid cell in pixels.
+     * @param debugShapesComponent Optional component for visual debugging of probe points and checked grid cells.
+     * @return `true` if any probed point intersects a solid level tile; `false` otherwise.
      */
     protected fun probeCollisionHorizontally(
         xMovement: Float,
@@ -263,7 +306,20 @@ open class CollisionMoveSystem : IteratingSystem(
     }
 
     /**
-     * This function probes the collision for a given entity when it moves vertically.
+     * Probes the horizontal leading edge of the moved collision box across [horizontalSteps] sample points against static level geometry.
+     *
+     * Samples along the $X$-axis from left-to-right (when moving right or stationary) or right-to-left (when moving left)
+     * to check if any probed point intersects a solid tile cell in `worldMapData`.
+     *
+     * @param xMovement Horizontal movement delta for the sub-step in pixels.
+     * @param yMovement Vertical movement delta for the sub-step in pixels.
+     * @param xPosMovedLeft Left boundary $X$-coordinate of the moved collision box.
+     * @param xPosMovedRight Right boundary $X$-coordinate of the moved collision box.
+     * @param yPosMovedLeadingEdge Target $Y$-coordinate of the leading horizontal edge after vertical movement.
+     * @param horizontalSteps Number of horizontal sub-step sample points along the leading edge.
+     * @param gridSize Size of a tile grid cell in pixels.
+     * @param debugShapesComponent Optional component for visual debugging of probe points and checked grid cells.
+     * @return `true` if any probed point intersects a solid level tile; `false` otherwise.
      */
     protected fun probeCollisionVertically(
         xMovement: Float,
@@ -299,7 +355,20 @@ open class CollisionMoveSystem : IteratingSystem(
     }
 
     /**
-     * This function resolves the collision for a given entity when it collides horizontally.
+     * Resolves a horizontal collision by adjusting horizontal velocity based on [Motion.surfaceReactionX],
+     * snapping the entity's $X$-position outside the colliding tile cell, and updating collision flags (`right` or `left`).
+     *
+     * Surface reaction modes:
+     * - [GROUND_WALKING]: Sets `velocityX = 0f` (retains vertical velocity).
+     * - [EXPLOSION_SLIDING]: Dampens `velocityX *= 0.07f` and `velocityY *= 0.1f` to slide along/into walls.
+     * - [BOUNCE]: Inverts velocity `velocityX *= -1f`.
+     *
+     * @param xMovement Horizontal movement delta for the sub-step in pixels.
+     * @param xPosMovedLeadingEdge Target $X$-coordinate of the leading vertical edge after horizontal movement.
+     * @param positionComponent The position component containing entity world coordinates.
+     * @param motionComponent The motion component containing velocities and surface reaction modes.
+     * @param collisionComponent The collision component containing rect dimensions and collision flags.
+     * @param gridSize Size of a tile grid cell in pixels.
      */
     protected fun resolveCollisionHorizontally(
         xMovement: Float,
@@ -309,11 +378,21 @@ open class CollisionMoveSystem : IteratingSystem(
         collisionComponent: Collision,
         gridSize: Float
     ) {
-        // Stop movement along the collision axis (X)
-        motionComponent.velocityX = 0f
+        // Stop movement along the collision axis (X) or bounce off the surface
+        when (motionComponent.surfaceReactionX) {
+            GROUND_WALKING -> {
+                motionComponent.velocityX = 0f
+                // velocityY not changed
+            }
+            EXPLOSION_SLIDING -> {
+                motionComponent.velocityX *= 0.07f  // Let the explosions move a bit into the wall
+                motionComponent.velocityY *= 0.1f   // and slide faster on the wall
+            }
+            BOUNCE -> {
+                motionComponent.velocityX *= -1f  // Bounce off the surface
+            }
+        }
 
-        // Apply frictionY along the orthogonal axis (Y)
-        motionComponent.velocityY *= motionComponent.frictionY  // [0..1]
         val cxMovedLeadingEdge = (xPosMovedLeadingEdge / gridSize).toIntFloor()
 
         // Resolve the collision - move the entity out of the collider cell horizontally and
@@ -337,7 +416,20 @@ open class CollisionMoveSystem : IteratingSystem(
     }
 
     /**
-     * This function resolves the collision for a given entity when it collides vertically.
+     * Resolves a vertical collision by adjusting vertical velocity based on [Motion.surfaceReactionY],
+     * snapping the entity's $Y$-position outside the colliding tile cell, and updating collision flags (`isGrounded` or `isCollidingAbove`).
+     *
+     * Surface reaction modes:
+     * - [GROUND_WALKING]: Sets `velocityY = 0f` (retains horizontal velocity).
+     * - [EXPLOSION_SLIDING]: Dampens `velocityX *= 0.1f` and `velocityY *= 0.07f`.
+     * - [BOUNCE]: Inverts velocity `velocityY *= -1f`.
+     *
+     * @param yMovement Vertical movement delta for the sub-step in pixels.
+     * @param yPosMovedLeadingEdge Target $Y$-coordinate of the leading horizontal edge after vertical movement.
+     * @param positionComponent The position component containing entity world coordinates.
+     * @param motionComponent The motion component containing velocities and surface reaction modes.
+     * @param collisionComponent The collision component containing rect dimensions and collision flags.
+     * @param gridSize Size of a tile grid cell in pixels.
      */
     protected fun resolveCollisionVertically(
         yMovement: Float,
@@ -347,11 +439,21 @@ open class CollisionMoveSystem : IteratingSystem(
         collisionComponent: Collision,
         gridSize: Float
     ) {
-        // Stop movement along the collision axis (Y)
-        motionComponent.velocityY = 0f
+        // Stop movement along the collision axis (Y) or bounce off the surface
+        when (motionComponent.surfaceReactionY) {
+            GROUND_WALKING -> {
+                // velocityX not changed
+                motionComponent.velocityY = 0f
+            }
+            EXPLOSION_SLIDING -> {
+                motionComponent.velocityX *= 0.1f   // Let the explosions slide on the ground (or ceiling)
+                motionComponent.velocityY *= 0.07f  // and move them a bit into the ground
+            }
+            BOUNCE -> {
+                motionComponent.velocityY *= -1f  // Bounce off the surface
+            }
+        }
 
-        // Apply frictionX along the orthogonal axis (X)
-        motionComponent.velocityX *= motionComponent.frictionX
         val cyMovedLeadingEdge = (yPosMovedLeadingEdge / gridSize).toIntFloor()
 
         // Resolve the collision - move the entity out of the collider cell vertically and
@@ -373,11 +475,10 @@ open class CollisionMoveSystem : IteratingSystem(
     }
 
     /**
-     * Check if the object is within the playfield boundaries.
-     * If the object is outside the boundaries, it is moved back to the nearest boundary.
-     * If the object falls off the playfield at the bottom, the object is considered dead.
+     * Enforces level boundaries by clamping the entity's position strictly within map bounds
+     * with a guard margin (`guardBorder = worldMapData.tileSize.toFloat()`).
      *
-     * @param positionComponent The grid component of the entity to check.
+     * @param positionComponent The position component of the entity to clamp.
      */
     protected fun checkPlayfieldBoundaries(positionComponent: Position) {
         // Keep the player sprite inside the level
@@ -395,12 +496,14 @@ open class CollisionMoveSystem : IteratingSystem(
     }
 
     /**
-     * Calculate the number of steps needed to move the entity in relation to the step size (usually 16x16 pixels or smaller).
+     * Calculates the number of sub-step iterations required for frame displacement to prevent tunneling through tiles.
      *
-     * @param horizontalMovement The horizontal movement of the entity.
-     * @param verticalMovement The vertical movement of the entity.
-     * @param gridSize The size of a step. Can be smaller than the grid size.
-     * @return The number of steps needed for collision checking.
+     * Computes $\lceil \max(|dx|, |dy|) / \text{gridSize} \rceil$ clamped to a maximum of 100 steps.
+     *
+     * @param horizontalMovement Total horizontal frame displacement in pixels.
+     * @param verticalMovement Total vertical frame displacement in pixels.
+     * @param gridSize Size of a sub-step or tile grid cell in pixels.
+     * @return The integer count of sub-steps required for collision checking.
      */
     protected fun getCollisionSteps(horizontalMovement: Float, verticalMovement: Float, gridSize: Float): Int {
         if (gridSize < 1f && gridSize > -1f) {
@@ -416,19 +519,14 @@ open class CollisionMoveSystem : IteratingSystem(
     }
 
     /**
-     * Process the collision steps and call the callback function for each step.
+     * Divides total displacement into uniform sub-step slices and passes each sub-step delta to the callback.
      *
-     * In case of friction set to INFINITE_FRICTION the callback function can return true.
-     * This is used for collision handling of objects which are destroyed on collision.
+     * Halts sub-stepping loop early if the callback returns `true` (e.g., when an entity is destroyed on impact).
      *
-     * @param steps The number of steps to process.
-     * @param overallMovementX The overall movement in the X direction.
-     * @param overallMovementY The overall movement in the Y direction.
-     * @param callback The callback function to call for each step. It takes the movement in the X and Y
-     *        direction as parameters and returns a boolean value indicating whether to stop processing
-     *        the steps. If the callback returns `true`, the processing is stopped.
-     *
-     * @return `true` if the callback returned `true` for any step, `false` otherwise.
+     * @param steps The number of sub-steps to process.
+     * @param overallMovementX The total horizontal displacement for the frame.
+     * @param overallMovementY The total vertical displacement for the frame.
+     * @param callback Function called for each sub-step taking (`movementX`, `movementY`) and returning `true` to halt further steps.
      * @see getCollisionSteps
      */
     protected fun processCollisionSteps(

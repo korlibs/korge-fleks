@@ -21,6 +21,7 @@ import korlibs.korge.fleks.systems.SpawnerSystem
 import korlibs.korge.fleks.systems.SpriteVisibilitySystem
 import korlibs.korge.fleks.systems.SpriteSystem
 import korlibs.korge.fleks.systems.addTweenEngineSystems
+import korlibs.korge.fleks.systems.collision.BehaviorAfterCollisionSystem
 import korlibs.korge.fleks.systems.collision.CollisionMoveSystem
 import korlibs.korge.fleks.systems.collision.BehaviorSystem
 import korlibs.korge.view.Views
@@ -72,6 +73,7 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         // of an entity (with Behavior component)
         add(BehaviorSystem())  // --> set motionComponent of entity
         add(CollisionMoveSystem())  // --> modify motionComponent of entity in case of collision and set positionComponent of entity
+        add(BehaviorAfterCollisionSystem())
 
         add(SoundSystem())
         add(CameraSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))
