@@ -29,7 +29,7 @@ fun Parallax.getFgLayerEntity(name: String): Entity {
 
 
 class ParallaxSystem(
-    private val worldToPixelRatio: Float
+    private val worldToPixelRatio: Double
 ) : IteratingSystem(
     family = family { all(ParallaxComponent, MotionComponent) },
     interval = EachFrame
@@ -114,8 +114,8 @@ class ParallaxSystem(
             val positionComponent = layerEntity[PositionComponent]
             // Check if layer has MotionComponent for self-movement - if not, use selfSpeed from ParallaxTexture config
             // With MotionComponent we can control self-movement with the TweenEngineSystem
-            val layerVelocityX = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityX else parallaxLayer.selfSpeedX
-            val layerVelocityY = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityY else parallaxLayer.selfSpeedY
+            val layerVelocityX = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityX else parallaxLayer.selfSpeedX.toDouble()
+            val layerVelocityY = if (layerEntity has MotionComponent) layerEntity[MotionComponent].velocityY else parallaxLayer.selfSpeedY.toDouble()
 
             // Calculate new position based on speed factor and layer velocity
             positionComponent.x = (speedFactor * motionComponent.velocityX + layerVelocityX) * worldToPixelRatio * deltaTime + positionComponent.x  // f(x) = v * t + x
@@ -127,6 +127,6 @@ class ParallaxSystem(
         }
     }
 
-    private fun wrap(value: Float, max: Int, min: Int = 0): Float =
+    private fun wrap(value: Double, max: Int, min: Int = 0): Double =
         if (value >= max) value - max else if (value < min) value + max else value
 }

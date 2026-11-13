@@ -7,9 +7,9 @@ abstract class GroundChecker {
     abstract fun onGround(
         cx: Int,
         cy: Int,
-        xr: Float,
-        yr: Float,
-        velocityY: Float,
+        xr: Double,
+        yr: Double,
+        velocityY: Double,
         collisionBox: CollisionRect
     ): Boolean
 }

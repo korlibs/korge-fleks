@@ -15,8 +15,8 @@ class Wait private constructor(
     var event: Int? = null,                           // Wait for a specific event if event is not "null" - need to unblock from infinite wait (Float.MAX_VALUE)
 
     override var target: Entity = Entity.NONE,        // not used
-    override var delay: Float? = null,                // Not used
-    override var duration: Float? = Float.MAX_VALUE,  // Use duration by setting explicitly a value
+    override var delay: Double? = null,                // Not used
+    override var duration: Double? = Double.MAX_VALUE,  // Use duration by setting explicitly a value
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
 ) : TweenBase, Poolable<Wait> {
     // Init an existing data instance with data from another one
@@ -36,7 +36,7 @@ class Wait private constructor(
 
         // target not used
         // delay not used
-        duration = Float.MAX_VALUE
+        duration = Double.MAX_VALUE
         // easing not used
     }
 

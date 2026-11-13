@@ -27,8 +27,8 @@ internal class PositionTest {
         println("TEST CASE: testPositionSerialization")
 
         val compUnderTest = positionComponent {
-            x = 5.2f
-            y = 42.1f
+            x = 5.2
+            y = 42.1
         }
 
         val entity = expectedWorld.entity {

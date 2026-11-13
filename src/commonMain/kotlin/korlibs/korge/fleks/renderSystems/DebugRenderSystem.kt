@@ -82,8 +82,8 @@ class DebugRenderSystem(
                                 rect(
                                     x = position.x + position.offsetX - spriteComponent.pivotX,
                                     y = position.y + position.offsetY - spriteComponent.pivotY,
-                                    width = sprite.originalWidth.toFloat(),
-                                    height = sprite.originalHeight.toFloat()
+                                    width = sprite.originalWidth.toDouble(),
+                                    height = sprite.originalHeight.toDouble()
                                 )
                             }
                         }
@@ -93,8 +93,8 @@ class DebugRenderSystem(
                                 rect(
                                     x = position.x + position.offsetX + (if (spriteComponent.flipX) (sprite.originalWidth - texture.cropOffsetX - texture.bmpSlice.width) else texture.cropOffsetX) - spriteComponent.pivotX,
                                     y = position.y + position.offsetY + (if (spriteComponent.flipY) (sprite.originalHeight - texture.cripOffsetY - texture.bmpSlice.height) else texture.cripOffsetY) - spriteComponent.pivotY,
-                                    width = texture.bmpSlice.width.toFloat(),
-                                    height = texture.bmpSlice.height.toFloat()
+                                    width = texture.bmpSlice.width.toDouble(),
+                                    height = texture.bmpSlice.height.toDouble()
                                 )
                             }
                         }
@@ -120,8 +120,8 @@ class DebugRenderSystem(
                             rect(
                                 x = position.x + position.offsetX,
                                 y = position.y + position.offsetY,
-                                width = ninePatchComponent.width,
-                                height = ninePatchComponent.height
+                                width = ninePatchComponent.width.toDouble(),
+                                height = ninePatchComponent.height.toDouble()
                             )
                         }
                     }
@@ -132,8 +132,8 @@ class DebugRenderSystem(
                         // Draw collision bounds
                         batch.drawVector(Colors.LIGHTBLUE) {
                             rect(
-                                x = position.x + collisionComponent.rect.x.toFloat(),
-                                y = position.y + collisionComponent.rect.y.toFloat(),
+                                x = position.x + collisionComponent.rect.x.toDouble(),
+                                y = position.y + collisionComponent.rect.y.toDouble(),
                                 width = collisionComponent.rect.width,
                                 height = collisionComponent.rect.height
                             )
@@ -190,8 +190,8 @@ class DebugRenderSystem(
         ctx.useBatcher { batch ->
             val tileSize = levelData.tileSize
             // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-            val viewPortPosX: Float = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
-            val viewPortPosY: Float = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
+            val viewPortPosX: Double = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
+            val viewPortPosY: Double = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
             // Start and end indexes of viewport area (in tile coordinates)
             val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
             val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
@@ -203,8 +203,8 @@ class DebugRenderSystem(
             levelData.forEachCollisionTile(layerName, xStart, yStart, xTiles, yTiles) { collisionTile, px, py ->
                 batch.drawQuad(
                     tex = ctx.getTex(collisionTile),
-                    x = px - viewPortPosX,
-                    y = py - viewPortPosY,
+                    x = (px - viewPortPosX).toFloat(),
+                    y = (py - viewPortPosY).toFloat(),
                     filtering = false,
                     colorMul = rgba,
                     program = null // Possibility to use a custom shader - add ShaderComponent or similar
@@ -213,7 +213,7 @@ class DebugRenderSystem(
         }
     }
 
-    private fun drawPoint(batch: LineRenderBatcher, x: Float, y: Float, color: RGBA) {
+    private fun drawPoint(batch: LineRenderBatcher, x: Double, y: Double, color: RGBA) {
         batch.drawVector(color) {
             circle(korlibs.math.geom.Point(x, y), 2)
             line(korlibs.math.geom.Point(x - 3, y), korlibs.math.geom.Point(x + 3, y))
@@ -226,7 +226,7 @@ class DebugRenderSystem(
         positionOnScreen.y = cell.y
         positionOnScreen.convertToScreenCoordinates(cameraPosition)
         batch.drawVector(color) {
-            rect(positionOnScreen.x, positionOnScreen.y, AppConfig.GRID_CELL_SIZE, AppConfig.GRID_CELL_SIZE)
+            rect(positionOnScreen.x, positionOnScreen.y, AppConfig.GRID_CELL_SIZE.toDouble(), AppConfig.GRID_CELL_SIZE.toDouble())
         }
     }
 

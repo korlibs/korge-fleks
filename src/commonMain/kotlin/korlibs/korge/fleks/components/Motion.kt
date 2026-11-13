@@ -17,20 +17,20 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Motion")
 class Motion private constructor(
-    var accelerationX: Float = 0f,
-    var accelerationY: Float = 0f,
+    var accelerationX: Double = 0.0,
+    var accelerationY: Double = 0.0,
 
-    var velocityX: Float = 0f,  // in world units (grid size e.g. 16 pixels) per second
-    var velocityY: Float = 0f,
+    var velocityX: Double = 0.0,  // in world units (grid size e.g. 16 pixels) per second
+    var velocityY: Double = 0.0,
 
     // Surface reaction surface-to-surface contact (e.g. walking on ground)
     var surfaceReactionX: Int = GROUND_WALKING,
     var surfaceReactionY: Int = GROUND_WALKING,
 
     // Damping handles energy dissipation over time or through space (e.g. when going through water basin)
-    var damping: Float = 1f,  // [0..1]  1 - no damping, 0 - full damping  // TODO Not used yet
+    var damping: Double = 1.0,  // [0..1]  1 - no damping, 0 - full damping  // TODO Not used yet
 
-    var lastHorizontalVelocity: Float = 0f,
+    var lastHorizontalVelocity: Double = 0.0,
 ) : PoolableComponent<Motion>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -48,14 +48,14 @@ class Motion private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        accelerationX = 0f
-        accelerationY = 0f
-        velocityX = 0f
-        velocityY = 0f
+        accelerationX = 0.0
+        accelerationY = 0.0
+        velocityX = 0.0
+        velocityY = 0.0
         surfaceReactionX = GROUND_WALKING
         surfaceReactionY = GROUND_WALKING
-        damping = 0f
-        lastHorizontalVelocity = 0f
+        damping = 0.0
+        lastHorizontalVelocity = 0.0
     }
 
     override fun type() = MotionComponent

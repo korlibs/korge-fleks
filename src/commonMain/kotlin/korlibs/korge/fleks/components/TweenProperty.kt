@@ -26,8 +26,8 @@ class TweenProperty private constructor(
     @Serializable(with = AnySerializer::class) var change: Any = Unit,
     @Serializable(with = AnySerializer::class) var value: Any = Unit,
 
-    var duration: Float = 0f,                    // in seconds
-    var timeProgress: Float = 0f,                // in seconds
+    var duration: Double = 0.0,                    // in seconds
+    var timeProgress: Double = 0.0,                // in seconds
     @Serializable(with = EasingAsString::class) var easing: Easing = Easing.LINEAR  // Changing function
 ) : PoolableComponent<TweenProperty>() {
     // Init an existing component data instance with data from another component
@@ -47,8 +47,8 @@ class TweenProperty private constructor(
         property = TweenPropertyType.UnconfiguredType
         change = Unit
         value = Unit
-        duration = 0f
-        timeProgress = 0f
+        duration = 0.0
+        timeProgress = 0.0
         easing = Easing.LINEAR
     }
 

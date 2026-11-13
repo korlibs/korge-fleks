@@ -11,13 +11,13 @@ object CollisionUtils {
     fun debugSaveGridCell(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, worldMapData: WorldMapData) {
         debugShapesComponent.gridCells.add(
             point {
-                x = cx.toFloat() * worldMapData.tileSize
-                y = cy.toFloat() * worldMapData.tileSize
+                x = cx.toDouble() * worldMapData.tileSize
+                y = cy.toDouble() * worldMapData.tileSize
             }
         )
     }
 
-    fun debugSaveRatioPointX(debugShapesComponent: DebugCollisionShapes, x: Float, y: Float) {
+    fun debugSaveRatioPointX(debugShapesComponent: DebugCollisionShapes, x: Double, y: Double) {
         debugShapesComponent.ratioPositionsX.add(
             point {
                 this.x = x
@@ -25,7 +25,8 @@ object CollisionUtils {
             }
         )
     }
-    fun debugSaveRatioPointY(debugShapesComponent: DebugCollisionShapes, x: Float, y: Float) {
+
+    fun debugSaveRatioPointY(debugShapesComponent: DebugCollisionShapes, x: Double, y: Double) {
         debugShapesComponent.ratioPositionsY.add(
             point {
                 this.x = x

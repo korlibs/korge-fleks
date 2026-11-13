@@ -14,12 +14,12 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("SpawnEntity")
 class SpawnEntity private constructor(
     var entityBlueprint: String = "",   // name of the entity blueprint which creates and configures the spawned entity
-    var x: Float = 0f,                  // position where entity will be spawned
-    var y: Float = 0f,
+    var x: Double = 0.0,                  // position where entity will be spawned
+    var y: Double = 0.0,
 
     override var target: Entity = Entity.NONE, // when entity is not given (= Entity.NONE) than it will be created
-    override var delay: Float? = null,
-    override var duration: Float? = 0f,    // not used - 0f for immediately
+    override var delay: Double? = null,
+    override var duration: Double? = 0.0,    // not used - 0f for immediately
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
 ) : TweenBase, Poolable<SpawnEntity> {
     // Init an existing data instance with data from another one
@@ -38,8 +38,8 @@ class SpawnEntity private constructor(
     // This is used for data instances when they are a value property of a component
     override fun cleanup() {
         entityBlueprint = ""
-        x = 0f
-        y = 0f
+        x = 0.0
+        y = 0.0
 
         target = Entity.NONE
         delay = null

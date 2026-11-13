@@ -16,8 +16,8 @@ class Jump private constructor(
     var event: Int? = null,                       // Check for a specific event - if event is 0 than jump otherwise do not jump and tween execution continues with next tween in the list
 
     override var target: Entity = Entity.NONE,    // not used
-    override var delay: Float? = null,            // not used
-    override var duration: Float? = null,         // not used
+    override var delay: Double? = null,            // not used
+    override var duration: Double? = null,         // not used
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
 ) : TweenBase, Poolable<Jump> {
     // Init an existing data instance with data from another one

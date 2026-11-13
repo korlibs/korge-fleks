@@ -13,8 +13,8 @@ import kotlinx.serialization.Serializable
 @Serializable @SerialName("DeleteEntity")
 class DeleteEntity private constructor(
     override var target: Entity = Entity.NONE,
-    override var delay: Float? = null,     // not used
-    override var duration: Float? = null,  // not used
+    override var delay: Double? = null,     // not used
+    override var duration: Double? = null,  // not used
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
 ) : TweenBase, Poolable<DeleteEntity> {
     // Init an existing data instance with data from another one

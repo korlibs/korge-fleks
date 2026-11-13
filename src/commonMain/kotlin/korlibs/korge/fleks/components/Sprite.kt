@@ -40,8 +40,8 @@ import kotlinx.serialization.Serializable
 class Sprite private constructor(
     var name: String = "",  // TODO rename to animation (?)
     var visible: Boolean = true,
-    var pivotX: Float = 0f,                          // x,y position of the pivot point within the sprite which comes from LDtk level map
-    var pivotY: Float = 0f,
+    var pivotX: Double = 0.0,                          // x,y position of the pivot point within the sprite which comes from LDtk level map
+    var pivotY: Double = 0.0,
 
     var frameIndex: Int = 0,                          // frame number of animation which is currently drawn
     var running: Boolean = false,                     // Switch animation on and off
@@ -52,7 +52,7 @@ class Sprite private constructor(
     var flipX: Boolean = false,                       // flip sprite on demand if needed (e.g. flipX = tue; flipY = false; for player character when looking left or right)
     var flipY: Boolean = false,
     var increment: Int = -2,                          // out of [-1, 0, 1]; will be added to frameIndex each new frame
-    var nextFrameIn: Float = 0f                       // time in seconds until next frame of animation shall be shown
+    var nextFrameIn: Double = 0.0                      // time in seconds until next frame of animation shall be shown
 ) : PoolableComponent<Sprite>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -76,8 +76,8 @@ class Sprite private constructor(
     fun cleanup() {
         name = ""
         visible = true
-        pivotX = 0f
-        pivotY = 0f
+        pivotX = 0.0
+        pivotY = 0.0
         frameIndex = 0
         running = false
         direction = FORWARD
@@ -85,7 +85,7 @@ class Sprite private constructor(
         flipX = false
         flipY = false
         increment = -2
-        nextFrameIn = 0f
+        nextFrameIn = 0.0
     }
 
     override fun type() = SpriteComponent
@@ -150,7 +150,7 @@ class Sprite private constructor(
 
     // Set frame time for first frame
     fun setNextFrameIn(assetStore: AssetStore) {
-        nextFrameIn = assetStore.getSpriteTexture(name).getDuration(frameIndex)
+        nextFrameIn = assetStore.getSpriteTexture(name).getDuration(frameIndex).toDouble()
     }
 
     // Init increment for setting frameIndex
@@ -198,7 +198,7 @@ class Sprite private constructor(
         resetAnimation()
     }
 
-    fun startAnimation(frameTag: String, frameIndex: Int, nextFrameIn: Float) {
+    fun startAnimation(frameTag: String, frameIndex: Int, nextFrameIn: Double) {
         name = frameTag
         this@Sprite.frameIndex = frameIndex
         this@Sprite.nextFrameIn = nextFrameIn

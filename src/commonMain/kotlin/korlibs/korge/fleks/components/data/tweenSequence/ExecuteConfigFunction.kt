@@ -15,8 +15,8 @@ class ExecuteConfigFunction private constructor(
     var entityConfig: String = "",                // name of entity config which contains the function to configure the spawned entity
 
     override var target: Entity = Entity.NONE,    // [optional] entity can be provided if needed in the configure-function
-    override var delay: Float? = null,            // not used
-    override var duration: Float? = null,         // not used
+    override var delay: Double? = null,            // not used
+    override var duration: Double? = null,         // not used
     @Serializable(with = EasingAsString::class) override var easing: Easing? = null  // not used
 ) : TweenBase, Poolable<ExecuteConfigFunction> {
     // Init an existing data instance with data from another one

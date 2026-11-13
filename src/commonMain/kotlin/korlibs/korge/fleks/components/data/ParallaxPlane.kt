@@ -17,9 +17,9 @@ class ParallaxPlane private constructor(
     var name: String = "",  // TODO - remove, not used anymore
     var entity: Entity = Entity.NONE,
     // Used for horizontal or vertical movements of line and attached layers depending on ParallaxMode
-    val linePositions: MutableList<Float> = mutableListOf(),
-    val bottomAttachedLayerPositions: MutableList<Float> = mutableListOf(),
-    val topAttachedLayerPositions: MutableList<Float> = mutableListOf()
+    val linePositions: MutableList<Double> = mutableListOf(),
+    val bottomAttachedLayerPositions: MutableList<Double> = mutableListOf(),
+    val topAttachedLayerPositions: MutableList<Double> = mutableListOf()
 ) : Poolable<ParallaxPlane> {
     // Init an existing data instance with data from another one
     override fun init(from: ParallaxPlane) {

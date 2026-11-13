@@ -22,8 +22,8 @@ class TweenSequence private constructor(
 
     // Internal runtime data
     var index: Int = 0,              // This points to the animation step which is currently in progress
-    var timeProgress: Float = 0f,    // Elapsed time for the object to be animated
-    var waitTime: Float = 0f,
+    var timeProgress: Double = 0.0,    // Elapsed time for the object to be animated
+    var waitTime: Double = 0.0,
     var executed: Boolean = false
 ) : PoolableComponent<TweenSequence>(), TweenListBase {
     // Init an existing component data instance with data from another component
@@ -44,8 +44,8 @@ class TweenSequence private constructor(
         tweens.freeAndClear()
 
         index = 0
-        timeProgress = 0f
-        waitTime = 0f
+        timeProgress = 0.0
+        waitTime = 0.0
         executed = false
     }
 
@@ -71,7 +71,7 @@ class TweenSequence private constructor(
     // Initialize the component automatically when it is added to an entity
     override fun World.initComponent(entity: Entity) {
         // Initialize internal waitTime property with delay value of first tween if available.
-        if (tweens.isNotEmpty()) waitTime = tweens[index].delay ?: 0f
+        if (tweens.isNotEmpty()) waitTime = tweens[index].delay ?: 0.0
     }
 
     // Cleanup/Reset the component automatically when it is removed from an entity (component will be returned to the pool eventually)

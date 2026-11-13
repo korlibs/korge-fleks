@@ -56,8 +56,8 @@ class TweenSequenceSystem : IteratingSystem(
     private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
     // Internally used variables in createAnimateComponent function
     private val defaultTweenValues: ParallelTweens = staticParallelTweens { // <-- gives default values for delay, duration and easing
-        delay = 0f
-        duration = 0f
+        delay = 0.0
+        duration = 0.0
         easing = Easing.LINEAR
     }
 
@@ -87,7 +87,7 @@ class TweenSequenceSystem : IteratingSystem(
         val tweenSequence = entity[TweenSequenceComponent]
 
         if (tweenSequence.timeProgress >= tweenSequence.waitTime) {
-            tweenSequence.timeProgress = 0f
+            tweenSequence.timeProgress = 0.0
 
             val currentTween: TweenBase =
                 if (tweenSequence.index >= tweenSequence.tweens.size) {
@@ -102,19 +102,19 @@ class TweenSequenceSystem : IteratingSystem(
                     if (tweenSequence.index >= tweenSequence.tweens.size) {
 //                        entity.configure { it -= TweenSequenceComponent }
                         //println("INFO: TweenSequence ended and removed for entity '${entity.id}' (${world.nameOf(entity)}).")
-                        tweenSequence.waitTime = 0f
+                        tweenSequence.waitTime = 0.0
                         return
                     }
                     // check for initial delay of new tween
                     val currentTween = tweenSequence.tweens[tweenSequence.index]
-                    tweenSequence.waitTime = currentTween.delay ?: 0f
-                    if (tweenSequence.waitTime != 0f)
+                    tweenSequence.waitTime = currentTween.delay ?: 0.0
+                    if (tweenSequence.waitTime != 0.0)
                         return
                     currentTween
                 } else tweenSequence.tweens[tweenSequence.index]
 
             tweenSequence.executed = true
-            tweenSequence.waitTime = currentTween.duration ?: 0f
+            tweenSequence.waitTime = currentTween.duration ?: 0.0
 
             when (currentTween) {
                 is SpawnNewTweenSequence -> {
@@ -143,7 +143,7 @@ class TweenSequenceSystem : IteratingSystem(
                                 // Put the tween into a new TweenSequence which runs independently of the parent TweenSequence
                                 it += tweenSequenceComponent {
                                     // If duration and easing are not set, inherit the current parent tween's values
-                                    if (tween.duration == null) tween.duration = currentTween.duration ?: 0f
+                                    if (tween.duration == null) tween.duration = currentTween.duration ?: 0.0
                                     if (tween.easing == null) tween.easing = currentTween.easing ?: Easing.LINEAR
                                     tweens.init(fromTween = tween)
                                     deleteEntity { target = it }  // Delete the TweenSequence entity after it has been executed
@@ -271,8 +271,8 @@ class TweenSequenceSystem : IteratingSystem(
                     this.property = componentProperty
                     this.change = change
                     this.value = value
-                    this.duration = tween.duration ?: parentTween.duration ?: 0f
-                    this.timeProgress = 0f
+                    this.duration = tween.duration ?: parentTween.duration ?: 0.0
+                    this.timeProgress = 0.0
                     this.easing = tween.easing ?: parentTween.easing ?: Easing.LINEAR
                 }
             }

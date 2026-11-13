@@ -47,8 +47,8 @@ class WorldChunkSystem : IntervalSystem(
         val chunkHeight = worldMapData.chunkPixelHeight
 
         // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-        val viewPortPosX: Float = cameraPositionComponent.x  // - AppConfig.VIEW_PORT_WIDTH_HALF  // Camera position is middle point of view port
-        val viewPortPosY: Float = cameraPositionComponent.y  // - AppConfig.VIEW_PORT_HEIGHT_HALF
+        val viewPortPosX: Double = cameraPositionComponent.x  // - AppConfig.VIEW_PORT_WIDTH_HALF  // Camera position is middle point of view port
+        val viewPortPosY: Double = cameraPositionComponent.y  // - AppConfig.VIEW_PORT_HEIGHT_HALF
         // Start and end indexes of viewport area (in tile coordinates)
         val viewPortMiddlePosX: Int = viewPortPosX.toInt() / tileSize  // x in positive direction, in world grid
         val viewPortMiddlePosY: Int = viewPortPosY.toInt() / tileSize  // y in negative direction, in world grid

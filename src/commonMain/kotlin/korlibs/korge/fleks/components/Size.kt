@@ -14,8 +14,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("Size")
 class Size private constructor(
-    var width: Float = 0f,
-    var height: Float = 0f,
+    var width: Double = 0.0,
+    var height: Double = 0.0,
 ) : PoolableComponent<Size>() {
     // Init an existing component data instance with data from another component
     // This is used for component instances when they are part (val property) of another component
@@ -27,8 +27,8 @@ class Size private constructor(
     // Cleanup the component data instance manually
     // This is used for component instances when they are part (val property) of another component
     fun cleanup() {
-        width = 0f
-        height = 0f
+        width = 0.0
+        height = 0.0
     }
 
     override fun type() = SizeComponent

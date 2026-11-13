@@ -12,8 +12,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable @SerialName("SpriteLayer")
 class SpriteLayer private constructor(
-    var offsetX: Float = 0f,
-    var offsetY: Float = 0f,
+    var offsetX: Double = 0.0,
+    var offsetY: Double = 0.0,
     @Serializable(with = RGBAAsInt::class) var rgba: RGBA = Colors.WHITE
 ) : Poolable<SpriteLayer> {
     // Init an existing data instance with data from another one
@@ -26,8 +26,8 @@ class SpriteLayer private constructor(
     // Cleanup data instance manually
     // This is used for data instances when they are part (val property) of a component
     override fun cleanup() {
-        offsetX = 0f
-        offsetY = 0f
+        offsetX = 0.0
+        offsetY = 0.0
         rgba = Colors.WHITE
     }
 

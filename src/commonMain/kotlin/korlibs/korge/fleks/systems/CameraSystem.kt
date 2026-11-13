@@ -12,7 +12,7 @@ import korlibs.korge.fleks.utils.*
 
 
 class CameraSystem(
-    private val worldToPixelRatio: Float
+    private val worldToPixelRatio: Double
 ) : IteratingSystem(
     family = family { all(CameraFollowTag, PositionComponent) },
     interval = EachFrame
@@ -26,8 +26,8 @@ class CameraSystem(
 
     override fun onTickEntity(entity: Entity) {
         // Load world size from level data (always)
-        val worldWidth: Float = assetStore.worldMapData.worldWidth
-        val worldHeight: Float = assetStore.worldMapData.worldHeight
+        val worldWidth: Double = assetStore.worldMapData.worldWidth
+        val worldHeight: Double = assetStore.worldMapData.worldHeight
 
         // Get main camera position or exit if it does not exist
         val cameraPosition = systemRuntimeConfigs.getCameraPositionComponent(world) ?: return
@@ -55,8 +55,8 @@ class CameraSystem(
             else if (newCameraPositionX > rightBound) rightBound
             else newCameraPositionX
         cameraPosition.y =
-            if (newCameraPositionY < topBound) topBound
-            else if (newCameraPositionY > bottomBound) bottomBound
+            if (newCameraPositionY < topBound) topBound.toDouble()
+            else if (newCameraPositionY > bottomBound) bottomBound.toDouble()
             else newCameraPositionY
 
         // Update chunk position of camera in runtime configs

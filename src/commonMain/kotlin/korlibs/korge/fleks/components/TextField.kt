@@ -23,8 +23,8 @@ class TextField private constructor(
     var textRangeEnd: Int = Int.MAX_VALUE,
 
     // size of text bounds
-    var width: Float = 0f,
-    var height: Float = 0f,
+    var width: Double = 0.0,
+    var height: Double = 0.0,
     var wordWrap: Boolean = true,
     @Serializable(with = HorizontalAlignAsDouble::class) var horizontalAlign: HorizontalAlign = HorizontalAlign.LEFT,
     @Serializable(with = VerticalAlignAsDouble::class) var verticalAlign: VerticalAlign = VerticalAlign.TOP
@@ -51,8 +51,8 @@ class TextField private constructor(
         fontName = ""
         textRangeStart = 0
         textRangeEnd = Int.MAX_VALUE
-        width = 0f
-        height = 0f
+        width = 0.0
+        height = 0.0
         wordWrap = true
         horizontalAlign = HorizontalAlign.LEFT
         verticalAlign = VerticalAlign.TOP

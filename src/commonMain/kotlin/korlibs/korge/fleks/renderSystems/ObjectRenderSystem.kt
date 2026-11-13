@@ -96,8 +96,8 @@ class ObjectRenderSystem(
                         flipX = spriteComponent.flipX,
                         flipY = spriteComponent.flipY,
                         tex = ctx.getTex(spriteFrame.bmpSlice),
-                        x = px,
-                        y = py,
+                        x = px.toFloat(),
+                        y = py.toFloat(),
                         filtering = false,
                         colorMul = rgba,
                         program = null
@@ -186,8 +186,8 @@ class ObjectRenderSystem(
                 val tileSize = tileMap.tileSize
 
                 // Draw only visible tiles
-                val tileMapPosX: Float = position.x + position.offsetX
-                val tileMapPosY: Float = position.y + position.offsetY
+                val tileMapPosX: Double = position.x + position.offsetX
+                val tileMapPosY: Double = position.y + position.offsetY
 
                 // Start and end indexes of viewport area
                 val xStart: Int = (tileMapPosX.toInt() / tileSize - 1).clamp(0, tileMap.tileMapWidth)  // TODO check if clamp is really needed
@@ -215,8 +215,8 @@ class ObjectRenderSystem(
                                     tileSet[tileIndex]?.let { bmpSlice ->
                                         batch.drawQuad(
                                             tex = ctx.getTex(bmpSlice),
-                                            x = px,
-                                            y = py,
+                                            x = px.toFloat(),
+                                            y = py.toFloat(),
                                             filtering = false,
                                             colorMul = rgba,
                                             program = null // Possibility to use a custom shader - add ShaderComponent or similar

@@ -99,9 +99,9 @@ class Parallax private constructor(
                 it += positionComponent {}
                 it += rgbaComponent {}
             }
-            repeat(plane.lineTextures.size) { parallaxPlane.linePositions.add(0f) }
-            repeat(plane.topAttachedLayers.size) { parallaxPlane.topAttachedLayerPositions.add(0f) }
-            repeat(plane.bottomAttachedLayers.size) { parallaxPlane.bottomAttachedLayerPositions.add(0f) }
+            repeat(plane.lineTextures.size) { parallaxPlane.linePositions.add(0.0) }
+            repeat(plane.topAttachedLayers.size) { parallaxPlane.topAttachedLayerPositions.add(0.0) }
+            repeat(plane.bottomAttachedLayers.size) { parallaxPlane.bottomAttachedLayerPositions.add(0.0) }
         }
     }
 

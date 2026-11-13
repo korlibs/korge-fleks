@@ -10,8 +10,8 @@ import korlibs.math.interpolation.Easing
  */
 interface TweenBase {
     var target: Entity
-    var delay: Float?
-    var duration: Float?
+    var delay: Double?
+    var duration: Double?
     var easing: Easing?
 }
 
