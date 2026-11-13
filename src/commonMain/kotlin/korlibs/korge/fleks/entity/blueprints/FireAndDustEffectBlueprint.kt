@@ -63,7 +63,7 @@ data class FireAndDustEffectBlueprint(
             if (fadeOutDuration > 0f) {
                 it += tweenSequenceComponent {
                     // Fade out effect objects
-                    tweenRgba { target = it; alpha = 0.0; duration = fadeOutDuration.toDouble() }
+                    tweenRgba { target = it; alpha = 0f; duration = fadeOutDuration.toDouble() }
                     deleteEntity { target = it }
                 }
             }
