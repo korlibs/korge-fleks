@@ -128,8 +128,8 @@ class ParallaxRenderSystem(
         batch: BatchBuilder2D,
         ctx: RenderContext
     ) {
-        val countH = if (parallaxLayer.repeatX) AppConfig.VIEW_PORT_WIDTH / parallaxLayer.bmpSlice.width else 0
-        val countV = if (parallaxLayer.repeatY) AppConfig.VIEW_PORT_HEIGHT / parallaxLayer.bmpSlice.height else 0
+        val countH = if (parallaxLayer.repeatX) AppConfig.VIEW_PORT_WIDTH_i / parallaxLayer.bmpSlice.width else 0
+        val countV = if (parallaxLayer.repeatY) AppConfig.VIEW_PORT_HEIGHT_i / parallaxLayer.bmpSlice.height else 0
 
         val x = if (countH != 0 && parallaxLayer.speedFactor != null) global.x else global.x + parallaxLayer.targetX
         val y = if (countV != 0 && parallaxLayer.speedFactor != null) global.y else global.y + parallaxLayer.targetY
@@ -166,14 +166,14 @@ class ParallaxRenderSystem(
             HORIZONTAL_PLANE -> {
                 val targetX = 0  // TODO check if needed
                 val targetY = lineTexture.index
-                val countH = if (repeat) AppConfig.VIEW_PORT_WIDTH / lineTexture.bmpSlice.width else 0
+                val countH = if (repeat) AppConfig.VIEW_PORT_WIDTH_i / lineTexture.bmpSlice.width else 0
                 val x = if (countH != 0) global.x else global.x + targetX
                 val y = global.y + targetY
 
                 for(xIndex in -1 - countH until countH + 1) {
                     batch.drawQuad(
                         tex = ctx.getTex(lineTexture.bmpSlice),
-                        x = (x + xIndex * lineTexture.bmpSlice.width + AppConfig.VIEW_PORT_WIDTH * 0.5f + localScroll).toFloat(),
+                        x = (x + xIndex * lineTexture.bmpSlice.width + AppConfig.VIEW_PORT_WIDTH_i * 0.5f + localScroll).toFloat(),
                         y = (y + local.offsetY).toFloat(),
                         filtering = false,
                         colorMul = rgba
@@ -183,14 +183,14 @@ class ParallaxRenderSystem(
             VERTICAL_PLANE -> {
                 val targetX = lineTexture.index
                 val targetY = 0  // TODO check if needed
-                val countV = if (repeat) AppConfig.VIEW_PORT_HEIGHT / lineTexture.bmpSlice.height else 0
+                val countV = if (repeat) AppConfig.VIEW_PORT_HEIGHT_i / lineTexture.bmpSlice.height else 0
                 val y = if (countV != 0) global.y else global.y + targetY
 
                 for(yIndex in -1 - countV until countV + 1) {
                     batch.drawQuad(
                         tex = ctx.getTex(lineTexture.bmpSlice),
                         x = (global.x + targetX + local.offsetX).toFloat(),
-                        y = (y + yIndex * lineTexture.bmpSlice.height + AppConfig.VIEW_PORT_HEIGHT * 0.5f + localScroll).toFloat(),
+                        y = (y + yIndex * lineTexture.bmpSlice.height + AppConfig.VIEW_PORT_HEIGHT_i * 0.5f + localScroll).toFloat(),
                         filtering = false,
                         colorMul = rgba
                     )

@@ -7,43 +7,44 @@ object AppConfig {
 
     // World to pixel ratio (# of pixels representing 1 meter)
     // = Pixel per unit
-    var WORLD_TO_PIXEL_RATIO: Double = 16.0
-    var WORLD_TO_PIXEL_RATIO_INV: Double = 1.0 / WORLD_TO_PIXEL_RATIO
+    var WORLD_TO_PIXEL_RATIO_d: Double = 16.0
+    var WORLD_TO_PIXEL_RATIO_INV_d: Double = 1.0 / WORLD_TO_PIXEL_RATIO_d
         private set
     var TITLE = "jobe's Legacy"
 
     // Target device physical display pixels, e.g.: 3120 x 1440 -> 624 x 288  (2.166 ratio)
     // This is to be used only to create a window for JVM on desktop to have the same size ration as a mobile device
-    var TARGET_VIRTUAL_WIDTH = 384  // target_width = target_height * ratio
+    var TARGET_VIRTUAL_WIDTH_i = 384  // target_width = target_height * ratio
         set(value) {
             field = value
-            VIEW_PORT_WIDTH = value
-            VIEW_PORT_WIDTH_HALF = (value / 2).toFloat()
+            VIEW_PORT_WIDTH_i = value
+            VIEW_PORT_WIDTH_HALF_d = (value / 2).toDouble()
         }
-    var TARGET_VIRTUAL_HEIGHT = 216
+    var TARGET_VIRTUAL_HEIGHT_i = 216
         set(value) {
             field = value
-            VIEW_PORT_HEIGHT = value
-            VIEW_PORT_HEIGHT_HALF = (value / 2).toFloat()
+            VIEW_PORT_HEIGHT_i = value
+            VIEW_PORT_HEIGHT_HALF_d = (value / 2).toDouble()
         }
-    var MIN_VIRTUAL_WIDTH = 384
+    var MIN_VIRTUAL_WIDTH_i = 384
         private set
-    var MIN_VIRTUAL_HEIGHT = 216
-        private set
-
-    var VIEW_PORT_WIDTH = TARGET_VIRTUAL_WIDTH
-        private set
-    var VIEW_PORT_HEIGHT = TARGET_VIRTUAL_HEIGHT
-        private set
-    var VIEW_PORT_WIDTH_HALF: Float = (VIEW_PORT_WIDTH / 2).toFloat()
-        private set
-    var VIEW_PORT_HEIGHT_HALF: Float = (VIEW_PORT_HEIGHT / 2).toFloat()
+    var MIN_VIRTUAL_HEIGHT_i = 216
         private set
 
-    var deltaPerFrame = 1.0
+    var VIEW_PORT_WIDTH_i = TARGET_VIRTUAL_WIDTH_i
+        private set
+    var VIEW_PORT_HEIGHT_i = TARGET_VIRTUAL_HEIGHT_i
+        private set
+    var VIEW_PORT_WIDTH_HALF_d: Double = (VIEW_PORT_WIDTH_i / 2).toDouble()
+        private set
+    var VIEW_PORT_HEIGHT_HALF_d: Double = (VIEW_PORT_HEIGHT_i / 2).toDouble()
+        private set
 
-    // Config used by collison system
-    var GRID_CELL_SIZE = 16f
+    var deltaPerFrame: Double = 1.0
+
+    // Config used by collision system
+    var GRID_CELL_SIZE_i = 16
+    var GRID_CELL_SIZE_d = GRID_CELL_SIZE_i.toDouble()
 
     /**
      * Any movement greater than this value will increase the number of steps checked between movement.

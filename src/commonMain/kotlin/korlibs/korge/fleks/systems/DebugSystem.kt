@@ -2,7 +2,6 @@ package korlibs.korge.fleks.systems
 
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
-import korlibs.korge.fleks.components.Grid.Companion.GridComponent
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.tags.CameraFollowTag
 import korlibs.math.geom.*
@@ -17,7 +16,7 @@ import korlibs.math.geom.*
  * Call [moveDebugEntity] with the desired world position to move the debug entity to that
  */
 class DebugSystem: IteratingSystem(
-    family { all(CameraFollowTag).any(PositionComponent, GridComponent) },
+    family { all(CameraFollowTag).all(PositionComponent) },
     interval = Fixed(1 / 60f)
 ) {
     private val systemRuntimeConfigs = world.inject<SystemRuntimeConfigs>("SystemRuntimeConfigs")
@@ -43,18 +42,10 @@ class DebugSystem: IteratingSystem(
         if (positionTrigger) {
             positionTrigger = false
 
-            // Transform incoming screen coordinates to world coordinates
-            if (entity has GridComponent) {
-                val gridComponent = entity[GridComponent]
-                gridComponent.x = xPos
-                gridComponent.y = yPos
-                gridComponent.convertToWorldCoordinates(cameraPosition)
-            } else if (entity has PositionComponent) {
-                val positionComponent = entity[PositionComponent]
-                positionComponent.x = xPos
-                positionComponent.y = yPos
-                positionComponent.convertToWorldCoordinates(cameraPosition)
-            }
+            val positionComponent = entity[PositionComponent]
+            positionComponent.x = xPos
+            positionComponent.y = yPos
+            positionComponent.convertToWorldCoordinates(cameraPosition)
         }
     }
 }

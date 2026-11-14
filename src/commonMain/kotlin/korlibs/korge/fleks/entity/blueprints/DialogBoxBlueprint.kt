@@ -79,8 +79,8 @@ data class DialogBoxBlueprint(
 
     override fun World.entityConfigure(entity: Entity) : Entity {
 
-        val viewPortWidth = AppConfig.VIEW_PORT_WIDTH.toFloat()
-        val viewPortHeight = AppConfig.VIEW_PORT_HEIGHT.toFloat()
+        val viewPortWidth = AppConfig.VIEW_PORT_WIDTH_i.toFloat()
+        val viewPortHeight = AppConfig.VIEW_PORT_HEIGHT_i.toFloat()
 
         val dialogBoxWidth = width
         val dialogBoxHeight = height

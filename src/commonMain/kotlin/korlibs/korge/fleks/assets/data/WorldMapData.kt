@@ -2,6 +2,7 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
+import korlibs.math.toIntFloor
 
 
 /**
@@ -100,7 +101,12 @@ class WorldMapData {
      *
      * @return Returns true if position has a collision tile/cell attached otherwise false.
      */
-    fun hasCollision(cx: Int, cy: Int): Boolean {
+    fun hasCollision(x: Double, y: Double): Double {
+        val cx: Int = (x / tileSize).toIntFloor()
+        val cy: Int = (y / tileSize).toIntFloor()
+
+        val yr: Double = (y % tileSize)  // [0..16]
+
         // Get the chunk coordinates in the chunk Grid-vania array
         val gridCx =  cx / chunkWidth
         val gridCy = cy / chunkHeight
@@ -116,13 +122,21 @@ class WorldMapData {
             val tileIdx = localCx + localCy * chunkWidth
             chunkLookUpTable[chunkId]?.levelMaps["default"]?.stackedTileMapData[tileIdx]?.firstOrNull()?.let { tile ->
                 val collisionIndex = (tile and 0xff00000) shr 20  // Get bits 20-27 for collision index
-                if (collisionIndex != 0) {
-                    // TODO Check shape of collision tile from collisionTileSet using collisionIndex and check if the point (cx, cy)
-                    //      is actually colliding with the shape of the collision tile
-                    true
-                } else false  // No collision index, so we can assume it's a valid tile without collision
-            } ?: false  // Tile is empty or no chunk mesh found for the chunk index
-        } else false  // Outside levelGridVania bounds
+                when (collisionIndex) {
+                    0 -> 0.0
+                    1 -> 16.0
+                    4 -> 0.5 * yr  // 0.0 .. 8.0
+                    5 -> 0.5 * yr + 8.0
+                    else -> 0.0
+                }
+
+//                if (collisionIndex != 0) {
+//                    // TODO Check shape of collision tile from collisionTileSet using collisionIndex and check if the point (cx, cy)
+//                    //      is actually colliding with the shape of the collision tile
+//                    16.0
+//                } else 0.0  // No collision index, so we can assume it's a valid tile without collision
+            } ?: 0.0  // Tile is empty or no chunk mesh found for the chunk index
+        } else 0.0  // Outside levelGridVania bounds
     }
 
     /**

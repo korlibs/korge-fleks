@@ -63,7 +63,7 @@ fun WorldConfiguration.addKorgeFleksSystems() {
 
         // Systems below depend on changes of above tween engine systems
         add(LifeCycleSystem())
-        add(ParallaxSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO.toDouble()))
+        add(ParallaxSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO_d.toDouble()))
         add(StaticMoveSystem())
         add(SpriteVisibilitySystem())
         add(EntityLinkSystem())
@@ -76,7 +76,7 @@ fun WorldConfiguration.addKorgeFleksSystems() {
         add(BehaviorAfterCollisionSystem())
 
         add(SoundSystem())
-        add(CameraSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO))
+        add(CameraSystem(worldToPixelRatio = AppConfig.WORLD_TO_PIXEL_RATIO_d))
 
         add(SnapshotSerializerSystem())
 
