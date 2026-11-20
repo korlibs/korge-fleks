@@ -22,8 +22,6 @@ enum class DebugInfoTag : EntityTags by entityTagOf() {
     TEXT_FIELD_BOUNDS,
     NINE_PATCH_BOUNDS,
 
-    //LEVEL_MAP_COLLISION_BOUNDS,
-
     COLLISION_BOX,
     COLLISION_CELL_AND_RATIO_POINTS,
 }
