@@ -15,10 +15,14 @@ const val FULL_COLLISION_SLOPE = 16.0
 /**
  * This class handles collision detection for the game. It probes horizontally and vertically for collision
  * against static level geometry, including slopes.
+ *
+ * @property worldMapData The world map data containing level tile geometry and collision layout.
  */
 class CollisionHandler(
     private val worldMapData: WorldMapData
 ) {
+    private val gridSize: Double = worldMapData.tileSize.toDouble()
+
     /**
      * Probes the horizontally leading edge of the moved collision box across [verticalSteps] sample points against static level geometry.
      *
@@ -31,7 +35,6 @@ class CollisionHandler(
      * @param yPosBottom Bottom boundary coordinate of the collision box.
      * @param xPosMovedLeadingEdge Target $X$-coordinate of the leading vertical edge after horizontal movement.
      * @param verticalSteps Number of vertical sub-step sample points along the leading edge.
-     * @param gridSize Size of a tile grid cell in pixels.
      * @param debugShapesComponent Optional component for visual debugging of probe points and checked grid cells.
      * @return `true` if any probed point intersects a solid level tile; `false` otherwise.
      */
@@ -42,17 +45,16 @@ class CollisionHandler(
         yPosBottom: Double,
         xPosMovedLeadingEdge: Double,
         verticalSteps: Int,
-        gridSize: Double,
         debugShapesComponent: DebugCollisionShapes?
     ): Boolean {
         for (i in 0..verticalSteps) {
             // Horizontal movement probe: sample y along the vertical leading edge (xPosMovedLeadingEdge)
             val yPosMovedProbe = if (yMovement < 0.0) {  // Moving up - Y Axis inverted
-                val xPosMovedProbeFromBottom = yPosBottom - i * gridSize
-                max(xPosMovedProbeFromBottom, yPosTop)
+                val yPosMovedProbeFromBottom = yPosBottom - i * gridSize
+                max(yPosMovedProbeFromBottom, yPosTop)
             } else {  // Moving down - Y Axis inverted
-                val xPosMovedProbeFromTop = yPosTop + i * gridSize
-                min(xPosMovedProbeFromTop, yPosBottom)
+                val yPosMovedProbeFromTop = yPosTop + i * gridSize
+                min(yPosMovedProbeFromTop, yPosBottom)
             }
             // Calculate the cell index and probe the cell for collision
             val cxProbe = (xPosMovedLeadingEdge / gridSize).toIntFloor()
@@ -78,7 +80,6 @@ class CollisionHandler(
      * @param xPosMovedRight Right boundary $X$-coordinate of the moved collision box.
      * @param yPosMovedLeadingEdge Target $Y$-coordinate of the leading horizontal edge after vertical movement.
      * @param horizontalSteps Number of horizontal sub-step sample points along the leading edge.
-     * @param gridSize Size of a tile grid cell in pixels.
      * @param debugShapesComponent Optional component for visual debugging of probe points and checked grid cells.
      * @return `true` if any probed point intersects a solid level tile; `false` otherwise.
      */
@@ -89,8 +90,7 @@ class CollisionHandler(
         xPosMovedRight: Double,
         yPosMovedLeadingEdge: Double,
         horizontalSteps: Int,
-        gridSize: Double,
-        debugShapesComponent: DebugCollisionShapes?
+        debugShapesComponent: DebugCollisionShapes? = null
     ): Boolean {
         for (i in 0..horizontalSteps) {
             // Vertical movement probe: sample x along the horizontal leading edge (yPosMovedLeadingEdge)
@@ -115,43 +115,64 @@ class CollisionHandler(
     }
 
     /**
-     * Probe for slopes on the left and right corners of the bottom collision rect edge.
+     * Probes for slope collision height at the horizontal midpoint of the leading horizontal edge.
+     *
+     * Selects the top or bottom leading edge based on vertical movement direction and queries
+     * `worldMapData` for any slope value defined at that cell and sub-pixel position.
      *
      * @param yMovement Vertical movement delta for the sub-step in pixels.
-     * @param xPosLeft Left boundary $X$-coordinate of the collision rect edge.
-     * @param yPosTop Top boundary $Y$-coordinate of the collision rect edge.
-     * @param xPosRight Right boundary $X$-coordinate of the collision rect edge.
-     * @param yPosBottom Bottom boundary $Y$-coordinate of the collision rect edge.
-     * @param gridSize Size of a tile grid cell in pixels.
+     * @param xCollisionRectLeft Left boundary $X$-coordinate of the collision box.
+     * @param xCollisionRectRight Right boundary $X$-coordinate of the collision box.
+     * @param yCollisionRectTop Top boundary $Y$-coordinate of the collision box.
+     * @param yCollisionRectBottom Bottom boundary $Y$-coordinate of the collision box.
      * @param debugShapesComponent Optional component for visual debugging of probe points and checked grid cells.
-     *
-     * @return The maximum slope value between the left and right corners of the bottom collision rect edge.
+     * @return The collision slope height value at the probed position.
      */
     fun probeHorizontalSlopes(
         yMovement: Double,
-        xPosLeft: Double,
-        yPosTop: Double,
-        xPosRight: Double,
-        yPosBottom: Double,
-        gridSize: Double,
+        xCollisionRectLeft: Double,
+        xCollisionRectRight: Double,
+        yCollisionRectTop: Double,
+        yCollisionRectBottom: Double,
         debugShapesComponent: DebugCollisionShapes? = null
     ): Double {
-        val yPosProbe = if (yMovement < 0.0) yPosTop else yPosBottom  // Moving up - Y Axis inverted
+        val xPosProbe = (xCollisionRectLeft + xCollisionRectRight) / 2.0
+        val yPosProbe = if (yMovement < 0.0) yCollisionRectTop else yCollisionRectBottom  // Moving up - Y Axis inverted
 
-        val cxLeft: Int = (xPosLeft / gridSize).toIntFloor()
-        val cyLeft: Int = (yPosProbe / gridSize).toIntFloor()
-        val xrLeft: Double = xPosLeft % gridSize
-        // Left Edge of the bottom collision rect edge
-        val slopeLeft = worldMapData.getCollisionSlope(cxLeft, cyLeft, xrLeft)
+        val cx: Int = (xPosProbe / gridSize).toIntFloor()
+        val cy: Int = (yPosProbe / gridSize).toIntFloor()
+        val xr: Double = xPosProbe % gridSize
 
-        val cxRight: Int = (xPosRight / gridSize).toIntFloor()
-        val cyRight: Int = (yPosProbe / gridSize).toIntFloor()
-        val xrRight: Double = xPosRight % gridSize
-        // Right Edge of the bottom collision rect edge
-        val slopeRight = worldMapData.getCollisionSlope(cxRight, cyRight, xrRight)
+        debugShapesComponent?.let { debugSaveRatioPointY(it, xPosProbe, yPosProbe) }
 
-//        println("slope left: $slopeLeft, slope right: $slopeRight")
+        return worldMapData.getCollisionSlope(cx, cy, xr)
+    }
 
-        return max(slopeLeft, slopeRight)
+    /**
+     * Probes for slope collision height beneath the collision box along both left and right bottom corners.
+     *
+     * Evaluates slope heights at the left and right $X$-coordinates at the target $Y$-position, returning
+     * the maximum slope value found between both corners.
+     *
+     * @param xCollisionRectLeft Left boundary $X$-coordinate of the bottom edge of the collision box.
+     * @param xCollisionRectRight Right boundary $X$-coordinate of the bottom edge of the collision box.
+     * @param yCollisionRectBottom Target $Y$-coordinate along the bottom edge to probe.
+     * @return The maximum slope height value between the left and right probed bottom corners.
+     */
+    fun probeSlopeBeneath(
+        xCollisionRectLeft: Double,
+        xCollisionRectRight: Double,
+        yCollisionRectBottom: Double,
+        debugShapesComponent: DebugCollisionShapes? = null
+    ): Double {
+        val xCollisionRectMiddle = (xCollisionRectLeft + xCollisionRectRight) / 2.0
+
+        val cx: Int = (xCollisionRectMiddle / gridSize).toIntFloor()
+        val cy: Int = (yCollisionRectBottom / gridSize).toIntFloor()
+        val xr: Double = xCollisionRectLeft % gridSize
+
+        debugShapesComponent?.let { debugSaveGridCell(it, cx, cy, worldMapData.tileSize)}
+
+        return worldMapData.getCollisionSlope(cx, cy, xr)
     }
 }

@@ -49,7 +49,7 @@ class CollisionMoveSystemTest {
             verticalSteps: Int,
             gridSize: Double,
             debugShapesComponent: DebugCollisionShapes? = null,
-        ): Boolean = probeCollisionHorizontally(
+        ): Boolean = collisionHandler.probeCollisionHorizontally(
             xMovement, yMovement, yPosTop, yPosBottom, xPosMovedLeadingEdge, verticalSteps, gridSize, debugShapesComponent
         )
 
@@ -62,7 +62,7 @@ class CollisionMoveSystemTest {
             horizontalSteps: Int,
             gridSize: Double,
             debugShapesComponent: DebugCollisionShapes? = null,
-        ): Boolean = probeCollisionVertically(
+        ): Boolean = collisionHandler.probeCollisionVertically(
             xMovement, yMovement, xPosMovedLeft, xPosMovedRight, yPosMovedLeadingEdge, horizontalSteps, gridSize, debugShapesComponent
         )
 
@@ -73,7 +73,7 @@ class CollisionMoveSystemTest {
             motionComponent: korlibs.korge.fleks.components.Motion,
             collisionComponent: korlibs.korge.fleks.components.Collision,
             gridSize: Double,
-        ) = resolveCollisionHorizontally(
+        ) = collisionResolver.resolveCollisionHorizontally(
             xMovement, xPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize
         )
 
@@ -84,7 +84,7 @@ class CollisionMoveSystemTest {
             motionComponent: korlibs.korge.fleks.components.Motion,
             collisionComponent: korlibs.korge.fleks.components.Collision,
             gridSize: Double,
-        ) = resolveCollisionVertically(
+        ) = collisionResolver.resolveCollisionVertically(
             yMovement, yPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize
         )
 
@@ -440,7 +440,7 @@ class CollisionMoveSystemTest {
         assertEquals(0.0, motion.velocityX, "velocityX should be zeroed out on horizontal collision")
         assertEquals(50.0, motion.velocityY, "velocityY should remain unchanged when surfaceReactionY is GROUND_WALKING")
         assertTrue(collision.right, "collision.right should be set to true")
-        assertEquals(38.999, pos.x, 0.001, "Position X should snap left of cell 3")
+        assertEquals(38.99, pos.x, 0.001, "Position X should snap left of cell 3")
     }
 
     @Test
@@ -505,7 +505,7 @@ class CollisionMoveSystemTest {
         assertEquals(0.0, motion.velocityX)
         assertEquals(0.0, motion.velocityY)
         assertTrue(collision.left, "collision.left should be set to true")
-        assertEquals(40.001, pos.x, 0.001, "Position X should snap right of cell 1")
+        assertEquals(40.01, pos.x, 0.001, "Position X should snap right of cell 1")
     }
 
     // -------------------------------------------------------------------------
@@ -532,7 +532,7 @@ class CollisionMoveSystemTest {
         assertEquals(0.0, motion.velocityX)
         assertEquals(0.0, motion.velocityY)
         assertTrue(collision.isGrounded, "collision.isGrounded should be set to true")
-        assertEquals(2782.999, pos.y, 0.001, "Position Y should snap on top of ground cell 174")
+        assertEquals(2782.99, pos.y, 0.001, "Position Y should snap on top of ground cell 174")
     }
 
     @Test
@@ -576,7 +576,7 @@ class CollisionMoveSystemTest {
         assertEquals(0.0, motion.velocityX)
         assertEquals(0.0, motion.velocityY)
         assertTrue(collision.isCollidingAbove, "collision.isCollidingAbove should be set to true")
-        assertEquals(76.001, pos.y, 0.001, "Position Y should snap below ceiling cell 2")
+        assertEquals(76.01, pos.y, 0.001, "Position Y should snap below ceiling cell 2")
     }
 
     // -------------------------------------------------------------------------

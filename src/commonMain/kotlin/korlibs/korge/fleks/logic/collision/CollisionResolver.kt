@@ -96,7 +96,7 @@ class CollisionResolver {
         motionComponent: Motion,
         collisionComponent: Collision,
         gridSize: Double,
-        slopeValue: Double
+        slopeValue: Double = NO_COLLISION_SLOPE
     ) {
         // Stop movement along the collision axis (Y) or bounce off the surface
         when (motionComponent.surfaceReactionY) {

@@ -129,8 +129,8 @@ class WorldMapData {
                     14 -> FULL_COLLISION_SLOPE  // == 16.0
                     else -> NO_COLLISION_SLOPE  // e.g. empty or solid tile have no slope value
                 }
-            } ?: 0.0  // Tile is empty or no chunk mesh found for the chunk index
-        } else 0.0  // Outside levelGridVania bounds
+            } ?: NO_COLLISION_SLOPE  // Tile is empty or no chunk mesh found for the chunk index
+        } else NO_COLLISION_SLOPE  // Outside levelGridVania bounds
     }
 
     /**

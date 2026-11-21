@@ -18,6 +18,7 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.logic.collision.CollisionHandler
 import korlibs.korge.fleks.logic.collision.CollisionResolver
 import korlibs.korge.fleks.logic.collision.FULL_COLLISION_SLOPE
+import korlibs.korge.fleks.logic.collision.NO_COLLISION_SLOPE
 import korlibs.math.isAlmostEquals
 import korlibs.math.toIntCeil
 import korlibs.math.toIntFloor
@@ -38,8 +39,8 @@ open class CollisionMoveSystem : IteratingSystem(
     interval = Fixed(1 / 60f)
 ) {
     private val worldMapData = world.inject<AssetStore>("AssetStore").worldMapData
-    private val collisionHandler = CollisionHandler(worldMapData)
-    private val collisionResolver = CollisionResolver()
+    protected val collisionHandler = CollisionHandler(worldMapData)
+    protected val collisionResolver = CollisionResolver()
 
     protected fun Double.isNotAlmostZero(): Boolean = this.absoluteValue > 0.01
 
@@ -179,7 +180,6 @@ open class CollisionMoveSystem : IteratingSystem(
             yPosInitialBottom,
             xPosMovedLeadingEdge,
             verticalSteps,
-            gridSize,
             debugShapesComponent
         )
 
@@ -187,16 +187,22 @@ open class CollisionMoveSystem : IteratingSystem(
         ySlopeValue = collisionHandler.probeHorizontalSlopes(
             yMovement,
             xPosInitialLeft,
-            yPosInitialTop,
             xPosInitialRight,
+            yPosInitialTop,
             yPosInitialBottom,
-            gridSize,
             debugShapesComponent
         )
 
         // Set horizontal position depending on collision
         if (isCollidingHor) {  // resolve only at solid collision
-            collisionResolver.resolveCollisionHorizontally(xMovement, xPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize)
+            collisionResolver.resolveCollisionHorizontally(
+                xMovement,
+                xPosMovedLeadingEdge,
+                positionComponent,
+                motionComponent,
+                collisionComponent,
+                gridSize
+            )
         } else {  // Not colliding with solid tile horizontally
             positionComponent.x += xMovement
         }
@@ -229,28 +235,38 @@ open class CollisionMoveSystem : IteratingSystem(
             xPosMovedRight,
             yPosMovedProbe,
             horizontalSteps,
-            gridSize,
+//            debugShapesComponent
+        )
+
+        val slopeBeneath = collisionHandler.probeSlopeBeneath(
+            xPosMovedLeft,
+            xPosMovedRight,
+            yPosMovedProbe,
             debugShapesComponent
         )
-/*
-        if (wasGroundedLastFrame && !isCollidingVer) {
-            ySlopeValue = collisionHandler.probeHorizontalSlopes(
+
+        if (slopeBeneath != NO_COLLISION_SLOPE && slopeBeneath != FULL_COLLISION_SLOPE) {
+            collisionResolver.resolveCollisionVertically(
                 yMovement,
-                xPosMovedLeft,
-                yPosMovedProbe,
-                xPosMovedRight,
-                yPosMovedProbe,  //yPosInitialBottom + 0.01,
+                yPosMovedProbe + 16.0,
+                positionComponent,
+                motionComponent,
+                collisionComponent,
                 gridSize,
-                debugShapesComponent
+                slopeBeneath
             )
-            println("slope value: $ySlopeValue")
-//            collisionResolver.resolveCollisionVertically(yMovement, yPosMovedProbe, positionComponent, motionComponent, collisionComponent, gridSize, ySlopeValue)
-        }
-*/
-        // Either we are colliding vertically or we are walking on the gound (wasGroundedLastFrame) and we enter a slope downwards
-//        if (isCollidingVer || (wasGroundedLastFrame && ySlopeValue != NO_COLLISION_SLOPE)) {
+        } else
+
         if (isCollidingVer) {
-            collisionResolver.resolveCollisionVertically(yMovement, yPosMovedProbe, positionComponent, motionComponent, collisionComponent, gridSize, ySlopeValue)
+            collisionResolver.resolveCollisionVertically(
+                yMovement,
+                yPosMovedProbe,
+                positionComponent,
+                motionComponent,
+                collisionComponent,
+                gridSize,
+                ySlopeValue
+            )
 
             // Apply friction to the horizontal movement - possibly correct the horizontal movement with only a fraction of the total movement based on frictionX
             if (motionComponent.surfaceReactionX != GROUND_WALKING) {
@@ -271,7 +287,11 @@ open class CollisionMoveSystem : IteratingSystem(
                     positionComponent.y += yDeltaMove
                 }
             } else {  // No collision horizontally - we don't need to resolve Y
-                positionComponent.y += yMovement
+                // Check if we were grounded last frame and if now there is a slope tile beneath us
+//                if (wasGroundedLastFrame && slopeBeneath != NO_COLLISION_SLOPE) {
+//                } else {
+                    positionComponent.y += yMovement
+//                }
             }
         }
         return isCollidingHor || isCollidingVer
