@@ -186,14 +186,14 @@ open class CollisionMoveSystem : IteratingSystem(
         // Then check if we are running into a slope tile --> move up the object by the slope value
         ySlopeValue = collisionHandler.probeHorizontalSlopes(
             yMovement,
-            xPosInitialLeft,
-            xPosInitialRight,
-            yPosInitialTop,
+            xPosMoveProbeLeft,  // probe at the moved X position
+            xPosMoveProbeRight,
+            yPosInitialTop,     // probe at the not yet moved Y position
             yPosInitialBottom,
             debugShapesComponent
         )
 
-        // Set horizontal position depending on collision
+        // Set horizontal position depending on collision - here we detect slopes when running up
         if (isCollidingHor) {  // resolve only at solid collision
             collisionResolver.resolveCollisionHorizontally(
                 xMovement,
@@ -255,9 +255,7 @@ open class CollisionMoveSystem : IteratingSystem(
                 gridSize,
                 slopeBeneath
             )
-        } else
-
-        if (isCollidingVer) {
+        } else if (isCollidingVer) {
             collisionResolver.resolveCollisionVertically(
                 yMovement,
                 yPosMovedProbe,

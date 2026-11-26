@@ -61,7 +61,7 @@ class CollisionHandler(
             val cyProbe = (yPosMovedProbe / gridSize).toIntFloor()
 
             debugShapesComponent?.let { debugSaveRatioPointX(it, xPosMovedLeadingEdge, yPosMovedProbe) }
-            debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData.tileSize) }
+//            debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData.tileSize) }
 
             if (worldMapData.hasCollision(cxProbe, cyProbe)) return true
         }
@@ -107,7 +107,7 @@ class CollisionHandler(
             val cyProbe = (yPosMovedLeadingEdge / gridSize).toIntFloor()
 
             debugShapesComponent?.let { debugSaveRatioPointY(it, xPosMovedProbe, yPosMovedLeadingEdge) }
-            debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData.tileSize) }
+//            debugShapesComponent?.let { debugSaveGridCell(it, cxProbe, cyProbe, worldMapData.tileSize) }
 
             if (worldMapData.hasCollision(cxProbe, cyProbe, fullSlopeCheck = true)) return true
         }
@@ -169,7 +169,7 @@ class CollisionHandler(
 
         val cx: Int = (xCollisionRectMiddle / gridSize).toIntFloor()
         val cy: Int = (yCollisionRectBottom / gridSize).toIntFloor()
-        val xr: Double = xCollisionRectLeft % gridSize
+        val xr: Double = xCollisionRectMiddle % gridSize
 
         debugShapesComponent?.let { debugSaveGridCell(it, cx, cy, worldMapData.tileSize)}
 
