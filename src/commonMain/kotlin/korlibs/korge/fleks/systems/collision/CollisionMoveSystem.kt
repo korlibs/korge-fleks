@@ -48,8 +48,10 @@ open class CollisionMoveSystem : IteratingSystem(
     private val gridSizeHalf = gridSize * 0.5
 
     // Internal states during this frame
-    var wasGroundedLastFrame = false
-    var wasOnSlopeLastFrame = false
+    private var wasGroundedLastFrame = false
+    private var wasOnSlopeLastFrame = false
+    private var slopeValueLastFrame = 0.0
+    private var slopeSpeedFactor = 1.0
 
     override fun onTickEntity(entity: Entity) {
         // Iterate over all entities that have a Grid, Collision and MotionComponent
@@ -96,11 +98,16 @@ open class CollisionMoveSystem : IteratingSystem(
             collisionComponent.isCollidingAbove = false
             wasOnSlopeLastFrame = collisionComponent.isOnSlope
             collisionComponent.isOnSlope = false
+            slopeValueLastFrame = collisionComponent.currentSlopeValue
         }
+
+        slopeSpeedFactor = 1.0
 
         processCollisionSteps(steps, overallMovementX, overallMovementY) { movementX, movementY ->
             checkCollision(movementX, movementY, positionComponent, motionComponent, collisionComponent, debugShapesComponent)
         }
+
+        motionComponent.velocityX *= slopeSpeedFactor
 
         if (motionComponent.velocityX.isAlmostEquals(0.0005)) {
             // Velocity values smaller than 0.0005 are zeroed out
@@ -167,7 +174,7 @@ open class CollisionMoveSystem : IteratingSystem(
 
         var isCollidingHor: Boolean
         var isCollidingVer: Boolean
-        var ySlopeValue: Double  // [0.0 ... <16.0]  --> 0.0 = no collision --> 0.01 ... 15.99 = inside a slope tile
+        val ySlopeValue: Double  // [0.0 ... <16.0]  --> 0.0 = no collision --> 0.01 ... 15.99 = inside a slope tile
 
         // Define position of moved collision box edges
         val xPosMoveProbeLeft = xPosInitialLeft + xMovement
@@ -186,6 +193,7 @@ open class CollisionMoveSystem : IteratingSystem(
         )
 
         collisionComponent.isOnSlope = ySlopeValue != NO_COLLISION_SLOPE
+        collisionComponent.currentSlopeValue = ySlopeValue
 
         // Check if we were on a slope last frame, are not moving up and the current cell is no slope
         // then we need to ground the object otherwise at the end of a slope down we will fall
@@ -310,6 +318,12 @@ open class CollisionMoveSystem : IteratingSystem(
                 positionComponent.y += yMovement
             }
         }
+
+        // Check if we are running up or down a slope
+        slopeSpeedFactor = if (ySlopeValue != NO_COLLISION_SLOPE && slopeValueLastFrame != NO_COLLISION_SLOPE)
+            if (ySlopeValue > slopeValueLastFrame) 0.9 else 1.1
+        else 1.0
+
         return isCollidingHor || isCollidingVer
     }
 

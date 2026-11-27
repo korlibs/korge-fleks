@@ -25,6 +25,7 @@ class Collision private constructor(
     var isCollidingAbove: Boolean = false,
     var isGrounded: Boolean = false,
     var isOnSlope: Boolean = false,
+    var currentSlopeValue: Double = 0.0,
     var jumpEnergy: Double = 0.0,  // Used to store the maximum jump velocity of the player which is then decreased over time
     // Collision rectangle which contains size and anchor point to the pivot point of the entity
     // This is threat as a static immutable object
@@ -51,6 +52,7 @@ class Collision private constructor(
         isCollidingAbove = from.isCollidingAbove
         isGrounded = from.isGrounded
         isOnSlope = from.isOnSlope
+        currentSlopeValue = from.currentSlopeValue
         jumpEnergy = from.jumpEnergy
         // Collision rectangle data
         rect = from.rect
@@ -77,6 +79,7 @@ class Collision private constructor(
         isCollidingAbove = false
         isGrounded = false
         isOnSlope = false
+        currentSlopeValue = 0.0
         jumpEnergy = 0.0
         // Collision rectangle data
         rect = CollisionRect.EMPTY
