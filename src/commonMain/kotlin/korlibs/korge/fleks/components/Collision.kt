@@ -24,6 +24,7 @@ class Collision private constructor(
     var left: Boolean = false,
     var isCollidingAbove: Boolean = false,
     var isGrounded: Boolean = false,
+    var isOnSlope: Boolean = false,
     var jumpEnergy: Double = 0.0,  // Used to store the maximum jump velocity of the player which is then decreased over time
     // Collision rectangle which contains size and anchor point to the pivot point of the entity
     // This is threat as a static immutable object
@@ -33,7 +34,6 @@ class Collision private constructor(
 //    var wasGroundedLastFrame: Boolean = false,
 //    var wasInFrontOfWall: Boolean = false,  // used to check if the player was in front of a wall last frame
 //    var canJump: Boolean = true,
-//    var movingDownSlope: Boolean = false,
 //    var slopeAngle: Float = 0f,
 //    var isFalling: Boolean = false,
 //    var collisionWithStaticObject: Boolean = false,  // used currently e.g. by shoot objects
@@ -50,6 +50,7 @@ class Collision private constructor(
         left = from.left
         isCollidingAbove = from.isCollidingAbove
         isGrounded = from.isGrounded
+        isOnSlope = from.isOnSlope
         jumpEnergy = from.jumpEnergy
         // Collision rectangle data
         rect = from.rect
@@ -57,7 +58,6 @@ class Collision private constructor(
 //        wasGroundedLastFrame = from.wasGroundedLastFrame
 //        wasInFrontOfWall = from.wasInFrontOfWall
 //        canJump = from.canJump
-//        movingDownSlope = from.movingDownSlope
 //        slopeAngle = from.slopeAngle
 //        isFalling = from.isFalling
 //        collisionWithStaticObject = from.collisionWithStaticObject
@@ -76,6 +76,7 @@ class Collision private constructor(
         left = false
         isCollidingAbove = false
         isGrounded = false
+        isOnSlope = false
         jumpEnergy = 0.0
         // Collision rectangle data
         rect = CollisionRect.EMPTY
@@ -83,7 +84,6 @@ class Collision private constructor(
 //        wasGroundedLastFrame = false
 //        wasInFrontOfWall = false
 //        canJump = true
-//        movingDownSlope = false
 //        slopeAngle = 0f
 //        isFalling = false
 //        collisionWithStaticObject = false

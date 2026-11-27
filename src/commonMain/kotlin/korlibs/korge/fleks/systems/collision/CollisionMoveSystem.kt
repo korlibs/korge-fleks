@@ -17,7 +17,6 @@ import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 import korlibs.korge.fleks.logic.collision.CollisionHandler
 import korlibs.korge.fleks.logic.collision.CollisionResolver
-import korlibs.korge.fleks.logic.collision.FULL_COLLISION_SLOPE
 import korlibs.korge.fleks.logic.collision.NO_COLLISION_SLOPE
 import korlibs.math.isAlmostEquals
 import korlibs.math.toIntCeil
@@ -44,8 +43,13 @@ open class CollisionMoveSystem : IteratingSystem(
 
     protected fun Double.isNotAlmostZero(): Boolean = this.absoluteValue > 0.01
 
+    // Size of a tile grid cell in pixels (e.g. 16.0).
+    private val gridSize = worldMapData.tileSize.toDouble()
+    private val gridSizeHalf = gridSize * 0.5
+
     // Internal states during this frame
     var wasGroundedLastFrame = false
+    var wasOnSlopeLastFrame = false
 
     override fun onTickEntity(entity: Entity) {
         // Iterate over all entities that have a Grid, Collision and MotionComponent
@@ -70,7 +74,6 @@ open class CollisionMoveSystem : IteratingSystem(
         // Total frame displacement is calculated from velocity and frame time (deltaTime)
         val overallMovementX = motionComponent.velocityX * deltaTime
         val overallMovementY = motionComponent.velocityY * deltaTime  // Negative sign for upward movement - Y Axis is mirrored in the game
-        val gridSize = worldMapData.tileSize.toDouble()
 
         // The number of steps which an object travels through a grid cell is defined either by its collision
         // rect size or the grid size, i.e. if the collision rect is smaller than the grid size we need to
@@ -91,10 +94,12 @@ open class CollisionMoveSystem : IteratingSystem(
             wasGroundedLastFrame = collisionComponent.isGrounded
             collisionComponent.isGrounded = false
             collisionComponent.isCollidingAbove = false
+            wasOnSlopeLastFrame = collisionComponent.isOnSlope
+            collisionComponent.isOnSlope = false
         }
 
         processCollisionSteps(steps, overallMovementX, overallMovementY) { movementX, movementY ->
-            checkCollision(movementX, movementY, positionComponent, motionComponent, collisionComponent, gridSize, debugShapesComponent)
+            checkCollision(movementX, movementY, positionComponent, motionComponent, collisionComponent, debugShapesComponent)
         }
 
         if (motionComponent.velocityX.isAlmostEquals(0.0005)) {
@@ -126,7 +131,6 @@ open class CollisionMoveSystem : IteratingSystem(
      * @param positionComponent The position component containing entity world coordinates and offsets.
      * @param motionComponent The motion component containing velocities and surface reaction modes.
      * @param collisionComponent The collision component containing the bounding box rect and collision flags.
-     * @param gridSize Size of a tile grid cell in pixels (e.g., 16.0).
      * @param debugShapesComponent Optional component for rendering debug collision probe points and cells.
      * @return `true` if either a horizontal or vertical collision was detected and resolved; `false` otherwise.
      */
@@ -136,7 +140,6 @@ open class CollisionMoveSystem : IteratingSystem(
         positionComponent: Position,
         motionComponent: Motion,
         collisionComponent: Collision,
-        gridSize: Double,
         debugShapesComponent: DebugCollisionShapes?
     ): Boolean {
         val xPositionSaved = positionComponent.x
@@ -149,8 +152,8 @@ open class CollisionMoveSystem : IteratingSystem(
         // Define initial (not moved) position of the entity collision box edges
         val xPosInitialLeft = positionComponent.x + positionComponent.offsetX + collisionComponent.rect.x
         val xPosInitialRight = xPosInitialLeft + collisionComponent.rect.width
-        val yPosInitialTop = positionComponent.y + positionComponent.offsetY + collisionComponent.rect.y
-        val yPosInitialBottom = yPosInitialTop + collisionComponent.rect.height
+        var yPosInitialTop = positionComponent.y + positionComponent.offsetY + collisionComponent.rect.y
+        var yPosInitialBottom = yPosInitialTop + collisionComponent.rect.height
 
         // Initial position of the leading edge of the collision box
         val xPosInitialLeadingEdge = if (xMovement > 0.0) xPosInitialRight else xPosInitialLeft
@@ -162,9 +165,9 @@ open class CollisionMoveSystem : IteratingSystem(
         val horizontalSteps = (horizontalSpan / gridSize).toIntCeil()
         val verticalSteps = (verticalSpan / gridSize).toIntCeil()
 
-        var isCollidingHor = false
-        var isCollidingVer = false
-        var ySlopeValue: Double = 0.0  // [0.0 ... 16.0]  --> 0.0 = no collision --> 16.0 = completely moved out of the slope tile
+        var isCollidingHor: Boolean
+        var isCollidingVer: Boolean
+        var ySlopeValue: Double  // [0.0 ... <16.0]  --> 0.0 = no collision --> 0.01 ... 15.99 = inside a slope tile
 
         // Define position of moved collision box edges
         val xPosMoveProbeLeft = xPosInitialLeft + xMovement
@@ -172,24 +175,49 @@ open class CollisionMoveSystem : IteratingSystem(
         // Leading collision box edge coordinates for probing
         val xPosMovedLeadingEdge = if (xMovement > 0.0) xPosMoveProbeRight else xPosMoveProbeLeft
 
-        // Probe first horizontally and then vertically
-        isCollidingHor = collisionHandler.probeCollisionHorizontally(
-            xMovement,
-            yMovement,
-            yPosInitialTop,
-            yPosInitialBottom,
-            xPosMovedLeadingEdge,
-            verticalSteps,
-            debugShapesComponent
-        )
-
-        // Then check if we are running into a slope tile --> move up the object by the slope value
+        // First check if we are running into a slope tile --> move up the object by the slope value
         ySlopeValue = collisionHandler.probeHorizontalSlopes(
             yMovement,
             xPosMoveProbeLeft,  // probe at the moved X position
             xPosMoveProbeRight,
             yPosInitialTop,     // probe at the not yet moved Y position
             yPosInitialBottom,
+            debugShapesComponent
+        )
+
+        collisionComponent.isOnSlope = ySlopeValue != NO_COLLISION_SLOPE
+
+        // Check if we were on a slope last frame, are not moving up and the current cell is no slope
+        // then we need to ground the object otherwise at the end of a slope down we will fall
+        // or at the end of a slope up we will hit a wall
+        if (wasOnSlopeLastFrame && yMovement > 0.0 && ySlopeValue == NO_COLLISION_SLOPE) {  // Y-Axis inverted!
+
+            // Sample the slope value at position of the last frame (initial position)
+            val yr = collisionHandler.probeHorizontalSlopes(
+                yMovement,
+                xPosInitialLeft,
+                xPosInitialRight,
+                yPosInitialTop,
+                yPosInitialBottom
+            )
+
+            // running up slop -> move collision rect up to cell bounds (current cell 0)
+            // running down slope -> move collision rect down to cell bounds (next cell +1)
+            val cyBottomEdge = (yPosInitialBottom / gridSize).toIntFloor() + if (yr > gridSizeHalf) 0 else 1
+
+            // Move collision rect to the top of the collider cell
+            val guardMove = 0.01
+            yPosInitialBottom = cyBottomEdge * gridSize - guardMove  // Y-Axis inverted!
+            yPosInitialTop = yPosInitialBottom - collisionComponent.rect.height
+        }
+
+        // Probe horizontally
+        isCollidingHor = collisionHandler.probeCollisionHorizontally(
+            yPosInitialTop,
+            yPosInitialBottom,
+            xPosMovedLeadingEdge,
+            verticalSteps,
+            ySlopeValue,
             debugShapesComponent
         )
 
@@ -209,12 +237,7 @@ open class CollisionMoveSystem : IteratingSystem(
 
         // Define position of moved collision box edges
         val yPosMovedTop = yPosInitialTop + yMovement
-        val yPosMovedBottom = if (ySlopeValue == FULL_COLLISION_SLOPE)
-            // If slope tile is a full slope than move the object up to the top edge of the current cell
-            ((yPosMovedTop + collisionRectHeightGuarded) / gridSize).toIntFloor() * gridSize
-        else
-            yPosMovedTop + collisionRectHeightGuarded
-
+        val yPosMovedBottom = yPosMovedTop + collisionRectHeightGuarded
 
         // Leading collision box edge coordinates for probing
         val yPosMovedLeadingEdge = if (yMovement > 0.0) yPosMovedBottom else yPosMovedTop
@@ -229,13 +252,11 @@ open class CollisionMoveSystem : IteratingSystem(
 
         // Now probe vertically
         isCollidingVer = collisionHandler.probeCollisionVertically(
-            xMovement,
-            yMovement,
             xPosMovedLeft,
             xPosMovedRight,
             yPosMovedProbe,
             horizontalSteps,
-//            debugShapesComponent
+            debugShapesComponent
         )
 
         val slopeBeneath = collisionHandler.probeSlopeBeneath(
@@ -245,7 +266,8 @@ open class CollisionMoveSystem : IteratingSystem(
             debugShapesComponent
         )
 
-        if (slopeBeneath != NO_COLLISION_SLOPE && slopeBeneath != FULL_COLLISION_SLOPE) {
+        // Vertically first check if we are on a slope
+        if (slopeBeneath != NO_COLLISION_SLOPE) {
             collisionResolver.resolveCollisionVertically(
                 yMovement,
                 yPosMovedProbe + 16.0,
@@ -285,11 +307,7 @@ open class CollisionMoveSystem : IteratingSystem(
                     positionComponent.y += yDeltaMove
                 }
             } else {  // No collision horizontally - we don't need to resolve Y
-                // Check if we were grounded last frame and if now there is a slope tile beneath us
-//                if (wasGroundedLastFrame && slopeBeneath != NO_COLLISION_SLOPE) {
-//                } else {
-                    positionComponent.y += yMovement
-//                }
+                positionComponent.y += yMovement
             }
         }
         return isCollidingHor || isCollidingVer

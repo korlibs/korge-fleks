@@ -2,7 +2,6 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
-import korlibs.korge.fleks.logic.collision.FULL_COLLISION_SLOPE
 import korlibs.korge.fleks.logic.collision.NO_COLLISION_SLOPE
 
 
@@ -120,13 +119,10 @@ class WorldMapData {
             chunkLookUpTable[chunkId]?.levelMaps["default"]?.stackedTileMapData[tileIdx]?.firstOrNull()?.let { tile ->
                 val collisionIndex = (tile and 0xff00000) shr 20  // Get bits 20-27 for collision index
 
-//                if (collisionIndex > 1) println("slope index: $collisionIndex")
-
                 // Behave differently for specific collision tiles
                 when (collisionIndex) {
                     4 -> 0.5 * xr        // 0.0 ... 8.0
                     5 -> 0.5 * xr + 8.0  // 8.0 ... 16.0
-                    14 -> FULL_COLLISION_SLOPE  // == 16.0
                     else -> NO_COLLISION_SLOPE  // e.g. empty or solid tile have no slope value
                 }
             } ?: NO_COLLISION_SLOPE  // Tile is empty or no chunk mesh found for the chunk index
@@ -139,12 +135,10 @@ class WorldMapData {
      *
      * @param cx Horizontal position in positive x direction (in pixel)
      * @param cy Vertical positon in positive y direction (in pixel)
-     * @param fullSlopeCheck Used to threat a full slope tile as a solid tile when needed. E.g. when probing
-     *        collision in vertical direction.
      *
      * @return Returns true if position has a collision tile/cell attached otherwise false.
      */
-    fun hasCollision(cx: Int, cy: Int, fullSlopeCheck: Boolean = false): Boolean {
+    fun hasCollision(cx: Int, cy: Int): Boolean {
         // Get the chunk coordinates in the chunk Grid-vania array
         val gridCx = cx / chunkWidth
         val gridCy = cy / chunkHeight
@@ -164,7 +158,6 @@ class WorldMapData {
                 // Check only for solid tile
                 when (collisionIndex) {
                     1 -> true
-                    14 -> fullSlopeCheck  // special full slope tile
                     else -> false
                 }
             } ?: false  // Tile is empty or no chunk mesh found for the chunk index
