@@ -41,29 +41,24 @@ class CollisionMoveSystemTest {
         ): Double = calculateRatio(movement, posInitialLeadingEdge, posMovedLeadingEdge, gridSize)
 
         fun testProbeCollisionHorizontally(
-            xMovement: Double,
-            yMovement: Double,
             yPosTop: Double,
             yPosBottom: Double,
             xPosMovedLeadingEdge: Double,
             verticalSteps: Int,
-            gridSize: Double,
+            slopeValue: Double = 0.0,
             debugShapesComponent: DebugCollisionShapes? = null,
         ): Boolean = collisionHandler.probeCollisionHorizontally(
-            xMovement, yMovement, yPosTop, yPosBottom, xPosMovedLeadingEdge, verticalSteps, gridSize, debugShapesComponent
+            yPosTop, yPosBottom, xPosMovedLeadingEdge, verticalSteps, slopeValue, debugShapesComponent
         )
 
         fun testProbeCollisionVertically(
-            xMovement: Double,
-            yMovement: Double,
             xPosMovedLeft: Double,
             xPosMovedRight: Double,
             yPosMovedLeadingEdge: Double,
             horizontalSteps: Int,
-            gridSize: Double,
             debugShapesComponent: DebugCollisionShapes? = null,
         ): Boolean = collisionHandler.probeCollisionVertically(
-            xMovement, yMovement, xPosMovedLeft, xPosMovedRight, yPosMovedLeadingEdge, horizontalSteps, gridSize, debugShapesComponent
+            xPosMovedLeft, xPosMovedRight, yPosMovedLeadingEdge, horizontalSteps, debugShapesComponent
         )
 
         fun testResolveCollisionHorizontally(
@@ -97,10 +92,9 @@ class CollisionMoveSystemTest {
             positionComponent: Position,
             motionComponent: korlibs.korge.fleks.components.Motion,
             collisionComponent: korlibs.korge.fleks.components.Collision,
-            gridSize: Double,
             debugShapesComponent: DebugCollisionShapes? = null,
         ): Boolean = checkCollision(
-            xMovement, yMovement, positionComponent, motionComponent, collisionComponent, gridSize, debugShapesComponent
+            xMovement, yMovement, positionComponent, motionComponent, collisionComponent, debugShapesComponent
         )
     }
 
@@ -391,13 +385,10 @@ class CollisionMoveSystemTest {
     @Test
     fun testProbeCollisionHorizontallyZeroMovementReturnsFalse() {
         val result = collisionMoveSystem.testProbeCollisionHorizontally(
-            xMovement = 0.0,
-            yMovement = 5.0,
             yPosTop = 100.0,
             yPosBottom = 129.0,
             xPosMovedLeadingEdge = 50.0,
             verticalSteps = 2,
-            gridSize = 16.0,
         )
         assertFalse(result, "probeCollisionHorizontally should return false when xMovement is zero")
     }
@@ -405,13 +396,10 @@ class CollisionMoveSystemTest {
     @Test
     fun testProbeCollisionVerticallyZeroMovementReturnsFalse() {
         val result = collisionMoveSystem.testProbeCollisionVertically(
-            xMovement = 5.0,
-            yMovement = 0.0,
             xPosMovedLeft = 100.0,
             xPosMovedRight = 117.0,
             yPosMovedLeadingEdge = 2785.0,
             horizontalSteps = 1,
-            gridSize = 16.0,
         )
         assertFalse(result, "probeCollisionVertically should return false when yMovement is zero")
     }
@@ -618,7 +606,6 @@ class CollisionMoveSystemTest {
             positionComponent = pos,
             motionComponent = motion,
             collisionComponent = collision,
-            gridSize = 16.0,
         )
 
         assertFalse(isColliding, "checkCollision should return false when no collision is detected")
