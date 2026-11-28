@@ -192,12 +192,12 @@ class ObjectRenderSystem(
                 // Start and end indexes of viewport area
                 val xStart: Int = (tileMapPosX.toInt() / tileSize - 1).clamp(0, tileMap.tileMapWidth)  // TODO check if clamp is really needed
                                   // x in positive direction;  -1 = start one tile before
-                val xTiles = AppConfig.VIEW_PORT_WIDTH / tileSize + 3
+                val xTiles = AppConfig.VIEW_PORT_WIDTH_i / tileSize + 3
                 val xEnd: Int = (xStart + xTiles).clamp(0, tileMap.tileMapWidth)
 
                 val yStart: Int = (tileMapPosY.toInt() / tileSize - 1).clamp(0, tileMap.tileMapHeight)
                                   // y in negative direction;  -1 = start one tile before
-                val yTiles = AppConfig.VIEW_PORT_HEIGHT / tileSize + 3
+                val yTiles = AppConfig.VIEW_PORT_HEIGHT_i / tileSize + 3
                 val yEnd: Int = (yStart + yTiles).clamp(0, tileMap.tileMapHeight)
 
                 ctx.useBatcher { batch ->

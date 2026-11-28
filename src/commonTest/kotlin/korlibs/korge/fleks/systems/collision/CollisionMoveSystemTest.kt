@@ -41,29 +41,24 @@ class CollisionMoveSystemTest {
         ): Double = calculateRatio(movement, posInitialLeadingEdge, posMovedLeadingEdge, gridSize)
 
         fun testProbeCollisionHorizontally(
-            xMovement: Double,
-            yMovement: Double,
             yPosTop: Double,
             yPosBottom: Double,
             xPosMovedLeadingEdge: Double,
             verticalSteps: Int,
-            gridSize: Double,
+            slopeValue: Double = 0.0,
             debugShapesComponent: DebugCollisionShapes? = null,
-        ): Boolean = probeCollisionHorizontally(
-            xMovement, yMovement, yPosTop, yPosBottom, xPosMovedLeadingEdge, verticalSteps, gridSize, debugShapesComponent
+        ): Boolean = collisionHandler.probeCollisionHorizontally(
+            yPosTop, yPosBottom, xPosMovedLeadingEdge, verticalSteps, slopeValue, debugShapesComponent
         )
 
         fun testProbeCollisionVertically(
-            xMovement: Double,
-            yMovement: Double,
             xPosMovedLeft: Double,
             xPosMovedRight: Double,
             yPosMovedLeadingEdge: Double,
             horizontalSteps: Int,
-            gridSize: Double,
             debugShapesComponent: DebugCollisionShapes? = null,
-        ): Boolean = probeCollisionVertically(
-            xMovement, yMovement, xPosMovedLeft, xPosMovedRight, yPosMovedLeadingEdge, horizontalSteps, gridSize, debugShapesComponent
+        ): Boolean = collisionHandler.probeCollisionVertically(
+            xPosMovedLeft, xPosMovedRight, yPosMovedLeadingEdge, horizontalSteps, debugShapesComponent
         )
 
         fun testResolveCollisionHorizontally(
@@ -73,7 +68,7 @@ class CollisionMoveSystemTest {
             motionComponent: korlibs.korge.fleks.components.Motion,
             collisionComponent: korlibs.korge.fleks.components.Collision,
             gridSize: Double,
-        ) = resolveCollisionHorizontally(
+        ) = collisionResolver.resolveCollisionHorizontally(
             xMovement, xPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize
         )
 
@@ -84,7 +79,7 @@ class CollisionMoveSystemTest {
             motionComponent: korlibs.korge.fleks.components.Motion,
             collisionComponent: korlibs.korge.fleks.components.Collision,
             gridSize: Double,
-        ) = resolveCollisionVertically(
+        ) = collisionResolver.resolveCollisionVertically(
             yMovement, yPosMovedLeadingEdge, positionComponent, motionComponent, collisionComponent, gridSize
         )
 
@@ -97,10 +92,9 @@ class CollisionMoveSystemTest {
             positionComponent: Position,
             motionComponent: korlibs.korge.fleks.components.Motion,
             collisionComponent: korlibs.korge.fleks.components.Collision,
-            gridSize: Double,
             debugShapesComponent: DebugCollisionShapes? = null,
         ): Boolean = checkCollision(
-            xMovement, yMovement, positionComponent, motionComponent, collisionComponent, gridSize, debugShapesComponent
+            xMovement, yMovement, positionComponent, motionComponent, collisionComponent, debugShapesComponent
         )
     }
 
@@ -391,13 +385,10 @@ class CollisionMoveSystemTest {
     @Test
     fun testProbeCollisionHorizontallyZeroMovementReturnsFalse() {
         val result = collisionMoveSystem.testProbeCollisionHorizontally(
-            xMovement = 0.0,
-            yMovement = 5.0,
             yPosTop = 100.0,
             yPosBottom = 129.0,
             xPosMovedLeadingEdge = 50.0,
             verticalSteps = 2,
-            gridSize = 16.0,
         )
         assertFalse(result, "probeCollisionHorizontally should return false when xMovement is zero")
     }
@@ -405,13 +396,10 @@ class CollisionMoveSystemTest {
     @Test
     fun testProbeCollisionVerticallyZeroMovementReturnsFalse() {
         val result = collisionMoveSystem.testProbeCollisionVertically(
-            xMovement = 5.0,
-            yMovement = 0.0,
             xPosMovedLeft = 100.0,
             xPosMovedRight = 117.0,
             yPosMovedLeadingEdge = 2785.0,
             horizontalSteps = 1,
-            gridSize = 16.0,
         )
         assertFalse(result, "probeCollisionVertically should return false when yMovement is zero")
     }
@@ -440,7 +428,7 @@ class CollisionMoveSystemTest {
         assertEquals(0.0, motion.velocityX, "velocityX should be zeroed out on horizontal collision")
         assertEquals(50.0, motion.velocityY, "velocityY should remain unchanged when surfaceReactionY is GROUND_WALKING")
         assertTrue(collision.right, "collision.right should be set to true")
-        assertEquals(38.999, pos.x, 0.001, "Position X should snap left of cell 3")
+        assertEquals(38.99, pos.x, 0.001, "Position X should snap left of cell 3")
     }
 
     @Test
@@ -505,7 +493,7 @@ class CollisionMoveSystemTest {
         assertEquals(0.0, motion.velocityX)
         assertEquals(0.0, motion.velocityY)
         assertTrue(collision.left, "collision.left should be set to true")
-        assertEquals(40.001, pos.x, 0.001, "Position X should snap right of cell 1")
+        assertEquals(40.01, pos.x, 0.001, "Position X should snap right of cell 1")
     }
 
     // -------------------------------------------------------------------------
@@ -532,7 +520,7 @@ class CollisionMoveSystemTest {
         assertEquals(0.0, motion.velocityX)
         assertEquals(0.0, motion.velocityY)
         assertTrue(collision.isGrounded, "collision.isGrounded should be set to true")
-        assertEquals(2782.999, pos.y, 0.001, "Position Y should snap on top of ground cell 174")
+        assertEquals(2782.99, pos.y, 0.001, "Position Y should snap on top of ground cell 174")
     }
 
     @Test
@@ -576,7 +564,7 @@ class CollisionMoveSystemTest {
         assertEquals(0.0, motion.velocityX)
         assertEquals(0.0, motion.velocityY)
         assertTrue(collision.isCollidingAbove, "collision.isCollidingAbove should be set to true")
-        assertEquals(76.001, pos.y, 0.001, "Position Y should snap below ceiling cell 2")
+        assertEquals(76.01, pos.y, 0.001, "Position Y should snap below ceiling cell 2")
     }
 
     // -------------------------------------------------------------------------
@@ -618,7 +606,6 @@ class CollisionMoveSystemTest {
             positionComponent = pos,
             motionComponent = motion,
             collisionComponent = collision,
-            gridSize = 16.0,
         )
 
         assertFalse(isColliding, "checkCollision should return false when no collision is detected")

@@ -54,7 +54,7 @@ class Motion private constructor(
         velocityY = 0.0
         surfaceReactionX = GROUND_WALKING
         surfaceReactionY = GROUND_WALKING
-        damping = 0.0
+        damping = 1.0
         lastHorizontalVelocity = 0.0
     }
 

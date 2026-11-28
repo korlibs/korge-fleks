@@ -2,6 +2,7 @@ package korlibs.korge.fleks.assets.data
 
 import korlibs.datastructure.IntArray2
 import korlibs.image.bitmap.BmpSlice
+import korlibs.korge.fleks.logic.collision.NO_COLLISION_SLOPE
 
 
 /**
@@ -92,6 +93,43 @@ class WorldMapData {
         else -1  // Outside levelGridVania bounds
 
     /**
+     * Get slope value for collision tile at cell position.
+     * Position cannot get negative.
+     *
+     * @param cx Horizontal position in positive x direction (in pixel)
+     * @param cy Vertical positon in positive y direction (in pixel)
+     * @param xr:
+     *
+     * @return Returns true if position has a collision tile/cell attached otherwise false.
+     */
+    fun getCollisionSlope(cx: Int, cy: Int, xr: Double): Double {
+        // Get the chunk coordinates in the chunk Grid-vania array
+        val gridCx = cx / chunkWidth
+        val gridCy = cy / chunkHeight
+
+        // We can directly check the chunk mesh for the chunk which contains the cell position and
+        // check if the tile at the cell position has a collision index (bits 20-27) that is not 0
+        return if (chunkGridVania.inside(gridCx, gridCy)) {
+            // Get the local coordinates within the chunk
+            val localCx = cx % chunkWidth
+            val localCy = cy % chunkHeight
+            // Check if the tile is not empty and if it has a collision index (bits 20-27) that is not 0
+            val chunkId = chunkGridVania[gridCx, gridCy]
+            val tileIdx = localCx + localCy * chunkWidth
+            chunkLookUpTable[chunkId]?.levelMaps["default"]?.stackedTileMapData[tileIdx]?.firstOrNull()?.let { tile ->
+                val collisionIndex = (tile and 0xff00000) shr 20  // Get bits 20-27 for collision index
+
+                // Behave differently for specific collision tiles
+                when (collisionIndex) {
+                    4 -> 0.5 * xr        // 0.0 ... 8.0
+                    5 -> 0.5 * xr + 8.0  // 8.0 ... 16.0
+                    else -> NO_COLLISION_SLOPE  // e.g. empty or solid tile have no slope value
+                }
+            } ?: NO_COLLISION_SLOPE  // Tile is empty or no chunk mesh found for the chunk index
+        } else NO_COLLISION_SLOPE  // Outside levelGridVania bounds
+    }
+
+    /**
      * Check collision at cell position.
      * Position cannot get negative.
      *
@@ -102,11 +140,11 @@ class WorldMapData {
      */
     fun hasCollision(cx: Int, cy: Int): Boolean {
         // Get the chunk coordinates in the chunk Grid-vania array
-        val gridCx =  cx / chunkWidth
+        val gridCx = cx / chunkWidth
         val gridCy = cy / chunkHeight
 
-        // TODO refactor collision check and remove need for level Grid Array
-        //      -> we can directly check the chunk mesh for the chunk which contains the cell position and check if the tile at the cell position has a collision index (bits 20-27) that is not 0
+        // We can directly check the chunk mesh for the chunk which contains the cell position and
+        // check if the tile at the cell position has a collision index (bits 20-27) that is not 0
         return if (chunkGridVania.inside(gridCx, gridCy)) {
             // Get the local coordinates within the chunk
             val localCx = cx % chunkWidth
@@ -116,13 +154,14 @@ class WorldMapData {
             val tileIdx = localCx + localCy * chunkWidth
             chunkLookUpTable[chunkId]?.levelMaps["default"]?.stackedTileMapData[tileIdx]?.firstOrNull()?.let { tile ->
                 val collisionIndex = (tile and 0xff00000) shr 20  // Get bits 20-27 for collision index
-                if (collisionIndex != 0) {
-                    // TODO Check shape of collision tile from collisionTileSet using collisionIndex and check if the point (cx, cy)
-                    //      is actually colliding with the shape of the collision tile
-                    true
-                } else false  // No collision index, so we can assume it's a valid tile without collision
+
+                // Check only for solid tile
+                when (collisionIndex) {
+                    1 -> true
+                    else -> false
+                }
             } ?: false  // Tile is empty or no chunk mesh found for the chunk index
-        } else false  // Outside levelGridVania bounds
+        } else false // Outside levelGridVania bounds
     }
 
     /**
@@ -249,7 +288,7 @@ class WorldMapData {
                 val tiles = levelMap.stackedTileMapData[tx + ty * chunkWidth]
                 tiles.forEach { tile ->
                     val clusterIndex = tile and 0xf           // Get bits 0-3 for cluster index
-                    val tileIndex = (tile and 0xffff0) shr 4  // Get bits 4-16 for tile index in tileset
+                    val tileIndex = (tile and 0xffff0) shr 4  // Get bits 4-19 for tile index in tileset
                     levelMap.listOfTileSets[clusterIndex][tileIndex]?.let { bmpSlice ->
                         val px = (tx * tileSize) + (chunkX * levelWidth * tileSize)
                         val py = (ty * tileSize) + (chunkY * levelHeight * tileSize)

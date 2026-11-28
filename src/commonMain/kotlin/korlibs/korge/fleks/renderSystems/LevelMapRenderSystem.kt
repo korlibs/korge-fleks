@@ -3,8 +3,6 @@ package korlibs.korge.fleks.renderSystems
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.collection.*
 import korlibs.korge.fleks.assets.*
-import korlibs.korge.fleks.components.Layer.Companion.LayerComponent
-import korlibs.korge.fleks.components.WorldMap.Companion.WorldMapComponent
 import korlibs.korge.fleks.components.Position
 import korlibs.korge.fleks.systems.SystemRuntimeConfigs
 import korlibs.korge.fleks.tags.*
@@ -36,13 +34,13 @@ class LevelMapRenderSystem(
         val tileSize = assetStore.worldMapData.tileSize
 
         // Calculate viewport position in world coordinates from Camera position (x,y) + offset
-        val viewPortPosX: Double = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF
-        val viewPortPosY: Double = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF
+        val viewPortPosX: Double = cameraPosition.x + cameraPosition.offsetX - AppConfig.VIEW_PORT_WIDTH_HALF_d
+        val viewPortPosY: Double = cameraPosition.y + cameraPosition.offsetY - AppConfig.VIEW_PORT_HEIGHT_HALF_d
         // Start and end indexes of viewport area (in tile coordinates)
         val xStart: Int = viewPortPosX.toInt() / tileSize - 1  // x in positive direction;  -1 = start one tile before
-        val xTiles = (AppConfig.VIEW_PORT_WIDTH / tileSize) + 3
+        val xTiles = (AppConfig.VIEW_PORT_WIDTH_i / tileSize) + 3
         val yStart: Int = viewPortPosY.toInt() / tileSize - 1  // y in negative direction;  -1 = start one tile before
-        val yTiles = (AppConfig.VIEW_PORT_HEIGHT / tileSize) + 3
+        val yTiles = (AppConfig.VIEW_PORT_HEIGHT_i / tileSize) + 3
 
         ctx.useBatcher { batch ->
             // Iterate over all tiles in the visible area of the view port

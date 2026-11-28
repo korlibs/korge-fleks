@@ -1,6 +1,5 @@
 package korlibs.korge.fleks.utils
 
-import korlibs.korge.fleks.assets.data.WorldMapData
 import korlibs.korge.fleks.components.DebugCollisionShapes
 import korlibs.korge.fleks.components.data.Point.Companion.point
 
@@ -8,11 +7,11 @@ import korlibs.korge.fleks.components.data.Point.Companion.point
  * Utility functions for collision system.
  */
 object CollisionUtils {
-    fun debugSaveGridCell(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, worldMapData: WorldMapData) {
+    fun debugSaveGridCell(debugShapesComponent: DebugCollisionShapes, cx: Int, cy: Int, tileSize: Int) {
         debugShapesComponent.gridCells.add(
             point {
-                x = cx.toDouble() * worldMapData.tileSize
-                y = cy.toDouble() * worldMapData.tileSize
+                x = (cx * tileSize).toDouble()
+                y = (cy * tileSize).toDouble()
             }
         )
     }
