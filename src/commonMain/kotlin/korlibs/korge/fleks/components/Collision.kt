@@ -2,8 +2,7 @@ package korlibs.korge.fleks.components
 
 import com.github.quillraven.fleks.*
 import korlibs.korge.fleks.assets.data.gameObject.CollisionRect
-import korlibs.korge.fleks.components.data.Point
-import korlibs.korge.fleks.components.data.Point.Companion.staticPoint
+import korlibs.korge.fleks.logic.collision.NO_COLLISION_SLOPE
 import korlibs.korge.fleks.utils.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -24,8 +23,7 @@ class Collision private constructor(
     var left: Boolean = false,
     var isCollidingAbove: Boolean = false,
     var isGrounded: Boolean = false,
-    var isOnSlope: Boolean = false,
-    var currentSlopeValue: Double = 0.0,
+    var slopeValue: Double = NO_COLLISION_SLOPE,
     var jumpEnergy: Double = 0.0,  // Used to store the maximum jump velocity of the player which is then decreased over time
     // Collision rectangle which contains size and anchor point to the pivot point of the entity
     // This is threat as a static immutable object
@@ -51,8 +49,7 @@ class Collision private constructor(
         left = from.left
         isCollidingAbove = from.isCollidingAbove
         isGrounded = from.isGrounded
-        isOnSlope = from.isOnSlope
-        currentSlopeValue = from.currentSlopeValue
+        slopeValue = from.slopeValue
         jumpEnergy = from.jumpEnergy
         // Collision rectangle data
         rect = from.rect
@@ -78,8 +75,7 @@ class Collision private constructor(
         left = false
         isCollidingAbove = false
         isGrounded = false
-        isOnSlope = false
-        currentSlopeValue = 0.0
+        slopeValue = NO_COLLISION_SLOPE
         jumpEnergy = 0.0
         // Collision rectangle data
         rect = CollisionRect.EMPTY

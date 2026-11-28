@@ -49,8 +49,7 @@ open class CollisionMoveSystem : IteratingSystem(
 
     // Internal states during this frame
     private var wasGroundedLastFrame = false
-    private var wasOnSlopeLastFrame = false
-    private var slopeValueLastFrame = 0.0
+    private var slopeValueLastFrame = NO_COLLISION_SLOPE
 
     override fun onTickEntity(entity: Entity) {
         // Iterate over all entities that have a Grid, Collision and MotionComponent
@@ -96,9 +95,7 @@ open class CollisionMoveSystem : IteratingSystem(
             wasGroundedLastFrame = collisionComponent.isGrounded
             collisionComponent.isGrounded = false
             collisionComponent.isCollidingAbove = false
-            wasOnSlopeLastFrame = collisionComponent.isOnSlope
-            collisionComponent.isOnSlope = false
-            slopeValueLastFrame = collisionComponent.currentSlopeValue
+            slopeValueLastFrame = collisionComponent.slopeValue
         }
 
         processCollisionSteps(steps, overallMovementX, overallMovementY) { movementX, movementY ->
@@ -106,10 +103,12 @@ open class CollisionMoveSystem : IteratingSystem(
         }
 
         // Calculate target damping factor depending on slope movement direction
-        val currentSlope = collisionComponent.currentSlopeValue
-        val targetDamping = if (collisionComponent.isOnSlope && wasOnSlopeLastFrame && currentSlope != NO_COLLISION_SLOPE && slopeValueLastFrame != NO_COLLISION_SLOPE) {
-            if (currentSlope > slopeValueLastFrame) 0.5      // Running UP a slope -> decrease speed
-            else if (currentSlope < slopeValueLastFrame) 1.5  // Running DOWN a slope -> increase speed
+        val isOnSlope = collisionComponent.slopeValue != NO_COLLISION_SLOPE
+        val wasOnSlopeLastFrame = slopeValueLastFrame != NO_COLLISION_SLOPE
+        val currentSlopeValue = collisionComponent.slopeValue
+        val targetDamping = if (isOnSlope && wasOnSlopeLastFrame) {
+            if (currentSlopeValue > slopeValueLastFrame) 0.5       // Running UP a slope -> decrease speed
+            else if (currentSlopeValue < slopeValueLastFrame) 1.5  // Running DOWN a slope -> increase speed
             else 1.0
         } else {
             1.0  // Flat ground or in air -> normal speed
@@ -118,6 +117,12 @@ open class CollisionMoveSystem : IteratingSystem(
         // Smoothly adjust damping towards targetDamping
         val lerpRate = (10.0 * deltaTime).coerceAtMost(1.0)
         motionComponent.damping += (targetDamping - motionComponent.damping) * lerpRate
+
+        if (motionComponent.damping.isAlmostEquals(1.0, 0.0001)) {
+            // Damping values with distance < 0.0001 are rounded to 1.0
+            motionComponent.damping = 1.0
+        }
+        //if (motionComponent.damping != 1.0) println("Damping: ${motionComponent.damping}")
 
         if (motionComponent.velocityX.isAlmostEquals(0.0005)) {
             // Velocity values smaller than 0.0005 are zeroed out
@@ -202,12 +207,12 @@ open class CollisionMoveSystem : IteratingSystem(
             debugShapesComponent
         )
 
-        collisionComponent.isOnSlope = ySlopeValue != NO_COLLISION_SLOPE
-        collisionComponent.currentSlopeValue = ySlopeValue
+        collisionComponent.slopeValue = ySlopeValue
 
         // Check if we were on a slope last frame, are not moving up and the current cell is no slope
         // then we need to ground the object otherwise at the end of a slope down we will fall
         // or at the end of a slope up we will hit a wall
+        val wasOnSlopeLastFrame = slopeValueLastFrame != NO_COLLISION_SLOPE
         if (wasOnSlopeLastFrame && yMovement > 0.0 && ySlopeValue == NO_COLLISION_SLOPE) {  // Y-Axis inverted!
 
             // Sample the slope value at position of the last frame (initial position)
