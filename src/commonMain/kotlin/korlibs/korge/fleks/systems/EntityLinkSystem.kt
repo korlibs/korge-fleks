@@ -11,7 +11,7 @@ import korlibs.korge.fleks.components.Position.Companion.PositionComponent
 
 /**
  * This system links entities together based on EntityRefComponent, EntityRefsComponent, and EntityRefsByNameComponent.
- * It is useful when entity IDs are knows on compile/configure time. For example, when an entity is created staticall and
+ * It is useful when entity IDs are known on compile/configure time. For example, when an entity is created statically and
  * needs to be linked to another entity.
  *
  * If entity IDs are only known at runtime (for example when spawning entities dynamically), consider using

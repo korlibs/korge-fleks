@@ -4,15 +4,21 @@ import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import korlibs.image.format.ImageAnimation.Direction.*
 import korlibs.korge.fleks.assets.*
+import korlibs.korge.fleks.components.EntityRef.Companion.EntityRefComponent
 import korlibs.korge.fleks.components.Info.Companion.InfoComponent
+import korlibs.korge.fleks.components.Motion.Companion.MotionComponent
 import korlibs.korge.fleks.components.Sprite.Companion.SpriteComponent
 import korlibs.korge.fleks.utils.deleteViaLifeCycle
 import korlibs.math.*
 import kotlin.text.contains
 
-
+/**
+ * This System is responsible for handling sprite animations.
+ *
+ * If the entity has a [MotionComponent] the animation speed is adjusted accordingly to its damping value.
+ */
 class SpriteSystem : IteratingSystem(
-    family = family { all(SpriteComponent) },
+    family = family { all(SpriteComponent).any(SpriteComponent, EntityRefComponent, MotionComponent) },
     interval = Fixed(1 / 60f)
 ) {
     private val assetStore: AssetStore = world.inject(name = "AssetStore")
@@ -26,9 +32,20 @@ class SpriteSystem : IteratingSystem(
         //   2. do instead:
         //        Update offsetX and offsetY in PositionComponent depending on frame index
 
+        // Get animation speed factor from either MotionComponent or via a referenced entity
+        val animationSpeedFactor = if (entity has MotionComponent) {
+            entity[MotionComponent].damping  //* 2.0
+        } else if (entity has EntityRefComponent && entity[EntityRefComponent].entity has MotionComponent) {
+            entity[EntityRefComponent].entity[MotionComponent].damping // * 2.0
+        } else 1.0
+
+//        if (animationSpeedFactor > 1.0) animationSpeedFactor *= 2.0
+
+        if (animationSpeedFactor != 1.0) println("animationSpeedFactor: $animationSpeedFactor")
+
         // Update sprite animation
         if (spriteComponent.running) {
-            spriteComponent.nextFrameIn -= deltaTime
+            spriteComponent.nextFrameIn -= deltaTime * animationSpeedFactor
             if (spriteComponent.nextFrameIn <= 0f) {
 //                println("increment: ${comp.increment}, frameIndex: ${comp.frameIndex} was shown for: ${comp.time}")
                 val spriteFrames = assetStore.getSpriteTexture(spriteComponent.name)
